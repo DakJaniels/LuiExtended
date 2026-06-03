@@ -14,48 +14,16 @@ local Zonenames = Data.ZoneNames
 local alertZoneOverride =
 {
 
-    [7835] =
-    {                                                                 -- Convalescence (Lamia)
-        [131] = UnitNames.NPC_Lamia_Curare,                           -- Tempest Island
-        [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Lamia_Curare, -- Tempest Island
-    },
-    [9680] =
-    {                                                                 -- Summon Spectral Lamia
-        [131] = UnitNames.NPC_Lamia_Curare,                           -- Tempest Island
-        [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Lamia_Curare, -- Tempest Island
-    },
+    [7835] = { [131] = UnitNames.NPC_Lamia_Curare, [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Lamia_Curare }, -- Convalescence (Lamia)
+    [9680] = { [131] = UnitNames.NPC_Lamia_Curare, [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Lamia_Curare }, -- Summon Spectral Lamia
 
-    [35220] =
-    { -- Impending Storm (Storm Atronach)
+    [35220] = { [681] = UnitNames.NPC_Storm_Atronach, [131] = UnitNames.NPC_Storm_Atronach, [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Storm_Atronach }, -- Impending Storm (Storm Atronach)
 
-        -- DUNGEONS
-        [681] = UnitNames.NPC_Storm_Atronach,                           -- City of Ash II
-        [131] = UnitNames.NPC_Storm_Atronach,                           -- Tempest Island
-        [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Storm_Atronach, -- Tempest Island
-    },
+    [54021] = { [681] = UnitNames.NPC_Xivilai_Immolator }, -- Release Flame (Marruz)
 
-    [54021] =
-    { -- Release Flame (Marruz)
+    [4591] = { [681] = UnitNames.NPC_Crocodile }, -- Sweep (Crocodile)
 
-        -- DUNGEONS
-        [681] = UnitNames.NPC_Xivilai_Immolator, -- City of Ash II
-    },
-
-    [4591] =
-    { -- Sweep (Crocodile)
-
-        -- DUNGEONS
-        [681] = UnitNames.NPC_Crocodile, -- City of Ash II
-    },
-
-    [34742] =
-    { -- Fiery Breath (Dragonknight)
-
-        -- DUNGEONS
-        [176] = UnitNames.NPC_Dremora_Kynval,   -- City of Ash I
-        [681] = UnitNames.NPC_Dremora_Kynval,   -- City of Ash 2
-        [22] = UnitNames.NPC_Imperial_Overseer, -- Volenfell
-    },
+    [34742] = { [176] = UnitNames.NPC_Dremora_Kynval, [681] = UnitNames.NPC_Dremora_Kynval, [22] = UnitNames.NPC_Imperial_Overseer }, -- Fiery Breath (Dragonknight)
 
     [57534] =
     { -- Focused Healing (Healer)
@@ -70,50 +38,15 @@ local alertZoneOverride =
         [22] = UnitNames.NPC_Treasure_Hunter_Healer,                      -- Volenfell
     },
 
-    [35151] =
-    { -- Spell Absorption (Spirit Mage)
+    [35151] = { [931] = UnitNames.NPC_Dremora_Invoker }, -- Spell Absorption (Spirit Mage)
+    [14472] = { [931] = UnitNames.NPC_Dremora_Invoker }, -- Burdening Eye (Spirit Mage)
 
-        -- DUNGEONS
-        [931] = UnitNames.NPC_Dremora_Invoker, -- Elden Hollow II
-    },
-    [14472] =
-    { -- Burdening Eye (Spirit Mage)
+    [12459] = { [1160] = UnitNames.NPC_Icereach_Chillrender, [380] = UnitNames.NPC_Banished_Mage }, -- Winter's Reach (Frost Mage)
+    [14194] = { [1160] = UnitNames.NPC_Icereach_Chillrender, [380] = UnitNames.NPC_Banished_Mage }, -- Ice Barrier (Frost Mage)
 
-        -- DUNGEONS
-        [931] = UnitNames.NPC_Dremora_Invoker, -- Elden Hollow II
-    },
+    [4337] = { [380] = UnitNames.Boss_Cell_Haunter, [935] = UnitNames.NPC_Wraith, [130] = UnitNames.NPC_Wraith }, -- Winter's Reach (Wraith)
 
-    [12459] =
-    {                                                -- Winter's Reach (Frost Mage)
-        -- QUESTS
-        [1160] = UnitNames.NPC_Icereach_Chillrender, -- Deepwood Vale (Greymoor)
-        -- DUNGEONS
-        [380] = UnitNames.NPC_Banished_Mage,         -- Banished Cells I
-    },
-    [14194] =
-    {                                                -- Ice Barrier (Frost Mage)
-        -- QUESTS
-        [1160] = UnitNames.NPC_Icereach_Chillrender, -- Deepwood Vale (Greymoor)
-        -- DUNGEONS
-        [380] = UnitNames.NPC_Banished_Mage,         -- Banished Cells I
-    },
-
-    [4337] =
-    {                                        -- Winter's Reach (Wraith)
-        -- DUNGEONS
-        [380] = UnitNames.Boss_Cell_Haunter, -- Banished Cells I
-        [935] = UnitNames.NPC_Wraith,        -- Banished Cells II (Summon Only)
-        [130] = UnitNames.NPC_Wraith,        -- Crypt of Hearts I
-    },
-
-    [36985] =
-    {                                             -- Void (Time Bomb Mage)
-        [555] = UnitNames.Boss_Vicereeve_Pelidil, -- Abecean Sea
-
-        -- DUNGEONS
-        [130] = UnitNames.NPC_Skeletal_Runecaster, -- Crypt of Hearts I
-        [932] = UnitNames.Boss_Mezeluth,           -- Crypt of Hearts II
-    },
+    [36985] = { [555] = UnitNames.Boss_Vicereeve_Pelidil, [130] = UnitNames.NPC_Skeletal_Runecaster, [932] = UnitNames.Boss_Mezeluth }, -- Void (Time Bomb Mage)
 
     [29471] =
     {                                                                 -- Thunder Thrall (Storm Mage)
@@ -134,39 +67,8 @@ local alertZoneOverride =
         [681] = UnitNames.NPC_Urata_Elementalist,   -- City of Ash II
         [932] = UnitNames.NPC_Spiderkith_Enervator, -- Crypt of Hearts II
     },
-    [29510] =
-    {                                                                    -- Thunder Hammer (Thundermaul)
-        [Zonenames.Zone_Maormer_Invasion_Camp] = UnitNames.Elite_Arstul, -- Maormer Invasion Camp (Auridon)
-        [394] = UnitNames.NPC_Thundermaul,                               -- Ezduiin Undercroft (Auridon)
-        [399] = UnitNames.NPC_Skeletal_Thundermaul,                      -- Wansalen (Auridon - Delve)
-
-        [435] = UnitNames.NPC_Sainted_Charger,                           -- Cathedral of the Golden Path
-        [555] = UnitNames.NPC_Sea_Viper_Charger,                         -- Abecean Sea
-
-        -- Greymoor
-        [1160] = UnitNames.NPC_Icereach_Charger, -- Deepwood Vale (Greymoor)
-
-        -- DUNGEONS
-        [131] = UnitNames.NPC_Sea_Viper_Charger,                           -- Tempest Island
-        [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Sea_Viper_Charger, -- Tempest Island
-    },
-    [17867] =
-    {                                                                    -- Shock Aura (Thundermaul)
-        [Zonenames.Zone_Maormer_Invasion_Camp] = UnitNames.Elite_Arstul, -- Maormer Invasion Camp (Auridon)
-        [394] = UnitNames.NPC_Thundermaul,                               -- Ezduiin Undercroft (Auridon)
-        [399] = UnitNames.NPC_Skeletal_Thundermaul,                      -- Wansalen (Auridon - Delve)
-
-        [435] = UnitNames.NPC_Sainted_Charger,                           -- Cathedral of the Golden Path
-        [555] = UnitNames.NPC_Sea_Viper_Charger,                         -- Abecean Sea
-
-        -- Greymoor
-        [1160] = UnitNames.NPC_Icereach_Charger, -- Deepwood Vale (Greymoor)
-
-        -- DUNGEONS
-        [126] = UnitNames.Boss_Nenesh_gro_Mal,                             -- Elden Hollow I
-        [131] = UnitNames.NPC_Sea_Viper_Charger,                           -- Tempest Island
-        [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Sea_Viper_Charger, -- Tempest Island
-    },
+    [29510] = { [Zonenames.Zone_Maormer_Invasion_Camp] = UnitNames.Elite_Arstul, [394] = UnitNames.NPC_Thundermaul, [399] = UnitNames.NPC_Skeletal_Thundermaul, [435] = UnitNames.NPC_Sainted_Charger, [555] = UnitNames.NPC_Sea_Viper_Charger, [1160] = UnitNames.NPC_Icereach_Charger, [131] = UnitNames.NPC_Sea_Viper_Charger, [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Sea_Viper_Charger }, -- Thunder Hammer (Thundermaul)
+    [17867] = { [Zonenames.Zone_Maormer_Invasion_Camp] = UnitNames.Elite_Arstul, [394] = UnitNames.NPC_Thundermaul, [399] = UnitNames.NPC_Skeletal_Thundermaul, [435] = UnitNames.NPC_Sainted_Charger, [555] = UnitNames.NPC_Sea_Viper_Charger, [1160] = UnitNames.NPC_Icereach_Charger, [126] = UnitNames.Boss_Nenesh_gro_Mal, [131] = UnitNames.NPC_Sea_Viper_Charger, [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Sea_Viper_Charger }, -- Shock Aura (Thundermaul)
     [29520] =
     { -- Aura of Protection (Shaman)
 
@@ -321,39 +223,16 @@ local alertZoneOverride =
         [176] = UnitNames.NPC_Dagonite_Archer, -- City of Ash I
     },
 
-    [26324] =
-    { -- Lava Geyser (Flame Atronach)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Flame_Atronach, -- Banished Cells II
-        [176] = UnitNames.NPC_Flame_Atronach, -- City of Ash I
-        [681] = UnitNames.NPC_Flame_Atronach, -- City of Ash II
-    },
+    [26324] = { [935] = UnitNames.NPC_Flame_Atronach, [176] = UnitNames.NPC_Flame_Atronach, [681] = UnitNames.NPC_Flame_Atronach }, -- Lava Geyser (Flame Atronach)
 
     -- [88554] = { -- Summon the Dead (Necromancer)
     --
     -- },
-    [88555] =
-    {                                                                                 -- Summon the Dead (Necromancer)
-        [Zonenames.Zone_Tower_of_the_Vale] = UnitNames.Elite_Sanessalmo,              -- Tower of the Vale (Auridon)
-        [Zonenames.Zone_Quendeluun] = UnitNames.NPC_Pact_Necromancer,                 -- Quendeluun (Auridon)
-        [Zonenames.Zone_Wansalen] = UnitNames.NPC_Pact_Necromancer,                   -- Quendeluun (Auridon) - For a little section with npcs outside of the delv near Quendeluun.
-        [Zonenames.Zone_Torinaan] = UnitNames.Elite_Vregas,                           -- Torinaan (Auridon)
-
-        [395] = UnitNames.NPC_Dremora_Narkynaz,                                       -- The Refuge of Dread
-        [Zonenames.Zone_Hectahame] = UnitNames.NPC_Veiled_Necromancer,                -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Veiled_Necromancer,         -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Veiled_Necromancer,      -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Veiled_Necromancer, -- Hectahame Ritual Chamber
-    },
+    [88555] = { [Zonenames.Zone_Tower_of_the_Vale] = UnitNames.Elite_Sanessalmo, [Zonenames.Zone_Quendeluun] = UnitNames.NPC_Pact_Necromancer, [Zonenames.Zone_Wansalen] = UnitNames.NPC_Pact_Necromancer, [Zonenames.Zone_Torinaan] = UnitNames.Elite_Vregas, [395] = UnitNames.NPC_Dremora_Narkynaz, [Zonenames.Zone_Hectahame] = UnitNames.NPC_Veiled_Necromancer, [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Veiled_Necromancer, [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Veiled_Necromancer, [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Veiled_Necromancer }, -- Summon the Dead (Necromancer)
     -- [88556] = { -- Summon the Dead (Necromancer)
     --
 
-    [13397] =
-    {                                                -- Empower Undead (Necromancer)
-        -- DUNGEONS
-        [932] = UnitNames.NPC_Spiderkith_Broodnurse, -- Crypt of Hearts II
-    },
+    [13397] = { [932] = UnitNames.NPC_Spiderkith_Broodnurse }, -- Empower Undead (Necromancer)
 
     -- },
     [10805] =
@@ -451,352 +330,67 @@ local alertZoneOverride =
         [22] = UnitNames.NPC_Treasure_Hunter_Incendiary,     -- Volenfell
     },
 
-    [8779] =
-    {                                          -- Lightning Onslaught (Spider Daedra)
-        [395] = UnitNames.Elite_Mezelukhebruz, -- The Refuge of Dread
+    [8779] = { [395] = UnitNames.Elite_Mezelukhebruz, [935] = UnitNames.NPC_Spider_Daedra }, -- Lightning Onslaught (Spider Daedra)
+    [8782] = { [395] = UnitNames.Elite_Mezelukhebruz, [935] = UnitNames.NPC_Spider_Daedra }, -- Lightning Storm (Spider Daedra)
+    [8773] = { [395] = UnitNames.Elite_Mezelukhebruz }, -- Summon Spiderling (Spider Daedra)
+    [4799] = { [395] = UnitNames.Elite_Marrow, [Zonenames.Zone_Torinaan] = UnitNames.NPC_Clannfear, [0] = UnitNames.NPC_Clannfear, [380] = UnitNames.NPC_Clannfear, [935] = UnitNames.NPC_Clannfear, [681] = UnitNames.NPC_Clannfear }, -- Tail Spike (Clannfear)
+    [93745] = { [395] = UnitNames.Elite_Marrow, [Zonenames.Zone_Torinaan] = UnitNames.NPC_Clannfear, [380] = UnitNames.NPC_Clannfear, [935] = UnitNames.NPC_Clannfear, [681] = UnitNames.NPC_Clannfear }, -- Rending Leap (Clannfear)
 
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Spider_Daedra, -- Banished Cells II (Summon Only)
-    },
-    [8782] =
-    {                                          -- Lightning Storm (Spider Daedra)
-        [395] = UnitNames.Elite_Mezelukhebruz, -- The Refuge of Dread
+    [4653] = { [389] = UnitNames.NPC_Watcher }, -- Shockwave (Watcher)
+    [9219] = { [389] = UnitNames.NPC_Watcher }, -- Doom-Truth's Gaze (Watcher)
+    [14425] = { [389] = UnitNames.NPC_Watcher }, -- Doom-Truth's Gaze (Watcher)
 
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Spider_Daedra, -- Banished Cells II (Summon Only)
-    },
-    [8773] =
-    {                                          -- Summon Spiderling (Spider Daedra)
-        [395] = UnitNames.Elite_Mezelukhebruz, -- The Refuge of Dread
-    },
-    [4799] =
-    {                                                        -- Tail Spike (Clannfear)
-        [395] = UnitNames.Elite_Marrow,                      -- The Refuge of Dread
-        [Zonenames.Zone_Torinaan] = UnitNames.NPC_Clannfear, -- Torinaan (Auridon)
+    [4771] = { [435] = UnitNames.Elite_Free_Will, [935] = UnitNames.NPC_Daedroth }, -- Fiery Breath (Daedroth)
+    [91946] = { [435] = UnitNames.Elite_Free_Will, [935] = UnitNames.NPC_Daedroth }, -- Ground Tremor (Daedroth)
 
-        -- QUESTS
-        [0] = UnitNames.NPC_Clannfear, -- The Wailing Prison (Soul Shriven in Coldharbour)
+    [50182] = { [932] = UnitNames.NPC_Skeleton }, -- Consuming Energy (Spellfiend)
 
-        -- DUNGEONS
-        [380] = UnitNames.NPC_Clannfear, -- Banished Cells I
-        [935] = UnitNames.NPC_Clannfear, -- Banished Cells II
-        [681] = UnitNames.NPC_Clannfear, -- City of Ash II
-    },
-    [93745] =
-    {                                                        -- Rending Leap (Clannfear)
-        [395] = UnitNames.Elite_Marrow,                      -- The Refuge of Dread
-        [Zonenames.Zone_Torinaan] = UnitNames.NPC_Clannfear, -- Torinaan (Auridon)
+    [10270] = { [383] = UnitNames.NPC_Gargoyle }, -- Quake (Gargoyle)
+    [13701] = { [548] = UnitNames.NPC_Bandit_Savage, [131] = UnitNames.NPC_Sea_Viper_Strongarm, [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Sea_Viper_Strongarm }, -- Focused Charge (Brute)
 
-        -- DUNGEONS
-        [380] = UnitNames.NPC_Clannfear, -- Banished Cells I
-        [935] = UnitNames.NPC_Clannfear, -- Banished Cells II
-        [681] = UnitNames.NPC_Clannfear, -- City of Ash II
-    },
+    [37087] = { [548] = UnitNames.Elite_Baham, [935] = UnitNames.NPC_Dremora_Clasher }, -- Lightning Onslaught (Battlemage)
+    [37129] = { [548] = UnitNames.Elite_Baham, [130] = UnitNames.Boss_The_Mage_Master, [935] = UnitNames.NPC_Dremora_Clasher, [932] = UnitNames.Boss_Ibelgast }, -- Ice Cage (Battlemage)
+    [44216] = { [548] = UnitNames.Elite_Baham, [130] = UnitNames.Boss_The_Mage_Master, [932] = UnitNames.Boss_Ibelgast }, -- Negate Magic (Battlemage - Elite)
 
-    [4653] =
-    {                                  -- Shockwave (Watcher)
-        [389] = UnitNames.NPC_Watcher, -- Reliquary Ruins
-    },
-    [9219] =
-    {                                  -- Doom-Truth's Gaze (Watcher)
-        [389] = UnitNames.NPC_Watcher, -- Reliquary Ruins
-    },
-    [14425] =
-    {                                  -- Doom-Truth's Gaze (Watcher)
-        [389] = UnitNames.NPC_Watcher, -- Reliquary Ruins
-    },
+    [3767] = { [Zonenames.Zone_Hectahame] = UnitNames.NPC_Corrupt_Lurcher, [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Corrupt_Lurcher, [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Corrupt_Lurcher, [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Corrupt_Lurcher, [559] = UnitNames.NPC_Corrupt_Lurcher, [931] = UnitNames.NPC_Daedric_Lurcher }, -- Choking Pollen (Lurcher)
+    [21582] = { [Zonenames.Zone_Hectahame] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Corrupt_Lurcher }, -- Nature's Swarm (Spriggan)
+    [13477] = { [Zonenames.Zone_Hectahame] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Corrupt_Lurcher }, -- Control Beast (Spriggan)
+    [89102] = { [Zonenames.Zone_Hectahame] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Corrupt_Spriggan, [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Corrupt_Lurcher }, -- Summon Beast (Spriggan)
 
-    [4771] =
-    {                                      -- Fiery Breath (Daedroth)
-        [435] = UnitNames.Elite_Free_Will, -- Cathedral of the Golden Path
-        [935] = UnitNames.NPC_Daedroth,    -- Banished Cells II
-    },
-    [91946] =
-    {                                      -- Ground Tremor (Daedroth)
-        [435] = UnitNames.Elite_Free_Will, -- Cathedral of the Golden Path
-        [935] = UnitNames.NPC_Daedroth,    -- Banished Cells II
-    },
+    [35387] = { [399] = UnitNames.Elite_Nolonir, [Zonenames.Zone_Hectahame] = UnitNames.NPC_Veiled_Bonelord, [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Veiled_Bonelord, [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Veiled_Bonelord, [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Veiled_Bonelord, [935] = UnitNames.NPC_Dremora_Hauzkyn }, -- Defiled Grave (Bonelord)
+    [88507] = { [399] = UnitNames.Elite_Nolonir, [Zonenames.Zone_Hectahame] = UnitNames.NPC_Veiled_Bonelord, [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Veiled_Bonelord, [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Veiled_Bonelord, [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Veiled_Bonelord, [935] = UnitNames.NPC_Dremora_Hauzkyn }, -- Summon Abomination (Bonelord)
+    [5050] = { [Zonenames.Zone_Hightide_Keep] = UnitNames.Elite_Garggeel, [399] = UnitNames.NPC_Bone_Colossus, [Zonenames.Zone_Hectahame] = UnitNames.NPC_Bone_Colossus, [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Bone_Colossus, [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Bone_Colossus, [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Bone_Colossus, [130] = UnitNames.NPC_Bone_Colossus, [380] = UnitNames.Boss_Skeletal_Destroyer, [935] = UnitNames.NPC_Bone_Colossus, [681] = UnitNames.NPC_Flame_Colossus }, -- Bone Saw (Bone Colossus)
+    [5030] = { [Zonenames.Zone_Hightide_Keep] = UnitNames.Elite_Garggeel, [399] = UnitNames.NPC_Bone_Colossus, [130] = UnitNames.NPC_Bone_Colossus, [380] = UnitNames.Boss_Skeletal_Destroyer }, -- Voice to Wake the Dead (Bone Colossus)
 
-    [50182] =
-    {                                   -- Consuming Energy (Spellfiend)
-        [932] = UnitNames.NPC_Skeleton, -- Crypt of Hearts II
-    },
+    [22521] = { [559] = UnitNames.Boss_Shade_of_Naemon, [130] = UnitNames.Boss_Uulkar_Bonehand }, -- Defiled Ground (Lich)
+    [19137] = { [935] = UnitNames.NPC_Ghost, [130] = UnitNames.NPC_Ghost }, -- Haunting Spectre (Ghost)
+    [73925] = { [559] = UnitNames.Boss_Shade_of_Naemon, [130] = UnitNames.Boss_Uulkar_Bonehand }, -- Soul Cage (Lich)
 
-    [10270] =
-    {                                   -- Quake (Gargoyle)
-        [383] = UnitNames.NPC_Gargoyle, -- Grahtwood (for Nairume's Prison)
-    },
-    [13701] =
-    {                                        -- Focused Charge (Brute)
-        [548] = UnitNames.NPC_Bandit_Savage, -- Silatar
+    [44736] = { [Zonenames.Zone_Castle_Rilis] = UnitNames.NPC_Troll, [Zonenames.Zone_Nine_Prow_Landing] = UnitNames.NPC_Troll }, -- Swinging Cleave (Troll)
+    [9009] = { [Zonenames.Zone_Castle_Rilis] = UnitNames.NPC_Troll, [Zonenames.Zone_Nine_Prow_Landing] = UnitNames.NPC_Troll }, -- Tremor (Troll)
+    [3415] = { [392] = UnitNames.Elite_Sorondil }, -- Flurry (Werewolf)
 
-        -- DUNGEONS
-        [131] = UnitNames.NPC_Sea_Viper_Strongarm,                           -- Tempest Island
-        [Zonenames.Zone_Tempest_Island] = UnitNames.NPC_Sea_Viper_Strongarm, -- Tempest Island
-    },
+    [4415] = { [381] = UnitNames.NPC_Bear }, -- Crushing Swipe (Bear)
 
-    [37087] =
-    {                                  -- Lightning Onslaught (Battlemage)
-        [548] = UnitNames.Elite_Baham, -- Silatar
+    [5789] = { [393] = UnitNames.NPC_Spider, [1160] = UnitNames.NPC_Frostbite_Spider, [932] = UnitNames.NPC_Spider }, -- Fire Runes (Giant Spider)
+    [8087] = { [393] = UnitNames.NPC_Spider }, -- Poison Spray (Giant Spider)
+    [4737] = { [393] = UnitNames.NPC_Spider }, -- Encase (Giant Spider)
+    [13382] = { [393] = UnitNames.NPC_Spider, [932] = UnitNames.NPC_Spider }, -- Devour (Giant Spider)
 
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Dremora_Clasher, -- Banished Cells II
-    },
-    [37129] =
-    {                                  -- Ice Cage (Battlemage)
-        [548] = UnitNames.Elite_Baham, -- Silatar
+    [6166] = { [381] = UnitNames.NPC_Scamp, [380] = UnitNames.NPC_Scamp, [935] = UnitNames.NPC_Scamp, [931] = UnitNames.NPC_Scamp, [176] = UnitNames.NPC_Scamp, [681] = UnitNames.NPC_Scamp }, -- Heat Wave (Scamp)
+    [6160] = { [381] = UnitNames.NPC_Scamp, [380] = UnitNames.NPC_Scamp, [935] = UnitNames.NPC_Scamp, [931] = UnitNames.NPC_Scamp, [176] = UnitNames.NPC_Scamp, [681] = UnitNames.NPC_Scamp }, -- Rain of Fire (Scamp)
 
-        -- DUNGEONS
-        [130] = UnitNames.Boss_The_Mage_Master, -- Crypt of Hearts I
-        [935] = UnitNames.NPC_Dremora_Clasher,  -- Banished Cells II
-        [932] = UnitNames.Boss_Ibelgast,        -- Crypt of Hearts II
-    },
-    [44216] =
-    {                                  -- Negate Magic (Battlemage - Elite)
-        [548] = UnitNames.Elite_Baham, -- Silatar
+    [88947] = { [935] = UnitNames.NPC_Xivilai }, -- Lightning Grasp (Xivilai)
+    [7100] = { [935] = UnitNames.NPC_Xivilai }, -- Hand of Flame (Xivilai)
+    [25726] = { [935] = UnitNames.NPC_Xivilai }, -- Summon Daedra (Xivilai)
+    [4829] = { [935] = UnitNames.NPC_Flesh_Atronach, [932] = UnitNames.NPC_Flesh_Atronach }, -- Fire Brand (Flesh Atronach)
+    [6412] = { [935] = UnitNames.NPC_Winged_Twilight, [931] = UnitNames.Boss_Azara_the_Frightener }, -- Dusk's Howl (Winged Twilight)
 
-        -- DUNGEONS
-        [130] = UnitNames.Boss_The_Mage_Master, -- Crypt of Hearts I
-        [932] = UnitNames.Boss_Ibelgast,        -- Crypt of Hearts II
-    },
+    [24690] = { [935] = UnitNames.NPC_Flame_Ogrim, [932] = UnitNames.NPC_Ogrim }, -- Focused Charge (Ogrim)
+    [91848] = { [935] = UnitNames.NPC_Flame_Ogrim, [932] = UnitNames.NPC_Ogrim }, -- Stomp (Ogrim)
+    [91855] = { [935] = UnitNames.NPC_Flame_Ogrim, [932] = UnitNames.NPC_Ogrim }, -- Boulder Toss (Ogrim)
 
-    [3767] =
-    {                                                                              -- Choking Pollen (Lurcher)
-        [Zonenames.Zone_Hectahame] = UnitNames.NPC_Corrupt_Lurcher,                -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Corrupt_Lurcher,         -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Corrupt_Lurcher,      -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Corrupt_Lurcher, -- Hectahame Ritual Chamber
-        [559] = UnitNames.NPC_Corrupt_Lurcher,                                     -- Valenheart
-
-        -- DUNGEONS
-        [931] = UnitNames.NPC_Daedric_Lurcher, -- Elden Hollow II
-    },
-    [21582] =
-    {                                                                              -- Nature's Swarm (Spriggan)
-        [Zonenames.Zone_Hectahame] = UnitNames.NPC_Corrupt_Spriggan,               -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Corrupt_Spriggan,        -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Corrupt_Spriggan,     -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Corrupt_Lurcher, -- Hectahame Ritual Chamber
-    },
-    [13477] =
-    {                                                                              -- Control Beast (Spriggan)
-        [Zonenames.Zone_Hectahame] = UnitNames.NPC_Corrupt_Spriggan,               -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Corrupt_Spriggan,        -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Corrupt_Spriggan,     -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Corrupt_Lurcher, -- Hectahame Ritual Chamber
-    },
-    [89102] =
-    {                                                                              -- Summon Beast (Spriggan)
-        [Zonenames.Zone_Hectahame] = UnitNames.NPC_Corrupt_Spriggan,               -- Hectaham
-        [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Corrupt_Spriggan,        -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Corrupt_Spriggan,     -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Corrupt_Lurcher, -- Hectahame Ritual Chamber
-    },
-
-    [35387] =
-    {                                                                              -- Defiled Grave (Bonelord)
-        [399] = UnitNames.Elite_Nolonir,                                           -- Wansalen (Auridon - Delve)
-
-        [Zonenames.Zone_Hectahame] = UnitNames.NPC_Veiled_Bonelord,                -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Veiled_Bonelord,         -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Veiled_Bonelord,      -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Veiled_Bonelord, -- Hectahame Ritual Chamber
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Dremora_Hauzkyn, -- Banished Cells II
-    },
-    [88507] =
-    {                                                                              -- Summon Abomination (Bonelord)
-        [399] = UnitNames.Elite_Nolonir,                                           -- Wansalen (Auridon - Delve)
-
-        [Zonenames.Zone_Hectahame] = UnitNames.NPC_Veiled_Bonelord,                -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Veiled_Bonelord,         -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Veiled_Bonelord,      -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Veiled_Bonelord, -- Hectahame Ritual Chamber
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Dremora_Hauzkyn, -- Banished Cells II
-    },
-    [5050] =
-    {                                                                            -- Bone Saw (Bone Colossus)
-        [Zonenames.Zone_Hightide_Keep] = UnitNames.Elite_Garggeel,               -- Hightide Keep (Auridon)
-        [399] = UnitNames.NPC_Bone_Colossus,                                     -- Wansalen (Auridon - Delve)
-
-        [Zonenames.Zone_Hectahame] = UnitNames.NPC_Bone_Colossus,                -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = UnitNames.NPC_Bone_Colossus,         -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = UnitNames.NPC_Bone_Colossus,      -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = UnitNames.NPC_Bone_Colossus, -- Hectahame Ritual Chamber
-
-        -- DUNGEONS
-        [130] = UnitNames.NPC_Bone_Colossus,       -- Crypt of Hearts I
-        [380] = UnitNames.Boss_Skeletal_Destroyer, -- Banished Cells I
-        [935] = UnitNames.NPC_Bone_Colossus,       -- Banished Cells II (Summon Only)
-        [681] = UnitNames.NPC_Flame_Colossus,      -- City of Ash II
-    },
-    [5030] =
-    {                                                              -- Voice to Wake the Dead (Bone Colossus)
-        [Zonenames.Zone_Hightide_Keep] = UnitNames.Elite_Garggeel, -- Hightide Keep (Auridon)
-        [399] = UnitNames.NPC_Bone_Colossus,                       -- Wansalen (Auridon - Delve) -- TODO: Is this needed?
-
-        -- DUNGEONS
-        [130] = UnitNames.NPC_Bone_Colossus,       -- Crypt of Hearts I
-        [380] = UnitNames.Boss_Skeletal_Destroyer, -- Banished Cells I
-    },
-
-    [22521] =
-    {                                           -- Defiled Ground (Lich)
-        [559] = UnitNames.Boss_Shade_of_Naemon, -- Valenheart
-
-        -- DUNGEONS
-        [130] = UnitNames.Boss_Uulkar_Bonehand, -- Crypt of Hearts I
-    },
-    [19137] =
-    { -- Haunting Spectre (Ghost)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Ghost, -- Banished Cells II (Summon Only)
-        [130] = UnitNames.NPC_Ghost, -- Crypt of Hearts I
-    },
-    [73925] =
-    {                                           -- Soul Cage (Lich)
-        [559] = UnitNames.Boss_Shade_of_Naemon, -- Valenheart
-
-        -- DUNGEONS
-        [130] = UnitNames.Boss_Uulkar_Bonehand, -- Crypt of Hearts I
-    },
-
-    [44736] =
-    {                                                             -- Swinging Cleave (Troll)
-        [Zonenames.Zone_Castle_Rilis] = UnitNames.NPC_Troll,      -- Castle Rilis (Auridon) -- TODO: Probably can do all of Auridon
-        [Zonenames.Zone_Nine_Prow_Landing] = UnitNames.NPC_Troll, -- Nine-Prow Landing (Auridon) -- TODO: Probably can do all of Auridon
-    },
-    [9009] =
-    {                                                             -- Tremor (Troll)
-        [Zonenames.Zone_Castle_Rilis] = UnitNames.NPC_Troll,      -- Castle Rilis (Auridon) -- TODO: Probably can do all of Auridon
-        [Zonenames.Zone_Nine_Prow_Landing] = UnitNames.NPC_Troll, -- Nine-Prow Landing (Auridon) -- TODO: Probably can do all of Auridon
-    },
-    [3415] =
-    {                                     -- Flurry (Werewolf)
-        [392] = UnitNames.Elite_Sorondil, -- The Vault of Exile (Auridon)
-    },
-
-    [4415] =
-    {                               -- Crushing Swipe (Bear)
-        [381] = UnitNames.NPC_Bear, -- Auridon
-    },
-
-    [5789] =
-    {                                            -- Fire Runes (Giant Spider)
-        -- QUESTS
-        [393] = UnitNames.NPC_Spider,            -- Saltspray Cave (Auridon)
-        [1160] = UnitNames.NPC_Frostbite_Spider, -- Deepwood Vale (Greymoor)
-
-        -- DUNGEONS
-        [932] = UnitNames.NPC_Spider, -- Crypt of Hearts II
-    },
-    [8087] =
-    {                                 -- Poison Spray (Giant Spider)
-        -- QUESTS
-        [393] = UnitNames.NPC_Spider, -- Saltspray Cave (Auridon)
-    },
-    [4737] =
-    {                                 -- Encase (Giant Spider)
-        -- QUESTS
-        [393] = UnitNames.NPC_Spider, -- Saltspray Cave (Auridon)
-    },
-    [13382] =
-    {                                 -- Devour (Giant Spider)
-        -- QUESTS
-        [393] = UnitNames.NPC_Spider, -- Saltspray Cave (Auridon)
-
-        -- DUNGEONS
-        [932] = UnitNames.NPC_Spider, -- Crypt of Hearts II
-    },
-
-    [6166] =
-    {                                -- Heat Wave (Scamp)
-        [381] = UnitNames.NPC_Scamp, -- Auridon
-
-        -- DUNGEONS
-        [380] = UnitNames.NPC_Scamp, -- Banished Cells I
-        [935] = UnitNames.NPC_Scamp, -- Banished Cells II (Summon Only)
-        [931] = UnitNames.NPC_Scamp, -- Elden Hollow II
-        [176] = UnitNames.NPC_Scamp, -- City of Ash I
-        [681] = UnitNames.NPC_Scamp, -- City of Ash II
-    },
-    [6160] =
-    {                                -- Rain of Fire (Scamp)
-        [381] = UnitNames.NPC_Scamp, -- Auridon
-
-        -- DUNGEONS
-        [380] = UnitNames.NPC_Scamp, -- Banished Cells I
-        [935] = UnitNames.NPC_Scamp, -- Banished Cells II (Summon Only)
-        [931] = UnitNames.NPC_Scamp, -- Elden Hollow II
-        [176] = UnitNames.NPC_Scamp, -- City of Ash I
-        [681] = UnitNames.NPC_Scamp, -- City of Ash II
-    },
-
-    [88947] =
-    { -- Lightning Grasp (Xivilai)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Xivilai, -- Banished Cells I
-    },
-    [7100] =
-    { -- Hand of Flame (Xivilai)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Xivilai, -- Banished Cells I
-    },
-    [25726] =
-    { -- Summon Daedra (Xivilai)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Xivilai, -- Banished Cells I
-    },
-    [4829] =
-    { -- Fire Brand (Flesh Atronach)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Flesh_Atronach, -- Banished Cells I (Summon Only)
-        [932] = UnitNames.NPC_Flesh_Atronach, -- Crypt of Hearts II
-    },
-    [6412] =
-    { -- Dusk's Howl (Winged Twilight)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Winged_Twilight,       -- Banished Cells I
-        [931] = UnitNames.Boss_Azara_the_Frightener, -- Elden Hollow II
-    },
-
-    [24690] =
-    { -- Focused Charge (Ogrim)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Flame_Ogrim, -- Banished Cells II (Summon Only)
-        [932] = UnitNames.NPC_Ogrim,       -- Crypt of Hearts II
-    },
-    [91848] =
-    { -- Stomp (Ogrim)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Flame_Ogrim, -- Banished Cells II (Summon Only)
-        [932] = UnitNames.NPC_Ogrim,       -- Crypt of Hearts II
-    },
-    [91855] =
-    { -- Boulder Toss (Ogrim)
-
-        -- DUNGEONS
-        [935] = UnitNames.NPC_Flame_Ogrim, -- Banished Cells II (Summon Only)
-        [932] = UnitNames.NPC_Ogrim,       -- Crypt of Hearts II
-    },
-
-    [28939] =
-    { -- Heat Wave (Sees-All-Colors)
-
-        -- DUNGEONS
-        [935] = UnitNames.Boss_Keeper_Areldur, -- Banished Cells II
-    },
+    [28939] = { [935] = UnitNames.Boss_Keeper_Areldur }, -- Heat Wave (Sees-All-Colors)
 
     [5452] =
     {                               -- Lacerate (Alit)
@@ -807,132 +401,41 @@ local alertZoneOverride =
         -- [126] = UnitNames.NPC_Alit, -- Elden Hollow I (Can't use because Alit's are right next to Leafseether and can easily also be casting this)
     },
 
-    [5441] =
-    {                               -- Dive (Guar)
-        -- QUESTS
-        [968] = UnitNames.NPC_Guar, -- Firemoth Island (Vvardenfell)
-    },
+    [5441] = { [968] = UnitNames.NPC_Guar }, -- Dive (Guar)
 
-    [85395] =
-    {                                        -- Dive (Cliff Strider)
-        -- QUESTS
-        [968] = UnitNames.NPC_Cliff_Strider, -- Firemoth Island (Vvardenfell)
-    },
-    [85399] =
-    {                                        -- Retch (Cliff Strider)
-        -- QUESTS
-        [968] = UnitNames.NPC_Cliff_Strider, -- Firemoth Island (Vvardenfell)
-    },
+    [85395] = { [968] = UnitNames.NPC_Cliff_Strider }, -- Dive (Cliff Strider)
+    [85399] = { [968] = UnitNames.NPC_Cliff_Strider }, -- Retch (Cliff Strider)
 
-    [26412] =
-    {                                          -- Thunderstrikes (Thunderbug)
-        [126] = UnitNames.NPC_Thunderbug_Lord, -- Elden Hollow I
-    },
-    [9322] =
-    {                                    -- Poisoned Ground (Strangler)
-        [126] = UnitNames.NPC_Strangler, -- Elden Hollow I
-        [681] = UnitNames.NPC_Strangler, -- City of Ash II
-    },
-    [14272] =
-    {                               -- Call of the Pack (Wolf)
-        [534] = UnitNames.NPC_Wolf, -- Stros M'Kai
-    },
+    [26412] = { [126] = UnitNames.NPC_Thunderbug_Lord }, -- Thunderstrikes (Thunderbug)
+    [9322] = { [126] = UnitNames.NPC_Strangler, [681] = UnitNames.NPC_Strangler }, -- Poisoned Ground (Strangler)
+    [14272] = { [534] = UnitNames.NPC_Wolf }, -- Call of the Pack (Wolf)
 
-    [16031] =
-    {                                            -- Steam Wall (Dwemer Sphere)
-        -- QUESTS
-        [534] = UnitNames.Elite_Tempered_Sphere, -- Stros M'Kai
+    [16031] = { [534] = UnitNames.Elite_Tempered_Sphere, [22] = UnitNames.NPC_Dwarven_Sphere }, -- Steam Wall (Dwemer Sphere)
+    [7544] = { [534] = UnitNames.Elite_Tempered_Sphere, [22] = UnitNames.NPC_Dwarven_Sphere }, -- Quake (Dwemer Sphere)
 
-        -- DUNGEONS
-        [22] = UnitNames.NPC_Dwarven_Sphere, -- Volenfell
-    },
-    [7544] =
-    {                                            -- Quake (Dwemer Sphere)
-        -- QUESTS
-        [534] = UnitNames.Elite_Tempered_Sphere, -- Stros M'Kai
+    [11247] = { [22] = UnitNames.NPC_Dwarven_Centurion }, -- Sweeping Spin (Dwemer Centurion)
+    [11246] = { [22] = UnitNames.NPC_Dwarven_Centurion }, -- Steam Breath (Dwemer Centurion)
 
-        -- DUNGEONS
-        [22] = UnitNames.NPC_Dwarven_Sphere, -- Volenfell
-    },
+    [135612] = { [1160] = UnitNames.Elite_Matron_Urgala }, -- Frost Wave (Matron Urgala)
 
-    [11247] =
-    {                                           -- Sweeping Spin (Dwemer Centurion)
-        -- DUNGEONS
-        [22] = UnitNames.NPC_Dwarven_Centurion, -- Volenfell
-    },
-    [11246] =
-    {                                           -- Steam Breath (Dwemer Centurion)
-        -- DUNGEONS
-        [22] = UnitNames.NPC_Dwarven_Centurion, -- Volenfell
-    },
+    [70366] = { [Zonenames.Zone_Deepwood_Vale] = UnitNames.NPC_Feral_Guardian }, -- Slam (Great Bear)
 
-    [135612] =
-    {                                           -- Frost Wave (Matron Urgala)
-        -- QUESTS
-        [1160] = UnitNames.Elite_Matron_Urgala, -- Deepwood Vale (Greymoor Tutorial)
-    },
+    [88371] = { [1160] = UnitNames.NPC_Icereach_Beastcaller }, -- Dive (Beastcaller) (Morrowind)
+    [88394] = { [1160] = UnitNames.NPC_Icereach_Beastcaller }, -- Gore (Beastcaller) (Morrowind)
+    [88409] = { [1160] = UnitNames.NPC_Icereach_Beastcaller }, -- Raise the Earth (Beastcaller)
+    [8977] = { [22] = UnitNames.NPC_Duneripper }, -- Sweep (Duneripper)
 
-    [70366] =
-    {                                                                  -- Slam (Great Bear)
-        -- QUESTS
-        [Zonenames.Zone_Deepwood_Vale] = UnitNames.NPC_Feral_Guardian, -- Deepwood Vale (Greymoor Tutorial)
-    },
+    [25211] = { [22] = UnitNames.Boss_The_Guardians_Strength }, -- Whirlwind Function (The Guardian's Strength)
+    [25262] = { [22] = UnitNames.Boss_The_Guardians_Strength }, -- Hammer Strike (The Guardian's Soul)
 
-    [88371] =
-    {                                                -- Dive (Beastcaller) (Morrowind)
-        [1160] = UnitNames.NPC_Icereach_Beastcaller, -- Deepwood Vale (Greymoor)
-    },
-    [88394] =
-    {                                                -- Gore (Beastcaller) (Morrowind)
-        [1160] = UnitNames.NPC_Icereach_Beastcaller, -- Deepwood Vale (Greymoor)
-    },
-    [88409] =
-    {                                                -- Raise the Earth (Beastcaller)
-        [1160] = UnitNames.NPC_Icereach_Beastcaller, -- Deepwood Vale (Greymoor)
-    },
-    [8977] =
-    {                                    -- Sweep (Duneripper)
-        -- DUNGEONS
-        [22] = UnitNames.NPC_Duneripper, -- Volenfell
-    },
+    [63752] = { [0] = UnitNames.NPC_Feral_Soul_Shriven }, -- Vomit (Tutorial)
+    [63521] = { [0] = UnitNames.Elite_Child_of_Bones }, -- Bone Crush (Tutorial)
+    [107282] = { [1013] = UnitNames.Elite_Yaghra_Nightmare }, -- Impale (Yaghra Nightmare)
+    [105867] = { [1013] = UnitNames.Elite_Yaghra_Nightmare }, -- Pustulant Explosion (Yaghra Nightmare)
 
-    [25211] =
-    {                                                 -- Whirlwind Function (The Guardian's Strength)
-        -- DUNGEONS
-        [22] = UnitNames.Boss_The_Guardians_Strength, -- Volenfell
-    },
-    [25262] =
-    {                                                 -- Hammer Strike (The Guardian's Soul)
-        -- DUNGEONS
-        [22] = UnitNames.Boss_The_Guardians_Strength, -- Volenfell
-    },
+    [121643] = { [1106] = UnitNames.NPC_Euraxian_Necromancer }, -- Defiled Ground (Euraxian Necromancer)
 
-    [63752] =
-    {                                           -- Vomit (Tutorial)
-        [0] = UnitNames.NPC_Feral_Soul_Shriven, -- The Wailing Prison (Soul Shriven in Coldharbour)
-    },
-    [63521] =
-    {                                         -- Bone Crush (Tutorial)
-        [0] = UnitNames.Elite_Child_of_Bones, -- The Wailing Prison (Soul Shriven in Coldharbour)
-    },
-    [107282] =
-    {                                              -- Impale (Yaghra Nightmare)
-        [1013] = UnitNames.Elite_Yaghra_Nightmare, -- Summerset (The Mind Trap)
-    },
-    [105867] =
-    {                                              -- Pustulant Explosion (Yaghra Nightmare)
-        [1013] = UnitNames.Elite_Yaghra_Nightmare, -- Summerset (The Mind Trap)
-    },
-
-    [121643] =
-    {                                                -- Defiled Ground (Euraxian Necromancer)
-        [1106] = UnitNames.NPC_Euraxian_Necromancer, -- Elsweyr (Bright Moons, Warm Sands)
-    },
-
-    [5240] =
-    {                                      -- Lash (Giant Snake)
-        [534] = UnitNames.Elite_Deathfang, -- Deathfang (Stros M'Kai)
-    },
+    [5240] = { [534] = UnitNames.Elite_Deathfang }, -- Lash (Giant Snake)
 }
 
 --- @class (partial) AlertZoneOverride
