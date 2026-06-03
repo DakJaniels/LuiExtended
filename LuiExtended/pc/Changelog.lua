@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-field
+--- @diagnostic disable: undefined-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -49,6 +49,18 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.5
+    "|cFFA500LuiExtended Version 7.2.3.5|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t TBD.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Endless Archive and Night Market adventure-zone HUD tracker positions persist again after reloadui, zone change, and turning off Unlock Default UI Elements (tracker container saved-vars key on RefreshAnchors post-hook).",
+    "",
+
     -- Version Header 7.2.3.4
     "|cFFA500LuiExtended Version 7.2.3.4|r",
     "",
@@ -62,6 +74,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Active Combat Tips (dodge and synergy help) use a dedicated layout anchor so tips dismiss correctly again; saved positions migrate from the old ZO_ActiveCombatTipsTip unlock key.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Frame mover previews follow each HUD element's on-screen position. Moving one unlocked panel no longer drags other preview overlays with it (for example Equipment Status or Ram when the action bar is moved).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Saved positions for the compass, player XP bar, and HUD trackers are re-applied after ZOS UI refresh (compass style, XP template, tracker anchor refresh) without replacing ZOS template functions.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Endless Archive and Night Market adventure-zone HUD tracker positions persist again after reloadui, zone change, and turning off Unlock Default UI Elements (tracker container saved-vars key on RefreshAnchors post-hook).",
     "",
 
     -- Version Header 7.2.3.3

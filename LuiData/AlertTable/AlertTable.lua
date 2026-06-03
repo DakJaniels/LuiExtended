@@ -63,6 +63,9 @@ local LUIE_CC_TYPE_UNBREAKABLE = LUIE_CC_TYPE_UNBREAKABLE
 
     **Result / Filtering Options:**
     - result: ACTION_RESULT_TYPE  -- Determines the combat event action result to detect
+    - minHitValue: number    -- Only show when combat event hitValue is >= this (ms)
+    - maxHitValue: number    -- Only show when combat event hitValue is <= this (ms)
+    - hitValueEquals: number -- Only show when hitValue matches exactly
     - eventdetect: boolean   -- Detect combat events without a source or target
     - auradetect: boolean    -- Detect aura application instead of using targeting info
 
@@ -102,6 +105,9 @@ local LUIE_CC_TYPE_UNBREAKABLE = LUIE_CC_TYPE_UNBREAKABLE
 --- @field summon? boolean             -- (Misc) Displays summon alert
 --- @field destroy? boolean            -- (Misc) Displays destroy alert
 --- @field result? any                 -- (Filtering) Action result type to detect (ACTION_RESULT_TYPE)
+--- @field minHitValue? number         -- (Filtering) Minimum combat log hitValue (ms) to show alert
+--- @field maxHitValue? number         -- (Filtering) Maximum combat log hitValue (ms) to show alert
+--- @field hitValueEquals? number      -- (Filtering) Exact hitValue (ms) required to show alert
 --- @field eventdetect? boolean        -- (Filtering) Detects events with no source or target
 --- @field auradetect? boolean         -- (Filtering) Detects aura applications
 --- @field fakeName? string            -- (Source Name Modification) Custom source name override

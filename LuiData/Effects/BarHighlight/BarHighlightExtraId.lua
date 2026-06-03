@@ -99,6 +99,8 @@ local barHighlightExtraId =
 
     -- Necromancer
     [114108] = 114131, -- Flame Skull (slotted / combat) --> charge buff
+    [123683] = 114131, -- Flame Skull charged cast projectile --> charge buff
+    [123685] = 114131, -- Flame Skull 3rd cast projectile --> charge buff
     [117624] = 117625, -- Venom Skull
     [117637] = 117638, -- Ricochet Skull
     [143915] = 121513, -- Grave Grasp
@@ -107,6 +109,19 @@ local barHighlightExtraId =
     [143945] = 118309, -- Ghostly Embrace
     [143948] = 118354, -- Empowering Grasp
     [143949] = 118354, -- Empowering Grasp
+    [253164] = 253163, -- Vengeance Grave Grasp --> Minor Maim combat
+    [119068] = 253163, -- Vengeance Grave Grasp --> Immobilize Immunity (target)
+    [61693] = 255184,  -- Stand Firm --> Minor Resolve (player buff drives slotted bar)
+    [61705] = 255189,  -- Regroup --> Major Endurance
+    [61707] = 255189,  -- Regroup --> Major Intellect
+    [61735] = 255326,  -- Marshaling Cry --> Minor Expedition
+    [61744] = 255326,  -- Marshaling Cry --> Minor Berserk
+    [255165] = 269944, -- Battle Trauma (4s dodge penalty on target --> 6s track id)
+    [61694] = 246026,  -- Vengeance Bone Armor --> Major Resolve (player buff)
+    [238130] = 238129, -- Vengeance Frozen Colossus (secondary ground --> slotted ground)
+    [238132] = 238129, -- Vengeance Frozen Colossus (damage tick --> ground bar key)
+    [255480] = 255479, -- Detonating Strike (damage combat --> proc bar)
+    [255550] = 255479, -- Detonating Strike (ground tick --> proc bar)
 
     -- Two Handed
     [16825] = 38814,  -- Off Balance Exploit stun --> Dizzying Swing (bar slot)

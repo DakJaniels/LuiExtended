@@ -4176,7 +4176,7 @@ local debugAuras =
     [48946] = true,  -- Major Breach (Disintegrating combat; hide on frames --> 61743)
 
     [20930] = true,  -- Engulfing Dragonfire (slotted; cast bar 20930 in CastBarTable)
-    [32821] = true,  -- Engulfing Dragonfire (player channel buff; bar highlight + combat GAIN DUR 5000)
+    [32821] = true,  -- Engulfing Dragonfire (player channel buff; bar highlight + CastChannelCombatTrack cast bar)
     [31104] = true,  -- Engulfing Dragonfire (tick DMG combat on target; hidden on frames)
     [270517] = true, -- Engulfing Dragonfire (tick ON CD combat; hidden on frames)
     [34240] = true,  -- Dragonfire Breath Dummy (LMN dump)
@@ -7618,9 +7618,9 @@ local debugAuras =
     [58855] = true,  -- Rending Claws
     [58856] = true,  -- Rending Claws Bleed DOT
 
-    [58864] = true, -- Claw Fury channel buff on PLAYER
-    [58865] = true, -- Claw Fury per-tick DMG
-    [58869] = true, -- Claw Fury per-tick ON CD
+    [58864] = true,  -- Claw Fury channel buff on PLAYER
+    [58865] = true,  -- Claw Fury per-tick DMG
+    [58869] = true,  -- Claw Fury per-tick ON CD
 
     [58879] = true,  -- Bloodclaws initial Physical DMG
     [58880] = true,  -- Bloodclaws target Bleed DOT
@@ -17433,6 +17433,73 @@ local debugAuras =
     [116364] = true, -- Rourken's Rebuke (Rourken's Rebuke)
 
     [116094] = true, -- Malacath's Vengeance (Malacath's Vengeance)
+
+    -- Cyrodiil Vengeance — Dragonknight templates (VENGEANCE_SKILL_MAP.csv; track/combat TBD)
+    [237606] = true, -- Vengeance Lava Whip
+    [237607] = true, -- Vengeance Searing Strike
+    [237609] = true, -- Vengeance Searing Strike
+    [237611] = true, -- Vengeance Searing Strike
+    [237615] = true, -- Vengeance Dragonfire Breath
+    [237617] = true, -- Vengeance Dragonfire Breath
+    [237618] = true, -- Vengeance Dragonfire Breath
+    [237620] = true, -- Vengeance Chains of Flame
+    [237621] = true, -- Vengeance Chains of Flame
+    [237622] = true, -- Vengeance Chains of Flame
+    [237624] = true, -- Vengeance Inferno
+    [237627] = true, -- Vengeance Dragonknight Standard
+    [237629] = true, -- Vengeance Dragonknight Standard
+    [237630] = true, -- Vengeance Earthspike Mantle
+    [237636] = true, -- Vengeance Dark Talons
+    [237638] = true, -- Vengeance Dragon Blood
+    [237639] = true, -- Vengeance Wing Buffet
+    [237641] = true, -- Vengeance Core of Flame
+    [237644] = true, -- Vengeance Core of Flame
+    [237645] = true, -- Vengeance Core of Flame
+    [237648] = true, -- Vengeance Dragon Leap
+    [237649] = true, -- Vengeance Dragon Leap
+    [237650] = true, -- Vengeance Dragon Leap
+    [237651] = true, -- Vengeance Dragon Leap
+    [237652] = true, -- Vengeance Dragon Leap
+    [237781] = true, -- Vengeance Superheated Ward
+    [237782] = true, -- Vengeance Molten Weapons
+    [237785] = true, -- Vengeance Obsidian Shield
+    [237787] = true, -- Vengeance Petrify
+    [237788] = true, -- Vengeance Hearthfire
+    [237789] = true, -- Vengeance Hearthfire
+    [237790] = true, -- Vengeance Magma Armor
+    [261043] = true, -- Vengeance Petrify
+
+    -- Cyrodiil Vengeance — Necromancer (combat log: Guardian of Sedor)
+    [238137] = true, -- Vengeance Death Scythe
+    [238138] = true, -- Vengeance Death Scythe (heal)
+    [246025] = true, -- Vengeance Bone Armor
+    [246026] = true, -- Vengeance Bone Armor (player buff)
+    [253156] = true, -- Vengeance Grave Grasp (slotted)
+    [253163] = true, -- Vengeance Grave Grasp (target root)
+    [253164] = true, -- Vengeance Grave Grasp (Minor Maim combat)
+    [238258] = true, -- Vengeance Life amid Death
+    [238260] = true, -- Vengeance Life amid Death (heal)
+    [238255] = true, -- Vengeance Expunge
+    [238129] = true, -- Vengeance Frozen Colossus (ground)
+    [238130] = true, -- Vengeance Frozen Colossus (ground bundle)
+    [238132] = true, -- Vengeance Frozen Colossus (damage)
+
+    -- Cyrodiil Vengeance — Soldier kit (Vengeance Soldier line)
+    [255057] = true, -- Sweeping Assault
+    [255164] = true, -- Battle Trauma (slotted)
+    [255165] = true, -- Battle Trauma
+    [269944] = true, -- Battle Trauma
+    [255184] = true, -- Stand Firm
+    [255185] = true, -- Stand Firm (heal)
+    [255189] = true, -- Regroup
+    [255190] = true, -- Regroup (Major Intellect combat)
+    [255326] = true, -- Marshaling Cry
+    [255327] = true, -- Marshaling Cry (Minor Berserk combat)
+    [255479] = true, -- Detonating Strike (buff)
+    [255480] = true, -- Detonating Strike (damage)
+    [255498] = true, -- Detonating Strike (ground)
+    [255512] = true, -- Detonating Strike (player track)
+    [255550] = true, -- Detonating Strike (ground tick)
 
     [117979] = true, -- Accursed Charge (Accursed Charge)
     [117980] = true, -- Accursed Charge (Accursed Charge)

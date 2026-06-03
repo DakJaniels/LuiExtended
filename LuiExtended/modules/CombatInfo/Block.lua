@@ -71,18 +71,6 @@ local bloodlordEmbraceIsEquipped = false
 -- Helpers
 -- ---------------------------------------------------------------------------
 
----
---- @return string font
-local function GetUsableFont()
-    local font
-    if IsInGamepadPreferredMode() or ZO_IsConsoleOrGameCoreUI() then
-        font = "$(GAMEPAD_MEDIUM_FONT)|$(GP_14)|soft-shadow-thick"
-    else
-        font = "$(BOLD_FONT)|$(KB_12)|soft-shadow-thin"
-    end
-    return font
-end
-
 local function GetTitleFont()
     local sv = CombatInfo.SV.block
     local fontFaceChoice = sv.bloodlordEmbraceFontFace or CombatInfo.Defaults.block.bloodlordEmbraceFontFace

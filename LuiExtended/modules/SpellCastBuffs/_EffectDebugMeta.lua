@@ -866,9 +866,7 @@ end
 --- @param primary TooltipControl
 --- @param buffControl Control|nil
 local function anchorDebugOverflowBesidePrimary(overflow, primary, buffControl)
-    if overflow.animation then
-        overflow.animation:Stop()
-    end
+    ClearTooltipImmediately(overflow)
     overflow:SetHidden(false)
     overflow:SetAlpha(1)
 

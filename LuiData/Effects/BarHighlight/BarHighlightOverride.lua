@@ -342,7 +342,9 @@ local barHighlightOverride =
     ---------------------------
 
     -- Grave Lord — skull charge stacks (combatTrack; max 3 in BarHighlightStack)
-    [114108] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull
+    [114108] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull (slotted / cast 1 projectile)
+    [123683] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull charged cast (no corpse; combat log cast 2+)
+    [123685] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull every-3rd cast (+ corpse)
     [117624] = { newId = 117625, combatTrack = true, combatStackNoExpire = true },         -- Venom Skull
     [117637] = { newId = 117638, combatTrack = true, combatStackNoExpire = true },         -- Ricochet Skull
 
@@ -381,29 +383,29 @@ local barHighlightOverride =
     [118308] = { newId = 118309 },                                                         -- Ghostly Embrace
     [118352] = { newId = 118354 },                                                         -- Empowering Grasp
 
-    [115206] = { newId = 115206, duration = 20000 },                                         -- Bone Armor
-    [118237] = { newId = 118237, duration = 20000 },                                         -- Beckoning Armor
-    [118244] = { newId = 118244, duration = 30000 },                                         -- Summoner's Armor
+    [115206] = { newId = 115206, duration = 20000 },                                       -- Bone Armor
+    [118237] = { newId = 118237, duration = 20000 },                                       -- Beckoning Armor
+    [118244] = { newId = 118244, duration = 30000 },                                       -- Summoner's Armor
 
     [115093] = { newId = 115095, showFakeAura = true, noRemove = true, duration = 11100 }, -- Bone Totem
     [118380] = { newId = 118381, showFakeAura = true, noRemove = true, duration = 11100 }, -- Remote Totem
     [118404] = { newId = 118405, showFakeAura = true, noRemove = true, duration = 13100 }, -- Agony Totem
 
-    [115001] = { newId = 115001, duration = 20000 },                                         -- Bone Goliath Transformation
-    [118664] = { newId = 118664, duration = 20000 },                                         -- Pummeling Goliath
-    [118279] = { newId = 118279, duration = 20000 },                                         -- Ravenous Goliath
+    [115001] = { newId = 115001, duration = 20000 },                                       -- Bone Goliath Transformation
+    [118664] = { newId = 118664, duration = 20000 },                                       -- Pummeling Goliath
+    [118279] = { newId = 118279, duration = 20000 },                                       -- Ravenous Goliath
 
     [114196] = { newId = 114206, showFakeAura = true },                                    -- Render Flesh --> Minor Defile
     [117883] = { newId = 117885, showFakeAura = true },                                    -- Resistant Flesh --> Minor Defile
     [117888] = { newId = 117890, showFakeAura = true },                                    -- Blood Sacrifice --> Minor Defile
 
-    [115315] = { newId = 115532, showFakeAura = true, noRemove = true, duration = 5100 },   -- Life amid Death (player aura when extended)
-    [118017] = { newId = 118018, showFakeAura = true, noRemove = true, duration = 5100 }, -- Renewing Undeath
+    [115315] = { newId = 115532, showFakeAura = true, noRemove = true, duration = 5100 },  -- Life amid Death (player aura when extended)
+    [118017] = { newId = 118018, showFakeAura = true, noRemove = true, duration = 5100 },  -- Renewing Undeath
     [118809] = { newId = 118810, showFakeAura = true, noRemove = true, duration = 30100 }, -- Enduring Undeath (corpse-extended HoT window)
 
     [115710] = { newId = 115710, duration = 16000 },                                       -- Spirit Mender
     [118912] = { newId = 118912, duration = 16000 },                                       -- Spirit Guardian
-    [118840] = { newId = 118840, duration = 8000 },                                         -- Intensive Mender
+    [118840] = { newId = 118840, duration = 8000 },                                        -- Intensive Mender
 
     [115926] = { newId = 116450 },                                                         -- Restoring Tether
     [118070] = { newId = 118071 },                                                         -- Braided Tether
@@ -667,13 +669,13 @@ local barHighlightOverride =
     [58325] = { newId = 61704 },                       -- hircine's fortitude (minor fortitude)
     [32633] = { newId = 137257 },                      -- roar (off-balance)
     [39113] = { newId = 45834 },                       -- ferocious roar (off-balance)
-    [39114] = { newId = 137312 }, -- Deafening Roar --> Off Balance 7s
-    [58405] = { newId = 137317 }, -- Gnash --> 400ms second-hit indicator
-    [58742] = { newId = 58745 },  -- Rip and Tear --> 400ms second-hit indicator
-    [58798] = { newId = 58801 },  -- Bloody Gnash --> 400ms second-hit indicator
-    [58855] = { newId = 58856 },  -- Rending Claws --> DOT
-    [58864] = { newId = 58864 },  -- Claw Fury --> channel buff
-    [58879] = { newId = 58880 },  -- Bloodclaws --> 10s target Bleed DOT
+    [39114] = { newId = 137312 },                      -- Deafening Roar --> Off Balance 7s
+    [58405] = { newId = 137317 },                      -- Gnash --> 400ms second-hit indicator
+    [58742] = { newId = 58745 },                       -- Rip and Tear --> 400ms second-hit indicator
+    [58798] = { newId = 58801 },                       -- Bloody Gnash --> 400ms second-hit indicator
+    [58855] = { newId = 58856 },                       -- Rending Claws --> DOT
+    [58864] = { newId = 58864 },                       -- Claw Fury --> channel buff
+    [58879] = { newId = 58880 },                       -- Bloodclaws --> 10s target Bleed DOT
 
     ---------------------------
     -- Fighters Guild ---------
@@ -842,6 +844,31 @@ local barHighlightOverride =
     [240148] = contingency, -- "Ulfsild's Contingency"
     [240149] = contingency, -- "Healing Contingency"
     [240150] = contingency, -- "Ulfsild's Contingency"
+
+    ---------------------------
+    -- Cyrodiil Vengeance (combat log 2025-06; VENGEANCE_SKILL_MAP.csv)
+    ---------------------------
+
+    -- Necromancer — Bone Tyrant / Living Death / Grave Lord
+    [253156] = { newId = 253163, combatTrack = true },                                    -- Vengeance Grave Grasp (QUEUED / ON CD / target 253163)
+    [246025] = { newId = 246026, combatTrack = true, duration = 20000 },                  -- Vengeance Bone Armor (246025 GAIN DUR; 61694 on player)
+    [246026] = { newId = 246026, combatTrack = true, duration = 20000 },                  -- Vengeance Bone Armor (246026 parallel GAIN DUR / FADE)
+    [238258] = { newId = 238258, showFakeAura = true, noRemove = true, duration = 1000 }, -- Vengeance Life amid Death (ground)
+    [238137] = { newId = 238137, combatTrack = true },                                    -- Vengeance Death Scythe (ON CD / OOR / STUN / STAGGER)
+    [238129] = { newId = 238129, showFakeAura = true, noRemove = true, duration = 3000 }, -- Vengeance Frozen Colossus (ground; log 238129/238130 GAIN)
+    [238255] = { newId = 238255, combatTrack = true },                                    -- Vengeance Expunge (QUEUED; cleanse + restore bundle)
+
+    -- Alliance War — Soldier loadout kit
+    [255057] = { newId = 255057, combatTrack = true },                   -- Sweeping Assault (CD / combat from log ON CD)
+    [255164] = { newId = 269944, noRemove = true },                      -- Battle Trauma (reticle target; 269944 + 255165 via ExtraId / CheckOnFade)
+    [255184] = { newId = 255184, combatTrack = true, duration = 20000 }, -- Stand Firm (log 255184 GAIN DUR / FADE; Minor Resolve 61693 on player)
+    [255189] = { newId = 255189, combatTrack = true, duration = 10000 }, -- Regroup (255189 GAIN DUR; 61705 + 61707 on player)
+    [255190] = { newId = 255189, combatTrack = true, duration = 10000 }, -- Regroup --> Major Intellect combat (remap to slotted)
+    [255326] = { newId = 255326, combatTrack = true, duration = 15000 }, -- Marshaling Cry (255326 GAIN DUR; 61744 + 61735 on player)
+    [255327] = { newId = 255326, combatTrack = true, duration = 15000 }, -- Marshaling Cry --> Minor Berserk combat (remap to slotted)
+    [255479] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (255479 GAIN DUR; FADE on detonate cast)
+    [255498] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (ground BEGIN; remap to proc bar)
+    [255512] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (player track GAIN DUR; FADE with proc)
 
     ---------------------------
     -- Temp -------------------

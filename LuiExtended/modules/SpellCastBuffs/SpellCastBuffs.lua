@@ -1798,9 +1798,9 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         if control.tooltip then
             tooltipText = control.tooltip
         else
-            local duration
+            local duration = 0
             if type(control.effectId) == "number" then
-                local duration = zo_floor((control.duration / 1000 * 10) + 0.5) / 10
+                duration = zo_floor((control.duration / 1000 * 10) + 0.5) / 10
                 local ov = Effects.EffectOverride[control.effectId]
 
                 local formatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit)
@@ -1857,8 +1857,6 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                         tooltipText = dynTip
                     end
                 end
-            else
-                duration = 0
             end
         end
 

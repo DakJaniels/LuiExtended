@@ -98,6 +98,7 @@ local DebugStatus = {}
 --- @field AddNameOnBossEngaged AddNameOnBossEngaged Table of effects that add names when boss is engaged
 --- @field AddNameOnEvent AddNameOnEvent Table of effects that add names on specific events
 --- @field AddNoDurationBarHighlight table<integer, boolean> Table of effects that should highlight without duration
+--- @field BarHighlightHideDurationLabel table<integer, boolean> Track ids: bar stack highlight without countdown label
 --- @field AddStackOnEvent AddStackOnEvent Table of effects that add stacks on specific events
 --- @field ArtificialEffectOverride ArtificialEffectOverride Table of artificial effect overrides
 --- @field AssistantIcons AssistantIcons Table of assistant icon definitions
@@ -158,6 +159,7 @@ local Effects =
     AddNameOnBossEngaged = {},
     AddNameOnEvent = {},
     AddNoDurationBarHighlight = {},
+    BarHighlightHideDurationLabel = {},
     AddStackOnEvent = {},
     ArtificialEffectOverride = {},
     AssistantIcons = {},
@@ -268,8 +270,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7213
-LuiData.addonVersion = "7.2.1.3"
+LuiData.version = 7214
+LuiData.addonVersion = "7.2.1.4"
 
 --- @class (partial) Data
 LuiData.Data =

@@ -28,8 +28,8 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.3.4"
-LUIE.addonVersion = 7234
+LUIE.version = "7.2.3.5"
+LUIE.addonVersion = 7235
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -182,7 +182,9 @@ LUIE.OtherAddonCompatability =
     isCrutchAlertsEnabled = false,
     isFancyActionBarEnabled = false,
     isFancyActionBarPlusEnabled = false,
-    isWritCreatorEnabled = false
+    isWritCreatorEnabled = false,
+    isLibCombatEnabled = false,
+    isLibSlashCommanderEnabled = false,
 }
 -- -----------------------------------------------------------------------------
 -- Default Settings
@@ -194,6 +196,7 @@ LUIE.OtherAddonCompatability =
 --- @field TimeStamp boolean
 --- @field TimeStampFormat string
 --- @field TimeStampColor number[]
+--- @field LcmUseLuiExtendedTimestampFormat boolean|nil When true (default), Timestamp Format below drives LUIE proxy time; when false, LibChatMessage preset/os.date drives time.
 
 --- @class LUIE_Defaults_SV
 --- @field DebugEnvironmentActive boolean True while /luie debug on allowlist is applied
@@ -248,6 +251,7 @@ LUIE.Defaults =
         TimeStamp = false,
         TimeStampFormat = "HH:m:s",
         TimeStampColor = { 143 / 255, 143 / 255, 143 / 255 },
+        LcmUseLuiExtendedTimestampFormat = true,
     },
 
     Migrations                  = {}

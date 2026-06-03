@@ -211,23 +211,16 @@ local function PrintUsage()
     DebugEnvironmentChat("       /luie svstatus - SavedVariables migration diagnostics")
 end
 
-function LUIE.OnLuieSlashCommand(args)
-    args = zo_strtrim(args or "")
-    if args == "" then
-        PrintUsage()
-        return
-    end
-    local sub, action = zo_strlower(args):match("^(%S+)%s*(%S*)")
-    sub = sub or ""
-    action = action or ""
-    if sub == "svstatus" then
-        LUIE.PrintSavedVariablesMigrationStatus()
-        return
-    end
-    if sub ~= "debug" then
-        PrintUsage()
-        return
-    end
+function LUIE.LuieSlashCommandPrintUsage()
+    PrintUsage()
+end
+
+function LUIE.LuieSlashCommandSvStatus()
+    LUIE.PrintSavedVariablesMigrationStatus()
+end
+
+function LUIE.LuieSlashCommandDebug(action)
+    action = zo_strlower(zo_strtrim(action or ""))
     if action == "" or action == "status" then
         PrintDebugEnvironmentStatus()
         return
@@ -253,4 +246,24 @@ function LUIE.OnLuieSlashCommand(args)
         return
     end
     PrintUsage()
+end
+
+function LUIE.OnLuieSlashCommand(args)
+    args = zo_strtrim(args or "")
+    if args == "" then
+        PrintUsage()
+        return
+    end
+    local sub, action = zo_strlower(args):match("^(%S+)%s*(%S*)")
+    sub = sub or ""
+    action = action or ""
+    if sub == "svstatus" then
+        LUIE.LuieSlashCommandSvStatus()
+        return
+    end
+    if sub ~= "debug" then
+        PrintUsage()
+        return
+    end
+    LUIE.LuieSlashCommandDebug(action)
 end

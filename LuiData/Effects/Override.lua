@@ -2985,6 +2985,9 @@ local effectOverride =
     -- GRAVE LORD
 
     -- Flame Skull / Venom Skull / Ricochet Skull
+    [114108] = { hide = true },                                                                                             -- Flame Skull cast/projectile (player buff = 114131)
+    [123683] = { hide = true },                                                                                             -- Flame Skull charged cast variant (132143172)
+    [123685] = { hide = true },                                                                                             -- Flame Skull every-3rd cast (+ corpse)
     [114131] = { tooltip = Tooltips.Skill_Flame_Skull, tooltipValue2 = GetAbilityName(114108), forcedContainer = "short" }, -- Flame Skull (Flame Skull)
     [117625] = { tooltip = Tooltips.Skill_Flame_Skull, tooltipValue2 = GetAbilityName(117629), forcedContainer = "short" }, -- Venom Skull (Venom Skull)
     [117638] = { tooltip = Tooltips.Skill_Ricochet_Skull, forcedContainer = "short" },                                      -- Ricochet Skull (Ricochet Skull)
@@ -3100,6 +3103,9 @@ local effectOverride =
     [121513] = { tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 },                                                          -- Grave Grasp (Grave Grasp)
     [143915] = { icon = "/esoui/art/icons/ability_necromancer_009.dds", tooltip = Tooltips.Generic_Immobilize },                  -- Grave Grasp (Grave Grasp)
     [143917] = { icon = "/esoui/art/icons/ability_necromancer_009.dds", tooltip = Tooltips.Generic_Stun },                        -- Grave Grasp (Grave Grasp)
+    [253163] = { tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 },                                                          -- Vengeance Grave Grasp
+    [253164] = { hide = true },                                                                                                   -- Vengeance Grave Grasp (Minor Maim combat)
+    [238138] = { hide = true },                                                                                                   -- Vengeance Death Scythe (heal tick)
 
     [118309] = { icon = "/esoui/art/icons/ability_necromancer_009_b.dds", tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 }, -- Ghostly Embrace (Ghostly Embrace)
     [118325] = { icon = "/esoui/art/icons/ability_necromancer_009_b.dds", tooltip = Tooltips.Generic_Immobilize },                -- Ghostly Embrace (Ghostly Embrace)
@@ -3132,9 +3138,9 @@ local effectOverride =
 
     -- Render Flesh / Resistant Flesh / Blood Sacrifice
     [117886] = { tooltip = Tooltips.Skill_Resistant_Flesh }, -- Resistant Flesh (Resistant Flesh)
-    [117947] = { hide = true }, -- Expunge and Modify (Curative Curse on Resistant Flesh)
-    [117941] = { hide = true }, -- Expunge and Modify
-    [124005] = { hide = true }, -- Expunge slotted ping
+    [117947] = { hide = true },                              -- Expunge and Modify (Curative Curse on Resistant Flesh)
+    [117941] = { hide = true },                              -- Expunge and Modify
+    [124005] = { hide = true },                              -- Expunge slotted ping
 
     -- Life amid Death / Renewing Undeath / Enduring Undeath
     [115326] = { icon = "/esoui/art/icons/ability_necromancer_016.dds", tooltip = Tooltips.Skill_Life_amid_Death },   -- Life amid Death (Life amid Death)
@@ -4127,59 +4133,59 @@ local effectOverride =
     [137164] = { tooltip = Tooltips.Skill_Feral_Carnage },                                                -- Feral Carnage (Feral Pounce)
 
     -- Hircine's Bounty / Hircine's Rage / Hircine's Fortitude
-    [137202] = { icon = "/esoui/art/icons/ability_werewolf_004_a.dds" }, -- Hircine's Bounty (Hircine's Bounty)
+    [137202] = { icon = "/esoui/art/icons/ability_werewolf_004_a.dds" },                                                        -- Hircine's Bounty (Hircine's Bounty)
 
-    [137204] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds" }, -- Hircine's Rage (Hircine's Rage)
+    [137204] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds" },                                                        -- Hircine's Rage (Hircine's Rage)
     [137206] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds", name = Abilities.Skill_Hircines_Rage, unbreakable = 1 }, -- Hircine's Rage active state
-    [137347] = { hide = true },                                          -- Major Protection internal (Hircine's Rage while-slotted)
-    [267553] = { hide = true },                                          -- Hircine's Rage while-slotted anchor
-    [267554] = { hide = true },                                          -- Major Brutality internal (Hircine's Rage while-slotted)
-    [267555] = { hide = true },                                          -- Major Sorcery internal (Hircine's Rage while-slotted)
-    [267570] = { hide = true },                                          -- Minor Berserk internal (Hircine's Rage while-slotted)
+    [137347] = { hide = true },                                                                                                 -- Major Protection internal (Hircine's Rage while-slotted)
+    [267553] = { hide = true },                                                                                                 -- Hircine's Rage while-slotted anchor
+    [267554] = { hide = true },                                                                                                 -- Major Brutality internal (Hircine's Rage while-slotted)
+    [267555] = { hide = true },                                                                                                 -- Major Sorcery internal (Hircine's Rage while-slotted)
+    [267570] = { hide = true },                                                                                                 -- Minor Berserk internal (Hircine's Rage while-slotted)
 
-    [137209] = { icon = "/esoui/art/icons/ability_werewolf_004_c.dds" }, -- Hircine's Fortitude (Hircine's Fortitude)
-    [137210] = { tooltip = Tooltips.Skill_Hircines_Fortitude },          -- Hircine's Fortitude (Hircine's Fortitude)
+    [137209] = { icon = "/esoui/art/icons/ability_werewolf_004_c.dds" },                                                        -- Hircine's Fortitude (Hircine's Fortitude)
+    [137210] = { tooltip = Tooltips.Skill_Hircines_Fortitude },                                                                 -- Hircine's Fortitude (Hircine's Fortitude)
 
     -- Roar / Ferocious Roar / Deafening Roar
-    [32633] = { tooltip = Tooltips.Generic_Fear },                          -- Roar (Roar)
-    [137257] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance (Roar)
-    [170991] = { hide = true },                                             -- Roar target fear marker
+    [32633] = { tooltip = Tooltips.Generic_Fear },                                                                                                            -- Roar (Roar)
+    [137257] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                                                   -- Off Balance (Roar)
+    [170991] = { hide = true },                                                                                                                               -- Roar target fear marker
 
-    [39113] = { tooltip = Tooltips.Generic_Fear },                          -- Ferocious Roar (Ferocious Roar)
-    [45834] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance (Ferocious Roar)
-    [171001] = { hide = true },                                             -- Ferocious Roar target fear marker
+    [39113] = { tooltip = Tooltips.Generic_Fear },                                                                                                            -- Ferocious Roar (Ferocious Roar)
+    [45834] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                                                    -- Off Balance (Ferocious Roar)
+    [171001] = { hide = true },                                                                                                                               -- Ferocious Roar target fear marker
 
-    [39114] = { tooltip = Tooltips.Generic_Fear },                          -- Deafening Roar (Deafening Roar)
-    [137312] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance (Deafening Roar)
-    [137311] = { hide = true }, -- Major Maim internal (Deafening Roar; display 61725)
-    [111788] = { hide = true }, -- Major Cowardice internal (Deafening Roar; display 147643)
-    [171003] = { hide = true }, -- Deafening Roar target fear marker
+    [39114] = { tooltip = Tooltips.Generic_Fear },                                                                                                            -- Deafening Roar (Deafening Roar)
+    [137312] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                                                   -- Off Balance (Deafening Roar)
+    [137311] = { hide = true },                                                                                                                               -- Major Maim internal (Deafening Roar; display 61725)
+    [111788] = { hide = true },                                                                                                                               -- Major Cowardice internal (Deafening Roar; display 147643)
+    [171003] = { hide = true },                                                                                                                               -- Deafening Roar target fear marker
 
     [267744] = { icon = "/esoui/art/icons/ability_werewolf_003.dds", tooltip = Tooltips.Skill_Blood_Hunger, displayStacks = true, maxStacks = 3, stack = 1 }, -- Blood Hunger (Roar - All Morphs)
 
-    [266875] = { hide = true }, -- Fury (Werewolf resource counter)
-    [266744] = { hide = true }, -- Fury per-target generation throttle (ON CD marker)
+    [266875] = { hide = true },                                                                                                                               -- Fury (Werewolf resource counter)
+    [266744] = { hide = true },                                                                                                                               -- Fury per-target generation throttle (ON CD marker)
 
-    [58405] = { icon = "/esoui/art/icons/ability_werewolf_002_rend.dds", tooltip = Tooltips.Skill_Gnash }, -- Gnash
-    [137317] = { icon = "/esoui/art/icons/ability_werewolf_002_rend.dds", hide = true },                   -- Gnash ripping-out state (~400 ms; bar second-hit timer)
+    [58405] = { icon = "/esoui/art/icons/ability_werewolf_002_rend.dds", tooltip = Tooltips.Skill_Gnash },                                                    -- Gnash
+    [137317] = { icon = "/esoui/art/icons/ability_werewolf_002_rend.dds", hide = true },                                                                      -- Gnash ripping-out state (~400 ms; bar second-hit timer)
 
-    [58798] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", tooltip = Tooltips.Skill_Bloody_Gnash }, -- Bloody Gnash
-    [58801] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", hide = true },                           -- Bloody Gnash ~400 ms second-hit indicator
-    [267747] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", hide = true },                          -- Bloody Gnash Execute second-hit DMG
+    [58798] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", tooltip = Tooltips.Skill_Bloody_Gnash },                                           -- Bloody Gnash
+    [58801] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", hide = true },                                                                     -- Bloody Gnash ~400 ms second-hit indicator
+    [267747] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", hide = true },                                                                    -- Bloody Gnash Execute second-hit DMG
 
-    [268571] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, tooltip = Tooltips.Skill_Insatiable_Hunger }, -- Insatiable Hunger (active devour state)
+    [268571] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, tooltip = Tooltips.Skill_Insatiable_Hunger },                                 -- Insatiable Hunger (active devour state)
 
-    [261901] = { hide = true }, -- Major Brutality internal (Hircine's Bounty - All Morphs)
-    [261902] = { hide = true }, -- Major Sorcery internal (Hircine's Bounty - All Morphs)
+    [261901] = { hide = true },                                                                                                                               -- Major Brutality internal (Hircine's Bounty - All Morphs)
+    [261902] = { hide = true },                                                                                                                               -- Major Sorcery internal (Hircine's Bounty - All Morphs)
 
-    [266845] = { hide = true }, -- Call of the Pack passive
-    [266849] = { hide = true }, -- Feral Cruelty passive
-    [266851] = { hide = true }, -- Feral Cruelty passive
-    [266874] = { hide = true }, -- Master of the Chase passive
-    [267414] = { hide = true }, -- Werewolf Transformation internal passive
-    [268123] = { hide = true }, -- Slaughter passive
-    [269021] = { hide = true }, -- Prowl passive
-    [150998] = { hide = true }, -- Major Resolve internal (transform; display 61694)
+    [266845] = { hide = true },                                                                                                                               -- Call of the Pack passive
+    [266849] = { hide = true },                                                                                                                               -- Feral Cruelty passive
+    [266851] = { hide = true },                                                                                                                               -- Feral Cruelty passive
+    [266874] = { hide = true },                                                                                                                               -- Master of the Chase passive
+    [267414] = { hide = true },                                                                                                                               -- Werewolf Transformation internal passive
+    [268123] = { hide = true },                                                                                                                               -- Slaughter passive
+    [269021] = { hide = true },                                                                                                                               -- Prowl passive
+    [150998] = { hide = true },                                                                                                                               -- Major Resolve internal (transform; display 61694)
 
     -- Rending Claws / Claw Fury / Bloodclaws
     [58856] = { tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 },                                                       -- Rending Claws Bleed DOT
@@ -4191,18 +4197,18 @@ local effectOverride =
     [58881] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", hide = true },                                         -- Bloodclaws player HoT
     [267961] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", hide = true },                                        -- Bloodclaws instant heal POWER event
 
-    [58742] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear initial DMG
-    [58745] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear ~400 ms second-hit indicator
-    [58744] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear Execute second-hit DMG
-    [267785] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true }, -- Rip and Tear self-heal
-    [137321] = { tooltip = Tooltips.Skill_Major_Breach }, -- Major Breach (generic Sundered-status id)
+    [58742] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },                                    -- Rip and Tear initial DMG
+    [58745] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },                                    -- Rip and Tear ~400 ms second-hit indicator
+    [58744] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },                                    -- Rip and Tear Execute second-hit DMG
+    [267785] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },                                   -- Rip and Tear self-heal
+    [137321] = { tooltip = Tooltips.Skill_Major_Breach },                                                                    -- Major Breach (generic Sundered-status id)
 
-    [137287] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true }, -- Feeding Frenzy stage 1 player buff 10s
-    [58813] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },  -- Feeding Frenzy stage 2 player buff 20s
-    [131353] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true }, -- Feeding Frenzy stage 3 player buff 30s
-    [58775] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },  -- Feeding Frenzy synergy registration
+    [137287] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },                                        -- Feeding Frenzy stage 1 player buff 10s
+    [58813] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },                                         -- Feeding Frenzy stage 2 player buff 20s
+    [131353] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },                                        -- Feeding Frenzy stage 3 player buff 30s
+    [58775] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },                                         -- Feeding Frenzy synergy registration
 
-    [150999] = { hide = true }, -- Call of the Hunt passive (Pack Leader)
+    [150999] = { hide = true },                                                                                              -- Call of the Hunt passive (Pack Leader)
 
     -- Werewolf Transformation / Pack Leader / Werewolf Berserker
     [39477] = { hide = true },                                                                                                             -- De-Werewolf (Werewolf Transformation - All Morphs)
@@ -4221,11 +4227,11 @@ local effectOverride =
     [39076] = { tooltip = Tooltips.Skill_Werewolf_Berserker },                                                                             -- Werewolf Berserker (Werewolf Berserker)
     [111844] = { tooltip = Tooltips.Generic_Fear },                                                                                        -- Werewolf Berserker
     [89147] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_ATTACKBLEED_DDS, tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 1 }, -- Werewolf Berserker Bleed (Werewolf Bleed)
-    [267420] = { hide = true }, -- Major Berserk internal (Werewolf Berserker form-in passive; display 61745)
+    [267420] = { hide = true },                                                                                                            -- Major Berserk internal (Werewolf Berserker form-in passive; display 61745)
 
-    [39050] = { hide = true }, -- Insatiable Hunger Passive marker
+    [39050] = { hide = true },                                                                                                             -- Insatiable Hunger Passive marker
 
-    [267425] = { tooltip = Tooltips.Skill_Enduring_Rampage }, -- Enduring Rampage (Rampage morph)
+    [267425] = { tooltip = Tooltips.Skill_Enduring_Rampage },                                                                              -- Enduring Rampage (Rampage morph)
 
     ----------------------------------------------------------------
     -- WEREWOLF QUEST ABILITIES ------------------------------------

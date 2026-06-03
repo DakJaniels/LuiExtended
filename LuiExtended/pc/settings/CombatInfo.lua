@@ -35,25 +35,6 @@ local DurationOverridesList, DurationOverridesListValues = {}, {}
 
 local ACTION_RESULT_AREA_EFFECT = 669966
 
--- Create a list of abilityId's / abilityName's to use for Blacklist
-local function GenerateCustomList(input)
-    local options, values = {}, {}
-    local counter = 0
-    for id in pairs(input) do
-        counter = counter + 1
-        -- If the input is a numeric value then we can pull this abilityId's info.
-        if type(id) == "number" then
-            options[counter] = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat("<<C:1>>", GetAbilityName(id))
-            -- If the input is not numeric then add this as a name only.
-        else
-            options[counter] = id
-        end
-        values[counter] = id
-    end
-    return options, values
-end
-
-
 -- Load LibAddonMenu
 local LAM = LUIE.LAM
 

@@ -35,6 +35,23 @@ local castBarTable =
         [18429] = true, -- Unarmed
     },
 
+    -- First ability slot GCD probe (PerfectWeave-style; GetSlotCooldownInfo)
+    GcdReferenceSlot = 3,
+    -- Brief ShowCast suppress after block-dismiss (cleared on weapon pair change in ActionBar_CastBar.lua).
+    CastBarChannelSuppressMs = 800,
+
+    -- Heavy windup cast id -> medium hit id (Effects.Override icon/name); omit when cast id uses override directly
+    HeavyCastMediumDisplay =
+    {
+        [18429] = 18430, -- Unarmed
+        [16041] = 17162, -- Two Handed
+        [15279] = 15282, -- One Handed
+        [16420] = 17170, -- Dual Wield
+        [16691] = 17174, -- Bow
+        [16261] = 18405, -- Ice
+        [15383] = 15385, -- Inferno
+    },
+
     --------------------------------------------------------------------------------------------------------------------------------
     -- When a hard CC effect is successfully applied to the player, instantly stop any in progress Casts
     --------------------------------------------------------------------------------------------------------------------------------
@@ -276,6 +293,8 @@ local castBarTable =
 
         [113432] = true, -- 68235 Stun (Nascent Indrik)
         [148079] = true, -- 68235 Stun (Unstable Morpholith)
+
+        -- Block-at-cast-start grace (release then re-block cancels UI): ActionBar_CastBar.lua g_castBarBlockHeldAtStart / g_castBarBlockReleasedDuringCast.
     },
 
     --------------------------------------------------------------------------------------------------------------------------------
@@ -429,6 +448,26 @@ local castBarTable =
     },
 
     --------------------------------------------------------------------------------------------------------------------------------
+    --  Extra display time (ms) after API cast length (e.g. Radiant morphs)
+    --------------------------------------------------------------------------------------------------------------------------------
+    CastDisplayDelayMs =
+    {
+        [63029] = 100, -- Radiant Destruction
+        [63044] = 100, -- Radiant Glory
+        [63046] = 100, -- Radiant Oppression
+    },
+
+    --------------------------------------------------------------------------------------------------------------------------------
+    --  Never start cast bar for these ability ids (off-GCD toggles, etc.)
+    --------------------------------------------------------------------------------------------------------------------------------
+    CastIgnoreAbility =
+    {
+        [132141] = true, -- Blood Frenzy
+        [134160] = true, -- Simmering Frenzy
+        [135841] = true, -- Sated Fury
+    },
+
+    --------------------------------------------------------------------------------------------------------------------------------
     --  Duration update for any effects that are converted to casts (A lot of stun effects in PVE Quests with casting animations)
     --------------------------------------------------------------------------------------------------------------------------------
     CastDurationFix =
@@ -441,6 +480,9 @@ local castBarTable =
         [115478] = 1200, -- Bone Goliath Self Snare (Bone Goliath Transformation)
         [118673] = 1200, -- Pummeling Goliath Self Snare (Pummeling Goliath)
         [118287] = 1200, -- Ravenous Goliath Self Snare (Ravenous Goliath)
+
+        -- Dragonknight
+        [20930] = 5000, -- Engulfing Dragonfire (full channel; LibCombat ~4750 + lag)
 
         -- Innate
         [37059] = 1165,  -- Mount Up (Mount)
@@ -850,7 +892,7 @@ local castBarTable =
         [119107] = true, -- NAME ME Infect Brew (Winnowing Plague Decoction)
 
         -- Dragonknight
-        [20930] = true, -- Engulfing Dragonfire
+        [20930] = true, -- Engulfing Dragonfire (slotted; LibCombat BEGIN_CHANNEL or combat fallback)
 
         -- Nightblade
         [33398] = true,  -- Death Stroke (Nightblade)
@@ -1302,6 +1344,9 @@ local castBarTable =
         [198330] = true, -- Cascading Fortune (stamina channel)
         [186200] = true, -- Curative Surge (channel)
         [198537] = true, -- Curative Surge (stamina channel)
+
+        -- Dragonknight
+        [32821] = true, -- Engulfing Dragonfire (channel buff FADE ends cast bar)
     },
 
     -- Possibly use later if any cast removal events need to rely on EVENT_COMBAT_EVENT
@@ -1313,6 +1358,14 @@ local castBarTable =
     --------------------------------------------------------------------------------------------------------------------------------
     -- Convert a cast time ability to channeled, since our function detects Casts/Channels automatically and tries to sort them, we need to add a forced override for certain things we want to show as a channel when it makes sense
     --------------------------------------------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------------------------------
+    -- Channel buff combat id fires GAIN each damage tick; start once from slottedId + durationMs (no per-tick refresh).
+    --------------------------------------------------------------------------------------------------------------------------------
+    CastChannelCombatTrack =
+    {
+        [32821] = { slottedId = 20930, durationMs = 5000 }, -- Engulfing Dragonfire (U49+ player channel buff)
+    },
+
     CastChannelConvert =
     {
         -- Cyrodiil

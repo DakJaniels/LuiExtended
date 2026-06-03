@@ -2,8 +2,8 @@
 ## Title: LuiData
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
-## AddOnVersion: 7213
-## Version: 7.2.1.3
+## AddOnVersion: 7214
+## Version: 7.2.1.4
 ## Description: Provides data for LuiExtended.
 ## DependsOn: LuiMedia>=7133
 ## IsLibrary: true
@@ -89,6 +89,8 @@ src/CombatTextConstants.lua
 
 # Alert System
 AlertTable/AlertTable.lua
+AlertTable/InfiniteArchive.lua
+AlertTable/TrialSupplementAlerts.lua
 AlertTable/BossNameConvert.lua
 AlertTable/MapOverride.lua
 AlertTable/ZoneOverride.lua
@@ -103,6 +105,7 @@ CrowdControl/aoePlayerSet.lua
 CrowdControl/aoePlayerUltimate.lua
 CrowdControl/aoeTraps.lua
 CrowdControl/IgnoreList.lua
+CrowdControl/IgnoreListSupplement.lua
 CrowdControl/LavaAlerts.lua
 CrowdControl/ReversedLogic.lua
 CrowdControl/SpecialCC.lua

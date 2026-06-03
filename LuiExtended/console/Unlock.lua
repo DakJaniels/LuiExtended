@@ -221,8 +221,8 @@ function Unlock.RegisterUnlockPositionHooks()
     end
     if ZO_HUDTracker_Base then
         ZO_PostHook(ZO_HUDTracker_Base, "RefreshAnchors", function (tracker)
-            if tracker.control then
-                Unlock.ApplySavedUnlockFramePosition(tracker.control:GetName())
+            if tracker.container then
+                Unlock.ApplySavedUnlockFramePosition(tracker.container:GetName())
             end
         end)
     end

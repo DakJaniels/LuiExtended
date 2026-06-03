@@ -568,10 +568,14 @@ local SOUND_TYPE_SETTINGS =
     [LUIE_ALERT_SOUND_TYPE_HEAL] = { toggle = "sound_healEnable", sound = "sound_heal" },
 }
 
--- Play a sound if the option is enabled and priority is set.
-function AbilityAlerts.PlayAlertSound(abilityId, ...)
+-- Play alert sound from Alerts[abilityId].sound when that sound type is enabled in settings.
+function AbilityAlerts.PlayAlertSound(abilityId)
     local Settings = CombatInfo.SV.alerts
-    local soundType = Alerts[abilityId].sound
+    local alertEntry = Alerts[abilityId]
+    if not alertEntry or not alertEntry.sound then
+        return
+    end
+    local soundType = alertEntry.sound
 
     if not soundType then
         return
@@ -1089,6 +1093,32 @@ function AbilityAlerts.AlertEffectChanged(eventCode, changeType, effectSlot, eff
     end
 end
 
+local ALERT_HIT_VALUE_LIGHT_ATTACK_MS = 75
+
+--- Combat log hitValue filters (optional AlertTableItem minHitValue / maxHitValue / hitValueEquals).
+function AbilityAlerts.ShouldShowAlertForHitValue(abilityId, hitValue)
+    if type(hitValue) ~= "number" then
+        return true
+    end
+    if hitValue <= ALERT_HIT_VALUE_LIGHT_ATTACK_MS then
+        return false
+    end
+    local entry = Alerts[abilityId]
+    if not entry then
+        return true
+    end
+    if entry.minHitValue and hitValue < entry.minHitValue then
+        return false
+    end
+    if entry.maxHitValue and hitValue > entry.maxHitValue then
+        return false
+    end
+    if entry.hitValueEquals and hitValue ~= entry.hitValueEquals then
+        return false
+    end
+    return true
+end
+
 function AbilityAlerts.OnCombatIn(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     if not Alerts[abilityId] then
         return
@@ -1163,6 +1193,9 @@ function AbilityAlerts.OnCombatIn(eventCode, result, isError, abilityName, abili
             end
 
             if Alerts[abilityId].block or Alerts[abilityId].dodge or Alerts[abilityId].avoid or Alerts[abilityId].interrupt or Alerts[abilityId].shouldusecc or Alerts[abilityId].unmit or Alerts[abilityId].power or Alerts[abilityId].destroy or Alerts[abilityId].summon then
+                if not AbilityAlerts.ShouldShowAlertForHitValue(abilityId, hitValue) then
+                    return
+                end
                 -- Filter by priority
                 if (Settings.toggles.mitigationDungeon and not IsUnitInDungeon("player")) or not Settings.toggles.mitigationDungeon then
                     if Alerts[abilityId].priority == 3 and not Settings.toggles.mitigationRank3 then
@@ -1216,6 +1249,9 @@ function AbilityAlerts.OnCombatAlert(eventCode, resultType, isError, abilityName
             end
 
             if Alerts[abilityId].block or Alerts[abilityId].dodge or Alerts[abilityId].avoid or Alerts[abilityId].interrupt or Alerts[abilityId].shouldusecc or Alerts[abilityId].unmit or Alerts[abilityId].power or Alerts[abilityId].destroy or Alerts[abilityId].summon then
+                if not AbilityAlerts.ShouldShowAlertForHitValue(abilityId, hitValue) then
+                    return
+                end
                 -- Filter by priority
                 if (Settings.toggles.mitigationDungeon and not IsUnitInDungeon("player")) or not Settings.toggles.mitigationDungeon then
                     if Alerts[abilityId].priority == 3 and not Settings.toggles.mitigationRank3 then
@@ -1416,7 +1452,7 @@ function AbilityAlerts.OnEvent(alertType, abilityId, abilityName, abilityIcon, s
     local endTime = currentTime + duration
 
     AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier, textName, textMitigation, abilityIcon, currentTime, endTime, showDuration, crowdControl, sourceUnitId, postCast, alwaysShowInterrupt, neverShowInterrupt, effectOnlyInterrupt, mitigationParts)
-    AbilityAlerts.PlayAlertSound(abilityId, alertType)
+    AbilityAlerts.PlayAlertSound(abilityId)
 end
 
 -- Updates local variables with new font

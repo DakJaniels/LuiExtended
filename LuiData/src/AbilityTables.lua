@@ -69,25 +69,25 @@ local darkShade
 local abilityTables =
 {
 
-    -- Dragonknight Cyrodiil Templates
-    Skill_Vengeance_Standard = zo_strformat("<<C:1>>", GetAbilityName(237627)),         -- Vengeance Dragonknight Standard
-    Skill_Vengeance_Lava_Whip = zo_strformat("<<C:1>>", GetAbilityName(237606)),        -- Vengeance Lava Whip
-    Skill_Vengeance_Searing_Strike = zo_strformat("<<C:1>>", GetAbilityName(237607)),   -- Vengeance Searing Strike
-    Skill_Vengeance_Fiery_Breath = zo_strformat("<<C:1>>", GetAbilityName(237615)),     -- Vengeance Fiery Breath
-    Skill_Vengeance_Fiery_Grip = zo_strformat("<<C:1>>", GetAbilityName(237620)),       -- Vengeance Fiery Grip
-    Skill_Vengeance_Inferno = zo_strformat("<<C:1>>", GetAbilityName(237624)),          -- Vengeance Inferno
-    Skill_Vengeance_Dragon_Leap = zo_strformat("<<C:1>>", GetAbilityName(237648)),      -- Vengeance Dragon Leap
-    Skill_Vengeance_Spiked_Armor = zo_strformat("<<C:1>>", GetAbilityName(237630)),     -- Vengeance Spiked Armor
-    Skill_Vengeance_Dark_Talons = zo_strformat("<<C:1>>", GetAbilityName(237636)),      -- Vengeance Dark Talons
-    Skill_Vengeance_Dragon_Blood = zo_strformat("<<C:1>>", GetAbilityName(237638)),     -- Vengeance Dragon Blood
-    Skill_Vengeance_Protective_Scale = zo_strformat("<<C:1>>", GetAbilityName(237639)), -- Vengeance Protective Scale
-    Skill_Vengeance_Inhale = zo_strformat("<<C:1>>", GetAbilityName(237641)),           -- Vengeance Inhale
-    Skill_Vengeance_Magma_Armor = zo_strformat("<<C:1>>", GetAbilityName(237790)),      -- Vengeance Magma Armor
-    Skill_Vengeance_Stonefist = zo_strformat("<<C:1>>", GetAbilityName(237781)),        -- Vengeance Stonefist
-    Skill_Vengeance_Molten_Weapons = zo_strformat("<<C:1>>", GetAbilityName(237782)),   -- Vengeance Molten Weapons
-    Skill_Vengeance_Obsidian_Shield = zo_strformat("<<C:1>>", GetAbilityName(237785)),  -- Vengeance Obsidian Shield
-    Skill_Vengeance_Petrify = zo_strformat("<<C:1>>", GetAbilityName(237787)),          -- Vengeance Petrify
-    Skill_Vengeance_Ash_Cloud = zo_strformat("<<C:1>>", GetAbilityName(237788)),        -- Vengeance Ash Cloud
+    -- Dragonknight — Vengeance Cyro templates (see docs/VENGEANCE_SKILL_MAP.csv)
+    Skill_Vengeance_Standard = zo_strformat("<<C:1>>", GetAbilityName(237627)),          -- Vengeance Dragonknight Standard
+    Skill_Vengeance_Lava_Whip = zo_strformat("<<C:1>>", GetAbilityName(237606)),         -- Vengeance Lava Whip
+    Skill_Vengeance_Searing_Strike = zo_strformat("<<C:1>>", GetAbilityName(237607)),    -- Vengeance Searing Strike
+    Skill_Vengeance_Dragonfire_Breath = zo_strformat("<<C:1>>", GetAbilityName(237615)), -- Vengeance Dragonfire Breath
+    Skill_Vengeance_Chains_of_Flame = zo_strformat("<<C:1>>", GetAbilityName(237620)),   -- Vengeance Chains of Flame
+    Skill_Vengeance_Inferno = zo_strformat("<<C:1>>", GetAbilityName(237624)),           -- Vengeance Inferno (Ardent Flame passive)
+    Skill_Vengeance_Dragon_Leap = zo_strformat("<<C:1>>", GetAbilityName(237648)),       -- Vengeance Dragon Leap
+    Skill_Vengeance_Earthspike_Mantle = zo_strformat("<<C:1>>", GetAbilityName(237630)), -- Vengeance Earthspike Mantle
+    Skill_Vengeance_Dark_Talons = zo_strformat("<<C:1>>", GetAbilityName(237636)),       -- Vengeance Dark Talons
+    Skill_Vengeance_Dragon_Blood = zo_strformat("<<C:1>>", GetAbilityName(237638)),      -- Vengeance Dragon Blood
+    Skill_Vengeance_Wing_Buffet = zo_strformat("<<C:1>>", GetAbilityName(237639)),       -- Vengeance Wing Buffet
+    Skill_Vengeance_Core_of_Flame = zo_strformat("<<C:1>>", GetAbilityName(237641)),     -- Vengeance Core of Flame
+    Skill_Vengeance_Magma_Armor = zo_strformat("<<C:1>>", GetAbilityName(237790)),       -- Vengeance Magma Armor
+    Skill_Vengeance_Superheated_Ward = zo_strformat("<<C:1>>", GetAbilityName(237781)),  -- Vengeance Superheated Ward
+    Skill_Vengeance_Molten_Weapons = zo_strformat("<<C:1>>", GetAbilityName(237782)),    -- Vengeance Molten Weapons
+    Skill_Vengeance_Obsidian_Shield = zo_strformat("<<C:1>>", GetAbilityName(237785)),   -- Vengeance Obsidian Shield
+    Skill_Vengeance_Petrify = zo_strformat("<<C:1>>", GetAbilityName(237787)),           -- Vengeance Petrify
+    Skill_Vengeance_Hearthfire = zo_strformat("<<C:1>>", GetAbilityName(237788)),        -- Vengeance Hearthfire
 
     -- ---------------------------------------------------
     -- GENERIC BUFFS & DEBUFFS ---------------------------

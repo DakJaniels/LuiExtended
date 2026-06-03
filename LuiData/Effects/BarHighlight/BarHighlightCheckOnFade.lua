@@ -69,6 +69,13 @@ local barHighlightCheckOnFade =
     [121513] = { id1 = 121513, id2 = 143915, id3 = 143917, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Grave Grasp / Minor Maim
     [118309] = { id1 = 118309, id2 = 118325, id3 = 143945, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Ghostly Embrace / Minor Maim
     [118354] = { id1 = 118354, id2 = 143948, id3 = 143949, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Empowering Grasp / Minor Maim
+    [253163] = { id1 = 253163, id2 = 253164, id3 = 119068, unitTag = TARGET_UNIT_TAG }, -- Vengeance Grave Grasp / Minor Maim / immunity
+    [269944] = { id1 = 269944, id2 = 255165, unitTag = TARGET_UNIT_TAG },               -- Battle Trauma (6s + 4s components)
+    [255184] = { id1 = 61693, id2 = 255185, unitTag = PLAYER_UNIT_TAG },                -- Stand Firm --> Minor Resolve / heal combat
+    [255189] = { id1 = 61705, id2 = 61707, unitTag = PLAYER_UNIT_TAG },                 -- Regroup --> Major Endurance / Major Intellect
+    [255326] = { id1 = 61744, id2 = 61735, unitTag = PLAYER_UNIT_TAG },                 -- Marshaling Cry --> Minor Berserk / Minor Expedition
+    [255479] = { id1 = 255479, id2 = 255512, unitTag = PLAYER_UNIT_TAG },               -- Detonating Strike proc / player track remainder
+    [246026] = { id1 = 246026, id2 = 61694, unitTag = PLAYER_UNIT_TAG },                -- Bone Armor buff fade --> Major Resolve remainder
     [114131] = { id1 = 114131, unitTag = PLAYER_UNIT_TAG },                             -- Flame Skull charges (resync stacks after per-cast combat FADE)
     [117625] = { id1 = 117625, unitTag = PLAYER_UNIT_TAG },                             -- Venom Skull charges
     [117638] = { id1 = 117638, unitTag = PLAYER_UNIT_TAG },                             -- Ricochet Skull charges

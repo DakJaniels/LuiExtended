@@ -15,7 +15,9 @@ local Effects = Data.Effects
 --------------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------------
--- We don't add bar highlights for 0 duration abilities, a few abilities with dynamic durations show as 0 duration so we need this override table.
+-- BarSlotUpdate skips toggled highlights when GetUpdatedAbilityDuration is 0 unless the **track** id (after BarHighlightOverride.newId) is listed here.
+-- Does not suppress bar countdown labels — use BarHighlightHideDurationLabel for stack-only charge buffs (e.g. Necromancer skulls).
+-- Do not list ids that still show a real timer from combatTrack (e.g. Power Lash 34117 keeps its 20s label via BarHighlightOverride.duration).
 --------------------------------------------------------------------------------------------------------------------------------
 --- @type table<integer, boolean>
 local addNoDurationBarHighlight =
@@ -25,7 +27,7 @@ local addNoDurationBarHighlight =
     [32821] = true, -- Engulfing Dragonfire channel (player); combat GAIN DUR 5000 per tick
 
     -- Necromancer
-    [114131] = true, -- Flame Skull charges
+    [114131] = true, -- Flame Skull charges (track; slotted 114108)
     [117625] = true, -- Venom Skull charges
     [117638] = true, -- Ricochet Skull charges
     [115240] = true, -- Bitter Harvest
@@ -39,3 +41,17 @@ local addNoDurationBarHighlight =
 }
 
 Effects.AddNoDurationBarHighlight = addNoDurationBarHighlight
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- Track ids: show stack highlight with no bar duration text (internal placeholder remain only).
+-- Pair with BarHighlightStack + BarHighlightOverride.combatStackNoExpire on slotted skull rows.
+--------------------------------------------------------------------------------------------------------------------------------
+--- @type table<integer, boolean>
+local barHighlightHideDurationLabel =
+{
+    [114131] = true, -- Flame Skull charges
+    [117625] = true, -- Venom Skull charges
+    [117638] = true, -- Ricochet Skull charges
+}
+
+Effects.BarHighlightHideDurationLabel = barHighlightHideDurationLabel

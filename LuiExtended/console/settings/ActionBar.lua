@@ -25,13 +25,6 @@ local LHAS = LibHarvensAddonSettings
 local globalMethodOptions = { "Radial", "Vertical Reveal" }
 local globalMethodOptionsKeys = { ["Radial"] = 1, ["Vertical Reveal"] = 2 }
 
--- Helper function to add indentation to names
-local function AddIndent(name, level)
-    level = level or 1
-    local tabs = string_rep("\t", level)
-    return zo_strformat("<<1>><<2>>", tabs, name)
-end
-
 local function SetAbilityBarTimersEnabled()
     if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)) == 0 then
         SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS, "true", SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
@@ -1182,6 +1175,27 @@ function ActionBar.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_TP),
+            items =
+            {
+                { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_MS), data = 1 },
+                { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_01), data = 2 },
+                { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_001), data = 3 },
+            },
+            getFunction = function () return Settings.CastBarTimerFormat end,
+            setFunction = function (combobox, value, item)
+                Settings.CastBarTimerFormat = item.data
+            end,
+            default = Defaults.CastBarTimerFormat,
+            disable = function ()
+                return castBarOptionDisabled() or not Settings.CastBarTimer
+            end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE_TP),
             items = fontItems,
@@ -1297,6 +1311,40 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value) Settings.CastBarHeavy = value end,
             default = Defaults.CastBarHeavy,
             disable = castBarOptionDisabled,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP),
+            getFunction = function () return Settings.CastBarWeaveHelper end,
+            setFunction = function (value)
+                Settings.CastBarWeaveHelper = value
+                if ActionBar.CastBar and ActionBar.CastBar.OnWeaveHelperSettingChanged then
+                    ActionBar.CastBar.OnWeaveHelperSettingChanged()
+                end
+            end,
+            default = Defaults.CastBarWeaveHelper,
+            disable = function ()
+                return castBarOptionDisabled() or not LUIE.OtherAddonCompatability.isLibCombatEnabled
+            end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP),
+            min = 0,
+            max = 200,
+            step = 10,
+            getFunction = function () return Settings.CastBarWeaveThresholdMs end,
+            setFunction = function (value) Settings.CastBarWeaveThresholdMs = value end,
+            default = Defaults.CastBarWeaveThresholdMs,
+            disable = function ()
+                return castBarOptionDisabled() or not Settings.CastBarWeaveHelper or not LUIE.OtherAddonCompatability.isLibCombatEnabled
+            end,
         }
 
         -- Blacklist subsection

@@ -105,6 +105,8 @@ local function OnAddOnLoaded(eventId, addonName)
         LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
         LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
         LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
+        LUIE.OtherAddonCompatability.isLibCombatEnabled = LUIE.IsItEnabled("LibCombat")
+        LUIE.OtherAddonCompatability.isLibSlashCommanderEnabled = LUIE.IsItEnabled("LibSlashCommander")
         -- -----------------------------------------------------------------------------
         -- Toggle Alert Frame Visibility if needed
         LUIE.SetupAlertFrameVisibility()
@@ -145,7 +147,11 @@ local function OnAddOnLoaded(eventId, addonName)
         if LUIE.SV.ShowChangeLog == true then
             LUIE.ChangelogScreen()
         end
-        SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+        if LUIE.SlashCommandRegistry then
+            LUIE.SlashCommandRegistry.ApplyPostInitSlashCommandIntegration()
+        else
+            SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+        end
         -- -----------------------------------------------------------------------------
         -- Register global event listeners
         RegisterEvents()

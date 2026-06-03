@@ -68,12 +68,158 @@ function ChatOutput.IsLibChatMessageActive()
     return ChatOutput.lcm ~= nil
 end
 
-function ChatOutput.ShouldUseExternalFormatting()
-    local SV = GetSettings()
-    if not SV then
+--- pChat / rChat system-message formatters (PC). Bypass only applies when one is present.
+function ChatOutput.HasExternalChatFormatter()
+    return GetExternalFormatSysMessage() ~= nil
+end
+
+--- pChat wraps the LibChatMessage formatter when useSystemMessageChatHandler is enabled.
+function ChatOutput.ShouldPChatFormatLibChatMessageProxy()
+    if not ChatOutput.lcm or not IsPChatAvailable() then
         return false
     end
-    return SV.ChatBypassFormat == true
+    if not ChatOutput.HasExternalChatFormatter() then
+        return false
+    end
+    local db = pChat.db
+    if not db then
+        return false
+    end
+    return db.useSystemMessageChatHandler == true
+end
+
+function ChatOutput.ShouldUseExternalFormatting()
+    local SV = GetSettings()
+    if not SV or SV.ChatBypassFormat ~= true then
+        return false
+    end
+    return ChatOutput.HasExternalChatFormatter()
+end
+
+--- @param formatStr string|nil
+--- @return boolean
+function ChatOutput.LuiExtendedFormatUsesMilliseconds(formatStr)
+    return type(formatStr) == "string" and zo_strfind(formatStr, "xy", 1, true) ~= nil
+end
+
+--- Maps LUIE Timestamp Format tokens (HH, m, xy, …) to a LibChatMessage/os.date format (bracketed literals).
+--- @param luiFormat string|nil
+--- @return string
+function ChatOutput.LuiExtendedFormatToLibChatMessageOsDate(luiFormat)
+    if type(luiFormat) ~= "string" or luiFormat == "" then
+        return "[%X]"
+    end
+
+    local out = luiFormat
+    out = string.gsub(out, "xy", "")
+    out = string.gsub(out, ":+$", "")
+    out = string.gsub(out, "HH", "%%H")
+    out = string.gsub(out, "hh", "%%I")
+    out = string.gsub(out, "H", "%%H")
+    out = string.gsub(out, "h", "%%I")
+    out = string.gsub(out, "A", "%%p")
+    out = string.gsub(out, "a", "%%p")
+    out = string.gsub(out, "m", "%%M")
+    out = string.gsub(out, "s", "%%S")
+
+    if out:sub(1, 1) ~= "[" then
+        out = "[" .. out .. "]"
+    end
+    return out
+end
+
+function ChatOutput.PrependLuiExtendedTimestampToMessage(rawMsg)
+    local SV = GetSettings()
+    if not SV or SV.TimeStamp ~= true then
+        return rawMsg
+    end
+    local timestring = GetTimeString()
+    local timestamp = LUIE.CreateTimestamp(timestring, SV.TimeStampFormat, nil)
+    local timestampFormatted = zo_strformat("|c<<1>>[<<2>>]|r ", LUIE.TimeStampColorize, timestamp)
+    return timestampFormatted .. rawMsg
+end
+
+--- When true, LUIE proxy prints use Timestamp Format below (xy/ms). When false, LibChatMessage os.date preset or custom field applies.
+function ChatOutput.UsesLuiExtendedTimestampFormatWithLibChatMessage()
+    local SV = GetSettings()
+    if not SV then
+        return true
+    end
+    if SV.LcmUseLuiExtendedTimestampFormat == nil then
+        return true
+    end
+    return SV.LcmUseLuiExtendedTimestampFormat == true
+end
+
+--- With LibChatMessage, LUIE applies Include Timestamp on proxy prints only in LuiExtended-format mode.
+function ChatOutput.ShouldPrependLuiExtendedTimestampOnLibChatMessageProxy()
+    local SV = GetSettings()
+    if not ChatOutput.lcm or not SV or SV.TimeStamp ~= true then
+        return false
+    end
+    if ChatOutput.ShouldPChatFormatLibChatMessageProxy() then
+        return false
+    end
+    return ChatOutput.UsesLuiExtendedTimestampFormatWithLibChatMessage()
+end
+
+--- Apply Include Timestamp + LCM time mode to LibChatMessage APIs.
+function ChatOutput.ApplyLibChatMessageTimePrefixSettings()
+    if not LibChatMessage or not ChatOutput.lcm then
+        return
+    end
+    local SV = GetSettings()
+    if not SV then
+        return
+    end
+
+    if ChatOutput.ShouldPChatFormatLibChatMessageProxy() then
+        LibChatMessage:SetTimePrefixEnabled(false)
+        return
+    end
+
+    if ChatOutput.UsesLuiExtendedTimestampFormatWithLibChatMessage() then
+        LibChatMessage:SetTimePrefixFormat(ChatOutput.LuiExtendedFormatToLibChatMessageOsDate(SV.TimeStampFormat))
+        LibChatMessage:SetTimePrefixEnabled(false)
+    else
+        LibChatMessage:SetTimePrefixEnabled(SV.TimeStamp == true)
+    end
+end
+
+--- LUIE timestamps must not compete with LibChatMessage tag/time formatters.
+function ChatOutput.ShouldApplyLuiExtendedTimestamp()
+    if ChatOutput.lcm then
+        return false
+    end
+    local SV = GetSettings()
+    if ChatOutput.ShouldUseExternalFormatting() then
+        return false
+    end
+    return SV and SV.TimeStamp == true
+end
+
+local function PrintViaLibChatMessage(msg)
+    if ChatOutput.lcm then
+        if ChatOutput.ShouldPrependLuiExtendedTimestampOnLibChatMessageProxy() then
+            msg = ChatOutput.PrependLuiExtendedTimestampToMessage(msg)
+        end
+        ChatOutput.lcm:Print(msg)
+        return true
+    end
+    return false
+end
+
+--- When LibChatMessage is loaded, LUIE must use the proxy so tags, time, and history use LIB_IDENTIFIER routing.
+function ChatOutput.ShouldRoutePrintThroughLibChatMessage()
+    return ChatOutput.lcm ~= nil
+end
+
+local function UsesPrintToAllTabsMethod()
+    if ZO_IsConsoleOrGameCoreUI() then
+        return true
+    end
+    local SV = GetSettings()
+    return SV and SV.ChatMethod == "Print to All Tabs"
 end
 
 local function ApplyExternalSystemFormat(rawMsg)
@@ -99,12 +245,10 @@ local function ApplyExternalSystemFormat(rawMsg)
 end
 
 function ChatOutput.FormatForDisplay(rawMsg)
-    local SV = GetSettings()
     if ChatOutput.ShouldUseExternalFormatting() then
         return ApplyExternalSystemFormat(rawMsg)
     end
-    local useTimestamp = SV and SV.TimeStamp
-    return LUIE.FormatMessage(rawMsg, useTimestamp)
+    return LUIE.FormatMessage(rawMsg, ChatOutput.ShouldApplyLuiExtendedTimestamp())
 end
 
 function ChatOutput.PrintToChatWindows(formattedMsg, isSystem)
@@ -155,15 +299,15 @@ function ChatOutput.Print(msg, isSystem)
         return
     end
 
-    if SV.ChatMethod == "Print to All Tabs" then
+    if PrintViaLibChatMessage(msg) then
+        return
+    end
+
+    if UsesPrintToAllTabsMethod() then
         if ChatOutput.ShouldUseExternalFormatting() then
-            if ChatOutput.lcm then
-                ChatOutput.lcm:Print(msg)
-            else
-                LUIE.AddSystemMessage(ApplyExternalSystemFormat(msg))
-            end
+            LUIE.AddSystemMessage(ApplyExternalSystemFormat(msg))
         else
-            LUIE.AddSystemMessage(LUIE.FormatMessage(msg, SV.TimeStamp))
+            LUIE.AddSystemMessage(LUIE.FormatMessage(msg, ChatOutput.ShouldApplyLuiExtendedTimestamp()))
         end
         return
     end
@@ -243,6 +387,9 @@ local function RegisterExternalChatRechainCallbacks()
     externalChatCallbacksRegistered = true
 
     if IsPChatAvailable() then
+        CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_AddSystemMessage", function ()
+            ChatOutput.ApplyLibChatMessageTimePrefixSettings()
+        end)
         CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
             ChatOutput.WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
         end)
@@ -280,6 +427,7 @@ end
 function ChatOutput.InitializePrintRouting()
     if LibChatMessage then
         ChatOutput.lcm = LibChatMessage("LuiExtended", "LUIE")
+        ChatOutput.ApplyLibChatMessageTimePrefixSettings()
     else
         ChatOutput.lcm = nil
     end
