@@ -904,8 +904,6 @@ local tooltips =
     -- Necromancer
     Skill_Reusable_Parts_Rank_1 = zo_strformat(str_REUSABLE_PARTS_TP, 25),
     Skill_Reusable_Parts_Rank_2 = zo_strformat(str_REUSABLE_PARTS_TP, 50),
-    Skill_Flame_Skull = GetString(LUIE_STRING_SKILL_FLAME_SKULL_TP),
-    Skill_Ricochet_Skull = GetString(LUIE_STRING_SKILL_RICOCHET_SKULL_TP),
     Skill_Blastbones = GetString(LUIE_STRING_SKILL_BLASTBONES_TP),
     Skill_Blighted_Blastbones = GetString(LUIE_STRING_SKILL_BLIGHTED_BLASTBONES_TP),
     Skill_Stalking_Blastbones = GetString(LUIE_STRING_SKILL_STALKING_BLASTBONES_TP),

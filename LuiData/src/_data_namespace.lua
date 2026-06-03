@@ -108,6 +108,11 @@ local DebugStatus = {}
 --- @field BarHighlightExtraId BarHighlightExtraId Table of additional effect IDs for highlighting
 --- @field BarHighlightOverride table<integer, BarHighlightOverrideOptions> Table of highlight override definitions
 --- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
+--- @field BarHighlightStackFromCast table<integer, integer> Cast ability id -> charge stack when combat GAIN hitValue is missing
+--- @field BarHighlightSkullChargeTrack table<integer, integer> Skull track buff id -> max bar stack label (Flame/Ricochet 2, Venom 3)
+--- @field BarHighlightSkullEmpoweredCast table<integer, integer> Third-cast ability id -> skull track buff id (reset charges)
+--- @field BarHighlightSkullChargeSource table<integer, string> Skull track buff id -> skullCastCombat | trackBuff
+--- @field BarHighlightSkullSlottedDisplay table<integer, integer> Slotted bound id -> raw charge for bar (0 = none; Venom up to 3)
 --- @field BarHighlightStackConsume table<integer, integer> Bound ability id -> combatTrack stack buff id (consume one stack on cast)
 --- @field BarHighlightStackZeroEffect table<integer, "keep"|"clear"> Track buff id behavior when effect stack count is 0
 --- @field BarHighlightStackCounter table<integer, boolean> Counter buff id: fade updates slotted bar stack (Grim Focus, Bound Armaments)
@@ -169,6 +174,11 @@ local Effects =
     BarHighlightExtraId = {},
     BarHighlightOverride = {},
     BarHighlightStack = {},
+    BarHighlightStackFromCast = {},
+    BarHighlightSkullChargeTrack = {},
+    BarHighlightSkullEmpoweredCast = {},
+    BarHighlightSkullChargeSource = {},
+    BarHighlightSkullSlottedDisplay = {},
     BarHighlightStackConsume = {},
     BarHighlightStackZeroEffect = {},
     BarHighlightStackCounter = {},
@@ -270,8 +280,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7214
-LuiData.addonVersion = "7.2.1.4"
+LuiData.version = 7215
+LuiData.addonVersion = "7.2.1.5"
 
 --- @class (partial) Data
 LuiData.Data =

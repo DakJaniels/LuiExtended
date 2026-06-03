@@ -35,8 +35,8 @@ local barHighlightStack =
     [34117] = 5, -- Power Lash stacks (Flame Lash line)
     [23808] = 5, -- Lava Slam / Volcanic Whip stacks (Lava Whip line)
 
-    -- Necromancer (skull charge tracks; max 3)
-    [114131] = 3, -- Flame Skull charges
+    -- Necromancer (skull charge tracks; combat hitValue may be 3 internally, bar label max 2)
+    [114131] = 3, -- Flame Skull charges (display capped in ActionBar)
     [117625] = 3, -- Venom Skull charges
     [117638] = 3, -- Ricochet Skull charges
 }

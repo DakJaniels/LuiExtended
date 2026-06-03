@@ -345,8 +345,12 @@ local barHighlightOverride =
     [114108] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull (slotted / cast 1 projectile)
     [123683] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull charged cast (no corpse; combat log cast 2+)
     [123685] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull every-3rd cast (+ corpse)
-    [117624] = { newId = 117625, combatTrack = true, combatStackNoExpire = true },         -- Venom Skull
-    [117637] = { newId = 117638, combatTrack = true, combatStackNoExpire = true },         -- Ricochet Skull
+    [117624] = { newId = 117625, combatTrack = true, combatStackNoExpire = true },         -- Venom Skull (slotted / cast 1)
+    [123699] = { newId = 117625, combatTrack = true, combatStackNoExpire = true },         -- Venom Skull charged cast
+    [123704] = { newId = 117625, combatTrack = true, combatStackNoExpire = true },         -- Venom Skull 3rd cast
+    [117637] = { newId = 117638, combatTrack = true, combatStackNoExpire = true },         -- Ricochet Skull (slotted / cast 1)
+    [123718] = { newId = 117638, combatTrack = true, combatStackNoExpire = true },         -- Ricochet Skull charged cast
+    [123719] = { newId = 117638, combatTrack = true, combatStackNoExpire = true },         -- Ricochet Skull 3rd cast
 
     [114860] = { newId = 114863 },                                                         -- Blastbones
     [117330] = { newId = 114863 },                                                         -- Blastbones

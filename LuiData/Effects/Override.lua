@@ -2988,9 +2988,13 @@ local effectOverride =
     [114108] = { hide = true },                                                                                             -- Flame Skull cast/projectile (player buff = 114131)
     [123683] = { hide = true },                                                                                             -- Flame Skull charged cast variant (132143172)
     [123685] = { hide = true },                                                                                             -- Flame Skull every-3rd cast (+ corpse)
-    [114131] = { tooltip = Tooltips.Skill_Flame_Skull, tooltipValue2 = GetAbilityName(114108), forcedContainer = "short" }, -- Flame Skull (Flame Skull)
-    [117625] = { tooltip = Tooltips.Skill_Flame_Skull, tooltipValue2 = GetAbilityName(117629), forcedContainer = "short" }, -- Venom Skull (Venom Skull)
-    [117638] = { tooltip = Tooltips.Skill_Ricochet_Skull, forcedContainer = "short" },                                      -- Ricochet Skull (Ricochet Skull)
+    [123699] = { hide = true },                                                                                             -- Venom Skull charged cast
+    [123704] = { hide = true },                                                                                             -- Venom Skull 3rd cast
+    [123718] = { hide = true },                                                                                             -- Ricochet Skull charged cast
+    [123719] = { hide = true },                                                                                             -- Ricochet Skull 3rd cast
+    [114131] = { dynamicTooltip = true, tooltipMorphId = 114108, forcedContainer = "short" }, -- Flame Skull charge buff (live morph text from 114108)
+    [117625] = { dynamicTooltip = true, tooltipMorphId = 117624, forcedContainer = "short" }, -- Venom Skull charge buff (live morph text from 117624)
+    [117638] = { dynamicTooltip = true, tooltipMorphId = 117637, forcedContainer = "short" }, -- Ricochet Skull charge buff (live morph text from 117637)
 
     -- Sacrifice / pet tick noise (player frame)
     [220098] = { hide = true },
