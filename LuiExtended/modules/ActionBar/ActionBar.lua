@@ -1996,6 +1996,10 @@ local function OnEffectFaded(abilityId)
         if g_triggeredSlotsBack[abilityId] and g_uiProcAnimation[g_triggeredSlotsBack[abilityId]] then
             g_uiProcAnimation[g_triggeredSlotsBack[abilityId]]:Stop()
         end
+        local backSlotNum = g_triggeredSlotsBack[abilityId]
+        if backSlotNum then
+            Backbar.UpdateActivationHighlight(backSlotNum)
+        end
         g_triggeredSlotsRemain[abilityId] = nil
     end
 
@@ -2562,8 +2566,17 @@ function ActionBar.OnSlotUpdated(actionSlotIndex)
     -- Update the slot if the bound id has a proc
     if actionSlotIndex >= BAR_INDEX_START and actionSlotIndex <= BAR_INDEX_END then
         local abilityId = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
-        if Effects.IsAbilityProc[abilityId] or Effects.BaseForAbilityProc[abilityId] then
+        local inactiveHotbarCategory = Backbar.GetInactiveHotbarCategory()
+        local inactiveAbilityId = GetSlotTrueBoundId(actionSlotIndex, inactiveHotbarCategory)
+        local isProcSlot = Effects.IsAbilityProc[abilityId] or Effects.BaseForAbilityProc[abilityId]
+            or Effects.IsAbilityProc[inactiveAbilityId] or Effects.BaseForAbilityProc[inactiveAbilityId]
+        if isProcSlot then
             ActionBar.BarSlotUpdate(actionSlotIndex, false, true)
+            if ActionBar.SV.BarShowBack then
+                local backSlotNum = actionSlotIndex + BACKBAR_INDEX_OFFSET
+                ActionBar.BarSlotUpdate(backSlotNum, false, true)
+                Backbar.UpdateActivationHighlight(backSlotNum)
+            end
         end
     end
 end

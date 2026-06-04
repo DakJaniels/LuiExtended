@@ -120,31 +120,45 @@ function Backbar.UpdateActivationHighlight(luiSlotNum)
         and ActionSlotHasActivationHighlight(physicalSlot, hotbarCategory)
         and not button.useFailure
         and not button.showingCooldown
-    local isShowingHighlight = button.activationHighlight:IsControlHidden() == false
+    local activationHighlight = button.activationHighlight
+    local anim = activationHighlight.animation
 
-    if showHighlight ~= isShowingHighlight then
-        button.activationHighlight:SetHidden(not showHighlight)
-
-        if showHighlight then
-            local _, _, activationAnimationTexture = GetSlotTexture(physicalSlot, hotbarCategory)
-            button.activationHighlight:SetTexture(activationAnimationTexture)
-
-            local anim = button.activationHighlight.animation
-            if not anim then
-                anim = CreateSimpleAnimation(ANIMATION_TEXTURE, button.activationHighlight)
-                anim:SetImageData(64, 1)
-                anim:SetFramerate(30)
-                anim:GetTimeline():SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
-                button.activationHighlight.animation = anim
-            end
-
-            anim:GetTimeline():PlayFromStart()
-        else
-            local anim = button.activationHighlight.animation
-            if anim then
-                anim:GetTimeline():Stop()
-            end
+    if not showHighlight then
+        activationHighlight:SetHidden(true)
+        if anim then
+            anim:GetTimeline():Stop()
         end
+        return
+    end
+
+    local isShowingHighlight = activationHighlight:IsControlHidden() == false
+    if not isShowingHighlight then
+        activationHighlight:SetHidden(false)
+    end
+
+    local _, _, activationAnimationTexture = GetSlotTexture(physicalSlot, hotbarCategory)
+    activationHighlight:SetTexture(activationAnimationTexture)
+
+    if not anim then
+        anim = CreateSimpleAnimation(ANIMATION_TEXTURE, activationHighlight)
+        anim:SetImageData(64, 1)
+        anim:SetFramerate(30)
+        anim:GetTimeline():SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
+        activationHighlight.animation = anim
+    end
+
+    if not anim:GetTimeline():IsPlaying() then
+        anim:GetTimeline():PlayFromStart()
+    end
+end
+
+--- @param physicalSlotIndex integer
+function Backbar.OnPhysicalSlotVisualSync(physicalSlotIndex)
+    if not ActionBar.SV.BarShowBack then
+        return
+    end
+    if physicalSlotIndex >= BAR_INDEX_START and physicalSlotIndex <= BACKBAR_INDEX_END then
+        Backbar.UpdateActivationHighlight(physicalSlotIndex + BACKBAR_INDEX_OFFSET)
     end
 end
 
@@ -544,16 +558,18 @@ function Backbar.RegisterEvents()
     end)
     eventManager:RegisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE, Backbar.BackbarToggleSettings)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarSlotState", EVENT_HOTBAR_SLOT_STATE_UPDATED, function (_, actionSlotIndex, hotbarCategory)
+    eventManager:RegisterForEvent(moduleName .. "BackbarSlotState", EVENT_HOTBAR_SLOT_STATE_UPDATED, function (_, actionSlotIndex, _hotbarCategory)
         if not ActionBar.SV.BarShowBack then
             return
         end
-        if hotbarCategory ~= Backbar.GetInactiveHotbarCategory() then
+        Backbar.OnPhysicalSlotVisualSync(actionSlotIndex)
+    end)
+
+    eventManager:RegisterForEvent(moduleName .. "BackbarSlotEffect", EVENT_ACTION_SLOT_EFFECT_UPDATE, function (_, _hotbarCategory, actionSlotIndex)
+        if not ActionBar.SV.BarShowBack then
             return
         end
-        if actionSlotIndex >= BAR_INDEX_START and actionSlotIndex <= BACKBAR_INDEX_END then
-            Backbar.UpdateActivationHighlight(actionSlotIndex + BACKBAR_INDEX_OFFSET)
-        end
+        Backbar.OnPhysicalSlotVisualSync(actionSlotIndex)
     end)
 
     eventManager:RegisterForEvent(moduleName .. "BackbarActiveHotbar", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function ()
@@ -626,6 +642,7 @@ local forward =
     "BackbarSetupTemplate", "BackbarToggleSettings",
     "HideAllAbilityActionButtonDropCallouts", "ShowAppropriateAbilityActionButtonDropCallouts",
     "OakensoulEquipped", "GetInactiveHotbarCategory", "UpdateActivationHighlight", "RefreshAllActivationHighlights",
+    "OnPhysicalSlotVisualSync",
 }
 for _, name in ipairs(forward) do
     ActionBar[name] = Backbar[name]

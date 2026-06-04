@@ -181,6 +181,7 @@ ActionBar.CastBar =
 --- @field GetInactiveHotbarCategory fun(): HotBarCategory
 --- @field UpdateActivationHighlight fun(luiSlotNum: number)
 --- @field RefreshAllActivationHighlights fun()
+--- @field OnPhysicalSlotVisualSync fun(physicalSlotIndex: number)
 ActionBar.Backbar =
 {
     name = LUIE.name .. "ActionBar" .. "Backbar",
