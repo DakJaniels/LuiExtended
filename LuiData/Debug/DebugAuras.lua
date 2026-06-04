@@ -4660,6 +4660,7 @@ local debugAuras =
     [76632] = true,  -- Manifestation of Terror (Manifestation of Terror)
 
     [65269] = true,  -- Shade Initialize (Summon Shade - All Morphs)
+    [235097] = true, -- Shade Initialize (combat log pet init)
     -- [85086] = true, -- Boss (Summon Shade - All Morphs)
     -- [85087] = true, -- Boss (Summon Shade - All Morphs)
 

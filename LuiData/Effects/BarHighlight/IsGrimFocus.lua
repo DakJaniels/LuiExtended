@@ -55,9 +55,12 @@ Effects.IsSimmeringFrenzyOverride =
 Effects.BarHighlightStackCounter =
 {
     [61905] = true,  -- Grim Focus (counter)
-    [61928] = true,  -- Relentless Focus (counter)
-    [61920] = true,  -- Merciless Resolve (counter)
+    [107054] = true, -- Relentless Focus (counter; combat log)
+    [61928] = true,  -- Relentless Focus (counter; legacy)
+    [107055] = true, -- Merciless Resolve (counter; combat log)
+    [61920] = true,  -- Merciless Resolve (counter; legacy)
     [130293] = true, -- Bound Armaments (counter)
+    [215672] = true, -- Leeching Strikes (cost-reduction stacks)
 }
 
 --- @class (partial) BarHighlightStackBaseAbility
@@ -68,6 +71,17 @@ Effects.BarHighlightStackBaseAbility =
     [61927] = true, -- Relentless Focus (slotted)
     [61919] = true, -- Merciless Resolve (slotted)
     [24165] = true, -- Bound Armaments (slotted)
+    [36908] = true, -- Leeching Strikes (slotted)
+}
+
+--- Track buff ids: on /reloadui BarSlotUpdate reads stack count from player buff (GetUnitBuffInfo).
+--- @type table<integer, boolean>
+Effects.BarHighlightReloadStackFromBuff =
+{
+    [122585] = true, -- Grim Focus
+    [122586] = true, -- Merciless Resolve
+    [122587] = true, -- Relentless Focus
+    [215672] = true, -- Leeching Strikes (cost-reduction stacks)
 }
 
 --- Proc sound at stack thresholds on track buff ids (pairs with IsGrimFocus / IsBoundArmaments).
@@ -76,7 +90,8 @@ Effects.BarHighlightStackBaseAbility =
 Effects.BarHighlightProcSoundThresholds =
 {
     [122585] = { 5, 10 }, -- Grim Focus
-    [122587] = { 5, 10 }, -- Relentless Focus
+    [122587] = { 4, 10 }, -- Relentless Focus (spend at 4 stacks)
     [122586] = { 5, 10 }, -- Merciless Resolve
     [203447] = { 4, 8 },  -- Bound Armaments
 }
+

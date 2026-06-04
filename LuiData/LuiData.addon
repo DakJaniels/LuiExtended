@@ -32,6 +32,7 @@ Effects/Override.lua
 Effects/OffBalance.lua
 Effects/OverrideByName.lua
 Effects/PullDuration.lua
+Effects/PullStacks.lua
 Effects/SourceOverride.lua
 Effects/SynergyNameOverride.lua
 Effects/TooltipUseDefault.lua

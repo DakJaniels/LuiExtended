@@ -129,9 +129,12 @@ local fakePlayerBuffs =
     -- Mirage (35414): native aura from EVENT_EFFECT_CHANGED; fake [90593] shiftId 35414 duplicated the same id under a second EffectsList key when Extra Buffs was enabled
     [90620] = { duration = "GET", shiftId = 35419, onlyExtended = true }, -- Phantasmal Escape
 
-    [33317] = { duration = "GET", shiftId = 33316, onlyExtra = true },    -- Drain Power
-    [131344] = { duration = "GET", shiftId = 36901, onlyExtra = true },   -- Power Extraction
-    [62240] = { duration = "GET", shiftId = 36891, onlyExtra = true },    -- Sap Essence
+    [33317] = { duration = "GET", shiftId = 61687, onlyExtra = true },    -- Drain Power (combat --> display Major Sorcery)
+    [131342] = { duration = "GET", shiftId = 61665, onlyExtra = true },   -- Drain Power Major Brutality combat
+    [131344] = { duration = "GET", shiftId = 61687, onlyExtra = true },   -- Power Extraction Major Sorcery combat
+    [36903] = { duration = "GET", shiftId = 61665, onlyExtra = true },      -- Power Extraction Major Brutality combat
+    [62240] = { duration = "GET", shiftId = 61687, onlyExtra = true },    -- Sap Essence Major Sorcery combat
+    [131343] = { duration = "GET", shiftId = 61665, onlyExtra = true },   -- Sap Essence Major Brutality combat
 
     -- Templar
     [22223] = { duration = 4000 }, -- Rite of Passage (Rite of Passage)

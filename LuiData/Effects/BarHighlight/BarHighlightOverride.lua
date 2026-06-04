@@ -149,47 +149,99 @@ local barHighlightOverride =
     ---------------------------
 
     -- Assassination
-    [18342] = { newId = 79717 },                   -- Teleport Strike --> Minor Vulnerability
-    [25493] = { newId = 35336 },                   -- Lotus Fan
-    [25484] = { newId = 79717 },                   -- Ambush --> Minor Vulnerability
-    [33375] = { newId = 61716 },                   -- Blur --> Major Evasion
-    [35414] = { newId = 61716 },                   -- Mirage --> Major Evasion
-    [35419] = { newId = 125314, noRemove = true }, -- Phantasmal Escape --> Major Evasion
+    [18342] = { newId = 79717, noRemove = true, duration = 10000 },                   -- Teleport Strike --> Minor Vulnerability
+    [124803] = { newId = 79717, noRemove = true, duration = 10000, combatTrack = true },
+    [25493] = { newId = 35336, noRemove = true, duration = 5000 },                   -- Lotus Fan
+    [124806] = { newId = 79717, noRemove = true, duration = 10000, combatTrack = true },
+    [25484] = { newId = 79717, noRemove = true, duration = 10000 },                   -- Ambush --> Minor Vulnerability
+    [124804] = { newId = 79717, noRemove = true, duration = 10000, combatTrack = true },
+    [33357] = { newId = 33357, noRemove = true, duration = 20000 },                   -- Mark Target
+    [33363] = { newId = 33357, noRemove = true, duration = 20000, combatTrack = true },
+    [33372] = { newId = 33357, noRemove = true, duration = 20000, combatTrack = true },
+    [36968] = { newId = 36968, noRemove = true, duration = 60000 },                   -- Piercing Mark
+    [36980] = { newId = 36968, noRemove = true, duration = 60000, combatTrack = true },
+    [36984] = { newId = 36968, noRemove = true, duration = 60000, combatTrack = true },
+    [36967] = { newId = 36967, noRemove = true, duration = 20000 },                   -- Reaper's Mark
+    [36972] = { newId = 36967, noRemove = true, duration = 20000, combatTrack = true },
+    [36976] = { newId = 36967, noRemove = true, duration = 20000, combatTrack = true },
     [61902] = { newId = 122585 },                  -- Grim Focus
     [61927] = { newId = 122587 },                  -- Relentless Focus
     [61919] = { newId = 122586 },                  -- Merciless Resolve
-    [33398] = { newId = 61389 },                   -- Death Stroke --> Damage Taken Increased
-    [36508] = { newId = 61393 },                   -- Incapacitating Strike --> Damage Taken Increased
-    [36514] = { newId = 61400 },                   -- Soul Harvest --> Damage Taken Increased
+    [33398] = { newId = 61389, noRemove = true, duration = 8000 },                   -- Death Stroke
+    [36508] = { newId = 61393, noRemove = true, duration = 8000 },                   -- Incapacitating Strike
+    [113107] = { newId = 61393, noRemove = true, duration = 12000, combatTrack = true }, -- Incap empowered debuff
+    [36514] = { newId = 61400, noRemove = true, duration = 8000 },                   -- Soul Harvest
 
     -- Shadow
     [25255] = { newId = 34733 },                                        -- Veiled Strike --> Off-Balance
     [25260] = { newId = 34733 },                                        -- Surprise Attack --> Off-Balance
     [25267] = { newId = 34736 },                                        -- Concealed Weapon
-    [25375] = { newId = 229837, showFakeAura = true, noRemove = true }, -- Shadow Cloak
-    [25380] = { newId = 234617 },                                       -- Shadowy Disguise
-    -- [25352] = { }, -- Aspect of Terror -- TODO: Disabled because API won't return correct duration for Fear
-    -- [37470] = { }, -- Mass Hysteria -- TODO: Disabled because API won't return correct duration for Fear
-    [33211] = { showFakeAura = true, noRemove = true },                -- Summon Shade
-    [35434] = { showFakeAura = true, noRemove = true },                -- Dark Shade --> Summon Shade
-    [35441] = { showFakeAura = true, noRemove = true },                -- Shadow Image --> Shadow
-    [35445] = { newId = 35441, showFakeAura = true, noRemove = true }, -- Shadow Image Teleport --> Shadow
+    [33375] = { newId = 61716, noRemove = true, duration = 20000 },                   -- Blur --> Major Evasion
+    [35414] = { newId = 61716, noRemove = true, duration = 20000 },                   -- Mirage --> Major Evasion
+    [35419] = { newId = 125314, noRemove = true, duration = 20000 }, -- Phantasmal Escape --> Major Evasion
+    [25375] = { newId = 229837, showFakeAura = true, noRemove = true, duration = 10000 }, -- Shadow Cloak
+    [25377] = { showFakeAura = true, noRemove = true, duration = 3000 },                                       -- Dark Cloak
+    [25380] = { newId = 234617, showFakeAura = true, noRemove = true, duration = 10000 },                                       -- Shadowy Disguise
+    [33195] = { newId = 33197, duration = 11000 },                       -- Path of Darkness (ground track)
+    [36049] = { newId = 36049, duration = 12000 },                       -- Twisting Path
+    [36028] = { newId = 36028, duration = 12000 },                       -- Refreshing Path
+    [25352] = { newId = 147643, noRemove = true, duration = 11000 },     -- Aspect of Terror --> Major Cowardice
+    [177247] = { newId = 147643, noRemove = true, duration = 11000, combatTrack = true },
+    [37470] = { newId = 147643, noRemove = true, duration = 12000 },     -- Mass Hysteria --> Major Cowardice
+    [177249] = { newId = 147643, noRemove = true, duration = 12000, combatTrack = true },
+    [37475] = { newId = 37475, duration = 24000 },                       -- Manifestation of Terror (ground)
+    [177251] = { newId = 147643, noRemove = true, duration = 12000, combatTrack = true },
+    -- Summon Shade (base — slotted 38517; bar track 33211)
+    [38517] = { newId = 33211, showFakeAura = true, noRemove = true, duration = 22000 },
+    [88662] = { newId = 33211, showFakeAura = true, noRemove = true, duration = 22000 },
+    [88663] = { newId = 33211, showFakeAura = true, noRemove = true, duration = 22000 },
+    [33211] = { showFakeAura = true, noRemove = true, duration = 22000 },
+    [33290] = { newId = 33211, combatTrack = true, noRemove = true, duration = 22000 },
+    -- Dark Shade morph (slotted 35438 — do not newId to 108940; API duration on track is ~1s)
+    [35438] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Dark Shade (slotted)
+    [88677] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Dark Shade -- Khajiit
+    [88678] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Dark Shade -- Argonian
+    [108940] = { newId = 35438, combatTrack = true, noRemove = true, duration = 22000 }, -- Dark Shade player buff
+    [35434] = { newId = 35438, combatTrack = true, noRemove = true, duration = 22000 },  -- Dark Shade summon combat
+    -- Shadow Image morph (slotted 35441 — do not newId to 35451; API duration on track is ~1s)
+    [35441] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Shadow Image (slotted)
+    [88696] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Shadow Image -- Khajiit
+    [88697] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Shadow Image -- Argonian
+    [38528] = { newId = 35441, combatTrack = true, noRemove = true, duration = 22000 },  -- Shadow Image player buff
+    [35442] = { newId = 35441, combatTrack = true, noRemove = true, duration = 22000 },  -- Shadow Image summon combat
+    [35451] = { newId = 35441, combatTrack = true, noRemove = true, duration = 22000 },  -- Shadow (shade track)
+    [35445] = { newId = 35441, showFakeAura = true, noRemove = true },                   -- Shadow Image Teleport
+    [25411] = { newId = 25411, duration = 14000 },                       -- Consuming Darkness (ground)
+    [36493] = { newId = 36493, duration = 15000 },                       -- Bolstering Darkness (ground)
+    [36485] = { newId = 36485, duration = 15000 },                       -- Veil of Blades (ground)
 
     -- Siphoning
-    [33291] = { newId = 33292 },                       -- Strife
-    [34838] = { newId = 34841, noRemove = true },      -- Funnel Health
-    [34835] = { newId = 34836 },                       -- Swallow Soul
-    [33308] = { newId = 108925, noRemove = true },     -- Malevolent Offering
-    [34721] = { newId = 108927, noRemove = true },     -- Shrewd Offering
-    [34727] = { newId = 108932, noRemove = true },     -- Healthy Offering
-    [33326] = { newId = 33333 },                       -- Cripple
-    [36943] = { newId = 36947 },                       -- Debilitate
-    [36957] = { newId = 36960 },                       -- Crippling Grasp
-    [33316] = { newId = 33317, showFakeAura = true },  -- Drain Power --> Major Sorcery
-    [36901] = { newId = 131344, showFakeAura = true }, -- Power Extraction --> Major Sorcery
-    [36891] = { newId = 62240, showFakeAura = true },  -- Sap Essence --> Major Sorcery
-    [25091] = { newId = 25093 },                       -- Soul Shred
-    [35460] = { newId = 35462 },                       -- Soul Tether
+    [33291] = { newId = 33292, duration = 10000, noRemove = true },                       -- Strife
+    [34838] = { newId = 34841, duration = 10000, noRemove = true },      -- Funnel Health
+    [34835] = { newId = 34836, duration = 10000, noRemove = true },                       -- Swallow Soul
+    [33308] = { newId = 108925, noRemove = true, duration = 3000 },     -- Malevolent Offering
+    [34721] = { newId = 108927, noRemove = true, duration = 2000 },     -- Shrewd Offering
+    [34727] = { newId = 108932, noRemove = true, duration = 3000 },     -- Healthy Offering
+    [108934] = { newId = 61710, combatTrack = true, noRemove = true, duration = 10000 }, -- Healthy Offering --> Minor Mending
+    [36908] = { newId = 215672, combatTrack = true, combatStackNoExpire = true },        -- Leeching Strikes (stacks on effect 215672)
+    [33326] = { newId = 33333, duration = 20000, noRemove = true },                       -- Cripple
+    [36943] = { newId = 36947, duration = 20000, noRemove = true },                       -- Debilitate
+    [36957] = { newId = 36960, duration = 18000, noRemove = true },                       -- Crippling Grasp
+    [33316] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000 },  -- Drain Power --> Major Sorcery
+    [33317] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [131342] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [36901] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000 }, -- Power Extraction --> Major Sorcery
+    [131344] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [36903] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [175664] = { newId = 147417, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true }, -- Minor Courage (Power Extraction)
+    [126675] = { newId = 79867, noRemove = true, duration = 10000, combatTrack = true }, -- Minor Cowardice (Power Extraction)
+    [36891] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000 },  -- Sap Essence --> Major Sorcery
+    [62240] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [131343] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [25091] = { newId = 25093, duration = 4000, noRemove = true },                       -- Soul Shred
+    [35508] = { newId = 61713, showFakeAura = true, noRemove = true, duration = 4000 }, -- Soul Siphon --> Major Vitality
+    [63533] = { newId = 61713, showFakeAura = true, noRemove = true, duration = 4000, combatTrack = true },
+    [35460] = { newId = 35462, duration = 7000, noRemove = true },                       -- Soul Tether
 
     ---------------------------
     -- Sorcerer ---------------

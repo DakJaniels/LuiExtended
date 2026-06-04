@@ -47,6 +47,11 @@ local GAMEPAD_CONSTANTS = ActionBar.GAMEPAD_CONSTANTS
 local KEYBOARD_CONSTANTS = ActionBar.KEYBOARD_CONSTANTS
 local isStackCounter = ActionBar.isStackCounter
 local isStackBaseAbility = ActionBar.isStackBaseAbility
+
+--- Grim Focus track buffs: API duration 0; stacks on bar from buff (not legacy counter combat id).
+local function IsGrimFocusTrack(abilityId)
+    return Effects.IsGrimFocus[abilityId]
+end
 local PROC_SOUND_THRESHOLDS = ActionBar.PROC_SOUND_THRESHOLDS
 local ACTION_BUTTON_BORDERS = ActionBar.ACTION_BUTTON_BORDERS
 local BOUNCE_DURATION_MS = ActionBar.BOUNCE_DURATION_MS
@@ -111,6 +116,7 @@ local SetToggledStackLabels
 local HideToggledSlots
 local ShowToggledSlots
 local DecrementBarHighlightCombatStack
+local ClearBarHighlightCombatStacks
 local g_triggeredSlotsFront = {}           -- Triggered bar highlight slots
 local g_triggeredSlotsBack = {}            -- Triggered bar highlight slots
 --- @type table<number, number>
@@ -138,6 +144,8 @@ local g_barCombatTrack = {}                -- Track ids registered via BarHighli
 local g_barCombatStackMax = {}             -- Max stacks (Effects.BarHighlightStack) for combatTrack highlights
 --- @type {[integer]:integer}
 local g_barConsumeStackOnCast = {}         -- Bound id -> track id (Effects.BarHighlightStackConsume)
+--- @type {[integer]:integer}
+local g_barStackSpendAllOnCast = {}        -- Slotted id -> track id (Effects.BarHighlightStackSpendAllOnCast)
 --- @type {[integer]: "keep"|"clear"}
 local g_barCombatStackZeroEffect = {}      -- Effects.BarHighlightStackZeroEffect for track buff ids
 --- @type {[integer]: integer}
@@ -857,8 +865,37 @@ function ActionBar.UpdateBarHighlightTables()
         for slottedAbilityId, combatTrackAbilityId in pairs(Effects.BarHighlightStackConsume) do
             g_barConsumeStackOnCast[slottedAbilityId] = combatTrackAbilityId
         end
+        g_barStackSpendAllOnCast = {}
+        local spendAllTracks = {}
+        if Effects.BarHighlightStackSpendAllOnCast then
+            for slottedAbilityId, combatTrackAbilityId in pairs(Effects.BarHighlightStackSpendAllOnCast) do
+                g_barStackSpendAllOnCast[slottedAbilityId] = combatTrackAbilityId
+                spendAllTracks[combatTrackAbilityId] = true
+            end
+        end
+        for slottedAbilityId, override in pairs(Effects.BarHighlightOverride) do
+            local trackId = override and override.newId
+            if trackId and spendAllTracks[trackId] then
+                g_barStackSpendAllOnCast[slottedAbilityId] = trackId
+            end
+        end
         for combatTrackAbilityId, mode in pairs(Effects.BarHighlightStackZeroEffect) do
             g_barCombatStackZeroEffect[combatTrackAbilityId] = mode
+        end
+        if Effects.BarHighlightStackCounter then
+            for counterId in pairs(Effects.BarHighlightStackCounter) do
+                ActionBar.isStackCounter[counterId] = true
+            end
+        end
+        if Effects.BarHighlightStackBaseAbility then
+            for slottedId in pairs(Effects.BarHighlightStackBaseAbility) do
+                isStackBaseAbility[slottedId] = true
+            end
+        end
+        if Effects.BarHighlightProcSoundThresholds then
+            for trackId, thresholds in pairs(Effects.BarHighlightProcSoundThresholds) do
+                ActionBar.PROC_SOUND_THRESHOLDS[trackId] = thresholds
+            end
         end
         -- combatTrack buff fades often have no player source on FADE; target = player still clears bar highlight.
         for combatTrackAbilityId in pairs(g_barCombatTrack) do
@@ -1140,14 +1177,26 @@ function ActionBar.OnPlayerActivated()
 end
 
 -- -----------------------------------------------------------------------------
--- Hide duration label if the ability is Grim Focus or one of its morphs
+--- Whether the bar toggle duration label should be hidden for this ability id.
+--- @param abilityId integer
+--- @return boolean
+local function ShouldHideBarDurationLabel(abilityId)
+    if IsGrimFocusTrack(abilityId) or Effects.IsBloodFrenzy[abilityId] then
+        return true
+    end
+    if Effects.BarHighlightHideDurationLabel[abilityId] then
+        return true
+    end
+    local override = Effects.BarHighlightOverride[abilityId]
+    local trackId = override and override.newId
+    return trackId and Effects.BarHighlightHideDurationLabel[trackId] or false
+end
+
 --- @param remain integer
 --- @param abilityId integer
 --- @return string
 local function SetBarRemainLabel(remain, abilityId)
-    if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId]
-    or Effects.BarHighlightHideDurationLabel[abilityId]
-    then
+    if ShouldHideBarDurationLabel(abilityId) then
         return ""
     end
 
@@ -1204,7 +1253,8 @@ function ActionBar.OnUpdate(currentTimeMS)
         local backToggle = backSlotNum and g_uiCustomToggle[backSlotNum]
         -- Update Label (FRONT)
         if effectEndTimeMs < currentTimeMS then
-            if g_barCombatStackNoExpire[highlightAbilityId] and g_toggledSlotsStack[highlightAbilityId] and g_toggledSlotsStack[highlightAbilityId] > 0 then
+            if (g_barCombatStackNoExpire[highlightAbilityId] or IsGrimFocusTrack(highlightAbilityId))
+            and g_toggledSlotsStack[highlightAbilityId] and g_toggledSlotsStack[highlightAbilityId] > 0 then
                 g_toggledSlotsRemain[highlightAbilityId] = currentTimeMS + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
             else
                 if frontToggle then
@@ -1280,11 +1330,19 @@ end
 -- -----------------------------------------------------------------------------
 --- @param actionSlotIndex number
 function ActionBar.OnAbilityUsed(actionSlotIndex)
-    -- combatTrack stack spenders (Effects.BarHighlightStackConsume)
-    if ActionBar.SV.ShowToggled then
-        local slottedAbilityId = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
-        local combatTrackAbilityId = g_barConsumeStackOnCast[slottedAbilityId]
-        if combatTrackAbilityId and (g_toggledSlotsFront[combatTrackAbilityId] or g_toggledSlotsBack[combatTrackAbilityId]) and g_toggledSlotsRemain[combatTrackAbilityId] then
+    if not ActionBar.SV.ShowToggled then
+        return
+    end
+    local slottedAbilityId = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
+    local spendAllTrack = g_barStackSpendAllOnCast[slottedAbilityId]
+    if spendAllTrack then
+        ClearBarHighlightCombatStacks(spendAllTrack)
+        return
+    end
+    local combatTrackAbilityId = g_barConsumeStackOnCast[slottedAbilityId]
+    if combatTrackAbilityId and (g_toggledSlotsFront[combatTrackAbilityId] or g_toggledSlotsBack[combatTrackAbilityId]
+    or g_toggledSlotsFront[slottedAbilityId] or g_toggledSlotsBack[slottedAbilityId]) then
+        if g_toggledSlotsStack[combatTrackAbilityId] or g_toggledSlotsStack[slottedAbilityId] then
             DecrementBarHighlightCombatStack(combatTrackAbilityId)
         end
     end
@@ -1852,7 +1910,10 @@ SetToggledStackLabels = function (abilityId, textOrNil)
     local display = GetSkullDisplayStack(abilityId, textOrNil) or textOrNil
     local stackLabelText = (display and display > 0) and tostring(display) or ""
     forEachToggledBarSlot(abilityId, function (slotNum)
-        g_uiCustomToggle[slotNum].stack:SetText(stackLabelText)
+        local customToggleControl = g_uiCustomToggle[slotNum]
+        if customToggleControl and customToggleControl.stack then
+            customToggleControl.stack:SetText(stackLabelText)
+        end
     end)
 end
 
@@ -1870,6 +1931,26 @@ ShowToggledSlots = function (abilityId, currentTime)
     end
     if g_toggledSlotsBack[abilityId] then
         ActionBar.ShowSlot(g_toggledSlotsBack[abilityId], abilityId, currentTime, false)
+    end
+end
+
+--- Clear all stacks and stack highlight for combatTrack + slotted rows (Effects.BarHighlightStackSpendAllOnCast).
+ClearBarHighlightCombatStacks = function (combatTrackAbilityId)
+    g_toggledSlotsStack[combatTrackAbilityId] = nil
+    g_toggledSlotsRemain[combatTrackAbilityId] = nil
+    HideToggledSlots(combatTrackAbilityId)
+    if ActionBar.SV.BarShowLabel then
+        SetToggledStackLabels(combatTrackAbilityId, nil)
+    end
+    for slottedId, override in pairs(Effects.BarHighlightOverride) do
+        if override.newId == combatTrackAbilityId then
+            g_toggledSlotsStack[slottedId] = nil
+            g_toggledSlotsRemain[slottedId] = nil
+            HideToggledSlots(slottedId)
+            if ActionBar.SV.BarShowLabel then
+                SetToggledStackLabels(slottedId, nil)
+            end
+        end
     end
 end
 
@@ -1891,6 +1972,96 @@ DecrementBarHighlightCombatStack = function (combatTrackAbilityId)
     end
     if ActionBar.SV.BarShowLabel and g_barCombatStackMax[combatTrackAbilityId] then
         SetToggledStackLabels(combatTrackAbilityId, g_toggledSlotsStack[combatTrackAbilityId])
+    end
+    for slottedId, override in pairs(Effects.BarHighlightOverride) do
+        if override.newId == combatTrackAbilityId then
+            g_toggledSlotsStack[slottedId] = g_toggledSlotsStack[combatTrackAbilityId]
+            if ActionBar.SV.BarShowLabel then
+                SetToggledStackLabels(slottedId, g_toggledSlotsStack[slottedId])
+            end
+            if not g_toggledSlotsStack[slottedId] then
+                HideToggledSlots(slottedId)
+            else
+                ShowToggledSlots(slottedId, currentTimeMs)
+            end
+        end
+    end
+end
+
+--- @param trackId integer
+--- @param unitTag string
+--- @return integer|nil
+local function ReadPlayerBuffStacksForTrack(trackId, unitTag)
+    if unitTag ~= "player" or not DoesUnitExist(unitTag) then
+        return nil
+    end
+    for i = 1, GetNumBuffs(unitTag) do
+        local _, _, _, _, buffStacks, _, _, _, _, _, abilityIdNew, _, castByPlayer = GetUnitBuffInfo(unitTag, i)
+        if abilityIdNew == trackId and castByPlayer and buffStacks and buffStacks > 0 then
+            local maxStack = g_barCombatStackMax[trackId]
+            if maxStack and buffStacks > maxStack then
+                return maxStack
+            end
+            return buffStacks
+        end
+    end
+    return nil
+end
+
+--- @param trackId integer
+--- @param unitTag string
+--- @param eventStackCount integer|nil
+--- @return integer|nil
+local function ResolveBarHighlightStacks(trackId, unitTag, eventStackCount)
+    if Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[trackId] then
+        return ReadPlayerBuffStacksForTrack(trackId, unitTag)
+    end
+    local buffStacks = ReadPlayerBuffStacksForTrack(trackId, unitTag)
+    return buffStacks or eventStackCount
+end
+
+--- Grim Focus track buff (122585 etc.) has API duration 0; stacks live on the buff, not counter 61905 in combat log.
+local function ApplyGrimFocusBarStacks(trackId, stackCount)
+    if not (IsGrimFocusTrack(trackId) or Effects.BarHighlightReloadStackFromBuff[trackId]) then
+        return
+    end
+    if Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[trackId] then
+        stackCount = ReadPlayerBuffStacksForTrack(trackId, "player")
+    elseif not stackCount or stackCount <= 0 then
+        if DoesUnitExist("player") then
+            for i = 1, GetNumBuffs("player") do
+                local _, _, _, _, buffStacks, _, _, _, _, _, abilityIdNew, _, castByPlayer = GetUnitBuffInfo("player", i)
+                if abilityIdNew == trackId and castByPlayer and buffStacks and buffStacks > 0 then
+                    stackCount = buffStacks
+                    break
+                end
+            end
+        end
+    end
+    if not stackCount or stackCount <= 0 then
+        return
+    end
+    local currentTimeMs = GetGameTimeMilliseconds()
+    g_toggledSlotsStack[trackId] = stackCount
+    g_toggledSlotsRemain[trackId] = currentTimeMs + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+    for slottedId in pairs(isStackBaseAbility) do
+        local override = Effects.BarHighlightOverride[slottedId]
+        if override and override.newId == trackId then
+            g_toggledSlotsStack[slottedId] = stackCount
+            local slotNum = g_toggledSlotsFront[slottedId] or g_toggledSlotsBack[slottedId]
+            if ActionBar.SV.ShowToggled and slotNum then
+                ActionBar.ShowSlot(slotNum, slottedId, currentTimeMs, false)
+            end
+            if ActionBar.SV.BarShowLabel and slotNum then
+                SetToggledStackLabels(slottedId, stackCount)
+            end
+        end
+    end
+    if ActionBar.SV.ShowToggled and (g_toggledSlotsFront[trackId] or g_toggledSlotsBack[trackId]) then
+        ShowToggledSlots(trackId, currentTimeMs)
+        if ActionBar.SV.BarShowLabel then
+            SetToggledStackLabels(trackId, stackCount)
+        end
     end
 end
 
@@ -1977,9 +2148,17 @@ end
 local function OnEffectFaded(abilityId)
     if isStackCounter[abilityId] then
         for stackBaseAbilityId in pairs(isStackBaseAbility) do
-            g_toggledSlotsStack[stackBaseAbilityId] = nil
-            if ActionBar.SV.ShowToggled and ActionBar.SV.BarShowLabel and (g_toggledSlotsFront[stackBaseAbilityId] or g_toggledSlotsBack[stackBaseAbilityId]) then
-                SetToggledStackLabels(stackBaseAbilityId, nil)
+            local override = Effects.BarHighlightOverride[stackBaseAbilityId]
+            if override and override.newId and IsGrimFocusTrack(override.newId) then
+                ApplyGrimFocusBarStacks(override.newId, nil)
+            end
+        end
+    elseif IsGrimFocusTrack(abilityId) then
+        g_toggledSlotsStack[abilityId] = nil
+        for slottedId in pairs(isStackBaseAbility) do
+            local override = Effects.BarHighlightOverride[slottedId]
+            if override and override.newId == abilityId then
+                g_toggledSlotsStack[slottedId] = nil
             end
         end
     end
@@ -2014,7 +2193,9 @@ end
 
 --- Handle non-ground effect GAINED: proc sound, proc animation, ShowSlot, Grim Focus stack labels.
 local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeType, passThrough)
-    PlayProcSoundAtStacks(abilityId, stackCount)
+    if not Effects.IsGrimFocus[abilityId] then
+        PlayProcSoundAtStacks(abilityId, stackCount)
+    end
 
     if g_triggeredSlotsFront[abilityId] or g_triggeredSlotsBack[abilityId] then
         if ActionBar.SV.ShowTriggered then
@@ -2082,28 +2263,44 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
                     if zeroMode == "keep" and (g_toggledSlotsRemain[abilityId] or (g_barCombatStackNoExpire[abilityId] and keepStacks)) then
                         ShowToggledSlots(abilityId, GetGameTimeMilliseconds())
                     elseif zeroMode == "clear" then
-                        HideToggledSlots(abilityId)
-                        g_toggledSlotsRemain[abilityId] = nil
-                        g_toggledSlotsStack[abilityId] = nil
+                        ClearBarHighlightCombatStacks(abilityId)
                     end
                 else
-                    local currentTime = GetGameTimeMilliseconds()
-                    if g_barCombatStackNoExpire[abilityId] then
-                        g_toggledSlotsRemain[abilityId] = currentTime + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+                    local resolvedStacks = ResolveBarHighlightStacks(abilityId, unitTag, stackCount)
+                    if Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]
+                    and (not resolvedStacks or resolvedStacks <= 0) then
+                        local zeroMode = g_barCombatStackZeroEffect[abilityId]
+                        if zeroMode == "clear" then
+                            ClearBarHighlightCombatStacks(abilityId)
+                        end
                     else
-                        g_toggledSlotsRemain[abilityId] = 1000 * endTime
-                    end
-                    if not isStackBaseAbility[abilityId] then
-                        if stackCount and stackCount > 0 then
-                            g_toggledSlotsStack[abilityId] = stackCount
-                        elseif not g_toggledSlotsStack[abilityId] and g_toggledSlotsRemain[abilityId] then
-                            g_toggledSlotsStack[abilityId] = maxStack
+                        local currentTime = GetGameTimeMilliseconds()
+                        if g_barCombatStackNoExpire[abilityId] then
+                            g_toggledSlotsRemain[abilityId] = currentTime + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+                        else
+                            g_toggledSlotsRemain[abilityId] = 1000 * endTime
+                        end
+                        if not isStackBaseAbility[abilityId] then
+                            if resolvedStacks and resolvedStacks > 0 then
+                                g_toggledSlotsStack[abilityId] = resolvedStacks
+                            elseif stackCount and stackCount > 0
+                            and not (Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]) then
+                                g_toggledSlotsStack[abilityId] = stackCount
+                            elseif not g_toggledSlotsStack[abilityId] and g_toggledSlotsRemain[abilityId]
+                            and not (Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]) then
+                                g_toggledSlotsStack[abilityId] = maxStack
+                            end
+                        end
+                        ShowToggledSlots(abilityId, currentTime)
+                        if ActionBar.SV.BarShowLabel and g_toggledSlotsStack[abilityId] then
+                            SetToggledStackLabels(abilityId, g_toggledSlotsStack[abilityId])
                         end
                     end
-                    ShowToggledSlots(abilityId, currentTime)
-                    if ActionBar.SV.BarShowLabel and g_toggledSlotsStack[abilityId] then
-                        SetToggledStackLabels(abilityId, g_toggledSlotsStack[abilityId])
-                    end
+                end
+            elseif IsGrimFocusTrack(abilityId) then
+                ApplyGrimFocusBarStacks(abilityId, stackCount)
+                if stackCount and stackCount > 0 then
+                    PlayProcSoundAtStacks(abilityId, stackCount)
                 end
             else
                 local currentTime = GetGameTimeMilliseconds()
@@ -2126,12 +2323,31 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
     end
 
     if isStackCounter[abilityId] then
-        for i = 1, GetNumBuffs(unitTag) do
-            local baseId = select(11, GetUnitBuffInfo(unitTag, i))
-            if isStackBaseAbility[baseId] then
-                g_toggledSlotsStack[baseId] = stackCount
-                if ActionBar.SV.ShowToggled and ActionBar.SV.BarShowLabel and (g_toggledSlotsFront[baseId] or g_toggledSlotsBack[baseId]) then
-                    SetToggledStackLabels(baseId, g_toggledSlotsStack[baseId] and g_toggledSlotsStack[baseId] > 0 and g_toggledSlotsStack[baseId] or nil)
+        local zeroMode = g_barCombatStackZeroEffect[abilityId]
+        local displayStacks = ResolveBarHighlightStacks(abilityId, unitTag, stackCount)
+        if not displayStacks or displayStacks <= 0 then
+            if zeroMode == "clear" then
+                ClearBarHighlightCombatStacks(abilityId)
+            end
+            return
+        end
+        local currentTimeMs = GetGameTimeMilliseconds()
+        g_toggledSlotsStack[abilityId] = displayStacks
+        if g_barCombatStackNoExpire[abilityId] then
+            g_toggledSlotsRemain[abilityId] = currentTimeMs + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+        end
+        for slottedId, override in pairs(Effects.BarHighlightOverride) do
+            if override.newId == abilityId then
+                g_toggledSlotsStack[slottedId] = displayStacks
+                local slotNum = g_toggledSlotsFront[slottedId] or g_toggledSlotsBack[slottedId]
+                if ActionBar.SV.ShowToggled and slotNum then
+                    ActionBar.ShowSlot(slotNum, slottedId, currentTimeMs, false)
+                end
+                if ActionBar.SV.BarShowLabel and slotNum then
+                    SetToggledStackLabels(slottedId, displayStacks)
+                end
+                if displayStacks > 0 then
+                    PlayProcSoundAtStacks(abilityId, displayStacks)
                 end
             end
         end
@@ -2218,6 +2434,11 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
     end
 
     if unitTag ~= "player" and unitTag ~= "reticleover" then return end
+
+    if Effects.BarHighlightIgnoreBarStackEvent and Effects.BarHighlightIgnoreBarStackEvent[abilityId]
+    and changeType ~= EFFECT_RESULT_FADED then
+        return
+    end
 
     if changeType == EFFECT_RESULT_FADED then
         OnEffectFaded(abilityId)
@@ -2452,11 +2673,19 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                 if maxStack then
                     -- combatTrack stack buff: hitValue = stack count (EFFECT_GAINED) or duration ms (EFFECT_GAINED_DURATION).
                     if result == ACTION_RESULT_EFFECT_GAINED_DURATION and type(hitValue) == "number" and hitValue >= 500 then
-                        g_toggledSlotsRemain[barAbilityId] = currentTimeMS + hitValue
-                        if not g_toggledSlotsStack[barAbilityId] then
-                            g_toggledSlotsStack[barAbilityId] = maxStack
-                            if ActionBar.SV.BarShowLabel then
-                                SetToggledStackLabels(barAbilityId, maxStack)
+                        local buffOnlyTrack = Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[barAbilityId]
+                        local durationStacks = buffOnlyTrack and ResolveBarHighlightStacks(barAbilityId, "player", nil)
+                        if not buffOnlyTrack or (durationStacks and durationStacks > 0) then
+                            g_toggledSlotsRemain[barAbilityId] = currentTimeMS + hitValue
+                            if not g_toggledSlotsStack[barAbilityId] then
+                                if buffOnlyTrack then
+                                    g_toggledSlotsStack[barAbilityId] = durationStacks
+                                else
+                                    g_toggledSlotsStack[barAbilityId] = maxStack
+                                end
+                                if ActionBar.SV.BarShowLabel and g_toggledSlotsStack[barAbilityId] then
+                                    SetToggledStackLabels(barAbilityId, g_toggledSlotsStack[barAbilityId])
+                                end
                             end
                         end
                     elseif result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue > 0 and hitValue <= maxStack then
@@ -2466,16 +2695,25 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                         elseif isSkullChargeTrack then
                             skipToggleShow = true
                         else
-                            g_toggledSlotsStack[barAbilityId] = hitValue
-                            if ActionBar.SV.BarShowLabel then
-                                SetToggledStackLabels(barAbilityId, hitValue)
+                            local combatStacks = hitValue
+                            if Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[barAbilityId] then
+                                combatStacks = ResolveBarHighlightStacks(barAbilityId, "player", hitValue)
+                                if not combatStacks or combatStacks <= 0 then
+                                    skipToggleShow = true
+                                end
                             end
-                            if not g_toggledSlotsRemain[barAbilityId] then
-                                local duration = g_barDurationOverride[barAbilityId] or GetUpdatedAbilityDuration(barAbilityId)
-                                if duration > 0 then
-                                    g_toggledSlotsRemain[barAbilityId] = currentTimeMS + duration
-                                elseif g_barCombatStackNoExpire[barAbilityId] then
-                                    g_toggledSlotsRemain[barAbilityId] = currentTimeMS + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+                            if combatStacks and combatStacks > 0 then
+                                g_toggledSlotsStack[barAbilityId] = combatStacks
+                                if ActionBar.SV.BarShowLabel then
+                                    SetToggledStackLabels(barAbilityId, combatStacks)
+                                end
+                                if not g_toggledSlotsRemain[barAbilityId] then
+                                    local duration = g_barDurationOverride[barAbilityId] or GetUpdatedAbilityDuration(barAbilityId)
+                                    if duration > 0 then
+                                        g_toggledSlotsRemain[barAbilityId] = currentTimeMS + duration
+                                    elseif g_barCombatStackNoExpire[barAbilityId] then
+                                        g_toggledSlotsRemain[barAbilityId] = currentTimeMS + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+                                    end
                                 end
                             end
                         end
@@ -2519,6 +2757,15 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                 end
                 -- Toggle highlight on
                 if not skipToggleShow then
+                    if Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[barAbilityId] then
+                        local stacks = g_toggledSlotsStack[barAbilityId]
+                        local remain = g_toggledSlotsRemain[barAbilityId]
+                        if (not stacks or stacks <= 0) and not remain then
+                            skipToggleShow = true
+                        end
+                    end
+                end
+                if not skipToggleShow then
                     if g_toggledSlotsFront[barAbilityId] then
                         local slotNum = g_toggledSlotsFront[barAbilityId]
                         ActionBar.ShowSlot(slotNum, barAbilityId, currentTimeMS, false)
@@ -2526,6 +2773,13 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                     if g_toggledSlotsBack[barAbilityId] then
                         local slotNum = g_toggledSlotsBack[barAbilityId]
                         ActionBar.ShowSlot(slotNum, barAbilityId, currentTimeMS, false)
+                    end
+                elseif Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[barAbilityId] then
+                    HideToggledSlots(barAbilityId)
+                    for slottedId, override in pairs(Effects.BarHighlightOverride) do
+                        if override.newId == barAbilityId then
+                            HideToggledSlots(slottedId)
+                        end
                     end
                 end
             end
@@ -2671,6 +2925,7 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
         TrySyncSkullChargeFromSlottedBound(abilityId)
     end
 
+    local slottedAbilityId = abilityId
     local showFakeAura = (Effects.BarHighlightOverride[abilityId] and Effects.BarHighlightOverride[abilityId].showFakeAura)
 
     if Effects.BarHighlightOverride[abilityId] then
@@ -2748,24 +3003,43 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
     if onlyProc == false and toggledSlots and abilityId then
         if duration > 0 or Effects.AddNoDurationBarHighlight[abilityId] or Effects.MajorMinor[abilityId] then
             toggledSlots[abilityId] = slotNum
-            if g_toggledSlotsRemain[abilityId] then
-                if ActionBar.SV.ShowToggled then
-                    slotNum = toggledSlots[abilityId]
-                    -- Check the other slot here to determine if we desaturate (in case effects are running in both slots)
-                    local desaturate
-                    local slotIndex = slotNum > BACKBAR_INDEX_OFFSET and slotNum - BACKBAR_INDEX_OFFSET or nil
-                    if slotIndex then
-                        local customToggleControl = GetCustomToggleControl(slotIndex)
-                        if customToggleControl then
-                            desaturate = false
-                            if customToggleControl:IsHidden() then
-                                ActionBar.BackbarHideSlot(slotNum)
-                                desaturate = true
-                            end
+        end
+        if slottedAbilityId and Effects.BarHighlightStackBaseAbility and Effects.BarHighlightStackBaseAbility[slottedAbilityId] then
+            toggledSlots[slottedAbilityId] = slotNum
+        end
+        -- ReloadUI / slot refresh: track buff stacks already on player (Grim Focus, Leeching, etc.)
+        if onlyProc == false and slottedAbilityId and Effects.BarHighlightStackBaseAbility[slottedAbilityId] then
+            local override = Effects.BarHighlightOverride[slottedAbilityId]
+            local trackId = override and override.newId
+            if trackId and Effects.BarHighlightReloadStackFromBuff[trackId] then
+                ApplyGrimFocusBarStacks(trackId, nil)
+            end
+        end
+        local showAbilityId
+        if g_toggledSlotsRemain[abilityId] then
+            showAbilityId = abilityId
+        elseif slottedAbilityId and g_toggledSlotsRemain[slottedAbilityId] then
+            showAbilityId = slottedAbilityId
+        elseif slottedAbilityId and Effects.BarHighlightStackBaseAbility and Effects.BarHighlightStackBaseAbility[slottedAbilityId]
+        and g_toggledSlotsStack[slottedAbilityId] and g_toggledSlotsStack[slottedAbilityId] > 0 then
+            showAbilityId = slottedAbilityId
+        end
+        if showAbilityId and ActionBar.SV.ShowToggled then
+            local showSlotNum = toggledSlots[showAbilityId]
+            if showSlotNum then
+                local desaturate
+                local slotIndex = showSlotNum > BACKBAR_INDEX_OFFSET and showSlotNum - BACKBAR_INDEX_OFFSET or nil
+                if slotIndex then
+                    local customToggleControl = GetCustomToggleControl(slotIndex)
+                    if customToggleControl then
+                        desaturate = false
+                        if customToggleControl:IsHidden() then
+                            ActionBar.BackbarHideSlot(showSlotNum)
+                            desaturate = true
                         end
                     end
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTime, desaturate)
                 end
+                ActionBar.ShowSlot(showSlotNum, showAbilityId, currentTime, desaturate)
             end
         end
     end

@@ -35,6 +35,9 @@ local barHighlightStack =
     [34117] = 5, -- Power Lash stacks (Flame Lash line)
     [23808] = 5, -- Lava Slam / Volcanic Whip stacks (Lava Whip line)
 
+    -- Nightblade
+    [215672] = 10, -- Leeching Strikes (cost-reduction stacks)
+
     -- Necromancer (skull charge tracks; combat hitValue may be 3 internally, bar label max 2)
     [114131] = 3, -- Flame Skull charges (display capped in ActionBar)
     [117625] = 3, -- Venom Skull charges
@@ -48,8 +51,18 @@ local barHighlightStackConsume =
     [20824] = 34117,  -- Power Lash
     [256798] = 23808, -- Volcanic Whip
     [24165] = 203447, -- Bound Armaments
+    -- Leeching Strikes: spend-all on cast (BarHighlightStackSpendAllOnCast), not -1 per press.
     -- Necromancer skulls: charge counter builds on cast; do not consume here (unlike Power Lash).
 }
+
+--- Slotted ability use clears all stacks on the track buff (Leeching Strikes activate spends built stacks).
+--- @type table<integer, integer>
+local barHighlightStackSpendAllOnCast =
+{
+    [36908] = 215672, -- Leeching Strikes
+}
+
+Effects.BarHighlightStackSpendAllOnCast = barHighlightStackSpendAllOnCast
 
 --- When EVENT_EFFECT_CHANGED reports stackCount 0 on the track buff id.
 --- @type table<integer, "keep"|"clear">
@@ -60,6 +73,7 @@ local barHighlightStackZeroEffect =
     [114131] = "keep",
     [117625] = "keep",
     [117638] = "keep",
+    [215672] = "clear", -- stacks spent on activate; hide bar when API reports 0
 }
 
 --- @class (partial) BarHighlightStack
@@ -70,3 +84,17 @@ Effects.BarHighlightStackConsume = barHighlightStackConsume
 
 --- @class (partial) BarHighlightStackZeroEffect
 Effects.BarHighlightStackZeroEffect = barHighlightStackZeroEffect
+
+--- Track buff ids: bar stack count only from GetUnitBuffInfo on this id (ignore EVENT/COMBAT stackCount).
+--- @type table<integer, boolean>
+Effects.BarHighlightStackBuffOnly =
+{
+    [215672] = true, -- Leeching Strikes (cost-reduction stacks; not while-slotted ping 215669)
+}
+
+--- Effect ids that must not drive bar highlight GAIN/UPDATE (while-slotted ping, etc.).
+--- @type table<integer, boolean>
+Effects.BarHighlightIgnoreBarStackEvent =
+{
+    [215669] = true, -- Leeching Strikes while-slotted ping
+}

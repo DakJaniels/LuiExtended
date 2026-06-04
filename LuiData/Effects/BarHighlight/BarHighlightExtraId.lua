@@ -86,6 +86,35 @@ local barHighlightExtraId =
     [259138] = 32678, -- Shattering Rocks stun (target) --> slotted
     [259137] = 32678, -- Shattering Rocks Minor Breach combat --> slotted
 
+    -- Nightblade
+    [124803] = 18342, -- Teleport Strike Minor Vulnerability combat --> slotted
+    [124806] = 25493, -- Lotus Fan vuln combat --> slotted
+    [124804] = 25484, -- Ambush Minor Vulnerability combat --> slotted
+    [33363] = 33357,  -- Mark Target combat --> slotted
+    [33372] = 33357,
+    [36980] = 36968,  -- Piercing Mark combat --> slotted
+    [36984] = 36968,
+    [36972] = 36967,  -- Reaper's Mark combat --> slotted
+    [36976] = 36967,
+    [177247] = 25352, -- Aspect of Terror cowardice combat --> slotted
+    [177248] = 25352, -- Aspect of Terror cast --> slotted
+    [177249] = 37470, -- Mass Hysteria cowardice combat --> slotted
+    [177251] = 37475, -- Manifestation cowardice combat --> slotted
+    [44871] = 25411,  -- Consuming Darkness Major Protection combat --> slotted
+    [44862] = 36493,  -- Bolstering Darkness Major Protection combat --> slotted
+    [126675] = 36901, -- Power Extraction Minor Cowardice combat --> slotted
+    [33317] = 33316,  -- Drain Power Major Sorcery combat --> slotted
+    [131342] = 33316, -- Drain Power Major Brutality combat --> slotted
+    [131344] = 36901, -- Power Extraction Major Sorcery combat --> slotted
+    [36903] = 36901,  -- Power Extraction Major Brutality combat --> slotted
+    [62240] = 36891,  -- Sap Essence Major Sorcery combat --> slotted
+    [131343] = 36891, -- Sap Essence Major Brutality combat --> slotted
+    [108940] = 35438, -- Dark Shade player buff --> slotted
+    [35434] = 35438,  -- Dark Shade summon combat --> slotted
+    [38528] = 35441,  -- Shadow Image player buff --> slotted
+    [35451] = 35441,  -- Shadow Image shade track --> slotted
+    [35442] = 35441,
+
     -- Sorcerer
     [89491] = 24330,  -- Haunting Curse (1-stack target track --> slotted)
     [132946] = 23236, -- Streak (combat --> slotted; target stun 28482 hidden)
