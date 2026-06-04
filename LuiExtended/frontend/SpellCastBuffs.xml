@@ -109,8 +109,8 @@
                hidden="true" />
         <Backdrop name="$(parent)_BarBackdrop"
                   alpha="1"
-                  centerColor="000066"
-                  edgeColor="000099"
+                  centerColor="000000"
+                  edgeColor="000000"
                   hidden="true"
                   excludeFromResizeToFitExtents="true"
                   layer="BACKGROUND">
@@ -200,7 +200,13 @@
       <Controls>
         <Tooltip name="LUIE_SCB_DebugOverflowTooltip"
                  inherits="ZO_BaseTooltip"
-                 tier="HIGH" />
+                 tier="HIGH"
+                 headerVerticalOffset="11">
+          <ResizeToFitPadding width="32"
+                              height="40" />
+          <DimensionConstraints minX="416"
+                                maxX="416" />
+        </Tooltip>
       </Controls>
     </TopLevelControl>
   </Controls>

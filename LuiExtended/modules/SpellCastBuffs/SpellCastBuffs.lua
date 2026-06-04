@@ -1440,6 +1440,30 @@ function SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
     end
 end
 
+--- Glow/back, inset, and drop chrome after effect bind (single authoritative pass).
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param container string|nil
+--- @param effectContext table|nil effect row from display sort (optional `backdrop`)
+function SpellCastBuffs.ApplyBuffIconChrome(buff, container, effectContext)
+    local useGlow = SpellCastBuffs.UseGlowIconBorder()
+    if buff.back then
+        buff.back:SetHidden(useGlow)
+    end
+    if buff.frame then
+        buff.frame:SetHidden(not useGlow)
+    end
+    if buff.drop then
+        if effectContext then
+            buff.drop:SetHidden(not effectContext.backdrop)
+        elseif SpellCastBuffs.SV.BuffDebuffIconInset then
+            buff.drop:SetHidden(true)
+        end
+    end
+    SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
+    SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
+    buff.lastChromeLayoutVersion = SpellCastBuffs.displayLayoutVersion
+end
+
 --- Crops the 64×64 atlas to the center `iconSize` region (keyboard), or uses the gamepad XML UVs.
 --- @param texture TextureControl|nil
 --- @param iconSize number Slot width/height in px (SpellCastBuffs.SV.IconSize)
@@ -1522,13 +1546,11 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     buff.frame:SetAnchor(CENTER, buff, CENTER, 0, 0)
     buff.frame:SetDimensions(frameSize, frameSize)
     buff.frame:SetPixelRoundingEnabled(true)
-    buff.back:SetHidden(SpellCastBuffs.UseGlowIconBorder())
     if buff.buffType then
         local borderTexture = (buff.buffType == BUFF_EFFECT_TYPE_BUFF) and SpellCastBuffs.GetBuffBorderTexture() or SpellCastBuffs.GetDebuffBorderTexture()
         buff.back:SetTexture(borderTexture)
     end
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, buffSize)
-    buff.frame:SetHidden(not SpellCastBuffs.UseGlowIconBorder())
     buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
     buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
     buff.label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
@@ -1565,9 +1587,6 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
         end
     end
 
-    SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
-    SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
-
     if buff.back then
         buff.back:ClearAnchors()
         buff.back:SetAnchor(TOPLEFT, buff, TOPLEFT, 0, 0)
@@ -1578,6 +1597,8 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
         buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 0, 0)
         buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, 0, 0)
     end
+
+    SpellCastBuffs.ApplyBuffIconChrome(buff, container, nil)
 
     if container == "prominentbuffs" then
         if SpellCastBuffs.SV.ProminentBuffLabelDirection == "Left" then
@@ -1707,6 +1728,7 @@ end
 local function ClearStickyTooltip()
     ClearTooltip(InformationTooltip)
     SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+    SpellCastBuffs.ClearDebugMetaTooltipLiveUpdate()
     SpellCastBuffs.tooltipHoverState = nil
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 end
@@ -1836,6 +1858,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
     }
 
     SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+    SpellCastBuffs.ClearDebugMetaTooltipLiveUpdate()
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5, TOP)
     -- Setup Text
     local tooltipText = ""
@@ -2034,6 +2057,7 @@ function SpellCastBuffs.Buff_OnMouseExit(control)
     else
         ClearTooltip(InformationTooltip)
         SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+        SpellCastBuffs.ClearDebugMetaTooltipLiveUpdate()
     end
 end
 

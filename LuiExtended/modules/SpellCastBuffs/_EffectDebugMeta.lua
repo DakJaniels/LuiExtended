@@ -41,6 +41,8 @@ local Effects = Data.Effects
 --- @field iconFilename string?
 --- @field sourceType CombatUnitType|integer?
 
+local DEBUG_OVERFLOW_TOOLTIP_DEFAULT_WIDTH = 416
+local DEBUG_OVERFLOW_TOOLTIP_MIN_WIDTH = 384
 local DEBUG_LINE_HEIGHT = 20
 local SCREEN_MARGIN = 24
 local BETWEEN_TOOLTIP_OFFSET_X = 20
@@ -51,6 +53,27 @@ local PRIMARY_DEBUG_LINE_CAP = 14
 local debugMetaOverflowTooltip
 local debugMetaOverflowContentKey
 local debugMetaOverflowAnchorSide
+
+--- @type ZO_ControlPool|nil
+local debugMetaRemainingValueLabelPool
+
+--- @class SCBBuffDebugMetaLiveRemaining
+--- @field tooltip TooltipControl
+--- @field headerRow integer
+--- @field timeEnding number
+--- @field lastText string
+--- @field control Control
+--- @field unitTag string
+--- @field valueLabel LabelControl
+--- @field valueLabelPoolKey integer
+
+--- @type SCBBuffDebugMetaLiveRemaining|nil
+local debugMetaLiveRemaining
+
+--- @class SCBBuffDebugMetaLiveRemainingCtx
+--- @field timeEnding number
+--- @field control Control
+--- @field unitTag string
 
 local advancedStatDisplayFormatNames =
 {
@@ -171,6 +194,33 @@ local abilityTypeNames =
     [ABILITY_TYPE_PACIFY] = "PACIFY",
     [ABILITY_TYPE_OFFBALANCE] = "OFFBALANCE",
 }
+
+--- AbilityType value → label (API order 0..119). Fills gaps without pairs(_G) — insecure scan hits protected globals.
+local ABILITY_TYPE_VALUE_LABELS =
+{
+    "NONE", "DAMAGE", "HEAL", "RESURRECT", "BLINK", "BONUS", "REGISTERTRIGGER", "SETTARGET", "THREAT", "STUN",
+    "SNARE", "SILENCE", "REMOVETYPE", "SETCOOLDOWN", "COMBATRESOURCE", "DAMAGESHIELD", "MOVEPOSITION", "KNOCKBACK", "CHARGE", "IMMUNITY",
+    "INTERCEPT", "REFLECTION", "AREAEFFECT", "PHASETHROUGH", "CREATEINVENTORYITEM", "DAMAGELIMIT", "AREATELEPORT", "FEAR", "TRAUMA", "STEALTH",
+    "SEESTEALTH", "FLIGHT", "DISORIENT", "STAGGER", "SLOWFALL", "JUMP", "SIEGECLUSTERAREAEFFECT", "SUMMON", "MOUNT", "INTERACTREFUSALOVERRIDE",
+    "BLADETURN", "NONEXISTENT", "NOKILL", "NOAGGRO", "DISPEL", "VAMPIRE", "CREATEINTERACTABLE", "MODIFYCOOLDOWN", "LEVITATE", "PACIFY",
+    "ACTIONLIST", "INTERRUPT", "BLOCK", "OFFBALANCE", "EXHAUSTED", "MODIFYDURATION", "DODGE", "SHOWNON", "MISDIRECT", "FREECAST",
+    "SIEGECREATE", "SIEGEAREAEFFECT", "DEFEND", "FREEINTERACT", "CHANGEAPPEARANCE", "ATTACKERREFLECT", "ATTACKERINTERCEPT", "DISARM", "PARRY", "PATHLINE",
+    "DEPRECATED_0", "FIRETRIGGER", "LEAP", "REVEAL", "SIEGEPACKUP", "RECALL", "GRANTABILITY", "HIDE", "SETHOTBAR", "NOLOCKPICK",
+    "FILLSOULGEM", "SOULGEMRESURRECT", "DESPAWNOVERRIDE", "UPDATEDEATHDIALOG", "COSTMECHANICOVERRIDE", "CLIENTFX", "AVOIDDEATH", "NONCOMBATBONUS", "NOSEETARGET", "DIRECTEDMOVEMENTABILITY",
+    "SETPERSONALITY", "BASIC", "REWINDTIME", "LIGHTHEAVYATTACKOVERRIDE", "DERIVEDSTATCACHE", "AVAREACH", "RANDOMBRANCH", "MOUNTBLOCK", "PERSISTENTRADIUS", "HARDDISMOUNT",
+    "LINKTARGET", "CUSTOMTARGETAREA", "DAMAGETRANSFER", "DISABLEITEMSETS", "FOLLOWWAYPOINTPATH", "SETAIMATTARGET", "FACETARGET", "LOSMOVEPOSITION", "DISABLECLIENTTURNING", "DAMAGEIMMUNE",
+    "STOPMOVING", "RESOURCETAP", "HOTBARSLOTOVERRIDE", "REPAIR", "PREVENTHEALING", "PLAYERFLIGHT", "PAUSECOOLDOWN", "DISABLEGAMEPLAYMECHANICS", "MODIFYSTACKCOUNT", "SPECIALMOVEREPLACEMENT",
+}
+
+local function mergeAbilityTypeNamesFromGlobals()
+    for value = 0, #ABILITY_TYPE_VALUE_LABELS - 1 do
+        if not abilityTypeNames[value] then
+            abilityTypeNames[value] = ABILITY_TYPE_VALUE_LABELS[value + 1]
+        end
+    end
+end
+
+mergeAbilityTypeNamesFromGlobals()
 
 local buffEffectTypeNames =
 {
@@ -377,6 +427,85 @@ local function formatRemainingSeconds(value)
     return string.format("%.1fs", value)
 end
 
+--- @param displayFormat AdvancedStatDisplayFormat|integer
+--- @param effectValue integer|nil
+--- @return string
+local function formatAbilityAdvancedEffectValue(displayFormat, effectValue)
+    local value = effectValue or 0
+    if displayFormat == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT
+        or displayFormat == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
+        return zo_strformat(SI_STAT_VALUE_PERCENT, value)
+    end
+    if displayFormat == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
+        return tostring(value)
+    end
+    return tostring(value)
+end
+
+--- @param derivedStat DerivedStats|integer
+--- @param effectValue integer|nil
+--- @return string
+local function formatAbilityDerivedEffectValue(derivedStat, effectValue)
+    local value = effectValue or 0
+    if derivedStat == STAT_CRITICAL_STRIKE or derivedStat == STAT_SPELL_CRITICAL then
+        return zo_strformat(SI_STAT_VALUE_PERCENT, GetCriticalStrikeChance(value))
+    end
+    return tostring(value)
+end
+
+--- @type table<integer, { displayName: string, description: string }>|nil
+local advancedStatInfoByType
+
+local advancedStatInfoCacheBuilt = false
+
+local function ensureAdvancedStatInfoCache()
+    if advancedStatInfoCacheBuilt then
+        return
+    end
+    advancedStatInfoCacheBuilt = true
+    advancedStatInfoByType = {}
+
+    local numCategories = GetNumAdvancedStatCategories()
+    for categoryIndex = 1, numCategories do
+        local categoryId = GetAdvancedStatsCategoryId(categoryIndex)
+        local _, numStats = GetAdvancedStatCategoryInfo(categoryId)
+        if numStats and numStats > 0 then
+            for statIndex = 1, numStats do
+                local statType, displayName, description = GetAdvancedStatInfo(categoryId, statIndex)
+                if statType then
+                    advancedStatInfoByType[statType] =
+                    {
+                        displayName = displayName,
+                        description = description,
+                    }
+                end
+            end
+        end
+    end
+end
+
+--- @param statType AdvancedStatDisplayType|integer
+--- @return string
+local function formatAdvancedStatTypeLabel(statType)
+    ensureAdvancedStatInfoCache()
+    local info = advancedStatInfoByType and advancedStatInfoByType[statType]
+    if info and info.displayName and info.displayName ~= "" then
+        return string.format("%s (%s)", info.displayName, tostring(statType))
+    end
+    return formatStatWithId(advancedStatDisplayTypeNames, statType)
+end
+
+--- @param text string
+--- @param maxLen integer
+--- @return string
+local function truncateDebugMetaSingleLine(text, maxLen)
+    local normalized = text:gsub("[\r\n]+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+    if #normalized <= maxLen then
+        return normalized
+    end
+    return string.sub(normalized, 1, maxLen - 3) .. "..."
+end
+
 local function isMundusStoneBuffIndex(unitTag, buffListIndex)
     if not buffListIndex then
         return false
@@ -405,7 +534,11 @@ local function addDerivedStatDebugLines(abilityId, addLine)
         if derivedStat ~= nil then
             addLine(
                 string.format("derived[%d]", index),
-                string.format("%s --> %s", formatStatWithId(derivedStatNames, derivedStat), tostring(effect or 0))
+                string.format(
+                    "%s --> %s",
+                    formatStatWithId(derivedStatNames, derivedStat),
+                    formatAbilityDerivedEffectValue(derivedStat, effect)
+                )
             )
         end
     end
@@ -419,18 +552,70 @@ local function addAdvancedStatDebugLines(abilityId, addLine)
         return
     end
 
+    ensureAdvancedStatInfoCache()
+
     addLine("Advanced #", tostring(numAdvanced))
 
+    local entries = {}
     for index = 1, numAdvanced do
         local statType, displayFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, index)
         if statType ~= nil then
+            entries[#entries + 1] =
+            {
+                index = index,
+                statType = statType,
+                displayFormat = displayFormat,
+                formattedEffect = formatAbilityAdvancedEffectValue(displayFormat, effectValue),
+            }
+        end
+    end
+
+    local groups = {}
+    local groupOrder = {}
+    for _, entry in ipairs(entries) do
+        local groupKey = string.format("%s|%s", tostring(entry.displayFormat), entry.formattedEffect)
+        local group = groups[groupKey]
+        if not group then
+            group =
+            {
+                displayFormat = entry.displayFormat,
+                formattedEffect = entry.formattedEffect,
+                items = {},
+            }
+            groups[groupKey] = group
+            groupOrder[#groupOrder + 1] = groupKey
+        end
+        group.items[#group.items + 1] = entry
+    end
+
+    for _, groupKey in ipairs(groupOrder) do
+        local group = groups[groupKey]
+        local items = group.items
+        if #items > 1 then
+            local minStat = items[1].statType
+            local maxStat = items[1].statType
+            for itemIndex = 2, #items do
+                minStat = zo_min(minStat, items[itemIndex].statType)
+                maxStat = zo_max(maxStat, items[itemIndex].statType)
+            end
+            local statRange = minStat == maxStat and tostring(minStat) or string.format("%s–%s", minStat, maxStat)
+            local valueStr = string.format(
+                "%d stats (%s) | %s --> %s",
+                #items,
+                statRange,
+                formatEnumLabel(advancedStatDisplayFormatNames, group.displayFormat),
+                group.formattedEffect
+            )
+            addLine(string.format("adv (×%d)", #items), valueStr)
+        else
+            local entry = items[1]
             addLine(
-                string.format("adv[%d]", index),
+                string.format("adv[%d]", entry.index),
                 string.format(
                     "%s | %s --> %s",
-                    formatStatWithId(advancedStatDisplayTypeNames, statType),
-                    formatEnumLabel(advancedStatDisplayFormatNames, displayFormat),
-                    tostring(effectValue or 0)
+                    formatAdvancedStatTypeLabel(entry.statType),
+                    formatEnumLabel(advancedStatDisplayFormatNames, entry.displayFormat),
+                    entry.formattedEffect
                 )
             )
         end
@@ -740,32 +925,94 @@ local function addBuffAbilityApiDebugLines(abilityId, unitTag, addLine)
     end
 end
 
---- @param label string
---- @param value string
---- @return string
-local function formatDebugMetaLineText(label, value)
-    return string.format("%s: %s", ZO_NORMAL_TEXT:Colorize(label), tostring(value))
+local function releaseLiveRemainingPoolLabel(state)
+    if state and state.valueLabelPoolKey and debugMetaRemainingValueLabelPool then
+        debugMetaRemainingValueLabelPool:ReleaseObject(state.valueLabelPoolKey)
+    end
+end
+
+local function clearDebugMetaLiveRemaining()
+    if debugMetaLiveRemaining then
+        releaseLiveRemainingPoolLabel(debugMetaLiveRemaining)
+    end
+    debugMetaLiveRemaining = nil
+end
+
+--- Same virtual template as ZO_TooltipSection.labelPool (ZO_Tooltip.lua).
+--- @return ZO_ControlPool
+local function GetDebugMetaRemainingValueLabelPool()
+    if not debugMetaRemainingValueLabelPool then
+        local pool = ZO_ControlPool:New("ZO_TooltipLabel", GuiRoot, "LUIE_SCB_DebugMetaRemaining")
+        pool:SetCustomFactoryBehavior(function (label)
+            label:SetFont("ZoFontWinT1")
+            label:SetColor(1, 1, 1, 1)
+            label:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
+            label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+        end)
+        pool:SetCustomResetBehavior(function (label)
+            label:SetText("")
+            label:SetHidden(true)
+            label:ClearAnchors()
+            label:SetParent(GuiRoot)
+        end)
+        debugMetaRemainingValueLabelPool = pool
+    end
+    return debugMetaRemainingValueLabelPool
+end
+
+--- AddHeaderLine on the same row stacks labels; use a header control for live countdown updates.
+--- @return LabelControl label
+--- @return integer poolKey
+local function acquireLiveRemainingValueLabel()
+    return GetDebugMetaRemainingValueLabelPool():AcquireObject()
 end
 
 --- @param tooltip TooltipControl
 --- @param label string
 --- @param value string
-local function appendDebugMetaLineToTooltip(tooltip, label, value)
-    tooltip:AddLine(formatDebugMetaLineText(label, value), "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
+--- @param headerLineIndex integer
+--- @param liveRemainingCtx SCBBuffDebugMetaLiveRemainingCtx|nil
+--- @return integer nextHeaderLineIndex
+local function appendDebugMetaLineToTooltip(tooltip, label, value, headerLineIndex, liveRemainingCtx)
+    tooltip:AddHeaderLine(label, "ZoFontWinT1", headerLineIndex, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+    local valueText = tostring(value)
+    if label == "API Remaining" and liveRemainingCtx then
+        local valueLabel, poolKey = acquireLiveRemainingValueLabel()
+        valueLabel:SetText(valueText)
+        tooltip:AddHeaderControl(valueLabel, headerLineIndex, TOOLTIP_HEADER_SIDE_RIGHT)
+        debugMetaLiveRemaining =
+        {
+            tooltip = tooltip,
+            headerRow = headerLineIndex,
+            timeEnding = liveRemainingCtx.timeEnding,
+            lastText = valueText,
+            control = liveRemainingCtx.control,
+            unitTag = liveRemainingCtx.unitTag,
+            valueLabel = valueLabel,
+            valueLabelPoolKey = poolKey,
+        }
+    else
+        tooltip:AddHeaderLine(valueText, "ZoFontWinT1", headerLineIndex, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+    end
+    return headerLineIndex + 1
 end
 
 --- @param tooltip TooltipControl
 --- @param debugLines { label: string, value: string }[]
 --- @param startIndex integer
 --- @param endIndex integer
-local function appendDebugMetaLineRangeToTooltip(tooltip, debugLines, startIndex, endIndex)
+--- @param headerLineIndex integer
+--- @param liveRemainingCtx SCBBuffDebugMetaLiveRemainingCtx|nil
+--- @return integer nextHeaderLineIndex
+local function appendDebugMetaLineRangeToTooltip(tooltip, debugLines, startIndex, endIndex, headerLineIndex, liveRemainingCtx)
     for i = startIndex, endIndex do
         local row = debugLines[i]
-        appendDebugMetaLineToTooltip(tooltip, row.label, row.value)
+        headerLineIndex = appendDebugMetaLineToTooltip(tooltip, row.label, row.value, headerLineIndex, liveRemainingCtx)
     end
     if endIndex >= startIndex then
         tooltip:SetVerticalPadding(2)
     end
+    return headerLineIndex
 end
 
 --- Stable key for overflow rebuild; API Remaining is omitted so sub-second drift does not clear the column.
@@ -788,8 +1035,26 @@ end
 local function GetDebugMetaOverflowTooltip()
     if not debugMetaOverflowTooltip then
         debugMetaOverflowTooltip = LUIE_SCB_DebugOverflowTooltip
+        debugMetaOverflowTooltip:SetDimensionConstraints(DEBUG_OVERFLOW_TOOLTIP_DEFAULT_WIDTH, 0, DEBUG_OVERFLOW_TOOLTIP_DEFAULT_WIDTH, 0)
+        debugMetaOverflowTooltip:SetResizeToFitPadding(32, 40)
+        debugMetaOverflowTooltip:SetHeaderVerticalOffset(11)
     end
     return debugMetaOverflowTooltip
+end
+
+--- Match primary tooltip width so long API header labels (e.g. IsAbilityDurationToggled) do not wrap mid-word.
+--- @param overflow TooltipControl
+--- @param primary TooltipControl
+local function applyDebugOverflowTooltipWidth(overflow, primary)
+    local width = DEBUG_OVERFLOW_TOOLTIP_DEFAULT_WIDTH
+    if primary then
+        local primaryLeft, _, primaryRight, _ = primary:GetScreenRect()
+        local primaryWidth = primaryRight - primaryLeft
+        if primaryWidth >= DEBUG_OVERFLOW_TOOLTIP_MIN_WIDTH then
+            width = zo_floor(primaryWidth)
+        end
+    end
+    overflow:SetDimensionConstraints(width, 0, width, 0)
 end
 
 --- @param numLines integer
@@ -866,9 +1131,9 @@ end
 --- @param primary TooltipControl
 --- @param buffControl Control|nil
 local function anchorDebugOverflowBesidePrimary(overflow, primary, buffControl)
-    ClearTooltipImmediately(overflow)
     overflow:SetHidden(false)
     overflow:SetAlpha(1)
+    applyDebugOverflowTooltipWidth(overflow, primary)
 
     local screenWidth = select(1, GuiRoot:GetDimensions())
     local primaryLeft, _, primaryRight, _ = primary:GetScreenRect()
@@ -920,29 +1185,34 @@ end
 
 --- @param debugLines { label: string, value: string }[]
 --- @param buffControl Control|nil
-local function flushDebugMetaTooltips(debugLines, buffControl)
+--- @param detailsLine integer
+--- @param liveRemainingCtx SCBBuffDebugMetaLiveRemainingCtx|nil
+--- @return integer detailsLine
+local function flushDebugMetaTooltips(debugLines, buffControl, detailsLine, liveRemainingCtx)
     local numLines = #debugLines
     if numLines == 0 then
         SpellCastBuffs.ClearDebugMetaOverflowTooltip()
-        return
+        return detailsLine
     end
 
     local primaryCount = resolvePrimarySplitCount(debugLines, computePrimaryDebugLineCount(numLines))
 
-    appendDebugMetaLineRangeToTooltip(InformationTooltip, debugLines, 1, primaryCount)
+    detailsLine = appendDebugMetaLineRangeToTooltip(InformationTooltip, debugLines, 1, primaryCount, detailsLine, liveRemainingCtx)
 
     if numLines <= primaryCount then
         SpellCastBuffs.ClearDebugMetaOverflowTooltip()
-        return
+        return detailsLine
     end
 
     local overflow = GetDebugMetaOverflowTooltip()
     local overflowKey = buildDebugMetaOverflowContentKey(debugLines)
     local overflowLinesStart = primaryCount + 1
 
+    applyDebugOverflowTooltipWidth(overflow, InformationTooltip)
+
     if overflowKey == debugMetaOverflowContentKey and not overflow:IsHidden() then
         anchorDebugOverflowBesidePrimary(overflow, InformationTooltip, buffControl)
-        return
+        return detailsLine
     end
 
     debugMetaOverflowContentKey = overflowKey
@@ -954,9 +1224,10 @@ local function flushDebugMetaTooltips(debugLines, buffControl)
     overflow:AddLine("Debug meta (continued)", "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
     overflow:SetVerticalPadding(2)
 
-    appendDebugMetaLineRangeToTooltip(overflow, debugLines, overflowLinesStart, numLines)
+    appendDebugMetaLineRangeToTooltip(overflow, debugLines, overflowLinesStart, numLines, 1, liveRemainingCtx)
 
     anchorDebugOverflowBesidePrimary(overflow, InformationTooltip, buffControl)
+    return detailsLine
 end
 
 function SpellCastBuffs.ClearDebugMetaOverflowTooltip()
@@ -964,6 +1235,65 @@ function SpellCastBuffs.ClearDebugMetaOverflowTooltip()
     debugMetaOverflowAnchorSide = nil
     if debugMetaOverflowTooltip then
         ClearTooltipImmediately(debugMetaOverflowTooltip)
+    end
+end
+
+function SpellCastBuffs.ClearDebugMetaTooltipLiveUpdate()
+    clearDebugMetaLiveRemaining()
+end
+
+function SpellCastBuffs.TickDebugMetaTooltipLiveUpdate()
+    if not SpellCastBuffs.SV.TooltipDebugMeta then
+        return
+    end
+
+    local state = debugMetaLiveRemaining
+    if not state then
+        return
+    end
+
+    if InformationTooltip:IsHidden() then
+        clearDebugMetaLiveRemaining()
+        return
+    end
+
+    local hover = SpellCastBuffs.tooltipHoverState
+    if not hover or hover.control ~= state.control then
+        clearDebugMetaLiveRemaining()
+        return
+    end
+
+    if state.tooltip:IsHidden() then
+        clearDebugMetaLiveRemaining()
+        return
+    end
+
+    local timeEnding = state.timeEnding
+    local meta = SpellCastBuffs.ResolveEffectDebugMetaForTooltip(state.control, state.unitTag)
+    if meta and meta.timeEnding and meta.timeEnding > 0 then
+        timeEnding = meta.timeEnding
+        state.timeEnding = timeEnding
+    end
+
+    if not timeEnding or timeEnding <= 0 then
+        clearDebugMetaLiveRemaining()
+        return
+    end
+
+    local remain = timeEnding - GetGameTimeSeconds()
+    if remain < 0 then
+        clearDebugMetaLiveRemaining()
+        return
+    end
+
+    local text = formatRemainingSeconds(remain)
+    if text == state.lastText then
+        return
+    end
+
+    state.lastText = text
+    if state.valueLabel then
+        state.valueLabel:SetText(text)
     end
 end
 
@@ -1002,6 +1332,10 @@ function SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, unitTag)
         end
         if meta.apiBuffSlot then
             addLine("API Buff Slot", tostring(meta.apiBuffSlot))
+            local effectDesc = GetAbilityEffectDescription(meta.apiBuffSlot)
+            if effectDesc and effectDesc ~= "" then
+                addLine("API Effect Desc", truncateDebugMetaSingleLine(effectDesc, 80))
+            end
         end
         if meta.deprecatedBuffType and meta.deprecatedBuffType ~= "" then
             addLine("Deprecated BuffType", meta.deprecatedBuffType)
@@ -1035,7 +1369,19 @@ function SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, unitTag)
 
     addCcTooltipDebugLines(override, meta, abilityId, addLine)
 
-    flushDebugMetaTooltips(debugLines, control)
+    clearDebugMetaLiveRemaining()
+
+    local liveRemainingCtx
+    if meta and meta.timeStarted and meta.timeEnding and meta.timeEnding > 0 then
+        liveRemainingCtx =
+        {
+            timeEnding = meta.timeEnding,
+            control = control,
+            unitTag = ttUnit,
+        }
+    end
+
+    detailsLine = flushDebugMetaTooltips(debugLines, control, detailsLine, liveRemainingCtx)
 
     return detailsLine
 end
