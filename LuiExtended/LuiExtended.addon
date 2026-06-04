@@ -30,7 +30,6 @@ bindings/Bindings.xml
 # Addon Base
 src/LuiExtended.lua
 src/LuiExtended_Log.lua
-src/UI.lua
 src/Functions.lua
 src/DebugEnvironment.lua
 src/ProtectedHooks.lua
