@@ -102,12 +102,13 @@ S.g_mailIsTakingMail = false
 S.g_mailBatchTakeAll = false        -- Category Take All in progress (no S.g_mailTarget fallback)
 S.g_mailIncomingCurrencySender = "" -- Per-line mail gold sender during batch Take All
 S.g_mailPendingCurrencySender = ""  -- Set by EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS before currency update
+S.g_mailPendingCurrencyMailId = nil -- mailId paired with pending currency sender (dedupe per mail)
 S.g_mailPendingItemSender = ""      -- Legacy; prefer S.g_mailItemSenderFifo per attachment
 S.g_mailItemSenderFifo = {}         -- FIFO { mailId, sender } per attachment line (LWC / rapid take)
 S.g_mailNotifySuppressUntilMs = 0   -- Suppress Mail received/deleted while Loot Mail lines are in flight
 local MAIL_CURRENCY_ANNOUNCE_DEDUPE_MS = 2500
 local MAIL_NOTIFY_SUPPRESS_AFTER_LOOT_MS = 2000
-S.g_lastMailCurrencyAnnounce = { amount = 0, senderKey = "", timeMs = 0 }
+S.g_lastMailCurrencyAnnounce = { amount = 0, senderKey = "", mailId = nil, timeMs = 0 }
 
 local TIMED_ACTIVITY_PROGRESS_ANNOUNCE_DEDUPE_MS = 500
 S.g_lastTimedActivityProgressAnnounce = {}
@@ -1886,7 +1887,9 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             return contextMessages.CurrencyMessageSpend, nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_MAIL and amountDelta > 0 then
             local mailSender = S.g_mailPendingCurrencySender
+            local pendingMailId = S.g_mailPendingCurrencyMailId
             S.g_mailPendingCurrencySender = ""
+            S.g_mailPendingCurrencyMailId = nil
             if mailSender == "" then
                 mailSender = ChatAnnouncements.GetNextMailSender()
             end
@@ -1899,14 +1902,22 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             if currencyType == CURT_MONEY then
                 local senderKey = currencySender ~= "" and currencySender or ""
                 local nowMs = GetGameTimeMilliseconds()
+                local mailIdForDedupe = pendingMailId
+                if mailIdForDedupe == nil
+                and S.g_lastMailCurrencyAnnounce.amount == amountDelta
+                and S.g_lastMailCurrencyAnnounce.senderKey == senderKey then
+                    mailIdForDedupe = S.g_lastMailCurrencyAnnounce.mailId
+                end
                 if  not S.g_mailBatchTakeAll
                 and S.g_lastMailCurrencyAnnounce.amount == amountDelta
                 and S.g_lastMailCurrencyAnnounce.senderKey == senderKey
+                and I.MailCurrencyDedupeIdsMatch(mailIdForDedupe, S.g_lastMailCurrencyAnnounce.mailId)
                 and (nowMs - S.g_lastMailCurrencyAnnounce.timeMs) < MAIL_CURRENCY_ANNOUNCE_DEDUPE_MS then
                     return nil, nil, "return"
                 end
                 S.g_lastMailCurrencyAnnounce.amount = amountDelta
                 S.g_lastMailCurrencyAnnounce.senderKey = senderKey
+                S.g_lastMailCurrencyAnnounce.mailId = pendingMailId
                 S.g_lastMailCurrencyAnnounce.timeMs = nowMs
             end
             local mailMessageChange = currencySender ~= "" and contextMessages.CurrencyMessageMailIn or contextMessages.CurrencyMessageMailInNoName
@@ -1916,6 +1927,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             if not S.g_mailCODPresent then return nil, nil, "return" end
             local mailSender = S.g_mailPendingCurrencySender
             S.g_mailPendingCurrencySender = ""
+            S.g_mailPendingCurrencyMailId = nil
             if mailSender == "" then
                 mailSender = ChatAnnouncements.GetNextMailSender()
             end
@@ -2630,6 +2642,16 @@ function I.ResolveMailSender(mailId)
     return mailTarget, (codAmount and codAmount > 0), numAttachments, attachedMoney
 end
 
+function I.MailCurrencyDedupeIdsMatch(a, b)
+    if a == nil and b == nil then
+        return true
+    end
+    if a == nil or b == nil then
+        return false
+    end
+    return CompareId64s(a, b) == 0
+end
+
 function I.StoreMailSenderForMailId(mailId, mailTarget)
     if mailId and mailTarget and mailTarget ~= "" then
         S.g_mailSenderMap[mailId] = mailTarget
@@ -2705,6 +2727,7 @@ function ChatAnnouncements.ResetMailSession(preserveMailboxOpen)
         S.g_mailLootLineSequence = 0
         S.g_mailIncomingCurrencySender = ""
         S.g_mailPendingCurrencySender = ""
+        S.g_mailPendingCurrencyMailId = nil
         S.g_mailPendingItemSender = ""
         S.g_mailItemSenderFifo = {}
         eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
@@ -2723,6 +2746,7 @@ function ChatAnnouncements.ResetMailSession(preserveMailboxOpen)
     S.g_mailLootLineSequence = 0
     S.g_mailIncomingCurrencySender = ""
     S.g_mailPendingCurrencySender = ""
+    S.g_mailPendingCurrencyMailId = nil
     S.g_mailPendingItemSender = ""
     S.g_mailItemSenderFifo = {}
     S.g_mailNotifySuppressUntilMs = 0
@@ -2794,6 +2818,7 @@ function I.OnPreTakeAllMailAttachmentsInCategory(category, deleteOnClaim)
     S.g_mailIsTakingMail = true
     I.TouchMailNotifySuppressWindow()
     S.g_mailPendingCurrencySender = ""
+    S.g_mailPendingCurrencyMailId = nil
     S.g_mailPendingItemSender = ""
     S.g_mailDelayedLootLines = {}
     S.g_mailLootLineSequence = 0
@@ -2897,6 +2922,7 @@ function ChatAnnouncements.OnMailTakeAttachedMoney(eventId, mailId)
     local mailTarget = I.ResolveMailSender(mailId)
     I.StoreMailSenderForMailId(mailId, mailTarget)
     S.g_mailPendingCurrencySender = mailTarget
+    S.g_mailPendingCurrencyMailId = mailId
     if not S.g_mailBatchTakeAll then
         I.EnqueueMailLootEntry(mailId, mailTarget)
     end
