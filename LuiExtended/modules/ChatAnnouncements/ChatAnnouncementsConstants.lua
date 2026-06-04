@@ -502,6 +502,7 @@ ChatAnnouncements.Brackets =
 --- @field LootCraft boolean
 --- @field LootGroup boolean
 --- @field LootIcons boolean
+--- @field LootShowCollectionStatus boolean
 --- @field LootMail boolean
 --- @field LootNotTrash boolean
 --- @field LootOnlyNotable boolean
@@ -1121,6 +1122,7 @@ ChatAnnouncements.Defaults =
         LootCraft = true,
         LootGroup = true,
         LootIcons = true,
+        LootShowCollectionStatus = true,
         LootMail = true,
         LootNotTrash = true,
         LootOnlyNotable = false,

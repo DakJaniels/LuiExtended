@@ -4285,7 +4285,47 @@ function I.CheckLibLazyCraftingActive()
     return true
 end
 
-function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
+--- @param itemLink string
+--- @return integer collectionStatus 0 not collectible; 1/3 not collected; 2/4 collected
+function ChatAnnouncements.GetItemLinkSetCollectionStatus(itemLink)
+    if IsItemLinkSetCollectionPiece(itemLink) then
+        if IsItemSetCollectionPieceUnlocked(GetItemLinkItemId(itemLink)) then
+            return 4
+        else
+            return 3
+        end
+    else
+        local id = GetItemLinkContainerCollectibleId(itemLink)
+        if id > 0 then
+            if IsCollectibleOwnedByDefId(id) then
+                return 2
+            elseif GetCollectibleCategoryType(id) == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT and not CanCombinationFragmentBeUnlocked(id) then
+                return 2
+            else
+                return 1
+            end
+        end
+        return 0
+    end
+end
+
+--- @param itemLink string
+--- @return string
+function ChatAnnouncements.GetFormattedCollectionStatusIcon(itemLink)
+    if not ChatAnnouncements.SV.Inventory.LootShowCollectionStatus or not itemLink or itemLink == "" then
+        return ""
+    end
+    local status = ChatAnnouncements.GetItemLinkSetCollectionStatus(itemLink)
+    if status == 0 then
+        return ""
+    end
+    if status == 2 or status == 4 then
+        return zo_strformat("<<1>> ", ZO_SUCCEEDED_TEXT:Colorize(zo_iconFormatInheritColor(ZO_CHECK_ICON, 16, 16)))
+    end
+    return zo_strformat("<<1>> ", ZO_ERROR_COLOR:Colorize(zo_iconFormatInheritColor("EsoUI/Art/Buttons/decline_up.dds", 16, 16)))
+end
+
+function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay, showCollectionStatus)
     if filter then
         -- If filter returns false then bail out right now, we're not displaying this item.
         if not ChatAnnouncements.ItemFilter(itemType, itemId, itemLink, false) then
@@ -4355,7 +4395,8 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
         end
     end
 
-    local itemString = string_format("%s%s%s%s%s%s", formattedIcon, itemLink, formattedQuantity, formattedArmorType, formattedTrait, formattedStyle)
+    local formattedCollectionStatus = (showCollectionStatus and ChatAnnouncements.GetFormattedCollectionStatusIcon(itemLink)) or ""
+    local itemString = string_format("%s%s%s%s%s%s%s", formattedIcon, formattedCollectionStatus, itemLink, formattedQuantity, formattedArmorType, formattedTrait, formattedStyle)
 
     local delayTimer = 50
     local messageType = alwaysFirst and "CONTAINER" or "LOOT"
@@ -4689,11 +4730,11 @@ function I.FlushDelayedItemPoolInDisplayOrder(pool)
     for i = 1, #ids do
         local itemId = ids[i]
         local data = pool[itemId]
-        ChatAnnouncements.ItemPrinter(data.icon, data.stack, data.itemType, itemId, data.itemLink, data.receivedBy, data.logPrefix, data.gainOrLoss, data.filter, data.groupLoot, data.alwaysFirst, data.delay)
+        ChatAnnouncements.ItemPrinter(data.icon, data.stack, data.itemType, itemId, data.itemLink, data.receivedBy, data.logPrefix, data.gainOrLoss, data.filter, data.groupLoot, data.alwaysFirst, data.delay, data.showCollectionStatus)
     end
 end
 
-function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay, lootMailId)
+function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay, lootMailId, showCollectionStatus)
     -- Return if we have an invalid itemId or stack
     if itemId == 0 or not stack then
         -- if LUIE.IsDevDebugEnabled() then
@@ -4733,6 +4774,7 @@ function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemL
     -- Add stack counts if item exists in pool, with nil check
     if delayedItemPool[itemId] and delayedItemPool[itemId].stack then
         stack = delayedItemPool[itemId].stack + stack
+        showCollectionStatus = showCollectionStatus or delayedItemPool[itemId].showCollectionStatus
     end
 
     -- Save parameters to delayed item pool
@@ -4749,6 +4791,7 @@ function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemL
         groupLoot = groupLoot,
         alwaysFirst = alwaysFirst,
         delay = delay,
+        showCollectionStatus = showCollectionStatus,
     }
 
     -- Pass along all values to SendDelayedItems()
@@ -4943,7 +4986,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStow
             end
             if not S.g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not S.g_inTrade and not I.IsMailLootActive() then
-                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
+                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true, nil, true)
             end
             if I.IsMailLootActive() and isNewItem then
                 ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, mailSender, logPrefix, gainOrLoss, false, nil, nil, nil, lootMailId)
@@ -4995,7 +5038,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStow
                 end
                 if not S.g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not S.g_inTrade and not I.IsMailLootActive() then
-                    ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
+                    ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true, nil, true)
                 end
                 if I.IsMailLootActive() and isNewItem then
                     ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, mailSender, logPrefix, gainOrLoss, false, nil, nil, nil, lootMailId)
@@ -5185,7 +5228,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
         local itemQuality = GetItemLinkFunctionalQuality(itemLink)
 
         if not S.g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not S.g_inTrade and not I.IsMailLootActive() then
-            ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
+            ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true, nil, true)
         end
         if I.IsMailLootActive() and isNewItem then
             ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, mailSender, logPrefix, gainOrLoss, false, nil, nil, nil, lootMailId)
