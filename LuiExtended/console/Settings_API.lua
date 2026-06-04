@@ -91,7 +91,7 @@ function SettingsAPI:MarkFontDeferred(pendingKey)
     if not wasPending and not self.fontDeferChatShown then
         self.fontDeferChatShown = true
         if CHAT_ROUTER then
-            LUIE.PrintToChat(GetString(LUIE_STRING_CONSOLE_FONT_APPLY_RELOAD), true)
+            LUIE.ChatOutput:Print(GetString(LUIE_STRING_CONSOLE_FONT_APPLY_RELOAD), true)
         end
     end
 end

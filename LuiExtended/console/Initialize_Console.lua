@@ -18,7 +18,7 @@ local eventManager = GetEventManager()
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, eventId)
     if not LUIE.SV.StartupInfo and initial then
-        LUIE.PrintToChat(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
+        LUIE.ChatOutput:Print(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
     end
     if LibDebugLogger then
         LibDebugLogger:ClearLog()
@@ -71,7 +71,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.PlayerDisplayName = zo_strformat("<<C:1>>", GetUnitDisplayName("player"))
     LUIE.PlayerFaction = GetUnitAlliance("player")
     -- -----------------------------------------------------------------------------
-    LUIE.ChatAnnouncements.ChatOutput:InitializePrintRouting()
+    LUIE.ChatOutput:InitializePrintRouting()
     -- -----------------------------------------------------------------------------
     -- Initialize this addon modules according to user preferences
     LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)
@@ -84,7 +84,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
     -- -----------------------------------------------------------------------------
     -- Load Timestamp Color
-    LUIE.UpdateTimeStampColor()
+    LUIE.ChatOutput:UpdateTimeStampColor()
     -- -----------------------------------------------------------------------------
     -- Create settings menus for our addon
     LUIE.CreateConsoleSettings()

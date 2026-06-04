@@ -233,8 +233,18 @@ local function SetSingleIconBuffType(buff, buffType, unbreakable, id, statusEffe
     local borderTexture = (contextType == "buff") and SpellCastBuffs.GetBuffBorderTexture() or SpellCastBuffs.GetDebuffBorderTexture()
     buff.back:SetTexture(borderTexture)
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
-    buff.back:SetHidden(SpellCastBuffs.SV.GlowIcons)
-    buff.drop:SetHidden(false)
+    buff.back:SetHidden(SpellCastBuffs.UseGlowIconBorder())
+    buff.frame:SetHidden(not SpellCastBuffs.UseGlowIconBorder())
+    if SpellCastBuffs.SV.BuffDebuffIconInset then
+        buff.drop:SetHidden(true)
+    else
+        buff.drop:SetHidden(false)
+    end
+
+    if buff.container then
+        SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, buff.container)
+        SpellCastBuffs.ApplyBuffIconInsetVisual(buff, buff.container)
+    end
 
     -- Set cooldown color if it exists
     if buff.cd then
@@ -385,6 +395,8 @@ local function ApplyIconLayoutIfNeeded(buff, container, force)
         buff.lastAppliedIconSize = iconSize
         buff.lastLayoutVersion = SpellCastBuffs.displayLayoutVersion
         SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
+        SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
+        SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
     end
 end
 
@@ -446,6 +458,8 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
             else
                 buff.drop:SetHidden(true)
             end
+            SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
+            SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
             buff.icon:SetTexture(effect.icon)
             buff:SetAlpha(1)
             buff:SetHidden(false)

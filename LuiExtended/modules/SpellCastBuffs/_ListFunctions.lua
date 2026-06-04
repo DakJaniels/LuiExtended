@@ -12,7 +12,7 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 local Abilities = Data.Abilities
 local Tooltips = Data.Tooltips
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 local GetString = GetString
 local zo_strformat = zo_strformat
 local chatSystem = ZO_GetChatSystem()
@@ -47,7 +47,7 @@ function SpellCastBuffs.ClearCustomList(list)
     end
     chatSystem:Maximize()
     chatSystem.primaryContainer:FadeIn()
-    printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
+    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
     SpellCastBuffs.ReloadEffects("player")
 end
 
@@ -67,18 +67,18 @@ function SpellCastBuffs.AddToCustomList(list, input)
             list[id] = true
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
         else
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
         end
     else
         if input ~= "" then
             list[input] = true
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
         end
     end
     SpellCastBuffs.ReloadEffects("player")
@@ -99,13 +99,13 @@ function SpellCastBuffs.RemoveFromCustomList(list, input)
         list[id] = nil
         chatSystem:Maximize()
         chatSystem.primaryContainer:FadeIn()
-        printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
     else
         if input ~= "" then
             list[input] = nil
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
         end
     end
     SpellCastBuffs.ReloadEffects("player")

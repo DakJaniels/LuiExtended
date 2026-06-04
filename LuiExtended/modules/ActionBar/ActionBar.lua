@@ -18,7 +18,7 @@ local Castbar = Data.CastBarTable
 local OtherAddonCompatability = LUIE.OtherAddonCompatability
 
 local pairs = pairs
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 local GetSlotTrueBoundId = LUIE.GetSlotTrueBoundId
 local GetAbilityDuration = GetAbilityDuration
 local zo_strformat = zo_strformat
@@ -1038,7 +1038,7 @@ function ActionBar.ClearCustomList(list)
     end
     chatSystem:Maximize()
     chatSystem.primaryContainer:FadeIn()
-    printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), customListLabel), true)
+    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), customListLabel), true)
 end
 
 -- -----------------------------------------------------------------------------
@@ -1056,18 +1056,18 @@ function ActionBar.AddToCustomList(list, input)
             list[abilityId] = true
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), abilityListIcon, abilityId, abilityDisplayName, customListLabel), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), abilityListIcon, abilityId, abilityDisplayName, customListLabel), true)
         else
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, customListLabel), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, customListLabel), true)
         end
     else
         if input ~= "" then
             list[input] = true
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, customListLabel), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, customListLabel), true)
         end
     end
 end
@@ -1086,13 +1086,13 @@ function ActionBar.RemoveFromCustomList(list, input)
         list[abilityId] = nil
         chatSystem:Maximize()
         chatSystem.primaryContainer:FadeIn()
-        printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), abilityListIcon, abilityId, abilityDisplayName, customListLabel), true)
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), abilityListIcon, abilityId, abilityDisplayName, customListLabel), true)
     else
         if input ~= "" then
             list[input] = nil
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, customListLabel), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, customListLabel), true)
         end
     end
 end
@@ -1353,7 +1353,7 @@ end
 function ActionBar.ApplyProcSound(previewMenuContext)
     local barProcSound = LUIE.Sounds[ActionBar.SV.ProcSoundName]
     if not barProcSound or barProcSound == "" then
-        printToChat(GetString(LUIE_STRING_ERROR_SOUND), true)
+        ChatOutput:Print(GetString(LUIE_STRING_ERROR_SOUND), true)
         barProcSound = "DeathRecap_KillingBlowShown"
     end
 

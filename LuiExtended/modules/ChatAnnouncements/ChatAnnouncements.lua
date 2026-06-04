@@ -19,7 +19,7 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 local Quests = Data.Quests
 
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 local string_format = string.format
 local table_insert = table.insert
 local table_concat = table.concat
@@ -321,8 +321,6 @@ function ChatAnnouncements.Initialize(enabled)
 
     ChatAnnouncements.InvalidateQuestCounterFilterCache()
 
-    ChatAnnouncements.ChatOutput:InitializeRouterIntegration(enabled)
-
     -- Some modules might need to pull some of the color settings from CA so we want these to always be set regardless of CA module being enabled/disabled.
     ChatAnnouncements.RegisterColorEvents()
     -- Always register this function for other components to use
@@ -367,9 +365,6 @@ function ChatAnnouncements.Initialize(enabled)
     -- TODO: Maybe move this, is needed for ALL INVENTORY & QUEST
     eventManager:RegisterForEvent(moduleName, EVENT_CHATTER_BEGIN, ChatAnnouncements.OnChatterBegin)
     eventManager:RegisterForEvent(moduleName, EVENT_CHATTER_END, ChatAnnouncements.OnChatterEnd)
-
-    -- TEMP: Social Error Register
-    eventManager:RegisterForEvent(moduleName, EVENT_SOCIAL_ERROR, ChatAnnouncements.OnErrorSocialChat)
 
     -- TEMP: Register Antiquity Dig Toggle
     eventManager:RegisterForEvent(moduleName, EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY, ChatAnnouncements.OnDigStart)
@@ -460,6 +455,10 @@ function ChatAnnouncements.RegisterColorEvents()
     ColorizeColors.AntiquityColorize = ZO_ColorDef:New(unpack(SV.Antiquities.AntiquityColor))
 end
 
+local function GetChatOutputSocialSettings()
+    return LUIE.SV and LUIE.SV.ChatOutput and LUIE.SV.ChatOutput.Social
+end
+
 function ChatAnnouncements.RegisterSocialEvents()
     eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_ADDED, ChatAnnouncements.FriendAdded)
     eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_REMOVED, ChatAnnouncements.FriendRemoved)
@@ -467,6 +466,7 @@ function ChatAnnouncements.RegisterSocialEvents()
     eventManager:RegisterForEvent(moduleName, EVENT_IGNORE_ADDED, ChatAnnouncements.IgnoreAdded)
     eventManager:RegisterForEvent(moduleName, EVENT_IGNORE_REMOVED, ChatAnnouncements.IgnoreRemoved)
     eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_PLAYER_STATUS_CHANGED, ChatAnnouncements.FriendPlayerStatus)
+    LUIE.ChatOutput:RegisterSocialChatEvents()
 end
 
 function ChatAnnouncements.RegisterQuestEvents()
@@ -820,18 +820,6 @@ function ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
     return ""
 end
 
-function I.ShouldShowSocialErrorInChat(error)
-    return not ShouldShowSocialErrorInAlert(error)
-end
-
--- TODO: Better function later when we implement more error handlers
--- EVENT_SOCIAL_ERROR - New handler to replace the chat handler
-function ChatAnnouncements.OnErrorSocialChat(eventId, error)
-    if not IsSocialErrorIgnoreResponse(error) and I.ShouldShowSocialErrorInChat(error) then
-        printToChat(zo_strformat(GetString("SI_SOCIALACTIONRESULT", error)))
-    end
-end
-
 function ChatAnnouncements.OnDigStart()
     S.g_weAreInADig = true
 end
@@ -945,7 +933,7 @@ function ChatAnnouncements.GuildRankSaved(eventId, guildId, rankIndex)
     local rankSyntaxAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(icon1, "100%", "100%", rankName) or rankName
 
     if ChatAnnouncements.SV.Social.GuildManageCA then
-        printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UPDATE), rankSyntax, guildNameAlliance), true)
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UPDATE), rankSyntax, guildNameAlliance), true)
     end
     if ChatAnnouncements.SV.Social.GuildManageAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UPDATE), rankSyntaxAlert, guildNameAllianceAlert))
@@ -1012,7 +1000,7 @@ function ChatAnnouncements.GuildRankChanged(eventId, guildId, displayName, newRa
 
             if guildName == name then
                 if ChatAnnouncements.SV.Social.GuildRankCA then
-                    printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED), displayNameLink, guildNameAlliance, rankSyntax), true)
+                    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED), displayNameLink, guildNameAlliance, rankSyntax), true)
                 end
                 if ChatAnnouncements.SV.Social.GuildRankAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED), displayName, guildNameAllianceAlert, rankSyntaxAlert))
@@ -1038,14 +1026,14 @@ function ChatAnnouncements.GuildPlayerRankChanged(eventId, guildId, rankIndex, g
     local syntax
     if guildRankChangeAction == GUILD_RANK_CHANGE_ACTION_PROMOTE then
         if ChatAnnouncements.SV.Social.GuildRankCA then
-            printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UP_SELF), rankSyntax, guildNameAlliance), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UP_SELF), rankSyntax, guildNameAlliance), true)
         end
         if ChatAnnouncements.SV.Social.GuildRankAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UP_SELF), rankSyntaxAlert, guildNameAllianceAlert))
         end
     elseif guildRankChangeAction == GUILD_RANK_CHANGE_ACTION_DEMOTE then
         if ChatAnnouncements.SV.Social.GuildRankCA then
-            printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_DOWN_SELF), rankSyntax, guildNameAlliance), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_DOWN_SELF), rankSyntax, guildNameAlliance), true)
         end
         if ChatAnnouncements.SV.Social.GuildRankAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_DOWN_SELF), rankSyntaxAlert, guildNameAllianceAlert))
@@ -1068,7 +1056,7 @@ function ChatAnnouncements.GuildMemberPromoteSuccessful(eventId, displayName, ne
         local rankSyntaxAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(icon, "100%", "100%", rankText) or rankText
 
         if ChatAnnouncements.SV.Social.GuildRankCA then
-            printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_PROMOTE), displayNameLink, rankSyntax, guildNameAlliance), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_PROMOTE), displayNameLink, rankSyntax, guildNameAlliance), true)
         end
         if ChatAnnouncements.SV.Social.GuildRankAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_PROMOTE), displayName, rankSyntaxAlert, guildNameAllianceAlert))
@@ -1092,7 +1080,7 @@ function ChatAnnouncements.GuildMemberDemoteSuccessful(eventId, displayName, new
         local rankSyntaxAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(icon, "100%", "100%", rankText) or rankText
 
         if ChatAnnouncements.SV.Social.GuildRankCA then
-            printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_DEMOTE), displayNameLink, rankSyntax, guildNameAlliance), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_DEMOTE), displayNameLink, rankSyntax, guildNameAlliance), true)
         end
         if ChatAnnouncements.SV.Social.GuildRankAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_DEMOTE), displayName, rankSyntaxAlert, guildNameAllianceAlert))
@@ -1115,7 +1103,7 @@ function ChatAnnouncements.GuildAddedSelf(eventId, guildId, guildName)
 
         if guildName == name then
             if ChatAnnouncements.SV.Social.GuildCA then
-                printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_JOIN_SELF), guildNameAlliance), true)
+                ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GUILD_JOIN_SELF), guildNameAlliance), true)
             end
             if ChatAnnouncements.SV.Social.GuildAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_JOIN_SELF), guildNameAllianceAlert))
@@ -1132,7 +1120,7 @@ function ChatAnnouncements.GuildInviteAdded(eventId, guildId, guildName, guildAl
     local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
     local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
     if ChatAnnouncements.SV.Social.GuildCA then
-        printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_INCOMING_GUILD_REQUEST), displayNameLink, guildNameAlliance), true)
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GUILD_INCOMING_GUILD_REQUEST), displayNameLink, guildNameAlliance), true)
     end
     if ChatAnnouncements.SV.Social.GuildAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_INCOMING_GUILD_REQUEST), inviterName, guildNameAllianceAlert))
@@ -1140,9 +1128,10 @@ function ChatAnnouncements.GuildInviteAdded(eventId, guildId, guildName, guildAl
 end
 
 function ChatAnnouncements.FriendAdded(eventId, displayName)
-    if ChatAnnouncements.SV.Social.FriendIgnoreCA then
+    local social = GetChatOutputSocialSettings()
+    if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayName))
@@ -1150,9 +1139,10 @@ function ChatAnnouncements.FriendAdded(eventId, displayName)
 end
 
 function ChatAnnouncements.FriendRemoved(eventId, displayName)
-    if ChatAnnouncements.SV.Social.FriendIgnoreCA then
+    local social = GetChatOutputSocialSettings()
+    if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayName))
@@ -1160,9 +1150,10 @@ function ChatAnnouncements.FriendRemoved(eventId, displayName)
 end
 
 function ChatAnnouncements.FriendInviteAdded(eventId, displayName)
-    if ChatAnnouncements.SV.Social.FriendIgnoreCA then
+    local social = GetChatOutputSocialSettings()
+    if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayName))
@@ -1170,9 +1161,10 @@ function ChatAnnouncements.FriendInviteAdded(eventId, displayName)
 end
 
 function ChatAnnouncements.IgnoreAdded(eventId, displayName)
-    if ChatAnnouncements.SV.Social.FriendIgnoreCA then
+    local social = GetChatOutputSocialSettings()
+    if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayName))
@@ -1180,9 +1172,10 @@ function ChatAnnouncements.IgnoreAdded(eventId, displayName)
 end
 
 function ChatAnnouncements.IgnoreRemoved(eventId, displayName)
-    if ChatAnnouncements.SV.Social.FriendIgnoreCA then
+    local social = GetChatOutputSocialSettings()
+    if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayName))
@@ -1216,8 +1209,9 @@ function ChatAnnouncements.FriendPlayerStatus(eventId, displayName, characterNam
             end
         end
 
-        if ChatAnnouncements.SV.Social.FriendStatusCA then
-            printToChat(chatText, true)
+        local social = GetChatOutputSocialSettings()
+        if social and social.FriendStatusCA then
+            ChatOutput:Print(chatText, true)
         end
         if ChatAnnouncements.SV.Social.FriendStatusAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
@@ -1235,7 +1229,7 @@ function ChatAnnouncements.QuestShared(eventId, questId)
         local alertMessage = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P), finalName, questName)
 
         if ChatAnnouncements.SV.Quests.QuestShareCA then
-            printToChat(message, true)
+            ChatOutput:Print(message, true)
         end
         if ChatAnnouncements.SV.Quests.QuestShareAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
@@ -1262,7 +1256,7 @@ function ChatAnnouncements.GroupingToolsLFGJoined(eventId, locationName)
     -- If the locationName is different thant the saved currentActivityName we have entered a new LFG instance, so display this message.
     if locationName ~= currentActivityName then
         if ChatAnnouncements.SV.Group.GroupLFGCA then
-            printToChat(zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName), true)
+            ChatOutput:Print(zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName), true)
         end
         if ChatAnnouncements.SV.Group.GroupLFGAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName))
@@ -1308,7 +1302,7 @@ function ChatAnnouncements.ActivityStatusUpdate(eventId, status)
 
     if message then
         if ChatAnnouncements.SV.Group.GroupLFGQueueCA then
-            printToChat(message, true)
+            ChatOutput:Print(message, true)
         end
         if ChatAnnouncements.SV.Group.GroupLFGQueueAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
@@ -1388,7 +1382,7 @@ function ChatAnnouncements.ReadyCheckUpdate(eventId)
         end
 
         if ChatAnnouncements.SV.Group.GroupLFGCA then
-            printToChat(message, true)
+            ChatOutput:Print(message, true)
         end
         if ChatAnnouncements.SV.Group.GroupLFGAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
@@ -1479,16 +1473,16 @@ local message = ""
 
     if updatedRoleName ~= LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", displayNameLink, message) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", displayNameLink, message) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", characterNameLink, message) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", characterNameLink, message) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", displayBoth, message) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", displayBoth, message) )
         end
     else
-        printToChat(zo_strformat("You have updated your role: <<1>>", message) )
+        ChatOutput:Print(zo_strformat("You have updated your role: <<1>>", message) )
     end
 end
 ]]
@@ -1510,23 +1504,23 @@ function ChatAnnouncements.GMCS(eventId, unitTag, isOnline)
 
     if not isOnline and onlineRoleName ~=LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", displayNameLink) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", displayNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", characterNameLink) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", characterNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", displayBoth) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", displayBoth) )
         end
     elseif isOnline and onlineRoleName ~=LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", displayNameLink) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", displayNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", characterNameLink) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", characterNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            printToChat(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", displayBoth) )
+            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", displayBoth) )
         end
     end
 end
@@ -2133,7 +2127,7 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
 
     -- If this value is being sent from the Throttle Printer, do not throttle the printout of the value
     if type == "LUIE_CURRENCY_THROTTLE" then
-        printToChat(finalMessage)
+        ChatOutput:Print(finalMessage)
         -- Otherwise sent to our Print Queued Messages function to be processed on a 50 ms delay.
     else
         local resolveType = (type == "LUIE_CURRENCY_POSTAGE" and "CURRENCY POSTAGE") or (baseCurrencyType == CURT_CROWNS and "EXPERIENCE") or "CURRENCY"
@@ -4537,7 +4531,7 @@ function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color
     -- Construct and output the final message with additional safety checks
     local finalMessage = string_format("|c%s%s|r%s", color:ToHex(), formattedMessageP2 or "", totalString or "")
     if finalMessage and finalMessage ~= "" then
-        printToChat(finalMessage)
+        ChatOutput:Print(finalMessage)
     end
 
     -- Reset all tracking variables
@@ -6795,7 +6789,7 @@ end
 function ChatAnnouncements.StuckOnCooldown(eventId)
     local cooldownText = ZO_FormatTime(GetStuckCooldown(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
     local cooldownRemainingText = ZO_FormatTimeMilliseconds(GetTimeUntilStuckAvailable(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-    printToChat(zo_strformat(GetString(SI_STUCK_ERROR_ON_COOLDOWN), cooldownText, cooldownRemainingText ))
+    ChatOutput:Print(zo_strformat(GetString(SI_STUCK_ERROR_ON_COOLDOWN), cooldownText, cooldownRemainingText ))
 end
 ]]
 
@@ -6803,15 +6797,15 @@ end
 
 --[[
 function ChatAnnouncements.InventoryFullQuest(eventId)
-    printToChat(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), true)
+    ChatOutput:Print(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), true)
 end
 
 function ChatAnnouncements.InventoryFull(eventId, numSlotsRequested, numSlotsFree)
     local function DisplayItemFailed()
         if numSlotsRequested == 1 then
-            printToChat(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), true)
+            ChatOutput:Print(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), true)
         else
-            printToChat(zo_strformat(GetString(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE), (numSlotsRequested - numSlotsFree) ))
+            ChatOutput:Print(zo_strformat(GetString(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE), (numSlotsRequested - numSlotsFree) ))
         end
     end
 
@@ -6823,7 +6817,7 @@ function ChatAnnouncements.LootItemFailed(eventId, reason, itemName)
     eventManager:UnregisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED)
 
     local function ReactivateLootItemFailed()
-    printToChat(zo_strformat(GetString("SI_LOOTITEMRESULT", reason), itemName))
+    ChatOutput:Print(zo_strformat(GetString("SI_LOOTITEMRESULT", reason), itemName))
         eventManager:RegisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED, ChatAnnouncements.LootItemFailed)
     end
 
@@ -6886,7 +6880,7 @@ function ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
 
     -- Otherwise print the message
     if ChatAnnouncements.SV.Group.GroupCA then
-        printToChat(SendMessage, true)
+        ChatOutput:Print(SendMessage, true)
     end
     if ChatAnnouncements.SV.Group.GroupAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, SendAlert)
@@ -6902,7 +6896,7 @@ function ChatAnnouncements.CheckLFGStatusLeave(WasKicked)
     end
     if S.g_leaveLFGOverride and GetGroupSize() == 0 then
         if ChatAnnouncements.SV.Group.GroupCA then
-            printToChat(GetString(LUIE_STRING_CA_GROUP_QUIT_LFG), true)
+            ChatOutput:Print(GetString(LUIE_STRING_CA_GROUP_QUIT_LFG), true)
         end
         if ChatAnnouncements.SV.Group.GroupAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_QUIT_LFG))
@@ -6916,7 +6910,7 @@ function ChatAnnouncements.OnGroupInviteReceived(eventId, inviterName, inviterDi
     if ChatAnnouncements.SV.Group.GroupCA then
         local finalName = ChatAnnouncements.ResolveNameLink(inviterName, inviterDisplayName)
         local message = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE), finalName)
-        printToChat(message, true)
+        ChatOutput:Print(message, true)
     end
     if ChatAnnouncements.SV.Group.GroupAlert then
         local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterName, inviterDisplayName)
@@ -6951,7 +6945,7 @@ function ChatAnnouncements.OnGroupTypeChanged(eventId, largeGroup)
     end
 
     if ChatAnnouncements.SV.Group.GroupCA then
-        printToChat(message, true)
+        ChatOutput:Print(message, true)
     end
     if ChatAnnouncements.SV.Group.GroupAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
@@ -6963,7 +6957,7 @@ function ChatAnnouncements.VoteNotify(eventId)
     local electionType, timeRemainingSeconds, electionDescriptor, targetUnitTag = GetGroupElectionInfo()
     if electionType == GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS then -- Ready Check
         if ChatAnnouncements.SV.Group.GroupVoteCA then
-            printToChat(GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE), true)
+            ChatOutput:Print(GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE), true)
         end
         if ChatAnnouncements.SV.Group.GroupVoteAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE))
@@ -6977,7 +6971,7 @@ function ChatAnnouncements.VoteNotify(eventId)
         if ChatAnnouncements.SV.Group.GroupVoteCA then
             local finalName = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName)
             local message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START), finalName)
-            printToChat(message, true)
+            ChatOutput:Print(message, true)
         end
         if ChatAnnouncements.SV.Group.GroupVoteAlert then
             local finalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName)
@@ -6998,9 +6992,9 @@ function ChatAnnouncements.MaraOffer(eventId, characterName, isSender, displayNa
     if ChatAnnouncements.SV.Social.PledgeOfMaraCA then
         local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
         if isSender then
-            printToChat(zo_strformat(GetString(SI_PLEDGE_OF_MARA_SENDER_MESSAGE), finalName), true)
+            ChatOutput:Print(zo_strformat(GetString(SI_PLEDGE_OF_MARA_SENDER_MESSAGE), finalName), true)
         else
-            printToChat(zo_strformat(GetString(SI_PLEDGE_OF_MARA_MESSAGE), finalName), true)
+            ChatOutput:Print(zo_strformat(GetString(SI_PLEDGE_OF_MARA_MESSAGE), finalName), true)
         end
     end
 
@@ -7032,7 +7026,7 @@ function ChatAnnouncements.DuelStarted(eventId)
         end
 
         if ChatAnnouncements.SV.Social.DuelStartCA then
-            printToChat(message, true)
+            ChatOutput:Print(message, true)
         end
 
         if ChatAnnouncements.SV.Social.DuelStartAlert then
@@ -7082,18 +7076,18 @@ function ChatAnnouncements.PrintQueuedMessages()
                 if messageType == "QUEST LOOT REMOVE" then
                     local itemId = message.itemId
                     if not S.g_questItemAdded[itemId] then
-                        printToChat(message.message)
+                        ChatOutput:Print(message.message)
                     end
                 elseif messageType == "CONTAINER" or messageType == "LOOT" then
                     ChatAnnouncements.ResolveItemMessage(message.message, message.formattedRecipient, message.color, message.logPrefix, message.totalString, message.groupLoot)
                 elseif messageType == "QUEST LOOT ADD" then
                     local itemId = message.itemId
                     if not S.g_questItemRemoved[itemId] then
-                        printToChat(message.message)
+                        ChatOutput:Print(message.message)
                     end
                 else
                     local isSystem = message.isSystem or false
-                    printToChat(message.message, isSystem)
+                    ChatOutput:Print(message.message, isSystem)
                 end
             end
         end
@@ -7130,7 +7124,7 @@ function ChatAnnouncements.AnnounceMemento()
 
     if message and ChatAnnouncements.SV.Collectibles.CollectibleUseCA or LUIE.LastMementoUsed > 0 then
         message = ColorizeColors.CollectibleUseColorize:Colorize(message)
-        printToChat(message)
+        ChatOutput:Print(message)
     end
     if alert and ChatAnnouncements.SV.Collectibles.CollectibleUseAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alert)
@@ -7414,7 +7408,7 @@ function ChatAnnouncements.CollectibleResult()
 
     if message and ChatAnnouncements.SV.Collectibles.CollectibleUseCA or LUIE.SlashCollectibleOverride then
         message = ColorizeColors.CollectibleUseColorize:Colorize(message)
-        printToChat(message)
+        ChatOutput:Print(message)
     end
     if alert and ChatAnnouncements.SV.Collectibles.CollectibleUseAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alert)

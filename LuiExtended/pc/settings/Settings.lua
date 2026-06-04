@@ -373,12 +373,12 @@ function LUIE.CreateSettings()
     local function ProfileCopyExecute()
         local tgtP, tgtA, tgtB = ProfileCopyGetTargetTriple()
         if not (tgtP and tgtA and tgtB) then
-            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
+            LUIE.ChatOutput:Print(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         local srcBucket = ProfileCopyGetEffectiveSourceBucket()
         if not (copyPick_server and copyPick_account and srcBucket) then
-            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
+            LUIE.ChatOutput:Print(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         if ProfileCopyIsSameAsTarget() then
@@ -399,7 +399,7 @@ function LUIE.CreateSettings()
             end
         end
         if not anyCopied then
-            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
+            LUIE.ChatOutput:Print(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         ReloadUI("ingame")

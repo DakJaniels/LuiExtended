@@ -9,8 +9,6 @@ local LUIE = LUIE
 -- ChatAnnouncements namespace
 --- @class (partial) ChatAnnouncements
 --- @field SV CADefaults
---- @field ChatOutput LUIE_ChatOutput
---- @field ChatOutputClass LUIE_ChatOutput
 local ChatAnnouncements = {}
 
 --- @class (partial) ChatAnnouncements

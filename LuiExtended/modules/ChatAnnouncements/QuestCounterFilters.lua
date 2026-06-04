@@ -9,7 +9,7 @@ local LUIE = LUIE
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 
 local table_insert = table.insert
 local table_sort = table.sort
@@ -439,7 +439,7 @@ function ChatAnnouncements.TryAddQuestCounterFilterFromStaging()
         return false
     end
     local label = ChatAnnouncements.FormatQuestCounterFilterRuleLabel(rule)
-    printToChat(zo_strformat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADDED), label), true)
+    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADDED), label), true)
     staging.questIdentifier = ""
     staging.conditionText = ""
     staging.milestonesText = ""
@@ -459,7 +459,7 @@ function ChatAnnouncements.RegisterQuestCounterFilterDialogs()
         end,
         function (itemData)
             ChatAnnouncements.RemoveQuestCounterFilter(itemData)
-            printToChat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMOVED), true)
+            ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMOVED), true)
             LUIE.RefreshBlacklistDialog(QUEST_COUNTER_FILTER_DIALOG)
         end,
         nil,
@@ -483,7 +483,7 @@ function ChatAnnouncements.RegisterQuestCounterFilterClearDialog()
         GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR_DIALOG),
         function ()
             ChatAnnouncements.ClearQuestCounterFilters()
-            printToChat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEARED), true)
+            ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEARED), true)
         end
     )
 end
@@ -607,7 +607,7 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
                         settingsApi:RefreshPanel(panel)
                     end
                 else
-                    printToChat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_FAILED), true)
+                    ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_FAILED), true)
                 end
             end,
             disable = filterDisabled,
@@ -753,7 +753,7 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
                 if ChatAnnouncements.TryAddQuestCounterFilterFromStaging() then
                     RefreshQuestCounterFilterListControl()
                 else
-                    printToChat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_FAILED), true)
+                    ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_FAILED), true)
                 end
             end,
             width = "half",
@@ -782,7 +782,7 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
             end,
             setFunc = function (value)
                 ChatAnnouncements.RemoveQuestCounterFilter(value)
-                printToChat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMOVED), true)
+                ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMOVED), true)
                 RefreshQuestCounterFilterListControl()
             end,
             width = "full",

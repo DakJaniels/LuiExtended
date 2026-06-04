@@ -131,8 +131,8 @@ local function SetupBuffIconControlReferences(buff)
         buff.cd:SetLeadingEdgeTexture("")
     end
     if buff.iconbg then
-        buff.iconbg:SetDrawLayer(DL_CONTROLS)
-        buff.iconbg:SetDrawLevel(1)
+        buff.iconbg:SetDrawLayer(DL_BACKGROUND)
+        buff.iconbg:SetDrawLevel(2)
     end
     buff.icon:SetDrawLayer(DL_CONTROLS)
     buff.icon:SetDrawLevel(2)
@@ -140,8 +140,11 @@ local function SetupBuffIconControlReferences(buff)
     ApplyBuffIconTextureReleasePolicy(buff.icon)
     ApplyBuffIconTextureReleasePolicy(buff.back)
     ApplyBuffIconTextureReleasePolicy(buff.frame)
+    ApplyBuffIconTextureReleasePolicy(buff.iconbg)
 
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
+    SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, nil)
+    SpellCastBuffs.ApplyBuffIconInsetVisual(buff, nil)
 
     buff.label:SetFont(SpellCastBuffs.buffsFont or "LUIE Default Font")
     buff.label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)

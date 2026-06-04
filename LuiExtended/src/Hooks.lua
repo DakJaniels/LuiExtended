@@ -9,7 +9,7 @@ local LUIE = LUIE
 local Data = LuiData.Data
 local Effects = Data.Effects
 
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 
 -- -----------------------------------------------------------------------------
 -- ESO API Locals.
@@ -45,7 +45,7 @@ function LUIE.API_Hooks()
         zos_RequestFriend(charOrDisplayName, message)
         if not menu then
             message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG), charOrDisplayName)
-            printToChat(message, true)
+            ChatOutput:Print(message, true)
             if LUIE.ChatAnnouncements.SV.Social.FriendIgnoreAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, message)
             end
@@ -59,7 +59,7 @@ function LUIE.API_Hooks()
         zos_AddIgnore(charOrDisplayName)
 
         if IsIgnored(charOrDisplayName) then -- Only lists account names, unfortunately
-            printToChat(GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_ALREADYIGNORE), true)
+            ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_ALREADYIGNORE), true)
             if LUIE.ChatAnnouncements.SV.Social.FriendIgnoreAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_ALREADYIGNORE)))
             end

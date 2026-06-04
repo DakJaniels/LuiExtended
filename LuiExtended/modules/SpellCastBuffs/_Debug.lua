@@ -6,7 +6,7 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 -- LUIE utility functions
-local PrintToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
@@ -100,7 +100,7 @@ function SpellCastBuffs.EventCombatDebug(eventId, result, isError, abilityName, 
     local formattedResult = DebugResults[result]
 
     local finalString = (iconFormatted .. " [" .. abilityId .. "] " .. ability .. ": [S] " .. source .. " --> [T] " .. target .. " [D] " .. duration .. showachantime .. showacasttime .. " [R] " .. formattedResult)
-    PrintToChat(finalString, true)
+    ChatOutput:Print(finalString, true)
 end
 
 -- Debug Display for Effect Events
@@ -169,5 +169,5 @@ function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effect
     else
         finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. GetEffectResultString(changeType) .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration .. ccDebug)
     end
-    PrintToChat(finalString, true)
+    ChatOutput:Print(finalString, true)
 end

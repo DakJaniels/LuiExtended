@@ -1678,12 +1678,12 @@ end
 
 local function QueueCrowdControlPreview()
     if not CombatInfo.SV.cct.enabled then
-        LUIE.PrintToChat("[LUIE] Crowd Control Tracker is disabled.", true)
+        LUIE.ChatOutput:Print("[LUIE] Crowd Control Tracker is disabled.", true)
         return
     end
 
     if CombatInfo.SV.cct.enabledOnlyInCyro and not LUIE.ResolvePVPZone() then
-        LUIE.PrintToChat("[LUIE] Crowd Control Tracker preview is limited to Cyrodiil.", true)
+        LUIE.ChatOutput:Print("[LUIE] Crowd Control Tracker preview is limited to Cyrodiil.", true)
         return
     end
 
@@ -1692,7 +1692,7 @@ local function QueueCrowdControlPreview()
     end
 
     if not CrowdControlTracker.addonEnabled then
-        LUIE.PrintToChat("[LUIE] Crowd Control Tracker is unavailable in this location.", true)
+        LUIE.ChatOutput:Print("[LUIE] Crowd Control Tracker is unavailable in this location.", true)
         return
     end
 

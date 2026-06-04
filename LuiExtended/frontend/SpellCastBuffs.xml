@@ -108,8 +108,9 @@
                excludeFromResizeToFitExtents="true"
                hidden="true" />
         <Backdrop name="$(parent)_BarBackdrop"
-                  centerColor="00000066"
-                  edgeColor="00000099"
+                  alpha="1"
+                  centerColor="000066"
+                  edgeColor="000099"
                   hidden="true"
                   excludeFromResizeToFitExtents="true"
                   layer="BACKGROUND">

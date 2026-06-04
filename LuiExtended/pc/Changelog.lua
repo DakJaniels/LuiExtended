@@ -55,6 +55,7 @@ local changelogMessages =
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Taking attached gold from multiple mails individually (same amount and sender) now prints a currency line per mail again; duplicate mail gold announcements within 2.5s are still suppressed per mail (Take All unchanged).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: Announcements missing when LUIE was on but System was off; enabling LUIE on a tab now turns System on for that tab, with a settings note and one-time chat warning when no tab can receive messages.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Show Backbar mirrors the base-game activation proc glow on inactive weapon bar slots (same highlight as the active bar when an ability is ready).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Show Triggered proc feedback on the back bar (timed procs, instant procs, and stack-based highlights such as Necromancer skull charges) matches the front bar again.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Necromancer Flame, Venom, and Ricochet skull charge highlights use separate tracking (Venom advances from the charge buff and any in-combat Necromancer ability while slotted, not only skull casts). Stack labels, proc at full charge, and clear after the empowered cast match the base game.",

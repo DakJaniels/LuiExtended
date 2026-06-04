@@ -110,9 +110,9 @@
                    color="FFFFFF"
                    verticalAlignment="CENTER"
                    horizontalAlignment="CENTER"
-                   text="88:88:88"
-                   wrapMode="ELLIPSIS">
-              <Dimensions x="60"
+                   text="88:88:88:888"
+                   wrapMode="TRUNCATE">
+              <Dimensions x="88"
                           y="20" />
             </Label>
             <!-- Soul Gems -->

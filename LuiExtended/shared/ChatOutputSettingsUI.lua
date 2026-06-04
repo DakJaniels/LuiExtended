@@ -10,6 +10,7 @@ local wm = WINDOW_MANAGER
 
 local LAM_TAB_ROW_HEIGHT = 26
 local LAM_TAB_HEADER_HEIGHT = LAM_TAB_ROW_HEIGHT
+local LAM_NO_DELIVERABLE_WARNING_HEIGHT = 52
 local LAM_TOGGLE_ON_TEXT = GetString(SI_CHECK_BUTTON_ON):upper()
 local LAM_TOGGLE_OFF_TEXT = GetString(SI_CHECK_BUTTON_OFF):upper()
 
@@ -168,7 +169,7 @@ end
 --- @return LUIE_ChatOutputSettingsUI
 local function GetChatOutputSettingsUI()
     if not LUIE.chatOutputSettingsUI then
-        local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+        local chatOutput = LUIE.ChatOutput
         LUIE.chatOutputSettingsUI = LUIE_ChatOutputSettingsUI:New(chatOutput)
     end
     return LUIE.chatOutputSettingsUI
@@ -227,23 +228,23 @@ end
 
 local chatTabLAMRefreshRegistered = false
 
---- LAM anchors controls at creation; never SetHidden (leaves empty gaps). Refresh labels and live System filter state (PC).
+--- LAM tab rows are created for all slots at addon load; refresh enables/disables rows by live tab count (never hide — avoids LAM gaps).
 local function RefreshChatTabLAMControlLabels()
     if ZO_IsConsoleOrGameCoreUI() then
         return
     end
-    local LAM = LibAddonMenu2
-    if not LAM or not LAM.currentPanelOpened then
-        return
-    end
-    local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+    local chatOutput = LUIE.ChatOutput
     if not chatOutput then
         return
     end
-    for tabIndex = 1, chatOutput:GetChatTabSettingsSlotCount() do
+    local warningControl = _G["LUIE_ChatOutputNoDeliverableWarning"]
+    if warningControl and warningControl.RefreshNoDeliverableWarning then
+        warningControl:RefreshNoDeliverableWarning()
+    end
+    local slotCount = chatOutput:GetChatTabSettingsSlotCount()
+    for tabIndex = 1, slotCount do
         local rowControl = _G["LUIE_ChatOutputTabRow_" .. tabIndex]
         if rowControl then
-            rowControl:SetHidden(false)
             if rowControl.RefreshChatTabRoutingRow then
                 rowControl:RefreshChatTabRoutingRow()
             elseif rowControl.UpdateValue then
@@ -259,6 +260,15 @@ local function RegisterChatTabLAMRefreshCallback()
     end
     chatTabLAMRefreshRegistered = true
     CALLBACK_MANAGER:RegisterCallback("LAM-RefreshPanel", RefreshChatTabLAMControlLabels)
+    local eventManager = GetEventManager()
+    eventManager:RegisterForEvent(LUIE.name .. "ChatOutputSettingsTabs", EVENT_PLAYER_ACTIVATED, function ()
+        zo_callLater(RefreshChatTabLAMControlLabels, 0)
+    end)
+end
+
+--- Called after chat containers load (player activation) so LAM tab rows match live tab count.
+function LUIE_ChatOutputSettingsUI:RefreshChatTabRoutingRows()
+    RefreshChatTabLAMControlLabels()
 end
 
 local function IsLibChatMessageLoaded()
@@ -279,7 +289,7 @@ local function GetChatBypassTooltip()
 end
 
 local function UsesExternalChatFormatting()
-    local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+    local chatOutput = LUIE.ChatOutput
     return chatOutput and chatOutput:ShouldUseExternalFormatting()
 end
 
@@ -288,7 +298,7 @@ local function IsLuiExtendedTimestampSettingsDisabled()
 end
 
 local function ApplyChatOutputTimePrefixSettingsFromSavedVars()
-    local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+    local chatOutput = LUIE.ChatOutput
     if chatOutput then
         chatOutput:ApplyLibChatMessageTimePrefixSettings()
     end
@@ -378,7 +388,7 @@ local function FormatLibChatMessageOsDateForSettingsDisplay(format)
 end
 
 local function GetChatOutputForSettings()
-    return LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+    return LUIE.ChatOutput
 end
 
 --- Convert LUIE Timestamp Format tokens to LibChatMessage os.date for display/storage.
@@ -751,7 +761,7 @@ local function AppendLuiExtendedTimestampLAMControls(controls, SettingsAPI, Sett
         end,
         function (r, g, b, a)
             Settings.TimeStampColor = { r, g, b, a }
-            LUIE.UpdateTimeStampColor()
+            LUIE.ChatOutput:UpdateTimeStampColor()
         end,
         Defaults.TimeStampColor,
         "full",
@@ -809,7 +819,7 @@ local function AppendLuiExtendedTimestampConsoleControls(settings, LHAS, Setting
         end,
         setFunction = function (r, g, b, a)
             Settings.TimeStampColor = { r, g, b, a }
-            LUIE.UpdateTimeStampColor()
+            LUIE.ChatOutput:UpdateTimeStampColor()
         end,
         default = Settings.TimeStampColor,
         disable = function ()
@@ -828,7 +838,7 @@ end
 local LCM_HISTORY_DEFAULT_MAX_AGE = 3600
 
 local function IsPChatChatRestoreEnabled()
-    local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+    local chatOutput = LUIE.ChatOutput
     return chatOutput and chatOutput:IsPChatChatRestoreEnabled()
 end
 
@@ -976,18 +986,57 @@ function LUIE_ChatOutputSettingsUI:BuildLibChatMessageLAMControls(SettingsAPI)
     return controls
 end
 
+--- @param chatOutput LUIE_ChatOutput|nil
+--- @return table LAM custom control data
+local function CreateChatTabRoutingNoDeliverableWarningLAMOption(chatOutput)
+    return
+    {
+        type = "custom",
+        reference = "LUIE_ChatOutputNoDeliverableWarning",
+        width = "full",
+        minHeight = 0,
+        refreshFunc = function (control)
+            if control.RefreshNoDeliverableWarning then
+                control:RefreshNoDeliverableWarning()
+            end
+        end,
+        createFunc = function (control)
+            control.warningLabel = wm:CreateControl(nil, control, CT_LABEL)
+            control.warningLabel:SetFont("ZoFontGame")
+            control.warningLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+            control.warningLabel:SetAnchor(TOPLEFT, control, TOPLEFT, 0, 0)
+            control.warningLabel:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, 0, 0)
+            control.warningLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+            control.warningLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
+            control.warningLabel:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
+            control.warningLabel:SetMaxLineCount(0)
+
+            function control:RefreshNoDeliverableWarning()
+                local showWarning = chatOutput and not chatOutput:HasDeliverableTab()
+                if showWarning then
+                    self:SetHidden(false)
+                    self.warningLabel:SetHidden(false)
+                    self.warningLabel:SetText(GetString(LUIE_STRING_LAM_CA_CHATOUTPUT_NO_DELIVERABLE_TAB_LAM))
+                    self.warningLabel:SetHeight(LAM_NO_DELIVERABLE_WARNING_HEIGHT)
+                    self:SetHeight(LAM_NO_DELIVERABLE_WARNING_HEIGHT)
+                else
+                    self.warningLabel:SetText("")
+                    self.warningLabel:SetHidden(true)
+                    self:SetHidden(true)
+                    self:SetHeight(0)
+                end
+            end
+
+            control:RefreshNoDeliverableWarning()
+        end,
+    }
+end
+
 --- @param tabIndex integer
 --- @param chatOutput LUIE_ChatOutput|nil
 --- @return table LAM custom control data
 local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
     local tabIndexCapture = tabIndex
-
-    local function IsTabSlotDisabled()
-        if chatOutput then
-            return not chatOutput:IsChatTabIndexActiveForSettings(tabIndexCapture)
-        end
-        return tabIndexCapture > 5
-    end
 
     local function GetTabRowLabel()
         if chatOutput then
@@ -1032,6 +1081,14 @@ local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
                 end,
                 function (value)
                     SetChatTabCheckboxValue(tabIndexCapture, value)
+                    if value and chatOutput then
+                        chatOutput:SetSystemCategoryEnabledOnTabForSettings(tabIndexCapture, true)
+                    end
+                    control:RefreshChatTabRoutingRow()
+                    local warningControl = _G["LUIE_ChatOutputNoDeliverableWarning"]
+                    if warningControl and warningControl.RefreshNoDeliverableWarning then
+                        warningControl:RefreshNoDeliverableWarning()
+                    end
                 end,
                 zo_strformat(GetString(LUIE_STRING_LAM_CA_CHATTAB_TP), tostring(tabIndexCapture))
             )
@@ -1046,6 +1103,11 @@ local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
                 function (value)
                     if chatOutput then
                         chatOutput:SetSystemCategoryEnabledOnTabForSettings(tabIndexCapture, value)
+                    end
+                    control:RefreshChatTabRoutingRow()
+                    local warningControl = _G["LUIE_ChatOutputNoDeliverableWarning"]
+                    if warningControl and warningControl.RefreshNoDeliverableWarning then
+                        warningControl:RefreshNoDeliverableWarning()
                     end
                 end,
                 GetString(LUIE_STRING_LAM_CA_CHATTAB_SYSTEMFILTER_TP)
@@ -1064,20 +1126,24 @@ local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
             end)
 
             function control:RefreshChatTabRoutingRow()
-                local disabled = IsTabSlotDisabled()
-                self.rowLabel:SetText(GetTabRowLabel())
-                if disabled then
-                    self.rowLabel:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
-                else
+                local tabActive = chatOutput and chatOutput:IsChatTabIndexActiveForSettings(tabIndexCapture)
+                local rowDisabled = not tabActive
+                if tabActive then
+                    self.rowLabel:SetText(GetTabRowLabel())
                     self.rowLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+                else
+                    self.rowLabel:SetText(zo_strformat(GetString(LUIE_STRING_LAM_CA_CHATTAB_ROW_NONAME), tostring(tabIndexCapture)))
+                    self.rowLabel:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
                 end
+                self.luiToggle:SetMouseEnabled(tabActive)
+                self.systemToggle:SetMouseEnabled(tabActive)
                 ApplyChatTabRoutingToggleVisual(
                     self.luiToggle,
                     GetChatTabCheckboxValue(tabIndexCapture),
-                    disabled
+                    rowDisabled
                 )
-                local systemEnabled = chatOutput and chatOutput:IsSystemCategoryEnabledOnTabForSettings(tabIndexCapture) or false
-                ApplyChatTabRoutingToggleVisual(self.systemToggle, systemEnabled, disabled)
+                local systemEnabled = tabActive and chatOutput and chatOutput:IsSystemCategoryEnabledOnTabForSettings(tabIndexCapture) or false
+                ApplyChatTabRoutingToggleVisual(self.systemToggle, systemEnabled, rowDisabled)
             end
 
             control:RefreshChatTabRoutingRow()
@@ -1089,8 +1155,8 @@ end
 --- @param SettingsAPI table
 --- @param Defaults LUIE_ChatOutputDefaults
 local function AppendChatTabRoutingLAMControls(controls, SettingsAPI, Defaults)
-    local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
-    local tabSlotCount = chatOutput and chatOutput:GetChatTabSettingsSlotCount() or 20
+    local chatOutput = LUIE.ChatOutput
+    local slotCount = chatOutput and chatOutput:GetChatTabSettingsSlotCount() or 20
 
     controls[#controls + 1] = SettingsAPI.CreateDescriptionOption(
         GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_SECTION),
@@ -1098,11 +1164,13 @@ local function AppendChatTabRoutingLAMControls(controls, SettingsAPI, Defaults)
         GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_TITLE)
     )
     controls[#controls + 1] = CreateChatTabRoutingColumnHeaderLAMOption()
+    controls[#controls + 1] = CreateChatTabRoutingNoDeliverableWarningLAMOption(chatOutput)
 
-    for tabIndex = 1, tabSlotCount do
+    for tabIndex = 1, slotCount do
         controls[#controls + 1] = CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
     end
     RegisterChatTabLAMRefreshCallback()
+    zo_callLater(RefreshChatTabLAMControlLabels, 0)
 end
 
 --- @param SettingsAPI table

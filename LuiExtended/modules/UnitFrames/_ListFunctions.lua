@@ -5,7 +5,7 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 
 -- Unit Frames namespace
 --- @class (partial) UnitFrames
@@ -45,7 +45,7 @@ function UnitFrames.ClearCustomList(list)
     end
     ZO_GetChatSystem():Maximize()
     ZO_GetChatSystem().primaryContainer:FadeIn()
-    printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
+    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
 end
 
 -- -----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ function UnitFrames.AddToCustomList(list, input)
         list[input] = true
         ZO_GetChatSystem():Maximize()
         ZO_GetChatSystem().primaryContainer:FadeIn()
-        printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
     end
 end
 
@@ -68,7 +68,7 @@ function UnitFrames.RemoveFromCustomList(list, input)
         list[input] = nil
         ZO_GetChatSystem():Maximize()
         ZO_GetChatSystem().primaryContainer:FadeIn()
-        printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
     end
 end
 

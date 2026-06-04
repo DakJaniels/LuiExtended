@@ -215,7 +215,7 @@ local function ApplyDebugVisualPreset(visualUnitTag, presetName)
 end
 
 local function NotifyMissing(name)
-    LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames debug: '%s' frame not enabled in settings.", name))
+    LUIE.ChatOutput:AddSystemMessage(string.format("[LUIE] UnitFrames debug: '%s' frame not enabled in settings.", name))
 end
 
 -- -----------------------------------------------------------------------------
@@ -297,8 +297,8 @@ end
 
 local function DebugAttributeVisuals(arg1, arg2)
     if not arg1 or arg1 == "" or string.lower(arg1) == "help" then
-        LUIE.AddSystemMessage("[LUIE] /luieufdebug <frame> <preset>  — frame: player, reticleover, SmallGroup1, sg1, RaidGroup1, boss1, …")
-        LUIE.AddSystemMessage("[LUIE] Presets: " .. table.concat(DEBUG_VISUAL_PRESET_NAMES, ", "))
+        LUIE.ChatOutput:AddSystemMessage("[LUIE] /luieufdebug <frame> <preset>  — frame: player, reticleover, SmallGroup1, sg1, RaidGroup1, boss1, …")
+        LUIE.ChatOutput:AddSystemMessage("[LUIE] Presets: " .. table.concat(DEBUG_VISUAL_PRESET_NAMES, ", "))
         return
     end
 
@@ -314,18 +314,18 @@ local function DebugAttributeVisuals(arg1, arg2)
     end
 
     if not UnitFrames.CustomFrames[frameKey] then
-        LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames debug: unknown or disabled frame '%s'.", frameKey))
+        LUIE.ChatOutput:AddSystemMessage(string.format("[LUIE] UnitFrames debug: unknown or disabled frame '%s'.", frameKey))
         return
     end
 
     ShowFrameForDebug(frameKey)
 
     if not ApplyDebugVisualPreset(frameKey, presetName) then
-        LUIE.AddSystemMessage(string.format("[LUIE] Unknown visual preset '%s'. Use /luieufdebug help.", presetName))
+        LUIE.ChatOutput:AddSystemMessage(string.format("[LUIE] Unknown visual preset '%s'. Use /luieufdebug help.", presetName))
         return
     end
 
-    LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames visual debug: %s --> %s", frameKey, presetName))
+    LUIE.ChatOutput:AddSystemMessage(string.format("[LUIE] UnitFrames visual debug: %s --> %s", frameKey, presetName))
 end
 
 -- -----------------------------------------------------------------------------
@@ -595,11 +595,11 @@ local function tlwHiddenForFrame(frame)
 end
 
 function UnitFrames.DumpFontDiagnostics()
-    LUIE.AddSystemMessage("[LUIE] UnitFrames font diagnostics:")
+    LUIE.ChatOutput:AddSystemMessage("[LUIE] UnitFrames font diagnostics:")
     local sv = UnitFrames.SV
     local svRoot = sv and sv.CustomFrameAppearance or {}
     local groupSize = GetGroupSize()
-    LUIE.AddSystemMessage(string.format("  context: groupSize=%d", groupSize))
+    LUIE.ChatOutput:AddSystemMessage(string.format("  context: groupSize=%d", groupSize))
     for _, category in ipairs(UnitFrames.APPEARANCE_CATEGORY_IDS) do
         local rawEntry = svRoot[category] or {}
         local resolved = UnitFrames.GetCustomFrameAppearance(category)
@@ -620,7 +620,7 @@ function UnitFrames.DumpFontDiagnostics()
                 nameHidden = tostring(frame.name:IsHidden())
             end
         end
-        LUIE.AddSystemMessage(string.format(
+        LUIE.ChatOutput:AddSystemMessage(string.format(
             "  %s: raw{face=%s style=%s bars=%s other=%s tex=%s} resolved{bars=%s other=%s caption=%s} label{w=%s h=%s text=%sx%s hidden=%s frame=%s}",
             category,
             tostring(rawEntry.fontFace),
@@ -649,7 +649,7 @@ function UnitFrames.DumpFontDiagnostics()
             if parentW then parts[#parts + 1] = "rhbW=" .. formatNumber(parentW) end
             local hidden = tlwHiddenForFrame(frame)
             if hidden ~= nil then parts[#parts + 1] = "tlwHidden=" .. tostring(hidden) end
-            LUIE.AddSystemMessage(string.format("    %s SV: %s", category, table.concat(parts, " ")))
+            LUIE.ChatOutput:AddSystemMessage(string.format("    %s SV: %s", category, table.concat(parts, " ")))
         end
     end
 end

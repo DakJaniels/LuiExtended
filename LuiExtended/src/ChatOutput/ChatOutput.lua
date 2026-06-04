@@ -1,19 +1,17 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat output routing implementation
+--  LuiExtended — LUIE-wide chat output routing (LUIE.SV.ChatOutput)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class (partial) ChatAnnouncements
-local ChatAnnouncements = LUIE.ChatAnnouncements
-
 --- @class LUIE_ChatOutput
-local LUIE_ChatOutput = ChatAnnouncements.ChatOutputClass
-local ChatOutput = ChatAnnouncements.ChatOutput
+local LUIE_ChatOutput = LUIE.ChatOutputClass
+local ChatOutput = LUIE.ChatOutput
 
 local ACTIVATION_HANDLER_NAME = LUIE.name .. "ChatOutput"
+local SOCIAL_CHAT_HANDLER_NAME = LUIE.name .. "ChatOutputSocial"
 local LIB_CHAT_MESSAGE_FORMATTER_KEY = "LibChatMessage"
 
 local eventManager = GetEventManager()
@@ -60,6 +58,12 @@ function LUIE_ChatOutput:GetChatOutputSavedVars()
         return LUIE.SV.ChatOutput
     end
     return LUIE.Defaults and LUIE.Defaults.ChatOutput
+end
+
+--- @return table|nil
+function LUIE_ChatOutput:GetChatOutputSocialSettings()
+    local chatOutputSettings = self:GetChatOutputSavedVars()
+    return chatOutputSettings and chatOutputSettings.Social
 end
 
 --- True when pChat will save/restore chat (LCM history must stay off).
@@ -139,7 +143,7 @@ local LUIE_TIMESTAMP_TOKEN_TO_OSDATE =
     s = "%S",
 }
 
---- Longest-match-first; same priority as LUIE.CreateTimestamp.
+--- Longest-match-first; same priority as CreateTimestamp.
 local LUIE_TIMESTAMP_TOKEN_SCAN_ORDER =
 {
     "HH",
@@ -249,8 +253,8 @@ function LUIE_ChatOutput:PrependLuiExtendedTimestampToMessage(rawMessage)
         return rawMessage
     end
     local timestring = GetTimeString()
-    local timestamp = LUIE.CreateTimestamp(timestring, chatOutputSettings.TimeStampFormat, nil)
-    local timestampFormatted = zo_strformat("|c<<1>>[<<2>>]|r ", LUIE.TimeStampColorize, timestamp)
+    local timestamp = self:CreateTimestamp(timestring, chatOutputSettings.TimeStampFormat, nil)
+    local timestampFormatted = zo_strformat("|c<<1>>[<<2>>]|r ", self.timestampColorHex, timestamp)
     return timestampFormatted .. rawMessage
 end
 
@@ -363,7 +367,7 @@ function LUIE_ChatOutput:ApplyLibChatMessageTimePrefixSettings()
     end
 end
 
---- When true, LUIE prints via LibChatMessage:Print so tag/time use LibChatMessage settings (not AddSystemMessage + LUIE.FormatMessage).
+--- When true, LUIE prints via LibChatMessage:Print so tag/time use LibChatMessage settings (not AddSystemMessage + self:FormatMessage).
 --- @return boolean
 function LUIE_ChatOutput:ShouldRoutePrintThroughLibChatMessageProxy()
     if not self.libChatMessage or self:ShouldUseExternalFormatting() then
@@ -413,6 +417,7 @@ function LUIE_ChatOutput:FormatMessageViaLibChatMessageFormatter(messageText)
     if not self.libChatMessage or not CHAT_ROUTER then
         return nil
     end
+    self:ApplyLibChatMessageTimePrefixSettings()
     local messageFormatter = CHAT_ROUTER:GetRegisteredMessageFormatters()[LIB_CHAT_MESSAGE_FORMATTER_KEY]
     if not messageFormatter then
         return nil
@@ -428,6 +433,8 @@ end
 
 function LUIE_ChatOutput:PrintViaLibChatMessage(messageText)
     if self.libChatMessage then
+        -- Re-apply before each print (pChat/LCM init order can leave timePrefixEnabled true).
+        self:ApplyLibChatMessageTimePrefixSettings()
         if self:ShouldPrependLuiExtendedTimestampOnLibChatMessageProxy() then
             messageText = self:PrependLuiExtendedTimestampToMessage(messageText)
         end
@@ -480,7 +487,7 @@ function LUIE_ChatOutput:FormatForDisplay(rawMessage)
     if self:ShouldUseExternalFormatting() then
         return self:ApplyExternalSystemFormat(rawMessage)
     end
-    return LUIE.FormatMessage(rawMessage, self:ShouldApplyLuiExtendedTimestamp())
+    return self:FormatMessage(rawMessage, self:ShouldApplyLuiExtendedTimestamp())
 end
 
 --- Max tab index on the primary chat container, or across all containers (minimum 1).
@@ -566,6 +573,81 @@ function LUIE_ChatOutput:GetPrimaryChatContainerForSettings()
     return chatSystem and chatSystem.primaryContainer or nil
 end
 
+--- Per-tab chat UI is available after player activation (ZOS loads chat in its EVENT_PLAYER_ACTIVATED handler first).
+--- @return boolean
+function LUIE_ChatOutput:IsPlayerActivatedForChatDelivery()
+    if not IsChatSystemAvailableForCurrentPlatform() then
+        return true
+    end
+    return IsPlayerActivated()
+end
+
+--- @param messageText string
+--- @param isSystem boolean|nil
+function LUIE_ChatOutput:EnqueuePendingPrint(messageText, isSystem)
+    self.pendingPrintQueue[#self.pendingPrintQueue + 1] = { messageText = messageText, isSystem = isSystem }
+end
+
+function LUIE_ChatOutput:FlushPendingPrints()
+    if #self.pendingPrintQueue == 0 or not self:IsPlayerActivatedForChatDelivery() then
+        return
+    end
+    local queue = self.pendingPrintQueue
+    self.pendingPrintQueue = {}
+    for i = 1, #queue do
+        local entry = queue[i]
+        self:PrintWhenReady(entry.messageText, entry.isSystem)
+    end
+end
+
+--- After ZOS chat load; same routing as Print without readiness gating.
+--- @param messageText string
+--- @param isSystem boolean|nil
+function LUIE_ChatOutput:PrintWhenReady(messageText, isSystem)
+    if messageText == "" then
+        messageText = "[Empty String]"
+    end
+
+    if self.libChatMessage then
+        self:ApplyLibChatMessageTimePrefixSettings()
+    end
+
+    local chatOutputSettings = self:GetChatOutputSavedVars()
+    if not chatOutputSettings then
+        self:AddSystemMessage(messageText)
+        return
+    end
+
+    if not self:UsesPrintToAllTabsMethod() then
+        self:DeliverToSelectedChatTabs(messageText, isSystem)
+        return
+    end
+
+    -- Print to All Tabs: CHAT_ROUTER only when system messages use game/pChat System category on all tabs.
+    if isSystem and chatOutputSettings.ChatSystemAll then
+        if self:ShouldUseExternalFormatting() then
+            if self:PrintViaLibChatMessage(messageText) then
+                return
+            end
+            self:AddSystemMessage(self:ApplyExternalSystemFormat(messageText))
+        elseif self:ShouldRoutePrintThroughLibChatMessageProxy() then
+            if self:PrintViaLibChatMessage(messageText) then
+                return
+            end
+            self:AddSystemMessage(self:FormatMessage(messageText, self:ShouldApplyLuiExtendedTimestamp()))
+        else
+            local applyLuiTimestamp = self:ShouldApplyLuiExtendedTimestamp()
+            if isSystem and self:ShouldPChatFormatLibChatMessageProxy() then
+                applyLuiTimestamp = false
+            end
+            self:AddSystemMessage(self:FormatMessage(messageText, applyLuiTimestamp))
+        end
+        return
+    end
+
+    self:DeliverToSelectedChatTabs(messageText, isSystem)
+end
+
 --- System category filter on the primary chat container tab (settings UI).
 --- @param tabIndex integer
 --- @return boolean
@@ -604,40 +686,93 @@ function LUIE_ChatOutput:IsChatCategoryEnabledOnTab(chatContainer, tabIndex, cat
     return IsChatContainerTabCategoryEnabled(chatContainer.id, tabIndex, category)
 end
 
+--- Same gates as PrintToChatWindows for one primary-container tab (including CMX chat-log skip).
+--- @param chatOutputSettings LUIE_ChatOutputDefaults
+--- @param tabIndex integer
+--- @return boolean
+function LUIE_ChatOutput:WouldDeliverToPrimaryTab(chatOutputSettings, tabIndex)
+    if not chatOutputSettings or not chatOutputSettings.ChatTab or chatOutputSettings.ChatTab[tabIndex] ~= true then
+        return false
+    end
+    local primaryContainer = self:GetPrimaryChatContainerForSettings()
+    if not primaryContainer or not primaryContainer.windows or tabIndex < 1 or tabIndex > #primaryContainer.windows then
+        return false
+    end
+    if CMX and CMX.db and CMX.db.chatLog and primaryContainer.GetTabName then
+        if primaryContainer:GetTabName(tabIndex) == CMX.db.chatLog.name then
+            return false
+        end
+    end
+    return self:IsChatCategoryEnabledOnTab(primaryContainer, tabIndex, CHAT_CATEGORY_SYSTEM)
+end
+
+--- True when at least one primary tab would receive per-tab delivery (see PrintToChatWindows).
+--- @param chatOutputSettings LUIE_ChatOutputDefaults|nil
+--- @return boolean
+function LUIE_ChatOutput:HasDeliverableTab(chatOutputSettings)
+    chatOutputSettings = chatOutputSettings or self:GetChatOutputSavedVars()
+    if not chatOutputSettings or not chatOutputSettings.ChatTab then
+        return false
+    end
+    local primaryContainer = self:GetPrimaryChatContainerForSettings()
+    if not primaryContainer or not primaryContainer.windows then
+        return false
+    end
+    for tabIndex = 1, #primaryContainer.windows do
+        if self:WouldDeliverToPrimaryTab(chatOutputSettings, tabIndex) then
+            return true
+        end
+    end
+    return false
+end
+
+--- @param isSystem boolean|nil
+function LUIE_ChatOutput:MaybeWarnNoDeliverableTab(isSystem)
+    if self.noDeliverableTabWarningShown then
+        return
+    end
+    local chatOutputSettings = self:GetChatOutputSavedVars()
+    if not chatOutputSettings then
+        return
+    end
+    if self:UsesPrintToAllTabsMethod() and isSystem and chatOutputSettings.ChatSystemAll then
+        return
+    end
+    if self:HasDeliverableTab(chatOutputSettings) then
+        return
+    end
+    self.noDeliverableTabWarningShown = true
+    self:AddSystemMessage(GetString(LUIE_STRING_LAM_CA_CHATOUTPUT_NO_DELIVERABLE_TAB))
+end
+
 function LUIE_ChatOutput:PrintToChatWindows(formattedMessage, isSystem)
     local chatOutputSettings = self:GetChatOutputSavedVars()
     if not chatOutputSettings then
-        LUIE.AddSystemMessage(formattedMessage)
+        self:AddSystemMessage(formattedMessage)
         return
     end
 
     if isSystem and chatOutputSettings.ChatSystemAll then
-        LUIE.AddSystemMessage(formattedMessage)
+        self:AddSystemMessage(formattedMessage)
         return
     end
 
-    for _, chatContainer in ipairs(ZO_GetChatSystem().containers) do
-        for tabIndex = 1, #chatContainer.windows do
-            if chatOutputSettings.ChatTab[tabIndex] == true then
-                local chatWindow = chatContainer.windows[tabIndex]
+    local chatContainer = self:GetPrimaryChatContainerForSettings()
+    if not chatContainer or not chatContainer.windows then
+        return
+    end
 
-                local skipWindow = false
-                if CMX and CMX.db and CMX.db.chatLog then
-                    if chatContainer:GetTabName(tabIndex) == CMX.db.chatLog.name then
-                        skipWindow = true
-                    end
-                end
-
-                if not skipWindow and self:IsChatCategoryEnabledOnTab(chatContainer, tabIndex, CHAT_CATEGORY_SYSTEM) then
-                    chatContainer:AddEventMessageToWindow(chatWindow, formattedMessage, CHAT_CATEGORY_SYSTEM)
-                end
-            end
+    for tabIndex = 1, #chatContainer.windows do
+        if self:WouldDeliverToPrimaryTab(chatOutputSettings, tabIndex) then
+            local chatWindow = chatContainer.windows[tabIndex]
+            chatContainer:AddEventMessageToWindow(chatWindow, formattedMessage, CHAT_CATEGORY_SYSTEM)
         end
     end
 end
 
 --- Delivers via SharedChatContainer:AddEventMessageToWindow on tabs selected in ChatTab[] (see PrintToChatWindows).
 function LUIE_ChatOutput:DeliverToSelectedChatTabs(messageText, isSystem)
+    self:MaybeWarnNoDeliverableTab(isSystem)
     if self:ShouldUseExternalFormatting() then
         self:PrintToChatWindows(self:ApplyExternalSystemFormat(messageText), isSystem)
     elseif self.libChatMessage and not self:ShouldUseExternalFormatting() then
@@ -647,45 +782,15 @@ function LUIE_ChatOutput:DeliverToSelectedChatTabs(messageText, isSystem)
     end
 end
 
+--- @param messageText string
+--- @param isSystem boolean|nil
 function LUIE_ChatOutput:Print(messageText, isSystem)
-    if not ZO_GetChatSystem().primaryContainer then
+    if not self:IsPlayerActivatedForChatDelivery() then
+        self:EnqueuePendingPrint(messageText, isSystem)
+        self:RegisterPlayerActivatedHandlerOnce()
         return
     end
-
-    if messageText == "" then
-        messageText = "[Empty String]"
-    end
-
-    local chatOutputSettings = self:GetChatOutputSavedVars()
-    if not chatOutputSettings then
-        LUIE.AddSystemMessage(messageText)
-        return
-    end
-
-    if not self:UsesPrintToAllTabsMethod() then
-        self:DeliverToSelectedChatTabs(messageText, isSystem)
-        return
-    end
-
-    -- Print to All Tabs: CHAT_ROUTER only when system messages use game/pChat System category on all tabs.
-    if isSystem and chatOutputSettings.ChatSystemAll then
-        if self:ShouldUseExternalFormatting() then
-            if self:PrintViaLibChatMessage(messageText) then
-                return
-            end
-            LUIE.AddSystemMessage(self:ApplyExternalSystemFormat(messageText))
-        elseif self:ShouldRoutePrintThroughLibChatMessageProxy() then
-            if self:PrintViaLibChatMessage(messageText) then
-                return
-            end
-            LUIE.AddSystemMessage(LUIE.FormatMessage(messageText, self:ShouldApplyLuiExtendedTimestamp()))
-        else
-            LUIE.AddSystemMessage(LUIE.FormatMessage(messageText, self:ShouldApplyLuiExtendedTimestamp()))
-        end
-        return
-    end
-
-    self:DeliverToSelectedChatTabs(messageText, isSystem)
+    self:PrintWhenReady(messageText, isSystem)
 end
 
 function LUIE_ChatOutput:WrapFormatter(eventKey, shouldSuppressFn)
@@ -715,28 +820,44 @@ function LUIE_ChatOutput:WrapFormatter(eventKey, shouldSuppressFn)
     CHAT_ROUTER:RegisterMessageFormatter(eventKey, outerFormatter)
 end
 
+--- @param error integer
+--- @return boolean
+function LUIE_ChatOutput:ShouldShowSocialErrorInChat(error)
+    return not ShouldShowSocialErrorInAlert(error)
+end
+
+function LUIE_ChatOutput:OnSocialErrorChat(_, error)
+    if not IsSocialErrorIgnoreResponse(error) and self:ShouldShowSocialErrorInChat(error) then
+        self:Print(zo_strformat(GetString("SI_SOCIALACTIONRESULT", error)))
+    end
+end
+
+--- Registers social-error event and CHAT_ROUTER formatter suppressions (friend/ignore/social error).
+function LUIE_ChatOutput:RegisterSocialChatEvents()
+    eventManager:RegisterForEvent(SOCIAL_CHAT_HANDLER_NAME, EVENT_SOCIAL_ERROR, function (eventId, err)
+        ChatOutput:OnSocialErrorChat(eventId, err)
+    end)
+    self:ChainFormatterSuppressions()
+end
+
 local function ShouldSuppressFriendStatus()
-    return ChatAnnouncements.Enabled and ChatAnnouncements.SV.Social.FriendStatusCA
+    local social = ChatOutput:GetChatOutputSocialSettings()
+    return social and social.FriendStatusCA == true
 end
 
 local function ShouldSuppressFriendIgnore()
-    return ChatAnnouncements.Enabled and ChatAnnouncements.SV.Social.FriendIgnoreCA
+    local social = ChatOutput:GetChatOutputSocialSettings()
+    return social and social.FriendIgnoreCA == true
 end
 
 local function ShouldSuppressSocialError(_, error)
-    if not ChatAnnouncements.Enabled then
-        return false
-    end
     if IsSocialErrorIgnoreResponse(error) then
         return false
     end
-    return ChatAnnouncements.Internal.ShouldShowSocialErrorInChat(error)
+    return ChatOutput:ShouldShowSocialErrorInChat(error)
 end
 
 function LUIE_ChatOutput:ChainFormatterSuppressions()
-    if not ChatAnnouncements.Enabled then
-        return
-    end
     self:WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
     self:WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnore)
     self:WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnore)
@@ -744,11 +865,13 @@ function LUIE_ChatOutput:ChainFormatterSuppressions()
 end
 
 function LUIE_ChatOutput:OnDeferredPlayerActivated()
-    if not ChatAnnouncements.Enabled or not ZO_GetChatSystem().primaryContainer then
+    if not self:GetPrimaryChatContainerForSettings() then
         return
     end
     self:DisableLibChatMessageHistoryWhenPChatRestoreIsActive()
-    self:ChainFormatterSuppressions()
+    if LUIE.chatOutputSettingsUI then
+        LUIE.chatOutputSettingsUI:RefreshChatTabRoutingRows()
+    end
 end
 
 function LUIE_ChatOutput:RegisterExternalChatInitializerCallbacksOnce()
@@ -766,27 +889,34 @@ function LUIE_ChatOutput:RegisterExternalChatInitializerCallbacksOnce()
             ChatOutput:DisableLibChatMessageHistoryWhenPChatRestoreIsActive()
         end)
         CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
-            ChatOutput:WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
+            ChatOutput:ChainFormatterSuppressions()
         end)
         CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_ADDED", function ()
-            ChatOutput:WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnore)
+            ChatOutput:ChainFormatterSuppressions()
         end)
         CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_REMOVED", function ()
-            ChatOutput:WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnore)
+            ChatOutput:ChainFormatterSuppressions()
         end)
     end
 
     if IsRChatAvailable() then
         CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
-            ChatOutput:WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
+            ChatOutput:ChainFormatterSuppressions()
         end)
         CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_IGNORE_ADDED", function ()
-            ChatOutput:WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnore)
+            ChatOutput:ChainFormatterSuppressions()
         end)
         CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_IGNORE_REMOVED", function ()
-            ChatOutput:WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnore)
+            ChatOutput:ChainFormatterSuppressions()
         end)
     end
+end
+
+function LUIE_ChatOutput:OnChatSystemPlayerActivatedDeferred()
+    zo_callLater(function ()
+                     ChatOutput:FlushPendingPrints()
+                     ChatOutput:OnDeferredPlayerActivated()
+                 end, 0)
 end
 
 function LUIE_ChatOutput:RegisterPlayerActivatedHandlerOnce()
@@ -795,9 +925,7 @@ function LUIE_ChatOutput:RegisterPlayerActivatedHandlerOnce()
     end
     self.playerActivatedHandlerRegistered = true
     eventManager:RegisterForEvent(ACTIVATION_HANDLER_NAME, EVENT_PLAYER_ACTIVATED, function ()
-        zo_callLater(function ()
-                         ChatOutput:OnDeferredPlayerActivated()
-                     end, 0)
+        ChatOutput:OnChatSystemPlayerActivatedDeferred()
     end)
 end
 
@@ -809,27 +937,12 @@ function LUIE_ChatOutput:InitializePrintRouting()
     else
         self.libChatMessage = nil
     end
-end
 
-function LUIE_ChatOutput:InitializeRouterIntegration(caModuleEnabled)
-    if not caModuleEnabled then
-        return
-    end
-
-    self:RegisterExternalChatInitializerCallbacksOnce()
     self:RegisterPlayerActivatedHandlerOnce()
-
-    if ZO_GetChatSystem().primaryContainer then
-        zo_callLater(function ()
-                         ChatOutput:OnDeferredPlayerActivated()
-                     end, 0)
+    self:RegisterExternalChatInitializerCallbacksOnce()
+    if self:IsPlayerActivatedForChatDelivery() then
+        self:OnChatSystemPlayerActivatedDeferred()
     end
-end
-
---- @param caModuleEnabled boolean Chat Announcements module enabled (not just SV loaded)
-function LUIE_ChatOutput:Initialize(caModuleEnabled)
-    self:InitializePrintRouting()
-    self:InitializeRouterIntegration(caModuleEnabled)
 end
 
 --- Registers settings UI singleton after ChatOutput exists (called from ChatOutputSettingsUI).

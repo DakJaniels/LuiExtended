@@ -65,7 +65,7 @@ local function TryShowPendingCrutchAlertsVersionWarning()
         return
     end
     pendingCrutchAlertsVersionWarning = false
-    LUIE.PrintToChat(CRUTCH_ALERTS_MIN_VERSION_WARNING, true)
+    LUIE.ChatOutput:Print(CRUTCH_ALERTS_MIN_VERSION_WARNING, true)
 end
 
 local BOSS_THRESHOLD_MARKER_WIDTH = 2

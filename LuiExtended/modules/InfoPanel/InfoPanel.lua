@@ -21,6 +21,14 @@ local collectgarbage = collectgarbage
 
 local moduleName = LUIE.name .. "InfoPanel"
 
+--- Clock refresh when ClockFormat includes xy (milliseconds).
+local INFO_PANEL_CLOCK_INTERVAL_MS_PRECISE = 33
+local INFO_PANEL_CLOCK_INTERVAL_MS_STANDARD = ZO_ONE_SECOND_IN_MILLISECONDS
+
+local function InfoPanelClockFormatUsesMilliseconds(clockFormat)
+    return type(clockFormat) == "string" and zo_strfind(clockFormat, "xy", 1, true) ~= nil
+end
+
 local colors =
 {
     RED = { r = 1, g = 0, b = 0 },
@@ -155,7 +163,6 @@ end
 -- Meter system (ZOS-style component objects)
 -- -----------------------------------------------------------------------------
 
-local updateDriverName = moduleName .. "UpdateDriver"
 local meters = {}
 local metersOrdered = {}
 
@@ -215,6 +222,36 @@ function InfoPanelMeterBase:ApplyFont(fontString)
     -- override
 end
 
+function InfoPanelMeterBase:GetUpdateEventName()
+    return moduleName .. "Meter_" .. self.id
+end
+
+function InfoPanelMeterBase:UnregisterMeterUpdate()
+    eventManager:UnregisterForUpdate(self:GetUpdateEventName())
+end
+
+function InfoPanelMeterBase:RegisterMeterUpdate()
+    local updateName = self:GetUpdateEventName()
+    eventManager:UnregisterForUpdate(updateName)
+    local meter = self
+    eventManager:RegisterForUpdate(updateName, meter:GetInterval(), function ()
+        if not InfoPanel.Enabled or not uiPanel then
+            return
+        end
+        if uiPanel:IsHidden() then
+            return
+        end
+        if not meter:IsEnabled() then
+            return
+        end
+        local nowMs = GetFrameTimeMilliseconds()
+        if meter:ShouldUpdate(nowMs) then
+            meter:Update(nowMs)
+            meter:MarkUpdated(nowMs)
+        end
+    end)
+end
+
 -- -----------------------------------------------------------------------------
 -- Meter implementations
 -- -----------------------------------------------------------------------------
@@ -222,7 +259,18 @@ end
 local ClockMeter = InfoPanelMeterBase:Subclass()
 
 function ClockMeter:Initialize(infoPanel)
-    InfoPanelMeterBase.Initialize(self, infoPanel, "Clock", ZO_ONE_SECOND_IN_MILLISECONDS)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "Clock", INFO_PANEL_CLOCK_INTERVAL_MS_STANDARD)
+    self:RefreshUpdateInterval()
+end
+
+function ClockMeter:RefreshUpdateInterval()
+    local intervalMs = INFO_PANEL_CLOCK_INTERVAL_MS_STANDARD
+    if self.infoPanel and self.infoPanel.SV and InfoPanelClockFormatUsesMilliseconds(self.infoPanel.SV.ClockFormat) then
+        intervalMs = INFO_PANEL_CLOCK_INTERVAL_MS_PRECISE
+    end
+    self:SetInterval(intervalMs)
+    self.lastUpdateMs = nil
+    self:RegisterMeterUpdate()
 end
 
 function ClockMeter:IsEnabled()
@@ -230,13 +278,27 @@ function ClockMeter:IsEnabled()
 end
 
 function ClockMeter:ApplyFont(fontString)
-    if uiClock.label then uiClock.label:SetFont(fontString) end
+    if uiClock.label then
+        uiClock.label:SetFont(fontString)
+        uiClock.layoutWidth = nil
+    end
 end
+
+local INFO_PANEL_CLOCK_LABEL_MIN_WIDTH = 60
+local INFO_PANEL_CLOCK_LABEL_PADDING = 4
 
 function ClockMeter:Update(nowMs)
     if not self:IsEnabled() or not uiClock.label then return end
     local timestring = GetTimeString()
-    uiClock.label:SetText(LUIE.CreateTimestamp(timestring, self.infoPanel.SV.ClockFormat))
+    local clockText = LUIE.ChatOutput:CreateTimestamp(timestring, self.infoPanel.SV.ClockFormat)
+    uiClock.label:SetText(clockText)
+    local labelWidth = uiClock.label:GetStringWidth(clockText) + INFO_PANEL_CLOCK_LABEL_PADDING
+    labelWidth = zo_max(INFO_PANEL_CLOCK_LABEL_MIN_WIDTH, labelWidth)
+    if uiClock.layoutWidth ~= labelWidth then
+        uiClock.layoutWidth = labelWidth
+        uiClock.label:SetWidth(labelWidth)
+        self.infoPanel.RearrangePanel()
+    end
 end
 
 local FpsMeter = InfoPanelMeterBase:Subclass()
@@ -584,6 +646,13 @@ function MountFeedMeter:Update(nowMs)
 end
 
 -- Build/replace the meter registry (called during Initialize)
+function InfoPanel.RefreshClockMeterUpdateInterval()
+    local clockMeter = InfoPanel.GetMeter("Clock")
+    if clockMeter and clockMeter.RefreshUpdateInterval then
+        clockMeter:RefreshUpdateInterval()
+    end
+end
+
 function InfoPanel.BuildMeters()
     meters = {}
     metersOrdered = {}
@@ -605,20 +674,15 @@ function InfoPanel.BuildMeters()
     AddMeter(GoldMeter:New(InfoPanel))
 end
 
-function InfoPanel.OnUpdateDriver()
-    if not InfoPanel.Enabled or not uiPanel then
-        return
-    end
-    if uiPanel:IsHidden() then
-        return
-    end
-
-    local nowMs = GetFrameTimeMilliseconds()
+function InfoPanel.RegisterAllMeterUpdates()
     ForEachMeter(function (meter)
-        if meter:IsEnabled() and meter:ShouldUpdate(nowMs) then
-            meter:Update(nowMs)
-            meter:MarkUpdated(nowMs)
-        end
+        meter:RegisterMeterUpdate()
+    end)
+end
+
+function InfoPanel.UnregisterAllMeterUpdates()
+    ForEachMeter(function (meter)
+        meter:UnregisterMeterUpdate()
     end)
 end
 
@@ -971,6 +1035,7 @@ function InfoPanel.Initialize(enabled)
 
     -- Build meter registry now that controls exist
     InfoPanel.BuildMeters()
+    InfoPanel.RefreshClockMeterUpdateInterval()
 
     InfoPanel.RearrangePanel()
 
@@ -1000,8 +1065,7 @@ function InfoPanel.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_CARRIED_CURRENCY_UPDATE, InfoPanel.OnCurrencyUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_RIDING_SKILL_IMPROVEMENT, InfoPanel.UpdateMountFeedTimer)
 
-    -- Single update driver; meters handle their own intervals
-    eventManager:RegisterForUpdate(updateDriverName, ZO_ONE_SECOND_IN_MILLISECONDS, InfoPanel.OnUpdateDriver)
+    InfoPanel.RegisterAllMeterUpdates()
 
     -- Combat state: always register so enabling HideInCombat in settings later works. Handler checks HideInCombat.
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_COMBAT_STATE, function (eventId, inCombat)
@@ -1122,29 +1186,6 @@ function InfoPanel.DoBagUpdate()
     end
 end
 
-function InfoPanel.OnUpdate01()
-    local nowMs = GetFrameTimeMilliseconds()
-    local clockMeter = InfoPanel.GetMeter("Clock")
-    if clockMeter then
-        clockMeter:Update(nowMs)
-        clockMeter:MarkUpdated(nowMs)
-    end
-    local fpsMeter = InfoPanel.GetMeter("FPS")
-    if fpsMeter then
-        fpsMeter:Update(nowMs)
-        fpsMeter:MarkUpdated(nowMs)
-    end
-end
-
-function InfoPanel.OnUpdate10()
-    local nowMs = GetFrameTimeMilliseconds()
-    local latencyMeter = InfoPanel.GetMeter("Latency")
-    if latencyMeter then
-        latencyMeter:Update(nowMs)
-        latencyMeter:MarkUpdated(nowMs)
-    end
-end
-
 -- Update mount feed timer information
 --- @param eventId integer|nil Optional - event ID if called from event
 --- @param ridingSkillType RidingTrainType|nil Optional - riding skill type
@@ -1157,22 +1198,6 @@ function InfoPanel.UpdateMountFeedTimer(eventId, ridingSkillType, previous, curr
         meter:UpdateFromEvent(eventId, ridingSkillType, previous, current, source)
         meter:MarkUpdated(GetFrameTimeMilliseconds())
     end
-end
-
-function InfoPanel.OnUpdate60()
-    local nowMs = GetFrameTimeMilliseconds()
-    local armourMeter = InfoPanel.GetMeter("Armour")
-    if armourMeter then
-        armourMeter:Update(nowMs)
-        armourMeter:MarkUpdated(nowMs)
-    end
-    local weaponsMeter = InfoPanel.GetMeter("WeaponCharges")
-    if weaponsMeter then
-        weaponsMeter:Update(nowMs)
-        weaponsMeter:MarkUpdated(nowMs)
-    end
-    InfoPanel.DoBagUpdate()
-    InfoPanel.UpdateMountFeedTimer()
 end
 
 -- Update bag capacity when it changes

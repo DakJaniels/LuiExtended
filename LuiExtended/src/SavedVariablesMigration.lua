@@ -327,26 +327,26 @@ function LUIE.PrintSavedVariablesMigrationStatus()
     local dn = GetDisplayName()
     local charSpec = LUIE.SV and LUIE.SV.CharacterSpecificSV or false
 
-    LUIE.PrintToChat("|cFFAA00[LUIE] SavedVariables migration status|r", true)
-    LUIE.PrintToChat(zo_strformat("World profile (GetWorldName): <<1>>", tostring(world)), true)
-    LUIE.PrintToChat(zo_strformat("@DisplayName: <<1>>", dn), true)
-    LUIE.PrintToChat(zo_strformat("CharacterSpecificSV: <<1>>", tostring(charSpec)), true)
-    LUIE.PrintToChat(zo_strformat("split_module_saved_vars_v1: <<1>>", mkey("split_module_saved_vars_v1")), true)
-    LUIE.PrintToChat(zo_strformat("split_module_saved_vars_v2: <<1>>", mkey("split_module_saved_vars_v2")), true)
-    LUIE.PrintToChat(zo_strformat("lui_pruned_legacy_default_profile_v1: <<1>>", mkey("lui_pruned_legacy_default_profile_v1")), true)
+    LUIE.ChatOutput:Print("|cFFAA00[LUIE] SavedVariables migration status|r", true)
+    LUIE.ChatOutput:Print(zo_strformat("World profile (GetWorldName): <<1>>", tostring(world)), true)
+    LUIE.ChatOutput:Print(zo_strformat("@DisplayName: <<1>>", dn), true)
+    LUIE.ChatOutput:Print(zo_strformat("CharacterSpecificSV: <<1>>", tostring(charSpec)), true)
+    LUIE.ChatOutput:Print(zo_strformat("split_module_saved_vars_v1: <<1>>", mkey("split_module_saved_vars_v1")), true)
+    LUIE.ChatOutput:Print(zo_strformat("split_module_saved_vars_v2: <<1>>", mkey("split_module_saved_vars_v2")), true)
+    LUIE.ChatOutput:Print(zo_strformat("lui_pruned_legacy_default_profile_v1: <<1>>", mkey("lui_pruned_legacy_default_profile_v1")), true)
 
     local luiRoot = _G[LUIE.SVName]
     if type(luiRoot) == "table" then
         local hasDefault = luiRoot[legacy] ~= nil and luiRoot[legacy][dn] ~= nil
         local hasWorld = luiRoot[world] ~= nil and luiRoot[world][dn] ~= nil
-        LUIE.PrintToChat(zo_strformat("LUIESV[Default][@]: exists=<<1>>", tostring(hasDefault)), true)
-        LUIE.PrintToChat(zo_strformat("LUIESV[<<1>>][@]: exists=<<2>>", tostring(world), tostring(hasWorld)), true)
+        LUIE.ChatOutput:Print(zo_strformat("LUIESV[Default][@]: exists=<<1>>", tostring(hasDefault)), true)
+        LUIE.ChatOutput:Print(zo_strformat("LUIESV[<<1>>][@]: exists=<<2>>", tostring(world), tostring(hasWorld)), true)
         local cDef = CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, legacy, dn, charSpec)
         local cWorld = CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, world, dn, charSpec)
-        LUIE.PrintToChat(zo_strformat("Legacy module namespaces still in LUIESV (Default profile): <<1>>", tostring(cDef)), true)
-        LUIE.PrintToChat(zo_strformat("Legacy module namespaces still in LUIESV (world profile): <<1>>", tostring(cWorld)), true)
+        LUIE.ChatOutput:Print(zo_strformat("Legacy module namespaces still in LUIESV (Default profile): <<1>>", tostring(cDef)), true)
+        LUIE.ChatOutput:Print(zo_strformat("Legacy module namespaces still in LUIESV (world profile): <<1>>", tostring(cWorld)), true)
     else
-        LUIE.PrintToChat("LUIESV root missing.", true)
+        LUIE.ChatOutput:Print("LUIESV root missing.", true)
     end
 
     for _, moduleKey in ipairs(LUIE.ModuleSavedVarNamespaceKeys) do
@@ -359,7 +359,7 @@ function LUIE.PrintSavedVariablesMigrationStatus()
                 leaf = GetRawAccountWideLeaf(globalName, world, dn)
             end
             local n = LUIE.SavedVarsRawLeafNonVersionKeyCount(leaf)
-            LUIE.PrintToChat(zo_strformat("<<1>>: rawLeafKeys(excl.version)=<<2>>", globalName, tostring(n)), true)
+            LUIE.ChatOutput:Print(zo_strformat("<<1>>: rawLeafKeys(excl.version)=<<2>>", globalName, tostring(n)), true)
         end
     end
 end
@@ -646,6 +646,23 @@ function LUIE.MigrateChatOutputToCore()
         if type(src.TimeStampColor) == "table" then
             dest.TimeStampColor = { unpack(src.TimeStampColor) }
         end
+        if type(src.Social) == "table" then
+            dest.Social = dest.Social or {}
+            if src.Social.FriendStatusCA ~= nil then
+                dest.Social.FriendStatusCA = src.Social.FriendStatusCA
+            end
+            if src.Social.FriendIgnoreCA ~= nil then
+                dest.Social.FriendIgnoreCA = src.Social.FriendIgnoreCA
+            end
+        end
+    end
+
+    dest.Social = dest.Social or {}
+    if dest.Social.FriendStatusCA == nil then
+        dest.Social.FriendStatusCA = LUIE.Defaults.ChatOutput.Social.FriendStatusCA
+    end
+    if dest.Social.FriendIgnoreCA == nil then
+        dest.Social.FriendIgnoreCA = LUIE.Defaults.ChatOutput.Social.FriendIgnoreCA
     end
 
     LUIE.MarkMigrationDone("chat_output_to_core")

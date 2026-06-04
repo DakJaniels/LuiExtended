@@ -12,7 +12,7 @@ local CombatText = LUIE.CombatText
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 
 local pairs = pairs
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 
 local eventManager = GetEventManager()
 local moduleName = LUIE.name .. "CombatTextPanels"
@@ -207,7 +207,7 @@ function CombatText.ClearCustomList(list)
     end
     chatSystem:Maximize()
     chatSystem.primaryContainer:FadeIn()
-    printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
+    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
 end
 
 -- List Handling (Add) for Prominent Auras & Blacklist
@@ -224,18 +224,18 @@ function CombatText.AddToCustomList(list, input)
             list[id] = true
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
         else
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
         end
     else
         if input ~= "" then
             list[input] = true
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
         end
     end
 end
@@ -253,13 +253,13 @@ function CombatText.RemoveFromCustomList(list, input)
         list[id] = nil
         chatSystem:Maximize()
         chatSystem.primaryContainer:FadeIn()
-        printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
     else
         if input ~= "" then
             list[input] = nil
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
         end
     end
 end
@@ -278,7 +278,7 @@ function CombatText.ApplyFont()
     local fontName = LUIE.Fonts[LUIE.CombatText.SV.fontFace]
     LUIE.CombatText.SV.fontFaceApplied = fontName
     if not fontName or fontName == "" then
-        printToChat(GetString(LUIE_STRING_ERROR_FONT), true)
+        ChatOutput:Print(GetString(LUIE_STRING_ERROR_FONT), true)
         LUIE.CombatText.SV.fontFaceApplied = "$(MEDIUM_FONT)"
     end
 end

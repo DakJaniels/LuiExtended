@@ -83,7 +83,7 @@ local function GetDebugEnvironmentAllowlist()
 end
 
 local function DebugEnvironmentChat(message)
-    LUIE.AddSystemMessage("[LUIE] " .. message)
+    LUIE.ChatOutput:Print("[LUIE] " .. message, true)
 end
 
 --- @return boolean

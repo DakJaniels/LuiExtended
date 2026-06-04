@@ -1342,6 +1342,104 @@ function SpellCastBuffs.GetDebuffBorderTexture()
     return IsInGamepadPreferredMode() and "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_debuff.dds" or "EsoUI/Art/ActionBar/abilityFrame_debuff.dds"
 end
 
+function SpellCastBuffs.GetBuffDebuffInsetTexture()
+    return "EsoUI/Art/ActionBar/abilityInset_buffdebuff.dds"
+end
+
+function SpellCastBuffs.GetGenericIconInsetTexture()
+    if IsInGamepadPreferredMode() then
+        return "EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds"
+    end
+    return "EsoUI/Art/ActionBar/abilityInset.dds"
+end
+
+--- Glow ring (buff_frame/debuff_frame) is incompatible with buff/debuff inset; inset forces square abilityFrame chrome.
+--- @return boolean
+function SpellCastBuffs.UseGlowIconBorder()
+    return SpellCastBuffs.SV.GlowIcons and not SpellCastBuffs.SV.BuffDebuffIconInset
+end
+
+--- ZO_BUFF_DEBUFF_ICON = frame - 4 (2px per edge at 40px frame). Inset panel must sit under smaller icon art.
+--- @param container string|nil
+--- @return boolean
+function SpellCastBuffs.ShouldShowBuffIconInsetBg(container)
+    if container == "player_long" then
+        return false
+    end
+    return SpellCastBuffs.SV.BuffDebuffIconInset or SpellCastBuffs.SV.RemainingCooldown
+end
+
+--- @param container string|nil
+--- @return number
+function SpellCastBuffs.GetBuffIconArtInset(container)
+    if SpellCastBuffs.ShouldShowBuffIconInsetBg(container) then
+        return 2
+    end
+    return 1
+end
+
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param container string|nil
+function SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
+    if not buff.iconbg then
+        return
+    end
+    local showIconBg = SpellCastBuffs.ShouldShowBuffIconInsetBg(container)
+    local iconArtInset = SpellCastBuffs.GetBuffIconArtInset(container)
+    local panelInset = zo_max(1, iconArtInset - 1)
+
+    buff.iconbg:ClearAnchors()
+    if showIconBg then
+        buff.iconbg:SetAnchor(TOPLEFT, buff, TOPLEFT, panelInset, panelInset)
+        buff.iconbg:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -panelInset, -panelInset)
+    end
+
+    if buff.icon then
+        buff.icon:ClearAnchors()
+        buff.icon:SetAnchor(TOPLEFT, buff, TOPLEFT, iconArtInset, iconArtInset)
+        buff.icon:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -iconArtInset, -iconArtInset)
+    end
+    if buff.drop then
+        buff.drop:ClearAnchors()
+        buff.drop:SetAnchor(TOPLEFT, buff, TOPLEFT, iconArtInset, iconArtInset)
+        buff.drop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -iconArtInset, -iconArtInset)
+    end
+end
+
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param container string
+function SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
+    if container == "player_long" then
+        if buff.iconbg then
+            buff.iconbg:SetHidden(true)
+        end
+        if buff.cd then
+            buff.cd:SetHidden(true)
+        end
+        return
+    end
+
+    local showRadial = SpellCastBuffs.SV.RemainingCooldown
+    local showBuffDebuffInset = SpellCastBuffs.SV.BuffDebuffIconInset
+    local showIconBg = SpellCastBuffs.ShouldShowBuffIconInsetBg(container)
+
+    if buff.cd then
+        buff.cd:SetHidden(not showRadial)
+    end
+    if buff.iconbg then
+        buff.iconbg:SetHidden(not showIconBg)
+        if showIconBg then
+            if showBuffDebuffInset then
+                buff.iconbg:SetTexture(SpellCastBuffs.GetBuffDebuffInsetTexture())
+            else
+                buff.iconbg:SetTexture(SpellCastBuffs.GetGenericIconInsetTexture())
+            end
+            buff.iconbg:SetDrawLayer(DL_BACKGROUND)
+            buff.iconbg:SetDrawLevel(2)
+        end
+    end
+end
+
 --- Crops the 64×64 atlas to the center `iconSize` region (keyboard), or uses the gamepad XML UVs.
 --- @param texture TextureControl|nil
 --- @param iconSize number Slot width/height in px (SpellCastBuffs.SV.IconSize)
@@ -1424,13 +1522,13 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     buff.frame:SetAnchor(CENTER, buff, CENTER, 0, 0)
     buff.frame:SetDimensions(frameSize, frameSize)
     buff.frame:SetPixelRoundingEnabled(true)
-    buff.back:SetHidden(SpellCastBuffs.SV.GlowIcons)
+    buff.back:SetHidden(SpellCastBuffs.UseGlowIconBorder())
     if buff.buffType then
         local borderTexture = (buff.buffType == BUFF_EFFECT_TYPE_BUFF) and SpellCastBuffs.GetBuffBorderTexture() or SpellCastBuffs.GetDebuffBorderTexture()
         buff.back:SetTexture(borderTexture)
     end
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, buffSize)
-    buff.frame:SetHidden(not SpellCastBuffs.SV.GlowIcons)
+    buff.frame:SetHidden(not SpellCastBuffs.UseGlowIconBorder())
     buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
     buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
     buff.label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
@@ -1460,19 +1558,6 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
         end
     end
 
-    if container == "player_long" then
-        -- Long-term strip never uses radial cooldown or inset bg (shared pool template always has cd/iconbg).
-        if buff.iconbg then
-            buff.iconbg:SetHidden(true)
-        end
-        if buff.cd then
-            buff.cd:SetHidden(true)
-        end
-    elseif buff.cd ~= nil then
-        buff.cd:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
-        buff.iconbg:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
-    end
-
     SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
     if SpellCastBuffs.SV.ShowDebugAbilityId and buff.abilityId and buff.abilityId:GetText() ~= "" then
         if SpellCastBuffs.NeedsAbilityIdLabelFit(buff) then
@@ -1480,24 +1565,8 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
         end
     end
 
-    -- ZO_BUFF_DEBUFF_ICON_DIMENSIONS = frame - 4 (2px inset per edge); matches abilityFrame + icon padding.
-    local inset = 1
-    if container ~= "player_long" and SpellCastBuffs.SV.RemainingCooldown and buff.cd ~= nil then
-        inset = 2
-    end
-
-    buff.drop:ClearAnchors()
-    buff.drop:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
-    buff.drop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
-
-    buff.icon:ClearAnchors()
-    buff.icon:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
-    buff.icon:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
-    if buff.iconbg ~= nil then
-        buff.iconbg:ClearAnchors()
-        buff.iconbg:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
-        buff.iconbg:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
-    end
+    SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
+    SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
 
     if buff.back then
         buff.back:ClearAnchors()

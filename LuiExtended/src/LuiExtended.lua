@@ -21,6 +21,8 @@
 --- @field UI LUIE.UI
 --- @field GridOverlay LUIE.GridOverlay
 --- @field chatOutputSettingsUI LUIE_ChatOutputSettingsUI|nil
+--- @field ChatOutput LUIE_ChatOutput
+--- @field ChatOutputClass LUIE_ChatOutput
 LUIE = {}
 LUIE.__index = LUIE
 -- -----------------------------------------------------------------------------
@@ -186,6 +188,10 @@ LUIE.OtherAddonCompatability =
 }
 -- -----------------------------------------------------------------------------
 -- Default Settings
+--- @class LUIE_ChatOutputSocialDefaults
+--- @field FriendStatusCA boolean
+--- @field FriendIgnoreCA boolean
+
 --- @class LUIE_ChatOutputDefaults
 --- @field ChatMethod string
 --- @field ChatBypassFormat boolean
@@ -195,6 +201,7 @@ LUIE.OtherAddonCompatability =
 --- @field TimeStampFormat string
 --- @field TimeStampColor number[]
 --- @field LcmUseLuiExtendedTimestampFormat boolean|nil When true (default), Timestamp Format below drives LUIE proxy time; when false, LibChatMessage preset/os.date drives time.
+--- @field Social LUIE_ChatOutputSocialDefaults
 
 --- @class LUIE_Defaults_SV
 --- @field DebugEnvironmentActive boolean True while /luie debug on allowlist is applied
@@ -244,13 +251,18 @@ LUIE.Defaults =
     {
         ChatMethod = "Print to All Tabs",
         ChatBypassFormat = false,
-        -- Tab indices 1..N are dynamic (see ChatAnnouncements.ChatOutput:GetMaxChatTabIndex); defaults keep first five enabled for legacy installs.
+        -- Tab indices 1..N are dynamic (see LUIE.ChatOutput:GetMaxChatTabIndex); defaults keep first five enabled for legacy installs.
         ChatTab = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true },
         ChatSystemAll = true,
         TimeStamp = false,
         TimeStampFormat = "HH:m:s",
         TimeStampColor = { 143 / 255, 143 / 255, 143 / 255 },
         LcmUseLuiExtendedTimestampFormat = true,
+        Social =
+        {
+            FriendStatusCA = true,
+            FriendIgnoreCA = true,
+        },
     },
 
     Migrations                  = {}

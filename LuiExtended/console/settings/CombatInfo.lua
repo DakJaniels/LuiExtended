@@ -3508,7 +3508,7 @@ function CombatInfo.CreateConsoleSettings()
                 if tracker then
                     tracker:RefreshActiveSynergies()
                 end
-                LUIE.PrintToChat("Blacklist cleared. Refresh settings to see changes.", true)
+                LUIE.ChatOutput:Print("Blacklist cleared. Refresh settings to see changes.", true)
             end,
             disable = function ()
                 return not Settings.synergy.enabled
@@ -3522,7 +3522,7 @@ function CombatInfo.CreateConsoleSettings()
             tooltip = "Refresh the list of detected synergies. Close and reopen settings to see updated list.",
             buttonText = "Refresh List",
             clickHandler = function ()
-                LUIE.PrintToChat("Refresh settings menu to see updated synergy list.", true)
+                LUIE.ChatOutput:Print("Refresh settings menu to see updated synergy list.", true)
             end,
             disable = function ()
                 return not Settings.synergy.enabled

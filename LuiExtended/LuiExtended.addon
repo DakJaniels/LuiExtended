@@ -29,6 +29,9 @@ bindings/Bindings.xml
 
 # Addon Base
 src/LuiExtended.lua
+src/ChatOutput/Namespace.lua
+src/ChatOutput/TimestampAndFormat.lua
+src/ChatOutput/ChatOutput.lua
 src/LuiExtended_Log.lua
 src/Functions.lua
 src/DebugEnvironment.lua
@@ -68,8 +71,6 @@ console/Unlock.lua
 
 # Modules - Chat Announcements
 modules/ChatAnnouncements/ChatAnnouncementsConstants.lua
-modules/ChatAnnouncements/ChatOutput/_Namespace.lua
-modules/ChatAnnouncements/ChatOutput/ChatOutput.lua
 modules/ChatAnnouncements/ChatAnnouncementsPlayerToPlayerHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
 modules/ChatAnnouncements/ChatAnnouncementsCSA.lua
