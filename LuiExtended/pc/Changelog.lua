@@ -52,6 +52,17 @@ local changelogMessages =
     -- Version Header 7.2.3.7
     "|cFFA500LuiExtended Version 7.2.3.7|r",
     "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Optional Display Collection Status on loot announcements shows a green check when a set collection piece or container collectible is already known, or a red X when it is not (off by default).",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output / ChatAnnouncements: When Chat Announcements owns friend, ignore, and related social lines, default CHAT_ROUTER duplicates are suppressed; friend online/offline and friend/ignore Chat Announcements toggles are stored under Chat Output Social (FriendStatusCA, FriendIgnoreCA) and re-chain suppression when changed.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output (PC): Per-tab routing shows an inline settings warning when no tab has both LUIE and System enabled so announcements have a deliverable tab.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData / Action Bar: Grim Focus and its morphs use improved stack labels and bar highlights (including reload seeding when the track buff is already active); Leeching Strikes cost-reduction stacks display on the visible buff via PullStacks tracking.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Unified buff icon backdrop and ApplyBuffIconChrome for consistent chrome; tooltip inset textures preload to avoid pop-in; debug tooltips layout and refresh improvements.",
+    "",
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Taking attached gold from multiple mails individually (same amount and sender) now prints a currency line per mail again; duplicate mail gold announcements within 2.5s are still suppressed per mail (Take All unchanged).",
