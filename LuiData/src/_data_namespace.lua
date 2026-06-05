@@ -121,6 +121,8 @@ local DebugStatus = {}
 --- @field BarHighlightIgnoreBarStackEvent table<integer, boolean> Effect id: ignore non-FADE EVENT_EFFECT_CHANGED for bar stacks
 --- @field BarHighlightStackCounter table<integer, boolean> Counter buff id: fade updates slotted bar stack (Grim Focus, Bound Armaments)
 --- @field BarHighlightStackBaseAbility table<integer, boolean> Slotted ability ids that display stack count on the bar
+--- @field BarHighlightTauntDebuffId integer Shared innate Taunt debuff id on reticleover (38254)
+--- @field BarHighlightTauntSlotted table<integer, boolean> Slotted bound ids that taunt (ActionBar per-slot timer keys)
 --- @field BarHighlightProcSoundThresholds table<integer, integer[]> Track buff id -> stack thresholds for proc sound
 --- @field CompanionAbilityTrack CompanionAbilityTrack Slotted companion ability id -> UF icon track data
 --- @field BarIdOverride BarIdOverride Table of bar ID overrides
@@ -193,6 +195,8 @@ local Effects =
     BarHighlightIgnoreBarStackEvent = {},
     BarHighlightStackCounter = {},
     BarHighlightStackBaseAbility = {},
+    BarHighlightTauntDebuffId = 38254,
+    BarHighlightTauntSlotted = {},
     BarHighlightProcSoundThresholds = {},
     CompanionAbilityTrack = {},
     BarIdOverride = {},
@@ -292,8 +296,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7215
-LuiData.addonVersion = "7.2.1.5"
+LuiData.version = 7216
+LuiData.addonVersion = "7.2.1.6"
 
 --- @class (partial) Data
 LuiData.Data =

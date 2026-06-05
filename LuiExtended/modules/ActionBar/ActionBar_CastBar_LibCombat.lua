@@ -72,6 +72,14 @@ local function logCastBarLibCombat(message, ...)
     LUIE:Log("Verbose", LOG_PREFIX .. string_format(message, ...))
 end
 
+local function formatAbilityRefForLog(abilityId)
+    local formatter = Private.FormatAbilityRefForLog
+    if formatter then
+        return formatter(abilityId)
+    end
+    return tostring(abilityId)
+end
+
 local function castBarUi()
     return Private.GetState().bar
 end
@@ -288,8 +296,8 @@ local function updateWeaveDelayMarker(timems, durationMs, abilityId, reducedSlot
     local r, g, b = edge:UnpackRGB()
     bar.backdrop:SetEdgeColor(r, g, b, 1)
     logCastBarLibCombat(
-        "Weave delay shown abilityId=%s reducedSlot=%s rel=%.2f displayRel=%.2f gapMs=%s gcdRemainMs=%s afterLA=%s",
-        abilityId,
+        "Weave delay shown ability=%s reducedSlot=%s rel=%.2f displayRel=%.2f gapMs=%s gcdRemainMs=%s afterLA=%s",
+        formatAbilityRefForLog(abilityId),
         reducedSlot,
         rel,
         displayRel,
@@ -330,9 +338,9 @@ function CastBar.OnLibCombatSkillTimings(_, timems, reducedSlot, abilityId, skil
     local slotIndex = reducedSlot % 10
     local statusLabel = SKILL_STATUS_LABEL[skillStatus] or tostring(skillStatus)
     logCastBarLibCombat(
-        "SKILL_TIMINGS %s abilityId=%s reducedSlot=%s slotIndex=%s timems=%s skillDelay=%s skillDuration=%s",
+        "SKILL_TIMINGS %s ability=%s reducedSlot=%s slotIndex=%s timems=%s skillDelay=%s skillDuration=%s",
         statusLabel,
-        abilityId,
+        formatAbilityRefForLog(abilityId),
         reducedSlot,
         slotIndex,
         timems,
@@ -346,12 +354,12 @@ function CastBar.OnLibCombatSkillTimings(_, timems, reducedSlot, abilityId, skil
 
     if skillStatus == SKILLSTATUS_QUEUE then
         g_castBarQueuedPressMs[abilityId] = timems
-        logCastBarLibCombat("QUEUE abilityId=%s timems=%s", abilityId, timems)
+        logCastBarLibCombat("QUEUE ability=%s timems=%s", formatAbilityRefForLog(abilityId), timems)
         return
     end
 
     if skillStatus == SKILLSTATUS_SUCCESS then
-        logCastBarLibCombat("SUCCESS ignored abilityId=%s", abilityId)
+        logCastBarLibCombat("SUCCESS ignored ability=%s", formatAbilityRefForLog(abilityId))
         return
     end
 
@@ -363,17 +371,17 @@ function CastBar.OnLibCombatSkillTimings(_, timems, reducedSlot, abilityId, skil
 
     local icon, name = CastBar.GetCastDisplayNameAndIcon(abilityId)
     if not CastBar.ShouldShowOnCastBar(abilityId, name) then
-        logCastBarLibCombat("Filtered from cast bar: abilityId=%s name=%s", abilityId, name or "?")
+        logCastBarLibCombat("Filtered from cast bar: ability=%s", formatAbilityRefForLog(abilityId))
         return
     end
 
     local durationMs, channeled = durationMsFromSkillTiming(abilityId, skillStatus, skillDuration)
     if durationMs <= 0 then
-        logCastBarLibCombat("durationMs<=0 abilityId=%s status=%s", abilityId, statusLabel)
+        logCastBarLibCombat("durationMs<=0 ability=%s status=%s", formatAbilityRefForLog(abilityId), statusLabel)
         return
     end
 
-    logCastBarLibCombat("ShowCast LibCombat abilityId=%s durationMs=%s channeled=%s", abilityId, durationMs, tostring(channeled))
+    logCastBarLibCombat("ShowCast LibCombat ability=%s durationMs=%s channeled=%s", formatAbilityRefForLog(abilityId), durationMs, tostring(channeled))
     CastBar.ShowCast(abilityId, timems, durationMs, channeled, icon, name, true)
     ageWeaveMarkers()
     updateWeaveDelayMarker(timems, durationMs, abilityId, reducedSlot)

@@ -153,7 +153,10 @@ local g_barCombatEventRemap = {}           -- Slotted ability id -> combatTrack 
 --- @type {[integer]: boolean}
 local g_barCombatTrackRemainOnSlotted = {} -- Track id: bar timer only from slotted-id combat / effect (not tick newId combat)
 --- @type {[integer]: boolean}
-local g_barCombatStackNoExpire = {}        -- Track ids: keep bar highlight while stacks remain (BarHighlightOverride.combatStackNoExpire)
+local g_barCombatStackNoExpire = {}        -- Track ids: keep bar highlight while stacks remain (BarHighlightOverride.combatTrackNoExpire)
+--- @type {[integer]: boolean}
+local g_barTauntSlotted = {}               -- Slotted bound ids (Effects.BarHighlightTauntSlotted)
+local g_barTauntDebuffId                   -- Shared innate Taunt debuff on reticleover (38254)
 --- Dur-0 stack highlights: internal remain so OnUpdate / BarSlotUpdate do not expire immediately
 local BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS = 3600000
 --- @type string[]
@@ -795,6 +798,13 @@ function ActionBar.UpdateBarHighlightTables()
     g_barCombatEventRemap = {}
     g_barCombatTrackRemainOnSlotted = {}
     g_barCombatStackNoExpire = {}
+    g_barTauntSlotted = {}
+    g_barTauntDebuffId = Effects.BarHighlightTauntDebuffId
+    if Effects.BarHighlightTauntSlotted then
+        for slottedId in pairs(Effects.BarHighlightTauntSlotted) do
+            g_barTauntSlotted[slottedId] = true
+        end
+    end
 
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then
         -- Grab any aura's from the list that have on EVENT_COMBAT_EVENT AURA support
@@ -1934,6 +1944,44 @@ ShowToggledSlots = function (abilityId, currentTime)
     end
 end
 
+--- @param fn fun(slottedId: integer)
+local function ForEachSlottedTauntOnBar(fn)
+    for slottedId in pairs(g_barTauntSlotted) do
+        if g_toggledSlotsFront[slottedId] or g_toggledSlotsBack[slottedId] then
+            fn(slottedId)
+        end
+    end
+end
+
+--- Fan-out innate Taunt debuff (38254) to every slotted taunt highlight key.
+--- @param endTime number
+local function ApplyTauntDebuffToSlottedHighlights(endTime)
+    if not ActionBar.SV.ShowToggled then
+        return
+    end
+    local currentTime = GetGameTimeMilliseconds()
+    local newRemain = 1000 * endTime
+    ForEachSlottedTauntOnBar(function (slottedId)
+        g_toggledSlotsRemain[slottedId] = newRemain
+        ShowToggledSlots(slottedId, currentTime)
+    end)
+end
+
+local function ClearTauntDebuffFromSlottedHighlights()
+    ForEachSlottedTauntOnBar(function (slottedId)
+        if g_toggledSlotsRemain[slottedId] then
+            HideToggledSlots(slottedId)
+            g_toggledSlotsRemain[slottedId] = nil
+            g_toggledSlotsStack[slottedId] = nil
+        end
+    end)
+    if g_barTauntDebuffId and g_toggledSlotsRemain[g_barTauntDebuffId] then
+        HideToggledSlots(g_barTauntDebuffId)
+        g_toggledSlotsRemain[g_barTauntDebuffId] = nil
+        g_toggledSlotsStack[g_barTauntDebuffId] = nil
+    end
+end
+
 --- Clear all stacks and stack highlight for combatTrack + slotted rows (Effects.BarHighlightStackSpendAllOnCast).
 ClearBarHighlightCombatStacks = function (combatTrackAbilityId)
     g_toggledSlotsStack[combatTrackAbilityId] = nil
@@ -2434,6 +2482,15 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
     end
 
     if unitTag ~= "player" and unitTag ~= "reticleover" then return end
+
+    if g_barTauntDebuffId and abilityId == g_barTauntDebuffId and unitTag == "reticleover" then
+        if changeType == EFFECT_RESULT_FADED then
+            ClearTauntDebuffFromSlottedHighlights()
+        else
+            ApplyTauntDebuffToSlottedHighlights(endTime)
+        end
+        return
+    end
 
     if  Effects.BarHighlightIgnoreBarStackEvent and Effects.BarHighlightIgnoreBarStackEvent[abilityId]
     and changeType ~= EFFECT_RESULT_FADED then
@@ -2949,9 +3006,13 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
         end
     end
 
+    local isTauntSlotted = slottedAbilityId and g_barTauntSlotted[slottedAbilityId]
+    local toggleSlotKey = isTauntSlotted and slottedAbilityId or abilityId
+    local durationAbilityId = isTauntSlotted and g_barTauntDebuffId or abilityId
+
     local abilityName = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].name or GetAbilityName(abilityId, "player") -- GetSlotName(slotNum)
     -- local _, _, channel = GetAbilityCastInfo(abilityId)
-    local duration = GetUpdatedAbilityDuration(abilityId)
+    local duration = GetUpdatedAbilityDuration(durationAbilityId)
     local currentTime = GetGameTimeMilliseconds()
 
     local triggeredSlots
@@ -3000,9 +3061,9 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
     end
 
     -- Check for active duration to display highlight for abilities on bar swap
-    if onlyProc == false and toggledSlots and abilityId then
-        if duration > 0 or Effects.AddNoDurationBarHighlight[abilityId] or Effects.MajorMinor[abilityId] then
-            toggledSlots[abilityId] = slotNum
+    if onlyProc == false and toggledSlots and toggleSlotKey then
+        if duration > 0 or Effects.AddNoDurationBarHighlight[durationAbilityId] or Effects.MajorMinor[durationAbilityId] then
+            toggledSlots[toggleSlotKey] = slotNum
         end
         if slottedAbilityId and Effects.BarHighlightStackBaseAbility and Effects.BarHighlightStackBaseAbility[slottedAbilityId] then
             toggledSlots[slottedAbilityId] = slotNum
@@ -3016,7 +3077,9 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
             end
         end
         local showAbilityId
-        if g_toggledSlotsRemain[abilityId] then
+        if g_toggledSlotsRemain[toggleSlotKey] then
+            showAbilityId = toggleSlotKey
+        elseif g_toggledSlotsRemain[abilityId] then
             showAbilityId = abilityId
         elseif slottedAbilityId and g_toggledSlotsRemain[slottedAbilityId] then
             showAbilityId = slottedAbilityId

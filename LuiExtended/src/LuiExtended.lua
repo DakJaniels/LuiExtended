@@ -28,8 +28,8 @@ LUIE.__index = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.3.7"
-LUIE.addonVersion = 7237
+LUIE.version = "7.2.3.8"
+LUIE.addonVersion = 7238
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
