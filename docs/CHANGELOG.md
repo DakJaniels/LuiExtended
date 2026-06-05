@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.3.8
+
+### Fixed
+
+- Action Bar / LuiData: Bar highlight taunt timers on each slotted taunt ability (including multiple taunts on one bar and on the back bar) share the player taunt debuff on your reticle target; previously only one slot updated because highlights were keyed only to debuff id **38254**.
+
 ## Version 7.2.3.7
 
 ### New
