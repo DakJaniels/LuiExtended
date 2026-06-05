@@ -108,8 +108,17 @@ local DebugStatus = {}
 --- @field BarHighlightExtraId BarHighlightExtraId Table of additional effect IDs for highlighting
 --- @field BarHighlightOverride table<integer, BarHighlightOverrideOptions> Table of highlight override definitions
 --- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
+--- @field BarHighlightStackFromCast table<integer, integer> Cast ability id -> charge stack when combat GAIN hitValue is missing
+--- @field BarHighlightSkullChargeTrack table<integer, integer> Skull track buff id -> max bar stack label (Flame/Ricochet 2, Venom 3)
+--- @field BarHighlightSkullEmpoweredCast table<integer, integer> Third-cast ability id -> skull track buff id (reset charges)
+--- @field BarHighlightSkullChargeSource table<integer, string> Skull track buff id -> skullCastCombat | trackBuff
+--- @field BarHighlightSkullSlottedDisplay table<integer, integer> Slotted bound id -> raw charge for bar (0 = none; Venom up to 3)
 --- @field BarHighlightStackConsume table<integer, integer> Bound ability id -> combatTrack stack buff id (consume one stack on cast)
+--- @field BarHighlightStackSpendAllOnCast table<integer, integer> Slotted ability id -> track buff id (clear all stacks on cast)
+--- @field BarHighlightReloadStackFromBuff table<integer, boolean> Track buff id: reload bar stacks from GetUnitBuffInfo on slot update
 --- @field BarHighlightStackZeroEffect table<integer, "keep"|"clear"> Track buff id behavior when effect stack count is 0
+--- @field BarHighlightStackBuffOnly table<integer, boolean> Track buff id: stacks only from player buff row (not event stackCount)
+--- @field BarHighlightIgnoreBarStackEvent table<integer, boolean> Effect id: ignore non-FADE EVENT_EFFECT_CHANGED for bar stacks
 --- @field BarHighlightStackCounter table<integer, boolean> Counter buff id: fade updates slotted bar stack (Grim Focus, Bound Armaments)
 --- @field BarHighlightStackBaseAbility table<integer, boolean> Slotted ability ids that display stack count on the bar
 --- @field BarHighlightProcSoundThresholds table<integer, integer[]> Track buff id -> stack thresholds for proc sound
@@ -124,6 +133,8 @@ local DebugStatus = {}
 --- @field EffectOverride EffectOverride Table of general effect overrides
 --- @field EffectOverrideByName EffectOverrideByName Table of name-based effect overrides
 --- @field EffectPullDuration EffectPullDuration Table of duration pull definitions
+--- @field EffectPullStacks table<integer, integer> Visible buff id --> stack buff id (SpellCastBuffs)
+--- @field EffectPushStacksFromHidden table<integer, integer> Hidden stack buff id --> visible buff id
 --- @field EffectSourceOverride EffectSourceOverride Table of effect source overrides
 --- @field FakeExternalBuffs FakeExternalBuffs Table of fake external buff definitions
 --- @field FakeExternalDebuffs FakeExternalDebuffs Table of fake player debuff definitions
@@ -169,8 +180,17 @@ local Effects =
     BarHighlightExtraId = {},
     BarHighlightOverride = {},
     BarHighlightStack = {},
+    BarHighlightStackFromCast = {},
+    BarHighlightSkullChargeTrack = {},
+    BarHighlightSkullEmpoweredCast = {},
+    BarHighlightSkullChargeSource = {},
+    BarHighlightSkullSlottedDisplay = {},
     BarHighlightStackConsume = {},
+    BarHighlightStackSpendAllOnCast = {},
+    BarHighlightReloadStackFromBuff = {},
     BarHighlightStackZeroEffect = {},
+    BarHighlightStackBuffOnly = {},
+    BarHighlightIgnoreBarStackEvent = {},
     BarHighlightStackCounter = {},
     BarHighlightStackBaseAbility = {},
     BarHighlightProcSoundThresholds = {},
@@ -190,6 +210,8 @@ local Effects =
     EffectOverride = {},
     EffectOverrideByName = {},
     EffectPullDuration = {},
+    EffectPullStacks = {},
+    EffectPushStacksFromHidden = {},
     EffectSourceOverride = {},
     FakeExternalBuffs = {},
     FakeExternalDebuffs = {},
@@ -270,8 +292,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7214
-LuiData.addonVersion = "7.2.1.4"
+LuiData.version = 7215
+LuiData.addonVersion = "7.2.1.5"
 
 --- @class (partial) Data
 LuiData.Data =

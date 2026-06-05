@@ -3411,7 +3411,7 @@ function CombatInfo.CreateSettings()
                 if tracker then
                     tracker:RefreshActiveSynergies()
                 end
-                LUIE.PrintToChat("Blacklist cleared.", true)
+                LUIE.ChatOutput:Print("Blacklist cleared.", true)
             end,
             width = "half",
             disabled = function ()

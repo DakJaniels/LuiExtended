@@ -38,6 +38,12 @@ local addNoDurationBarHighlight =
 
     -- Two Handed
     [61737] = true, -- Empower (Wrecking Blow); API Dur 0 until combat refresh
+
+    -- Nightblade — Grim Focus line (track buff API duration 0; stacks via counter + slotted id)
+    [122585] = true, -- Grim Focus
+    [122586] = true, -- Merciless Resolve
+    [122587] = true, -- Relentless Focus
+    [215672] = true, -- Leeching Strikes (stack effect; API duration 0)
 }
 
 Effects.AddNoDurationBarHighlight = addNoDurationBarHighlight
@@ -52,6 +58,13 @@ local barHighlightHideDurationLabel =
     [114131] = true, -- Flame Skull charges
     [117625] = true, -- Venom Skull charges
     [117638] = true, -- Ricochet Skull charges
+
+    [122585] = true, -- Grim Focus (stack count on bar; no duration text)
+    [122586] = true, -- Merciless Resolve
+    [122587] = true, -- Relentless Focus
+
+    [215672] = true, -- Leeching Strikes (stacks only)
+    [36908] = true, -- Leeching Strikes (slotted; label keyed by slot id in ShowSlot)
 }
 
 Effects.BarHighlightHideDurationLabel = barHighlightHideDurationLabel

@@ -71,7 +71,8 @@
                                 <Cooldown name="$(parent)_Cooldown"
                                           hidden="true"
                                           textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-                                          fillColor="000000B3"
+                                          fillColor="000000"
+                                          alpha="0.702"
                                           desaturation="1">
                                         <Anchor point="TOPLEFT"
                                                 relativeTo="$(parent)_Icon"
@@ -110,9 +111,15 @@
                         <Controls>
                                 <Backdrop name="$(parent)_Background"
                                           hidden="true"
-                                          centerColor="00000080"
-                                          edgeColor="4D4D4DCC">
+                                          centerColor="000000"
+                                          edgeColor="4D4D4D">
                                         <AnchorFill />
+                                        <OnInitialized>
+                                                local center = ZO_ColorDef:New("00000080")
+                                                local edge = ZO_ColorDef:New("4D4D4DCC")
+                                                self:SetCenterColor(center:UnpackRGBA())
+                                                self:SetEdgeColor(edge:UnpackRGBA())
+                                        </OnInitialized>
                                 </Backdrop>
                         </Controls>
                 </TopLevelControl>

@@ -114,6 +114,11 @@ function UnitFrames.CustomFramesSetMovingState(state)
             if tlw.preview then
                 tlw.preview:SetHidden(not state) -- player frame does not have 'preview' control
             end
+            if state then
+                local left, top = tlw:GetLeft(), tlw:GetTop()
+                tlw:ClearAnchors()
+                tlw:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+            end
             tlw:SetMouseEnabled(state)
             tlw:SetMovable(state)
             tlw:SetHidden(false)

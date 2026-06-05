@@ -9,16 +9,23 @@
     <Backdrop name="LUIE_CombatText_PanelPreviewBacking"
               virtual="true"
               hidden="true"
-              centerColor="0D99E640"
-              edgeColor="0D99E6E6">
+              centerColor="0D99E6"
+              edgeColor="0D99E6">
       <AnchorFill />
       <Edge edgeFileWidth="8"
             edgeFileHeight="1"
             edgeFilePadding="1" />
+      <OnInitialized>
+        local center = ZO_ColorDef:New("0D99E640")
+        local edge = ZO_ColorDef:New("0D99E6E6")
+        self:SetCenterColor(center:UnpackRGBA())
+        self:SetEdgeColor(edge:UnpackRGBA())
+      </OnInitialized>
       <Controls>
         <Texture name="$(parent)_AnchorTexture"
                  textureFile="/esoui/art/reticle/border_topleft.dds"
-                 color="FFFF00E6">
+                 color="FFFF00"
+                 alpha="0.902">
           <Dimensions x="16"
                       y="16" />
           <Anchor point="TOPLEFT"
@@ -26,8 +33,8 @@
                   relativePoint="TOPLEFT" />
         </Texture>
         <Backdrop name="$(parent)_AnchorLabelBg"
-                  centerColor="000000FF"
-                  edgeColor="000000FF"
+                  centerColor="000000"
+                  edgeColor="000000"
                   layer="OVERLAY"
                   level="0"
                   tier="LOW">

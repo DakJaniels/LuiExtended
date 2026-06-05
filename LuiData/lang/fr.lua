@@ -550,8 +550,6 @@ local strings =
 
     -- Necromancer
     LUIE_STRING_SKILL_REUSABLE_PARTS_TP = "Reduce the cost of your next Blastbones, Skeletal Mage, or Spirit Mender by |cFFFFFF<<1>>|r%.",
-    LUIE_STRING_SKILL_FLAME_SKULL_TP = "Every third cast of <<2>> deals |cFFFFFF20|r% increased damage.",
-    LUIE_STRING_SKILL_RICOCHET_SKULL_TP = "Every third cast of Ricochet Skull deals |cFFFFFF20|r% increased damage and will bounce up to |cFFFFFF2|r times to other nearby enemies.",
     LUIE_STRING_SKILL_BLASTBONES_TP = "A flaming skeleton runs toward your target and explodes when it gets close to them, dealing Flame Damage to all enemies within |cFFFFFF6|r meters.\n\nThe skeleton remains for |cFFFFFF8|r seconds or until it explodes.\n\nCreates a corpse on death.",
     LUIE_STRING_SKILL_BLIGHTED_BLASTBONES_TP = "A decaying skeleton runs toward your target and explodes when it gets close to them, dealing Disease Damage to all enemies within |cFFFFFF6|r meters and applying Major Defile to them for |cFFFFFF4|r seconds.\n\nThe skeleton remains for |cFFFFFF8|r seconds or until it explodes.\n\nCreates a corpse on death.",
     LUIE_STRING_SKILL_STALKING_BLASTBONES_TP = "A flaming skeleton runs toward your target and explodes when it gets close to them, dealing Flame Damage to all enemies within |cFFFFFF6|r meters.\n\nEvery second the skeleton spends chasing its target increases the damage of the explosion by |cFFFFFF10|r% up to a maximum of |cFFFFFF50|r% more damage.\n\nThe skeleton remains for |cFFFFFF8|r seconds or until it explodes.\n\nCreates a corpse on death.",

@@ -34,7 +34,7 @@ local questCounterFilterDialogs =
         callback = function (_)
             ChatAnnouncements.ClearQuestCounterFilters()
             RefreshQuestCounterFilterListDropdown()
-            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEARED), true)
+            LUIE.ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEARED), true)
         end,
     },
 }
@@ -1815,6 +1815,22 @@ function ChatAnnouncements.CreateSettings()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
                 default = Defaults.Inventory.LootIcons,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWCOLLECTIONSTATUS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWCOLLECTIONSTATUS_TP),
+                getFunc = function ()
+                    return Settings.Inventory.LootShowCollectionStatus
+                end,
+                setFunc = function (value)
+                    Settings.Inventory.LootShowCollectionStatus = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Inventory.LootShowCollectionStatus,
             },
             {
                 -- Show Armor Type
@@ -7280,16 +7296,20 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat(GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
                 getFunc = function ()
-                    return Settings.Social.FriendIgnoreCA
+                    local social = LUIE.SV.ChatOutput and LUIE.SV.ChatOutput.Social
+                    return social and social.FriendIgnoreCA
                 end,
                 setFunc = function (value)
-                    Settings.Social.FriendIgnoreCA = value
+                    LUIE.SV.ChatOutput = LUIE.SV.ChatOutput or {}
+                    LUIE.SV.ChatOutput.Social = LUIE.SV.ChatOutput.Social or {}
+                    LUIE.SV.ChatOutput.Social.FriendIgnoreCA = value
+                    LUIE.ChatAnnouncements.ChainChatRouterSocialSuppressions()
                 end,
                 width = "full",
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.Social.FriendIgnoreCA,
+                default = LUIE.Defaults.ChatOutput.Social.FriendIgnoreCA,
             },
             {
                 -- Show Friend/Ignore Events Alert
@@ -7314,16 +7334,20 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat(GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
                 getFunc = function ()
-                    return Settings.Social.FriendStatusCA
+                    local social = LUIE.SV.ChatOutput and LUIE.SV.ChatOutput.Social
+                    return social and social.FriendStatusCA
                 end,
                 setFunc = function (value)
-                    Settings.Social.FriendStatusCA = value
+                    LUIE.SV.ChatOutput = LUIE.SV.ChatOutput or {}
+                    LUIE.SV.ChatOutput.Social = LUIE.SV.ChatOutput.Social or {}
+                    LUIE.SV.ChatOutput.Social.FriendStatusCA = value
+                    LUIE.ChatAnnouncements.ChainChatRouterSocialSuppressions()
                 end,
                 width = "full",
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.Social.FriendStatusCA,
+                default = LUIE.Defaults.ChatOutput.Social.FriendStatusCA,
             },
             {
                 -- Friend Online/Offline Alert

@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\SpellCastBuffs.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\SpellCastBuffs.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -28,7 +28,7 @@ LUIE_SCB_EffectsRegion_Template = {}
 LUIE_SCB_Tlw_Template = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_SCB_DebugOverflowTooltipTopLevel : TopLevelWindow, TooltipTopLevel
+---@class LUIE_SCB_DebugOverflowTooltipTopLevel : TopLevelWindow
 ---@field public tier DrawTier
 LUIE_SCB_DebugOverflowTooltipTopLevel = {}
 ---------- LVL: 03 ----------
@@ -37,14 +37,12 @@ LUIE_SCB_DebugOverflowTooltipTopLevel = {}
 --
 ---@class LUIE_SpellCastBuffIcon_Back : TextureControl
 ---@field public layer DrawLayer
----@field public textureFileReleaseOption ReleaseReferenceOptions
 ---@field public hidden boolean
 LUIE_SpellCastBuffIcon_Back = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_SpellCastBuffIcon_Frame : TextureControl
 ---@field public layer DrawLayer
----@field public textureFileReleaseOption ReleaseReferenceOptions
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_SpellCastBuffIcon_Frame = {}
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -66,7 +64,7 @@ LUIE_SpellCastBuffIcon_IconBg = {}
 LUIE_SpellCastBuffIcon_Drop = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_SpellCastBuffIcon_Cooldown : CooldownControl, ZO_DefaultCooldown
+---@class LUIE_SpellCastBuffIcon_Cooldown : CooldownControl
 ---@field public level integer
 ---@field public alpha number
 ---@field public hidden boolean
@@ -75,7 +73,6 @@ LUIE_SpellCastBuffIcon_Cooldown = {}
 --
 ---@class LUIE_SpellCastBuffIcon_Icon : TextureControl
 ---@field public textureFile string
----@field public textureFileReleaseOption ReleaseReferenceOptions
 ---@field public level integer
 ---@field public layer DrawLayer
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
@@ -123,6 +120,7 @@ LUIE_SpellCastBuffIcon_Name = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_SpellCastBuffIcon_BarBackdrop : BackdropControl
+---@field public alpha number
 ---@field public centerColor string
 ---@field public edgeColor string
 ---@field public hidden boolean
@@ -145,6 +143,7 @@ LUIE_SpellCastBuffIcon_Bar = {}
 ---@field public textureFile string
 ---@field public layer DrawLayer
 ---@field public hidden boolean
+---@field AnchorFill boolean
 LUIE_SCB_EffectsRegion_Template_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -158,6 +157,7 @@ LUIE_SCB_EffectsRegion_Template_IconHolder = {}
 ---@field public textureFile string
 ---@field public layer DrawLayer
 ---@field public hidden boolean
+---@field AnchorFill boolean
 LUIE_SCB_Tlw_Template_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -167,8 +167,11 @@ LUIE_SCB_Tlw_Template_Preview = {}
 LUIE_SCB_Tlw_Template_IconHolder = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_SCB_DebugOverflowTooltip : TooltipControl, ZO_BaseTooltip
+---@class LUIE_SCB_DebugOverflowTooltip : TooltipControl
 ---@field public tier DrawTier
+---@field public headerVerticalOffset number
+---@field ResizeToFitPadding {width: layout_measurement, height: layout_measurement}
+---@field DimensionConstraints {minX: layout_measurement, maxX: layout_measurement}
 LUIE_SCB_DebugOverflowTooltip = {}
 ---------- LVL: 05 ----------
 ---------- LVL: 06 ----------
@@ -191,4 +194,4 @@ LUIE_SCB_EffectsRegion_Template_Preview_Label = {}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_SCB_Tlw_Template_Preview_Label = {}
 ---------- LVL: 07 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\SpellCastBuffs.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\SpellCastBuffs.xml

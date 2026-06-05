@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\SynergyTracker.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\SynergyTracker.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -71,6 +71,7 @@ LUIE_SynergyTracker_RowTemplate_Priority = {}
 ---@field public hidden boolean
 ---@field public textureFile string
 ---@field public fillColor string
+---@field public alpha number
 ---@field public desaturation number
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 ---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
@@ -90,6 +91,8 @@ LUIE_SynergyTracker_RowTemplate_CooldownText = {}
 ---@field public hidden boolean
 ---@field public centerColor string
 ---@field public edgeColor string
+---@field AnchorFill boolean
+---@field public OnInitialized fun(self: Control)
 LUIE_SynergyTracker_UI_Background = {}
 ---------- LVL: 05 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\SynergyTracker.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\SynergyTracker.xml

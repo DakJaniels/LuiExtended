@@ -1790,6 +1790,23 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWCOLLECTIONSTATUS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWCOLLECTIONSTATUS_TP),
+            getFunction = function ()
+                return Settings.Inventory.LootShowCollectionStatus
+            end,
+            setFunction = function (value)
+                Settings.Inventory.LootShowCollectionStatus = value
+            end,
+            default = Defaults.Inventory.LootShowCollectionStatus,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWARMORTYPE),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWARMORTYPE_TP),
             getFunction = function ()
@@ -7026,12 +7043,16 @@ function ChatAnnouncements.CreateConsoleSettings()
             label = zo_strformat(GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
             getFunction = function ()
-                return Settings.Social.FriendIgnoreCA
+                local social = LUIE.SV.ChatOutput and LUIE.SV.ChatOutput.Social
+                return social and social.FriendIgnoreCA
             end,
             setFunction = function (value)
-                Settings.Social.FriendIgnoreCA = value
+                LUIE.SV.ChatOutput = LUIE.SV.ChatOutput or {}
+                LUIE.SV.ChatOutput.Social = LUIE.SV.ChatOutput.Social or {}
+                LUIE.SV.ChatOutput.Social.FriendIgnoreCA = value
+                LUIE.ChatAnnouncements.ChainChatRouterSocialSuppressions()
             end,
-            default = Defaults.Social.FriendIgnoreCA,
+            default = LUIE.Defaults.ChatOutput.Social.FriendIgnoreCA,
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -7060,12 +7081,16 @@ function ChatAnnouncements.CreateConsoleSettings()
             label = zo_strformat(GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
             getFunction = function ()
-                return Settings.Social.FriendStatusCA
+                local social = LUIE.SV.ChatOutput and LUIE.SV.ChatOutput.Social
+                return social and social.FriendStatusCA
             end,
             setFunction = function (value)
-                Settings.Social.FriendStatusCA = value
+                LUIE.SV.ChatOutput = LUIE.SV.ChatOutput or {}
+                LUIE.SV.ChatOutput.Social = LUIE.SV.ChatOutput.Social or {}
+                LUIE.SV.ChatOutput.Social.FriendStatusCA = value
+                LUIE.ChatAnnouncements.ChainChatRouterSocialSuppressions()
             end,
-            default = Defaults.Social.FriendStatusCA,
+            default = LUIE.Defaults.ChatOutput.Social.FriendStatusCA,
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end

@@ -8,7 +8,7 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SlashCommands
 local SlashCommands = LUIE.SlashCommands
 
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 local zo_strformat = zo_strformat
 
 local pairs = pairs
@@ -17,7 +17,7 @@ local pairs = pairs
 function SlashCommands.SlashGuildInvite(option)
     -- If no input was entered, display an error and end.
     if option == "" or option == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV)))
         end
@@ -39,7 +39,7 @@ function SlashCommands.SlashGuildInvite(option)
 
     -- If no name was entered, display an error and end.
     if guildnumber == nil or name == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV)))
         end
@@ -58,7 +58,7 @@ function SlashCommands.SlashGuildInvite(option)
     elseif guildnumber == "5" and LUIE.GuildIndexData[5] then
         guildnumber = LUIE.GuildIndexData[5].id
     else -- If we enter anything outside of the range of 1-5, display an error and end.
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_INV)))
         end
@@ -82,7 +82,7 @@ function SlashCommands.SlashGuildQuit(guildnumber)
     elseif guildnumber == "5" and LUIE.GuildIndexData[5] then
         guildnumber = LUIE.GuildIndexData[5].id
     else
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILD_LEAVE), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILD_LEAVE), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILD_LEAVE)))
         end
@@ -92,7 +92,7 @@ function SlashCommands.SlashGuildQuit(guildnumber)
 
     -- If we try to leave a guild we don't have display an error and end.
     if guildnumber == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILD_LEAVE), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILD_LEAVE), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILD_LEAVE)))
         end
@@ -108,7 +108,7 @@ end
 function SlashCommands.SlashGuildKick(option)
     -- If no input was entered, display an error and end.
     if option == "" or option == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK)))
         end
@@ -130,7 +130,7 @@ function SlashCommands.SlashGuildKick(option)
 
     -- If no name was entered, display an error and end.
     if guildnumber == nil or name == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK)))
         end
@@ -150,7 +150,7 @@ function SlashCommands.SlashGuildKick(option)
         guildnumber = LUIE.GuildIndexData[5].id
         -- If we enter anything outside of the range of 1-5, display an error and end.
     else
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDGUILDACC_KICK)))
         end
@@ -159,7 +159,7 @@ function SlashCommands.SlashGuildKick(option)
     end
 
     if not DoesPlayerHaveGuildPermission(guildnumber, GUILD_PERMISSION_REMOVE) then
-        printToChat(GetString(SI_SOCIALACTIONRESULT18), true)
+        ChatOutput:Print(GetString(SI_SOCIALACTIONRESULT18), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(SI_SOCIALACTIONRESULT18)))
         end
@@ -205,7 +205,7 @@ function SlashCommands.SlashGuildKick(option)
     if finalName ~= "" then
         GuildRemove(guildnumber, finalName)
     else
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDNAME_GUILD), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDNAME_GUILD), true)
         if LUIE.ChatAnnouncements.SV.Social.GuildAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_KICK_FAILED_NOVALIDNAME_GUILD)))
         end

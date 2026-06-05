@@ -21,7 +21,7 @@ local LUIE = LUIE
 --- @field cooldownCompleteAnim ActionButtonCooldownCompleteAnim
 
 --- Control for cooldown-complete animation; holds optional animation object (see ESO ActionButton.lua).
---- @class ActionButtonCooldownCompleteAnim
+--- @class ActionButtonCooldownCompleteAnim : Control
 --- @field animation? table
 
 --- RGBA color tuple (0-1). Used for cast bar gradient, etc.
@@ -178,6 +178,10 @@ ActionBar.CastBar =
 --- @field ShowAppropriateAbilityActionButtonDropCallouts fun(actionType: integer, actionValue: integer)
 --- @field OnPlayerActivatedScan fun()
 --- @field OnSetHotbarEffect fun(changeType: number): boolean
+--- @field GetInactiveHotbarCategory fun(): HotBarCategory
+--- @field UpdateActivationHighlight fun(luiSlotNum: number)
+--- @field RefreshAllActivationHighlights fun()
+--- @field OnPhysicalSlotVisualSync fun(physicalSlotIndex: number)
 ActionBar.Backbar =
 {
     name = LUIE.name .. "ActionBar" .. "Backbar",
@@ -474,6 +478,8 @@ ActionBar.isStackCounter =
     [61905] = true,
     [61928] = true,
     [61920] = true,
+    [107054] = true,
+    [107055] = true,
     [130293] = true,
 }
 
@@ -488,7 +494,7 @@ ActionBar.isStackBaseAbility =
 ActionBar.PROC_SOUND_THRESHOLDS =
 {
     [122585] = { 5, 10 },
-    [122587] = { 5, 10 },
+    [122587] = { 4, 10 },
     [122586] = { 5, 10 },
     [203447] = { 4, 8 },
 }

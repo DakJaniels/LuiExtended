@@ -1616,7 +1616,7 @@ function SpellCastBuffs.CreateSettings()
                 width = "full",
                 default = Defaults.GlowIcons,
                 disabled = function ()
-                    return not LUIE.SV.SpellCastBuff_Enable
+                    return not LUIE.SV.SpellCastBuff_Enable or Settings.BuffDebuffIconInset
                 end,
             },
             {
@@ -1633,6 +1633,26 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 width = "full",
                 default = Defaults.RemainingCooldown,
+                disabled = function ()
+                    return not LUIE.SV.SpellCastBuff_Enable
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_BUFF_BUFFDEBUFFICONINSET),
+                tooltip = GetString(LUIE_STRING_LAM_BUFF_BUFFDEBUFFICONINSET_TP),
+                getFunc = function ()
+                    return Settings.BuffDebuffIconInset
+                end,
+                setFunc = function (value)
+                    Settings.BuffDebuffIconInset = value
+                    if value then
+                        Settings.GlowIcons = false
+                    end
+                    SpellCastBuffs.Reset()
+                end,
+                width = "full",
+                default = Defaults.BuffDebuffIconInset,
                 disabled = function ()
                     return not LUIE.SV.SpellCastBuff_Enable
                 end,

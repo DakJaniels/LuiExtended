@@ -1,5 +1,28 @@
 # LuiExtended Changelog
 
+## Version 7.2.3.7
+
+### New
+
+- ChatAnnouncements: Optional **Display Collection Status** on loot announcements shows a green check when a set collection piece or container collectible is already known, or a red X when it is not (**off by default**).
+
+### Changes
+
+- Chat Output / ChatAnnouncements: When Chat Announcements owns friend, ignore, and related social lines, default **CHAT_ROUTER** duplicates are suppressed; friend online/offline and friend/ignore Chat Announcements toggles are stored under **Chat Output** Social (**FriendStatusCA**, **FriendIgnoreCA**) and re-chain suppression when changed.
+- Chat Output (PC): Per-tab routing shows an inline settings warning when no tab has both **LUIE** and **System** enabled so announcements have a deliverable tab.
+- LuiData / Action Bar: **Grim Focus** and its morphs use improved stack labels and bar highlights (including reload seeding when the track buff is already active); **Leeching Strikes** cost-reduction stacks display on the visible buff via **PullStacks** tracking.
+- SpellCastBuffs: Unified buff icon backdrop and **ApplyBuffIconChrome** for consistent chrome; tooltip inset textures preload to avoid pop-in; debug tooltips layout and refresh improvements.
+
+### Fixed
+
+- ChatAnnouncements: Taking attached gold from multiple mails individually (same amount and sender) now prints a currency line per mail again; duplicate mail gold announcements within 2.5s are still suppressed per mail (**Take All** unchanged).
+- Chat Output: Announcements missing when **LUIE** was on but **System** was off; enabling **LUIE** on a tab now turns **System** on for that tab, with a settings note and one-time chat warning when no tab can receive messages.
+- Action Bar: **Show Backbar** mirrors the base-game activation proc glow on inactive weapon bar slots (same highlight as the active bar when an ability is ready).
+- Action Bar: **Show Triggered** proc feedback on the back bar (timed procs, instant procs, and stack-based highlights such as Necromancer skull charges) matches the front bar again.
+- Action Bar: Necromancer **Flame**, **Venom**, and **Ricochet** skull charge highlights use separate tracking (**Venom** advances from the charge buff and any in-combat Necromancer ability while slotted, not only skull casts). Stack labels, proc at full charge, and clear after the empowered cast match the base game.
+- Action Bar / LuiData: **Venom Skull** bar stacks show **1** through **3** when the charge buff reports three stacks (**Flame** and **Ricochet** remain **1** and **2** with proc at two charges).
+- SpellCastBuffs: Necromancer skull charge buff tooltips pull live morph text from the skill sheet (localized) instead of shortened static strings.
+
 ## Version 7.2.3.6
 
 ### Changes

@@ -8,15 +8,28 @@
 --- @field formatterWrappers table<any, { innerFormatter: function, outerFormatter: function }>
 --- @field playerActivatedHandlerRegistered boolean
 --- @field externalChatInitializerCallbacksRegistered boolean
+--- @field noDeliverableTabWarningShown boolean
+--- @field pendingPrintQueue { messageText: string, isSystem: boolean|nil }[]
+--- @field timestampColorHex string
 --- @field Initialize fun(self: LUIE_ChatOutput)
+--- @field UpdateTimeStampColor fun(self: LUIE_ChatOutput)
+--- @field CreateTimestamp fun(self: LUIE_ChatOutput, timeStr: string, formatStr?: string, milliseconds?: string): string
+--- @field FormatMessage fun(self: LUIE_ChatOutput, msg: string, doTimestamp: boolean, lineNumber?: number, chanCode?: number): string
+--- @field AddSystemMessage fun(self: LUIE_ChatOutput, messageOrFormatter: string, ...: any)
+--- @field WouldDeliverToPrimaryTab fun(self: LUIE_ChatOutput, chatOutputSettings: LUIE_ChatOutputDefaults, tabIndex: integer): boolean
+--- @field HasDeliverableTab fun(self: LUIE_ChatOutput, chatOutputSettings?: LUIE_ChatOutputDefaults): boolean
+--- @field MaybeWarnNoDeliverableTab fun(self: LUIE_ChatOutput, isSystem?: boolean)
 --- @field GetChatOutputSavedVars fun(self: LUIE_ChatOutput): LUIE_ChatOutputDefaults|nil
 --- @field Print fun(self: LUIE_ChatOutput, messageText: string, isSystem?: boolean)
+--- @field PrintWhenReady fun(self: LUIE_ChatOutput, messageText: string, isSystem?: boolean)
+--- @field IsPlayerActivatedForChatDelivery fun(self: LUIE_ChatOutput): boolean
+--- @field ChainFormatterSuppressions fun(self: LUIE_ChatOutput)
+--- @field FlushPendingPrints fun(self: LUIE_ChatOutput)
 --- @field DeliverToSelectedChatTabs fun(self: LUIE_ChatOutput, messageText: string, isSystem?: boolean)
 --- @field IsChatCategoryEnabledOnTab fun(self: LUIE_ChatOutput, chatContainer: table, tabIndex: integer, category: integer): boolean
 --- @field FormatForDisplay fun(self: LUIE_ChatOutput, rawMessage: string): string
 --- @field InitializePrintRouting fun(self: LUIE_ChatOutput)
---- @field InitializeRouterIntegration fun(self: LUIE_ChatOutput, caModuleEnabled: boolean)
---- @field Initialize fun(self: LUIE_ChatOutput, caModuleEnabled: boolean)
+--- @field RegisterExternalChatInitializerCallbacksOnce fun(self: LUIE_ChatOutput)
 --- @field ApplyLibChatMessageTimePrefixSettings fun(self: LUIE_ChatOutput)
 --- @field IsLibChatMessageTimeFormatLockedByPChat fun(self: LUIE_ChatOutput): boolean
 --- @field GetTimestampFormatStringForLibChatMessageSync fun(self: LUIE_ChatOutput): string|nil
@@ -34,7 +47,15 @@
 --- @field GetPrimaryChatContainerForSettings fun(self: LUIE_ChatOutput): table|nil
 --- @field IsSystemCategoryEnabledOnTabForSettings fun(self: LUIE_ChatOutput, tabIndex: integer): boolean
 --- @field SetSystemCategoryEnabledOnTabForSettings fun(self: LUIE_ChatOutput, tabIndex: integer, enabled: boolean)
+--- @field GetChatOutputSocialSettings fun(self: LUIE_ChatOutput): table|nil
+--- @field RegisterSocialChatEvents fun(self: LUIE_ChatOutput)
+--- @field ShouldShowSocialErrorInChat fun(self: LUIE_ChatOutput, error: integer): boolean
+--- @field OnSocialErrorChat fun(self: LUIE_ChatOutput, eventId: integer, error: integer)
 LUIE_ChatOutput = {}
+
+--- @class LUIE_ChatOutputSocialDefaults
+--- @field FriendStatusCA boolean
+--- @field FriendIgnoreCA boolean
 
 --- @class LUIE_ChatOutputSettingsUI : ZO_InitializingObject
 --- @field chatOutput LUIE_ChatOutput|nil
@@ -45,11 +66,10 @@ LUIE_ChatOutput = {}
 --- @field BuildChatOutputLAMControls fun(self: LUIE_ChatOutputSettingsUI, settingsApi: table): table
 --- @field BuildLibChatMessageLAMControls fun(self: LUIE_ChatOutputSettingsUI, settingsApi: table): table
 --- @field AppendChatOutputConsoleControls fun(self: LUIE_ChatOutputSettingsUI, settings: table, LHAS: table)
+--- @field RefreshChatTabRoutingRows fun(self: LUIE_ChatOutputSettingsUI)
 LUIE_ChatOutputSettingsUI = {}
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LuiExtended
 --- @field ChatOutput LUIE_ChatOutput
 --- @field ChatOutputClass LUIE_ChatOutput
-
---- @class (partial) LuiExtended
 --- @field chatOutputSettingsUI LUIE_ChatOutputSettingsUI|nil

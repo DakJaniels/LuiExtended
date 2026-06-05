@@ -65,7 +65,7 @@ local function TryShowPendingCrutchAlertsVersionWarning()
         return
     end
     pendingCrutchAlertsVersionWarning = false
-    LUIE.PrintToChat(CRUTCH_ALERTS_MIN_VERSION_WARNING, true)
+    LUIE.ChatOutput:Print(CRUTCH_ALERTS_MIN_VERSION_WARNING, true)
 end
 
 local BOSS_THRESHOLD_MARKER_WIDTH = 2
@@ -89,8 +89,8 @@ local DEFAULT_BOSS_THRESHOLD_PERCENTS = { 25, 50, 75 }
 -- Some dev/debug environments treat reads of missing globals as errors. We therefore cache any
 -- needed Crutch handles/options once during `UnitFrames.Initialize()` when the addon is confirmed enabled.
 local crutchBossHealthBar = nil
-local crutchBossHealthOptions = nil -- CrutchAlerts.savedOptions.bossHealthBar (table) or nil
-local crutchGetBossThresholds = nil -- function or nil
+local crutchBossHealthOptions = nil                -- CrutchAlerts.savedOptions.bossHealthBar (table) or nil
+local crutchGetBossThresholds = nil                -- function or nil
 local crutchRegisterThresholdsChangeListener = nil -- function or nil
 
 -- Extra bottom padding applied to the bosses TLW when threshold mechanics are shown,
@@ -3605,6 +3605,9 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     local group = UnitFrames.CustomFrames["SmallGroup1"].tlw
     local totalFrameHeight = groupBarHeight + resourceBarsHeight
     group:SetDimensions(UnitFrames.SV.GroupBarWidth, totalFrameHeight * 4 + UnitFrames.SV.GroupBarSpacing * 3.5)
+    if group.preview then
+        group.preview:SetDimensions(group:GetWidth(), group:GetHeight())
+    end
 
     -- Build player list (sorted by role if enabled)
     local playerList = {}

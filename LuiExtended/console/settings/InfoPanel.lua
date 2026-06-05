@@ -342,6 +342,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ClockFormat = value
+                InfoPanel.RefreshClockMeterUpdateInterval()
                 InfoPanel.RearrangePanel()
             end,
             default = Defaults.ClockFormat,

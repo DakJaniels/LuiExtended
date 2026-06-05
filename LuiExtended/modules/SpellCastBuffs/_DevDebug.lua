@@ -11,7 +11,7 @@ if not LUIE.IsDevDebugEnabled() then
 end
 
 -- LUIE utility functions
-local AddSystemMessage = LUIE.AddSystemMessage
+local ChatOutput = LUIE.ChatOutput
 
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
@@ -402,8 +402,8 @@ end
 --- When enabled, shows additional debug information for abilities.
 function SpellCastBuffs.TempSlashFilter()
     SpellCastBuffs.SV.ShowDebugFilter = not SpellCastBuffs.SV.ShowDebugFilter
-    AddSystemMessage(string_format("LUIE --- Ability Debug Filter %s ---",
-                                   SpellCastBuffs.SV.ShowDebugFilter and "Enabled" or "Disabled"))
+    ChatOutput:AddSystemMessage(string_format("LUIE --- Ability Debug Filter %s ---",
+                                              SpellCastBuffs.SV.ShowDebugFilter and "Enabled" or "Disabled"))
 end
 
 --- Toggles ground damage aura visualization on/off.
@@ -411,8 +411,8 @@ end
 --- Reloads player effects after toggling.
 function SpellCastBuffs.TempSlashGround()
     SpellCastBuffs.SV.GroundDamageAura = not SpellCastBuffs.SV.GroundDamageAura
-    AddSystemMessage(string_format("LUIE --- Ground Damage Auras %s ---",
-                                   SpellCastBuffs.SV.GroundDamageAura and "Enabled" or "Disabled"))
+    ChatOutput:AddSystemMessage(string_format("LUIE --- Ground Damage Auras %s ---",
+                                              SpellCastBuffs.SV.GroundDamageAura and "Enabled" or "Disabled"))
     LUIE.SpellCastBuffs.ReloadEffects("player")
 end
 
@@ -481,19 +481,19 @@ function SpellCastBuffs.TempSlashZoneCheck()
 
     -- POI information
     if info.poiInfo.count and info.poiInfo.count > 0 then
-        AddSystemMessage("--------------------")
-        AddSystemMessage("DETAILED POI INFORMATION:")
-        AddSystemMessage("--------------------")
+        ChatOutput:AddSystemMessage("--------------------")
+        ChatOutput:AddSystemMessage("DETAILED POI INFORMATION:")
+        ChatOutput:AddSystemMessage("--------------------")
 
         for i, poi in ipairs(info.poiInfo.items) do
             if i <= 5 then -- Limit to first 5 POIs to avoid spam
-                AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
-                                               i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
+                ChatOutput:AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
+                                                          i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
             end
         end
 
         if #info.poiInfo.items > 5 then
-            AddSystemMessage(string_format("... and %d more POIs", #info.poiInfo.items - 5))
+            ChatOutput:AddSystemMessage(string_format("... and %d more POIs", #info.poiInfo.items - 5))
         end
     end
 
@@ -533,7 +533,7 @@ function SpellCastBuffs.TempSlashZoneCheck()
     table.insert(displayInfo, { "--------------------" })
 
     for _, v in ipairs(displayInfo) do
-        AddSystemMessage(#v == 1 and v[1] or string_format("%s %s", v[1], v[2]))
+        ChatOutput:AddSystemMessage(#v == 1 and v[1] or string_format("%s %s", v[1], v[2]))
     end
 end
 
@@ -548,7 +548,7 @@ function SpellCastBuffs.TempSlashCheckRemovedAbilities()
     end
     table_sort(missing)
 
-    AddSystemMessage(string_format("DebugAuras: %d ids without DoesAbilityExist (see log for detail)", #missing))
+    ChatOutput:AddSystemMessage(string_format("DebugAuras: %d ids without DoesAbilityExist (see log for detail)", #missing))
     for _, abilityId in ipairs(missing) do
         local tags = {}
         if EffectOverride[abilityId] then
@@ -562,7 +562,7 @@ function SpellCastBuffs.TempSlashCheckRemovedAbilities()
         if #tags > 0 then
             line = string_format("%s  (%s)", line, table.concat(tags, ", "))
         end
-        AddSystemMessage(line)
+        ChatOutput:AddSystemMessage(line)
         LUIE:Log("Debug", line)
     end
 end
@@ -576,52 +576,52 @@ function SpellCastBuffs.TempSlashZoneCheckFull()
 
     -- Display POI details
     if info.poiInfo.count and info.poiInfo.count > 0 then
-        AddSystemMessage("--------------------")
-        AddSystemMessage("DETAILED POI INFORMATION:")
-        AddSystemMessage("--------------------")
+        ChatOutput:AddSystemMessage("--------------------")
+        ChatOutput:AddSystemMessage("DETAILED POI INFORMATION:")
+        ChatOutput:AddSystemMessage("--------------------")
 
         for i, poi in ipairs(info.poiInfo.items) do
             if i <= 5 then -- Limit to first 5 POIs to avoid spam
-                AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
-                                               i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
+                ChatOutput:AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
+                                                          i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
             end
         end
 
         if #info.poiInfo.items > 5 then
-            AddSystemMessage(string_format("... and %d more POIs", #info.poiInfo.items - 5))
+            ChatOutput:AddSystemMessage(string_format("... and %d more POIs", #info.poiInfo.items - 5))
         end
     end
 
     -- Display wayshrine details
     if info.fastTravelInfo.count and info.fastTravelInfo.count > 0 then
-        AddSystemMessage("--------------------")
-        AddSystemMessage("DETAILED WAYSHRINE INFORMATION:")
-        AddSystemMessage("--------------------")
+        ChatOutput:AddSystemMessage("--------------------")
+        ChatOutput:AddSystemMessage("DETAILED WAYSHRINE INFORMATION:")
+        ChatOutput:AddSystemMessage("--------------------")
 
         for i, node in ipairs(info.fastTravelInfo.items) do
             if i <= 5 then -- Limit to first 5 wayshrines
-                AddSystemMessage(string_format("Wayshrine %d: %s (Known: %s, Cost: %d)",
-                                               i, node.name, node.known and "Yes" or "No", node.cost))
+                ChatOutput:AddSystemMessage(string_format("Wayshrine %d: %s (Known: %s, Cost: %d)",
+                                                          i, node.name, node.known and "Yes" or "No", node.cost))
             end
         end
 
         if #info.fastTravelInfo.items > 5 then
-            AddSystemMessage(string_format("... and %d more wayshrines", #info.fastTravelInfo.items - 5))
+            ChatOutput:AddSystemMessage(string_format("... and %d more wayshrines", #info.fastTravelInfo.items - 5))
         end
     end
 
     -- Display key section info
     if info.keyInfo.sections and #info.keyInfo.sections > 0 then
-        AddSystemMessage("--------------------")
-        AddSystemMessage("MAP KEY INFORMATION:")
-        AddSystemMessage("--------------------")
+        ChatOutput:AddSystemMessage("--------------------")
+        ChatOutput:AddSystemMessage("MAP KEY INFORMATION:")
+        ChatOutput:AddSystemMessage("--------------------")
 
         for i, section in ipairs(info.keyInfo.sections) do
-            AddSystemMessage(string_format("Section: %s (%d symbols)", section.name, #section.symbols))
+            ChatOutput:AddSystemMessage(string_format("Section: %s (%d symbols)", section.name, #section.symbols))
         end
     end
 
-    AddSystemMessage("--------------------")
+    ChatOutput:AddSystemMessage("--------------------")
 end
 
 function SpellCastBuffs.LogBuffIconPoolStats()

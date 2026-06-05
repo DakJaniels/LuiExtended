@@ -150,8 +150,9 @@ end
 --- @param id integer
 --- @param statusEffectType StatusEffectType|integer|nil
 --- @param abilityType AbilityType|integer|nil
+--- @param container string
 --- @param combatCcType integer|nil LUIE_CC_TYPE_* derived from EVENT_COMBAT_EVENT for fake combat entries
-local function SetSingleIconBuffType(buff, buffType, unbreakable, id, statusEffectType, abilityType, combatCcType)
+local function SetSingleIconBuffType(buff, container, buffType, unbreakable, id, statusEffectType, abilityType, combatCcType)
     -- Determine context type and get ability name
     local contextType = (buffType == BUFF_EFFECT_TYPE_BUFF) and "buff" or "debuff"
     local abilityName = GetAbilityName(id)
@@ -216,7 +217,12 @@ local function SetSingleIconBuffType(buff, buffType, unbreakable, id, statusEffe
             (isPriority and SpellCastBuffs.SV.ProminentProgressDebuffPriorityC1 or SpellCastBuffs.SV.ProminentProgressDebuffC1) or
             (isPriority and SpellCastBuffs.SV.ProminentProgressBuffPriorityC1 or SpellCastBuffs.SV.ProminentProgressBuffC1)
 
-        buff.bar.backdrop:SetCenterColor(0.1 * colors[1], 0.1 * colors[2], 0.1 * colors[3], 0.75)
+        local backdropR = 0.1 * colors[1]
+        local backdropG = 0.1 * colors[2]
+        local backdropB = 0.1 * colors[3]
+        local backdropA = 0.75
+        buff.bar.backdrop:SetCenterColor(backdropR, backdropG, backdropB, backdropA)
+        buff.bar.backdrop:SetEdgeColor(backdropR, backdropG, backdropB, backdropA)
         buff.bar.bar:SetGradientColors(colors[1], colors[2], colors[3], 1, gradientColors[1], gradientColors[2], gradientColors[3], 1)
     end
 
@@ -233,8 +239,6 @@ local function SetSingleIconBuffType(buff, buffType, unbreakable, id, statusEffe
     local borderTexture = (contextType == "buff") and SpellCastBuffs.GetBuffBorderTexture() or SpellCastBuffs.GetDebuffBorderTexture()
     buff.back:SetTexture(borderTexture)
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
-    buff.back:SetHidden(SpellCastBuffs.SV.GlowIcons)
-    buff.drop:SetHidden(false)
 
     -- Set cooldown color if it exists
     if buff.cd then
@@ -404,18 +408,9 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
         end
 
         local buff = SpellCastBuffs.BuffContainers[container].icons[index]
-        if container == "player_long" then
-            if buff.cd then
-                buff.cd:SetHidden(true)
-            end
-            if buff.iconbg then
-                buff.iconbg:SetHidden(true)
-            end
-        end
 
         local slotRebound = effect.iconNum ~= index
         ApplyIconLayoutIfNeeded(buff, container, slotRebound)
-        buff:SetHidden(false)
 
         if buff.abilityId and effect.id and SpellCastBuffs.SV.ShowDebugAbilityId then
             SpellCastBuffs.UpdateAbilityIdDebugLabel(buff, tostring(effect.id))
@@ -424,13 +419,14 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
         end
 
         if slotRebound then
+            buff:SetHidden(true)
             effect.iconNum = index
             effect.restart = true
             local name = (effect.name ~= nil) and effect.name or nil
             local statusFx = effect.debugMeta and effect.debugMeta.statusEffectType or nil
             local abiType = effect.debugMeta and effect.debugMeta.abilityType or nil
             local combatCcType = effect.combatCcType or nil
-            SetSingleIconBuffType(buff, effect.type, effect.unbreakable, effect.id, statusFx, abiType, combatCcType)
+            SetSingleIconBuffType(buff, container, effect.type, effect.unbreakable, effect.id, statusFx, abiType, combatCcType)
 
             buff.effectId = effect.id
             buff.effectName = name
@@ -438,17 +434,10 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
             buff.buffSlot = effect.buffSlot
             buff.tooltip = effect.tooltip
             buff.duration = effect.dur or 0
-            buff.container = container
             buff.debugMeta = effect.debugMeta
 
-            if effect.backdrop then
-                buff.drop:SetHidden(false)
-            else
-                buff.drop:SetHidden(true)
-            end
             buff.icon:SetTexture(effect.icon)
             buff:SetAlpha(1)
-            buff:SetHidden(false)
 
             local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
             if not remain or effect.fakeDuration then
@@ -471,6 +460,10 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
                 buff.name:SetText(nameText)
             end
         end
+
+        buff.container = container
+        SpellCastBuffs.ApplyBuffIconChrome(buff, container, effect)
+        buff:SetHidden(false)
     end
 
     SpellCastBuffs.ReleaseSurplusBuffIcons(container, iconsNum)
@@ -529,6 +522,10 @@ local function updateIconsLight(currentTimeMs, sortedList, container)
                 buff.cd:StartCooldown(remain, effect.dur, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
                 effect.restart = false
             end
+        end
+
+        if buff.lastChromeLayoutVersion ~= SpellCastBuffs.displayLayoutVersion or effect.restart then
+            SpellCastBuffs.ApplyBuffIconChrome(buff, container, effect)
         end
 
         if buff.abilityId then
@@ -643,6 +640,8 @@ end
 --- currentTimeMs is passed explicitly since it's the only per-tick value.
 --- @param currentTimeMs number
 local function rebuildDisplaySortedLists(currentTimeMs)
+    SpellCastBuffs.displayLayoutVersion = SpellCastBuffs.displayLayoutVersion + 1
+
     for _, container in pairs(SpellCastBuffs.containerRouting) do
         if not g_buffsSorted[container] then
             g_buffsSorted[container] = {}
@@ -828,4 +827,6 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
     if LUIE.IsDevDebugEnabled() then
         SpellCastBuffs.RecordBuffIconPoolHighWater()
     end
+
+    SpellCastBuffs.TickDebugMetaTooltipLiveUpdate()
 end

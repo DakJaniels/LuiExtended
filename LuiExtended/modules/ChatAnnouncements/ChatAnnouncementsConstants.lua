@@ -9,8 +9,6 @@ local LUIE = LUIE
 -- ChatAnnouncements namespace
 --- @class (partial) ChatAnnouncements
 --- @field SV CADefaults
---- @field ChatOutput LUIE_ChatOutput
---- @field ChatOutputClass LUIE_ChatOutput
 local ChatAnnouncements = {}
 
 --- @class (partial) ChatAnnouncements
@@ -502,6 +500,7 @@ ChatAnnouncements.Brackets =
 --- @field LootCraft boolean
 --- @field LootGroup boolean
 --- @field LootIcons boolean
+--- @field LootShowCollectionStatus boolean
 --- @field LootMail boolean
 --- @field LootNotTrash boolean
 --- @field LootOnlyNotable boolean
@@ -1121,6 +1120,7 @@ ChatAnnouncements.Defaults =
         LootCraft = true,
         LootGroup = true,
         LootIcons = true,
+        LootShowCollectionStatus = false,
         LootMail = true,
         LootNotTrash = true,
         LootOnlyNotable = false,

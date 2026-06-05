@@ -2234,15 +2234,28 @@ local effectOverride =
     ----------------------------------------------------------------
 
     -- Assassin's Blade / Killer's Blade / Impale
+    [61788] = { hide = true },                                            -- Killer's Blade (pre-buff ping)
     [61787] = { icon = "/esoui/art/icons/ability_nightblade_017_a.dds" }, -- Killer's Blade (Killer's Blade)
 
     -- Teleport Strike / Lotus Fan / Ambush
+    [18346] = { hide = true },                                         -- Teleport Strike (hit ping)
+    [124803] = { hide = true },                                        -- Teleport Strike (Minor Vuln combat)
+    [124804] = { hide = true },                                        -- Ambush (Minor Vuln combat)
+    [124806] = { hide = true },                                        -- Lotus Fan (Minor Vuln combat)
+    [25485] = { hide = true },                                         -- Ambush (hit ping)
+    [147422] = { hide = true },                                        -- Ambush (Empower combat)
+    [175655] = { hide = true },                                        -- Ambush (Minor Berserk combat)
     [35336] = { tooltip = Tooltips.Generic_Magic, tooltipValue2 = 2 }, -- Lotus Fan (Lotus Fan)
 
     -- Blur / Mirage / Phantasmal Escape
     [125314] = { tooltip = Tooltips.Innate_Snare_Immobilize_Immunity }, -- Phantasmal Escape (Phantasmal Escape)
 
     -- Mark Target / Piercing Mark / Reaper's Mark
+    [33363] = { hide = true },                                                                                                                   -- Mark Target (combat)
+    [33372] = { hide = true },                                                                                                                   -- Mark Target (combat)
+    [33408] = { hide = true },                                                                                                                   -- Mark Target (player CD buff)
+    [36982] = { hide = true },                                                                                                                   -- Piercing Mark (player CD buff)
+    [36974] = { hide = true },                                                                                                                   -- Reaper's Mark (player CD buff)
     [33357] = { tooltip = Tooltips.Skill_Mark_Target },                                                                                          -- Mark Target (Mark Target)
     [33373] = { icon = "/esoui/art/icons/ability_nightblade_014.dds" },                                                                          -- Mark Target (Mark Target)
     [36968] = { tooltip = Tooltips.Skill_Mark_Target },                                                                                          -- Piercing Mark (Piercing Mark)
@@ -2252,14 +2265,17 @@ local effectOverride =
     [36975] = { icon = "/esoui/art/icons/ability_nightblade_014_a.dds" },                                                                        -- Reaper's Mark (Reaper's Mark)
 
     -- Grim Focus / Relentless Focus / Merciless Resolve
-    [61905] = { icon = "/esoui/art/icons/ability_nightblade_005.dds" },    -- Grim Focus (Grim Focus)
-    [122585] = { tooltip = Tooltips.Skill_Grim_Focus_Defense },            -- Grim Focus (Grim Focus)
-
-    [107054] = { icon = "/esoui/art/icons/ability_nightblade_005_a.dds" }, -- Relentless Focus (Relentless Focus)
-    [122587] = { tooltip = Tooltips.Skill_Grim_Focus_Defense },            -- Relentless Focus (Relentless Focus)
-
-    [107055] = { icon = "/esoui/art/icons/ability_nightblade_005_b.dds" }, -- Merciless Resolve (Merciless Resolve)
-    [122586] = { tooltip = Tooltips.Skill_Grim_Focus_Defense },            -- Merciless Resolve (Merciless Resolve)
+    [61907] = { hide = true },                                                                                          -- Grim Focus (equip ping)
+    [61932] = { hide = true },                                                                                          -- Relentless Focus (equip ping)
+    [61930] = { hide = true },                                                                                          -- Merciless Resolve (equip ping)
+    [61905] = { icon = "/esoui/art/icons/ability_nightblade_005.dds", dynamicTooltip = true, tooltipMorphId = 61902 },    -- Grim Focus (stack counter)
+    [61928] = { icon = "/esoui/art/icons/ability_nightblade_005_a.dds", dynamicTooltip = true, tooltipMorphId = 61927 }, -- Relentless Focus (counter; legacy)
+    [61920] = { icon = "/esoui/art/icons/ability_nightblade_005_b.dds", dynamicTooltip = true, tooltipMorphId = 61919 }, -- Merciless Resolve (counter; legacy)
+    [122585] = { dynamicTooltip = true, tooltipMorphId = 61902 },                                                     -- Grim Focus track; no description on 122585 in lang/API
+    [107054] = { icon = "/esoui/art/icons/ability_nightblade_005_a.dds", dynamicTooltip = true, tooltipMorphId = 61927 }, -- Relentless Focus (stack counter)
+    [122587] = { dynamicTooltip = true, tooltipMorphId = 61927 },                                                     -- Relentless Focus track
+    [107055] = { icon = "/esoui/art/icons/ability_nightblade_005_b.dds", dynamicTooltip = true, tooltipMorphId = 61919 }, -- Merciless Resolve (stack counter)
+    [122586] = { dynamicTooltip = true, tooltipMorphId = 61919 },                                                     -- Merciless Resolve track
 
     -- Death Stroke / Incapacitating Strike / Soul Harvest
     [61389] = { icon = "/esoui/art/icons/ability_nightblade_007.dds", name = Abilities.Skill_Death_Stroke, tooltip = Tooltips.Skill_Death_Stroke_Debuff },               -- Damage Taken Increased (Death Stroke)
@@ -2299,6 +2315,8 @@ local effectOverride =
     [76639] = { tooltip = Tooltips.Generic_Fear },                  -- Manifestation of Terror (Manifestation of Terror)
     [76635] = { hide = true },                                      -- Remove Trap (Manifestation of Terror)
     [38208] = { hide = true },                                      -- Birth Manifestation of Terror (Manifestation of Terror)
+    [76630] = { hide = true },                                      -- Manifestation of Terror (arm ping)
+    [76634] = { hide = true },                                      -- Manifestation of Terror (trap proc)
     [76632] = { hide = true },                                      -- Manifestation of Terror (Manifestation of Terror)
 
     -- Summon Shade / Dark Shade / Shadow Image
@@ -2352,10 +2370,17 @@ local effectOverride =
     [36964] = { tooltip = Tooltips.Skill_Crippling_Grasp, hideReduce = true },                                                                        -- Crippling Grasp (Crippling Grasp)
 
     -- Siphoning Strikes / Leeching Strikes / Siphoning Attacks
+    [129717] = { hide = true },                                          -- Siphoning Strikes (while-slotted ping)
+    [129718] = { hide = true },                                          -- Siphoning Strikes (proc heal)
+    [215669] = { hide = true }, -- Leeching Strikes (while-slotted ping; stacks on 215672 only)
+    [215671] = { hide = true },                                          -- Leeching / Siphoning Attacks (proc)
+    [215672] = { icon = "/esoui/art/icons/ability_nightblade_003.dds", dynamicTooltip = true, tooltipMorphId = 36908, unbreakable = 1 }, -- Leeching Strikes (cost-reduction stacks; bar + buff frame)
+    [215494] = { hide = true },
+    [215651] = { hide = true },
     [33319] = { tooltip = Tooltips.Skill_Siphoning_Strikes },            -- Siphoning Strikes (Siphoning Strikes)
     [33321] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" },  -- Siphoning Strikes (Siphoning Strikes)
     [114957] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" }, -- Siphoning Strikes (Siphoning Strikes)
-    [36908] = { tooltip = Tooltips.Skill_Leeching_Strikes },             -- Leeching Strikes (Leeching Strikes)
+    [36908] = { tooltip = Tooltips.Skill_Leeching_Strikes, dynamicTooltip = true }, -- Leeching Strikes (main aura)
     [215493] = { dynamicTooltip = true, tooltipMorphId = 36935 },        -- Siphoning Attacks bundle buff --> morph 36935
     [36935] = { dynamicTooltip = true },                                 -- Siphoning Attacks morph — GetAbilityDescription (was stale static TP)
 
@@ -2366,6 +2391,8 @@ local effectOverride =
     [25171] = { icon = "/esoui/art/icons/ability_nightblade_018.dds" },    -- Soul Leech (Synergy - Soul Shred)
     [25093] = { tooltip = Tooltips.Generic_Stun },                         -- Soul Shred (Soul Shred)
     [35508] = { tooltip = Tooltips.Generic_HoT, tooltipValue2 = 0.5 },     -- Soul Siphon (Soul Siphon)
+    [106133] = { hide = true },                                            -- Soul Siphon (HoT combat tick)
+    [35615] = { hide = true },                                             -- Soul Siphon (instant heal ping)
     [35613] = { hide = true },                                             -- Soul Leech (Soul Siphon)
     [35466] = { tooltip = Tooltips.Skill_Soul_Tether, hideReduce = true }, -- Soul Tether (Soul Tether)
     [129384] = { icon = "/esoui/art/icons/ability_nightblade_018_a.dds" }, -- Soul Tether (Soul Tether)
@@ -2988,9 +3015,13 @@ local effectOverride =
     [114108] = { hide = true },                                                                                             -- Flame Skull cast/projectile (player buff = 114131)
     [123683] = { hide = true },                                                                                             -- Flame Skull charged cast variant (132143172)
     [123685] = { hide = true },                                                                                             -- Flame Skull every-3rd cast (+ corpse)
-    [114131] = { tooltip = Tooltips.Skill_Flame_Skull, tooltipValue2 = GetAbilityName(114108), forcedContainer = "short" }, -- Flame Skull (Flame Skull)
-    [117625] = { tooltip = Tooltips.Skill_Flame_Skull, tooltipValue2 = GetAbilityName(117629), forcedContainer = "short" }, -- Venom Skull (Venom Skull)
-    [117638] = { tooltip = Tooltips.Skill_Ricochet_Skull, forcedContainer = "short" },                                      -- Ricochet Skull (Ricochet Skull)
+    [123699] = { hide = true },                                                                                             -- Venom Skull charged cast
+    [123704] = { hide = true },                                                                                             -- Venom Skull 3rd cast
+    [123718] = { hide = true },                                                                                             -- Ricochet Skull charged cast
+    [123719] = { hide = true },                                                                                             -- Ricochet Skull 3rd cast
+    [114131] = { dynamicTooltip = true, tooltipMorphId = 114108, forcedContainer = "short" }, -- Flame Skull charge buff (live morph text from 114108)
+    [117625] = { dynamicTooltip = true, tooltipMorphId = 117624, forcedContainer = "short" }, -- Venom Skull charge buff (live morph text from 117624)
+    [117638] = { dynamicTooltip = true, tooltipMorphId = 117637, forcedContainer = "short" }, -- Ricochet Skull charge buff (live morph text from 117637)
 
     -- Sacrifice / pet tick noise (player frame)
     [220098] = { hide = true },

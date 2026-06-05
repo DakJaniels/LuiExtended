@@ -603,14 +603,14 @@ end
 
 local function OnSlashCommand()
     if not isInitialized then
-        LUIE.PrintToChat("Group Food/Drink Buff module is not initialized.", true)
+        LUIE.ChatOutput:Print("Group Food/Drink Buff module is not initialized.", true)
         return
     end
 
-    LUIE.PrintToChat("Refreshing food/drink buff icons...")
+    LUIE.ChatOutput:Print("Refreshing food/drink buff icons...")
     GroupFoodDrinkBuffManager.RefreshFrames()
     zo_callLater(function ()
-                     LUIE.PrintToChat("Food/drink buff icons refreshed.", true)
+                     LUIE.ChatOutput:Print("Food/drink buff icons refreshed.", true)
                  end, 200)
 end
 

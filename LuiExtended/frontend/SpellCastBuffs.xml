@@ -21,11 +21,9 @@
       <Controls>
         <Texture name="$(parent)_Back"
                  layer="BACKGROUND"
-                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"
                  hidden="true" />
         <Texture name="$(parent)_Frame"
-                 layer="OVERLAY"
-                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                 layer="OVERLAY">
           <Anchor point="CENTER"
                   relativeTo="$(parent)"
                   relativePoint="CENTER" />
@@ -57,7 +55,6 @@
                   hidden="true" />
         <Texture name="$(parent)_Icon"
                  textureFile="EsoUI/Art/Icons/icon_missing.dds"
-                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"
                  level="2"
                  layer="CONTROLS">
           <Anchor point="TOPLEFT"
@@ -108,8 +105,9 @@
                excludeFromResizeToFitExtents="true"
                hidden="true" />
         <Backdrop name="$(parent)_BarBackdrop"
-                  centerColor="00000066"
-                  edgeColor="00000099"
+                  alpha="1"
+                  centerColor="000000"
+                  edgeColor="000000"
                   hidden="true"
                   excludeFromResizeToFitExtents="true"
                   layer="BACKGROUND">
@@ -199,7 +197,13 @@
       <Controls>
         <Tooltip name="LUIE_SCB_DebugOverflowTooltip"
                  inherits="ZO_BaseTooltip"
-                 tier="HIGH" />
+                 tier="HIGH"
+                 headerVerticalOffset="11">
+          <ResizeToFitPadding width="32"
+                              height="40" />
+          <DimensionConstraints minX="416"
+                                maxX="416" />
+        </Tooltip>
       </Controls>
     </TopLevelControl>
   </Controls>

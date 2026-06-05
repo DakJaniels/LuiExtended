@@ -24,6 +24,9 @@ SpellCastBuffs.displayLayoutVersion = 0
 --- Session high water for dev pool metrics (GetTotalObjectCount on source pool).
 SpellCastBuffs.buffIconPoolHighWater = 0
 
+--- Hidden textures kept alive so inset DDS stays resident (avoids async pop-in on rebind).
+local buffIconInsetPreloadControls = nil
+
 function SpellCastBuffs.MarkDisplayDirty()
     SpellCastBuffs.displayDirty = true
 end
@@ -50,6 +53,26 @@ local BUFF_ICON_MISSING_TEXTURE = "EsoUI/Art/Icons/icon_missing.dds"
 local function ApplyBuffIconTextureReleasePolicy(textureControl)
     if textureControl and textureControl.SetTextureReleaseOption then
         textureControl:SetTextureReleaseOption(RELEASE_TEXTURE_AT_ZERO_REFERENCES)
+    end
+end
+
+local function EnsureBuffIconInsetTexturesPreloaded()
+    if buffIconInsetPreloadControls then
+        return
+    end
+    buffIconInsetPreloadControls = {}
+    local paths =
+    {
+        SpellCastBuffs.GetBuffDebuffInsetTexture(),
+        "EsoUI/Art/ActionBar/abilityInset.dds",
+        "EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds",
+    }
+    for i, path in ipairs(paths) do
+        local tex = WINDOW_MANAGER:CreateControl("LUIE_SCB_InsetPreload" .. i, GuiRoot, CT_TEXTURE)
+        tex:SetHidden(true)
+        tex:SetDimensions(4, 4)
+        tex:SetTexture(path)
+        buffIconInsetPreloadControls[i] = tex
     end
 end
 
@@ -97,7 +120,11 @@ local function ResetBuffIconControl(buff)
     buff.lastFlexContainer = nil
     buff.lastAppliedIconSize = nil
     buff.lastLayoutVersion = nil
+    buff.lastChromeLayoutVersion = nil
     buff.abilityIdLabelDirty = true
+    if buff.iconbg then
+        buff.iconbg:SetHidden(true)
+    end
     ResetBuffIconDynamicTextures(buff)
 end
 
@@ -131,8 +158,8 @@ local function SetupBuffIconControlReferences(buff)
         buff.cd:SetLeadingEdgeTexture("")
     end
     if buff.iconbg then
-        buff.iconbg:SetDrawLayer(DL_CONTROLS)
-        buff.iconbg:SetDrawLevel(1)
+        buff.iconbg:SetDrawLayer(DL_BACKGROUND)
+        buff.iconbg:SetDrawLevel(2)
     end
     buff.icon:SetDrawLayer(DL_CONTROLS)
     buff.icon:SetDrawLevel(2)
@@ -140,6 +167,8 @@ local function SetupBuffIconControlReferences(buff)
     ApplyBuffIconTextureReleasePolicy(buff.icon)
     ApplyBuffIconTextureReleasePolicy(buff.back)
     ApplyBuffIconTextureReleasePolicy(buff.frame)
+
+    buff.iconbg:SetTexture(SpellCastBuffs.GetBuffDebuffInsetTexture())
 
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
 
@@ -172,6 +201,7 @@ function SpellCastBuffs.InitializeBuffIconPools()
 
     SpellCastBuffs.buffIconControlPool = controlPool
     SpellCastBuffs.buffIconMetaPools = {}
+    EnsureBuffIconInsetTexturesPreloaded()
 end
 
 --- @param containerKey string

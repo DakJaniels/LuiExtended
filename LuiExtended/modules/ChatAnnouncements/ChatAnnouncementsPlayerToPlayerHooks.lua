@@ -6,7 +6,7 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 -- -----------------------------------------------------------------------------
 -- ESO API Locals.
 -- -----------------------------------------------------------------------------
@@ -179,7 +179,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
     -- Custom alert helpers
     local function AlertIgnored(customStringId)
         local stringId = customStringId or ALERT_IGNORED_STRING
-        printToChat(GetString(stringId), true)
+        ChatOutput:Print(GetString(stringId), true)
         if ChatAnnouncements.SV.Group.GroupAlert then
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, stringId)
         end
@@ -187,7 +187,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
     end
 
     local function AlertRestrictedCommunication()
-        printToChat(GetString(SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION), true)
+        ChatOutput:Print(GetString(SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION), true)
         if ChatAnnouncements.SV.Group.GroupAlert then
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION)
         end
@@ -195,7 +195,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
     end
 
     local function AlertGroupDisabled()
-        printToChat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE), true)
+        ChatOutput:Print(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE), true)
         if ChatAnnouncements.SV.Group.GroupAlert then
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
         end
@@ -203,7 +203,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
     end
 
     local function AlertGroupKickDisabled()
-        printToChat(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR), true)
+        ChatOutput:Print(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR), true)
         if ChatAnnouncements.SV.Group.GroupAlert then
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
         end
@@ -211,7 +211,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
     end
 
     local function AlreadyFriendsWarning()
-        printToChat(GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS), true)
+        ChatOutput:Print(GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS), true)
         if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS))
         end
@@ -339,7 +339,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
                     local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
                     local statusString = GetString("SI_DUELSTATE", state)
                     statusString = zo_strformat(statusString, userFacingPartnerName)
-                    printToChat(statusString, true)
+                    ChatOutput:Print(statusString, true)
                     if ChatAnnouncements.SV.Group.GroupAlert then
                         ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
                     end
@@ -363,7 +363,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
                     local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
                     local statusString = GetString("SI_TRIBUTEINVITESTATE", inviteState)
                     statusString = zo_strformat(statusString, userFacingPartnerName)
-                    printToChat(statusString, true)
+                    ChatOutput:Print(statusString, true)
                     if ChatAnnouncements.SV.Group.GroupAlert then
                         ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
                     end
@@ -376,7 +376,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
                 ChallengeTargetToTribute(currentTargetCharacterName)
             end
             local function TributeLockedAlert()
-                printToChat(GetString(SI_PLAYER_TO_PLAYER_TRIBUTE_LOCKED), true)
+                ChatOutput:Print(GetString(SI_PLAYER_TO_PLAYER_TRIBUTE_LOCKED), true)
                 if ChatAnnouncements.SV.Group.GroupAlert then
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_TRIBUTE_LOCKED)
                 end

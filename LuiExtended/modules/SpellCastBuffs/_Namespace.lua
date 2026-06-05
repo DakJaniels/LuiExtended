@@ -118,6 +118,7 @@ local SpellCastBuffs = ZO_Object:Subclass()
 --- @field RemainingTextColoured boolean
 --- @field RemainingTextMillis boolean
 --- @field RemainingCooldown boolean
+--- @field BuffDebuffIconInset boolean
 --- @field FadeOutIcons boolean
 --- @field lockPositionToUnitFrames boolean
 --- @field LongTermEffects_Player boolean
@@ -328,6 +329,7 @@ SpellCastBuffs.Defaults =
     RemainingTextColoured = false,
     RemainingTextMillis = true,
     RemainingCooldown = true,
+    BuffDebuffIconInset = false,
     FadeOutIcons = false,
     lockPositionToUnitFrames = true,
     LongTermEffects_Player = true,

@@ -8,13 +8,13 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SlashCommands
 local SlashCommands = LUIE.SlashCommands
 
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 local zo_strformat = zo_strformat
 
 -- Slash Command to add someone to the friendslist
 function SlashCommands.SlashFriend(option)
     if option == "" or option == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_FRIEND_FAILED_NONAME), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_FRIEND_FAILED_NONAME), true)
         if LUIE.ChatAnnouncements.SV.Social.FriendIgnoreAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_FRIEND_FAILED_NONAME)))
         end
@@ -27,7 +27,7 @@ end
 -- Slash Command to add someone to ignore list
 function SlashCommands.SlashIgnore(option)
     if option == "" or option == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME), true)
         if LUIE.ChatAnnouncements.SV.Social.FriendIgnoreAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME)))
         end
@@ -40,7 +40,7 @@ end
 -- Slash Command to remove someone from friends list
 function SlashCommands.SlashRemoveFriend(option)
     if option == "" or option == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_FRIEND_REMOVE_FAILED_NONAME), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_FRIEND_REMOVE_FAILED_NONAME), true)
         if LUIE.ChatAnnouncements.SV.Social.FriendIgnoreAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_FRIEND_REMOVE_FAILED_NONAME)))
         end
@@ -79,7 +79,7 @@ function SlashCommands.SlashRemoveFriend(option)
     if finalName ~= "" then
         RemoveFriend(finalName)
     else
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_FRIEND_REMOVE_FAILED_NONAME), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_FRIEND_REMOVE_FAILED_NONAME), true)
         if LUIE.ChatAnnouncements.SV.Social.FriendIgnoreAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_FRIEND_REMOVE_FAILED_NONAME)))
         end
@@ -90,7 +90,7 @@ end
 -- Slash Command to remove a given name from the ignore list
 function SlashCommands.SlashRemoveIgnore(option)
     if option == "" or option == nil then
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME_REMOVE), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME_REMOVE), true)
         if LUIE.ChatAnnouncements.SV.Social.FriendIgnoreAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME_REMOVE)))
         end
@@ -120,7 +120,7 @@ function SlashCommands.SlashRemoveIgnore(option)
     if finalName ~= "" then
         RemoveIgnore(option)
     else
-        printToChat(GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME_REMOVE), true)
+        ChatOutput:Print(GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME_REMOVE), true)
         if LUIE.ChatAnnouncements.SV.Social.FriendIgnoreAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, (GetString(LUIE_STRING_SLASHCMDS_IGNORE_FAILED_NONAME_REMOVE)))
         end

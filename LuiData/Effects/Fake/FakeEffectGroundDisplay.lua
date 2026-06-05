@@ -98,9 +98,9 @@ Effects.EffectGroundDisplay =
     [32710] = { buff = false, debuff = false, ground = true },                  -- Hearth and Home (Hearth and Home)
 
     -- Nightblade
-    [33195] = { buff = true, debuff = false, ground = false },                                                -- Path of Darkness (Path of Darkness)
+    [33195] = { buff = true, debuff = false, ground = true },                                                 -- Path of Darkness (Path of Darkness)
     [36049] = { buff = false, debuff = false, ground = true },                                                -- Twisting Path (Twisting Path)
-    [36028] = { buff = true, debuff = false, ground = false },                                                -- Refreshing Path (Refreshing Path)
+    [36028] = { buff = true, debuff = false, ground = true },                                                 -- Refreshing Path (Refreshing Path)
     [38517] = { buff = true, debuff = false, ground = false },                                                -- Summon Shade (Summon Shade)
     [88662] = { buff = true, debuff = false, ground = false },                                                -- Summon Shade (Summon Shade) -- Khajiit
     [88663] = { buff = true, debuff = false, ground = false },                                                -- Summon Shade (Summon Shade) -- Argonian
@@ -111,9 +111,9 @@ Effects.EffectGroundDisplay =
     [88696] = { name = Abilities.Skill_Shadow_Image, buff = true, debuff = false, ground = false },           -- Shadow (Shadow Image) -- Khajiit
     [88697] = { name = Abilities.Skill_Shadow_Image, buff = true, debuff = false, ground = false },           -- Shadow (Shadow Image) -- Argonian
     [37475] = { buff = false, debuff = false, ground = true, stackAdd = 1, stackRemove = 1, stackReset = 1 }, -- Manifestation of Terror (Nightblade)
-    [25411] = { buff = true, debuff = false, ground = false },                                                -- Consuming Darkness (Consuming Darkness)
-    [36493] = { buff = true, debuff = false, ground = false },                                                -- Bolstering Darkness (Bolstering Darkness)
-    [36485] = { buff = true, debuff = false, ground = false },                                                -- Veil of Blades (Veil of Blades)
+    [25411] = { buff = true, debuff = false, ground = true },                                                 -- Consuming Darkness (Consuming Darkness)
+    [36493] = { buff = true, debuff = false, ground = true },                                                 -- Bolstering Darkness (Bolstering Darkness)
+    [36485] = { buff = true, debuff = false, ground = true },                                                 -- Veil of Blades (Veil of Blades)
 
     -- Sorcerer
     [24830] = { buff = false, debuff = false, ground = true, stackAdd = 1, stackRemove = 1, stackReset = 3, icon = "/esoui/art/icons/ability_sorcerer_daedric_mines.dds" },                                               -- Daedric Mines (Daedric Mines)

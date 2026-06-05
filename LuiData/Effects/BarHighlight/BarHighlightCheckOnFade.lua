@@ -52,6 +52,25 @@ local barHighlightCheckOnFade =
 
     -- Nightblade
     [125314] = { duration = 90620, durationMod = 125314, unitTag = PLAYER_UNIT_TAG }, -- Phantasmal Escape --> Major Evasion
+    [33357] = { id1 = 61743, id2 = 33357, unitTag = TARGET_UNIT_TAG },               -- Mark Target debuff fade --> breach / mark
+    [36968] = { id1 = 61743, id2 = 36968, id3 = 36994, unitTag = TARGET_UNIT_TAG }, -- Piercing Mark
+    [36967] = { id1 = 61743, id2 = 36967, unitTag = TARGET_UNIT_TAG },               -- Reaper's Mark
+    [35336] = { id1 = 35336, id2 = 79717, unitTag = TARGET_UNIT_TAG },               -- Lotus Fan DoT --> vuln
+    [61389] = { id1 = 61389, unitTag = TARGET_UNIT_TAG },                             -- Death Stroke debuff
+    [61393] = { id1 = 61393, unitTag = TARGET_UNIT_TAG },                             -- Incapacitating Strike debuff
+    [61400] = { id1 = 61400, id2 = 61727, unitTag = TARGET_UNIT_TAG },               -- Soul Harvest debuff + defile
+    [122585] = { id1 = 122585, unitTag = PLAYER_UNIT_TAG },                           -- Grim Focus stacks after spend
+    [122587] = { id1 = 122587, unitTag = PLAYER_UNIT_TAG },                           -- Relentless Focus stacks after spend
+    [33211] = { id1 = 33211, unitTag = PLAYER_UNIT_TAG },                             -- Summon Shade pet timer
+    [33290] = { id1 = 33290, id2 = 33211, unitTag = PLAYER_UNIT_TAG },
+    [35438] = { id1 = 35438, unitTag = PLAYER_UNIT_TAG },                             -- Dark Shade (slotted)
+    [108940] = { id1 = 108940, id2 = 35438, unitTag = PLAYER_UNIT_TAG },
+    [35441] = { id1 = 35441, unitTag = PLAYER_UNIT_TAG },                             -- Shadow Image (slotted)
+    [38528] = { id1 = 38528, id2 = 35441, unitTag = PLAYER_UNIT_TAG },
+    [35451] = { id1 = 35451, id2 = 35441, unitTag = PLAYER_UNIT_TAG },
+
+    -- Siphoning (Offering self-drain fades; bar keeps slotted highlight on Minor Mending)
+    [108932] = { id1 = 61710, id2 = 108934, unitTag = PLAYER_UNIT_TAG }, -- Healthy Offering --> Minor Mending
 
     -- Warden
     [130139] = { id1 = 130140, id2 = 130139, unitTag = TARGET_UNIT_TAG }, -- Off-Balance --> Cutting Dive / Off-Balance

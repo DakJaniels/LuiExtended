@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\AbilityAlerts.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\AbilityAlerts.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -31,7 +31,9 @@ LUIE_AlertTemplate = {}
 ---@field public hidden boolean
 ---@field public centerColor string
 ---@field public edgeColor string
+---@field AnchorFill boolean
 ---@field Edge {edgeFileWidth: integer, edgeFileHeight: integer, edgeFilePadding: integer}
+---@field public OnInitialized fun(self: Control)
 LUIE_AlertFrame_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -65,6 +67,7 @@ LUIE_AlertTemplate_Modifier = {}
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Edge {edgeFileWidth: integer, edgeFileHeight: integer, edgeFilePadding: integer}
+---@field public OnInitialized fun(self: Control)
 LUIE_AlertTemplate_Icon = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -89,6 +92,7 @@ LUIE_AlertTemplate_Timer = {}
 ---@class LUIE_AlertFrame_Preview_AnchorTexture : TextureControl
 ---@field public textureFile string
 ---@field public color string
+---@field public alpha number
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_AlertFrame_Preview_AnchorTexture = {}
@@ -122,12 +126,14 @@ LUIE_AlertFrame_Preview_AnchorLabel = {}
 ---@class LUIE_AlertTemplate_Icon_Back : TextureControl
 ---@field public textureFile string
 ---@field public layer DrawLayer
+---@field AnchorFill boolean
 LUIE_AlertTemplate_Icon_Back = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_IconBg : BackdropControl
 ---@field public centerColor string
 ---@field public edgeColor string
+---@field public alpha number
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Edge {edgeFileWidth: integer, edgeFileHeight: integer, edgeFilePadding: integer}
@@ -136,6 +142,7 @@ LUIE_AlertTemplate_Icon_IconBg = {}
 --
 ---@class LUIE_AlertTemplate_Icon_Cd : CooldownControl
 ---@field public fillColor string
+---@field public alpha number
 ---@field public layer DrawLayer
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
@@ -149,4 +156,4 @@ LUIE_AlertTemplate_Icon_Cd = {}
 ---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 LUIE_AlertTemplate_Icon_Icon = {}
 ---------- LVL: 07 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\AbilityAlerts.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\AbilityAlerts.xml

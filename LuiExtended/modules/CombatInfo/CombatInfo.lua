@@ -6,7 +6,7 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 local pairs = pairs
-local printToChat = LUIE.PrintToChat
+local ChatOutput = LUIE.ChatOutput
 local zo_strformat = zo_strformat
 local eventManager = GetEventManager()
 local ACTION_RESULT_AREA_EFFECT = 669966
@@ -54,7 +54,7 @@ function CombatInfo.ClearCustomList(list)
     end
     ZO_GetChatSystem():Maximize()
     ZO_GetChatSystem().primaryContainer:FadeIn()
-    printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
+    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
 end
 
 function CombatInfo.AddToCustomList(list, input)
@@ -68,18 +68,18 @@ function CombatInfo.AddToCustomList(list, input)
             list[id] = true
             ZO_GetChatSystem():Maximize()
             ZO_GetChatSystem().primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
         else
             ZO_GetChatSystem():Maximize()
             ZO_GetChatSystem().primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
         end
     else
         if input ~= "" then
             list[input] = true
             ZO_GetChatSystem():Maximize()
             ZO_GetChatSystem().primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
         end
     end
 end
@@ -94,13 +94,13 @@ function CombatInfo.RemoveFromCustomList(list, input)
         list[id] = nil
         ZO_GetChatSystem():Maximize()
         ZO_GetChatSystem().primaryContainer:FadeIn()
-        printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
     else
         if input ~= "" then
             list[input] = nil
             ZO_GetChatSystem():Maximize()
             ZO_GetChatSystem().primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
         end
     end
 end

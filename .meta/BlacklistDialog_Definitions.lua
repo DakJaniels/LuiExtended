@@ -1,0 +1,12 @@
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\console\dialogs\BlacklistDialog.xml
+---------- LVL: 00 ----------
+---------- LVL: 01 ----------
+---------- LVL: 02 ----------
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_BlacklistDialog : TopLevelWindow
+---@field public hidden boolean
+---@field public OnInitialized fun(self: Control)
+LUIE_BlacklistDialog = {}
+---------- LVL: 03 ----------
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\console\dialogs\BlacklistDialog.xml

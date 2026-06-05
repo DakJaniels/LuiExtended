@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\pc\frontend\Changelog.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\pc\frontend\Changelog.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -21,6 +21,7 @@ LUIE_Changelog = {}
 ---@class LUIE_Changelog_Background : BackdropControl
 ---@field public edgeColor string
 ---@field public centerColor string
+---@field AnchorFill boolean
 LUIE_Changelog_Background = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -49,15 +50,11 @@ LUIE_Changelog_TitleBar = {}
 LUIE_Changelog_About = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_Changelog_Container : Control, ZO_ScrollContainer
+---@class LUIE_Changelog_Container : Control
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field public OnInitialized fun(self: Control)
 LUIE_Changelog_Container = {}
----@class LUIE_Changelog_ContainerScrollChild : Control
-LUIE_Changelog_ContainerScrollChild = {}
----@class LUIE_Changelog_ContainerScrollBar : SliderControl
-LUIE_Changelog_ContainerScrollBar = {}
 ---------- LVL: 05 ----------
 ---------- LVL: 06 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -65,6 +62,7 @@ LUIE_Changelog_ContainerScrollBar = {}
 ---@class LUIE_Changelog_TitleBarBg : BackdropControl
 ---@field public edgeColor string
 ---@field public centerColor string
+---@field AnchorFill boolean
 LUIE_Changelog_TitleBarBg = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -74,6 +72,7 @@ LUIE_Changelog_TitleBarBg = {}
 ---@field public verticalAlignment TextAlignment
 ---@field public horizontalAlignment TextAlignment
 ---@field public color string
+---@field AnchorFill boolean
 LUIE_Changelog_Title = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -86,4 +85,4 @@ LUIE_Changelog_Title = {}
 ---@field public OnClicked fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
 LUIE_Changelog_Close = {}
 ---------- LVL: 07 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\pc\frontend\Changelog.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\pc\frontend\Changelog.xml

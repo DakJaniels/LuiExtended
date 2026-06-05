@@ -41,6 +41,47 @@ local function IsOakensoul(buffId)
     return false
 end
 
+--- @param unitTag string
+--- @param stackBuffId integer
+--- @return integer|nil
+local function ReadPlayerBuffStacks(unitTag, stackBuffId)
+    if unitTag ~= "player" or not DoesUnitExist(unitTag) then
+        return nil
+    end
+    for i = 1, GetNumBuffs(unitTag) do
+        local _, _, _, _, buffStacks, _, _, _, _, _, abilityIdNew, _, castByPlayer = GetUnitBuffInfo(unitTag, i)
+        if abilityIdNew == stackBuffId and castByPlayer and buffStacks and buffStacks > 0 then
+            local maxStack = Effects.BarHighlightStack and Effects.BarHighlightStack[stackBuffId]
+            if maxStack and buffStacks > maxStack then
+                return maxStack
+            end
+            return buffStacks
+        end
+    end
+    return nil
+end
+
+--- @param unitTag string
+--- @param displayAbilityId integer
+--- @param stackCount integer|nil
+local function PushStacksToDisplayedBuff(unitTag, displayAbilityId, stackCount)
+    if unitTag ~= "player" then
+        return
+    end
+    local stacks = stackCount
+    if stacks == nil or stacks <= 0 then
+        stacks = nil
+    end
+    for _, effectsList in pairs(SpellCastBuffs.EffectsList) do
+        for _, v in pairs(effectsList) do
+            if v.id == displayAbilityId then
+                v.stack = stacks
+            end
+        end
+    end
+    SpellCastBuffs.MarkDisplayDirty()
+end
+
 -- Runs on the EVENT_EFFECT_CHANGED listener.
 -- This handler fires every long-term effect added or removed
 --- @param changeType EffectResult
@@ -138,6 +179,15 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
     -- Set Override data from Effects.lua
     if Effects.EffectOverride[abilityId] then
         if Effects.EffectOverride[abilityId].hide == true then
+            local displayId = Effects.EffectPushStacksFromHidden and Effects.EffectPushStacksFromHidden[abilityId]
+            if displayId then
+                if changeType == EFFECT_RESULT_FADED then
+                    PushStacksToDisplayedBuff(unitTag, displayId, nil)
+                else
+                    local pulled = ReadPlayerBuffStacks(unitTag, abilityId) or stackCount
+                    PushStacksToDisplayedBuff(unitTag, displayId, pulled)
+                end
+            end
             return
         end
         if Effects.EffectOverride[abilityId].hideReduce == true and SpellCastBuffs.SV.HideReduce then
@@ -150,6 +200,13 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
         iconName = Effects.EffectOverride[abilityId].icon or iconName
         unbreakable = Effects.EffectOverride[abilityId].unbreakable or 0
         stackCount = Effects.EffectOverride[abilityId].stack or stackCount
+        local stackSourceId = Effects.EffectPullStacks and Effects.EffectPullStacks[abilityId]
+        if stackSourceId then
+            local pulledStacks = ReadPlayerBuffStacks(unitTag, stackSourceId)
+            if pulledStacks then
+                stackCount = pulledStacks
+            end
+        end
         -- Destroy other effects of the same type if we don't want to show duplicates at all.
         if Effects.EffectOverride[abilityId].noDuplicate then
             for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
