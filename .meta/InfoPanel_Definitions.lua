@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\InfoPanel.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\InfoPanel.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -238,4 +238,4 @@ LUIE_InfoPanel_BotRow_Gold_Icon = {}
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 LUIE_InfoPanel_BotRow_Gold_Label = {}
 ---------- LVL: 09 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\InfoPanel.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\InfoPanel.xml

@@ -1,10 +1,10 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\pc\lam_extension\LUIE_ComboBoxStatusbarEntry.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\pc\lam_extension\LUIE_ComboBoxStatusbarEntry.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_ComboBoxStatusbarEntry : Control, ZO_ComboBoxEntry
+---@class LUIE_ComboBoxStatusbarEntry : Control
 ---@field public mouseEnabled boolean
 ---@field Dimensions {y: layout_measurement}
 LUIE_ComboBoxStatusbarEntry = {}
@@ -12,7 +12,7 @@ LUIE_ComboBoxStatusbarEntry = {}
 ---------- LVL: 04 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_ComboBoxStatusbarEntryPreviewBG : BackdropControl, ZO_DefaultBackdrop
+---@class LUIE_ComboBoxStatusbarEntryPreviewBG : BackdropControl
 ---@field public tier DrawTier
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, offsetX: layout_measurement}
@@ -20,7 +20,7 @@ LUIE_ComboBoxStatusbarEntry = {}
 LUIE_ComboBoxStatusbarEntryPreviewBG = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_ComboBoxStatusbarEntryPreviewBar : StatusBarControl, ZO_DefaultStatusBar
+---@class LUIE_ComboBoxStatusbarEntryPreviewBar : StatusBarControl
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_ComboBoxStatusbarEntryPreviewBar = {}
@@ -33,4 +33,4 @@ LUIE_ComboBoxStatusbarEntryPreviewBar = {}
 ---@field Anchor2 {point: AnchorPosition, offsetX: layout_measurement}
 LUIE_ComboBoxStatusbarEntryLabel = {}
 ---------- LVL: 05 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\pc\lam_extension\LUIE_ComboBoxStatusbarEntry.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\pc\lam_extension\LUIE_ComboBoxStatusbarEntry.xml

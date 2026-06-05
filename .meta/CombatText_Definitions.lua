@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\CombatText.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\CombatText.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -8,7 +8,9 @@
 ---@field public hidden boolean
 ---@field public centerColor string
 ---@field public edgeColor string
+---@field AnchorFill boolean
 ---@field Edge {edgeFileWidth: integer, edgeFileHeight: integer, edgeFilePadding: integer}
+---@field public OnInitialized fun(self: Control)
 LUIE_CombatText_PanelPreviewBacking = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -33,6 +35,7 @@ LUIE_CombatText_Virtual = {}
 ---@class LUIE_CombatText_PanelPreviewBacking_AnchorTexture : TextureControl
 ---@field public textureFile string
 ---@field public color string
+---@field public alpha number
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_CombatText_PanelPreviewBacking_AnchorTexture = {}
@@ -126,11 +129,11 @@ LUIE_CombatText_Virtual_Icon = {}
 ---------- LVL: 06 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Outgoing_Preview : BackdropControl, LUIE_CombatText_PanelPreviewBacking
+---@class LUIE_CombatText_Outgoing_Preview : BackdropControl
 LUIE_CombatText_Outgoing_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Outgoing_Backdrop : BackdropControl, ZO_DefaultBackdrop
+---@class LUIE_CombatText_Outgoing_Backdrop : BackdropControl
 ---@field public alpha number
 ---@field public hidden boolean
 LUIE_CombatText_Outgoing_Backdrop = {}
@@ -145,14 +148,15 @@ LUIE_CombatText_Outgoing_Backdrop = {}
 ---@field public text string
 ---@field public hidden boolean
 ---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
 LUIE_CombatText_Outgoing_Label = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Incoming_Preview : BackdropControl, LUIE_CombatText_PanelPreviewBacking
+---@class LUIE_CombatText_Incoming_Preview : BackdropControl
 LUIE_CombatText_Incoming_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Incoming_Backdrop : BackdropControl, ZO_DefaultBackdrop
+---@class LUIE_CombatText_Incoming_Backdrop : BackdropControl
 ---@field public alpha number
 ---@field public hidden boolean
 LUIE_CombatText_Incoming_Backdrop = {}
@@ -167,14 +171,15 @@ LUIE_CombatText_Incoming_Backdrop = {}
 ---@field public text string
 ---@field public hidden boolean
 ---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
 LUIE_CombatText_Incoming_Label = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Alert_Preview : BackdropControl, LUIE_CombatText_PanelPreviewBacking
+---@class LUIE_CombatText_Alert_Preview : BackdropControl
 LUIE_CombatText_Alert_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Alert_Backdrop : BackdropControl, ZO_DefaultBackdrop
+---@class LUIE_CombatText_Alert_Backdrop : BackdropControl
 ---@field public alpha number
 ---@field public hidden boolean
 LUIE_CombatText_Alert_Backdrop = {}
@@ -189,14 +194,15 @@ LUIE_CombatText_Alert_Backdrop = {}
 ---@field public text string
 ---@field public hidden boolean
 ---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
 LUIE_CombatText_Alert_Label = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Point_Preview : BackdropControl, LUIE_CombatText_PanelPreviewBacking
+---@class LUIE_CombatText_Point_Preview : BackdropControl
 LUIE_CombatText_Point_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Point_Backdrop : BackdropControl, ZO_DefaultBackdrop
+---@class LUIE_CombatText_Point_Backdrop : BackdropControl
 ---@field public alpha number
 ---@field public hidden boolean
 LUIE_CombatText_Point_Backdrop = {}
@@ -211,14 +217,15 @@ LUIE_CombatText_Point_Backdrop = {}
 ---@field public text string
 ---@field public hidden boolean
 ---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
 LUIE_CombatText_Point_Label = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Resource_Preview : BackdropControl, LUIE_CombatText_PanelPreviewBacking
+---@class LUIE_CombatText_Resource_Preview : BackdropControl
 LUIE_CombatText_Resource_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Resource_Backdrop : BackdropControl, ZO_DefaultBackdrop
+---@class LUIE_CombatText_Resource_Backdrop : BackdropControl
 ---@field public alpha number
 ---@field public hidden boolean
 LUIE_CombatText_Resource_Backdrop = {}
@@ -233,6 +240,7 @@ LUIE_CombatText_Resource_Backdrop = {}
 ---@field public text string
 ---@field public hidden boolean
 ---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
 LUIE_CombatText_Resource_Label = {}
 ---------- LVL: 07 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\CombatText.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\CombatText.xml

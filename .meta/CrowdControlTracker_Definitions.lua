@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\CrowdControlTracker.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\CrowdControlTracker.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -86,7 +86,7 @@ LUIE_CCTracker_IconFrame_IconBorder = {}
 LUIE_CCTracker_IconFrame_IconBorderHighlight = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CCTracker_IconFrame_Cooldown : CooldownControl, ZO_DefaultCooldown
+---@class LUIE_CCTracker_IconFrame_Cooldown : CooldownControl
 ---@field public layer DrawLayer
 ---@field public level integer
 ---@field public hidden boolean
@@ -95,7 +95,7 @@ LUIE_CCTracker_IconFrame_IconBorderHighlight = {}
 LUIE_CCTracker_IconFrame_Cooldown = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CCTracker_IconFrame_GlobalCooldown : CooldownControl, ZO_DefaultCooldown
+---@class LUIE_CCTracker_IconFrame_GlobalCooldown : CooldownControl
 ---@field public layer DrawLayer
 ---@field public level integer
 ---@field public hidden boolean
@@ -231,4 +231,4 @@ LUIE_CCTracker_BreakFreeFrame_Right_IconBorder = {}
 ---@field Anchor {point: AnchorPosition, offsetY: layout_measurement}
 LUIE_CCTracker_BreakFreeFrame_Right_IconBorderHighlight = {}
 ---------- LVL: 09 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\CrowdControlTracker.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\CrowdControlTracker.xml
