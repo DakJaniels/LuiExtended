@@ -59,7 +59,16 @@ frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml
 frontend/SynergyTracker.xml
 frontend/GridOverlay.xml
-frontend/UnitFrames.xml
+frontend/UnitFrames/Animations.xml
+frontend/UnitFrames/SharedTemplates.xml
+frontend/UnitFrames/SmallGroup.xml
+frontend/UnitFrames/RaidFrames.xml
+frontend/UnitFrames/PetFrames.xml
+frontend/UnitFrames/BossFrames.xml
+frontend/UnitFrames/PlayerFrame.xml
+frontend/UnitFrames/TargetFrame.xml
+frontend/UnitFrames/AvAFrame.xml
+frontend/UnitFrames/CompanionFrame.xml
 frontend/SpellCastBuffs.xml
 
 # Unlock

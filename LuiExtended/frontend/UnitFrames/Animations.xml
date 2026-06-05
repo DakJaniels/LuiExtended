@@ -1,0 +1,79 @@
+<!--
+      LuiExtended
+      License: The MIT License (MIT)
+-->
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  <!-- Custom Unit Frames -->
+  <!-- Animation Definitions -->
+  <Animations>
+    <!-- Possession Halo Animation (32-frame sprite sheet, looping) -->
+    <AnimationTimeline name="LUIE_PossessionHaloAnimation"
+                       playbackType="LOOP"
+                       loopCount="LOOP_INDEFINITELY">
+      <Animations>
+        <TextureAnimation cellsWide="4"
+                          cellsHigh="8"
+                          framerate="32"
+                          duration="1000" />
+      </Animations>
+    </AnimationTimeline>
+    <!-- No-Healing Fade Animation (fade in overlay when healing disabled) -->
+    <AnimationTimeline name="LUIE_NoHealingFadeAnimation">
+      <Animations>
+        <AlphaAnimation duration="200"
+                        startAlpha="0"
+                        endAlpha="1">
+          <EasingFunction>
+						return ZO_EaseInQuadratic(progress)
+					</EasingFunction>
+        </AlphaAnimation>
+      </Animations>
+      <OnStop>
+				if self.overlay:GetAlpha() == 0 then
+					self.overlay:SetHidden(true)
+					if self.stripe then
+						self.stripe:SetHidden(true)
+					end
+				end
+			</OnStop>
+    </AnimationTimeline>
+    <!-- Regen/Degen Base Animations (will be configured in Lua with dynamic offsets) -->
+    <AnimationTimeline name="LUIE_RegenAnimationTemplate"
+                       playbackType="LOOP"
+                       loopCount="LOOP_INDEFINITELY">
+      <Animations>
+        <!-- Translate animation - offsets set by Lua based on bar dimensions -->
+        <TranslateAnimation duration="1000"
+                            anchorIndex="0" />
+        <!-- Fade in -->
+        <AlphaAnimation duration="250"
+                        startAlpha="0"
+                        endAlpha="0.75">
+          <EasingFunction>
+						return ZO_EaseOutQuadratic(progress)
+					</EasingFunction>
+        </AlphaAnimation>
+        <!-- Fade out -->
+        <AlphaAnimation delay="750"
+                        duration="250"
+                        startAlpha="0.75"
+                        endAlpha="0">
+          <EasingFunction>
+						return ZO_EaseOutQuadratic(progress)
+					</EasingFunction>
+        </AlphaAnimation>
+      </Animations>
+    </AnimationTimeline>
+    <!-- Increased power halo: increasedPower_animatedHalo_32fr.dds (2048x1024, 4x8 cells) -->
+    <AnimationTimeline name="LUIE_PowerGlowAnimation"
+                       playbackType="LOOP"
+                       loopCount="LOOP_INDEFINITELY">
+      <Animations>
+        <TextureAnimation cellsWide="4"
+                          cellsHigh="8"
+                          framerate="32" />
+      </Animations>
+    </AnimationTimeline>
+  </Animations>
+</GuiXml>

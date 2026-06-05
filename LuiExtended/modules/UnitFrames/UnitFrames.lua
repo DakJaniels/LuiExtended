@@ -3605,6 +3605,9 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     local group = UnitFrames.CustomFrames["SmallGroup1"].tlw
     local totalFrameHeight = groupBarHeight + resourceBarsHeight
     group:SetDimensions(UnitFrames.SV.GroupBarWidth, totalFrameHeight * 4 + UnitFrames.SV.GroupBarSpacing * 3.5)
+    if group.preview then
+        group.preview:SetDimensions(group:GetWidth(), group:GetHeight())
+    end
 
     -- Build player list (sorted by role if enabled)
     local playerList = {}

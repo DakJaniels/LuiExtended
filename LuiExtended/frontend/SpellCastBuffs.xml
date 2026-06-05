@@ -21,11 +21,9 @@
       <Controls>
         <Texture name="$(parent)_Back"
                  layer="BACKGROUND"
-                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"
                  hidden="true" />
         <Texture name="$(parent)_Frame"
-                 layer="OVERLAY"
-                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                 layer="OVERLAY">
           <Anchor point="CENTER"
                   relativeTo="$(parent)"
                   relativePoint="CENTER" />
@@ -57,7 +55,6 @@
                   hidden="true" />
         <Texture name="$(parent)_Icon"
                  textureFile="EsoUI/Art/Icons/icon_missing.dds"
-                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"
                  level="2"
                  layer="CONTROLS">
           <Anchor point="TOPLEFT"

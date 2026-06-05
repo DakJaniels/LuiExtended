@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\UnitFrames.xml
+-- ////// START : GENERATED FROM frontend/UnitFrames/*.xml (split from former UnitFrames.xml)
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -2174,4 +2174,4 @@ LUIE_UF_CompanionFrame_Template_Companion_Health_PossessionOverlay_GlowRight = {
 ---@field TextureCoords {left: number, right: number, top: number, bottom: number}
 LUIE_UF_CompanionFrame_Template_Companion_Health_PossessionOverlay_GlowCenter = {}
 ---------- LVL: 11 ----------
--- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\UnitFrames.xml
+-- ////// END   : GENERATED FROM frontend/UnitFrames/*.xml

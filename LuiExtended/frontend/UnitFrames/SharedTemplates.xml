@@ -1,0 +1,122 @@
+<!--
+      LuiExtended
+      License: The MIT License (MIT)
+-->
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  <!-- Virtual Control Templates -->
+  <Controls>
+    <!-- Combat Glow Border Template (red glow for group frames in combat) -->
+    <Backdrop name="LUIE_CombatGlowBorder"
+              centerColor="000000"
+              edgeColor="FF0000"
+              tier="MEDIUM"
+              level="3"
+              hidden="true"
+              virtual="true">
+      <AnchorFill />
+      <Edge edgeSize="2" />
+      <OnInitialized>
+        local center = ZO_ColorDef:New("66000000")
+        self:SetCenterColor(center:UnpackRGBA())
+        self:SetEdgeColor(1, 0, 0, 1)
+      </OnInitialized>
+    </Backdrop>
+    <!-- Semi-transparent black fill (40%) with darker edge (60%) for unit frame bars -->
+    <Backdrop name="LUIE_UF_BlackFill40_Edge60"
+              centerColor="000000"
+              edgeColor="000000"
+              virtual="true">
+      <OnInitialized>
+        local center = ZO_ColorDef:New("66000000")
+        local edge = ZO_ColorDef:New("99000000")
+        self:SetCenterColor(center:UnpackRGBA())
+        self:SetEdgeColor(edge:UnpackRGBA())
+      </OnInitialized>
+    </Backdrop>
+    <!-- Mover preview: semi-transparent black fill with opaque white edge -->
+    <Backdrop name="LUIE_UF_BlackFill40_WhiteEdge"
+              centerColor="000000"
+              edgeColor="FFFFFF"
+              virtual="true">
+      <OnInitialized>
+        local center = ZO_ColorDef:New("66000000")
+        self:SetCenterColor(center:UnpackRGBA())
+        self:SetEdgeColor(1, 1, 1, 1)
+      </OnInitialized>
+    </Backdrop>
+    <!-- Player stamina dodge prediction marker (ZO_ControlPool) -->
+    <Backdrop name="LUIE_DodgePredictionMarker"
+              virtual="true"
+              hidden="true"
+              mouseEnabled="false"
+              tier="MEDIUM"
+              layer="OVERLAY"
+              level="6">
+      <Dimensions x="2"
+                  y="1" />
+      <Edge edgeSize="0" />
+    </Backdrop>
+    <!-- Decreased Armor Overlay Container (Full version with both textures) -->
+    <Control name="LUIE_DecreasedArmorOverlay"
+             tier="MEDIUM"
+             level="0"
+             hidden="true"
+             virtual="true">
+      <Anchor point="CENTER"
+              relativeTo="$(parent)"
+              relativePoint="CENTER" />
+      <Dimensions x="512"
+                  y="32" />
+      <Controls>
+        <Texture name="$(parent)_SmallTex"
+                 layer="OVERLAY"
+                 level="0"
+                 alpha="1"
+                 hidden="false">
+          <Dimensions x="512"
+                      y="32" />
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER" />
+        </Texture>
+        <Texture name="$(parent)_NormalTex"
+                 layer="OVERLAY"
+                 level="0"
+                 alpha="1"
+                 hidden="false">
+          <Dimensions x="512"
+                      y="32" />
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER" />
+        </Texture>
+      </Controls>
+    </Control>
+    <!-- Small variant (only smallTex) -->
+    <Control name="LUIE_DecreasedArmorOverlay_Small"
+             tier="MEDIUM"
+             level="0"
+             hidden="true"
+             virtual="true">
+      <Anchor point="CENTER"
+              relativeTo="$(parent)"
+              relativePoint="CENTER" />
+      <Dimensions x="512"
+                  y="32" />
+      <Controls>
+        <Texture name="$(parent)_SmallTex"
+                 layer="OVERLAY"
+                 level="0"
+                 alpha="1"
+                 hidden="false">
+          <Dimensions x="512"
+                      y="32" />
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER" />
+        </Texture>
+      </Controls>
+    </Control>
+  </Controls>
+</GuiXml>

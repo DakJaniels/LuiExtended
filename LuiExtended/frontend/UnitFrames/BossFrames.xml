@@ -1,0 +1,194 @@
+<!--
+      LuiExtended
+      License: The MIT License (MIT)
+-->
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  <!-- Virtual Control Templates -->
+  <Controls>
+    <Control virtual="true"
+             name="LUIE_UF_BossMember_Template"
+             hidden="false">
+      <Dimensions x="300"
+                  y="50" />
+      <Anchor point="TOPLEFT"
+              relativeTo="$(parent)"
+              relativePoint="TOPLEFT" />
+      <Controls>
+        <Backdrop name="$(parent)_Health"
+                  inherits="LUIE_UF_BlackFill40_Edge60"
+                  hidden="false">
+          <AnchorFill />
+          <Edge edgeSize="1" />
+          <Controls>
+            <StatusBar name="$(parent)_Bar"
+                       hidden="false">
+              <AnchorFill />
+            </StatusBar>
+            <StatusBar name="$(parent)_Trauma"
+                       hidden="true">
+              <AnchorFill />
+            </StatusBar>
+            <StatusBar name="$(parent)_Invulnerable"
+                       hidden="false">
+              <AnchorFill />
+            </StatusBar>
+            <StatusBar name="$(parent)_InvulnerableInlay"
+                       hidden="false">
+              <AnchorFill />
+            </StatusBar>
+            <StatusBar name="$(parent)_Shield"
+                       hidden="false">
+              <AnchorFill />
+            </StatusBar>
+            <StatusBar name="$(parent)_NoHealingOverlay"
+                       hidden="true">
+              <AnchorFill />
+            </StatusBar>
+            <StatusBar name="$(parent)_NoHealingStripe"
+                       hidden="true">
+              <AnchorFill />
+            </StatusBar>
+            <Control name="$(parent)_PossessionOverlay"
+                     hidden="true">
+              <AnchorFill />
+              <Controls>
+                <Texture name="$(parent)_GlowLeft"
+                         textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="10" />
+                  <Anchor point="TOPLEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="TOPLEFT" />
+                  <TextureCoords left="0.390625"
+                                 right="0.46875"
+                                 top="0.359375"
+                                 bottom="0.65625" />
+                </Texture>
+                <Texture name="$(parent)_GlowRight"
+                         textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="10" />
+                  <Anchor point="TOPRIGHT"
+                          relativeTo="$(parent)"
+                          relativePoint="TOPRIGHT" />
+                  <TextureCoords left="0.46875"
+                                 right="0.390625"
+                                 top="0.359375"
+                                 bottom="0.65625" />
+                </Texture>
+                <Texture name="$(parent)_GlowCenter"
+                         textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Anchor point="TOPLEFT"
+                          relativeTo="$(parent)_GlowLeft"
+                          relativePoint="TOPRIGHT" />
+                  <Anchor point="BOTTOMRIGHT"
+                          relativeTo="$(parent)_GlowRight"
+                          relativePoint="TOPLEFT" />
+                  <TextureCoords left="0.46875"
+                                 right="0.5234375"
+                                 top="0.359375"
+                                 bottom="0.65625" />
+                </Texture>
+              </Controls>
+            </Control>
+            <Control name="$(parent)_ThresholdContainer"
+                     hidden="false">
+              <AnchorFill />
+            </Control>
+            <Label name="$(parent)_Label"
+                   text="zz%"
+                   font="ZoFontGameSmall"
+                   color="FFFFFF"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   hidden="false">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5" />
+            </Label>
+            <Label name="$(parent)_Dead"
+                   text="Status"
+                   font="ZoFontGameSmall"
+                   color="FFFFFF"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   text="boss1"
+                   font="ZoFontGameSmall"
+                   color="FFFFFF"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   hidden="false">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="5" />
+            </Label>
+          </Controls>
+        </Backdrop>
+      </Controls>
+    </Control>
+    <TopLevelControl name="LUIE_UF_BossFrame_Template"
+                     virtual="true"
+                     mouseEnabled="false"
+                     movable="false"
+                     clampedToScreen="true"
+                     hidden="true"
+                     layer="BACKGROUND"
+                     level="0"
+                     tier="MEDIUM">
+      <Dimensions x="300"
+                  y="50" />
+      <Controls>
+        <Control name="$(parent)_Preview"
+                 hidden="true"
+                 mouseEnabled="false"
+                 layer="OVERLAY"
+                 tier="MEDIUM"
+                 level="100">
+          <AnchorFill />
+          <Controls>
+            <Backdrop name="$(parent)_Backdrop"
+                      inherits="LUIE_UF_BlackFill40_WhiteEdge"
+                      layer="OVERLAY"
+                      tier="MEDIUM"
+                      level="100">
+              <Edge edgeSize="2" />
+              <AnchorFill />
+            </Backdrop>
+            <Label name="$(parent)_Label"
+                   text="Bosses Group"
+                   font="ZoFontGamepad22"
+                   color="FFFFFF"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER">
+              <Anchor point="BOTTOM"
+                      relativeTo="$(parent)"
+                      relativePoint="TOP"
+                      offsetY="-1" />
+            </Label>
+          </Controls>
+        </Control>
+        <!-- Boss 1 -->
+        <!-- Boss 2 -->
+        <!-- Boss 3 -->
+        <!-- Boss 4 -->
+        <!-- Boss 5 -->
+        <!-- Boss 6 -->
+        <!-- Boss 7 -->
+      </Controls>
+    </TopLevelControl>
+  </Controls>
+</GuiXml>

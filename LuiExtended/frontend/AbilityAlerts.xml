@@ -30,17 +30,24 @@
         <!-- Preview background -->
         <Backdrop name="$(parent)_Preview"
                   hidden="true"
-                  centerColor="0D99E640"
-                  edgeColor="0D99E6E6">
+                  centerColor="0D99E6"
+                  edgeColor="0D99E6">
           <AnchorFill />
           <Edge edgeFileWidth="8"
                 edgeFileHeight="1"
                 edgeFilePadding="1" />
+          <OnInitialized>
+            local center = ZO_ColorDef:New("0D99E640")
+            local edge = ZO_ColorDef:New("0D99E6E6")
+            self:SetCenterColor(center:UnpackRGBA())
+            self:SetEdgeColor(edge:UnpackRGBA())
+          </OnInitialized>
           <Controls>
             <!-- Anchor texture -->
             <Texture name="$(parent)_AnchorTexture"
                      textureFile="/esoui/art/reticle/border_topleft.dds"
-                     color="FFFF00E6">
+                     color="FFFF00"
+                     alpha="0.902">
               <Dimensions x="16"
                           y="16" />
               <Anchor point="TOPLEFT"
@@ -49,8 +56,8 @@
             </Texture>
             <!-- Position label background -->
             <Backdrop name="$(parent)_AnchorLabelBg"
-                      centerColor="000000FF"
-                      edgeColor="000000FF"
+                      centerColor="000000"
+                      edgeColor="000000"
                       layer="OVERLAY"
                       level="0"
                       tier="LOW">
@@ -126,8 +133,8 @@
         </Label>
         <!-- Icon container -->
         <Backdrop name="$(parent)_Icon"
-                  centerColor="00000080"
-                  edgeColor="000000FF">
+                  centerColor="000000"
+                  edgeColor="000000">
           <Dimensions x="32"
                       y="32" />
           <Anchor point="LEFT"
@@ -138,6 +145,12 @@
           <Edge edgeFileWidth="8"
                 edgeFileHeight="1"
                 edgeFilePadding="1" />
+          <OnInitialized>
+            local center = ZO_ColorDef:New("00000080")
+            local edge = ZO_ColorDef:New("000000FF")
+            self:SetCenterColor(center:UnpackRGBA())
+            self:SetEdgeColor(edge:UnpackRGBA())
+          </OnInitialized>
           <Controls>
             <!-- Icon border -->
             <Texture name="$(parent)_Back"
@@ -147,8 +160,9 @@
             </Texture>
             <!-- Icon background -->
             <Backdrop name="$(parent)_IconBg"
-                      centerColor="000000E6"
-                      edgeColor="000000E6">
+                      centerColor="000000"
+                      edgeColor="000000"
+                      alpha="0.902">
               <Anchor point="TOPLEFT"
                       relativeTo="$(parent)"
                       relativePoint="TOPLEFT"
@@ -165,7 +179,8 @@
             </Backdrop>
             <!-- Cooldown control -->
             <Cooldown name="$(parent)_Cd"
-                      fillColor="00000000"
+                      fillColor="000000"
+                      alpha="0"
                       layer="BACKGROUND">
               <Anchor point="TOPLEFT"
                       relativeTo="$(parent)"
