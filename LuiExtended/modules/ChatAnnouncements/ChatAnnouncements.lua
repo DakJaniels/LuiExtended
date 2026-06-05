@@ -466,7 +466,7 @@ function ChatAnnouncements.RegisterSocialEvents()
     eventManager:RegisterForEvent(moduleName, EVENT_IGNORE_ADDED, ChatAnnouncements.IgnoreAdded)
     eventManager:RegisterForEvent(moduleName, EVENT_IGNORE_REMOVED, ChatAnnouncements.IgnoreRemoved)
     eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_PLAYER_STATUS_CHANGED, ChatAnnouncements.FriendPlayerStatus)
-    LUIE.ChatOutput:RegisterSocialChatEvents()
+    ChatAnnouncements.RegisterSocialChatRouter()
 end
 
 function ChatAnnouncements.RegisterQuestEvents()
@@ -1187,26 +1187,36 @@ function ChatAnnouncements.FriendPlayerStatus(eventId, displayName, characterNam
     local isOnline = newStatus ~= PLAYER_STATUS_OFFLINE
 
     if wasOnline ~= isOnline then
+        local loggedString
+        local loggedCharacterString
+        if isOnline then
+            loggedString = LUIE_STRING_CA_FRIENDS_LIST_LOGGED_ON
+            loggedCharacterString = LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_ON
+        else
+            loggedString = LUIE_STRING_CA_FRIENDS_LIST_LOGGED_OFF
+            loggedCharacterString = LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_OFF
+        end
+
+        local opt = ChatAnnouncements.SV.ChatPlayerDisplayOptions
+        local hasChar = characterName ~= nil and characterName ~= ""
         local chatText
         local alertText
-        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        local characterNameLink = ChatAnnouncements.CreateCharacterLink(characterName)
-        if isOnline then
-            if characterName ~= "" then
-                chatText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_ON, displayNameLink, characterNameLink)
-                alertText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_ON, displayName, characterName)
-            else
-                chatText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_LOGGED_ON, displayNameLink)
-                alertText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_LOGGED_ON, displayName)
-            end
+
+        if not hasChar or opt == 3 then
+            local nameLink = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+            local alertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+            chatText = zo_strformat(loggedString, nameLink)
+            alertText = zo_strformat(loggedString, alertName)
+        elseif opt == 1 then
+            chatText = zo_strformat(loggedCharacterString,
+                                    ChatAnnouncements.CreateDisplayNameLink(displayName, displayName),
+                                    ChatAnnouncements.CreateCharacterLink(characterName))
+            alertText = zo_strformat(loggedCharacterString, displayName, characterName)
         else
-            if characterName ~= "" then
-                chatText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_OFF, displayNameLink, characterNameLink)
-                alertText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_OFF, displayName, characterName)
-            else
-                chatText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_LOGGED_OFF, displayNameLink)
-                alertText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_LOGGED_OFF, displayName)
-            end
+            chatText = zo_strformat(loggedCharacterString,
+                                    ChatAnnouncements.CreateCharacterLink(characterName),
+                                    ChatAnnouncements.CreateDisplayNameLink(displayName, displayName))
+            alertText = zo_strformat(loggedCharacterString, characterName, displayName)
         end
 
         local social = GetChatOutputSocialSettings()
@@ -1897,7 +1907,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
                 local senderKey = currencySender ~= "" and currencySender or ""
                 local nowMs = GetGameTimeMilliseconds()
                 local mailIdForDedupe = pendingMailId
-                if mailIdForDedupe == nil
+                if  mailIdForDedupe == nil
                 and S.g_lastMailCurrencyAnnounce.amount == amountDelta
                 and S.g_lastMailCurrencyAnnounce.senderKey == senderKey then
                     mailIdForDedupe = S.g_lastMailCurrencyAnnounce.mailId

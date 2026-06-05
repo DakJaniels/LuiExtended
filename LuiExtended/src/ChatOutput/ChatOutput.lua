@@ -11,7 +11,6 @@ local LUIE_ChatOutput = LUIE.ChatOutputClass
 local ChatOutput = LUIE.ChatOutput
 
 local ACTIVATION_HANDLER_NAME = LUIE.name .. "ChatOutput"
-local SOCIAL_CHAT_HANDLER_NAME = LUIE.name .. "ChatOutputSocial"
 local LIB_CHAT_MESSAGE_FORMATTER_KEY = "LibChatMessage"
 
 local eventManager = GetEventManager()
@@ -403,11 +402,44 @@ function LUIE_ChatOutput:ShouldApplyLuiExtendedTimestamp()
     return true
 end
 
+--- Removes a leading LCM tag embedded in the message body so LibChatMessage does not duplicate it.
+--- @param messageText string
+--- @return string
+function LUIE_ChatOutput:StripLeadingLibChatMessageTagFromBody(messageText)
+    if not self.libChatMessage or type(messageText) ~= "string" or messageText == "" then
+        return messageText
+    end
+
+    local proxy = self.libChatMessage
+    local tagNames = { proxy.shortTag, proxy.longTag }
+    local stripped = messageText
+
+    for tagIndex = 1, #tagNames do
+        local tagName = tagNames[tagIndex]
+        if type(tagName) == "string" and tagName ~= "" then
+            local bracketTag = zo_strformat("[%s]", tagName)
+            if zo_strsub(stripped, 1, #bracketTag) == bracketTag then
+                stripped = zo_strsub(stripped, #bracketTag + 1)
+                stripped = zo_strgsub(stripped, "^%s+", "")
+                return stripped
+            end
+
+            local coloredPattern = "^|c%x%x%x%x%x%x%[" .. tagName .. "%]|r%s*"
+            local withoutColoredTag = zo_strgsub(stripped, coloredPattern, "")
+            if withoutColoredTag ~= stripped then
+                return withoutColoredTag
+            end
+        end
+    end
+
+    return stripped
+end
+
 function LUIE_ChatOutput:GetRawMessageForLibChatMessageFormatter(messageText)
     if self:ShouldPrependLuiExtendedTimestampOnLibChatMessageProxy() then
-        return self:PrependLuiExtendedTimestampToMessage(messageText)
+        messageText = self:PrependLuiExtendedTimestampToMessage(messageText)
     end
-    return messageText
+    return self:StripLeadingLibChatMessageTagFromBody(messageText)
 end
 
 --- Runs LibChatMessage (and pChat wrap) formatter without CHAT_ROUTER delivery; records LCM history.
@@ -435,9 +467,7 @@ function LUIE_ChatOutput:PrintViaLibChatMessage(messageText)
     if self.libChatMessage then
         -- Re-apply before each print (pChat/LCM init order can leave timePrefixEnabled true).
         self:ApplyLibChatMessageTimePrefixSettings()
-        if self:ShouldPrependLuiExtendedTimestampOnLibChatMessageProxy() then
-            messageText = self:PrependLuiExtendedTimestampToMessage(messageText)
-        end
+        messageText = self:GetRawMessageForLibChatMessageFormatter(messageText)
         self.libChatMessage:Print(messageText)
         return true
     end
@@ -799,15 +829,17 @@ function LUIE_ChatOutput:WrapFormatter(eventKey, shouldSuppressFn)
     end
 
     local registeredMessageFormatters = CHAT_ROUTER:GetRegisteredMessageFormatters()
-    local innerFormatter = registeredMessageFormatters[eventKey]
-    if not innerFormatter then
+    local registeredFormatter = registeredMessageFormatters[eventKey]
+    if not registeredFormatter then
         return
     end
 
     local existingWrapper = self.formatterWrappers[eventKey]
-    if existingWrapper and (existingWrapper.innerFormatter == innerFormatter or existingWrapper.outerFormatter == innerFormatter) then
+    if existingWrapper and existingWrapper.outerFormatter == registeredFormatter then
         return
     end
+
+    local innerFormatter = registeredFormatter
 
     local function outerFormatter(...)
         if shouldSuppressFn(...) then
@@ -818,50 +850,6 @@ function LUIE_ChatOutput:WrapFormatter(eventKey, shouldSuppressFn)
 
     self.formatterWrappers[eventKey] = { innerFormatter = innerFormatter, outerFormatter = outerFormatter }
     CHAT_ROUTER:RegisterMessageFormatter(eventKey, outerFormatter)
-end
-
---- @param error integer
---- @return boolean
-function LUIE_ChatOutput:ShouldShowSocialErrorInChat(error)
-    return not ShouldShowSocialErrorInAlert(error)
-end
-
-function LUIE_ChatOutput:OnSocialErrorChat(_, error)
-    if not IsSocialErrorIgnoreResponse(error) and self:ShouldShowSocialErrorInChat(error) then
-        self:Print(zo_strformat(GetString("SI_SOCIALACTIONRESULT", error)))
-    end
-end
-
---- Registers social-error event and CHAT_ROUTER formatter suppressions (friend/ignore/social error).
-function LUIE_ChatOutput:RegisterSocialChatEvents()
-    eventManager:RegisterForEvent(SOCIAL_CHAT_HANDLER_NAME, EVENT_SOCIAL_ERROR, function (eventId, err)
-        ChatOutput:OnSocialErrorChat(eventId, err)
-    end)
-    self:ChainFormatterSuppressions()
-end
-
-local function ShouldSuppressFriendStatus()
-    local social = ChatOutput:GetChatOutputSocialSettings()
-    return social and social.FriendStatusCA == true
-end
-
-local function ShouldSuppressFriendIgnore()
-    local social = ChatOutput:GetChatOutputSocialSettings()
-    return social and social.FriendIgnoreCA == true
-end
-
-local function ShouldSuppressSocialError(_, error)
-    if IsSocialErrorIgnoreResponse(error) then
-        return false
-    end
-    return ChatOutput:ShouldShowSocialErrorInChat(error)
-end
-
-function LUIE_ChatOutput:ChainFormatterSuppressions()
-    self:WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
-    self:WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnore)
-    self:WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnore)
-    self:WrapFormatter(EVENT_SOCIAL_ERROR, ShouldSuppressSocialError)
 end
 
 function LUIE_ChatOutput:OnDeferredPlayerActivated()
@@ -887,27 +875,6 @@ function LUIE_ChatOutput:RegisterExternalChatInitializerCallbacksOnce()
         CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_AddSystemMessage", function ()
             ChatOutput:ApplyLibChatMessageTimePrefixSettings()
             ChatOutput:DisableLibChatMessageHistoryWhenPChatRestoreIsActive()
-        end)
-        CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
-            ChatOutput:ChainFormatterSuppressions()
-        end)
-        CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_ADDED", function ()
-            ChatOutput:ChainFormatterSuppressions()
-        end)
-        CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_REMOVED", function ()
-            ChatOutput:ChainFormatterSuppressions()
-        end)
-    end
-
-    if IsRChatAvailable() then
-        CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
-            ChatOutput:ChainFormatterSuppressions()
-        end)
-        CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_IGNORE_ADDED", function ()
-            ChatOutput:ChainFormatterSuppressions()
-        end)
-        CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_IGNORE_REMOVED", function ()
-            ChatOutput:ChainFormatterSuppressions()
         end)
     end
 end

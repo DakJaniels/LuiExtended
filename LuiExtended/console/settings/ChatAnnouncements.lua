@@ -7050,7 +7050,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 LUIE.SV.ChatOutput = LUIE.SV.ChatOutput or {}
                 LUIE.SV.ChatOutput.Social = LUIE.SV.ChatOutput.Social or {}
                 LUIE.SV.ChatOutput.Social.FriendIgnoreCA = value
-                LUIE.ChatOutput:ChainFormatterSuppressions()
+                LUIE.ChatAnnouncements.ChainChatRouterSocialSuppressions()
             end,
             default = LUIE.Defaults.ChatOutput.Social.FriendIgnoreCA,
             disable = function ()
@@ -7088,7 +7088,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 LUIE.SV.ChatOutput = LUIE.SV.ChatOutput or {}
                 LUIE.SV.ChatOutput.Social = LUIE.SV.ChatOutput.Social or {}
                 LUIE.SV.ChatOutput.Social.FriendStatusCA = value
-                LUIE.ChatOutput:ChainFormatterSuppressions()
+                LUIE.ChatAnnouncements.ChainChatRouterSocialSuppressions()
             end,
             default = LUIE.Defaults.ChatOutput.Social.FriendStatusCA,
             disable = function ()
