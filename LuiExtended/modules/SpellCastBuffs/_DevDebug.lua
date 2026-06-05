@@ -403,7 +403,7 @@ end
 function SpellCastBuffs.TempSlashFilter()
     SpellCastBuffs.SV.ShowDebugFilter = not SpellCastBuffs.SV.ShowDebugFilter
     ChatOutput:AddSystemMessage(string_format("LUIE --- Ability Debug Filter %s ---",
-                                   SpellCastBuffs.SV.ShowDebugFilter and "Enabled" or "Disabled"))
+                                              SpellCastBuffs.SV.ShowDebugFilter and "Enabled" or "Disabled"))
 end
 
 --- Toggles ground damage aura visualization on/off.
@@ -412,7 +412,7 @@ end
 function SpellCastBuffs.TempSlashGround()
     SpellCastBuffs.SV.GroundDamageAura = not SpellCastBuffs.SV.GroundDamageAura
     ChatOutput:AddSystemMessage(string_format("LUIE --- Ground Damage Auras %s ---",
-                                   SpellCastBuffs.SV.GroundDamageAura and "Enabled" or "Disabled"))
+                                              SpellCastBuffs.SV.GroundDamageAura and "Enabled" or "Disabled"))
     LUIE.SpellCastBuffs.ReloadEffects("player")
 end
 
@@ -488,7 +488,7 @@ function SpellCastBuffs.TempSlashZoneCheck()
         for i, poi in ipairs(info.poiInfo.items) do
             if i <= 5 then -- Limit to first 5 POIs to avoid spam
                 ChatOutput:AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
-                                               i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
+                                                          i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
             end
         end
 
@@ -583,7 +583,7 @@ function SpellCastBuffs.TempSlashZoneCheckFull()
         for i, poi in ipairs(info.poiInfo.items) do
             if i <= 5 then -- Limit to first 5 POIs to avoid spam
                 ChatOutput:AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
-                                               i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
+                                                          i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
             end
         end
 
@@ -601,7 +601,7 @@ function SpellCastBuffs.TempSlashZoneCheckFull()
         for i, node in ipairs(info.fastTravelInfo.items) do
             if i <= 5 then -- Limit to first 5 wayshrines
                 ChatOutput:AddSystemMessage(string_format("Wayshrine %d: %s (Known: %s, Cost: %d)",
-                                               i, node.name, node.known and "Yes" or "No", node.cost))
+                                                          i, node.name, node.known and "Yes" or "No", node.cost))
             end
         end
 

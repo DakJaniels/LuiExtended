@@ -433,7 +433,7 @@ end
 local function formatAbilityAdvancedEffectValue(displayFormat, effectValue)
     local value = effectValue or 0
     if displayFormat == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT
-        or displayFormat == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
+    or displayFormat == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
         return zo_strformat(SI_STAT_VALUE_PERCENT, value)
     end
     if displayFormat == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then

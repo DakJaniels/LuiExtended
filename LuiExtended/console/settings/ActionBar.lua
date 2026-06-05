@@ -1179,8 +1179,8 @@ function ActionBar.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_TP),
             items =
             {
-                { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_MS), data = 1 },
-                { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_01), data = 2 },
+                { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_MS),      data = 1 },
+                { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_01),  data = 2 },
                 { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_001), data = 3 },
             },
             getFunction = function () return Settings.CastBarTimerFormat end,

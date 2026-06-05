@@ -77,6 +77,7 @@ modules/ChatAnnouncements/ChatAnnouncementsCSA.lua
 modules/ChatAnnouncements/QuestCounterFilters.lua
 modules/ChatAnnouncements/ChatAnnouncementsNightMarketDisplay.lua
 modules/ChatAnnouncements/ChatAnnouncementsHooks.lua
+modules/ChatAnnouncements/ChatAnnouncementsSocialRouter.lua
 modules/ChatAnnouncements/ChatAnnouncements.lua
 
 # Modules - Combat Text

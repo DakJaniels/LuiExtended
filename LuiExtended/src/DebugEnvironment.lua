@@ -17,7 +17,7 @@ local debugEnvironmentReloadChatShown = false
 local DEBUG_ENVIRONMENT_RELOAD_CHAT_NAMESPACE = "LuiExtended_DebugEnvironmentReloadChat"
 
 local DEBUG_ENVIRONMENT_ACTIVE_RELOAD_MESSAGE =
-    "Debug environment is active. LUIE core addons were enabled; you may enable more addons to test interactions. Use '/luie debug off' to restore your addon list."
+"Debug environment is active. LUIE core addons were enabled; you may enable more addons to test interactions. Use '/luie debug off' to restore your addon list."
 
 local CORE_ALLOWLIST =
 {
@@ -83,7 +83,7 @@ local function GetDebugEnvironmentAllowlist()
 end
 
 local function DebugEnvironmentChat(message)
-    LUIE.ChatOutput:Print("[LUIE] " .. message, true)
+    LUIE.ChatOutput:Print(message, true)
 end
 
 --- @return boolean

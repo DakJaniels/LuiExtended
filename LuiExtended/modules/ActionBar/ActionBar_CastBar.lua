@@ -110,17 +110,21 @@ CastBar.Private.moduleName = moduleName
 function CastBar.Private.GetState()
     return g_castBarState
 end
+
 function CastBar.Private.IsCasting()
     return g_casting
 end
+
 function CastBar.Private.SetLibCombatTimingsActive(active)
     g_castBarLibCombatTimingsActive = active
     CastBar.usesLibCombatSkillTimings = active
 end
+
 function CastBar.Private.RecordLibCombatCastStart(abilityId, startTimeMs)
     g_castBarLibCombatLastAbilityId = abilityId
     g_castBarLibCombatLastStartMs = startTimeMs
 end
+
 function CastBar.Private.ShouldDedupeCombatCastStart(abilityId)
     return g_castBarLibCombatTimingsActive
         and g_castBarLibCombatLastAbilityId == abilityId
@@ -1108,7 +1112,7 @@ function CastBar.HandleCombatEvent(result, isError, abilityName, abilityGraphic,
             CastBar.StopCastBar()
             return
         end
-        if (result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION)
+        if  (result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION)
         and sourceType == COMBAT_UNIT_TYPE_PLAYER then
             if not CastBar.Private.IsCasting() then
                 castBarClearChannelSuppressForSlotted(channelTrack.slottedId)

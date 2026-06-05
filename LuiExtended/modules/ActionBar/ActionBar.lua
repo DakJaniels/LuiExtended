@@ -1253,7 +1253,7 @@ function ActionBar.OnUpdate(currentTimeMS)
         local backToggle = backSlotNum and g_uiCustomToggle[backSlotNum]
         -- Update Label (FRONT)
         if effectEndTimeMs < currentTimeMS then
-            if (g_barCombatStackNoExpire[highlightAbilityId] or IsGrimFocusTrack(highlightAbilityId))
+            if  (g_barCombatStackNoExpire[highlightAbilityId] or IsGrimFocusTrack(highlightAbilityId))
             and g_toggledSlotsStack[highlightAbilityId] and g_toggledSlotsStack[highlightAbilityId] > 0 then
                 g_toggledSlotsRemain[highlightAbilityId] = currentTimeMS + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
             else
@@ -1341,7 +1341,7 @@ function ActionBar.OnAbilityUsed(actionSlotIndex)
     end
     local combatTrackAbilityId = g_barConsumeStackOnCast[slottedAbilityId]
     if combatTrackAbilityId and (g_toggledSlotsFront[combatTrackAbilityId] or g_toggledSlotsBack[combatTrackAbilityId]
-    or g_toggledSlotsFront[slottedAbilityId] or g_toggledSlotsBack[slottedAbilityId]) then
+        or g_toggledSlotsFront[slottedAbilityId] or g_toggledSlotsBack[slottedAbilityId]) then
         if g_toggledSlotsStack[combatTrackAbilityId] or g_toggledSlotsStack[slottedAbilityId] then
             DecrementBarHighlightCombatStack(combatTrackAbilityId)
         end
@@ -2267,7 +2267,7 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
                     end
                 else
                     local resolvedStacks = ResolveBarHighlightStacks(abilityId, unitTag, stackCount)
-                    if Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]
+                    if  Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]
                     and (not resolvedStacks or resolvedStacks <= 0) then
                         local zeroMode = g_barCombatStackZeroEffect[abilityId]
                         if zeroMode == "clear" then
@@ -2284,10 +2284,10 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
                             if resolvedStacks and resolvedStacks > 0 then
                                 g_toggledSlotsStack[abilityId] = resolvedStacks
                             elseif stackCount and stackCount > 0
-                            and not (Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]) then
+                            and    not (Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]) then
                                 g_toggledSlotsStack[abilityId] = stackCount
                             elseif not g_toggledSlotsStack[abilityId] and g_toggledSlotsRemain[abilityId]
-                            and not (Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]) then
+                            and    not (Effects.BarHighlightStackBuffOnly and Effects.BarHighlightStackBuffOnly[abilityId]) then
                                 g_toggledSlotsStack[abilityId] = maxStack
                             end
                         end
@@ -2435,7 +2435,7 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
 
     if unitTag ~= "player" and unitTag ~= "reticleover" then return end
 
-    if Effects.BarHighlightIgnoreBarStackEvent and Effects.BarHighlightIgnoreBarStackEvent[abilityId]
+    if  Effects.BarHighlightIgnoreBarStackEvent and Effects.BarHighlightIgnoreBarStackEvent[abilityId]
     and changeType ~= EFFECT_RESULT_FADED then
         return
     end
@@ -3021,7 +3021,7 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
         elseif slottedAbilityId and g_toggledSlotsRemain[slottedAbilityId] then
             showAbilityId = slottedAbilityId
         elseif slottedAbilityId and Effects.BarHighlightStackBaseAbility and Effects.BarHighlightStackBaseAbility[slottedAbilityId]
-        and g_toggledSlotsStack[slottedAbilityId] and g_toggledSlotsStack[slottedAbilityId] > 0 then
+        and    g_toggledSlotsStack[slottedAbilityId] and g_toggledSlotsStack[slottedAbilityId] > 0 then
             showAbilityId = slottedAbilityId
         end
         if showAbilityId and ActionBar.SV.ShowToggled then
