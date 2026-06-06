@@ -1864,8 +1864,6 @@ local effectOverride =
     -- Landslide passive stack (Earthen Heart skill menu: weapon_005; not Dragon Leap ground 29465/009).
     [29463] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide passive (rank 1 / stack buff)
     [44984] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide passive (rank 2 / stack buff)
-    [44987] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide (stack combat id)
-    [44988] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide (stack combat id)
     [29468] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 1)
     [44996] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 2)
     [29474] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS, hide = true }, -- Blessing at the Peak (passive POWER clutter; table 198758357)
@@ -2080,9 +2078,8 @@ local effectOverride =
     [29466] = { hide = true },                                                                              -- Landslide (ground tick)
     [29467] = { hide = true },                                                                              -- Landslide
     [259228] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Landslide (U49)
-    [44984] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
-    [44987] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
-    [44988] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
+    [44987] = { hide = true },                                                                              -- Landslide (ground tick, rank 2)
+    [44988] = { hide = true },                                                                              -- Landslide (rank 2)
     [118928] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Dragon Leap (combat bundle)
     [32719] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds" },                                 -- Take Flight (slotted)
     [259372] = { hide = true },                                                                             -- Take Flight (travel)
