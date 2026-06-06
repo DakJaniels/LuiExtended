@@ -13,7 +13,7 @@ local UnitFrames = LUIE.UnitFrames
 
 --- Module for handling Possession (mind control) visual effects
 --- @class LUIE_PossessionModule : LUIE_UnitAttributeVisualizerModuleBase
-local PossessionModule = LUIE_UnitAttributeVisualizerModuleBase:New()
+local PossessionModule = LUIE_UnitAttributeVisualizerModuleBase:Subclass()
 
 function PossessionModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_POSSESSION
@@ -56,7 +56,7 @@ function PossessionModule:UpdatePossession(unitTag, value)
         if isActive then
             overlay:SetHidden(false)
 
-            -- Show and play halo animation (pre-created in _CreateCustomFrames.lua)
+            -- Show and play halo animation (pre-created in CustomFrames build)
             if halo and halo.timeline then
                 halo:SetHidden(false)
                 if not halo.timeline:IsPlaying() then
@@ -107,18 +107,9 @@ function PossessionModule:UpdatePossession(unitTag, value)
         end
     end
 
-    -- Update frames
-    if UnitFrames.DefaultFrames[unitTag] and UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        updatePossessionOverlay(UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH])
-    end
-
-    if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        updatePossessionOverlay(UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH])
-    end
-
-    if UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        updatePossessionOverlay(UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH])
-    end
+    self:ForEachPowerEntry(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, function (healthBar)
+        updatePossessionOverlay(healthBar)
+    end)
 end
 
 -- -----------------------------------------------------------------------------
@@ -137,6 +128,8 @@ function PossessionModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, s
     self:UpdatePossession(unitTag, newValue)
 end
 
+LUIE_PossessionModule = PossessionModule
+UnitFrames.VisualizerModuleClasses.PossessionModule = PossessionModule
 UnitFrames.VisualizerModules.PossessionModule = PossessionModule
 
 return PossessionModule

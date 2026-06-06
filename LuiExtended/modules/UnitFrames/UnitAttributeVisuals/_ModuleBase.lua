@@ -14,6 +14,7 @@ local UnitFrames = LUIE.UnitFrames
 --- Base class for Unit Attribute Visualizer modules
 --- Provides the contract that all visualizer modules must implement
 --- @class LUIE_UnitAttributeVisualizerModuleBase : ZO_Object
+--- @field New fun(self, ...): LUIE_UnitAttributeVisualizerModuleBase
 LUIE_UnitAttributeVisualizerModuleBase = ZO_Object:Subclass()
 
 local g_numModulesCreated = 0
@@ -177,7 +178,46 @@ end
 --- @param magickaBarControl table|nil
 --- @param staminaBarControl table|nil
 function LUIE_UnitAttributeVisualizerModuleBase:OnAdded(healthBarControl, magickaBarControl, staminaBarControl)
-    -- Override in subclasses if needed
+    self.healthBarControl = healthBarControl
+    self.magickaBarControl = magickaBarControl
+    self.staminaBarControl = staminaBarControl
+end
+
+--- Invokes callback for each power entry this visualizer owns for unitTag/powerType.
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags
+--- @param callback fun(powerEntry: table)
+function LUIE_UnitAttributeVisualizerModuleBase:ForEachPowerEntry(unitTag, powerType, callback)
+    local owner = self.owner
+    if owner then
+        if owner.customFrame and owner.customFrame[powerType] then
+            callback(owner.customFrame[powerType])
+        end
+        if owner.defaultFrameTable and owner.defaultFrameTable[powerType] then
+            callback(owner.defaultFrameTable[powerType])
+        end
+    end
+    if UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][powerType] then
+        callback(UnitFrames.AvaCustFrames[unitTag][powerType])
+    end
+end
+
+--- Invokes callback for each unit-frame table (custom/default/ava) tied to this visualizer.
+--- @param unitTag string
+--- @param callback fun(frameTable: table)
+function LUIE_UnitAttributeVisualizerModuleBase:ForEachUnitFrameTable(unitTag, callback)
+    local owner = self.owner
+    if owner then
+        if owner.customFrame then
+            callback(owner.customFrame)
+        end
+        if owner.defaultFrameTable then
+            callback(owner.defaultFrameTable)
+        end
+    end
+    if UnitFrames.AvaCustFrames[unitTag] then
+        callback(UnitFrames.AvaCustFrames[unitTag])
+    end
 end
 
 --- Called when the unit the unitTag points to has changed (override in subclasses if needed)

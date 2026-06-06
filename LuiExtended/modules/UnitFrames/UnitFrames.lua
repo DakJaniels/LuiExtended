@@ -334,7 +334,7 @@ function UnitFrames.Initialize(enabled)
 
     -- Initialize visualizer coordinators for all tracked units
     -- Each coordinator registers its own attribute visual events with unit tag filtering
-    UnitFrames.InitializeVisualizers()
+    UnitFrames.InitializeDefaultVisualizers()
 
     -- Set event handlers
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, UnitFrames.OnPlayerActivated)
@@ -1561,10 +1561,9 @@ function UnitFrames.ReloadValues(unitTag)
 
     -- Trigger visualizer reinitialization (handles all visual states with proper sequence IDs)
     -- This replaces the manual module Update calls to keep sequence IDs in order
-    local coordinator = UnitFrames.GetVisualizerForUnit(unitTag)
-    if coordinator then
+    UnitFrames.ForEachVisualizerForUnit(unitTag, function (coordinator)
         coordinator:OnUnitChanged()
-    end
+    end)
 
     -- Now we need to update Name labels, classIcon
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
@@ -2100,10 +2099,11 @@ function UnitFrames.OnDeath(eventCode, unitTag, isDead)
     if isDead and UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
         local thb = UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
         -- 1. Regen/degen
-        UnitFrames.VisualizerModules.RegenerationModule:DisplayRegen(thb.regen1, false)
-        UnitFrames.VisualizerModules.RegenerationModule:DisplayRegen(thb.regen2, false)
-        UnitFrames.VisualizerModules.RegenerationModule:DisplayRegen(thb.degen1, false)
-        UnitFrames.VisualizerModules.RegenerationModule:DisplayRegen(thb.degen2, false)
+        local regenModule = LUIE_RegenerationModule
+        regenModule:DisplayRegen(thb.regen1, false)
+        regenModule:DisplayRegen(thb.regen2, false)
+        regenModule:DisplayRegen(thb.degen1, false)
+        regenModule:DisplayRegen(thb.degen2, false)
         -- 2. Stats
         if thb.stat then
             for _, statControls in pairs(thb.stat) do
@@ -2897,17 +2897,9 @@ function UnitFrames.CustomFramesSetPositions()
     default_anchors["boss1"] = { TOPLEFT, CENTER, coords.boss1[1], coords.boss1[2] }
     default_anchors["AvaPlayerTarget"] = { CENTER, CENTER, coords.AvaPlayerTarget[1], coords.AvaPlayerTarget[2] }
 
-    for _, unitTag in pairs(
-        {
-            "player",
-            "reticleover",
-            "companion",
-            "SmallGroup1",
-            "RaidGroup1",
-            "boss1",
-            "AvaPlayerTarget",
-            "PetGroup1",
-        }) do
+    local customFramesShared = LUIE.CustomFramesShared
+    for keyIndex = 1, #customFramesShared.MOVER_ANCHOR_REGISTRY_KEYS do
+        local unitTag = customFramesShared.MOVER_ANCHOR_REGISTRY_KEYS[keyIndex]
         if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
             local savedPos = UnitFrames.SV[UnitFrames.CustomFrames[unitTag].tlw.customPositionAttr]
             local anchors = (savedPos ~= nil and #savedPos == 2) and { TOPLEFT, TOPLEFT, savedPos[1], savedPos[2] } or default_anchors[unitTag]
@@ -3565,17 +3557,115 @@ function UnitFrames.CustomFramesApplyLayoutPlayer(unhide)
     UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
 end
 
+--- Applies layout across custom frame categories (single orchestration site).
+--- @class UnitFrames.CustomFramesApplyAllLayoutsOptions
+--- @field unhide boolean|nil Shorthand for unhidePlayer
+--- @field unhidePlayer boolean|nil
+--- @field unhideReticle boolean|nil
+--- @field unhideAva boolean|nil
+--- @field group boolean|nil Unhide flag for group layout
+--- @field raid boolean|nil Unhide flag for raid layout
+--- @field layoutAllRaidSlots boolean|nil Passed to CustomFramesApplyLayoutRaid
+--- @field playerTriadOnly boolean|nil When true, only player / reticleover / AvA layouts run
+--- @field includeGroup boolean|nil Default true unless playerTriadOnly
+--- @field includeRaid boolean|nil Default false
+--- @field includeCompanion boolean|nil Default matches includeGroup
+--- @field includePet boolean|nil Default matches includeGroup
+--- @field includeBosses boolean|nil Default false
+--- @field includeCompanionPetUpdates boolean|nil Default false
+--- @param options UnitFrames.CustomFramesApplyAllLayoutsOptions|nil
+function UnitFrames.CustomFramesApplyAllLayouts(options)
+    options = options or {}
+    local unhidePlayer = options.unhidePlayer
+    if unhidePlayer == nil then
+        unhidePlayer = options.unhide
+    end
+    if unhidePlayer == nil then
+        unhidePlayer = false
+    end
+    local unhideReticle = options.unhideReticle
+    if unhideReticle == nil then
+        unhideReticle = unhidePlayer
+    end
+    local unhideAva = options.unhideAva
+    if unhideAva == nil then
+        unhideAva = unhideReticle
+    end
+
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhidePlayer)
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhideReticle)
+    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhideAva)
+
+    if options.playerTriadOnly then
+        return
+    end
+
+    local includeGroup = options.includeGroup
+    if includeGroup == nil then
+        includeGroup = true
+    end
+    if includeGroup then
+        local groupUnhide = options.group
+        if groupUnhide == nil then
+            groupUnhide = unhidePlayer
+        end
+        UnitFrames.CustomFramesApplyLayoutGroup(groupUnhide)
+    end
+
+    if options.includeRaid then
+        local raidUnhide = options.raid
+        if raidUnhide == nil then
+            raidUnhide = unhidePlayer
+        end
+        UnitFrames.CustomFramesApplyLayoutRaid(raidUnhide, options.layoutAllRaidSlots)
+    end
+
+    local includeCompanion = options.includeCompanion
+    if includeCompanion == nil then
+        includeCompanion = includeGroup
+    end
+    if includeCompanion then
+        UnitFrames.CustomFramesApplyLayoutCompanion(unhidePlayer)
+    end
+
+    local includePet = options.includePet
+    if includePet == nil then
+        includePet = includeGroup
+    end
+    if includePet then
+        UnitFrames.CustomFramesApplyLayoutPet(unhidePlayer)
+    end
+
+    if options.includeCompanionPetUpdates then
+        UnitFrames.CustomPetUpdate()
+        UnitFrames.CompanionUpdate()
+        UnitFrames.CustomFramesApplyCompanionInCombat(true)
+        UnitFrames.UpdateCompanionCombatGlow()
+        UnitFrames.CustomFramesApplyPetInCombat(true)
+        UnitFrames.UpdatePetCombatGlow()
+    end
+
+    if options.includeBosses then
+        UnitFrames.CustomFramesApplyLayoutBosses(unhidePlayer)
+    end
+end
+
 -- Re-apply shield bar visibility after shield mode or layout changes.
 function UnitFrames.RefreshCustomFrameShields()
-    local powerShield = UnitFrames.VisualizerModules and UnitFrames.VisualizerModules.PowerShieldModule
-    if not powerShield or not UnitFrames.savedHealth then
+    if not UnitFrames.savedHealth then
         return
     end
     for unitTag, saved in pairs(UnitFrames.savedHealth) do
-        local shieldValue = saved[4]
-        if shieldValue and shieldValue > 0 then
-            powerShield:UpdateShield(unitTag, shieldValue, saved[3])
-        end
+        local shieldValue = saved[4] or 0
+        UnitFrames.ForEachVisualizerForUnit(unitTag, function (visualizer)
+            if visualizer.visualModules then
+                for module in pairs(visualizer.visualModules) do
+                    if module.UpdateShield then
+                        module:UpdateShield(unitTag, shieldValue, saved[3])
+                    end
+                end
+            end
+        end)
     end
 end
 
@@ -3676,6 +3766,7 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     end
 
     UnitFrames.CustomFramesTryUnhideTlw("SmallGroup1", unhide)
+    UnitFrames.RefreshCustomFrameShields()
 end
 
 --- @param index number

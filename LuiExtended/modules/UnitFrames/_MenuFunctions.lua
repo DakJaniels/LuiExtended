@@ -12,12 +12,12 @@ local UnitFrames = LUIE.UnitFrames
 local GridOverlay = LUIE.GridOverlay
 
 local function ApplyCustomShieldBarLayoutRefresh()
-    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
-    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
-    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
-    UnitFrames.CustomFramesApplyLayoutGroup(false)
-    UnitFrames.CustomFramesApplyLayoutCompanion(false)
-    UnitFrames.CustomFramesApplyLayoutPet(false)
+    UnitFrames.CustomFramesApplyAllLayouts(
+        {
+            includeRaid = false,
+            includeBosses = false,
+            includeCompanionPetUpdates = false,
+        })
 end
 
 function UnitFrames.OnCustomShieldBarSettingsChanged(applyLayout)
@@ -48,9 +48,7 @@ function UnitFrames.MenuUpdatePlayerFrameOptions(option)
     end
     UnitFrames.CustomFramesSetPositions()
     UnitFrames.CustomFramesSetupAlternative()
-    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
-    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
-    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
+    UnitFrames.CustomFramesApplyAllLayouts({ playerTriadOnly = true })
 end
 
 function UnitFrames.ResetCompassBarMenu()
@@ -68,36 +66,36 @@ end
 
 --- While reposition mode is on, disable mouse on group/raid member controls so the movable TLW receives drags.
 local sceneManager = SCENE_MANAGER
+--- @type LUIE.CustomFramesShared
+local CustomFramesShared = LUIE.CustomFramesShared
 
---- Custom frame TLWs use ZO_HUDFadeSceneFragment on hud/hudui/siegeBar/siegeBarUI only (not gameMenuInGame).
+--- Custom frame TLWs use ZO_HUDFadeSceneFragment on the same scenes as default UNIT_FRAMES_FRAGMENT.
 --- @return boolean
 local function CustomFramesIsHudGameplaySceneActive()
     local scene = sceneManager:GetCurrentScene()
     if not scene or scene:GetState() ~= SCENE_SHOWN then
         return false
     end
-    local sceneName = scene:GetName()
-    return sceneName == "hud" or sceneName == "hudui" or sceneName == "siegeBar" or sceneName == "siegeBarUI"
+    return CustomFramesShared.IsCustomFrameHudScene(scene)
 end
 
 --- Raid tiles the TLW with mouse-enabled children; small group leaves gaps but this keeps behavior consistent.
 --- @param enabled boolean True to restore mouse (normal play), false during frame moving.
 local function CustomFramesSetGroupMemberMouseEnabledForMoving(enabled)
-    for i = 1, 4 do
-        local frame = UnitFrames.CustomFrames["SmallGroup" .. i]
-        if frame and frame.control then
+    local manager = UnitFrames.CustomFramesManager
+    manager:ForEachFrameInBucket("smallGroup", function (_, frame)
+        if frame.control then
             frame.control:SetMouseEnabled(enabled)
             if frame.topInfo then
                 frame.topInfo:SetMouseEnabled(enabled)
             end
         end
-    end
-    for i = 1, 12 do
-        local frame = UnitFrames.CustomFrames["RaidGroup" .. i]
-        if frame and frame.control then
+    end)
+    manager:ForEachFrameInBucket("raid", function (_, frame)
+        if frame.control then
             frame.control:SetMouseEnabled(enabled)
         end
-    end
+    end)
 end
 
 -- Unlock CustomFrames for moving. Called from Settings Menu.
@@ -111,46 +109,32 @@ function UnitFrames.CustomFramesSetMovingState(state)
 
     -- PC/Keyboard version
     -- Unlock individual frames
-    for _, unitTag in pairs(
-        {
-            "player",
-            "reticleover",
-            "companion",
-            "SmallGroup1",
-            "RaidGroup1",
-            "boss1",
-            "AvaPlayerTarget",
-            "PetGroup1",
-        }) do
-        if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
-            local tlw = UnitFrames.CustomFrames[unitTag].tlw
-            if tlw.preview then
-                tlw.preview:SetHidden(not state) -- player frame does not have 'preview' control
-            end
-            if state then
-                local left, top = tlw:GetLeft(), tlw:GetTop()
-                tlw:ClearAnchors()
-                tlw:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-                tlw:SetHidden(false)
-            elseif not CustomFramesIsHudGameplaySceneActive() then
-                -- Unlock forces visible on GuiRoot; hide again when not on a HUD gameplay scene (e.g. gameMenuInGame).
-                tlw:SetHidden(true)
-            end
-            tlw:SetMouseEnabled(state)
-            tlw:SetMovable(state)
-
-            --- @param self LUIE_PositionableTopLevelWindow
-            local function OnMoveStop(self)
-                local left, top = self:GetLeft(), self:GetTop()
-                left, top = LUIE.ApplyGridSnap(left, top, "unitFrames")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-                UnitFrames.SV[self.customPositionAttr] = { left, top }
-            end
-            -- Add grid snapping handler
-            tlw:SetHandler("OnMoveStop", OnMoveStop)
+    CustomFramesShared.ForEachMovableAnchorFrame(function (_, _, tlw)
+        if tlw.preview then
+            tlw.preview:SetHidden(not state) -- player frame does not have 'preview' control
         end
-    end
+        if state then
+            local left, top = tlw:GetLeft(), tlw:GetTop()
+            tlw:ClearAnchors()
+            tlw:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+            tlw:SetHidden(false)
+        elseif not CustomFramesIsHudGameplaySceneActive() then
+            -- Unlock forces visible on GuiRoot; hide again when not on a HUD gameplay scene (e.g. gameMenuInGame).
+            tlw:SetHidden(true)
+        end
+        tlw:SetMouseEnabled(state)
+        tlw:SetMovable(state)
+
+        --- @param self LUIE_PositionableTopLevelWindow
+        local function OnMoveStop(self)
+            local left, top = self:GetLeft(), self:GetTop()
+            left, top = LUIE.ApplyGridSnap(left, top, "unitFrames")
+            self:ClearAnchors()
+            self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+            UnitFrames.SV[self.customPositionAttr] = { left, top }
+        end
+        tlw:SetHandler("OnMoveStop", OnMoveStop)
+    end)
 
     -- Unlock buffs for Player (preview control is created in SpellCastBuffs module)
     if UnitFrames.CustomFrames["player"] and UnitFrames.CustomFrames["player"].tlw then
@@ -788,11 +772,18 @@ function UnitFrames.CustomFramesReloadControlsMenu(unhidePlayer, group, raid, un
         UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
     end
 
-    UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhidePlayer)
-    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhideReticle)
-    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhideAva)
-    UnitFrames.CustomFramesApplyLayoutGroup(group)
-    UnitFrames.CustomFramesApplyLayoutRaid(raid)
+    UnitFrames.CustomFramesApplyAllLayouts(
+        {
+            unhidePlayer = unhidePlayer,
+            unhideReticle = unhideReticle,
+            unhideAva = unhideAva,
+            group = group,
+            raid = raid,
+            includeRaid = true,
+            includeCompanion = false,
+            includePet = false,
+            includeBosses = false,
+        })
 end
 
 function UnitFrames.CustomFramesReloadExecuteMenu()

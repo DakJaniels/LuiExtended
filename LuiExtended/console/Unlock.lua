@@ -23,6 +23,7 @@ local windowManager = GetWindowManager()
 --- TLW used by Unlock movers and UnitFrames custom roots (`LUIE.SV[customPositionAttr]` position persistence).
 --- @class LUIE_PositionableTopLevelWindow : TopLevelWindow
 --- @field customPositionAttr string
+--- @field hudSceneFragment ZO_HUDFadeSceneFragment|nil
 --- @field preview LUIE_PositionableTLWPreview|nil
 --- @field previewLabel LabelControl|nil
 

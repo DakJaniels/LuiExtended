@@ -15,47 +15,56 @@ local string_sub = string.sub
 -- Coordinator Setup
 -- -----------------------------------------------------------------------------
 
---- Creates and initializes a visualizer coordinator for a unitTag
---- @param unitTag string
-function UnitFrames.CreateVisualizer(unitTag)
-    if UnitFrames.Visualizers[unitTag] then
-        return -- Already exists
-    end
-
-    -- Create visualizer (modules are automatically added via mixin in Initialize)
-    local visualizer = LUIE_UnitAttributeVisualizer:New(unitTag)
-    UnitFrames.Visualizers[unitTag] = visualizer
-end
-
---- Initializes visualizers for all tracked units
-function UnitFrames.InitializeVisualizers()
-    -- Core units
-    UnitFrames.CreateVisualizer("player")
-    UnitFrames.CreateVisualizer("reticleover")
-    UnitFrames.CreateVisualizer("companion")
-    UnitFrames.CreateVisualizer("controlledsiege")
-
-    -- Group members
-    for i = 1, 12 do
-        UnitFrames.CreateVisualizer("group" .. i)
-    end
-
-    -- Bosses
-    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
-        UnitFrames.CreateVisualizer("boss" .. i)
-    end
-
-    -- Pets
-    for i = 1, 7 do
-        UnitFrames.CreateVisualizer("playerpet" .. i)
-    end
-end
-
---- Gets the visualizer coordinator for a specific unit
 --- @param unitTag string
 --- @return LUIE_UnitAttributeVisualizer|nil
 function UnitFrames.GetVisualizerForUnit(unitTag)
+    if not unitTag then
+        return nil
+    end
+
+    local customFrame = UnitFrames.CustomFrames[unitTag]
+    if customFrame and customFrame.attributeVisualizer then
+        return customFrame.attributeVisualizer
+    end
+
+    if UnitFrames.defaultVisualizers and UnitFrames.defaultVisualizers[unitTag] then
+        return UnitFrames.defaultVisualizers[unitTag]
+    end
+
     return UnitFrames.Visualizers[unitTag]
+end
+
+--- Invokes callback for every visualizer tracking game unitTag (custom + default + aliases).
+--- @param unitTag string
+--- @param callback fun(visualizer: LUIE_UnitAttributeVisualizer)
+function UnitFrames.ForEachVisualizerForUnit(unitTag, callback)
+    if not unitTag or not callback then
+        return
+    end
+
+    local seen = {}
+
+    local function visit(visualizer)
+        if visualizer and not seen[visualizer] then
+            seen[visualizer] = true
+            callback(visualizer)
+        end
+    end
+
+    visit(UnitFrames.GetVisualizerForUnit(unitTag))
+
+    for _, frame in pairs(UnitFrames.CustomFrames) do
+        if type(frame) == "table" and frame.GetVisualizerUnitTag and frame:GetVisualizerUnitTag() == unitTag then
+            visit(frame.attributeVisualizer)
+        end
+    end
+end
+
+--- Ensures default-frame visualizers exist for units without custom-frame visualizers.
+function UnitFrames.InitializeDefaultVisualizers()
+    if UnitFrames.InitializeDefaultVisualizersImpl then
+        UnitFrames.InitializeDefaultVisualizersImpl()
+    end
 end
 
 -- -----------------------------------------------------------------------------
@@ -157,12 +166,22 @@ end
 --- @param unitTag string
 function UnitFrames.ClearVisualizerRecencyInfo(unitTag)
     if not unitTag then return end
-    local modules = UnitFrames.VisualizerModules
-    if not modules then return end
-    for _, module in pairs(modules) do
-        if module and module.ClearUnitTag then
-            module:ClearUnitTag(unitTag)
+
+    local function clearModules(visualizer)
+        if not visualizer or not visualizer.visualModules then return end
+        for module in pairs(visualizer.visualModules) do
+            if module and module.ClearUnitTag then
+                module:ClearUnitTag(unitTag)
+            end
         end
+    end
+
+    clearModules(UnitFrames.GetVisualizerForUnit(unitTag))
+    clearModules(UnitFrames.defaultVisualizers and UnitFrames.defaultVisualizers[unitTag])
+
+    local customFrame = UnitFrames.CustomFrames[unitTag]
+    if customFrame and customFrame.attributeVisualizer then
+        clearModules(customFrame.attributeVisualizer)
     end
 end
 
@@ -249,7 +268,7 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
                     return
                 end
             end
-            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.CustomFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+            UnitFrames.UpdateCustomFramePower(unitTag, powerType, powerValue, powerMax, powerEffectiveMax, false, nil)
         end
 
         if UnitFrames.AvaCustFrames[unitTag] then

@@ -24,7 +24,7 @@ UnitFrames.APPEARANCE_CATEGORY_IDS =
     "ava",
 }
 
---- Categories whose custom frames use a separate `_TopInfo` caption row (see _CreateCustomFrames.lua).
+--- Categories whose custom frames use a separate `_TopInfo` caption row (see CustomFrames/*CustomFrameData.lua).
 UnitFrames.APPEARANCE_SEPARATE_CAPTION_FONT_CATEGORIES =
 {
     player = true,

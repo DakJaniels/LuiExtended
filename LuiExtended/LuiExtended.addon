@@ -188,7 +188,18 @@ modules/SlashCommands/Social.lua
 modules/UnitFrames/_Namespace.lua
 modules/UnitFrames/_FormatOptions.lua
 modules/UnitFrames/_MostRecentPowerUpdateHandler.lua
-modules/UnitFrames/_CreateCustomFrames.lua
+modules/UnitFrames/CustomFrames/_Shared.lua
+modules/UnitFrames/CustomFrames/_Base.lua
+modules/UnitFrames/CustomFrames/_Manager.lua
+modules/UnitFrames/CustomFrames/PlayerCustomFrameData.lua
+modules/UnitFrames/CustomFrames/TargetCustomFrameData.lua
+modules/UnitFrames/CustomFrames/AvAFrameCustomFrameData.lua
+modules/UnitFrames/CustomFrames/SmallGroupCustomFrameData.lua
+modules/UnitFrames/CustomFrames/RaidCustomFrameData.lua
+modules/UnitFrames/CustomFrames/PetCustomFrameData.lua
+modules/UnitFrames/CustomFrames/CompanionCustomFrameData.lua
+modules/UnitFrames/CustomFrames/BossCustomFrameData.lua
+modules/UnitFrames/CustomFrames/_PostCreate.lua
 modules/UnitFrames/_CustomFrames.lua
 modules/UnitFrames/_DefaultFrames.lua
 modules/UnitFrames/_Handlers.lua
@@ -201,6 +212,7 @@ modules/UnitFrames/UnitAttributeVisuals/Regeneration.lua
 modules/UnitFrames/UnitAttributeVisuals/Unwavering.lua
 modules/UnitFrames/UnitAttributeVisuals/StatChange.lua
 modules/UnitFrames/UnitAttributeVisuals/Possession.lua
+modules/UnitFrames/CustomFrames/_FrameVisualizers.lua
 modules/UnitFrames/_UnitAttributeVisualizerCoordinator.lua
 modules/UnitFrames/_UnitAttributeVisuals.lua
 
