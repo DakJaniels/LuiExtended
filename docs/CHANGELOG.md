@@ -1,5 +1,20 @@
 # LuiExtended Changelog
 
+## Version 7.2.3.9
+
+### New
+
+- Unit Frames: Optional **Show Rapport Change** on custom companion frames animates a green **+** or red **-** rapport delta beside the companion bar when rapport changes.
+
+### Changes
+
+- Localization: LUIE strings are split into per-module **lang** files (**Action Bar**, **Chat Announcements**, **Combat Info**, **Combat Text**, **Info Panel**, **Slash Commands**, **SpellCastBuffs**, **Unit Frames**, and shared **Core**) with expanded default and translation coverage.
+
+### Fixed
+
+- ChatAnnouncements: Guard confiscation loot lines no longer falsely list legitimate gear when you weapon swap and are caught with a bounty; only stolen items are announced, with worn-slot cache refresh on weapon pair change.
+- LuiData: Dragonknight **Landslide** passive stack buffs in the skills menu use the correct Landslide icon instead of Dragon Leap ground effect art.
+
 ## Version 7.2.3.8
 
 ### Fixed
