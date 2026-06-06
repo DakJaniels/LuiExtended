@@ -153,12 +153,9 @@ local function OnAddOnLoaded(eventId, addonName)
         -- Register global event listeners
         RegisterEvents()
         LUIE.ScheduleDebugEnvironmentReloadChat()
-        if LUIE_ScheduleLocalizationCoverageReport then
-            LUIE_ScheduleLocalizationCoverageReport()
-        end
-        if LuiData_ScheduleLocalizationCoverageReport then
-            LuiData_ScheduleLocalizationCoverageReport()
-        end
+        -- if LUIE_ScheduleLocalizationCoverageReport then
+        --     LUIE_ScheduleLocalizationCoverageReport()
+        -- end
     end
 end
 

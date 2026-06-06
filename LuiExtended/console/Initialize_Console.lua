@@ -111,9 +111,9 @@ local function OnAddOnLoaded(eventId, addonName)
     end
     -- -----------------------------------------------------------------------------
     LUIE.ScheduleDebugEnvironmentReloadChat()
-    if LUIE_ScheduleLocalizationCoverageReport then
-        LUIE_ScheduleLocalizationCoverageReport()
-    end
+    -- if LUIE_ScheduleLocalizationCoverageReport then
+    --     LUIE_ScheduleLocalizationCoverageReport()
+    -- end
     eventManager:UnregisterForEvent(addonName, eventId)
 end
 
