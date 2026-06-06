@@ -790,6 +790,9 @@ local function CreateCompanionFrame()
         if UnitFrames.companionAbilityTrack then
             UnitFrames.companionAbilityTrack:CreateControls(UnitFrames.CustomFrames["companion"])
         end
+        if UnitFrames.companionRapportFlourish then
+            UnitFrames.companionRapportFlourish:BindControls(UnitFrames.CustomFrames["companion"])
+        end
     end
 end
 

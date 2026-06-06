@@ -270,6 +270,9 @@ function UnitFrames.Initialize(enabled)
     if not UnitFrames.companionAbilityTrack then
         UnitFrames.companionAbilityTrack = LUIE_CompanionAbilityTrack:New()
     end
+    if not UnitFrames.companionRapportFlourish then
+        UnitFrames.companionRapportFlourish = LUIE_CompanionRapportFlourish:New()
+    end
 
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()

@@ -4550,6 +4550,25 @@ function UnitFrames.CreateSettings()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionAbilityTrack.enabled)
                 end,
             },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_RAPPORT_FLOURISH),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_RAPPORT_FLOURISH_TP),
+                getFunc = function ()
+                    return Settings.CompanionRapportFlourish.enabled
+                end,
+                setFunc = function (value)
+                    Settings.CompanionRapportFlourish.enabled = value
+                    if not value and UnitFrames.companionRapportFlourish then
+                        UnitFrames.companionRapportFlourish:StopFlourish()
+                    end
+                end,
+                width = "full",
+                default = Defaults.CompanionRapportFlourish.enabled,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
         },
     }
 

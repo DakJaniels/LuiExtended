@@ -220,6 +220,7 @@ modules/UnitFrames/_Debug.lua
 modules/UnitFrames/_DynamicPositioning.lua
 modules/UnitFrames/_PlayerDodgePrediction.lua
 modules/UnitFrames/_CompanionAbilityTrack.lua
+modules/UnitFrames/_CompanionRapportFlourish.lua
 modules/UnitFrames/UnitFrames.lua
 
 # SavedVariables migration (requires module Defaults tables)

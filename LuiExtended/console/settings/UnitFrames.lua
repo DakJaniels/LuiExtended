@@ -4463,6 +4463,26 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.CompanionAbilityTrack.showStacks,
         }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_RAPPORT_FLOURISH),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_RAPPORT_FLOURISH_TP),
+            getFunction = function ()
+                return Settings.CompanionRapportFlourish.enabled
+            end,
+            setFunction = function (value)
+                Settings.CompanionRapportFlourish.enabled = value
+                if not value and UnitFrames.companionRapportFlourish then
+                    UnitFrames.companionRapportFlourish:StopFlourish()
+                end
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+            end,
+            default = Defaults.CompanionRapportFlourish.enabled,
+        }
     end)
 
     -- Build Custom Unit Frames (Pet) Options Section

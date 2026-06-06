@@ -363,6 +363,10 @@ UnitFrames.Defaults =
         showStacks = true,
         showBuiltinInterrupt = true,
     },
+    CompanionRapportFlourish =
+    {
+        enabled = false,
+    },
     BarAlignPlayerHealth = 1,
     BarAlignPlayerMagicka = 1,
     BarAlignPlayerStamina = 1,
