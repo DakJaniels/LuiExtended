@@ -18,7 +18,7 @@
               relativePoint="TOPRIGHT"
               offsetX="-24"
               offsetY="20" />
-      <Dimensions x="240"
+      <Dimensions x="10"
                   y="48" />
       <OnMoveStop>
         LUIE.InfoPanel.OnPanelMoveStop(self)
@@ -71,7 +71,7 @@
                        verticalAlignment="CENTER"
                        horizontalAlignment="LEFT"
                        text="11999 ms"
-                       wrapMode="ELLIPSIS">
+                       wrapMode="TRUNCATE">
                   <Anchor point="LEFT"
                           relativeTo="$(parent)_Icon"
                           relativePoint="RIGHT"
@@ -89,7 +89,7 @@
                    verticalAlignment="CENTER"
                    horizontalAlignment="CENTER"
                    text="999 fps"
-                   wrapMode="ELLIPSIS">
+                   wrapMode="TRUNCATE">
               <Dimensions x="50"
                           y="20" />
             </Label>
@@ -100,7 +100,7 @@
                    verticalAlignment="CENTER"
                    horizontalAlignment="CENTER"
                    text="0M"
-                   wrapMode="ELLIPSIS">
+                   wrapMode="TRUNCATE">
               <Dimensions x="58"
                           y="20" />
             </Label>
@@ -135,7 +135,7 @@
                        verticalAlignment="CENTER"
                        horizontalAlignment="LEFT"
                        text="8/88"
-                       wrapMode="ELLIPSIS">
+                       wrapMode="TRUNCATE">
                   <Anchor point="LEFT"
                           relativeTo="$(parent)_Icon"
                           relativePoint="RIGHT"
@@ -179,7 +179,7 @@
                        verticalAlignment="CENTER"
                        horizontalAlignment="LEFT"
                        text="Train Now"
-                       wrapMode="ELLIPSIS">
+                       wrapMode="TRUNCATE">
                   <Anchor point="LEFT"
                           relativeTo="$(parent)_Icon"
                           relativePoint="RIGHT"
@@ -211,7 +211,7 @@
                        verticalAlignment="CENTER"
                        horizontalAlignment="LEFT"
                        text="100%"
-                       wrapMode="ELLIPSIS">
+                       wrapMode="TRUNCATE">
                   <Anchor point="LEFT"
                           relativeTo="$(parent)_Icon"
                           relativePoint="RIGHT"
@@ -270,7 +270,7 @@
                        verticalAlignment="CENTER"
                        horizontalAlignment="LEFT"
                        text="888/888"
-                       wrapMode="ELLIPSIS">
+                       wrapMode="TRUNCATE">
                   <Anchor point="LEFT"
                           relativeTo="$(parent)_Icon"
                           relativePoint="RIGHT"
@@ -301,7 +301,7 @@
                        verticalAlignment="CENTER"
                        horizontalAlignment="LEFT"
                        text="0"
-                       wrapMode="ELLIPSIS">
+                       wrapMode="TRUNCATE">
                   <Anchor point="LEFT"
                           relativeTo="$(parent)_Icon"
                           relativePoint="RIGHT"

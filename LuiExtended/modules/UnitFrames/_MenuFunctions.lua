@@ -67,6 +67,19 @@ function UnitFrames.ResetCompassBarMenu()
 end
 
 --- While reposition mode is on, disable mouse on group/raid member controls so the movable TLW receives drags.
+local sceneManager = SCENE_MANAGER
+
+--- Custom frame TLWs use ZO_HUDFadeSceneFragment on hud/hudui/siegeBar/siegeBarUI only (not gameMenuInGame).
+--- @return boolean
+local function CustomFramesIsHudGameplaySceneActive()
+    local scene = sceneManager:GetCurrentScene()
+    if not scene or scene:GetState() ~= SCENE_SHOWN then
+        return false
+    end
+    local sceneName = scene:GetName()
+    return sceneName == "hud" or sceneName == "hudui" or sceneName == "siegeBar" or sceneName == "siegeBarUI"
+end
+
 --- Raid tiles the TLW with mouse-enabled children; small group leaves gaps but this keeps behavior consistent.
 --- @param enabled boolean True to restore mouse (normal play), false during frame moving.
 local function CustomFramesSetGroupMemberMouseEnabledForMoving(enabled)
@@ -118,10 +131,13 @@ function UnitFrames.CustomFramesSetMovingState(state)
                 local left, top = tlw:GetLeft(), tlw:GetTop()
                 tlw:ClearAnchors()
                 tlw:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+                tlw:SetHidden(false)
+            elseif not CustomFramesIsHudGameplaySceneActive() then
+                -- Unlock forces visible on GuiRoot; hide again when not on a HUD gameplay scene (e.g. gameMenuInGame).
+                tlw:SetHidden(true)
             end
             tlw:SetMouseEnabled(state)
             tlw:SetMovable(state)
-            tlw:SetHidden(false)
 
             --- @param self LUIE_PositionableTopLevelWindow
             local function OnMoveStop(self)
@@ -160,6 +176,10 @@ function UnitFrames.CustomFramesSetMovingState(state)
     end
 
     CustomFramesSetGroupMemberMouseEnabledForMoving(not state)
+
+    if not state then
+        UnitFrames.CustomFramesSetPositions()
+    end
 end
 
 -- Apply colors to custom frame subsets for LAM (avoids repainting unrelated unit tag tables).

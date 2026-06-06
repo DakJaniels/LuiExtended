@@ -24,61 +24,6 @@ local pairs = pairs
 local table = table
 local table_insert = table.insert
 
-local nameDisplayOptions =
-{
-    GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID),
-    GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME),
-    GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID)
-}
-local nameDisplayOptionsKeys =
-{
-    [GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID)] = 1,
-    [GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME)] = 2,
-    [GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID)] = 3
-}
-
-local raidIconOptions =
-{
-    GetString(LUIE_STRING_LAM_UF_RAIDICON_NONE),
-    GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_ONLY),
-    GetString(LUIE_STRING_LAM_UF_RAIDICON_ROLE_ONLY),
-    GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_PVP_ROLE_PVE),
-    GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_PVE_ROLE_PVP)
-}
-local raidIconOptionsKeys =
-{
-    [GetString(LUIE_STRING_LAM_UF_RAIDICON_NONE)] = 1,
-    [GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_ONLY)] = 2,
-    [GetString(LUIE_STRING_LAM_UF_RAIDICON_ROLE_ONLY)] = 3,
-    [GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_PVP_ROLE_PVE)] = 4,
-    [GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_PVE_ROLE_PVP)] = 5
-}
-
-local playerFrameOptions =
-{
-    GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_VERTICAL),
-    GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_HORIZONTAL),
-    GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_PYRAMID)
-}
-local playerFrameOptionsKeys =
-{
-    [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_VERTICAL)] = 1,
-    [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_HORIZONTAL)] = 2,
-    [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_PYRAMID)] = 3
-}
-
-local alignmentOptions =
-{
-    GetString(LUIE_STRING_LAM_UF_ALIGNMENT_LEFT_RIGHT),
-    GetString(LUIE_STRING_LAM_UF_ALIGNMENT_RIGHT_LEFT),
-    GetString(LUIE_STRING_LAM_UF_ALIGNMENT_CENTER)
-}
-local alignmentOptionsKeys =
-{
-    [GetString(LUIE_STRING_LAM_UF_ALIGNMENT_LEFT_RIGHT)] = 1,
-    [GetString(LUIE_STRING_LAM_UF_ALIGNMENT_RIGHT_LEFT)] = 2,
-    [GetString(LUIE_STRING_LAM_UF_ALIGNMENT_CENTER)] = 3
-}
 
 local formatOptions =
 {
@@ -179,7 +124,7 @@ function UnitFrames.CreateConsoleSettings()
     )
 
     -- Create the addon settings panel
-    local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_UF)),
+    local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_UF),
                                 {
                                     allowDefaults = true,
                                     defaultsFunction = function ()
@@ -235,7 +180,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure which default game UI unit frames to display. Choose between ZOS default, LUIE overlay with additional information, or hide frames entirely.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_DEFAULT),
             canSelect = false,
         }
 
@@ -570,7 +515,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure shield bar, smooth transitions, and other global custom frame options. Font and texture settings are in the next section.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_CUSTOM_GLOBAL),
             canSelect = false,
         }
 
@@ -787,7 +732,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Customize colors for health, magicka, stamina, shields, and other resource bars on custom unit frames.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_CFRAMES_COLOR),
         }
 
         settings[#settings + 1] =
@@ -1256,17 +1201,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_PLAYER_TP),
             items = SettingsAPI:GetNameDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.DisplayOptionsPlayer
-                if type(index) == "string" then
-                    index = nameDisplayOptionsKeys[index] or 2
-                end
-                return nameDisplayOptions[index] or nameDisplayOptions[2]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfNameDisplayIndex(Settings.DisplayOptionsPlayer, Defaults.DisplayOptionsPlayer))
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsPlayer = item.data
                 UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, false)
             end,
-            default = nameDisplayOptions[2],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.DisplayOptionsPlayer),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -1747,17 +1688,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_TARGET_TP),
             items = SettingsAPI:GetNameDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.DisplayOptionsTarget
-                if type(index) == "string" then
-                    index = nameDisplayOptionsKeys[index] or 2
-                end
-                return nameDisplayOptions[index] or nameDisplayOptions[2]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfNameDisplayIndex(Settings.DisplayOptionsTarget, Defaults.DisplayOptionsTarget))
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsTarget = item.data
                 UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, false, false)
             end,
-            default = nameDisplayOptions[2],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.DisplayOptionsTarget),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -2273,7 +2210,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure the fill direction and visual alignment of resource bars (health, magicka, stamina) for player and target frames.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_BAR_ALIGN),
         }
 
         settings[#settings + 1] =
@@ -2283,17 +2220,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_PLAYER_HEALTH_TP),
             items = SettingsAPI:GetAlignmentOptionsList(),
             getFunction = function ()
-                local index = Settings.BarAlignPlayerHealth
-                if type(index) == "string" then
-                    index = alignmentOptionsKeys[index] or 1
-                end
-                return alignmentOptions[index] or alignmentOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfAlignmentIndex(Settings.BarAlignPlayerHealth, Defaults.BarAlignPlayerHealth))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BarAlignPlayerHealth = item.data
                 UnitFrames.CustomFramesApplyBarAlignment()
             end,
-            default = alignmentOptions[Defaults.BarAlignPlayerHealth],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BarAlignPlayerHealth),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
             end,
@@ -2306,17 +2239,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_PLAYER_MAGICKA_TP),
             items = SettingsAPI:GetAlignmentOptionsList(),
             getFunction = function ()
-                local index = Settings.BarAlignPlayerMagicka
-                if type(index) == "string" then
-                    index = alignmentOptionsKeys[index] or 1
-                end
-                return alignmentOptions[index] or alignmentOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfAlignmentIndex(Settings.BarAlignPlayerMagicka, Defaults.BarAlignPlayerMagicka))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BarAlignPlayerMagicka = item.data
                 UnitFrames.CustomFramesApplyBarAlignment()
             end,
-            default = alignmentOptions[Defaults.BarAlignPlayerMagicka],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BarAlignPlayerMagicka),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
             end,
@@ -2329,17 +2258,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_PLAYER_STAMINA_TP),
             items = SettingsAPI:GetAlignmentOptionsList(),
             getFunction = function ()
-                local index = Settings.BarAlignPlayerStamina
-                if type(index) == "string" then
-                    index = alignmentOptionsKeys[index] or 1
-                end
-                return alignmentOptions[index] or alignmentOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfAlignmentIndex(Settings.BarAlignPlayerStamina, Defaults.BarAlignPlayerStamina))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BarAlignPlayerStamina = item.data
                 UnitFrames.CustomFramesApplyBarAlignment()
             end,
-            default = alignmentOptions[Defaults.BarAlignPlayerStamina],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BarAlignPlayerStamina),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
             end,
@@ -2352,17 +2277,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_TARGET_TP),
             items = SettingsAPI:GetAlignmentOptionsList(),
             getFunction = function ()
-                local index = Settings.BarAlignTarget
-                if type(index) == "string" then
-                    index = alignmentOptionsKeys[index] or 1
-                end
-                return alignmentOptions[index] or alignmentOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfAlignmentIndex(Settings.BarAlignTarget, Defaults.BarAlignTarget))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BarAlignTarget = item.data
                 UnitFrames.CustomFramesApplyBarAlignment()
             end,
-            default = alignmentOptions[Defaults.BarAlignTarget],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BarAlignTarget),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
             end,
@@ -2446,7 +2367,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure advanced display options for player and target custom frames including layout style, information display, and special effects.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_PLAYER_TARGET),
         }
 
         settings[#settings + 1] =
@@ -2456,17 +2377,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_PLAYER_METHOD_TP),
             items = SettingsAPI:GetPlayerFrameOptionsList(),
             getFunction = function ()
-                local index = Settings.PlayerFrameOptions
-                if type(index) == "string" then
-                    index = playerFrameOptionsKeys[index] or 1
-                end
-                return playerFrameOptions[index] or playerFrameOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfPlayerFrameIndex(Settings.PlayerFrameOptions, Defaults.PlayerFrameOptions))
             end,
             setFunction = function (combobox, value, item)
                 Settings.PlayerFrameOptions = item.data
                 UnitFrames.MenuUpdatePlayerFrameOptions(Settings.PlayerFrameOptions)
             end,
-            default = playerFrameOptions[Defaults.PlayerFrameOptions],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.PlayerFrameOptions),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
             end,
@@ -2720,7 +2637,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure custom group frames with additional resource tracking, combat stats, and buff display options for dungeon and small group content.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_GROUP),
         }
 
         settings[#settings + 1] =
@@ -2748,17 +2665,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_GROUPRAID_TP),
             items = SettingsAPI:GetNameDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.DisplayOptionsGroupRaid
-                if type(index) == "string" then
-                    index = nameDisplayOptionsKeys[index] or 2
-                end
-                return nameDisplayOptions[index] or nameDisplayOptions[2]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfNameDisplayIndex(Settings.DisplayOptionsGroupRaid, Defaults.DisplayOptionsGroupRaid))
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsGroupRaid = item.data
                 UnitFrames.CustomFramesReloadControlsMenu(false, false, false)
             end,
-            default = nameDisplayOptions[2],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.DisplayOptionsGroupRaid),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -3095,7 +3008,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure custom raid frames for large group content (12+ players) with optimized layouts and performance for trials and large-scale PvP.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_RAID),
         }
 
         settings[#settings + 1] =
@@ -3123,17 +3036,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_GROUPRAID_TP),
             items = SettingsAPI:GetNameDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.DisplayOptionsGroupRaid
-                if type(index) == "string" then
-                    index = nameDisplayOptionsKeys[index] or 2
-                end
-                return nameDisplayOptions[index] or nameDisplayOptions[2]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfNameDisplayIndex(Settings.DisplayOptionsGroupRaid, Defaults.DisplayOptionsGroupRaid))
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsGroupRaid = item.data
                 UnitFrames.CustomFramesReloadControlsMenu(false, false, false)
             end,
-            default = nameDisplayOptions[2],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.DisplayOptionsGroupRaid),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -3300,17 +3209,13 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_ROLEICON_TP),
             items = SettingsAPI:GetRaidIconOptionsList(),
             getFunction = function ()
-                local index = Settings.RaidIconOptions
-                if type(index) == "string" then
-                    index = raidIconOptionsKeys[index] or 1
-                end
-                return raidIconOptions[index] or raidIconOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeUfRaidIconIndex(Settings.RaidIconOptions, Defaults.RaidIconOptions))
             end,
             setFunction = function (combobox, value, item)
                 Settings.RaidIconOptions = item.data
                 UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
-            default = raidIconOptions[Defaults.RaidIconOptions],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.RaidIconOptions),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
             end,
@@ -3472,7 +3377,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Display magicka and stamina resource bars for group members using LibGroupBroadcast (requires library and group members using compatible addons).",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_GROUP_RESOURCES),
         }
 
         settings[#settings + 1] =
@@ -3752,7 +3657,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Display combat performance metrics (ultimate status, DPS, HPS) for group members using LibGroupCombatStats (requires library and compatible addons).",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_GROUP_COMBAT_STATS),
         }
 
         settings[#settings + 1] =
@@ -3884,7 +3789,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    Vertical Offset",
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_ULT_ICON_OFFSET_Y),
             tooltip = "Adjust vertical position of ultimate icons on group frames.",
             min = -20,
             max = 20,
@@ -3915,7 +3820,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Display potion cooldown timers for group members on custom unit frames (requires LibGroupPotionCooldowns and compatible addons).",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_GROUP_POTION),
         }
 
         settings[#settings + 1] =
@@ -3963,7 +3868,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    Potion Icon Size",
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_ICON_SIZE),
             tooltip = "Set the size of potion cooldown icons on group frames (4 player).",
             min = 14,
             max = 32,
@@ -4005,8 +3910,8 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    Vertical Offset",
-            tooltip = "Adjust vertical position of potion icon on group frames.",
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_OFFSET_Y),
+            tooltip = SettingsAPI:ConsoleTooltip(LUIE_STRING_LAM_UF_GROUP_POTION_OFFSET_Y_TP),
             min = -20,
             max = 20,
             step = 1,
@@ -4036,7 +3941,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Display food and drink buff status indicators for group members to easily track buff uptime during group content.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_GROUP_FOODDRINK),
         }
 
         settings[#settings + 1] =
@@ -4069,7 +3974,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Show \"No Buff\" Icon",
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_NO_BUFF),
             tooltip = "Display an icon when a group member has no food or drink buff active.",
             getFunction = function ()
                 return Settings.GroupFoodDrinkBuff.showNoBuff
@@ -4209,7 +4114,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Enable and configure custom frames for your Companion, showing their health, resources, and status.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_COMPANION),
         }
 
         settings[#settings + 1] =
@@ -4572,7 +4477,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Enable and configure custom frames for combat pets (Sorcerer pets, Warden bear, etc.) with health and status display.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_PET),
         }
 
         settings[#settings + 1] =
@@ -4847,7 +4752,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Manage which specific pets display custom frames. Add pet names to the whitelist to show frames only for those pets, or use the blacklist to hide specific pets.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_PET_WHITELIST),
         }
 
         settings[#settings + 1] =
@@ -5317,7 +5222,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Global settings for Unit Frames and display options that apply across all unit frame types. For frame positioning, use the Frame positions submenu.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_UF_COMMON_GLOBAL),
         }
 
         -- Add common global settings (ReloadUI, etc.)
@@ -5414,7 +5319,7 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "Neutral Font Color",
+            label = GetString(LUIE_STRING_LAM_UF_COMMON_NEUTRAL_FONT_COLOR),
             tooltip = nil,
             getFunction = function ()
                 return Settings.Target_FontColour_Neutral[1], Settings.Target_FontColour_Neutral[2], Settings.Target_FontColour_Neutral[3], Settings.Target_FontColour_Neutral[4]
@@ -5491,10 +5396,10 @@ function UnitFrames.CreateConsoleSettings()
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OPTIONS_HEADER), sectionGroups["CustomFramesPlayerTargetOptions"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESG_HEADER), sectionGroups["CustomFramesGroup"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESR_HEADER), sectionGroups["CustomFramesRaid"])
-    SettingsAPI:AppendSection(allSettings, "Group Resources", sectionGroups["GroupResources"])
-    SettingsAPI:AppendSection(allSettings, "Group Combat Stats", sectionGroups["GroupCombatStats"])
-    SettingsAPI:AppendSection(allSettings, "Group Potion Cooldowns", sectionGroups["GroupPotionCooldowns"])
-    SettingsAPI:AppendSection(allSettings, "Group Food & Drink Buffs", sectionGroups["GroupFoodDrinkBuff"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_HEADER), sectionGroups["GroupResources"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_HEADER), sectionGroups["GroupCombatStats"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_GROUP_POTION_HEADER), sectionGroups["GroupPotionCooldowns"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_HEADER), sectionGroups["GroupFoodDrinkBuff"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_HEADER), sectionGroups["CustomFramesCompanion"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESPET_HEADER), sectionGroups["CustomFramesPet"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_CUSTOM_LIST_UF_WHITELIST), sectionGroups["PetWhitelist"])

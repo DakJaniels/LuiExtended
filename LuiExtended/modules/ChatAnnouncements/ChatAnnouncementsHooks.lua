@@ -123,7 +123,7 @@ function ChatAnnouncements.HookFunction()
                 local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, 250)
                 local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
                 local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
-                local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStable
+                local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageStable")
                 ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
             end
 
@@ -177,11 +177,11 @@ function ChatAnnouncements.HookFunction()
                 local csaPrefix
                 if categoryIndex == 1 then
                     -- Is a lore book
-                    stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookPrefix1
+                    stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix1")
                     csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED)
                 else
                     -- Is a normal book
-                    stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookPrefix2
+                    stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix2")
                     csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(LUIE_STRING_CA_LOREBOOK_BOOK)
                 end
 
@@ -910,6 +910,98 @@ function ChatAnnouncements.HookFunction()
         return true
     end
 
+    -- EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE (Alert Handler)
+    local function QueueForCampaignResponseAlert(response, parameter)
+        local responseString = GetString("SI_QUEUEFORCAMPAIGNRESPONSETYPE", response)
+        if responseString == "" then
+            return false
+        end
+        local notify = ChatAnnouncements.SV.Notify
+        if not (ChatAnnouncements.Enabled and (notify.CampaignQueueCA or notify.CampaignQueueAlert)) then
+            return false
+        end
+        local message = zo_strformat(responseString, parameter)
+        if notify.CampaignQueueCA then
+            ChatOutput:Print(message, true)
+        end
+        if notify.CampaignQueueAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, message)
+        end
+        return true
+    end
+
+    -- EVENT_OUTFIT_EQUIP_RESPONSE (Alert Handler)
+    local function OutfitEquipResponseAlert(actorCategory, result)
+        if actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_PLAYER then
+            return false
+        end
+        local notify = ChatAnnouncements.SV.Notify
+        if not (ChatAnnouncements.Enabled and (notify.OutfitEquipCA or notify.OutfitEquipAlert)) then
+            return false
+        end
+        local message
+        local alertCategory = UI_ALERT_CATEGORY_ERROR
+        local sound = SOUNDS.GENERAL_ALERT_ERROR
+        if result == EQUIP_OUTFIT_RESULT_SUCCESS then
+            local outfitIndex = GetEquippedOutfitIndex(actorCategory)
+            local name = GetOutfitName(actorCategory, outfitIndex)
+            if name == "" then
+                name = zo_strformat("<<1>> <<2>>", GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS), outfitIndex)
+            end
+            message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_OUTFIT_CONFIRMATION), name)
+            alertCategory = UI_ALERT_CATEGORY_ALERT
+            sound = SOUNDS.NONE
+        else
+            message = GetString("SI_EQUIPOUTFITRESULT", result)
+        end
+        if notify.OutfitEquipCA then
+            ChatOutput:Print(message, true)
+        end
+        if notify.OutfitEquipAlert then
+            ZO_Alert(alertCategory, sound, message)
+        end
+        return true
+    end
+
+    -- EVENT_JUMP_FAILED (Alert Handler) — home slash attribution
+    local function JumpFailedHomeAlert(result)
+        if not S.pendingHomeJump then
+            return false
+        end
+        S.pendingHomeJump = false
+        if result == JUMP_RESULT_JUMP_FAILED_ZONE_COLLECTIBLE or result == JUMP_RESULT_JUMP_FAILED_SOCIAL_TARGET_ZONE_COLLECTIBLE_LOCKED then
+            return false
+        end
+        local notify = ChatAnnouncements.SV.Notify
+        if not (ChatAnnouncements.Enabled and (notify.SlashHomeCA or notify.SlashHomeAlert)) then
+            return false
+        end
+        local message = GetString("SI_JUMPRESULT", result)
+        if notify.SlashHomeCA then
+            ChatOutput:Print(message, true)
+        end
+        if notify.SlashHomeAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+        end
+        return true
+    end
+
+    -- EVENT_SOCIAL_ERROR (Alert Handler)
+    local function SocialErrorNotifyAlert(error)
+        if error == SOCIAL_RESULT_NO_ERROR or IsSocialErrorIgnoreResponse(error) then
+            return false
+        end
+        local notify = ChatAnnouncements.SV.Notify
+        if not (ChatAnnouncements.Enabled and (notify.SocialErrorCA or notify.SocialErrorAlert)) then
+            return false
+        end
+        local message = zo_strformat(GetString("SI_SOCIALACTIONRESULT", error))
+        if notify.SocialErrorAlert and ShouldShowSocialErrorInAlert(error) then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, message)
+        end
+        return true
+    end
+
     -- EVENT_CLIENT_INTERACT_RESULT (Alert Handler)
     local function ClientInteractResult(result, interactTargetName)
         local formatString = GetString("SI_CLIENTINTERACTRESULT", result)
@@ -1064,7 +1156,7 @@ function ChatAnnouncements.HookFunction()
             for indexOut = 1, 5 do
                 if S.g_tradeStacksOut[indexOut] ~= nil then
                     local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    local logPrefix = S.g_tradeTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeOutNoName
+                    local logPrefix = S.g_tradeTarget ~= "" and ChatAnnouncements.GetContextMessage("CurrencyMessageTradeOut") or ChatAnnouncements.GetContextMessage("CurrencyMessageTradeOutNoName")
                     local item = S.g_tradeStacksOut[indexOut]
                     ChatAnnouncements.ItemCounterDelayOut(item.icon, item.stack, item.itemType, item.itemId, item.itemLink, S.g_tradeTarget, logPrefix, gainOrLoss, false)
                 end
@@ -1073,7 +1165,7 @@ function ChatAnnouncements.HookFunction()
             for indexIn = 1, 5 do
                 if S.g_tradeStacksIn[indexIn] ~= nil then
                     local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                    local logPrefix = S.g_tradeTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeInNoName
+                    local logPrefix = S.g_tradeTarget ~= "" and ChatAnnouncements.GetContextMessage("CurrencyMessageTradeIn") or ChatAnnouncements.GetContextMessage("CurrencyMessageTradeInNoName")
                     local item = S.g_tradeStacksIn[indexIn]
                     ChatAnnouncements.ItemCounterDelay(item.icon, item.stack, item.itemType, item.itemId, item.itemLink, S.g_tradeTarget, logPrefix, gainOrLoss, false)
                 end
@@ -1176,6 +1268,10 @@ function ChatAnnouncements.HookFunction()
     ZO_PreHook(alertHandlers, EVENT_SAVE_GUILD_RANKS_RESPONSE, GuildRanksResponseAlert)
     ZO_PreHook(alertHandlers, EVENT_LOCKPICK_FAILED, LockpickFailedAlert)
     ZO_PreHook(alertHandlers, EVENT_CLIENT_INTERACT_RESULT, ClientInteractResult)
+    ZO_PreHook(alertHandlers, EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE, QueueForCampaignResponseAlert)
+    ZO_PreHook(alertHandlers, EVENT_OUTFIT_EQUIP_RESPONSE, OutfitEquipResponseAlert)
+    ZO_PreHook(alertHandlers, EVENT_JUMP_FAILED, JumpFailedHomeAlert)
+    ZO_PreHook(alertHandlers, EVENT_SOCIAL_ERROR, SocialErrorNotifyAlert)
     ZO_PreHook(alertHandlers, EVENT_TRADE_INVITE_FAILED, TradeInviteFailedAlert)
     ZO_PreHook(alertHandlers, EVENT_TRADE_INVITE_CONSIDERING, TradeInviteConsideringAlert)
     ZO_PreHook(alertHandlers, EVENT_TRADE_INVITE_WAITING, TradeInviteWaitingAlert)
@@ -1213,11 +1309,11 @@ function ChatAnnouncements.HookFunction()
             local csaPrefix
             if categoryIndex == 1 then
                 -- Is a lore book
-                stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookPrefix1
+                stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix1")
                 csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED)
             else
                 -- Is a normal book
-                stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookPrefix2
+                stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix2")
                 csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(LUIE_STRING_CA_LOREBOOK_BOOK)
             end
 
@@ -1284,7 +1380,7 @@ function ChatAnnouncements.HookFunction()
         if guildReputationIndex == 0 or isMaxRank then
             -- Only fire this message if we're not part of the guild or at max level within the guild.
             local collectionName, description, numKnownBooks, totalBooks, hidden, textureName = GetLoreCollectionInfo(categoryIndex, collectionIndex)
-            local stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookCollectionPrefix
+            local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookCollectionPrefix")
             local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE)
             if not hidden or ChatAnnouncements.SV.Lorebooks.LorebookShowHidden then
                 if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCA then
@@ -1335,7 +1431,7 @@ function ChatAnnouncements.HookFunction()
     local function LoreCollectionXPHook(categoryIndex, collectionIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
         if guildReputationIndex > 0 then
             local collectionName, description, numKnownBooks, totalBooks, hidden, textureName = GetLoreCollectionInfo(categoryIndex, collectionIndex)
-            local stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookCollectionPrefix
+            local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookCollectionPrefix")
             local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE)
             if not hidden or ChatAnnouncements.SV.Lorebooks.LorebookShowHidden then
                 if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCA then
@@ -1394,7 +1490,7 @@ function ChatAnnouncements.HookFunction()
     local function SkillPointsChangedHook(oldPoints, newPoints, oldPartialPoints, newPartialPoints, changeReason)
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
         local numSkillPointsGained = newPoints - oldPoints
-        local stringPrefix = ChatAnnouncements.SV.Skills.SkillPointSkyshard
+        local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillPointSkyshard")
         local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_SKYSHARD_GAINED)
         local hasStringPrefix = stringPrefix ~= ""
         local flagDisplay, sound, finalMessage, finalText
@@ -1634,7 +1730,7 @@ function ChatAnnouncements.HookFunction()
             local nowOwnedCollectibles = collectiblesByUnlockState[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED]
             if nowOwnedCollectibles then
                 if #nowOwnedCollectibles > MAX_INDIVIDUAL_COLLECTIBLE_UPDATES then
-                    local stringPrefix = ChatAnnouncements.SV.Collectibles.CollectiblePrefix
+                    local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Collectibles", "CollectiblePrefix")
                     local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE)
 
                     if ChatAnnouncements.SV.Collectibles.CollectibleCA then
@@ -1677,7 +1773,7 @@ function ChatAnnouncements.HookFunction()
                         local categoryName = categoryData:GetName()
                         local collectibleId = collectibleData:GetId()
 
-                        local stringPrefix = ChatAnnouncements.SV.Collectibles.CollectiblePrefix
+                        local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Collectibles", "CollectiblePrefix")
                         local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE)
 
                         if ChatAnnouncements.SV.Collectibles.CollectibleCA then
@@ -2294,7 +2390,7 @@ function ChatAnnouncements.HookFunction()
             local rejectedMat = I.rejectQuest(questIndex)
             if rejectedMat then
                 local questName = GetJournalQuestName(questIndex)
-                ChatOutput:Print(zo_strformat("Writ Crafter abandoned the <<1>> because it requires <<2>> which was disallowed in settings", questName, rejectedMat), true)
+                ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_WRIT_CRAFTER_QUEST_ABANDONED), questName, rejectedMat), true)
                 zo_callLater(function ()
                                  AbandonQuest(questIndex)
                              end, 500)
@@ -3525,7 +3621,7 @@ function ChatAnnouncements.HookFunction()
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ACHIEVEMENT_AWARDED)
             local icon = select(4, GetAchievementInfo(id))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
-            messageParams:SetText(ChatAnnouncements.SV.Achievement.AchievementCompleteMsg, zo_strformat(name))
+            messageParams:SetText(ChatAnnouncements.GetModuleMessageFormat("Achievement", "AchievementCompleteMsg"), zo_strformat(name))
             messageParams:SetIconData(icon, "EsoUI/Art/Achievements/achievements_iconBG.dds")
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
@@ -3538,14 +3634,14 @@ function ChatAnnouncements.HookFunction()
         if ChatAnnouncements.SV.Achievement.AchievementCompleteCA then
             local link = zo_strformat(GetAchievementLink(id, B.linkBrackets[ChatAnnouncements.SV.BracketOptionAchievement]))
             local catName = GetAchievementCategoryInfo(topLevelIndex)
-            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or "General"
+            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL)
             local _, _, _, icon = GetAchievementInfo(id)
             icon = ChatAnnouncements.SV.Achievement.AchievementIcon and ("|t16:16:" .. icon .. "|t ") or ""
 
             -- Build string parts without using string_format on pre-formatted strings
             local stringpart1 = ColorizeColors.AchievementColorize1:Colorize(
                 B.bracket1[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] ..
-                ChatAnnouncements.SV.Achievement.AchievementCompleteMsg ..
+                ChatAnnouncements.GetModuleMessageFormat("Achievement", "AchievementCompleteMsg") ..
                 B.bracket2[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] .. " " ..
                 icon .. link
             )
@@ -3578,7 +3674,7 @@ function ChatAnnouncements.HookFunction()
 
         -- Display Alert
         if ChatAnnouncements.SV.Achievement.AchievementCompleteAlert then
-            local alertMessage = zo_strformat("<<1>>: <<2>>", ChatAnnouncements.SV.Achievement.AchievementCompleteMsg, name)
+            local alertMessage = zo_strformat("<<1>>: <<2>>", ChatAnnouncements.GetModuleMessageFormat("Achievement", "AchievementCompleteMsg"), name)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
 
@@ -3654,9 +3750,9 @@ function ChatAnnouncements.HookFunction()
 
             local formattedIcon = ChatAnnouncements.SV.Antiquities.AntiquityIcon and ("|t16:16:" .. antiquityIcon .. "|t ") or ""
 
-            local messageP1 = ColorizeColors.AntiquityColorize:Colorize(string_format("%s%s%s %s", B.bracket1[ChatAnnouncements.SV.Antiquities.AntiquityPrefixBracket], ChatAnnouncements.SV.Antiquities.AntiquityPrefix, B.bracket2[ChatAnnouncements.SV.Antiquities.AntiquityPrefixBracket], formattedIcon))
+            local messageP1 = ColorizeColors.AntiquityColorize:Colorize(string_format("%s%s%s %s", B.bracket1[ChatAnnouncements.SV.Antiquities.AntiquityPrefixBracket], ChatAnnouncements.GetModuleMessageFormat("Antiquities", "AntiquityPrefix"), B.bracket2[ChatAnnouncements.SV.Antiquities.AntiquityPrefixBracket], formattedIcon))
             local messageP2 = antiquityLink
-            local messageP3 = ColorizeColors.AntiquityColorize:Colorize(" " .. ChatAnnouncements.SV.Antiquities.AntiquitySuffix)
+            local messageP3 = ColorizeColors.AntiquityColorize:Colorize(" " .. ChatAnnouncements.GetModuleMessageFormat("Antiquities", "AntiquitySuffix"))
             local finalMessage = zo_strformat("<<1>><<2>><<3>>", messageP1, messageP2, messageP3)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "ANTIQUITY" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -3664,7 +3760,7 @@ function ChatAnnouncements.HookFunction()
         end
 
         if ChatAnnouncements.SV.Antiquities.AntiquityAlert then
-            local alertMessage = zo_strformat("<<1>>: <<2>> <<3>>", ChatAnnouncements.SV.Antiquities.AntiquityPrefix, antiquityName, ChatAnnouncements.SV.Antiquities.AntiquitySuffix)
+            local alertMessage = zo_strformat("<<1>>: <<2>> <<3>>", ChatAnnouncements.GetModuleMessageFormat("Antiquities", "AntiquityPrefix"), antiquityName, ChatAnnouncements.GetModuleMessageFormat("Antiquities", "AntiquitySuffix"))
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
 

@@ -1383,8 +1383,8 @@ end
 
 function LUIE_Changelog_Manager:OnDeferredInitialize()
     ApplyChangelogWindowTheme()
-    LUIE_Changelog_Title:SetText(zo_strformat("<<1>> Changelog", LUIE.name))
-    LUIE_Changelog_About:SetText(zo_strformat("v<<1>> by <<2>>", LUIE.version, LUIE.author))
+    LUIE_Changelog_Title:SetText(LUIE.FormatChangelogWindowTitle())
+    LUIE_Changelog_About:SetText(zo_strformat(GetString(LUIE_STRING_CORE_CHANGELOG_ABOUT_LINE), LUIE.version, LUIE.author))
 
     local scrollChild = LUIE_Changelog_ContainerScrollChild
     if scrollChild then

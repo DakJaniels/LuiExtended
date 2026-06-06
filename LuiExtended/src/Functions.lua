@@ -106,6 +106,9 @@ do
     --- @param style string|number|nil Font style (string will be converted to constant)
     --- @return string Font string
     local function CreateFontString(faceName, size, style)
+        if not faceName or faceName == "" then
+            faceName = "LUIE Default Font"
+        end
         local styleConstant = LUIE_FONT_STYLE_DEFAULT
         if type(style) == "string" then
             styleConstant = LUIE_FONT_STYLE_TO_CONSTANT[style] or LUIE_FONT_STYLE_DEFAULT

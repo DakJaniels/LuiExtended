@@ -22,8 +22,6 @@ local table_insert = table.insert
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
 
-local globalMethodOptions = { "Radial", "Vertical Reveal" }
-local globalMethodOptionsKeys = { ["Radial"] = 1, ["Vertical Reveal"] = 2 }
 
 local function SetAbilityBarTimersEnabled()
     if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)) == 0 then
@@ -78,7 +76,7 @@ function ActionBar.CreateConsoleSettings()
     )
 
     -- Create the addon settings panel
-    local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_AB)),
+    local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_AB),
                                 {
                                     allowDefaults = true,
                                     defaultsFunction = function ()
@@ -136,15 +134,15 @@ function ActionBar.CreateConsoleSettings()
     initialSettings[#initialSettings + 1] =
     {
         type = LHAS.ST_LABEL,
-        label = "Display Options",
+        label = GetString(LUIE_STRING_LAM_AB_DISPLAY_OPTIONS_HEADER),
         canSelect = false,
     }
 
     initialSettings[#initialSettings + 1] =
     {
         type = LHAS.ST_SLIDER,
-        label = "Out-of-Combat Opacity",
-        tooltip = "Action bar and cast bar opacity while out of combat (0–100%).",
+        label = GetString(LUIE_STRING_SHARED_OOC_OPACITY),
+        tooltip = GetString(LUIE_STRING_LAM_AB_OOC_OPACITY_TP),
         min = 0,
         max = 100,
         step = 5,
@@ -163,8 +161,8 @@ function ActionBar.CreateConsoleSettings()
     initialSettings[#initialSettings + 1] =
     {
         type = LHAS.ST_SLIDER,
-        label = "In-Combat Opacity",
-        tooltip = "Action bar and cast bar opacity while in combat (0–100%).",
+        label = GetString(LUIE_STRING_SHARED_IC_OPACITY),
+        tooltip = GetString(LUIE_STRING_LAM_AB_IC_OPACITY_TP),
         min = 0,
         max = 100,
         step = 5,
@@ -201,7 +199,7 @@ function ActionBar.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure global cooldown (GCD) display options including visual effects, animations, and color settings.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_AB_GCD),
         }
 
         settings[#settings + 1] =
@@ -269,16 +267,12 @@ function ActionBar.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_AB_GCD_ANIMATION_TP),
             items = SettingsAPI:GetGlobalMethodOptionsList(),
             getFunction = function ()
-                local index = Settings.GlobalMethod
-                if type(index) == "string" then
-                    index = globalMethodOptionsKeys[index] or 1
-                end
-                return globalMethodOptions[index] or globalMethodOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeGcdMethodIndex(Settings.GlobalMethod, Defaults.GlobalMethod))
             end,
             setFunction = function (combobox, value, item)
                 Settings.GlobalMethod = item.data
             end,
-            default = globalMethodOptions[Defaults.GlobalMethod],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.GlobalMethod),
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end
         }
     end)
@@ -295,7 +289,7 @@ function ActionBar.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure ultimate ability tracking display including value, percentage, font settings, and visual indicators.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_AB_ULTIMATE),
         }
 
         settings[#settings + 1] =
@@ -575,7 +569,7 @@ function ActionBar.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure ability highlight options including proc effects, toggled abilities, labels, colors, and backbar display settings.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_AB_HIGHLIGHT),
         }
 
         settings[#settings + 1] =
@@ -864,7 +858,7 @@ function ActionBar.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure quickslot (potion) cooldown timer display including position, font settings, color thresholds, and millisecond display options.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_AB_QUICKSLOT),
         }
 
         settings[#settings + 1] =
@@ -996,7 +990,7 @@ function ActionBar.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure cast bar display including size, position, fonts, textures, colors, filters, and blacklist management.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_AB_CASTBAR),
             canSelect = false,
         }
 

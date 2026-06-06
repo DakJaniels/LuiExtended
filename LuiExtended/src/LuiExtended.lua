@@ -28,6 +28,29 @@ LUIE.__index = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
+
+--- @return string
+function LUIE.FormatStartupChatMessage()
+    return zo_strformat(GetString(LUIE_STRING_CORE_STARTUP_CHAT), LUIE.name, LUIE.author, LUIE.version)
+end
+
+--- @return string
+function LUIE.FormatChangelogWindowTitle()
+    return zo_strformat(GetString(LUIE_STRING_CORE_CHANGELOG_WINDOW_TITLE), LUIE.name)
+end
+
+--- @param moduleStringId integer
+--- @return string
+function LUIE.FormatAddonSettingsPanelTitle(moduleStringId)
+    return zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(moduleStringId))
+end
+
+--- @param moduleStringId integer
+--- @return string
+function LUIE.FormatAddonSettingsPanelDisplayName(moduleStringId)
+    return zo_strformat("<<1>> <<2>>", LUIE.name, GetString(moduleStringId))
+end
+
 LUIE.version = "7.2.3.8"
 LUIE.addonVersion = 7238
 LUIE.author = "@dack_janiels[PC]"
@@ -216,9 +239,6 @@ LUIE.Defaults =
     HideAlertFrame              = false,
     AlertFrameAlignment         = 3,
     HideXPBar                   = false,
-    TempAlertHome               = false,
-    TempAlertCampaign           = false,
-    TempAlertOutfit             = false,
     WelcomeVersion              = 0,
     ShowChangeLog               = false,
 

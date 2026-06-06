@@ -83,9 +83,9 @@ end
 -- Print Experience Gain
 function ChatAnnouncements.PrintExperienceGain(change)
     local icon = ChatAnnouncements.SV.XP.ExperienceIcon and "|t16:16:/esoui/art/icons/icon_experience.dds|t " or ""
-    local xpName = zo_strformat(ChatAnnouncements.SV.XP.ExperienceName, change)
+    local xpName = zo_strformat(ChatAnnouncements.GetModuleMessageFormat("XP", "ExperienceName"), change)
     local messageP1 = ("|r|c" .. ColorizeColors.ExperienceNameColorize .. icon .. ZO_CommaDelimitDecimalNumber(change) .. " " .. xpName .. "|r|c" .. ColorizeColors.ExperienceMessageColorize)
-    local formattedMessageP1 = (string_format(ChatAnnouncements.SV.XP.ExperienceMessage, messageP1))
+    local formattedMessageP1 = (string_format(ChatAnnouncements.GetModuleMessageFormat("XP", "ExperienceMessage"), messageP1))
     local finalMessage = string_format("|c%s%s|r", ColorizeColors.ExperienceMessageColorize, formattedMessageP1)
 
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "EXPERIENCE" }
@@ -198,10 +198,10 @@ function ChatAnnouncements.PrintGuildRep(change, lineName, lineId, priority)
     local icon = zo_iconFormatInheritColor(GUILD_SKILL_ICONS[lineId], 16, 16)
     local formattedIcon = ChatAnnouncements.SV.Skills.SkillGuildIcon and (icon .. " ") or ""
 
-    local guildString = zo_strformat(ChatAnnouncements.SV.Skills.SkillGuildRepName, change)
+    local guildString = zo_strformat(ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillGuildRepName"), change)
     local colorize = GetGuildColor(lineId)
     local messageP1 = ("|r|c" .. colorize .. formattedIcon .. change .. " " .. lineName .. " " .. guildString .. "|r|c" .. ColorizeColors.SkillGuildColorize)
-    local formattedMessageP1 = (string_format(ChatAnnouncements.SV.Skills.SkillGuildMsg, messageP1))
+    local formattedMessageP1 = (string_format(ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillGuildMsg"), messageP1))
     local finalMessage = string_format("|c%s%s|r", ColorizeColors.SkillGuildColorize, formattedMessageP1)
 
     -- We set this to skill gain, so as to avoid creating an entire additional chat message category (we want it to show after XP but before any other skill gains or level up so we place it on top of the level up priority).

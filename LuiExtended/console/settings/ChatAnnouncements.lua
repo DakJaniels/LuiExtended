@@ -21,18 +21,6 @@ local table = table
 local table_insert = table.insert
 local unpack = unpack
 
-local chatNameDisplayOptions = { "@UserID", "Character Name", "Character Name @UserID" }
-local chatNameDisplayOptionsKeys = { ["@UserID"] = 1, ["Character Name"] = 2, ["Character Name @UserID"] = 3 }
-local linkBracketDisplayOptions = { "No Brackets", "Display Brackets" }
-local linkBracketDisplayOptionsKeys = { ["No Brackets"] = 1, ["Display Brackets"] = 2 }
-local bracketOptions4 = { "[]", "()", "-", "No Brackets" }
-local bracketOptions4Keys = { ["[]"] = 1, ["()"] = 2, ["-"] = 3, ["No Brackets"] = 4 }
-local bracketOptions5 = { "[]", "()", "-", ":", "No Brackets" }
-local bracketOptions5Keys = { ["[]"] = 1, ["()"] = 2, ["-"] = 3, [":"] = 4, ["No Brackets"] = 5 }
-local guildRankDisplayOptions = { "Self Only", "All w/ Permissions", "All Rank Changes" }
-local guildRankDisplayOptionsKeys = { ["Self Only"] = 1, ["All w/ Permissions"] = 2, ["All Rank Changes"] = 3 }
-local duelStartOptions = { "Message + Icon", "Message Only", "Icon Only" }
-local duelStartOptionsKeys = { ["Message + Icon"] = 1, ["Message Only"] = 2, ["Icon Only"] = 3 }
 
 ---
 --- @param topLevelIndex integer
@@ -68,7 +56,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     end
 
     -- Create the addon settings panel
-    local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CA)),
+    local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_CA),
                                 {
                                     allowDefaults = true
                                 })
@@ -116,7 +104,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure chat message display options including name display, brackets, chat tabs, and timestamps.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_CHAT),
         }
 
         settings[#settings + 1] =
@@ -126,17 +114,13 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_NAMEDISPLAYMETHOD_TP),
             items = SettingsAPI:GetChatNameDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.ChatPlayerDisplayOptions
-                if type(index) == "string" then
-                    index = chatNameDisplayOptionsKeys[index] or 2
-                end
-                return chatNameDisplayOptions[index] or chatNameDisplayOptions[2]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeChatNameDisplayIndex(Settings.ChatPlayerDisplayOptions, Defaults.ChatPlayerDisplayOptions))
             end,
             setFunction = function (combobox, value, item)
                 Settings.ChatPlayerDisplayOptions = item.data
                 ChatAnnouncements.IndexGroupLoot()
             end,
-            default = chatNameDisplayOptions[2],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.ChatPlayerDisplayOptions),
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -149,17 +133,13 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_CHARACTER_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.BracketOptionCharacter
-                if type(index) == "string" then
-                    index = linkBracketDisplayOptionsKeys[index] or 1
-                end
-                return linkBracketDisplayOptions[index] or linkBracketDisplayOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeLinkBracketDisplayIndex(Settings.BracketOptionCharacter, 1))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BracketOptionCharacter = item.data
                 ChatAnnouncements.IndexGroupLoot()
             end,
-            default = linkBracketDisplayOptions[Defaults.BracketOptionCharacter],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BracketOptionCharacter),
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -184,7 +164,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure currency change announcements including gold, AP, tel var, writ vouchers, crowns, gems, and other currencies.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_CURRENCY),
         }
 
         settings[#settings + 1] =
@@ -1745,7 +1725,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure loot announcements including items, collectibles, recipes, motifs, and other loot-related messages.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_LOOT),
         }
 
         settings[#settings + 1] =
@@ -1755,16 +1735,12 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_ITEM_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.BracketOptionItem
-                if type(index) == "string" then
-                    index = linkBracketDisplayOptionsKeys[index] or 1
-                end
-                return linkBracketDisplayOptions[index] or linkBracketDisplayOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeLinkBracketDisplayIndex(Settings.BracketOptionItem, 1))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BracketOptionItem = item.data
             end,
-            default = linkBracketDisplayOptions[Defaults.BracketOptionItem],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BracketOptionItem),
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -2552,7 +2528,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Attunable Crafting Station Announcements"
+            label = GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_HEADER)
         }
     end)
 
@@ -2568,7 +2544,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure shared currency and loot context menu options and message formatting.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_SHARED),
         }
 
         settings[#settings + 1] =
@@ -4658,20 +4634,14 @@ function ChatAnnouncements.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALBRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALBRACKET_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(bracketOptions5) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = SettingsAPI:GetBracketStyleOptions5List(),
             getFunction = function ()
-                return bracketOptions5[Settings.Skills.SkillPointBracket]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeBracketStyleIndex(Settings.Skills.SkillPointBracket, Defaults.Skills.SkillPointBracket, 5))
             end,
             setFunction = function (combobox, value, item)
-                Settings.Skills.SkillPointBracket = bracketOptions5Keys[item.data or item.name or value]
+                Settings.Skills.SkillPointBracket = item.data
             end,
-            default = bracketOptions5[Defaults.Skills.SkillPointBracket],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Skills.SkillPointBracket),
             disable = function ()
                 return not ((Settings.Skills.SkillPointCA or Settings.Skills.SkillPointCSA or Settings.Skills.SkillPointAlert) and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -5228,7 +5198,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Companion Level Up Announcements"
+            label = GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL_HEADER)
         }
     end)
 
@@ -5244,7 +5214,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure collectible and lorebook announcement settings.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_COLLECTIBLE),
         }
 
         settings[#settings + 1] =
@@ -5328,16 +5298,12 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_COLLECTIBLE_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.BracketOptionCollectible
-                if type(index) == "string" then
-                    index = linkBracketDisplayOptionsKeys[index] or 1
-                end
-                return linkBracketDisplayOptions[index] or linkBracketDisplayOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeLinkBracketDisplayIndex(Settings.BracketOptionCollectible, 1))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BracketOptionCollectible = item.data
             end,
-            default = linkBracketDisplayOptions[Defaults.BracketOptionCollectible],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BracketOptionCollectible),
             disable = function ()
                 return not ((Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert) and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -5399,20 +5365,14 @@ function ChatAnnouncements.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_BRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_BRACKET_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(bracketOptions5) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = SettingsAPI:GetBracketStyleOptions5List(),
             getFunction = function ()
-                return bracketOptions5[Settings.Collectibles.CollectibleBracket]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeBracketStyleIndex(Settings.Collectibles.CollectibleBracket, Defaults.Collectibles.CollectibleBracket, 5))
             end,
             setFunction = function (combobox, value, item)
-                Settings.Collectibles.CollectibleBracket = bracketOptions5Keys[item.data or item.name or value]
+                Settings.Collectibles.CollectibleBracket = item.data
             end,
-            default = bracketOptions5[Defaults.Collectibles.CollectibleBracket],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Collectibles.CollectibleBracket),
             disable = function ()
                 return not ((Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert) and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -5533,16 +5493,12 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_COLLECTIBLE_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.BracketOptionCollectibleUse
-                if type(index) == "string" then
-                    index = linkBracketDisplayOptionsKeys[index] or 1
-                end
-                return linkBracketDisplayOptions[index] or linkBracketDisplayOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeLinkBracketDisplayIndex(Settings.BracketOptionCollectibleUse, 1))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BracketOptionCollectibleUse = item.data
             end,
-            default = linkBracketDisplayOptions[Defaults.BracketOptionCollectibleUse],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BracketOptionCollectibleUse),
             disable = function ()
                 return not ((Settings.Collectibles.CollectibleUseCA or Settings.Collectibles.CollectibleUseAlert) and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -5646,16 +5602,12 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_LOREBOOK_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.BracketOptionLorebook
-                if type(index) == "string" then
-                    index = linkBracketDisplayOptionsKeys[index] or 1
-                end
-                return linkBracketDisplayOptions[index] or linkBracketDisplayOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeLinkBracketDisplayIndex(Settings.BracketOptionLorebook, 1))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BracketOptionLorebook = item.data
             end,
-            default = linkBracketDisplayOptions[Defaults.BracketOptionLorebook],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.BracketOptionLorebook),
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -5887,20 +5839,14 @@ function ChatAnnouncements.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_CATEGORY_BRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_CATEGORY_BRACKET_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(bracketOptions5) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = SettingsAPI:GetBracketStyleOptions5List(),
             getFunction = function ()
-                return bracketOptions5[Settings.Lorebooks.LorebookBracket]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeBracketStyleIndex(Settings.Lorebooks.LorebookBracket, Defaults.Lorebooks.LorebookBracket, 5))
             end,
             setFunction = function (combobox, value, item)
-                Settings.Lorebooks.LorebookBracket = bracketOptions5Keys[item.data or item.name or value]
+                Settings.Lorebooks.LorebookBracket = item.data
             end,
-            default = bracketOptions5[Defaults.Lorebooks.LorebookBracket],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Lorebooks.LorebookBracket),
             disable = function ()
                 return not (Settings.Lorebooks.LorebookCA or Settings.Lorebooks.LorebookCSA or Settings.Lorebooks.LorebookAlert or Settings.Lorebooks.LorebookCollectionCA or Settings.Lorebooks.LorebookCollectionCSA or Settings.Lorebooks.LorebookCollectionAlert and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -5953,7 +5899,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure antiquities and scrying announcement settings.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_ANTIQUITY),
         }
 
         settings[#settings + 1] =
@@ -6020,16 +5966,12 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_BRACKET_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.Antiquities.AntiquityBracket
-                if type(index) == "string" then
-                    index = linkBracketDisplayOptionsKeys[index] or 1
-                end
-                return linkBracketDisplayOptions[index] or linkBracketDisplayOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeLinkBracketDisplayIndex(Settings.Antiquities.AntiquityBracket, 1))
             end,
             setFunction = function (combobox, value, item)
                 Settings.Antiquities.AntiquityBracket = item.data
             end,
-            default = linkBracketDisplayOptions[Defaults.Antiquities.AntiquityBracket],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Antiquities.AntiquityBracket),
             disable = function ()
                 return not (Settings.Antiquities.AntiquityCA or Settings.Antiquities.AntiquityCSA or Settings.Antiquities.AntiquityAlert and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -6091,20 +6033,14 @@ function ChatAnnouncements.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX_BRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX_BRACKET_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(bracketOptions5) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = SettingsAPI:GetBracketStyleOptions5List(),
             getFunction = function ()
-                return bracketOptions5[Settings.Antiquities.AntiquityPrefixBracket]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeBracketStyleIndex(Settings.Antiquities.AntiquityPrefixBracket, Defaults.Antiquities.AntiquityPrefixBracket, 5))
             end,
             setFunction = function (combobox, value, item)
-                Settings.Antiquities.AntiquityPrefixBracket = bracketOptions5Keys[item.data or item.name or value]
+                Settings.Antiquities.AntiquityPrefixBracket = item.data
             end,
-            default = bracketOptions5[Defaults.Antiquities.AntiquityPrefixBracket],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Antiquities.AntiquityPrefixBracket),
             disable = function ()
                 return not (Settings.Antiquities.AntiquityCA or Settings.Antiquities.AntiquityCSA or Settings.Antiquities.AntiquityAlert and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -6140,7 +6076,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure achievement announcement settings including category filters.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_ACHIEVEMENT),
         }
 
         settings[#settings + 1] =
@@ -6329,11 +6265,7 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_ACHIEVEMENT_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.BracketOptionAchievement
-                if type(index) == "string" then
-                    index = linkBracketDisplayOptionsKeys[index] or 1
-                end
-                return linkBracketDisplayOptions[index] or linkBracketDisplayOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeLinkBracketDisplayIndex(Settings.BracketOptionAchievement, 1))
             end,
             setFunction = function (combobox, value, item)
                 Settings.BracketOptionAchievement = item.data
@@ -6451,20 +6383,14 @@ function ChatAnnouncements.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CA_ACHIEVE_BRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_ACHIEVE_BRACKET_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(bracketOptions5) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = SettingsAPI:GetBracketStyleOptions5List(),
             getFunction = function ()
-                return bracketOptions5[Settings.Achievement.AchievementBracketOptions]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeBracketStyleIndex(Settings.Achievement.AchievementBracketOptions, Defaults.Achievement.AchievementBracketOptions, 5))
             end,
             setFunction = function (combobox, value, item)
-                Settings.Achievement.AchievementBracketOptions = bracketOptions5Keys[item.data or item.name or value]
+                Settings.Achievement.AchievementBracketOptions = item.data
             end,
-            default = bracketOptions5[Defaults.Achievement.AchievementBracketOptions],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Achievement.AchievementBracketOptions),
             disable = function ()
                 return not (Settings.Achievement.AchievementCompleteCA or Settings.Achievement.AchievementCompleteCSA or Settings.Achievement.AchievementCompleteAlert or Settings.Achievement.AchievementUpdateCA or Settings.Achievement.AchievementUpdateAlert and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -6475,20 +6401,14 @@ function ChatAnnouncements.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CA_ACHIEVE_CATEGORYBRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_ACHIEVE_CATEGORYBRACKET_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(bracketOptions4) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = SettingsAPI:GetBracketStyleOptions4List(),
             getFunction = function ()
-                return bracketOptions4[Settings.Achievement.AchievementCatBracketOptions]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeBracketStyleIndex(Settings.Achievement.AchievementCatBracketOptions, Defaults.Achievement.AchievementCatBracketOptions, 4))
             end,
             setFunction = function (combobox, value, item)
-                Settings.Achievement.AchievementCatBracketOptions = bracketOptions4Keys[value]
+                Settings.Achievement.AchievementCatBracketOptions = item.data
             end,
-            default = bracketOptions4[Defaults.Achievement.AchievementCatBracketOptions],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Achievement.AchievementCatBracketOptions),
             disable = function ()
                 return not (Settings.Achievement.AchievementCategory or Settings.Achievement.AchievementSubcategory) or not (Settings.Achievement.AchievementCompleteCA or Settings.Achievement.AchievementCompleteCSA or Settings.Achievement.AchievementCompleteAlert or Settings.Achievement.AchievementUpdateCA or Settings.Achievement.AchievementUpdateAlert and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -7028,7 +6948,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure social announcement settings including friends, guilds, and player interactions.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_SOCIAL),
         }
 
         settings[#settings + 1] =
@@ -7194,16 +7114,12 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_RANKOPTIONS_TP),
             items = SettingsAPI:GetGuildRankDisplayOptionsList(),
             getFunction = function ()
-                local index = Settings.Social.GuildRankDisplayOptions
-                if type(index) == "string" then
-                    index = guildRankDisplayOptionsKeys[index] or 1
-                end
-                return guildRankDisplayOptions[index] or guildRankDisplayOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeGuildRankDisplayIndex(Settings.Social.GuildRankDisplayOptions, Defaults.Social.GuildRankDisplayOptions))
             end,
             setFunction = function (combobox, value, item)
                 Settings.Social.GuildRankDisplayOptions = item.data
             end,
-            default = guildRankDisplayOptions[Defaults.Social.GuildRankDisplayOptions],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Social.GuildRankDisplayOptions),
             disable = function ()
                 return not (Settings.Social.GuildRankCA or Settings.Social.GuildRankAlert and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -7432,16 +7348,12 @@ function ChatAnnouncements.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CA_SOCIAL_DUELSTART_OPTION_TP),
             items = SettingsAPI:GetDuelStartOptionsList(),
             getFunction = function ()
-                local index = Settings.Social.DuelStartOptions
-                if type(index) == "string" then
-                    index = duelStartOptionsKeys[index] or 1
-                end
-                return duelStartOptions[index] or duelStartOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeDuelStartDisplayIndex(Settings.Social.DuelStartOptions, 1))
             end,
             setFunction = function (combobox, value, item)
                 Settings.Social.DuelStartOptions = item.data
             end,
-            default = duelStartOptions[1],
+            default = SettingsAPI:LHASDropdownGetData(1),
             disable = function ()
                 return not (Settings.Social.DuelStartCA or Settings.Social.DuelStartCSA or Settings.Social.DuelStartAlert and LUIE.SV.ChatAnnouncements_Enable)
             end
@@ -7636,7 +7548,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure group announcement settings including group formation, roles, and group-related events.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_GROUP),
         }
 
         settings[#settings + 1] =
@@ -8061,7 +7973,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure display announcement settings including combat, death, and other display-related messages.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_DISPLAY),
         }
 
         settings[#settings + 1] =
@@ -8073,7 +7985,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "* Show Display Announcement Debug Message *",
+            label = GetString(LUIE_STRING_LAM_CA_DISPLAY_DEBUG_MESSAGE),
             tooltip = "Display a debug message when a Display Announcement that has not yet been added to LUIE is triggered. Enable this option if you'd like to help out with the addon by posting the messages you receive from this event. Do not enable if you are not using the English client.",
             getFunction = function ()
                 return Settings.DisplayAnnouncements.Debug
@@ -8750,7 +8662,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure miscellaneous announcement settings including mail, notifications, and other events.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_MISC),
         }
 
         settings[#settings + 1] =

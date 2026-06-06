@@ -239,10 +239,12 @@ S.g_loginHideQuestLoot = true -- Set to true onPlayerActivated and toggled after
 S.g_talkingToNPC = false      -- Toggled when we're in dialogue with an NPC (EVENT_CHATTER_BEGIN & EVENT_CHATTER_END)
 
 -- Trade
-S.g_tradeTarget = ""    -- Saves name of target player being traded with.
-S.g_tradeStacksIn = {}  -- Table for storing items to be traded in.
-S.g_tradeStacksOut = {} -- Table for storing items to be traded out.
-S.g_inTrade = false     -- Toggled on when in a trade.
+S.g_tradeTarget = ""      -- Saves name of target player being traded with.
+S.g_tradeStacksIn = {}    -- Table for storing items to be traded in.
+S.g_tradeStacksOut = {}   -- Table for storing items to be traded out.
+S.g_inTrade = false       -- Toggled on when in a trade.
+
+S.pendingHomeJump = false -- Set before RequestJumpToHouse from slash; cleared on EVENT_JUMP_FAILED.
 
 -- Antiquities
 S.g_weAreInADig = false -- When in a digsite.
@@ -308,7 +310,83 @@ S.g_blacklistIDs =
     [140222] = true, -- 200 Transmute Crystals (This is probably just a test item)
 }
 
+--- @param value boolean
+function ChatAnnouncements.SetPendingHomeJump(value)
+    S.pendingHomeJump = value
+end
 
+--- @param message string
+--- @param alertCategory integer
+--- @param sound integer|nil
+function ChatAnnouncements.AnnounceNotifyAlert(message, alertCategory, sound)
+    if not ChatAnnouncements.SV or not ChatAnnouncements.SV.Notify then
+        return
+    end
+    ZO_Alert(alertCategory or UI_ALERT_CATEGORY_ALERT, sound or SOUNDS.NONE, message)
+end
+
+--- @param message string
+--- @param alertCategory integer
+--- @param sound integer|nil
+--- @param caEnabled boolean
+--- @param alertEnabled boolean
+function ChatAnnouncements.AnnounceNotify(message, alertCategory, sound, caEnabled, alertEnabled)
+    if not ChatAnnouncements.SV or not ChatAnnouncements.SV.Notify then
+        return
+    end
+    if ChatAnnouncements.Enabled and caEnabled then
+        ChatOutput:Print(message, true)
+    end
+    if alertEnabled then
+        ChatAnnouncements.AnnounceNotifyAlert(message, alertCategory, sound)
+    end
+end
+
+--- @param message string
+--- @param alertCategory integer
+--- @param sound integer|nil
+--- @param caKey string
+--- @param alertKey string
+function ChatAnnouncements.AnnounceNotifySetting(message, alertCategory, sound, caKey, alertKey)
+    if not ChatAnnouncements.Enabled or not ChatAnnouncements.SV or not ChatAnnouncements.SV.Notify then
+        return
+    end
+    local notify = ChatAnnouncements.SV.Notify
+    ChatAnnouncements.AnnounceNotify(message, alertCategory, sound, notify[caKey], notify[alertKey])
+end
+
+local function CampaignQueueStateLabel(state)
+    local stateText = GetString("SI_CAMPAIGNQUEUEREQUESTSTATETYPE", state)
+    if stateText == nil or stateText == "" then
+        return tostring(state)
+    end
+    return stateText
+end
+
+function ChatAnnouncements.OnCampaignQueueJoined(_, campaignId)
+    local campaignName = GetCampaignName(campaignId)
+    local message = zo_strformat(GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_JOINED), campaignName)
+    ChatAnnouncements.AnnounceNotifySetting(message, UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "CampaignQueueCA", "CampaignQueueAlert")
+end
+
+function ChatAnnouncements.OnCampaignQueueLeft(_, campaignId)
+    local campaignName = GetCampaignName(campaignId)
+    local message = zo_strformat(GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_LEFT), campaignName)
+    ChatAnnouncements.AnnounceNotifySetting(message, UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "CampaignQueueCA", "CampaignQueueAlert")
+end
+
+function ChatAnnouncements.OnCampaignQueueStateChanged(_, campaignId, isGroup, state)
+    local campaignName = GetCampaignName(campaignId)
+    local stateLabel = CampaignQueueStateLabel(state)
+    local message = zo_strformat(GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_STATE), campaignName, stateLabel)
+    ChatAnnouncements.AnnounceNotifySetting(message, UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "CampaignQueueCA", "CampaignQueueAlert")
+end
+
+function ChatAnnouncements.RegisterCampaignQueueEvents()
+    eventManager:RegisterForEvent(moduleName, EVENT_CAMPAIGN_QUEUE_JOINED, ChatAnnouncements.OnCampaignQueueJoined)
+    eventManager:RegisterForEvent(moduleName, EVENT_CAMPAIGN_QUEUE_LEFT, ChatAnnouncements.OnCampaignQueueLeft)
+    eventManager:RegisterForEvent(moduleName, EVENT_CAMPAIGN_QUEUE_STATE_CHANGED, ChatAnnouncements.OnCampaignQueueStateChanged)
+end
 
 function ChatAnnouncements.Initialize(enabled)
     -- Load settings
@@ -318,6 +396,9 @@ function ChatAnnouncements.Initialize(enabled)
     else
         ChatAnnouncements.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.ChatAnnouncements, LUIE.SVVer, nil, ChatAnnouncements.Defaults, LUIE.SavedVarsProfile)
     end
+
+    ChatAnnouncements.RefreshMessageFormatDefaultsTable()
+    ChatAnnouncements.NormalizeStoredMessageFormats()
 
     ChatAnnouncements.InvalidateQuestCounterFilterCache()
 
@@ -386,6 +467,7 @@ function ChatAnnouncements.Initialize(enabled)
 
     ChatAnnouncements.RegisterGuildEvents()
     ChatAnnouncements.RegisterSocialEvents()
+    ChatAnnouncements.RegisterCampaignQueueEvents()
     ChatAnnouncements.RegisterDisguiseEvents()
     ChatAnnouncements.RegisterQuestEvents()
 
@@ -840,7 +922,7 @@ function ChatAnnouncements.GuildHeraldrySaved()
         local changeType = ZO_CommaDelimitDecimalNumber(value)
         local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
         local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, value)
+        local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyGoldName"), value)
         local currencyTotal = nil
         local messageTotal = ""
         local messageChange = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_HERALDRY)
@@ -1483,16 +1565,16 @@ local message = ""
 
     if updatedRoleName ~= LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", displayNameLink, message) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED), displayNameLink, message) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", characterNameLink, message) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED), characterNameLink, message) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has updated their role: <<2>>", displayBoth, message) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED), displayBoth, message) )
         end
     else
-        ChatOutput:Print(zo_strformat("You have updated your role: <<1>>", message) )
+        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED_SELF), message) )
     end
 end
 ]]
@@ -1514,23 +1596,23 @@ function ChatAnnouncements.GMCS(eventId, unitTag, isOnline)
 
     if not isOnline and onlineRoleName ~=LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", displayNameLink) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_DISCONNECTED), displayNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", characterNameLink) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_DISCONNECTED), characterNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has disconnected.", displayBoth) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_DISCONNECTED), displayBoth) )
         end
     elseif isOnline and onlineRoleName ~=LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", displayNameLink) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_RECONNECTED), displayNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", characterNameLink) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_RECONNECTED), characterNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            ChatOutput:Print(zo_strformat("|cFFFFFF<<1>>|r has reconnected.", displayBoth) )
+            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_RECONNECTED), displayBoth) )
         end
     end
 end
@@ -1724,9 +1806,9 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             {
                 currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex(),
                 currencyIcon = currencySettings.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or "",
-                currencyName = zo_strformat(currencySettings.CurrencyGoldName, amountDelta),
+                currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyGoldName"), amountDelta),
                 currencyTotal = currencySettings.CurrencyGoldShowTotal,
-                messageTotal = currencySettings.CurrencyMessageTotalGold,
+                messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalGold"),
             }
         elseif currencyType == CURT_ALLIANCE_POINTS then
             if not currencySettings.CurrencyAPShowChange then return nil end
@@ -1747,9 +1829,9 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             {
                 currencyTypeColor = ColorizeColors.CurrencyAPColorize:ToHex(),
                 currencyIcon = currencySettings.CurrencyIcon and "|t16:16:/esoui/art/currency/alliancepoints.dds|t" or "",
-                currencyName = zo_strformat(currencySettings.CurrencyAPName, amountDelta),
+                currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyAPName"), amountDelta),
                 currencyTotal = currencySettings.CurrencyAPShowTotal,
-                messageTotal = currencySettings.CurrencyMessageTotalAP,
+                messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalAP"),
             }
         elseif currencyType == CURT_TELVAR_STONES then
             if not currencySettings.CurrencyTVChange then return nil end
@@ -1770,9 +1852,9 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             {
                 currencyTypeColor = ColorizeColors.CurrencyTVColorize:ToHex(),
                 currencyIcon = currencySettings.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_telvar.dds|t" or "",
-                currencyName = zo_strformat(currencySettings.CurrencyTVName, amountDelta),
+                currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTVName"), amountDelta),
                 currencyTotal = currencySettings.CurrencyTVShowTotal,
-                messageTotal = currencySettings.CurrencyMessageTotalTV,
+                messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTV"),
             }
         else
             local currencyDescriptor = SIMPLE_CURRENCY[currencyType]
@@ -1784,9 +1866,9 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             {
                 currencyTypeColor = ColorizeColors[colorizeKey]:ToHex(),
                 currencyIcon = currencySettings.CurrencyIcon and iconString or "",
-                currencyName = zo_strformat(currencySettings[nameKey], amountDelta),
+                currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat(nameKey), amountDelta),
                 currencyTotal = currencySettings[showTotalKey],
-                messageTotal = currencySettings[messageTotalKey],
+                messageTotal = ChatAnnouncements.GetCurrencyMessageFormat(messageTotalKey),
             }
         end
     end
@@ -1803,7 +1885,6 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     changeColor, changeType = GetChangeColorAndType(UpOrDown, oldValue, newValue)
 
     -- Reason -> message key (ContextMessages key) for simple cases; reason -> type for bag/bank
-    local contextMessages = ChatAnnouncements.SV.ContextMessages
     local reasonToMessageKey =
     {
         [CURRENCY_CHANGE_REASON_QUESTREWARD] = "CurrencyMessageReceive",
@@ -1881,14 +1962,14 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     local function GetMessageChangeAndType(changeReason, currencyType, amountDelta)
         if changeReason == CURRENCY_CHANGE_REASON_VENDOR and amountDelta > 0 then
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-                return contextMessages.CurrencyMessageReceive, nil, "saved_purchase_return"
+                return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"), nil, "saved_purchase_return"
             end
-            return contextMessages.CurrencyMessageReceive, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_VENDOR and amountDelta < 0 then
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-                return contextMessages.CurrencyMessageSpend, nil, "saved_purchase_return"
+                return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "saved_purchase_return"
             end
-            return contextMessages.CurrencyMessageSpend, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_MAIL and amountDelta > 0 then
             local mailSender = S.g_mailPendingCurrencySender
             local pendingMailId = S.g_mailPendingCurrencyMailId
@@ -1924,7 +2005,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
                 S.g_lastMailCurrencyAnnounce.mailId = pendingMailId
                 S.g_lastMailCurrencyAnnounce.timeMs = nowMs
             end
-            local mailMessageChange = currencySender ~= "" and contextMessages.CurrencyMessageMailIn or contextMessages.CurrencyMessageMailInNoName
+            local mailMessageChange = currencySender ~= "" and ChatAnnouncements.GetContextMessage("CurrencyMessageMailIn") or ChatAnnouncements.GetContextMessage("CurrencyMessageMailInNoName")
             local mailCurrencyType = (currencySender ~= "") and "LUIE_CURRENCY_MAIL" or nil
             return mailMessageChange, mailCurrencyType, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_MAIL and amountDelta < 0 then
@@ -1941,27 +2022,27 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
                 S.g_mailTarget = mailSender
             end
             local currencySender = S.g_mailBatchTakeAll and mailSender or S.g_mailTarget
-            return contextMessages.CurrencyMessageMailCOD, (currencySender ~= "" and "LUIE_CURRENCY_MAIL" or nil), "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageMailCOD"), (currencySender ~= "" and "LUIE_CURRENCY_MAIL" or nil), "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_BUYBACK then
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-                return contextMessages.CurrencyMessageSpend, nil, "saved_purchase_return"
+                return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "saved_purchase_return"
             end
-            return contextMessages.CurrencyMessageSpend, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_TRADE and amountDelta > 0 then
-            return (S.g_tradeTarget ~= "" and contextMessages.CurrencyMessageTradeIn or contextMessages.CurrencyMessageTradeInNoName), (S.g_tradeTarget ~= "" and "LUIE_CURRENCY_TRADE" or nil), "continue"
+            return (S.g_tradeTarget ~= "" and ChatAnnouncements.GetContextMessage("CurrencyMessageTradeIn") or ChatAnnouncements.GetContextMessage("CurrencyMessageTradeInNoName")), (S.g_tradeTarget ~= "" and "LUIE_CURRENCY_TRADE" or nil), "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_TRADE and amountDelta < 0 then
-            return (S.g_tradeTarget ~= "" and contextMessages.CurrencyMessageTradeOut or contextMessages.CurrencyMessageTradeOutNoName), (S.g_tradeTarget ~= "" and "LUIE_CURRENCY_TRADE" or nil), "continue"
+            return (S.g_tradeTarget ~= "" and ChatAnnouncements.GetContextMessage("CurrencyMessageTradeOut") or ChatAnnouncements.GetContextMessage("CurrencyMessageTradeOutNoName")), (S.g_tradeTarget ~= "" and "LUIE_CURRENCY_TRADE" or nil), "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_SELL_STOLEN then
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-                return contextMessages.CurrencyMessageReceive, nil, "saved_purchase_return"
+                return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"), nil, "saved_purchase_return"
             end
-            return contextMessages.CurrencyMessageReceive, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_BAGSPACE then
-            return contextMessages.CurrencyMessageStorage, "LUIE_CURRENCY_BAG", "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageStorage"), "LUIE_CURRENCY_BAG", "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_BANKSPACE then
-            return contextMessages.CurrencyMessageStorage, "LUIE_CURRENCY_BANK", "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageStorage"), "LUIE_CURRENCY_BANK", "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_BATTLEGROUND then
-            return (amountDelta < 0 and contextMessages.CurrencyMessageCampaign or contextMessages.CurrencyMessageReceive), nil, "continue"
+            return (amountDelta < 0 and ChatAnnouncements.GetContextMessage("CurrencyMessageCampaign") or ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_LISTING then
             if ChatAnnouncements.SV.Currency.CurrencyGoldHideListingAH then
                 return nil, nil, "return"
@@ -1969,46 +2050,46 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             return nil, nil, "saved_purchase_return"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_SKILLS then
             ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
-            return contextMessages.CurrencyMessageSkills, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageSkills"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_ATTRIBUTES then
             ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
-            return contextMessages.CurrencyMessageAttributes, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageAttributes"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_MORPHS then
             ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_MORPHS)
-            return contextMessages.CurrencyMessageMorphs, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageMorphs"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_SUBCLASS then
             ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILL_LINE)
-            return contextMessages.CurrencyMessageSkillLine, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageSkillLine"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_CHAMPION then
             ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_CHAMPION)
-            return contextMessages.CurrencyMessageChampion, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageChampion"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_VENDOR_LAUNDER then
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-                return contextMessages.CurrencyMessageSpend, nil, "saved_purchase_return"
+                return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "saved_purchase_return"
             end
-            return contextMessages.CurrencyMessageSpend, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_REWARD then
-            return (currencyType == CURT_SEALS and contextMessages.CurrencyMessageEarn or contextMessages.CurrencyMessageReceive), nil, "continue"
+            return (currencyType == CURT_SEALS and ChatAnnouncements.GetContextMessage("CurrencyMessageEarn") or ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_PURCHASE then
             if ChatAnnouncements.SV.Currency.CurrencyGoldHideAH then
                 return nil, nil, "return"
             end
-            return contextMessages.CurrencyMessageSpend, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_GUARD or changeReason == CURRENCY_CHANGE_REASON_BOUNTY_CONFISCATED then
             zo_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 50)
-            return contextMessages.CurrencyMessageConfiscate, nil, "continue"
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageConfiscate"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_KILL then
-            return (currencyType == CURT_ALLIANCE_POINTS and contextMessages.CurrencyMessageEarn or contextMessages.CurrencyMessageLoot), nil, "continue"
+            return (currencyType == CURT_ALLIANCE_POINTS and ChatAnnouncements.GetContextMessage("CurrencyMessageEarn") or ChatAnnouncements.GetContextMessage("CurrencyMessageLoot")), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_GEMS or changeReason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_CROWNS then
-            return (currencyType == CURT_STYLE_STONES or currencyType == CURT_SEALS or currencyType == CURT_TRADE_BARS) and contextMessages.CurrencyMessageReceive or contextMessages.CurrencyMessageSpend, nil, "continue"
+            return (currencyType == CURT_STYLE_STONES or currencyType == CURT_SEALS or currencyType == CURT_TRADE_BARS) and ChatAnnouncements.GetContextMessage("CurrencyMessageReceive") or ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "continue"
         elseif debugReasonIds[changeReason] then
             return zo_strformat(GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY), changeReason), nil, "continue"
         end
         local contextMessageKey = reasonToMessageKey[changeReason]
         if contextMessageKey then
-            return contextMessages[contextMessageKey], reasonToCurrencyType[changeReason], "continue"
+            return ChatAnnouncements.GetContextMessage(contextMessageKey), reasonToCurrencyType[changeReason], "continue"
         end
-        return contextMessages.CurrencyMessageLoot, nil, "continue"
+        return ChatAnnouncements.GetContextMessage("CurrencyMessageLoot"), nil, "continue"
     end
 
     local messageChangeResult, typeResult, action = GetMessageChangeAndType(reason, currency, UpOrDown)
@@ -2154,10 +2235,10 @@ function ChatAnnouncements.CurrencyGoldThrottlePrinter()
         local changeType = ZO_CommaDelimitDecimalNumber(S.g_currencyGoldThrottleValue)
         local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
         local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, S.g_currencyGoldThrottleValue)
+        local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyGoldName"), S.g_currencyGoldThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
-        local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
-        local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
+        local messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalGold")
+        local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageLoot")
         local type = "LUIE_CURRENCY_THROTTLE"
         ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
@@ -2172,10 +2253,10 @@ function ChatAnnouncements.CurrencyAPThrottlePrinter()
         local changeType = ZO_CommaDelimitDecimalNumber(S.g_currencyAPThrottleValue)
         local currencyTypeColor = ColorizeColors.CurrencyAPColorize:ToHex()
         local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/alliancepoints.dds|t" or ""
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyAPName, S.g_currencyAPThrottleValue)
+        local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyAPName"), S.g_currencyAPThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyAPShowTotal
-        local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalAP
-        local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageEarn
+        local messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalAP")
+        local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageEarn")
         local type = "LUIE_CURRENCY_THROTTLE"
         ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
@@ -2191,10 +2272,10 @@ function ChatAnnouncements.CurrencyTVThrottlePrinter()
         local changeType = ZO_CommaDelimitDecimalNumber(S.g_currencyTVThrottleValue)
         local currencyTypeColor = ColorizeColors.CurrencyTVColorize:ToHex()
         local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_telvar.dds|t" or ""
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTVName, S.g_currencyTVThrottleValue)
+        local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTVName"), S.g_currencyTVThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTVShowTotal
-        local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTV
-        local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
+        local messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTV")
+        local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageLoot")
         local type = "LUIE_CURRENCY_THROTTLE"
         ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
@@ -2267,7 +2348,7 @@ function ChatAnnouncements.OnBuybackItem(eventId, itemName, quantity, money, ite
     local icon = itemIcon
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
     local type = "LUIE_CURRENCY_VENDOR"
-    local messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageBuyback or ChatAnnouncements.SV.ContextMessages.CurrencyMessageBuybackNoV
+    local messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.GetContextMessage("CurrencyMessageBuyback") or ChatAnnouncements.GetContextMessage("CurrencyMessageBuybackNoV")
     local itemCount = quantity > 1 and (" |cFFFFFFx" .. quantity .. "|r") or ""
     local carriedItem
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
@@ -2281,7 +2362,7 @@ function ChatAnnouncements.OnBuybackItem(eventId, itemName, quantity, money, ite
         local total1, total2, total3 = GetItemLinkStacks(itemName)
         local total = total1 + total2 + total3
         if total > 1 then
-            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
@@ -2397,7 +2478,7 @@ function ChatAnnouncements.OnBuyItem(eventId, itemName, entryType, quantity, mon
     local icon = itemIcon
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
     local type = "LUIE_CURRENCY_VENDOR"
-    local messageChange = ((money ~= 0 or specialCurrencyQuantity1 ~= 0 or specialCurrencyQuantity2 ~= 0) and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageBuy or ChatAnnouncements.SV.ContextMessages.CurrencyMessageBuyNoV
+    local messageChange = ((money ~= 0 or specialCurrencyQuantity1 ~= 0 or specialCurrencyQuantity2 ~= 0) and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.GetContextMessage("CurrencyMessageBuy") or ChatAnnouncements.GetContextMessage("CurrencyMessageBuyNoV")
     local itemCount = quantity > 1 and (" |cFFFFFFx" .. quantity .. "|r") or ""
     local carriedItem
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
@@ -2411,7 +2492,7 @@ function ChatAnnouncements.OnBuyItem(eventId, itemName, entryType, quantity, mon
         local total1, total2, total3 = GetItemLinkStacks(itemName)
         local total = total1 + total2 + total3
         if total > 1 then
-            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
@@ -2443,9 +2524,9 @@ function ChatAnnouncements.OnSellItem(eventId, itemName, quantity, money)
     local type = "LUIE_CURRENCY_VENDOR"
     local messageChange
     if S.g_weAreInAFence then
-        messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageFence or ChatAnnouncements.SV.ContextMessages.CurrencyMessageFenceNoV
+        messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.GetContextMessage("CurrencyMessageFence") or ChatAnnouncements.GetContextMessage("CurrencyMessageFenceNoV")
     else
-        messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageSell or ChatAnnouncements.SV.ContextMessages.CurrencyMessageSellNoV
+        messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.GetContextMessage("CurrencyMessageSell") or ChatAnnouncements.GetContextMessage("CurrencyMessageSellNoV")
     end
     local itemCount = quantity > 1 and (" |cFFFFFFx" .. quantity .. "|r") or ""
     local carriedItem
@@ -2460,7 +2541,7 @@ function ChatAnnouncements.OnSellItem(eventId, itemName, quantity, money)
         local total1, total2, total3 = GetItemLinkStacks(itemName)
         local total = total1 + total2 + total3
         if total > 1 then
-            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
@@ -2497,7 +2578,7 @@ function ChatAnnouncements.TradingHouseResponseReceived(eventId, TradingHouseRes
         changeColor = ColorizeColors.CurrencyColorize:ToHex()
     end
     local type = "LUIE_CURRENCY_VENDOR"
-    local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageListingValue
+    local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageListingValue")
 
     local icon = S.g_savedItem.icon
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
@@ -2517,7 +2598,7 @@ function ChatAnnouncements.TradingHouseResponseReceived(eventId, TradingHouseRes
         local total1, total2, total3 = GetItemLinkStacks(itemName)
         local total = total1 + total2 + total3
         if total > 1 then
-            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
@@ -2525,14 +2606,14 @@ function ChatAnnouncements.TradingHouseResponseReceived(eventId, TradingHouseRes
         ChatAnnouncements.CurrencyPrinter(nil, S.g_savedPurchase.formattedValue, changeColor, S.g_savedPurchase.changeType, S.g_savedPurchase.currencyTypeColor, S.g_savedPurchase.currencyIcon, S.g_savedPurchase.currencyName, S.g_savedPurchase.currencyTotal, messageChange, S.g_savedPurchase.messageTotal, type, carriedItem, carriedItemTotal)
     else
         type = "CURRENCY"
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageList
+        messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageList")
         local finalMessageP1 = string_format(carriedItem .. "|r|c" .. changeColor)
         local finalMessageP2 = string_format(messageChange, finalMessageP1)
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = type }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageListing
+        messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageListing")
         ChatAnnouncements.CurrencyPrinter(nil, S.g_savedPurchase.formattedValue, changeColor, S.g_savedPurchase.changeType, S.g_savedPurchase.currencyTypeColor, S.g_savedPurchase.currencyIcon, S.g_savedPurchase.currencyName, S.g_savedPurchase.currencyTotal, messageChange, S.g_savedPurchase.messageTotal, type)
     end
     S.g_savedPurchase = {}
@@ -2677,8 +2758,8 @@ function I.PopMailLootEntry()
 end
 
 function I.IsMailInLootLogPrefix(logPrefix)
-    return logPrefix == ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn
-        or logPrefix == ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+    return ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageMailIn")
+        or ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageMailInNoName")
 end
 
 function I.PrintMailDelayedLootLines(sortByMailId)
@@ -2813,7 +2894,7 @@ function I.GetMailSenderForInventoryLoot()
     if mailSender == "" and not S.g_mailBatchTakeAll then
         mailSender = S.g_mailTarget
     end
-    local logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+    local logPrefix = mailSender ~= "" and ChatAnnouncements.GetContextMessage("CurrencyMessageMailIn") or ChatAnnouncements.GetContextMessage("CurrencyMessageMailInNoName")
     return mailSender, logPrefix, mailId
 end
 
@@ -3002,21 +3083,21 @@ function ChatAnnouncements.OnMailSuccess(eventId)
     local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
     local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
     local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
-    local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
+    local messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalGold")
 
     if S.g_postageAmount > 0 then
         local type = "LUIE_CURRENCY_POSTAGE"
         local changeType = ZO_CommaDelimitDecimalNumber(S.g_postageAmount)
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, S.g_postageAmount)
-        local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePostage
+        local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyGoldName"), S.g_postageAmount)
+        local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessagePostage")
         ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
 
     if not S.g_mailCODPresent and S.g_mailAmount > 0 then
         local type = "LUIE_CURRENCY_MAIL"
         local changeType = ZO_CommaDelimitDecimalNumber(S.g_mailAmount)
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, S.g_mailAmount)
-        local messageChange = S.g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOutNoName
+        local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyGoldName"), S.g_mailAmount)
+        local messageChange = S.g_mailTarget ~= "" and ChatAnnouncements.GetContextMessage("CurrencyMessageMailOut") or ChatAnnouncements.GetContextMessage("CurrencyMessageMailOutNoName")
         ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
 
@@ -3042,7 +3123,7 @@ function ChatAnnouncements.OnMailSuccess(eventId)
             local item = S.g_mailStacksOut[mailIndex]
             if item ~= nil then
                 local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                local logPrefix = S.g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOutNoName
+                local logPrefix = S.g_mailTarget ~= "" and ChatAnnouncements.GetContextMessage("CurrencyMessageMailOut") or ChatAnnouncements.GetContextMessage("CurrencyMessageMailOutNoName")
                 ChatAnnouncements.ItemCounterDelayOut(item.icon, item.stack, item.itemType, item.itemId, item.itemLink, S.g_mailTarget, logPrefix, gainOrLoss, false)
             end
         end
@@ -3151,14 +3232,14 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
 
         if ChatAnnouncements.SV.Achievement.AchievementUpdateCA then
             local catName = GetAchievementCategoryInfo(topLevelIndex)
-            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or "General"
+            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL)
             local _, _, _, icon = GetAchievementInfo(id)
             icon = ChatAnnouncements.SV.Achievement.AchievementIcon and ("|t16:16:" .. icon .. "|t ") or ""
 
             -- Build string parts without using string_format on pre-formatted strings
             local stringpart1 = ColorizeColors.AchievementColorize1:Colorize(
                 B.bracket1[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] ..
-                ChatAnnouncements.SV.Achievement.AchievementProgressMsg ..
+                ChatAnnouncements.GetModuleMessageFormat("Achievement", "AchievementProgressMsg") ..
                 B.bracket2[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] .. " " ..
                 icon .. link
             )
@@ -3217,7 +3298,7 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
         end
 
         if ChatAnnouncements.SV.Achievement.AchievementUpdateAlert then
-            local alertMessage = zo_strformat("<<1>>: <<2>>", ChatAnnouncements.SV.Achievement.AchievementProgressMsg, name)
+            local alertMessage = zo_strformat("<<1>>: <<2>>", ChatAnnouncements.GetModuleMessageFormat("Achievement", "AchievementProgressMsg"), name)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
     end
@@ -3933,26 +4014,26 @@ function ChatAnnouncements.ResolveQuestItemChange()
                             color = ColorizeColors.CurrencyColorize:ToHex()
                         end
 
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRemove
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageRemove")
 
                         -- Any items that are removed at the same time a quest is turned or advanced in will be flagged to display as "Turned In."
                         if S.g_itemReceivedIsQuestReward then
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageQuestTurnIn")
                         end
 
                         if Quests.ItemRemovedMessage[itemId] and not Quests.ItemIgnoreTurnIn[itemId] then
-                            logPrefix = Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_TURNIN and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_USE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestUse or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_EXHAUST and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestExhaust or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_OFFER and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestOffer or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_DISCARD and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestDiscard or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_CONFISCATE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestConfiscate or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_OPEN and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestOpen or
-                                Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_ADMINISTER and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestAdminister or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_PLACE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestPlace
+                            logPrefix = Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_TURNIN and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestTurnIn") or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_USE and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestUse") or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_EXHAUST and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestExhaust") or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_OFFER and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestOffer") or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_DISCARD and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestDiscard") or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_CONFISCATE and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestConfiscate") or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_OPEN and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestOpen") or
+                                Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_ADMINISTER and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestAdminister") or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_PLACE and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestPlace")
                         end
 
                         if Quests.ItemRemovedInDialogueMessage[itemId] and S.g_talkingToNPC then
-                            logPrefix = Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_TURNIN and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_USE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestUse or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_EXHAUST and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestExhaust or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_OFFER and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestOffer or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_DISCARD and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestDiscard or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_CONFISCATE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestConfiscate or
-                                Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_OPEN and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestOpen or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_ADMINISTER and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestAdminister or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_PLACE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestPlace
+                            logPrefix = Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_TURNIN and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestTurnIn") or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_USE and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestUse") or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_EXHAUST and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestExhaust") or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_OFFER and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestOffer") or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_DISCARD and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestDiscard") or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_CONFISCATE and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestConfiscate") or
+                                Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_OPEN and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestOpen") or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_ADMINISTER and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestAdminister") or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_PLACE and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestPlace")
                         end
 
                         -- Any items that are removed at the same time a quest is abandoned will be flagged to display as "Removed."
                         if S.g_itemReceivedIsQuestAbandon then
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRemove
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageRemove")
                         end
 
                         local quantity = (countChange * -1) > 1 and (" |cFFFFFFx" .. (countChange * -1) .. "|r") or ""
@@ -3961,7 +4042,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
                         formattedMessageP2 = string_format(logPrefix, formattedMessageP1)
 
                         if ChatAnnouncements.SV.Inventory.LootTotal and total > 1 then
-                            totalString = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+                            totalString = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                         else
                             totalString = ""
                         end
@@ -4003,17 +4084,17 @@ function ChatAnnouncements.ResolveQuestItemChange()
                         end
 
                         if S.g_isLooted and not S.g_itemReceivedIsQuestReward and not S.g_isPickpocketed and not S.g_isStolen then
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageLoot")
                             -- reset variables that control looted, or at least ZO_CallLater them
                         elseif S.g_isPickpocketed then
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessagePickpocket")
                         elseif S.g_isStolen and not S.g_isPickpocketed then
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageSteal")
                         else
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
                         end
                         if Quests.ItemReceivedMessage[itemId] then
-                            logPrefix = Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_BUNDLE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestBundle or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_LOOT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_COMBINE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestCombine or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_MIX and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestMix or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_STEAL and ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
+                            logPrefix = Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_BUNDLE and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestBundle") or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_LOOT and ChatAnnouncements.GetContextMessage("CurrencyMessageLoot") or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_COMBINE and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestCombine") or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_MIX and ChatAnnouncements.GetContextMessage("CurrencyMessageQuestMix") or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_STEAL and ChatAnnouncements.GetContextMessage("CurrencyMessageSteal")
                         end
 
                         -- Some quest items we want to limit the maximum possible quantity displayed when looted (for wierd item swapping) so replace the actual quantity with this value.
@@ -4052,7 +4133,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
                         end
 
                         if ChatAnnouncements.SV.Inventory.LootTotal and total > 1 then
-                            totalString = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+                            totalString = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                         else
                             totalString = ""
                         end
@@ -4143,7 +4224,7 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemLink, quantit
 
         local icon = GetItemLinkIcon(itemLink)
         local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-        local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageGroup
+        local logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageGroup")
 
         local formattedItemLink
         if ChatAnnouncements.SV.BracketOptionItem == 1 then
@@ -4214,7 +4295,7 @@ function ChatAnnouncements.QueueAdventureZoneFactionReputationGain(deltaReputati
     if ChatAnnouncements.SV.Inventory.LootTotal and faction ~= ADVENTURE_ZONE_FACTION_NONE then
         local totalRep = playerReputationTotal or GetAdventureZonePlayerReputation()
         if totalRep > 0 then
-            totalString = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(totalRep))
+            totalString = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(totalRep))
         end
     end
 
@@ -4407,21 +4488,21 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     end
 
     local armorType = GetItemLinkArmorType(itemLink) -- Get Armor Type of item
-    formattedArmorType = (ChatAnnouncements.SV.Inventory.LootShowArmorType and armorType ~= ARMORTYPE_NONE and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail) and string_format(" |cFFFFFF(%s)|r", GetString("SI_ARMORTYPE", armorType)) or ""
+    formattedArmorType = (ChatAnnouncements.SV.Inventory.LootShowArmorType and armorType ~= ARMORTYPE_NONE and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgrade") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail")) and string_format(" |cFFFFFF(%s)|r", GetString("SI_ARMORTYPE", armorType)) or ""
 
     local traitType = GetItemLinkTraitInfo(itemLink) -- Get Trait type of item
-    formattedTrait = (ChatAnnouncements.SV.Inventory.LootShowTrait and traitType ~= ITEM_TRAIT_TYPE_NONE and itemType ~= ITEMTYPE_ARMOR_TRAIT and itemType ~= ITEMTYPE_WEAPON_TRAIT and itemType ~= ITEMTYPE_JEWELRY_TRAIT and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail) and string_format(" |cFFFFFF(%s)|r", GetString("SI_ITEMTRAITTYPE", traitType)) or ""
+    formattedTrait = (ChatAnnouncements.SV.Inventory.LootShowTrait and traitType ~= ITEM_TRAIT_TYPE_NONE and itemType ~= ITEMTYPE_ARMOR_TRAIT and itemType ~= ITEMTYPE_WEAPON_TRAIT and itemType ~= ITEMTYPE_JEWELRY_TRAIT and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgrade") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail")) and string_format(" |cFFFFFF(%s)|r", GetString("SI_ITEMTRAITTYPE", traitType)) or ""
 
     local styleType = GetItemLinkItemStyle(itemLink) -- Get Style of the item
     local unformattedStyle = zo_strformat("<<1>>", GetItemStyleName(styleType))
-    formattedStyle = (ChatAnnouncements.SV.Inventory.LootShowStyle and styleType ~= 0 and styleType ~= 10 and styleType ~= GetUniversalStyleId() and itemType ~= ITEMTYPE_STYLE_MATERIAL and itemType ~= ITEMTYPE_GLYPH_ARMOR and itemType ~= ITEMTYPE_GLYPH_JEWELRY and itemType ~= ITEMTYPE_GLYPH_WEAPON and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail) and string_format(" |cFFFFFF(%s)|r", unformattedStyle) or ""
+    formattedStyle = (ChatAnnouncements.SV.Inventory.LootShowStyle and styleType ~= 0 and styleType ~= 10 and styleType ~= GetUniversalStyleId() and itemType ~= ITEMTYPE_STYLE_MATERIAL and itemType ~= ITEMTYPE_GLYPH_ARMOR and itemType ~= ITEMTYPE_GLYPH_JEWELRY and itemType ~= ITEMTYPE_GLYPH_WEAPON and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgrade") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail")) and string_format(" |cFFFFFF(%s)|r", unformattedStyle) or ""
 
     local formattedTotal = ""
-    if ChatAnnouncements.SV.Inventory.LootTotal and receivedBy ~= "LUIE_INVENTORY_UPDATE_DISGUISE" and receivedBy ~= "LUIE_RECEIVE_CRAFT" and not groupLoot and (logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnRecipe and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnMotif and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnStyle) then
+    if ChatAnnouncements.SV.Inventory.LootTotal and receivedBy ~= "LUIE_INVENTORY_UPDATE_DISGUISE" and receivedBy ~= "LUIE_RECEIVE_CRAFT" and not groupLoot and (not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageLearnRecipe") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageLearnMotif") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageLearnStyle")) then
         local total1, total2, total3 = GetItemLinkStacks(itemLink)
         local total = total1 + total2 + total3
         if total > 1 then
-            formattedTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+            formattedTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
@@ -4432,7 +4513,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     local messageType = alwaysFirst and "CONTAINER" or "LOOT"
 
     -- Printer function, separate handling for listed entires (from crafting) or simple function that sends a message over to the printer.
-    if receivedBy == "LUIE_RECEIVE_CRAFT" and (gainOrLoss == 1 or gainOrLoss == 3) and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail then
+    if receivedBy == "LUIE_RECEIVE_CRAFT" and (gainOrLoss == 1 or gainOrLoss == 3) and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail") then
         local itemString2 = itemString
 
         if S.g_itemStringGain ~= "" then
@@ -4444,7 +4525,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
 
         S.g_itemCounterGainTracker = S.g_itemCounterGainTracker + 1
         if S.g_itemCounterGainTracker > 50 then
-            S.g_itemStringGain = string_format("|c%stoo many items to display|r", color)
+            S.g_itemStringGain = string_format(GetString(LUIE_STRING_CA_LOOT_TOO_MANY_ITEMS_COLORED), color)
         end
 
         if S.g_itemCounterGain == 0 then
@@ -4465,7 +4546,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
             groupLoot = groupLoot,
         }
         eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages)
-    elseif receivedBy == "LUIE_RECEIVE_CRAFT" and (gainOrLoss == 2 or gainOrLoss == 4) and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail then
+    elseif receivedBy == "LUIE_RECEIVE_CRAFT" and (gainOrLoss == 2 or gainOrLoss == 4) and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail") then
         local itemString2 = itemString
         if S.g_itemStringLoss ~= "" then
             S.g_itemStringLoss = string_format("%s|c%s,|r %s", S.g_itemStringLoss, color, itemString2)
@@ -4476,7 +4557,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
 
         S.g_itemCounterLossTracker = S.g_itemCounterLossTracker + 1
         if S.g_itemCounterLossTracker > 100 then
-            S.g_itemStringLoss = string_format("|c%stoo many items to display|r", color)
+            S.g_itemStringLoss = string_format(GetString(LUIE_STRING_CA_LOOT_TOO_MANY_ITEMS_COLORED), color)
         end
 
         if S.g_itemCounterLoss == 0 then
@@ -4497,7 +4578,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
             groupLoot = groupLoot,
         }
         eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages)
-    elseif logPrefix == ChatAnnouncements.SV.ContextMessages.CurrencyMessageContainer and alwaysFirst then
+    elseif ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageContainer") and alwaysFirst then
         ChatAnnouncements.ResolveItemMessage(itemString, formattedRecipient, color, logPrefix, formattedTotal, groupLoot)
         ChatAnnouncements.FlushDeferredContainerLootCurrency()
     else
@@ -4532,6 +4613,8 @@ function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color
     -- Determine the appropriate message prefix based on item acquisition context
     if logPrefix == "" then
         logPrefix = ChatAnnouncements.GetContextMessagePrefix() or ""
+    else
+        logPrefix = ChatAnnouncements.ResolveLogPrefix(logPrefix)
     end
 
     -- Format the message parts with nil checks
@@ -4551,19 +4634,19 @@ end
 -- Helper function to determine message prefix based on context
 function ChatAnnouncements.GetContextMessagePrefix()
     if S.g_isLooted and not S.g_itemReceivedIsQuestReward and not S.g_isPickpocketed and not S.g_isStolen then
-        return ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
+        return ChatAnnouncements.GetContextMessage("CurrencyMessageLoot")
     elseif S.g_isPickpocketed then
-        return ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
+        return ChatAnnouncements.GetContextMessage("CurrencyMessagePickpocket")
     elseif S.g_isStolen and not S.g_isPickpocketed then
-        return ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
+        return ChatAnnouncements.GetContextMessage("CurrencyMessageSteal")
     end
-    return ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+    return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
 end
 
 -- Helper function to format the context message
 function ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, formattedRecipient, color, groupLoot)
     -- Handle upgrade messages
-    if logPrefix == ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and ChatAnnouncements.IsValidOldItem() then
+    if ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgrade") and ChatAnnouncements.IsValidOldItem() then
         local formattedIcon = ChatAnnouncements.GetFormattedIcon(S.g_oldItem.icon)
         local formattedMessageUpgrade = string_format("|r%s%s|c%s", formattedIcon, S.g_oldItem.itemLink, color)
         S.g_oldItem = {}
@@ -4624,39 +4707,39 @@ function ChatAnnouncements.CraftModeOverrides()
     -- Crafting Mode Syntax (Enchanting - Item Gain)
     S.g_enchant_prefix_pos =
     {
-        [1] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft,
-        [2] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive,
-        [3] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft,
+        [1] = ChatAnnouncements.GetContextMessage("CurrencyMessageCraft"),
+        [2] = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"),
+        [3] = ChatAnnouncements.GetContextMessage("CurrencyMessageCraft"),
     }
 
     -- Crafting Mode Syntax (Enchanting - Item Loss)
     S.g_enchant_prefix_neg =
     {
-        [1] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse,
-        [2] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExtract,
-        [3] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse,
+        [1] = ChatAnnouncements.GetContextMessage("CurrencyMessageUse"),
+        [2] = ChatAnnouncements.GetContextMessage("CurrencyMessageExtract"),
+        [3] = ChatAnnouncements.GetContextMessage("CurrencyMessageUse"),
     }
 
     -- Crafting Mode Syntax (Blacksmithing - Item Gain)
     S.g_smithing_prefix_pos =
     {
-        [1] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive,
-        [2] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft,
-        [3] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive,
-        [4] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade,
+        [1] = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"),
+        [2] = ChatAnnouncements.GetContextMessage("CurrencyMessageCraft"),
+        [3] = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"),
+        [4] = ChatAnnouncements.GetContextMessage("CurrencyMessageUpgrade"),
         [5] = "",
-        [6] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft,
+        [6] = ChatAnnouncements.GetContextMessage("CurrencyMessageCraft"),
     }
 
     -- Crafting Mode Syntax (Blacksmithing - Item Loss)
     S.g_smithing_prefix_neg =
     {
-        [1] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRefine,
-        [2] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse,
-        [3] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeconstruct,
-        [4] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail,
-        [5] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageResearch,
-        [6] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse,
+        [1] = ChatAnnouncements.GetContextMessage("CurrencyMessageRefine"),
+        [2] = ChatAnnouncements.GetContextMessage("CurrencyMessageUse"),
+        [3] = ChatAnnouncements.GetContextMessage("CurrencyMessageDeconstruct"),
+        [4] = ChatAnnouncements.GetContextMessage("CurrencyMessageUpgradeFail"),
+        [5] = ChatAnnouncements.GetContextMessage("CurrencyMessageResearch"),
+        [6] = ChatAnnouncements.GetContextMessage("CurrencyMessageUse"),
     }
 end
 
@@ -4912,7 +4995,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
             if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotId == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
                 gainOrLoss = 3
                 receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDisguiseEquip
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDisguiseEquip")
                 ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
             -- EXISTING ITEM
@@ -4939,7 +5022,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                 if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotId == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
                     gainOrLoss = 3
                     receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDisguiseEquip
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDisguiseEquip")
                     ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 -- STACK COUNT INCREMENTED DOWN
@@ -4947,24 +5030,24 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                 local change = stackCountChange * -1
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 if not S.g_itemWasDestroyed then
                     if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotId == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
                         if IsUnitInCombat("player") then
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDisguiseDestroy
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDisguiseDestroy")
                             receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
                             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                         else
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDisguiseRemove
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDisguiseRemove")
                             receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
                             gainOrLoss = 3
                         end
                         ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                     elseif not S.g_itemWasDestroyed and S.g_removableIDs[itemId] and ChatAnnouncements.SV.Inventory.LootShowRemove then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRemove
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageRemove")
                         ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                     end
                 end
@@ -5010,10 +5093,10 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                 logPrefix = ""
             end
             if S.g_weAreInADig then
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExcavate
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageExcavate")
             end
             if S.g_packSiege and itemType == ITEMTYPE_SIEGE then
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStow
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageStow")
             end
             if not S.g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not S.g_inTrade and not I.IsMailLootActive() then
                 ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true, nil, true)
@@ -5062,10 +5145,10 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     logPrefix = ""
                 end
                 if S.g_weAreInADig then
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExcavate
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageExcavate")
                 end
                 if S.g_packSiege and itemType == ITEMTYPE_SIEGE then
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStow
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageStow")
                 end
                 if not S.g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not S.g_inTrade and not I.IsMailLootActive() then
                     ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true, nil, true)
@@ -5079,11 +5162,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                 -- Check Destroyed first
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false)
                     -- Check Lockpick next
                 elseif ChatAnnouncements.SV.Inventory.LootShowLockpick and S.g_lockpickBroken then
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLockpick
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageLockpick")
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false)
                     -- Check container is emptied next
@@ -5091,14 +5174,14 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     -- Don't display a message if the specialized item type is a "Container Style Page"
                     local _, specializedType = GetItemLinkItemType(itemLink)
                     if specializedType ~= SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE then
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageContainer
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageContainer")
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                         ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true)
                     end
                     -- Check to see if the item was removed in dialogue and Quest Item turnin is on.
                 elseif S.g_talkingToNPC and not S.g_weAreInAStore and ChatAnnouncements.SV.Inventory.LootShowTurnIn then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageQuestTurnIn")
                     zo_callLater(function ()
                                      if S.g_stackSplit == false then
                                          ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
@@ -5108,44 +5191,44 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                                  end, 25)
                 elseif S.g_weAreInAGuildStore and ChatAnnouncements.SV.Inventory.LootShowList then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageList
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageList")
                     S.g_savedItem = { icon = removedIcon, stack = change, itemLink = removedItemLink }
                     -- Check to see if the item was used
                 elseif not S.g_itemWasDestroyed and not S.g_talkingToNPC and not S.g_inTrade and not I.IsMailLootActive() then
                     local flag -- When set to true we deliver a message on a zo_callLater
                     if ChatAnnouncements.SV.Inventory.LootShowUsePotion and removedItemType == ITEMTYPE_POTION then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePotion
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessagePotion")
                         flag = true
                     end
                     if ChatAnnouncements.SV.Inventory.LootShowUseFood and removedItemType == ITEMTYPE_FOOD then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFood
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageFood")
                         flag = true
                     end
                     if ChatAnnouncements.SV.Inventory.LootShowUseDrink and removedItemType == ITEMTYPE_DRINK then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDrink
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDrink")
                         flag = true
                     end
                     if ChatAnnouncements.SV.Inventory.LootShowUseRepairKit and (removedItemType == ITEMTYPE_TOOL or removedItemType == ITEMTYPE_CROWN_REPAIR or removedItemType == ITEMTYPE_AVA_REPAIR or removedItemType == ITEMTYPE_GROUP_REPAIR) then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageUse")
                         flag = true
                     end
                     if ChatAnnouncements.SV.Inventory.LootShowUseSoulGem and removedItemType == ITEMTYPE_SOUL_GEM then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageUse")
                         flag = true
                     end
                     if ChatAnnouncements.SV.Inventory.LootShowUseSiege and removedItemType == ITEMTYPE_SIEGE then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeploy
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDeploy")
                         flag = true
                     end
                     if ChatAnnouncements.SV.Inventory.LootShowUseFish and removedItemType == ITEMTYPE_FISH then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageFillet")
                         flag = true
                     end
                     -- If this is a Skill respec scroll, manually call an announcement for it if enabled (for some reason doesn't display an EVENT_DISPLAY_ANNOUNCEMENT on use anymore)
@@ -5164,7 +5247,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                         -- Check to make sure the items aren't riding lesson books.
                         if not crownRidingIds[removedItemId] then
                             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageUse")
                             flag = true
                         end
                     end
@@ -5173,21 +5256,21 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                         -- Show recipe message if a recipe is learned.
                         if not S.g_combinedRecipe then
                             gainOrLoss = 4
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnRecipe
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageLearnRecipe")
                             flag = true
                             if ChatAnnouncements.SV.Inventory.LootRecipeHideAlert then
                                 PlaySound(SOUNDS.RECIPE_LEARNED)
                             end
                         else
                             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageUse")
                             flag = true
                         end
                     end
                     -- Learn Motif
                     if ChatAnnouncements.SV.Inventory.LootShowMotif and removedItemType == ITEMTYPE_RACIAL_STYLE_MOTIF then
                         gainOrLoss = 4
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnMotif
+                        logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageLearnMotif")
                         flag = true
                     end
                     -- Learn Style
@@ -5196,7 +5279,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                         local _, specializedType = GetItemLinkItemType(itemLink)
                         if specializedType == SPECIALIZED_ITEMTYPE_COLLECTIBLE_STYLE_PAGE then
                             gainOrLoss = 4
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnStyle
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageLearnStyle")
                             flag = true
                         end
                     end
@@ -5206,7 +5289,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                         local _, specializedType = GetItemLinkItemType(itemLink)
                         if specializedType == SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE then
                             gainOrLoss = 4
-                            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnStyle
+                            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageLearnStyle")
                             flag = true
                         end
                     end
@@ -5223,7 +5306,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     -- For any leftover cases for items removed.
                 elseif not S.g_itemWasDestroyed and S.g_removableIDs[itemId] and ChatAnnouncements.SV.Inventory.LootShowRemove then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRemove
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageRemove")
                     ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
@@ -5249,7 +5332,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
             logPrefix = ""
         end
         if S.g_weAreInADig then
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExcavate
+            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageExcavate")
         end
         local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotId))
         local icon = GetItemLinkInfo(itemLink)
@@ -5311,8 +5394,8 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
     local isSmithingDeconstruction = LUIE.IsSmithingDeconstructionContext()
 
     local receivedBy = "LUIE_RECEIVE_CRAFT" -- This keyword tells our item printer to print the items in a list separated by commas, to conserve space for the display of crafting mats consumed.
-    local logPrefixPos = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft
-    local logPrefixNeg = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+    local logPrefixPos = ChatAnnouncements.GetContextMessage("CurrencyMessageCraft")
+    local logPrefixNeg = ChatAnnouncements.GetContextMessage("CurrencyMessageUse")
 
     -- Get string values from our crafting hook function
     if GetCraftingInteractionType() == CRAFTING_TYPE_ENCHANTING then
@@ -5337,31 +5420,31 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
 
     -- Universal deconstruction (Giladil, etc.) may not report a smithing interaction type; still use decon verbs.
     if LUIE.IsSmithingDeconstructionContext() and craftingInteractionType ~= CRAFTING_TYPE_ENCHANTING then
-        logPrefixPos = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-        logPrefixNeg = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeconstruct
+        logPrefixPos = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
+        logPrefixNeg = ChatAnnouncements.GetContextMessage("CurrencyMessageDeconstruct")
     end
 
     -- If the hook function didn't return a string value (for example because the player was in Gamepad mode), then we use a default override.
     if logPrefixPos == nil then
-        logPrefixPos = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft
+        logPrefixPos = ChatAnnouncements.GetContextMessage("CurrencyMessageCraft")
     end
     if logPrefixNeg == nil then
-        logPrefixNeg = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeconstruct
+        logPrefixNeg = ChatAnnouncements.GetContextMessage("CurrencyMessageDeconstruct")
     end
 
     if I.CheckLibLazyCraftingActive() then
-        logPrefixPos = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft
-        logPrefixNeg = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+        logPrefixPos = ChatAnnouncements.GetContextMessage("CurrencyMessageCraft")
+        logPrefixNeg = ChatAnnouncements.GetContextMessage("CurrencyMessageUse")
     end
 
     local function ApplyCraftItemLossVerb(itemType, logPrefix)
         if itemType == ITEMTYPE_GLYPH_ARMOR or itemType == ITEMTYPE_GLYPH_WEAPON or itemType == ITEMTYPE_GLYPH_JEWELRY then
             if craftingInteractionType == CRAFTING_TYPE_ENCHANTING or isSmithingDeconstruction then
-                return ChatAnnouncements.SV.ContextMessages.CurrencyMessageExtract
+                return ChatAnnouncements.GetContextMessage("CurrencyMessageExtract")
             end
         end
         if itemType == ITEMTYPE_FISH then
-            return ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
+            return ChatAnnouncements.GetContextMessage("CurrencyMessageFillet")
         end
         return logPrefix
     end
@@ -5415,15 +5498,15 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = logPrefixPos
                 if itemId == 33753 then
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
                 end
                 ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
-                if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
+                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.GetContextMessage("CurrencyMessageUse")) or logPrefixNeg
+                if not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUse") or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
                     logPrefix = ApplyCraftItemLossVerb(itemType, logPrefix)
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
@@ -5494,7 +5577,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = logPrefixPos
                 if itemId == 33753 then
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
                 end
                 -- ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, false, true)
@@ -5502,8 +5585,8 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(removedItemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
-                if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
+                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(removedItemType) and ChatAnnouncements.GetContextMessage("CurrencyMessageUse")) or logPrefixNeg
+                if not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUse") or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
                     -- ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false)
                     logPrefix = ApplyCraftItemLossVerb(removedItemType, logPrefix)
                     ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
@@ -5569,7 +5652,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = logPrefixPos
                 if itemId == 33753 then
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
                 end
                 -- ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, false, true)
@@ -5577,8 +5660,8 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
-                if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
+                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.GetContextMessage("CurrencyMessageUse")) or logPrefixNeg
+                if not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUse") or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
                     -- ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                     logPrefix = ApplyCraftItemLossVerb(itemType, logPrefix)
                     ChatAnnouncements.ItemCounterDelay(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
@@ -5644,7 +5727,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = logPrefixPos
                 if itemId == 33753 then
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
                 end
                 -- ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, false, true)
@@ -5652,8 +5735,8 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
-                if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
+                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.GetContextMessage("CurrencyMessageUse")) or logPrefixNeg
+                if not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUse") or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
                     logPrefix = ApplyCraftItemLossVerb(itemType, logPrefix)
                     ChatAnnouncements.ItemCounterDelay(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
                 end
@@ -5682,22 +5765,22 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
 
         if stackCountChange > 0 then
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive) or logPrefixPos
+            logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")) or logPrefixPos
             change = stackCountChange
             alwaysFirst = false
         end
 
         if stackCountChange < 0 then
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
+            logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.GetContextMessage("CurrencyMessageUse")) or logPrefixNeg
             change = stackCountChange * -1
             alwaysFirst = true
         end
 
-        if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then
+        if not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUse") or ChatAnnouncements.SV.Inventory.LootShowCraftUse then
             logPrefix = ApplyCraftItemLossVerb(itemType, logPrefix)
             if itemId == 33753 then
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
             end
             ChatAnnouncements.ItemCounterDelay(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, alwaysFirst, true)
         end
@@ -5731,7 +5814,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = S.g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage)
+            logPrefix = S.g_bankBag == 1 and ChatAnnouncements.GetContextMessage("CurrencyMessageWithdraw") or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawStorage"))
             if S.g_InventoryOn then
                 ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
@@ -5757,7 +5840,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             -- STACK COUNT INCREMENTED UP
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                logPrefix = S.g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage)
+                logPrefix = S.g_bankBag == 1 and ChatAnnouncements.GetContextMessage("CurrencyMessageWithdraw") or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawStorage"))
                 if S.g_InventoryOn then
                     ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
@@ -5766,12 +5849,12 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
                 local change = stackCountChange * -1
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 if S.g_InventoryOn and not S.g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = S.g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage)
+                    logPrefix = S.g_bankBag == 1 and ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit") or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.GetContextMessage("CurrencyMessageDepositFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageDepositStorage"))
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
@@ -5813,7 +5896,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             S.g_bankStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
+            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit")
             if S.g_bankOn then
                 ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
@@ -5839,7 +5922,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             -- STACK COUNT INCREMENTED UP
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit")
                 if S.g_bankOn then
                     ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
@@ -5848,12 +5931,12 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
                 local change = stackCountChange * -1
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 if S.g_bankOn and not S.g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
@@ -5895,7 +5978,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             S.g_banksubStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
+            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit")
             if S.g_bankOn then
                 ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
@@ -5921,7 +6004,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             -- STACK COUNT INCREMENTED UP
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit")
                 if S.g_bankOn then
                     ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
@@ -5930,12 +6013,12 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
                 local change = stackCountChange * -1
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 if S.g_bankOn and not S.g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
@@ -5977,7 +6060,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             S.g_furnitureVaultStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDepositFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageDepositStorage")
             if S.g_bankOn then
                 ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
@@ -6001,7 +6084,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             -- STACK COUNT INCREMENTED UP
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDepositFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageDepositStorage")
                 if S.g_bankOn then
                     ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
@@ -6009,12 +6092,12 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
                 local change = stackCountChange * -1
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 if S.g_bankOn and not S.g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawStorage")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
@@ -6056,7 +6139,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             S.g_houseBags[bagId][slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDepositStorage")
             if S.g_bankOn then
                 ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
@@ -6082,7 +6165,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             -- STACK COUNT INCREMENTED UP
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDepositStorage")
                 if S.g_bankOn then
                     ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
@@ -6091,12 +6174,12 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
                 local change = stackCountChange * -1
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 if S.g_bankOn and not S.g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDepositStorage")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
@@ -6133,11 +6216,11 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
 
         if stackCountChange < 1 then
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = S.g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage)
+            logPrefix = S.g_bankBag == 1 and ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit") or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.GetContextMessage("CurrencyMessageDepositFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageDepositStorage"))
             stack = stackCountChange * -1
         else
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = S.g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage)
+            logPrefix = S.g_bankBag == 1 and ChatAnnouncements.GetContextMessage("CurrencyMessageWithdraw") or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawStorage"))
             stack = stackCountChange
         end
 
@@ -6168,7 +6251,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             S.g_inventoryStacks[slotId] = { icon = icon1, stack = stack1, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawGuild
+            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawGuild")
             S.g_guildBankCarry = {}
             S.g_guildBankCarry.icon = icon1
             S.g_guildBankCarry.stack = stack1
@@ -6198,7 +6281,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
 
             if stackCountChange > 0 then -- STACK COUNT INCREMENTED UP
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawGuild
+                logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawGuild")
                 S.g_guildBankCarry = {}
                 S.g_guildBankCarry.icon = icon
                 S.g_guildBankCarry.stack = stack
@@ -6212,12 +6295,12 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
                 local change = stackCountChange * -1
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 if not S.g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositGuild
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDepositGuild")
                     S.g_guildBankCarry = {}
                     S.g_guildBankCarry.icon = icon
                     S.g_guildBankCarry.stack = stack
@@ -6253,11 +6336,11 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
 
         if stackCountChange < 1 then
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositGuild
+            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDepositGuild")
             stack = stackCountChange * -1
         else
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawGuild
+            logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawGuild")
             stack = stackCountChange
         end
 
@@ -6320,7 +6403,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
 
             if stackCountChange == 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunder or ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunderNoV
+                logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.GetContextMessage("CurrencyMessageLaunder") or ChatAnnouncements.GetContextMessage("CurrencyMessageLaunderNoV")
                 if not S.g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot then
                     local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
                     if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
@@ -6341,7 +6424,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
                         local total1, total2, total3 = GetItemLinkStacks(itemLink)
                         local total = total1 + total2 + total3
                         if total > 1 then
-                            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+                            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                         end
                     end
 
@@ -6367,7 +6450,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
                 -- STACK COUNT INCREMENTED UP
             elseif stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunder or ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunderNoV
+                logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.GetContextMessage("CurrencyMessageLaunder") or ChatAnnouncements.GetContextMessage("CurrencyMessageLaunderNoV")
                 --[[                 if not S.g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot then
                     --ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true)
                 end ]]
@@ -6376,11 +6459,11 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
                 local change = stackCountChange * -1
                 if S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 else
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                    logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunder or ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunderNoV
+                    logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.GetContextMessage("CurrencyMessageLaunder") or ChatAnnouncements.GetContextMessage("CurrencyMessageLaunderNoV")
                     local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
                     if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
                         changeColor = ColorizeColors.CurrencyColorize:ToHex()
@@ -6400,7 +6483,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
                         local total1, total2, total3 = GetItemLinkStacks(itemLink)
                         local total = total1 + total2 + total3
                         if total > 1 then
-                            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+                            carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                         end
                     end
 
@@ -6437,7 +6520,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
 
     if bagId == BAG_VIRTUAL then
         local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-        local logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunder or ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunderNoV
+        local logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.GetContextMessage("CurrencyMessageLaunder") or ChatAnnouncements.GetContextMessage("CurrencyMessageLaunderNoV")
         local itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         local icon = GetItemLinkInfo(itemLink)
         local itemType = GetItemLinkItemType(itemLink)
@@ -6465,7 +6548,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
                 local total1, total2, total3 = GetItemLinkStacks(itemLink)
                 local total = total1 + total2 + total3
                 if total > 1 then
-                    carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
+                    carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.GetLootTotalString(), formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                 end
             end
 
@@ -6613,7 +6696,7 @@ function ChatAnnouncements.JusticeRemovePrint()
             if sample and removed.removedCount > 0 then
                 local receivedBy = ""
                 local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
+                local logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageConfiscate")
                 ChatAnnouncements.ItemPrinter(sample.icon, removed.removedCount, sample.itemType, sample.itemId, sample.itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
         end
@@ -6728,6 +6811,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
 end
 
 function ChatAnnouncements.OnPlayerActivated(eventId)
+    S.pendingHomeJump = false
     ChatAnnouncements.ResetMailSession()
 
     -- Get current trades if UI is reloaded

@@ -22,6 +22,73 @@ local SettingsAPI = LUIE.SettingsAPI
 -- Load LibAddonMenu
 local LAM = LUIE.LAM
 
+local MISSING_SCREENSHOT_FORMAT_VALUES = { "JPG", "PNG", "BMP" }
+
+local MISSING_SPEAKER_SETUP_VALUES =
+{
+    "Use Windows Setting",
+    "Mono",
+    "Stereo",
+    "2.1",
+    "4.0",
+    "4.1",
+    "5.0",
+    "5.1",
+    "7.1",
+}
+
+local MISSING_SPEAKER_SETUP_BY_VALUE =
+{
+    ["Use Windows Setting"] = 0,
+    ["Mono"] = 1,
+    ["Stereo"] = 2,
+    ["2.1"] = 3,
+    ["4.0"] = 4,
+    ["4.1"] = 5,
+    ["5.0"] = 6,
+    ["5.1"] = 7,
+    ["7.1"] = 8,
+}
+
+local MISSING_SPATIAL_SOUND_QUALITY_VALUES = { "Low", "High" }
+
+local function GetMissingScreenshotFormatChoices()
+    return MISSING_SCREENSHOT_FORMAT_VALUES
+end
+
+local function GetMissingSpeakerSetupChoices()
+    return
+    {
+        GetString(LUIE_STRING_LAM_MISSING_SPEAKER_USE_WINDOWS),
+        GetString(LUIE_STRING_LAM_MISSING_SPEAKER_MONO),
+        GetString(LUIE_STRING_LAM_MISSING_SPEAKER_STEREO),
+        "2.1",
+        "4.0",
+        "4.1",
+        "5.0",
+        "5.1",
+        "7.1",
+    }
+end
+
+local function GetMissingSpeakerSetupFromCVar()
+    local config = tonumber(GetCVar("SPEAKER_SETUP")) or 0
+    return MISSING_SPEAKER_SETUP_VALUES[config + 1] or MISSING_SPEAKER_SETUP_VALUES[1]
+end
+
+local function GetMissingSpatialSoundQualityChoices()
+    return
+    {
+        GetString(LUIE_STRING_LAM_MISSING_QUALITY_LOW),
+        GetString(LUIE_STRING_LAM_MISSING_QUALITY_HIGH),
+    }
+end
+
+local function GetMissingSpatialSoundQualityFromCVar()
+    local quality = tonumber(GetCVar("SPATIAL_SOUND_QUALITY")) or 0
+    return quality == 1 and "High" or "Low"
+end
+
 -- Create Settings Menu
 function LUIE.CreateSettings()
     local Defaults = LUIE.Defaults
@@ -503,8 +570,8 @@ function LUIE.CreateSettings()
 
     -- Grid Snap Settings
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Enable Grid Snap",
-        "Enable snapping UI elements to a grid when moving them",
+        zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_ENABLE), GetString(LUIE_STRING_SHARED_MODULE_DEFAULT_UI)),
+        zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_ENABLE_TP), GetString(LUIE_STRING_SHARED_MODULE_DEFAULT_UI)),
         function () return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
         function (value)
             local accountWideSettings = _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"]
@@ -519,8 +586,8 @@ function LUIE.CreateSettings()
 
     -- Grid Size
     optionsData[#optionsData + 1] = SettingsAPI.CreateSliderOption(
-        "Grid Size",
-        "Set the size of the grid for snapping UI elements",
+        zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_SIZE), GetString(LUIE_STRING_SHARED_MODULE_DEFAULT_UI)),
+        zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_SIZE_TP), GetString(LUIE_STRING_SHARED_MODULE_DEFAULT_UI)),
         5,
         100,
         5,
@@ -797,7 +864,7 @@ function LUIE.CreateSettings()
 
     -- Action Bar Module
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Action Bar",
+        GetString(LUIE_STRING_LAM_AB_SHOWACTIONBAR),
         nil,
         function () return Settings.ActionBar_Enabled end,
         function (value) Settings.ActionBar_Enabled = value end,
@@ -809,7 +876,7 @@ function LUIE.CreateSettings()
 
     -- Action Bar Description
     optionsData[#optionsData + 1] = SettingsAPI.CreateDescriptionOption(
-        "Enhanced action bar with cooldown timers, ultimate tracking, and cast bar.",
+        GetString(LUIE_STRING_LAM_AB_DESCRIPTION),
         "half"
     )
 
@@ -946,8 +1013,8 @@ function LUIE.CreateSettings()
 
     -- Show Changelog
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Show Changelog when there is a update to LUIE.",
-        "Show Changelog when there is a update to LUIE.",
+        GetString(LUIE_STRING_LAM_CHANGELOG),
+        GetString(LUIE_STRING_LAM_CHANGELOG_TP),
         function () return Settings.ShowChangeLog end,
         function (value) Settings.ShowChangeLog = value end,
         "full",
@@ -1015,8 +1082,8 @@ function LUIE.CreateSettings()
 
     -- Custom Icons
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Use Custom Icons",
-        "Use Custom Icons",
+        GetString(LUIE_STRING_LAM_MISSING_CUSTOM_ICONS),
+        GetString(LUIE_STRING_LAM_MISSING_CUSTOM_ICONS_TP),
         function () return Settings.CustomIcons end,
         function (value) Settings.CustomIcons = value end,
         "full",
@@ -1033,8 +1100,8 @@ function LUIE.CreateSettings()
 
     -- Energy Sustainability
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Energy Sustainability",
-        "Toggle energy sustainability measures",
+        GetString(LUIE_STRING_LAM_MISSING_ENERGY_SUSTAINABILITY),
+        GetString(LUIE_STRING_LAM_MISSING_ENERGY_SUSTAINABILITY_TP),
         function () return GetCVar("EnergySustainabilityMeasuresEnabled") == "1" end,
         function (value) SetCVar("EnergySustainabilityMeasuresEnabled", value and "1" or "0") end,
         "full",
@@ -1044,8 +1111,8 @@ function LUIE.CreateSettings()
 
     -- FPS Limit
     optionsData[#optionsData + 1] = SettingsAPI.CreateSliderOption(
-        "FPS Limit",
-        "Set the maximum FPS limit (requires game restart)\nDefault game UI only allows up to 100",
+        GetString(LUIE_STRING_LAM_MISSING_FPS_LIMIT),
+        GetString(LUIE_STRING_LAM_MISSING_FPS_LIMIT_TP),
         1,
         999,
         1,
@@ -1064,8 +1131,8 @@ function LUIE.CreateSettings()
 
     -- Skip Pregame Videos
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Skip Pregame Videos",
-        "Skip intro videos when launching the game",
+        GetString(LUIE_STRING_LAM_MISSING_SKIP_PREGAME_VIDEOS),
+        GetString(LUIE_STRING_LAM_MISSING_SKIP_PREGAME_VIDEOS_TP),
         function () return GetCVar("SkipPregameVideos") == "1" end,
         function (value) SetCVar("SkipPregameVideos", value and "1" or "0") end,
         "full",
@@ -1075,8 +1142,8 @@ function LUIE.CreateSettings()
 
     -- Raw Mouse Input
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Raw Mouse Input",
-        "Enable raw mouse input for more precise control",
+        GetString(LUIE_STRING_LAM_MISSING_RAW_MOUSE_INPUT),
+        GetString(LUIE_STRING_LAM_MISSING_RAW_MOUSE_INPUT_TP),
         function () return GetCVar("MouseRawInput") == "1" end,
         function (value) SetCVar("MouseRawInput", value and "1" or "0") end,
         "full",
@@ -1086,9 +1153,9 @@ function LUIE.CreateSettings()
 
     -- Screenshot Format
     optionsData[#optionsData + 1] = SettingsAPI.CreateDropdownOption(
-        "Screenshot Format",
-        "Choose the format for saved screenshots",
-        { "JPG", "PNG", "BMP" },
+        GetString(LUIE_STRING_LAM_MISSING_SCREENSHOT_FORMAT),
+        GetString(LUIE_STRING_LAM_MISSING_SCREENSHOT_FORMAT_TP),
+        GetMissingScreenshotFormatChoices(),
         function ()
             local format = GetCVar("ScreenshotFormat.2")
             if format == "PNG" then
@@ -1102,13 +1169,17 @@ function LUIE.CreateSettings()
         function (value) SetCVar("ScreenshotFormat.2", value) end,
         "full",
         nil,
-        "PNG"
+        "PNG",
+        nil,
+        nil,
+        nil,
+        MISSING_SCREENSHOT_FORMAT_VALUES
     )
 
     -- Disable Razer Chroma
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Disable Razer Chroma",
-        "Disable Razer Chroma integration",
+        GetString(LUIE_STRING_LAM_MISSING_DISABLE_RAZER_CHROMA),
+        GetString(LUIE_STRING_LAM_MISSING_DISABLE_RAZER_CHROMA_TP),
         function () return GetCVar("UseChromaIfAvailable") == "0" end,
         function (value) SetCVar("UseChromaIfAvailable", value and "0" or "1") end,
         "full",
@@ -1118,27 +1189,28 @@ function LUIE.CreateSettings()
 
     -- Speaker Setup
     optionsData[#optionsData + 1] = SettingsAPI.CreateDropdownOption(
-        "Speaker Setup",
-        "Configure audio speaker configuration",
-        { "Use Windows Setting", "Mono", "Stereo", "2.1", "4.0", "4.1", "5.0", "5.1", "7.1" },
+        GetString(LUIE_STRING_LAM_MISSING_SPEAKER_SETUP),
+        GetString(LUIE_STRING_LAM_MISSING_SPEAKER_SETUP_TP),
+        GetMissingSpeakerSetupChoices(),
         function ()
-            local config = tonumber(GetCVar("SPEAKER_SETUP")) or 0
-            local names = { "Use Windows Setting", "Mono", "Stereo", "2.1", "4.0", "4.1", "5.0", "5.1", "7.1" }
-            return names[config + 1] or "Use Windows Setting"
+            return GetMissingSpeakerSetupFromCVar()
         end,
         function (value)
-            local configs = { ["Use Windows Setting"] = 0, ["Mono"] = 1, ["Stereo"] = 2, ["2.1"] = 3, ["4.0"] = 4, ["4.1"] = 5, ["5.0"] = 6, ["5.1"] = 7, ["7.1"] = 8 }
-            SetCVar("SPEAKER_SETUP", tostring(configs[value] or 0))
+            SetCVar("SPEAKER_SETUP", tostring(MISSING_SPEAKER_SETUP_BY_VALUE[value] or 0))
         end,
         "full",
         nil,
-        "Use Windows Setting"
+        "Use Windows Setting",
+        nil,
+        nil,
+        nil,
+        MISSING_SPEAKER_SETUP_VALUES
     )
 
     -- Spatial Sound
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Spatial Sound",
-        "Enable spatial sound processing",
+        GetString(LUIE_STRING_LAM_MISSING_SPATIAL_SOUND),
+        GetString(LUIE_STRING_LAM_MISSING_SPATIAL_SOUND_TP),
         function () return GetCVar("SPATIAL_SOUND") == "1" end,
         function (value) SetCVar("SPATIAL_SOUND", value and "1" or "0") end,
         "full",
@@ -1148,19 +1220,22 @@ function LUIE.CreateSettings()
 
     -- Spatial Sound Quality
     optionsData[#optionsData + 1] = SettingsAPI.CreateDropdownOption(
-        "Spatial Sound Quality",
-        "Set the quality level for spatial sound processing",
-        { "Low", "High" },
+        GetString(LUIE_STRING_LAM_MISSING_SPATIAL_SOUND_QUALITY),
+        GetString(LUIE_STRING_LAM_MISSING_SPATIAL_SOUND_QUALITY_TP),
+        GetMissingSpatialSoundQualityChoices(),
         function ()
-            local quality = tonumber(GetCVar("SPATIAL_SOUND_QUALITY")) or 0
-            return quality == 1 and "High" or "Low"
+            return GetMissingSpatialSoundQualityFromCVar()
         end,
         function (value)
             SetCVar("SPATIAL_SOUND_QUALITY", value == "High" and "1" or "0")
         end,
         "full",
         nil,
-        "Low"
+        "Low",
+        nil,
+        nil,
+        nil,
+        MISSING_SPATIAL_SOUND_QUALITY_VALUES
     )
 
     if LUIE.IsDevDebugEnabled() then

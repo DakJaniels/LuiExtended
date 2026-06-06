@@ -20,10 +20,6 @@ local type, pairs = type, pairs
 local zo_strformat = zo_strformat
 local string_format = string.format
 
-local globalAlertOptions = { "Show All Incoming Abilities", "Only Show Hard CC Effects", "Only Show Unbreakable CC Effects" }
-local globalAlertOptionsKeys = { ["Show All Incoming Abilities"] = 1, ["Only Show Hard CC Effects"] = 2, ["Only Show Unbreakable CC Effects"] = 3 }
-local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
-local globalIconOptionsKeys = { ["All Crowd Control"] = 1, ["NPC CC Only"] = 2, ["Player CC Only"] = 3 }
 local ACTION_RESULT_AREA_EFFECT = 669966
 
 -- Load LibHarvensAddonSettings
@@ -39,7 +35,7 @@ function CombatInfo.CreateConsoleSettings()
     end
 
     -- Create the addon settings panel
-    local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CI)),
+    local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_CI),
                                 {
                                     allowDefaults = true,
                                     defaultsFunction = function ()
@@ -103,7 +99,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure floating enemy markers display options.",
+            label = GetString(LUIE_STRING_LAM_CI_FLOATING_MARKERS_DESC),
         }
 
         settings[#settings + 1] =
@@ -506,11 +502,7 @@ function CombatInfo.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER_TP),
             items = SettingsAPI:GetGlobalAlertOptionsList(),
             getFunction = function ()
-                local index = Settings.alerts.toggles.alertOptions
-                if type(index) == "string" then
-                    index = globalAlertOptionsKeys[index] or 1
-                end
-                return globalAlertOptions[index] or globalAlertOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeGlobalAlertOptionIndex(Settings.alerts.toggles.alertOptions, Defaults.alerts.toggles.alertOptions))
             end,
             setFunction = function (combobox, value, item)
                 Settings.alerts.toggles.alertOptions = item.data
@@ -518,7 +510,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
             end,
-            default = globalAlertOptions[Defaults.alerts.toggles.alertOptions]
+            default = SettingsAPI:LHASDropdownGetData(Defaults.alerts.toggles.alertOptions)
         }
 
         settings[#settings + 1] =
@@ -2176,9 +2168,9 @@ function CombatInfo.CreateConsoleSettings()
         -- Build display style items
         local displayStyleItems =
         {
-            { name = "Display: Icon & Text", data = "all"  },
-            { name = "Display: Icon",        data = "icon" },
-            { name = "Display: Text",        data = "text" }
+            { name = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_ICON_AND_TEXT), data = "all"  },
+            { name = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_ICON_ONLY),     data = "icon" },
+            { name = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_TEXT_ONLY),     data = "text" }
         }
 
         settings[#settings + 1] =
@@ -2188,13 +2180,7 @@ function CombatInfo.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_STYLE_TP),
             items = displayStyleItems,
             getFunction = function ()
-                if Settings.cct.showOptions == "all" then
-                    return "Display: Icon & Text"
-                elseif Settings.cct.showOptions == "icon" then
-                    return "Display: Icon"
-                elseif Settings.cct.showOptions == "text" then
-                    return "Display: Text"
-                end
+                return SettingsAPI:LHASDropdownGetData(Settings.cct.showOptions)
             end,
             setFunction = function (combobox, value, item)
                 Settings.cct.showOptions = item.data
@@ -2203,7 +2189,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.cct.enabled
             end,
-            default = "Display: Icon & Text"
+            default = SettingsAPI:LHASDropdownGetData(Defaults.cct.showOptions)
         }
 
         settings[#settings + 1] =
@@ -2249,11 +2235,7 @@ function CombatInfo.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
             items = SettingsAPI:GetGlobalIconOptionsList(),
             getFunction = function ()
-                local index = Settings.cct.defaultIconOptions
-                if type(index) == "string" then
-                    index = globalIconOptionsKeys[index] or 1
-                end
-                return globalIconOptions[index] or globalIconOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeGlobalIconOptionIndex(Settings.cct.defaultIconOptions, Defaults.cct.defaultIconOptions))
             end,
             setFunction = function (combobox, value, item)
                 Settings.cct.defaultIconOptions = item.data
@@ -2262,7 +2244,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.cct.useDefaultIcon
             end,
-            default = globalIconOptions[Defaults.cct.defaultIconOptions]
+            default = SettingsAPI:LHASDropdownGetData(Defaults.cct.defaultIconOptions)
         }
 
         settings[#settings + 1] =
@@ -3126,22 +3108,22 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Synergy Tracker",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_TRACKER_HEADER),
         }
 
         -- Submenu description
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Track and display multiple available synergies simultaneously. Set custom priorities and manage synergy preferences.",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_HEADER_DESC),
             canSelect = false,
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Unlock Synergy Display",
-            tooltip = "Unlock the synergy display to reposition it. Preview synergies will be shown while unlocked.",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_UNLOCK),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_UNLOCK_TP),
             getFunction = function ()
                 return Settings.synergy.unlocked
             end,
@@ -3160,9 +3142,9 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_BUTTON,
-            label = "Reset Position",
-            tooltip = "Reset the synergy display to default position.",
-            buttonText = "Reset Position",
+            label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_RESET_TP),
+            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
             clickHandler = function ()
                 local tracker = CombatInfo.SynergyTrackerInstance
                 if tracker then
@@ -3226,8 +3208,8 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Enable Synergy Tracker",
-            tooltip = "Enable the synergy tracking system. This will monitor available synergies and allow you to set priority overrides. Changes require a UI reload (/reloadui).",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_ENABLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_ENABLE_TP),
             getFunction = function ()
                 return Settings.synergy.enabled
             end,
@@ -3240,14 +3222,14 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Display Options"
+            label = GetString(LUIE_STRING_LAM_CI_DISPLAY_OPTIONS)
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "Out-of-Combat Opacity",
-            tooltip = "Synergy tracker opacity while out of combat (0–100%).",
+            label = GetString(LUIE_STRING_SHARED_OOC_OPACITY),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_OOC_OPACITY_TP),
             min = 0,
             max = 100,
             step = 5,
@@ -3271,8 +3253,8 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "In-Combat Opacity",
-            tooltip = "Synergy tracker opacity while in combat (0–100%).",
+            label = GetString(LUIE_STRING_SHARED_IC_OPACITY),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_IC_OPACITY_TP),
             min = 0,
             max = 100,
             step = 5,
@@ -3296,31 +3278,21 @@ function CombatInfo.CreateConsoleSettings()
         -- Build display mode items
         local displayModeItems =
         {
-            { name = "Single Synergy",        data = "single"  },
-            { name = "Multi-Synergy",         data = "multi"   },
-            { name = "Compact Multi-Synergy", data = "compact" },
-            { name = "Icon + Cooldown",       data = "minimal" },
-            { name = "Hidden",                data = "hidden"  },
+            { name = GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_SINGLE),  data = "single"  },
+            { name = GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_MULTI),   data = "multi"   },
+            { name = GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_COMPACT), data = "compact" },
+            { name = GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_MINIMAL), data = "minimal" },
+            { name = GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_HIDDEN),  data = "hidden"  },
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "Display Mode",
-            tooltip = "Single: Show only highest priority synergy (like default UI)\nMulti: Show all available synergies\nCompact: Show all synergies with short names\nIcon + Cooldown: Icon and cooldown timer only (tooltip shows ability name)\nHidden: No on-screen tracker (detection, sounds, and overrides still run)",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_DISPLAY_MODE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_DISPLAY_MODE_TP),
             items = displayModeItems,
             getFunction = function ()
-                if Settings.synergy.displayMode == "single" then
-                    return "Single Synergy"
-                elseif Settings.synergy.displayMode == "compact" then
-                    return "Compact Multi-Synergy"
-                elseif Settings.synergy.displayMode == "minimal" then
-                    return "Icon + Cooldown"
-                elseif Settings.synergy.displayMode == "hidden" then
-                    return "Hidden"
-                else
-                    return "Multi-Synergy"
-                end
+                return SettingsAPI:LHASDropdownGetData(Settings.synergy.displayMode)
             end,
             setFunction = function (combobox, value, item)
                 Settings.synergy.displayMode = item.data
@@ -3333,14 +3305,14 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.synergy.enabled
             end,
-            default = "Multi-Synergy"
+            default = SettingsAPI:LHASDropdownGetData(Defaults.synergy.displayMode)
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Horizontal Icon Layout",
-            tooltip = "When using Icon + Cooldown mode, arrange synergy icons in a horizontal row instead of a vertical list.",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_HORIZONTAL_ICONS),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_HORIZONTAL_ICONS_TP),
             getFunction = function ()
                 return Settings.synergy.minimalHorizontal
             end,
@@ -3361,8 +3333,8 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "Maximum Synergies to Display",
-            tooltip = "Maximum number of synergies to show simultaneously (1-10). Includes both active and cooldown synergies.",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_MAX_DISPLAY),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_MAX_DISPLAY_TP),
             min = 1,
             max = 10,
             step = 1,
@@ -3386,8 +3358,8 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Show Priority Numbers",
-            tooltip = "Display priority numbers next to each synergy.",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_PRIORITY),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_PRIORITY_TP),
             getFunction = function ()
                 return Settings.synergy.showPriority
             end,
@@ -3407,8 +3379,8 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Show Position Numbers",
-            tooltip = "Display position numbers (1-5) next to each synergy to show its order in the list.",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_POSITION),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_POSITION_TP),
             getFunction = function ()
                 return Settings.synergy.showKeybinds
             end,
@@ -3428,8 +3400,8 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Play Sound on New Synergy",
-            tooltip = "Play a sound notification when a new synergy becomes available.",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_SOUND_NEW),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_SOUND_NEW_TP),
             getFunction = function ()
                 return Settings.synergy.playSound
             end,
@@ -3445,8 +3417,8 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Show Synergies on Cooldown",
-            tooltip = "Display synergies that are currently on cooldown. The tracker automatically learns which synergies share cooldowns by detecting when multiple synergies go on cooldown together.",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_COOLDOWN),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_COOLDOWN_TP),
             getFunction = function ()
                 return Settings.synergy.showCooldowns
             end,
@@ -3470,21 +3442,21 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Detected Synergies & Priority Overrides"
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_DETECTED_HEADER)
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Synergies detected during gameplay will appear below. Each synergy has a checkbox to blacklist (hide) it and a slider to set custom priority (0 = game default, 1-10 = higher priority)."
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_DETECTED_DESC)
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_BUTTON,
-            label = "Clear All Priority Overrides",
-            tooltip = "Remove all custom priority overrides and reset to game defaults.",
-            buttonText = "Clear All Priority Overrides",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_OVERRIDES),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_OVERRIDES_TP),
+            buttontext = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_OVERRIDES),
             clickHandler = function ()
                 local tracker = CombatInfo.SynergyTrackerInstance
                 if tracker then
@@ -3499,16 +3471,16 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_BUTTON,
-            label = "Clear Blacklist",
-            tooltip = "Remove all synergies from the blacklist.",
-            buttonText = "Clear Blacklist",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_BLACKLIST),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_BLACKLIST_TP),
+            buttontext = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_BLACKLIST),
             clickHandler = function ()
                 Settings.synergy.blacklist = {}
                 local tracker = CombatInfo.SynergyTrackerInstance
                 if tracker then
                     tracker:RefreshActiveSynergies()
                 end
-                LUIE.ChatOutput:Print("Blacklist cleared. Refresh settings to see changes.", true)
+                LUIE.ChatOutput:Print(GetString(LUIE_STRING_CI_CHAT_BLACKLIST_CLEARED_REFRESH), true)
             end,
             disable = function ()
                 return not Settings.synergy.enabled
@@ -3518,11 +3490,11 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_BUTTON,
-            label = "Refresh List",
-            tooltip = "Refresh the list of detected synergies. Close and reopen settings to see updated list.",
-            buttonText = "Refresh List",
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_REFRESH_LIST),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_REFRESH_LIST_CONSOLE_TP),
+            buttontext = GetString(LUIE_STRING_LAM_CI_SYNERGY_REFRESH_LIST),
             clickHandler = function ()
-                LUIE.ChatOutput:Print("Refresh settings menu to see updated synergy list.", true)
+                LUIE.ChatOutput:Print(GetString(LUIE_STRING_CI_CHAT_SYNERGY_REFRESH_SETTINGS), true)
             end,
             disable = function ()
                 return not Settings.synergy.enabled
@@ -3551,7 +3523,7 @@ function CombatInfo.CreateConsoleSettings()
                 settings[#settings + 1] =
                 {
                     type = LHAS.ST_CHECKBOX,
-                    label = "Blacklist (Hide)",
+                    label = GetString(LUIE_STRING_LAM_CI_SYNERGY_BLACKLIST_HIDE),
                     tooltip = string_format("Hide this synergy from the tracker. Ability ID: [%d]", abilityId),
                     getFunction = function ()
                         return Settings.synergy.blacklist[abilityId] or false
@@ -3572,7 +3544,7 @@ function CombatInfo.CreateConsoleSettings()
                 settings[#settings + 1] =
                 {
                     type = LHAS.ST_SLIDER,
-                    label = "Priority Override",
+                    label = GetString(LUIE_STRING_LAM_CI_SYNERGY_PRIORITY_OVERRIDE),
                     tooltip = string_format("Set priority for %s. Higher values = higher priority. 0 = game default.", name),
                     min = 0,
                     max = 10,
@@ -3601,17 +3573,17 @@ function CombatInfo.CreateConsoleSettings()
 
     -- Build Block Indicator Section
     buildSectionSettings("Block", function (settings)
-        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = "Block Indicator" }
+        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_HEADER) }
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Shows a shield icon while blocking and optional remaining block count. Bloodlord's Embrace tracker appears when the set is equipped.",
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_DESC),
         }
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Enable Block Indicator (Requires UI Reload)",
-            tooltip = "Enable the block indicator system. Changes require a UI reload (/reloadui).",
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_ENABLE_CONSOLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_ENABLE_TP),
             getFunction = function ()
                 return Settings.block.enabled
             end,
@@ -3623,7 +3595,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "Update interval (ms)",
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_INTERVAL),
             min = 0,
             max = 100,
             step = 5,
@@ -3643,7 +3615,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Show remaining blocks",
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_REMAINING),
             getFunction = function ()
                 return Settings.block.showRemainingBlocks
             end,
@@ -3659,7 +3631,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "Block Indicator Font Face",
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_FACE),
             items = fontItems,
             getFunction = function ()
                 return Settings.block.blockIndicatorFontFace
@@ -3676,7 +3648,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "Block Indicator Font Style",
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_STYLE),
             items = fontStyleItems,
             getFunction = function ()
                 local value = Settings.block.blockIndicatorFontStyle
@@ -3699,7 +3671,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "Block Indicator Font Size",
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_FONT_SIZE),
             min = 10,
             max = 32,
             step = 1,
@@ -3719,7 +3691,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "Color shield by block resource (stamina/magicka)",
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_COLOR_RESOURCE),
             getFunction = function ()
                 return Settings.block.colorShieldByResource
             end,
@@ -3783,7 +3755,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "Bloodlord Embrace Font Face",
+            label = GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_FACE),
             items = fontItems,
             getFunction = function ()
                 return Settings.block.bloodlordEmbraceFontFace
@@ -3800,7 +3772,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "Bloodlord Embrace Font Style",
+            label = GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_STYLE),
             items = fontStyleItems,
             getFunction = function ()
                 local value = Settings.block.bloodlordEmbraceFontStyle
@@ -3823,7 +3795,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "Bloodlord Embrace Title Font Size",
+            label = GetString(LUIE_STRING_LAM_CI_BLOODLORD_TITLE_FONT),
             min = 8,
             max = 24,
             step = 1,
@@ -3843,7 +3815,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "Bloodlord Embrace Value Font Size",
+            label = GetString(LUIE_STRING_LAM_CI_BLOODLORD_VALUE_FONT),
             min = 8,
             max = 24,
             step = 1,

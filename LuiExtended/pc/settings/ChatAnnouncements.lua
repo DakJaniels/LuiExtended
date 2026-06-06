@@ -92,8 +92,8 @@ function ChatAnnouncements.CreateSettings()
     local panelDataChatAnnouncements =
     {
         type = "panel",
-        name = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CA)),
-        displayName = zo_strformat("<<1>> <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CA)),
+        name = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_CA),
+        displayName = LUIE.FormatAddonSettingsPanelDisplayName(LUIE_STRING_LAM_CA),
         author = LUIE.author .. "\n",
         version = LUIE.version,
         website = LUIE.website,
@@ -248,7 +248,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyGoldName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyGoldName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyGoldName = value
@@ -282,7 +282,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalGold
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalGold")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalGold = value
@@ -409,7 +409,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyAPName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyAPName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyAPName = value
@@ -443,7 +443,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_APTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_APTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalAP
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalAP")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalAP = value
@@ -539,7 +539,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyTVName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTVName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyTVName = value
@@ -573,7 +573,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TVTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TVTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalTV
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTV")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalTV = value
@@ -669,7 +669,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyWVName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyWVName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyWVName = value
@@ -703,7 +703,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_WVTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_WVTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalWV
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalWV")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalWV = value
@@ -759,7 +759,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyUndauntedName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyUndauntedName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyUndauntedName = value
@@ -793,7 +793,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalUndaunted
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalUndaunted")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalUndaunted = value
@@ -849,7 +849,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyEndlessName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyEndlessName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyEndlessName = value
@@ -883,7 +883,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDLESSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDLESSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalEndless
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalEndless")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalEndless = value
@@ -939,7 +939,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyOutfitTokenName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyOutfitTokenName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyOutfitTokenName = value
@@ -973,7 +973,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOKENSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOKENSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalOutfitToken
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalOutfitToken")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalOutfitToken = value
@@ -1029,7 +1029,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTENAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTENAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyTransmuteName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTransmuteName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyTransmuteName = value
@@ -1063,7 +1063,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TRANSMUTETOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TRANSMUTETOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalTransmute
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTransmute")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalTransmute = value
@@ -1117,7 +1117,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencySealsName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencySealsName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencySealsName = value
@@ -1149,7 +1149,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SEALSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SEALSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalSeals
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalSeals")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalSeals = value
@@ -1205,7 +1205,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyCrownsName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyCrownsName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyCrownsName = value
@@ -1239,7 +1239,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalCrowns
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalCrowns")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalCrowns = value
@@ -1295,7 +1295,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyCrownGemsName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyCrownGemsName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyCrownGemsName = value
@@ -1329,7 +1329,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNGEMSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNGEMSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalCrownGems
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalCrownGems")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalCrownGems = value
@@ -1384,7 +1384,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyTradeBarsName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTradeBarsName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyTradeBarsName = value
@@ -1416,7 +1416,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TRADEBARSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TRADEBARSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalTradeBars
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTradeBars")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalTradeBars = value
@@ -1470,7 +1470,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyTomePointsName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTomePointsName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyTomePointsName = value
@@ -1502,7 +1502,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalTomePoints
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTomePoints")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalTomePoints = value
@@ -1556,7 +1556,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyTomePointCachesName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTomePointCachesName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyTomePointCachesName = value
@@ -1588,7 +1588,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTCACHESTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTCACHESTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalTomePointCaches
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTomePointCaches")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalTomePointCaches = value
@@ -1642,7 +1642,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyTomeTokensName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTomeTokensName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyTomeTokensName = value
@@ -1674,7 +1674,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMETOKENSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMETOKENSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalTomeTokens
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTomeTokens")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalTomeTokens = value
@@ -1728,7 +1728,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSNAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyTomeChallengeRerollsName
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTomeChallengeRerollsName")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyTomeChallengeRerollsName = value
@@ -1760,7 +1760,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMECHALLENGEREROLLSTOTAL_MSG)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMECHALLENGEREROLLSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalTomeChallengeRerolls
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTomeChallengeRerolls")
                 end,
                 setFunc = function (value)
                     Settings.Currency.CurrencyMessageTotalTomeChallengeRerolls = value
@@ -1906,7 +1906,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_LOOT_TOTALSTRING)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_TOTALSTRING_TP),
                 getFunc = function ()
-                    return Settings.Inventory.LootTotalString
+                    return ChatAnnouncements.GetLootTotalString()
                 end,
                 setFunc = function (value)
                     Settings.Inventory.LootTotalString = value
@@ -2700,7 +2700,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOOT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOOT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageLoot
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageLoot")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageLoot = value
@@ -2717,7 +2717,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_RECEIVE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_RECEIVE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageReceive
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageReceive = value
@@ -2734,7 +2734,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_EARN),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_EARN_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageEarn
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageEarn")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageEarn = value
@@ -2751,7 +2751,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_STEAL),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_STEAL_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageSteal
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageSteal")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageSteal = value
@@ -2768,7 +2768,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_PICKPOCKET),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_PICKPOCKET_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessagePickpocket
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessagePickpocket")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessagePickpocket = value
@@ -2785,7 +2785,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CONFISCATE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CONFISCATE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageConfiscate
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageConfiscate")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageConfiscate = value
@@ -2802,7 +2802,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_SPEND),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_SPEND_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageSpend
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageSpend = value
@@ -2819,7 +2819,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_PAY),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_PAY_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessagePay
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessagePay")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessagePay = value
@@ -2836,7 +2836,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_USEKIT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_USEKIT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageUseKit
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageUseKit")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageUseKit = value
@@ -2853,7 +2853,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_POTION),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_POTION_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessagePotion
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessagePotion")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessagePotion = value
@@ -2870,7 +2870,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_FOOD),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_FOOD_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageFood
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageFood")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageFood = value
@@ -2887,7 +2887,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DRINK),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DRINK_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDrink
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDrink")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDrink = value
@@ -2904,7 +2904,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPLOY),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPLOY_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDeploy
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDeploy")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDeploy = value
@@ -2921,7 +2921,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_STOW),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_STOW_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageStow
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageStow")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageStow = value
@@ -2938,7 +2938,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_FILLET),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_FILLET_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageFillet
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageFillet")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageFillet = value
@@ -2955,7 +2955,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LEARN_RECIPE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LEARN_RECIPE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageLearnRecipe
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageLearnRecipe")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageLearnRecipe = value
@@ -2972,7 +2972,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LEARN_MOTIF),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LEARN_MOTIF_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageLearnMotif
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageLearnMotif")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageLearnMotif = value
@@ -2989,7 +2989,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LEARN_STYLE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LEARN_STYLE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageLearnStyle
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageLearnStyle")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageLearnStyle = value
@@ -3006,7 +3006,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_EXCAVATE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_EXCAVATE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageExcavate
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageExcavate")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageExcavate = value
@@ -3023,7 +3023,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADEIN),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADEIN_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageTradeIn
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageTradeIn")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageTradeIn = value
@@ -3040,7 +3040,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADEIN_NO_NAME),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADEIN_NO_NAME_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageTradeInNoName
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageTradeInNoName")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageTradeInNoName = value
@@ -3057,7 +3057,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADEOUT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADEOUT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageTradeOut
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageTradeOut")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageTradeOut = value
@@ -3074,7 +3074,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADEOUT_NO_NAME),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADEOUT_NO_NAME_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageTradeOutNoName
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageTradeOutNoName")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageTradeOutNoName = value
@@ -3091,7 +3091,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MAILIN),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MAILIN_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageMailIn
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageMailIn")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageMailIn = value
@@ -3108,7 +3108,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MAILIN_NO_NAME),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MAILIN_NO_NAME_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageMailInNoName
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageMailInNoName")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageMailInNoName = value
@@ -3125,7 +3125,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MAILOUT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MAILOUT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageMailOut
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageMailOut")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageMailOut = value
@@ -3142,7 +3142,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MAILOUT_NO_NAME),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MAILOUT_NO_NAME_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageMailOutNoName
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageMailOutNoName")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageMailOutNoName = value
@@ -3159,7 +3159,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDeposit
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDeposit")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDeposit = value
@@ -3176,7 +3176,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageWithdraw
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageWithdraw")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageWithdraw = value
@@ -3193,7 +3193,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSITGUILD),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSITGUILD_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDepositGuild
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDepositGuild")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDepositGuild = value
@@ -3210,7 +3210,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAWGUILD),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAWGUILD_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageWithdrawGuild
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawGuild")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageWithdrawGuild = value
@@ -3227,7 +3227,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSITSTORAGE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSITSTORAGE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDepositStorage
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDepositStorage")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDepositStorage = value
@@ -3244,7 +3244,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAWSTORAGE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAWSTORAGE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageWithdrawStorage
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawStorage")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageWithdrawStorage = value
@@ -3261,7 +3261,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDepositFurnitureVault
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDepositFurnitureVault")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDepositFurnitureVault = value
@@ -3278,7 +3278,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageWithdrawFurnitureVault
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawFurnitureVault")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageWithdrawFurnitureVault = value
@@ -3295,7 +3295,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOST),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOST_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageLost
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageLost")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageLost = value
@@ -3312,7 +3312,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BOUNTY),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BOUNTY_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageBounty
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageBounty")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageBounty = value
@@ -3329,7 +3329,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_REPAIR),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_REPAIR_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageRepair
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageRepair")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageRepair = value
@@ -3346,7 +3346,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADER),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TRADER_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageTrader
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageTrader")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageTrader = value
@@ -3363,7 +3363,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LISTING),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LISTING_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageListing
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageListing")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageListing = value
@@ -3380,7 +3380,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LIST),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LIST_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageList
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageList")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageList = value
@@ -3398,7 +3398,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LISTING_VALUE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LISTING_VALUE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageListingValue
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageListingValue")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageListingValue = value
@@ -3416,7 +3416,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUY_VALUE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUY_VALUE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageBuy
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageBuy")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageBuy = value
@@ -3433,7 +3433,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUY),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUY_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageBuyNoV
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageBuyNoV")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageBuyNoV = value
@@ -3450,7 +3450,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUYBACK_VALUE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUYBACK_VALUE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageBuyback
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageBuyback")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageBuyback = value
@@ -3467,7 +3467,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUYBACK),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUYBACK_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageBuybackNoV
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageBuybackNoV")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageBuybackNoV = value
@@ -3484,7 +3484,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_SELL_VALUE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_SELL_VALUE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageSell
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageSell")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageSell = value
@@ -3501,7 +3501,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_SELL),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_SELL_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageSellNoV
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageSellNoV")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageSellNoV = value
@@ -3518,7 +3518,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_FENCE_VALUE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_FENCE_VALUE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageFence
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageFence")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageFence = value
@@ -3535,7 +3535,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_FENCE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_FENCE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageFenceNoV
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageFenceNoV")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageFenceNoV = value
@@ -3552,7 +3552,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LAUNDER_VALUE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LAUNDER_VALUE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageLaunder
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageLaunder")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageLaunder = value
@@ -3569,7 +3569,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LAUNDER),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LAUNDER_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageLaunderNoV
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageLaunderNoV")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageLaunderNoV = value
@@ -3586,7 +3586,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_STABLE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_STABLE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageStable
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageStable")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageStable = value
@@ -3603,7 +3603,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_STORAGE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_STORAGE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageStorage
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageStorage")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageStorage = value
@@ -3620,7 +3620,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WAYSHRINE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WAYSHRINE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageWayshrine
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageWayshrine")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageWayshrine = value
@@ -3637,7 +3637,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UNSTUCK),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UNSTUCK_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageUnstuck
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageUnstuck")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageUnstuck = value
@@ -3654,7 +3654,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_ATTRIBUTES),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_ATTRIBUTES_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageAttributes
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageAttributes")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageAttributes = value
@@ -3671,7 +3671,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CHAMPION),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CHAMPION_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageChampion
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageChampion")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageChampion = value
@@ -3688,7 +3688,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MORPHS),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MORPHS_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageMorphs
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageMorphs")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageMorphs = value
@@ -3705,7 +3705,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_SKILLS),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_SKILLS_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageSkills
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageSkills")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageSkills = value
@@ -3722,7 +3722,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CAMPAIGN),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CAMPAIGN_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageCampaign
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageCampaign")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageCampaign = value
@@ -3739,7 +3739,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_USE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_USE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageUse
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageUse")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageUse = value
@@ -3756,7 +3756,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CRAFT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CRAFT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageCraft
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageCraft")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageCraft = value
@@ -3773,7 +3773,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_EXTRACT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_EXTRACT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageExtract
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageExtract")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageExtract = value
@@ -3790,7 +3790,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UPGRADE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UPGRADE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageUpgrade
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageUpgrade")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageUpgrade = value
@@ -3807,7 +3807,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UPGRADE_FAIL),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UPGRADE_FAIL_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageUpgradeFail
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageUpgradeFail")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageUpgradeFail = value
@@ -3824,7 +3824,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_REFINE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_REFINE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageRefine
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageRefine")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageRefine = value
@@ -3841,7 +3841,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DECONSTRUCT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DECONSTRUCT_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDeconstruct
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDeconstruct")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDeconstruct = value
@@ -3858,7 +3858,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_RESEARCH),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_RESEARCH_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageResearch
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageResearch")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageResearch = value
@@ -3875,7 +3875,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DESTROY),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DESTROY_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDestroy
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDestroy = value
@@ -3892,7 +3892,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CONTAINER),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_CONTAINER_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageContainer
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageContainer")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageContainer = value
@@ -3909,7 +3909,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOCKPICK),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOCKPICK_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageLockpick
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageLockpick")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageLockpick = value
@@ -3926,7 +3926,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_REMOVE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_REMOVE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageRemove
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageRemove")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageRemove = value
@@ -3944,7 +3944,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TURNIN),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_TURNIN_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestTurnIn
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestTurnIn")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestTurnIn = value
@@ -3961,7 +3961,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTUSE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTUSE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestUse
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestUse")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestUse = value
@@ -3978,7 +3978,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_EXHAUST),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_EXHAUST_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestExhaust
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestExhaust")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestExhaust = value
@@ -3995,7 +3995,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_OFFER),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_OFFER_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestOffer
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestOffer")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestOffer = value
@@ -4012,7 +4012,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DISCARD),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DISCARD_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestDiscard
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestDiscard")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestDiscard = value
@@ -4029,7 +4029,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTOPEN),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTOPEN_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestOpen
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestOpen")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestOpen = value
@@ -4046,7 +4046,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTCONFISCATE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTCONFISCATE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestConfiscate
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestConfiscate")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestConfiscate = value
@@ -4064,7 +4064,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTADMINISTER),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTADMINISTER_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestAdminister
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestAdminister")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestAdminister = value
@@ -4081,7 +4081,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTPLACE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_QUESTPLACE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestPlace
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestPlace")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestPlace = value
@@ -4099,7 +4099,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_COMBINE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_COMBINE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestCombine
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestCombine")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestCombine = value
@@ -4116,7 +4116,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MIX),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_MIX_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestMix
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestMix")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestMix = value
@@ -4133,7 +4133,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUNDLE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_BUNDLE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageQuestBundle
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageQuestBundle")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageQuestBundle = value
@@ -4151,7 +4151,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GROUP),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GROUP_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageGroup
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageGroup")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageGroup = value
@@ -4168,7 +4168,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DISGUISE_EQUIP),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DISGUISE_EQUIP_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDisguiseEquip
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDisguiseEquip")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDisguiseEquip = value
@@ -4185,7 +4185,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DISGUISE_REMOVE),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DISGUISE_REMOVE_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDisguiseRemove
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDisguiseRemove")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDisguiseRemove = value
@@ -4202,7 +4202,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DISGUISE_DESTROY),
                 tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DISGUISE_DESTROY_TP),
                 getFunc = function ()
-                    return Settings.ContextMessages.CurrencyMessageDisguiseDestroy
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageDisguiseDestroy")
                 end,
                 setFunc = function (value)
                     Settings.ContextMessages.CurrencyMessageDisguiseDestroy = value
@@ -4507,7 +4507,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_EXP_MESSAGE)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_EXP_MESSAGE_TP),
                 getFunc = function ()
-                    return Settings.XP.ExperienceMessage
+                    return ChatAnnouncements.GetModuleMessageFormat("XP", "ExperienceMessage")
                 end,
                 setFunc = function (value)
                     Settings.XP.ExperienceMessage = value
@@ -4524,7 +4524,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_EXP_NAME)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_EXP_NAME_TP),
                 getFunc = function ()
-                    return Settings.XP.ExperienceName
+                    return ChatAnnouncements.GetModuleMessageFormat("XP", "ExperienceName")
                 end,
                 setFunc = function (value)
                     Settings.XP.ExperienceName = value
@@ -4703,7 +4703,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALPREFIX)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALPREFIX_TP),
                 getFunc = function ()
-                    return Settings.Skills.SkillPointSkyshard
+                    return ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillPointSkyshard")
                 end,
                 setFunc = function (value)
                     Settings.Skills.SkillPointSkyshard = value
@@ -5000,7 +5000,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_GUILDREP_MESSAGEFORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CA_GUILDREP_MESSAGEFORMAT_TP),
                 getFunc = function ()
-                    return Settings.Skills.SkillGuildMsg
+                    return ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillGuildMsg")
                 end,
                 setFunc = function (value)
                     Settings.Skills.SkillGuildMsg = value
@@ -5018,7 +5018,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_GUILDREP_MESSAGENAME),
                 tooltip = GetString(LUIE_STRING_LAM_CA_GUILDREP_MESSAGENAME_TP),
                 getFunc = function ()
-                    return Settings.Skills.SkillGuildRepName
+                    return ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillGuildRepName")
                 end,
                 setFunc = function (value)
                     Settings.Skills.SkillGuildRepName = value
@@ -5473,7 +5473,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_MESSAGEPREFIX)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_MESSAGEPREFIX_TP),
                 getFunc = function ()
-                    return Settings.Collectibles.CollectiblePrefix
+                    return ChatAnnouncements.GetModuleMessageFormat("Collectibles", "CollectiblePrefix")
                 end,
                 setFunc = function (value)
                     Settings.Collectibles.CollectiblePrefix = value
@@ -5947,7 +5947,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX1)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX1_TP),
                 getFunc = function ()
-                    return Settings.Lorebooks.LorebookPrefix1
+                    return ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix1")
                 end,
                 setFunc = function (value)
                     Settings.Lorebooks.LorebookPrefix1 = value
@@ -5964,7 +5964,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX2)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX2_TP),
                 getFunc = function ()
-                    return Settings.Lorebooks.LorebookPrefix2
+                    return ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix2")
                 end,
                 setFunc = function (value)
                     Settings.Lorebooks.LorebookPrefix2 = value
@@ -5981,7 +5981,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX_COLLECTION)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX_COLLECTION_TP),
                 getFunc = function ()
-                    return Settings.Lorebooks.LorebookCollectionPrefix
+                    return ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookCollectionPrefix")
                 end,
                 setFunc = function (value)
                     Settings.Lorebooks.LorebookCollectionPrefix = value
@@ -6174,7 +6174,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX_TP),
                 getFunc = function ()
-                    return Settings.Antiquities.AntiquityPrefix
+                    return ChatAnnouncements.GetModuleMessageFormat("Antiquities", "AntiquityPrefix")
                 end,
                 setFunc = function (value)
                     Settings.Antiquities.AntiquityPrefix = value
@@ -6209,7 +6209,7 @@ function ChatAnnouncements.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_ANTIQUITY_SUFFIX)),
                 tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_SUFFIX_TP),
                 getFunc = function ()
-                    return Settings.Antiquities.AntiquitySuffix
+                    return ChatAnnouncements.GetModuleMessageFormat("Antiquities", "AntiquitySuffix")
                 end,
                 setFunc = function (value)
                     Settings.Antiquities.AntiquitySuffix = value
@@ -6477,7 +6477,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_ACHIEVE_PROGMSG),
                 tooltip = GetString(LUIE_STRING_LAM_CA_ACHIEVE_PROGMSG_TP),
                 getFunc = function ()
-                    return Settings.Achievement.AchievementProgressMsg
+                    return ChatAnnouncements.GetModuleMessageFormat("Achievement", "AchievementProgressMsg")
                 end,
                 setFunc = function (value)
                     Settings.Achievement.AchievementProgressMsg = value
@@ -6494,7 +6494,7 @@ function ChatAnnouncements.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CA_ACHIEVE_COMPLETEMSG),
                 tooltip = GetString(LUIE_STRING_LAM_CA_ACHIEVE_COMPLETEMSG_TP),
                 getFunc = function ()
-                    return Settings.Achievement.AchievementCompleteMsg
+                    return ChatAnnouncements.GetModuleMessageFormat("Achievement", "AchievementCompleteMsg")
                 end,
                 setFunc = function (value)
                     Settings.Achievement.AchievementCompleteMsg = value
@@ -7585,6 +7585,191 @@ function ChatAnnouncements.CreateSettings()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
                 default = Defaults.Notify.NotificationTradeAlert,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_HOME_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_HOME), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_HOME_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Notify.SlashHomeCA
+                end,
+                setFunc = function (value)
+                    Settings.Notify.SlashHomeCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.SlashHomeCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_HOME), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_HOME_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Notify.SlashHomeAlert
+                end,
+                setFunc = function (value)
+                    Settings.Notify.SlashHomeAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.SlashHomeAlert,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_CAMPAIGN_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_CAMPAIGN), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_CAMPAIGN_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Notify.SlashCampaignCA
+                end,
+                setFunc = function (value)
+                    Settings.Notify.SlashCampaignCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.SlashCampaignCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_CAMPAIGN), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SLASH_CAMPAIGN_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Notify.SlashCampaignAlert
+                end,
+                setFunc = function (value)
+                    Settings.Notify.SlashCampaignAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.SlashCampaignAlert,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_NOTIFY_CAMPAIGN_QUEUE_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CAMPAIGN_QUEUE), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CAMPAIGN_QUEUE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Notify.CampaignQueueCA
+                end,
+                setFunc = function (value)
+                    Settings.Notify.CampaignQueueCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.CampaignQueueCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CAMPAIGN_QUEUE), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CAMPAIGN_QUEUE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Notify.CampaignQueueAlert
+                end,
+                setFunc = function (value)
+                    Settings.Notify.CampaignQueueAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.CampaignQueueAlert,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_NOTIFY_OUTFIT_EQUIP_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_OUTFIT_EQUIP), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_OUTFIT_EQUIP_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Notify.OutfitEquipCA
+                end,
+                setFunc = function (value)
+                    Settings.Notify.OutfitEquipCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.OutfitEquipCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_OUTFIT_EQUIP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_OUTFIT_EQUIP_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Notify.OutfitEquipAlert
+                end,
+                setFunc = function (value)
+                    Settings.Notify.OutfitEquipAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.OutfitEquipAlert,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_NOTIFY_SOCIAL_ERROR_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SOCIAL_ERROR), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SOCIAL_ERROR_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Notify.SocialErrorCA
+                end,
+                setFunc = function (value)
+                    Settings.Notify.SocialErrorCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.SocialErrorCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SOCIAL_ERROR), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_SOCIAL_ERROR_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Notify.SocialErrorAlert
+                end,
+                setFunc = function (value)
+                    Settings.Notify.SocialErrorAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.SocialErrorAlert,
             },
             {
                 type = "header",

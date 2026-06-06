@@ -49,9 +49,6 @@ local companionOptions, companionOptionsKeys = CreateOptions(CollectibleTables.C
 local armoryOptions, armoryOptionsKeys = CreateOptions(CollectibleTables.Armory)
 local deconOptions, deconOptionsKeys = CreateOptions(CollectibleTables.Decon)
 
-local homeOptions = { "Inside", "Outside" }
-local homeOptionsKeys = { ["Inside"] = 1, ["Outside"] = 2 }
-
 function SlashCommands.MigrateSettings()
     local Settings = SlashCommands.SV
 
@@ -105,8 +102,8 @@ function SlashCommands.CreateSettings()
     local panelDataSlashCommands =
     {
         type = "panel",
-        name = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_SLASHCMDS)),
-        displayName = zo_strformat("<<1>> <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_SLASHCMDS)),
+        name = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_SLASHCMDS),
+        displayName = LUIE.FormatAddonSettingsPanelDisplayName(LUIE_STRING_LAM_SLASHCMDS),
         author = LUIE.author .. "\n",
         version = LUIE.version,
         website = LUIE.website,
@@ -119,6 +116,16 @@ function SlashCommands.CreateSettings()
     }
 
     local optionsDataSlashCommands = {}
+
+    local homeOptions =
+    {
+        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_INSIDE_LABEL),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_OUTSIDE_LABEL),
+    }
+    local homeOptionsKeys = {}
+    for i, label in ipairs(homeOptions) do
+        homeOptionsKeys[label] = i
+    end
 
     -- Slash Commands description
     optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateDescriptionOption(
@@ -167,7 +174,7 @@ function SlashCommands.CreateSettings()
 
     -- Choose Home Option
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Inside or Outside for /home",
+        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_CHOICE),
         nil,
         homeOptions,
         function () return homeOptions[Settings.SlashHomeChoice] end,
@@ -225,7 +232,7 @@ function SlashCommands.CreateSettings()
 
     -- Choose Companion
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Companion to Summon",
+        GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION_CHOICE),
         nil,
         companionOptions,
         function () return GetFormattedCollectibleName(Settings.SlashCompanionChoice) end,
@@ -253,7 +260,7 @@ function SlashCommands.CreateSettings()
 
     -- Choose Banker
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Banker to Summon",
+        GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER_CHOICE),
         nil,
         bankerOptions,
         function () return GetFormattedCollectibleName(Settings.SlashBankerChoice) end,
@@ -281,7 +288,7 @@ function SlashCommands.CreateSettings()
 
     -- Choose Merchant
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Merchant to Summon",
+        GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT_CHOICE),
         nil,
         merchantOptions,
         function () return GetFormattedCollectibleName(Settings.SlashMerchantChoice) end,
@@ -309,7 +316,7 @@ function SlashCommands.CreateSettings()
 
     -- Choose Armory
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Armory Assistant to Summon",
+        GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY_CHOICE),
         nil,
         armoryOptions,
         function () return GetFormattedCollectibleName(Settings.SlashArmoryChoice) end,
@@ -337,7 +344,7 @@ function SlashCommands.CreateSettings()
 
     -- Choose Decon
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Deconstruction Assistant to Summon",
+        GetString(LUIE_STRING_LAM_SLASHCMDS_DECON_CHOICE),
         nil,
         deconOptions,
         function () return GetFormattedCollectibleName(Settings.SlashDeconChoice) end,
@@ -433,39 +440,6 @@ function SlashCommands.CreateSettings()
         nil,
         Defaults.SlashReport,
         GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
-    )
-
-    -- /home Alert (Temp Setting)
-    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
-        "/home Results - Show Alert (Temp Setting)",
-        "Display an alert when the /home command is used.\nNote: This setting will be deprecated in the future when Social Errors Events are implemented in Chat Announcements.",
-        function () return LUIE.SV.TempAlertHome end,
-        function (value) LUIE.SV.TempAlertHome = value end,
-        "full",
-        nil,
-        LUIE.Defaults.TempAlertHome
-    )
-
-    -- /Campaign Results Alert (Temp Setting)
-    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
-        "/Campaign Results - Show Alert (Temp Setting)",
-        "Display an alert when the /campaign command is used.\nNote: This setting will be deprecated in the future when Campaign Queue Events are implemented in Chat Announcements.",
-        function () return LUIE.SV.TempAlertCampaign end,
-        function (value) LUIE.SV.TempAlertCampaign = value end,
-        "full",
-        nil,
-        LUIE.Defaults.TempAlertCampaign
-    )
-
-    -- /Outfit Alert (Temp Setting)
-    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
-        "/Outfit - Show Alert (Temp Setting)",
-        "Display an alert when the /outfit command is used.\nNote: This setting will be deprecated in the future when Outfit Alerts are implemented in Chat Announcements.",
-        function () return LUIE.SV.TempAlertOutfit end,
-        function (value) LUIE.SV.TempAlertOutfit = value end,
-        "full",
-        nil,
-        LUIE.Defaults.TempAlertOutfit
     )
 
     optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateSubmenuOption(

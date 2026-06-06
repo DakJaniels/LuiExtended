@@ -16,8 +16,12 @@ local string_rep = string.rep
 local type, pairs = type, pairs
 local table_insert = table.insert
 
-local globalMethodOptions = { "Radial", "Vertical Reveal" }
-local globalMethodOptionsKeys = { ["Radial"] = 1, ["Vertical Reveal"] = 2 }
+local globalMethodOptions =
+{
+    GetString(LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL),
+    GetString(LUIE_STRING_LAM_AB_GCD_ANIM_VERTICAL_REVEAL),
+}
+local globalMethodOptionValues = { 1, 2 }
 
 -- Helper function to get sounds list
 local function GetSoundsList()
@@ -99,8 +103,8 @@ function ActionBar.CreateSettings()
     local panelDataActionBar =
     {
         type = "panel",
-        name = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_AB)),
-        displayName = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_AB)),
+        name = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_AB),
+        displayName = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_AB),
         author = LUIE.author .. "\n",
         version = LUIE.version,
         website = LUIE.website,
@@ -136,13 +140,13 @@ function ActionBar.CreateSettings()
     optionsDataActionBar[#optionsDataActionBar + 1] =
     {
         type = "header",
-        name = "Display Options",
+        name = GetString(LUIE_STRING_LAM_AB_DISPLAY_OPTIONS_HEADER),
     }
     optionsDataActionBar[#optionsDataActionBar + 1] =
     {
         type = "slider",
-        name = zo_strformat("\t\t\t\t\t<<1>>", "Out-of-Combat Opacity"),
-        tooltip = "Action bar and cast bar opacity while out of combat (0–100%).",
+        name = zo_strformat("<<1>>", GetString(LUIE_STRING_SHARED_OOC_OPACITY)),
+        tooltip = GetString(LUIE_STRING_LAM_AB_OOC_OPACITY_TP),
         min = 0,
         max = 100,
         step = 5,
@@ -160,8 +164,8 @@ function ActionBar.CreateSettings()
     optionsDataActionBar[#optionsDataActionBar + 1] =
     {
         type = "slider",
-        name = zo_strformat("\t\t\t\t\t<<1>>", "In-Combat Opacity"),
-        tooltip = "Action bar and cast bar opacity while in combat (0–100%).",
+        name = zo_strformat("<<1>>", GetString(LUIE_STRING_SHARED_IC_OPACITY)),
+        tooltip = GetString(LUIE_STRING_LAM_AB_IC_OPACITY_TP),
         min = 0,
         max = 100,
         step = 5,
@@ -243,11 +247,12 @@ function ActionBar.CreateSettings()
                 name = AddIndent(GetString(LUIE_STRING_LAM_AB_GCD_ANIMATION), 1),
                 tooltip = GetString(LUIE_STRING_LAM_AB_GCD_ANIMATION_TP),
                 choices = globalMethodOptions,
-                getFunc = function () return globalMethodOptions[Settings.GlobalMethod] end,
-                setFunc = function (value) Settings.GlobalMethod = globalMethodOptionsKeys[value] end,
+                choicesValues = globalMethodOptionValues,
+                getFunc = function () return Settings.GlobalMethod end,
+                setFunc = function (value) Settings.GlobalMethod = value end,
                 width = "full",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end,
-                default = globalMethodOptions[Defaults.GlobalMethod],
+                default = Defaults.GlobalMethod,
             },
         },
     }

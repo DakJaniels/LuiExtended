@@ -191,3 +191,58 @@ function UnitFrames.MigrateCustomFrameAppearanceCompactFontSync()
     end
     LUIE.MarkMigrationDone("unitframes_custom_appearance_v3")
 end
+
+local LUIE_DEFAULT_FONT_FACE = "LUIE Default Font"
+local LUIE_DEFAULT_TEXTURE = "Minimalistic"
+
+local FONT_FACE_ALIASES =
+{
+    ["LUIE-Standardschrift"] = LUIE_DEFAULT_FONT_FACE,
+}
+
+local TEXTURE_ALIASES =
+{
+    ["Minimalistisch"] = LUIE_DEFAULT_TEXTURE,
+}
+
+local function NormalizeLuiMediaFontFaceKey(fontFace)
+    if not fontFace or fontFace == "" then
+        return fontFace
+    end
+    if LUIE.Fonts[fontFace] then
+        return fontFace
+    end
+    return FONT_FACE_ALIASES[fontFace] or fontFace
+end
+
+local function NormalizeLuiMediaTextureKey(texture)
+    if not texture or texture == "" then
+        return texture
+    end
+    return TEXTURE_ALIASES[texture] or texture
+end
+
+--- Fixes saved font/texture keys that were localized (must match LuiMedia registry names).
+function UnitFrames.MigrateLuiMediaAppearanceKeys()
+    if LUIE.IsMigrationDone("unitframes_luimedia_registry_keys") then
+        return
+    end
+    local sv = UnitFrames.SV
+    if sv.DefaultFontFace then
+        sv.DefaultFontFace = NormalizeLuiMediaFontFaceKey(sv.DefaultFontFace)
+    end
+    if sv.CustomFrameAppearance then
+        for _, category in ipairs(UnitFrames.APPEARANCE_CATEGORY_IDS) do
+            local entry = sv.CustomFrameAppearance[category]
+            if entry then
+                if entry.fontFace then
+                    entry.fontFace = NormalizeLuiMediaFontFaceKey(entry.fontFace)
+                end
+                if entry.texture then
+                    entry.texture = NormalizeLuiMediaTextureKey(entry.texture)
+                end
+            end
+        end
+    end
+    LUIE.MarkMigrationDone("unitframes_luimedia_registry_keys")
+end

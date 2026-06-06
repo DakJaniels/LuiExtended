@@ -4,98 +4,98 @@
 -->
 <Bindings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esobindings.xsd">
-    <Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
-        <Category name="|cE12000L|cFFFFB0ui E|rxtended|r">
-            <Action name="LUIE_COMMAND_RELOADUI">
-                <Down>ReloadUI("ingame")</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_ARMORY">
-                <Down>LUIE.SlashCommands.SlashArmory()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_DECON">
-                <Down>LUIE.SlashCommands.SlashDecon()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_FENCE">
-                <Down>LUIE.SlashCommands.SlashCollectible(300)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_MERCHANT">
-                <Down>LUIE.SlashCommands.SlashMerchant()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_BANKER">
-                <Down>LUIE.SlashCommands.SlashBanker()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_EYE">
-                <Down>LUIE.SlashCommands.SlashCollectible(8006)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_BASTIAN">
-                <Down>LUIE.SlashCommands.SlashCollectible(9245)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_MIRRI">
-                <Down>LUIE.SlashCommands.SlashCollectible(9353)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_EMBER">
-                <Down>LUIE.SlashCommands.SlashCollectible(9911)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_ISOBEL">
-                <Down>LUIE.SlashCommands.SlashCollectible(9912)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_SHARP">
-                <Down>LUIE.SlashCommands.SlashCollectible(11113)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_AZANDAR">
-                <Down>LUIE.SlashCommands.SlashCollectible(11114)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_TANLORIN">
-                <Down>LUIE.SlashCommands.SlashCollectible(12172)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_ZERITHVAR">
-                <Down>LUIE.SlashCommands.SlashCollectible(12173)</Down>
-            </Action>
-            <Action name="LUIE_DISMISS_PET">
-                <Down>LUIE.SlashCommands.SlashPet()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_HOME">
-                <Down>LUIE.SlashCommands.SlashHome()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_READY_CHECK">
-                <Down>LUIE.SlashCommands.SlashReadyCheck()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_LEAVE_GROUP">
-                <Down>LUIE.SlashCommands.SlashGroupLeave()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_REGROUP">
-                <Down>LUIE.SlashCommands.SlashRegroup()</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_1">
-                <Down>LUIE.SlashCommands.SlashOutfit(1)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_2">
-                <Down>LUIE.SlashCommands.SlashOutfit(2)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_3">
-                <Down>LUIE.SlashCommands.SlashOutfit(3)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_4">
-                <Down>LUIE.SlashCommands.SlashOutfit(4)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_5">
-                <Down>LUIE.SlashCommands.SlashOutfit(5)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_6">
-                <Down>LUIE.SlashCommands.SlashOutfit(6)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_7">
-                <Down>LUIE.SlashCommands.SlashOutfit(7)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_8">
-                <Down>LUIE.SlashCommands.SlashOutfit(8)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_9">
-                <Down>LUIE.SlashCommands.SlashOutfit(9)</Down>
-            </Action>
-            <Action name="LUIE_COMMAND_OUTFIT_10">
-                <Down>LUIE.SlashCommands.SlashOutfit(10)</Down>
-            </Action>
-        </Category>
-    </Layer>
+  <Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
+    <Category name="|cE12000L|cFFFFB0ui E|rxtended|r">
+      <Action name="LUIE_COMMAND_RELOADUI">
+        <Down>ReloadUI("ingame")</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_ARMORY">
+        <Down>LUIE.SlashCommands.SlashArmory()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_DECON">
+        <Down>LUIE.SlashCommands.SlashDecon()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_FENCE">
+        <Down>LUIE.SlashCommands.SlashCollectible(300)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_MERCHANT">
+        <Down>LUIE.SlashCommands.SlashMerchant()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_BANKER">
+        <Down>LUIE.SlashCommands.SlashBanker()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_EYE">
+        <Down>LUIE.SlashCommands.SlashCollectible(8006)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_BASTIAN">
+        <Down>LUIE.SlashCommands.SlashCollectible(9245)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_MIRRI">
+        <Down>LUIE.SlashCommands.SlashCollectible(9353)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_EMBER">
+        <Down>LUIE.SlashCommands.SlashCollectible(9911)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_ISOBEL">
+        <Down>LUIE.SlashCommands.SlashCollectible(9912)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_SHARP">
+        <Down>LUIE.SlashCommands.SlashCollectible(11113)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_AZANDAR">
+        <Down>LUIE.SlashCommands.SlashCollectible(11114)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_TANLORIN">
+        <Down>LUIE.SlashCommands.SlashCollectible(12172)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_ZERITHVAR">
+        <Down>LUIE.SlashCommands.SlashCollectible(12173)</Down>
+      </Action>
+      <Action name="LUIE_DISMISS_PET">
+        <Down>LUIE.SlashCommands.SlashPet()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_HOME">
+        <Down>LUIE.SlashCommands.SlashHome()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_READY_CHECK">
+        <Down>LUIE.SlashCommands.SlashReadyCheck()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_LEAVE_GROUP">
+        <Down>LUIE.SlashCommands.SlashGroupLeave()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_REGROUP">
+        <Down>LUIE.SlashCommands.SlashRegroup()</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_1">
+        <Down>LUIE.SlashCommands.SlashOutfit(1)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_2">
+        <Down>LUIE.SlashCommands.SlashOutfit(2)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_3">
+        <Down>LUIE.SlashCommands.SlashOutfit(3)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_4">
+        <Down>LUIE.SlashCommands.SlashOutfit(4)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_5">
+        <Down>LUIE.SlashCommands.SlashOutfit(5)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_6">
+        <Down>LUIE.SlashCommands.SlashOutfit(6)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_7">
+        <Down>LUIE.SlashCommands.SlashOutfit(7)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_8">
+        <Down>LUIE.SlashCommands.SlashOutfit(8)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_9">
+        <Down>LUIE.SlashCommands.SlashOutfit(9)</Down>
+      </Action>
+      <Action name="LUIE_COMMAND_OUTFIT_10">
+        <Down>LUIE.SlashCommands.SlashOutfit(10)</Down>
+      </Action>
+    </Category>
+  </Layer>
 </Bindings>

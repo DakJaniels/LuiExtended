@@ -50,11 +50,11 @@ function CombatTextPointEventViewer:OnEvent(pointType, value)
     elseif pointType == pointTypes.IN_COMBAT then
         color = Settings.colors.inCombat
         size = Settings.fontSizes.combatState
-        text = self:FormatString(Settings.formats.inCombat, { value = value, text = GetString(LUIE_STRING_CT_COMBAT_IN_DEFAULT) })
+        text = self:FormatString(LUIE.CombatText.GetFormat("inCombat"), { value = value, text = GetString(LUIE_STRING_CT_COMBAT_IN_DEFAULT) })
     elseif pointType == pointTypes.OUT_COMBAT then
         color = Settings.colors.outCombat
         size = Settings.fontSizes.combatState
-        text = self:FormatString(Settings.formats.outCombat, { value = value, text = GetString(LUIE_STRING_CT_COMBAT_OUT_DEFAULT) })
+        text = self:FormatString(LUIE.CombatText.GetFormat("outCombat"), { value = value, text = GetString(LUIE_STRING_CT_COMBAT_OUT_DEFAULT) })
     end
 
     self:PrepareLabel(control.label, size, color, text)

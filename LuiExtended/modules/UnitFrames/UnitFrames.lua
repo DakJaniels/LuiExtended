@@ -54,7 +54,6 @@ local g_PendingUpdate =
 }
 
 local pendingCrutchAlertsVersionWarning = false
-local CRUTCH_ALERTS_MIN_VERSION_WARNING = "CrutchAlerts was detected but is below the minimum supported version (v2.15.0). Reinstall or update CrutchAlerts to restore boss threshold markers."
 
 --- Chat is not ready during addon load; queue warning until primaryContainer exists.
 local function TryShowPendingCrutchAlertsVersionWarning()
@@ -65,7 +64,7 @@ local function TryShowPendingCrutchAlertsVersionWarning()
         return
     end
     pendingCrutchAlertsVersionWarning = false
-    LUIE.ChatOutput:Print(CRUTCH_ALERTS_MIN_VERSION_WARNING, true)
+    LUIE.ChatOutput:Print(GetString(LUIE_STRING_UF_CRUTCH_ALERTS_MIN_VERSION), true)
 end
 
 local BOSS_THRESHOLD_MARKER_WIDTH = 2
@@ -194,7 +193,9 @@ function UnitFrames.Initialize(enabled)
 
     UnitFrames.MigrateCustomFrameAppearance()
     UnitFrames.MigrateCustomFrameAppearanceCompactFontSync()
+    UnitFrames.MigrateLuiMediaAppearanceKeys()
     UnitFrames.MigratePlayerTargetLabelFormats()
+    UnitFrames.MigrateCanonicalFormatStrings()
     UnitFrames.MigratePlayerTargetOverlayFlags()
     UnitFrames.MigratePowerOverlayDefaultOff()
 

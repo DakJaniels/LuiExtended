@@ -4,124 +4,124 @@
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
-        <Controls>
-                <!-- Virtual template for a single synergy row — instantiated dynamically in Lua via
+  <Controls>
+    <!-- Virtual template for a single synergy row — instantiated dynamically in Lua via
     CreateControlFromVirtual -->
-                <Control name="LUIE_SynergyTracker_RowTemplate"
-                         mouseEnabled="true"
-                         hidden="true"
-                         virtual="true">
-                        <Dimensions x="320"
-                                    y="44" />
-                        <Controls>
-                                <Texture name="$(parent)_IconBg"
-                                         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-                                        <Dimensions x="40"
-                                                    y="40" />
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)"
-                                                relativePoint="LEFT"
-                                                offsetX="2"
-                                                offsetY="0" />
-                                </Texture>
-                                <Texture name="$(parent)_Icon">
-                                        <Dimensions x="36"
-                                                    y="36" />
-                                        <Anchor point="CENTER"
-                                                relativeTo="$(parent)_IconBg"
-                                                relativePoint="CENTER" />
-                                </Texture>
-                                <Label name="$(parent)_PosNum"
-                                       font="ZoFontGamepad27"
-                                       color="FFFF80"
-                                       horizontalAlignment="LEFT"
-                                       verticalAlignment="CENTER"
-                                       hidden="true">
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)_IconBg"
-                                                relativePoint="RIGHT"
-                                                offsetX="5"
-                                                offsetY="0" />
-                                </Label>
-                                <Label name="$(parent)_Name"
-                                       horizontalAlignment="LEFT"
-                                       verticalAlignment="CENTER"
-                                       wrapMode="ELLIPSIS">
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)_PosNum"
-                                                relativePoint="RIGHT"
-                                                offsetX="8"
-                                                offsetY="0" />
-                                        <DimensionConstraints minX="0"
-                                                              minY="0"
-                                                              maxX="200"
-                                                              maxY="44" />
-                                </Label>
-                                <Label name="$(parent)_Priority"
-                                       horizontalAlignment="RIGHT"
-                                       verticalAlignment="CENTER"
-                                       color="B3B3B3"
-                                       hidden="true">
-                                        <Anchor point="RIGHT"
-                                                relativeTo="$(parent)"
-                                                relativePoint="RIGHT"
-                                                offsetX="-5"
-                                                offsetY="0" />
-                                </Label>
-                                <Cooldown name="$(parent)_Cooldown"
-                                          hidden="true"
-                                          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-                                          fillColor="000000"
-                                          alpha="0.702"
-                                          desaturation="1">
-                                        <Anchor point="TOPLEFT"
-                                                relativeTo="$(parent)_Icon"
-                                                relativePoint="TOPLEFT" />
-                                        <Anchor point="BOTTOMRIGHT"
-                                                relativeTo="$(parent)_Icon"
-                                                relativePoint="BOTTOMRIGHT" />
-                                </Cooldown>
-                                <Label name="$(parent)_CooldownText"
-                                       horizontalAlignment="CENTER"
-                                       verticalAlignment="CENTER"
-                                       color="FFFFFF"
-                                       hidden="true">
-                                        <Anchor point="CENTER"
-                                                relativeTo="$(parent)_IconBg"
-                                                relativePoint="CENTER" />
-                                </Label>
-                        </Controls>
-                </Control>
+    <Control name="LUIE_SynergyTracker_RowTemplate"
+             mouseEnabled="true"
+             hidden="true"
+             virtual="true">
+      <Dimensions x="320"
+                  y="44" />
+      <Controls>
+        <Texture name="$(parent)_IconBg"
+                 textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+          <Dimensions x="40"
+                      y="40" />
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="LEFT"
+                  offsetX="2"
+                  offsetY="0" />
+        </Texture>
+        <Texture name="$(parent)_Icon">
+          <Dimensions x="36"
+                      y="36" />
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)_IconBg"
+                  relativePoint="CENTER" />
+        </Texture>
+        <Label name="$(parent)_PosNum"
+               font="ZoFontGamepad27"
+               color="FFFF80"
+               horizontalAlignment="LEFT"
+               verticalAlignment="CENTER"
+               hidden="true">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)_IconBg"
+                  relativePoint="RIGHT"
+                  offsetX="5"
+                  offsetY="0" />
+        </Label>
+        <Label name="$(parent)_Name"
+               horizontalAlignment="LEFT"
+               verticalAlignment="CENTER"
+               wrapMode="ELLIPSIS">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)_PosNum"
+                  relativePoint="RIGHT"
+                  offsetX="8"
+                  offsetY="0" />
+          <DimensionConstraints minX="0"
+                                minY="0"
+                                maxX="200"
+                                maxY="44" />
+        </Label>
+        <Label name="$(parent)_Priority"
+               horizontalAlignment="RIGHT"
+               verticalAlignment="CENTER"
+               color="B3B3B3"
+               hidden="true">
+          <Anchor point="RIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="RIGHT"
+                  offsetX="-5"
+                  offsetY="0" />
+        </Label>
+        <Cooldown name="$(parent)_Cooldown"
+                  hidden="true"
+                  textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                  fillColor="000000"
+                  alpha="0.702"
+                  desaturation="1">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_Icon"
+                  relativePoint="TOPLEFT" />
+          <Anchor point="BOTTOMRIGHT"
+                  relativeTo="$(parent)_Icon"
+                  relativePoint="BOTTOMRIGHT" />
+        </Cooldown>
+        <Label name="$(parent)_CooldownText"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER"
+               color="FFFFFF"
+               hidden="true">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)_IconBg"
+                  relativePoint="CENTER" />
+        </Label>
+      </Controls>
+    </Control>
 
-                <TopLevelControl name="LUIE_SynergyTracker_UI"
-                                 mouseEnabled="false"
-                                 movable="false"
-                                 clampedToScreen="true"
-                                 hidden="true"
-                                 layer="BACKGROUND"
-                                 level="1"
-                                 tier="MEDIUM">
-                        <Dimensions x="320"
-                                    y="440" />
-                        <Anchor point="CENTER"
-                                relativeTo="GuiRoot"
-                                relativePoint="CENTER"
-                                offsetX="0"
-                                offsetY="200" />
-                        <Controls>
-                                <Backdrop name="$(parent)_Background"
-                                          hidden="true"
-                                          centerColor="000000"
-                                          edgeColor="4D4D4D">
-                                        <AnchorFill />
-                                        <OnInitialized>
+    <TopLevelControl name="LUIE_SynergyTracker_UI"
+                     mouseEnabled="false"
+                     movable="false"
+                     clampedToScreen="true"
+                     hidden="true"
+                     layer="BACKGROUND"
+                     level="1"
+                     tier="MEDIUM">
+      <Dimensions x="320"
+                  y="440" />
+      <Anchor point="CENTER"
+              relativeTo="GuiRoot"
+              relativePoint="CENTER"
+              offsetX="0"
+              offsetY="200" />
+      <Controls>
+        <Backdrop name="$(parent)_Background"
+                  hidden="true"
+                  centerColor="000000"
+                  edgeColor="4D4D4D">
+          <AnchorFill />
+          <OnInitialized>
                                                 local center = ZO_ColorDef:New("00000080")
                                                 local edge = ZO_ColorDef:New("4D4D4DCC")
                                                 self:SetCenterColor(center:UnpackRGBA())
                                                 self:SetEdgeColor(edge:UnpackRGBA())
                                         </OnInitialized>
-                                </Backdrop>
-                        </Controls>
-                </TopLevelControl>
-        </Controls>
+        </Backdrop>
+      </Controls>
+    </TopLevelControl>
+  </Controls>
 </GuiXml>

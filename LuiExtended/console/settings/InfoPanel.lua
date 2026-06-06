@@ -29,7 +29,7 @@ function InfoPanel.CreateConsoleSettings()
         return
     end
 
-    local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_PNL)),
+    local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_PNL),
                                 {
                                     allowDefaults = true,
                                     defaultsFunction = function ()

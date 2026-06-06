@@ -813,7 +813,7 @@ function LUIE.CreateConsoleSettings()
     settingsData[#settingsData + 1] =
     {
         type = LHAS.ST_CHECKBOX,
-        label = "Action Bar",
+        label = GetString(LUIE_STRING_LAM_AB_SHOWACTIONBAR),
         getFunction = function () return Settings.ActionBar_Enabled end,
         setFunction = function (value) Settings.ActionBar_Enabled = value end,
         default = Defaults.ActionBar_Enabled
@@ -823,7 +823,7 @@ function LUIE.CreateConsoleSettings()
     settingsData[#settingsData + 1] =
     {
         type = LHAS.ST_LABEL,
-        label = "Enhanced action bar with cooldown timers, ultimate tracking, and cast bar."
+        label = GetString(LUIE_STRING_LAM_AB_DESCRIPTION)
     }
 
     -- Combat Info Module
@@ -1007,8 +1007,8 @@ function LUIE.CreateConsoleSettings()
     settingsData[#settingsData + 1] =
     {
         type = LHAS.ST_CHECKBOX,
-        label = "Use Custom Icons",
-        tooltip = "Use Custom Icons",
+        label = GetString(LUIE_STRING_LAM_MISSING_CUSTOM_ICONS),
+        tooltip = GetString(LUIE_STRING_LAM_MISSING_CUSTOM_ICONS_TP),
         getFunction = function () return Settings.CustomIcons end,
         setFunction = function (value) Settings.CustomIcons = value end,
         default = Defaults.CustomIcons

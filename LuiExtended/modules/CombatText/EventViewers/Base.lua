@@ -318,7 +318,7 @@ function CombatTextEventViewer:GetTextAttributes(powerType, damageType, flags)
     local Settings = LUIE.CombatText.SV
 
     -- Default values
-    local textFormat = Settings.formats.damage
+    local textFormat = CombatText.GetFormat("damage")
     local fontSize = Settings.fontSizes.damage
     local textColor = Settings.colors.damage[damageType]
 
@@ -327,9 +327,9 @@ function CombatTextEventViewer:GetTextAttributes(powerType, damageType, flags)
         if flags[config.flag] then
             -- Determine format
             if config.formatFunc then
-                textFormat = Settings.formats[config.formatFunc(powerType)]
+                textFormat = CombatText.GetFormat(config.formatFunc(powerType))
             elseif config.format then
-                textFormat = Settings.formats[config.format]
+                textFormat = CombatText.GetFormat(config.format)
             end
 
             -- Determine font size

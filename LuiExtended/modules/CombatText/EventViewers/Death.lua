@@ -30,7 +30,7 @@ function CombatTextDeathViewer:OnEvent(unitTag)
         return
     end
 
-    local text = self:FormatString(Settings.formats.death, { text = name, value = name })
+    local text = self:FormatString(CombatText.GetFormat("death"), { text = name, value = name })
     if text == nil or text == "" or zo_strtrim(text) == "" then
         return
     end

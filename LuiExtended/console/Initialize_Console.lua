@@ -8,6 +8,7 @@
 local LUIE = LUIE
 
 -- Local references for better performance
+local GetString = GetString
 local zo_strformat = zo_strformat
 local eventManager = GetEventManager()
 
@@ -17,8 +18,8 @@ local eventManager = GetEventManager()
 --- @param initial boolean
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, eventId)
-    if not LUIE.SV.StartupInfo and initial then
-        LUIE.ChatOutput:Print(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
+    if not LUIE.SV.StartupInfo then
+        LUIE.ChatOutput:Print(LUIE.FormatStartupChatMessage(), true)
     end
     if LibDebugLogger then
         LibDebugLogger:ClearLog()
@@ -46,6 +47,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     LUIE.MigrateChatOutputToCore()
+    LUIE.MigrateTempSlashAlertsToChatAnnouncements()
     LUIE.UpdateGuildData(nil, nil, nil, nil)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks
@@ -109,6 +111,9 @@ local function OnAddOnLoaded(eventId, addonName)
     end
     -- -----------------------------------------------------------------------------
     LUIE.ScheduleDebugEnvironmentReloadChat()
+    if LUIE_ScheduleLocalizationCoverageReport then
+        LUIE_ScheduleLocalizationCoverageReport()
+    end
     eventManager:UnregisterForEvent(addonName, eventId)
 end
 

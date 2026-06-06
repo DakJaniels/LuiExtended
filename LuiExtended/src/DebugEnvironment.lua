@@ -7,6 +7,7 @@ local LUIE = LUIE
 
 local addOnManager = GetAddOnManager()
 local eventManager = GetEventManager()
+local GetString = GetString
 local zo_strlower = zo_strlower
 local string_format = string.format
 local pairs = pairs
@@ -16,8 +17,14 @@ local debugEnvironmentReloadChatShown = false
 
 local DEBUG_ENVIRONMENT_RELOAD_CHAT_NAMESPACE = "LuiExtended_DebugEnvironmentReloadChat"
 
-local DEBUG_ENVIRONMENT_ACTIVE_RELOAD_MESSAGE =
+--- Stored in SV (not localized text) so reload chat respects client locale.
+local PENDING_CHAT_TOKEN_ACTIVE = "@LUIE_DEBUG_ENV_ACTIVE@"
+local PENDING_CHAT_TOKEN_DISABLED = "@LUIE_DEBUG_ENV_DISABLED@"
+
+--- Pre-token SavedVariables (English); resolved via GetString on display.
+local LEGACY_PENDING_ACTIVE =
 "Debug environment is active. LUIE core addons were enabled; you may enable more addons to test interactions. Use '/luie debug off' to restore your addon list."
+local LEGACY_PENDING_DISABLED = "Debug environment disabled. Your previous addon selection was restored."
 
 local CORE_ALLOWLIST =
 {
@@ -86,6 +93,25 @@ local function DebugEnvironmentChat(message)
     LUIE.ChatOutput:Print(message, true)
 end
 
+local function GetDebugEnvironmentActiveReloadMessage()
+    return GetString(LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD)
+end
+
+--- @param pending string|nil
+--- @return string|nil
+local function ResolvePendingChatMessage(pending)
+    if not pending or pending == "" then
+        return nil
+    end
+    if pending == PENDING_CHAT_TOKEN_ACTIVE or pending == LEGACY_PENDING_ACTIVE then
+        return GetDebugEnvironmentActiveReloadMessage()
+    end
+    if pending == PENDING_CHAT_TOKEN_DISABLED or pending == LEGACY_PENDING_DISABLED then
+        return GetString(LUIE_STRING_DEBUG_ENV_DISABLED_RESTORE)
+    end
+    return pending
+end
+
 --- @return boolean
 function LUIE.IsDebugEnvironmentActive()
     return LUIE.SV and LUIE.SV.DebugEnvironmentActive == true
@@ -127,29 +153,29 @@ end
 function LUIE.ApplyDebugEnvironment(enable)
     if enable then
         if LUIE.IsDebugEnvironmentActive() then
-            return false, "Debug environment is already active. Use '/luie debug off' first."
+            return false, GetString(LUIE_STRING_DEBUG_ENV_ALREADY_ACTIVE)
         end
         local currentStates, entries = ScanAddOnManager()
         LUIE.SV.DebugEnvironmentRestore = currentStates
         ApplyEnabledByName(GetDebugEnvironmentAllowlist(), entries)
         LUIE.SV.DebugEnvironmentActive = true
-        LUIE.SV.DebugEnvironmentPendingChat = DEBUG_ENVIRONMENT_ACTIVE_RELOAD_MESSAGE
-        return true, "Debug environment enabled. Reloading UI..."
+        LUIE.SV.DebugEnvironmentPendingChat = PENDING_CHAT_TOKEN_ACTIVE
+        return true, GetString(LUIE_STRING_DEBUG_ENV_ENABLE_RELOAD)
     end
 
     if not LUIE.IsDebugEnvironmentActive() then
-        return false, "Debug environment is not active."
+        return false, GetString(LUIE_STRING_DEBUG_ENV_NOT_ACTIVE)
     end
     local restore = LUIE.SV.DebugEnvironmentRestore
     if not restore then
         LUIE.SV.DebugEnvironmentActive = false
-        return false, "Debug environment has no restore snapshot. Toggle addons manually in the AddOns menu."
+        return false, GetString(LUIE_STRING_DEBUG_ENV_NO_RESTORE)
     end
     ApplyEnabledByName(restore)
     LUIE.SV.DebugEnvironmentActive = false
     LUIE.SV.DebugEnvironmentRestore = nil
-    LUIE.SV.DebugEnvironmentPendingChat = "Debug environment disabled. Your previous addon selection was restored."
-    return true, "Debug environment disabled. Reloading UI..."
+    LUIE.SV.DebugEnvironmentPendingChat = PENDING_CHAT_TOKEN_DISABLED
+    return true, GetString(LUIE_STRING_DEBUG_ENV_DISABLE_RELOAD)
 end
 
 --- One-shot message after debug on/off, or the active reminder on any reload while debug is on.
@@ -161,10 +187,10 @@ local function TakeDebugEnvironmentReloadChatMessage()
     local pending = LUIE.SV.DebugEnvironmentPendingChat
     if pending and pending ~= "" then
         LUIE.SV.DebugEnvironmentPendingChat = nil
-        return pending
+        return ResolvePendingChatMessage(pending)
     end
     if LUIE.IsDebugEnvironmentActive() then
-        return DEBUG_ENVIRONMENT_ACTIVE_RELOAD_MESSAGE
+        return GetDebugEnvironmentActiveReloadMessage()
     end
     return nil
 end
@@ -205,15 +231,15 @@ local function PrintDebugEnvironmentStatus()
                 count = count + 1
             end
         end
-        DebugEnvironmentChat(string_format("Debug environment: active (%d addons in restore snapshot).", count))
+        DebugEnvironmentChat(zo_strformat(GetString(LUIE_STRING_DEBUG_ENV_STATUS_ACTIVE), count))
     else
-        DebugEnvironmentChat("Debug environment: inactive.")
+        DebugEnvironmentChat(GetString(LUIE_STRING_DEBUG_ENV_STATUS_INACTIVE))
     end
 end
 
 local function PrintUsage()
-    DebugEnvironmentChat("Usage: /luie debug on | off | status")
-    DebugEnvironmentChat("       /luie svstatus - SavedVariables migration diagnostics")
+    DebugEnvironmentChat(GetString(LUIE_STRING_DEBUG_ENV_USAGE_DEBUG))
+    DebugEnvironmentChat(GetString(LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS))
 end
 
 function LUIE.LuieSlashCommandPrintUsage()

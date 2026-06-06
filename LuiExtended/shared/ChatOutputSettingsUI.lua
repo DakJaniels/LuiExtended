@@ -828,6 +828,21 @@ local function AppendLuiExtendedTimestampConsoleControls(settings, LHAS, Setting
     }
 end
 
+local CHAT_METHOD_SV_ALL_TABS = "Print to All Tabs"
+local CHAT_METHOD_SV_SPECIFIC_TABS = "Print to Specific Tabs"
+
+local function GetChatMethodDropdownChoices()
+    return
+    {
+        GetString(LUIE_STRING_LAM_CA_CHATMETHOD_ALL_TABS),
+        GetString(LUIE_STRING_LAM_CA_CHATMETHOD_SPECIFIC_TABS),
+    }
+end
+
+local function GetChatMethodDropdownValues()
+    return { CHAT_METHOD_SV_ALL_TABS, CHAT_METHOD_SV_SPECIFIC_TABS }
+end
+
 local function GetChatOutputIntegrationNote()
     if ZO_IsConsoleOrGameCoreUI() then
         return GetString(LUIE_STRING_LAM_CA_CHATOUTPUT_NOTE_CONSOLE)
@@ -1222,7 +1237,7 @@ function LUIE_ChatOutputSettingsUI:BuildChatOutputLAMControls(SettingsAPI)
     controls[#controls + 1] = SettingsAPI.CreateDropdownOption(
         GetString(LUIE_STRING_LAM_CA_CHATMETHOD),
         GetString(LUIE_STRING_LAM_CA_CHATMETHOD_TP),
-        { "Print to All Tabs", "Print to Specific Tabs" },
+        GetChatMethodDropdownChoices(),
         function ()
             return Settings.ChatMethod
         end,
@@ -1233,7 +1248,9 @@ function LUIE_ChatOutputSettingsUI:BuildChatOutputLAMControls(SettingsAPI)
         nil,
         Defaults.ChatMethod,
         nil,
-        "name-up"
+        "name-up",
+        nil,
+        GetChatMethodDropdownValues()
     )
 
     controls[#controls + 1] = SettingsAPI.CreateDividerOption()

@@ -41,11 +41,11 @@ function CombatTextResourceEventViewer:OnEvent(resourceType, value)
     elseif resourceType == resourceTypes.ULTIMATE then
         color = Settings.colors.ultimateReady
         size = Settings.fontSizes.readylabel
-        text = self:FormatString(Settings.formats.ultimateReady, { text = GetString(LUIE_STRING_LAM_CT_SHARED_ULTIMATE_READY) })
+        text = self:FormatString(LUIE.CombatText.GetFormat("ultimateReady"), { text = GetString(LUIE_STRING_LAM_CT_SHARED_ULTIMATE_READY) })
     elseif resourceType == resourceTypes.POTION then
         color = Settings.colors.potionReady
         size = Settings.fontSizes.readylabel
-        text = self:FormatString(Settings.formats.potionReady, { text = GetString(LUIE_STRING_LAM_CT_SHARED_POTION_READY) })
+        text = self:FormatString(LUIE.CombatText.GetFormat("potionReady"), { text = GetString(LUIE_STRING_LAM_CT_SHARED_POTION_READY) })
     end
 
     self:PrepareLabel(control.label, size, color, text)

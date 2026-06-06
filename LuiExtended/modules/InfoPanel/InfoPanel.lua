@@ -256,6 +256,73 @@ end
 -- Meter implementations
 -- -----------------------------------------------------------------------------
 
+local INFO_PANEL_LABEL_PADDING = 4
+local INFO_PANEL_CLOCK_LABEL_MIN_WIDTH = 60
+
+--- @param label LabelControl
+--- @param text string
+--- @param minWidth number|nil
+--- @return boolean layoutChanged
+local function FitInfoPanelLabelToText(label, text, minWidth)
+    if not label then
+        return false
+    end
+    local labelWidth = label:GetStringWidth(text) + INFO_PANEL_LABEL_PADDING
+    labelWidth = zo_max(minWidth or 0, labelWidth)
+    if label.infoPanelLayoutWidth ~= labelWidth then
+        label.infoPanelLayoutWidth = labelWidth
+        label:SetWidth(labelWidth)
+        return true
+    end
+    return false
+end
+
+--- @param control Control
+--- @param icon TextureControl|nil
+--- @param label LabelControl
+--- @param text string
+--- @param minLabelWidth number|nil
+--- @param iconToLabelGap number|nil
+--- @return boolean layoutChanged
+local function FitInfoPanelIconLabelRow(control, icon, label, text, minLabelWidth, iconToLabelGap)
+    if not control or not label then
+        return false
+    end
+    local changed = FitInfoPanelLabelToText(label, text, minLabelWidth)
+    local iconWidth = icon and icon:GetWidth() or 0
+    local gap = iconToLabelGap or 0
+    local totalWidth = iconWidth + gap + label:GetWidth()
+    if control.infoPanelLayoutWidth ~= totalWidth then
+        control.infoPanelLayoutWidth = totalWidth
+        control:SetWidth(totalWidth)
+        return true
+    end
+    return changed
+end
+
+--- @param control Control
+--- @param label LabelControl|nil
+local function ClearInfoPanelLayoutWidth(control, label)
+    if control then
+        control.infoPanelLayoutWidth = nil
+    end
+    if label then
+        label.infoPanelLayoutWidth = nil
+    end
+end
+
+function InfoPanel.ClearAllLayoutWidths()
+    ClearInfoPanelLayoutWidth(uiLatency.control, uiLatency.label)
+    ClearInfoPanelLayoutWidth(uiFps.control, uiFps.label)
+    ClearInfoPanelLayoutWidth(uiMemory.control, uiMemory.label)
+    ClearInfoPanelLayoutWidth(uiClock.control, uiClock.label)
+    ClearInfoPanelLayoutWidth(uiGems.control, uiGems.label)
+    ClearInfoPanelLayoutWidth(uiFeedTimer.control, uiFeedTimer.label)
+    ClearInfoPanelLayoutWidth(uiArmour.control, uiArmour.label)
+    ClearInfoPanelLayoutWidth(uiBags.control, uiBags.label)
+    ClearInfoPanelLayoutWidth(uiGold.control, uiGold.label)
+end
+
 local ClockMeter = InfoPanelMeterBase:Subclass()
 
 function ClockMeter:Initialize(infoPanel)
@@ -280,23 +347,21 @@ end
 function ClockMeter:ApplyFont(fontString)
     if uiClock.label then
         uiClock.label:SetFont(fontString)
-        uiClock.layoutWidth = nil
+        ClearInfoPanelLayoutWidth(uiClock.control, uiClock.label)
     end
 end
-
-local INFO_PANEL_CLOCK_LABEL_MIN_WIDTH = 60
-local INFO_PANEL_CLOCK_LABEL_PADDING = 4
 
 function ClockMeter:Update(nowMs)
     if not self:IsEnabled() or not uiClock.label then return end
     local timestring = GetTimeString()
     local clockText = LUIE.ChatOutput:CreateTimestamp(timestring, self.infoPanel.SV.ClockFormat)
     uiClock.label:SetText(clockText)
-    local labelWidth = uiClock.label:GetStringWidth(clockText) + INFO_PANEL_CLOCK_LABEL_PADDING
-    labelWidth = zo_max(INFO_PANEL_CLOCK_LABEL_MIN_WIDTH, labelWidth)
-    if uiClock.layoutWidth ~= labelWidth then
-        uiClock.layoutWidth = labelWidth
-        uiClock.label:SetWidth(labelWidth)
+    if FitInfoPanelLabelToText(uiClock.label, clockText, INFO_PANEL_CLOCK_LABEL_MIN_WIDTH) then
+        if uiClock.control then
+            uiClock.control.infoPanelLayoutWidth = nil
+            uiClock.control:SetWidth(uiClock.label:GetWidth())
+            uiClock.control.infoPanelLayoutWidth = uiClock.control:GetWidth()
+        end
         self.infoPanel.RearrangePanel()
     end
 end
@@ -332,8 +397,12 @@ function FpsMeter:Update(nowMs)
             end
         end
     end
-    uiFps.label:SetText(string_format("%d fps", fps))
+    local fpsText = zo_strformat(GetString(LUIE_STRING_PNL_FPS_FORMAT), fps)
+    uiFps.label:SetText(fpsText)
     uiFps.label:SetColor(color.r, color.g, color.b, 1)
+    if FitInfoPanelLabelToText(uiFps.label, fpsText, 44) then
+        self.infoPanel.RearrangePanel()
+    end
 end
 
 local MemoryMeter = InfoPanelMeterBase:Subclass()
@@ -360,6 +429,9 @@ function MemoryMeter:Update(nowMs)
     if not self:IsEnabled() or not uiMemory.label then return end
     local text, usage, cap = FormatInfoPanelMemoryText()
     uiMemory.label:SetText(text)
+    if FitInfoPanelLabelToText(uiMemory.label, text, 40) then
+        self.infoPanel.RearrangePanel()
+    end
 
     local color = colors.WHITE
     if not self.infoPanel.SV.DisableInfoColours then
@@ -404,8 +476,12 @@ function LatencyMeter:Update(nowMs)
             end
         end
     end
-    uiLatency.label:SetText(string_format("%d ms", lat))
+    local latText = zo_strformat(GetString(LUIE_STRING_PNL_LATENCY_MS_FORMAT), lat)
+    uiLatency.label:SetText(latText)
     uiLatency.label:SetColor(color.r, color.g, color.b, 1)
+    if FitInfoPanelIconLabelRow(uiLatency.control, uiLatency.icon, uiLatency.label, latText, 40, 0) then
+        self.infoPanel.RearrangePanel()
+    end
 end
 
 local SoulGemsMeter = InfoPanelMeterBase:Subclass()
@@ -437,7 +513,11 @@ function SoulGemsMeter:Update(nowMs)
         icon = "/esoui/art/icons/soulgem_001_empty.dds"
     end
     uiGems.icon:SetTexture(icon)
-    uiGems.label:SetText((fullCount > 9) and fullText or (fullText .. "/" .. emptyCount))
+    local gemsText = (fullCount > 9) and fullText or (fullText .. "/" .. emptyCount)
+    uiGems.label:SetText(gemsText)
+    if FitInfoPanelIconLabelRow(uiGems.control, uiGems.icon, uiGems.label, gemsText, 24, 2) then
+        self.infoPanel.RearrangePanel()
+    end
 end
 
 local BagsMeter = InfoPanelMeterBase:Subclass()
@@ -467,8 +547,12 @@ function BagsMeter:UpdateWithCapacity(bagSize)
             end
         end
     end
-    uiBags.label:SetText(ZO_FormatFraction(bagUsed, bagSize))
+    local bagsText = ZO_FormatFraction(bagUsed, bagSize)
+    uiBags.label:SetText(bagsText)
     uiBags.label:SetColor(color.r, color.g, color.b, 1)
+    if FitInfoPanelIconLabelRow(uiBags.control, uiBags.icon, uiBags.label, bagsText, 44, 0) then
+        self.infoPanel.RearrangePanel()
+    end
 end
 
 function BagsMeter:Update(nowMs)
@@ -511,9 +595,13 @@ function ArmourMeter:Update(nowMs)
             break
         end
     end
-    uiArmour.label:SetText(string_format("%d%%", duraPercentage))
+    local armourText = string_format("%d%%", duraPercentage)
+    uiArmour.label:SetText(armourText)
     uiArmour.label:SetColor(color.r, color.g, color.b, 1)
     uiArmour.icon:SetColor(iconcolor.r, iconcolor.g, iconcolor.b, 1)
+    if FitInfoPanelIconLabelRow(uiArmour.control, uiArmour.icon, uiArmour.label, armourText, 32, 0) then
+        self.infoPanel.RearrangePanel()
+    end
 end
 
 local WeaponChargesMeter = InfoPanelMeterBase:Subclass()
@@ -561,8 +649,12 @@ end
 
 function GoldMeter:Update(nowMs)
     if not self:IsEnabled() or not uiGold.label then return end
-    uiGold.label:SetText(ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)))
+    local goldText = ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
+    uiGold.label:SetText(goldText)
     uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
+    if FitInfoPanelIconLabelRow(uiGold.control, uiGold.icon, uiGold.label, goldText, 48, 2) then
+        self.infoPanel.RearrangePanel()
+    end
 end
 
 local MountFeedMeter = InfoPanelMeterBase:Subclass()
@@ -580,7 +672,20 @@ function MountFeedMeter:IsEnabled()
 end
 
 function MountFeedMeter:ApplyFont(fontString)
-    if uiFeedTimer.label then uiFeedTimer.label:SetFont(fontString) end
+    if uiFeedTimer.label then
+        uiFeedTimer.label:SetFont(fontString)
+        ClearInfoPanelLayoutWidth(uiFeedTimer.control, uiFeedTimer.label)
+    end
+end
+
+function MountFeedMeter:ApplyFeedTimerLabel(text)
+    if not uiFeedTimer.label then
+        return
+    end
+    uiFeedTimer.label:SetText(text)
+    if FitInfoPanelIconLabelRow(uiFeedTimer.control, uiFeedTimer.icon, uiFeedTimer.label, text, 48, 0) then
+        self.infoPanel.RearrangePanel()
+    end
 end
 
 function MountFeedMeter:SetHiddenLocally(hidden)
@@ -599,7 +704,7 @@ function MountFeedMeter:UpdateFromEvent(eventId, ridingSkillType, previous, curr
         local inventoryBonus, maxInventoryBonus, staminaBonus, maxStaminaBonus, speedBonus, maxSpeedBonus = GetRidingStats()
         local isFullyTrained = (inventoryBonus == maxInventoryBonus and staminaBonus == maxStaminaBonus and speedBonus == maxSpeedBonus)
         if isFullyTrained then
-            uiFeedTimer.label:SetText(GetString(LUIE_STRING_PNL_MAXED))
+            self:ApplyFeedTimerLabel(GetString(LUIE_STRING_PNL_MAXED))
             self:SetHiddenLocally(true)
             return
         else
@@ -607,9 +712,9 @@ function MountFeedMeter:UpdateFromEvent(eventId, ridingSkillType, previous, curr
             if mountFeedTimer and mountFeedTimer > 0 then
                 local hours = zo_floor(mountFeedTimer / ZO_ONE_HOUR_IN_MILLISECONDS)
                 local minutes = zo_floor((mountFeedTimer - (hours * ZO_ONE_HOUR_IN_MILLISECONDS)) / ZO_ONE_MINUTE_IN_MILLISECONDS)
-                uiFeedTimer.label:SetText(string_format("%dh %dm", hours, minutes))
+                self:ApplyFeedTimerLabel(string_format("%dh %dm", hours, minutes))
             else
-                uiFeedTimer.label:SetText(GetString(LUIE_STRING_PNL_TRAINNOW))
+                self:ApplyFeedTimerLabel(GetString(LUIE_STRING_PNL_TRAINNOW))
             end
             return
         end
@@ -642,7 +747,7 @@ function MountFeedMeter:Update(nowMs)
         end
     end
 
-    uiFeedTimer.label:SetText(mountFeedMessage)
+    self:ApplyFeedTimerLabel(mountFeedMessage)
 end
 
 -- Build/replace the meter registry (called during Initialize)
@@ -718,11 +823,20 @@ function InfoPanel.ApplyFont()
     g_infoPanelFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     -- Apply font to all elements
+    InfoPanel.ClearAllLayoutWidths()
     ForEachMeter(function (meter)
         if meter.ApplyFont then
             meter:ApplyFont(g_infoPanelFont)
         end
     end)
+    if InfoPanel.Enabled and uiPanel then
+        local nowMs = GetFrameTimeMilliseconds()
+        ForEachMeter(function (meter)
+            meter:Update(nowMs)
+            meter:MarkUpdated(nowMs)
+        end)
+        InfoPanel.RearrangePanel()
+    end
 end
 
 function InfoPanel.SetDisplayOnMap()
@@ -931,8 +1045,8 @@ function InfoPanel.RearrangePanel()
     end
     -- Set row size
     uiBotRow:SetWidth((sizeBot > 0) and sizeBot or 10)
-    -- Set size of panel
-    uiPanel:SetWidth(zo_max(uiTopRow:GetWidth(), uiBotRow:GetWidth(), 39 * 6))
+    -- Set size of panel (rows already sum visible meter widths)
+    uiPanel:SetWidth(zo_max(uiTopRow:GetWidth(), uiBotRow:GetWidth()))
     -- Set scale of panel again
     InfoPanel.SetScale()
     -- Apply transparency

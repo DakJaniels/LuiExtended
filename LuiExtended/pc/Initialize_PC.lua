@@ -8,6 +8,7 @@
 local LUIE = LUIE
 
 -- Local references for better performance
+local GetString = GetString
 local zo_strformat = zo_strformat
 local eventManager = GetEventManager()
 
@@ -27,6 +28,7 @@ local function LoadSavedVars()
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     LUIE.MigrateChatOutputToCore()
+    LUIE.MigrateTempSlashAlertsToChatAnnouncements()
 end
 
 --- - **EVENT_PLAYER_ACTIVATED **
@@ -46,7 +48,7 @@ local function LoadScreen(eventId, initial)
     -- Set Positions for moved Default UI elements
     LUIE.SetElementPosition()
     if not LUIE.SV.StartupInfo then
-        LUIE.ChatOutput:Print(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
+        LUIE.ChatOutput:Print(LUIE.FormatStartupChatMessage(), true)
     end
 end
 
@@ -60,7 +62,7 @@ local function RegisterEvents()
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_LEFT_GUILD, LUIE.UpdateGuildData)
     end
-    -- LUIE.ApplySceneLogOverrides()
+    LUIE.ApplySceneLogOverrides()
 end
 
 function LUIE:InitializeHooks()
@@ -86,7 +88,6 @@ end
 local function OnAddOnLoaded(eventId, addonName)
     if addonName == LUIE.name then
         eventManager:UnregisterForEvent(addonName, eventId)
-
         -- -----------------------------------------------------------------------------
         -- Load saved variables
         LoadSavedVars()
@@ -152,6 +153,9 @@ local function OnAddOnLoaded(eventId, addonName)
         -- Register global event listeners
         RegisterEvents()
         LUIE.ScheduleDebugEnvironmentReloadChat()
+        if LUIE_ScheduleLocalizationCoverageReport then
+            LUIE_ScheduleLocalizationCoverageReport()
+        end
     end
 end
 

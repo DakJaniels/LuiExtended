@@ -371,7 +371,7 @@ local function CreateFoodDrinkBuffUI(frameData)
         label:SetDrawLayer(DL_OVERLAY)
         label:SetDrawLevel(16)
         local appearance = UnitFrames.GetCustomFrameAppearance("group")
-        local fontFace = LUIE.Fonts[appearance.fontFace]
+        local fontFace = UnitFrames.ResolveLuiMediaFontPath(appearance.fontFace)
         local fontStyle = appearance.fontStyle
         label:SetFont(LUIE.CreateFontString(fontFace, fontSize, fontStyle))
         frameData.foodDrinkBuff.label = label
@@ -603,14 +603,14 @@ end
 
 local function OnSlashCommand()
     if not isInitialized then
-        LUIE.ChatOutput:Print("Group Food/Drink Buff module is not initialized.", true)
+        LUIE.ChatOutput:Print(GetString(LUIE_STRING_UF_FOODDRINK_NOT_INITIALIZED), true)
         return
     end
 
-    LUIE.ChatOutput:Print("Refreshing food/drink buff icons...")
+    LUIE.ChatOutput:Print(GetString(LUIE_STRING_UF_FOODDRINK_REFRESHING))
     GroupFoodDrinkBuffManager.RefreshFrames()
     zo_callLater(function ()
-                     LUIE.ChatOutput:Print("Food/drink buff icons refreshed.", true)
+                     LUIE.ChatOutput:Print(GetString(LUIE_STRING_UF_FOODDRINK_REFRESHED), true)
                  end, 200)
 end
 

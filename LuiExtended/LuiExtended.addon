@@ -1,9 +1,9 @@
-## Title: |cE12000L|cFFFFB0ui E|rxtended|r
+﻿## Title: |cE12000L|cFFFFB0ui E|rxtended|r
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101049 101050
-## Version: 7.2.3.8
-## AddOnVersion: 7238
+## Version: 7.2.3.9
+## AddOnVersion: 7239
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
 ## DependsOn: LuiMedia>=7133 LuiData>=7216
 ## PCDependsOn: LibAddonMenu-2.0>=43
@@ -11,7 +11,7 @@
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
 ## OptionalDependsOn: LibDebugLogger>=268 DebugLogViewer>=697 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028
-## OptionalDependsOn:  LootLog>=408040 Taneth LibCombat LibCombat2 LibSlashCommander
+## OptionalDependsOn: LootLog>=408040 Taneth LibCombat LibCombat2 LibSlashCommander
 ## SavedVariables: LUIESV LUIE_UnitFrames_SV LUIE_CombatText_SV LUIE_ChatAnnouncements_SV LUIE_SpellCastBuffs_SV
 ## SavedVariables: LUIE_ActionBar_SV LUIE_InfoPanel_SV LUIE_SlashCommands_SV LUIE_CombatInfo_SV
 
@@ -19,11 +19,27 @@
 ;src/AddonProfiler.lua
 
 # Language Files
-lang/default.lua
-lang/settings/default.lua
-
-lang/$(language).lua
-lang/settings/$(language).lua
+lang/_RegisterStrings.lua
+lang/Core/default.lua
+lang/Shared/default.lua
+lang/ActionBar/default.lua
+lang/ChatAnnouncements/default.lua
+lang/CombatInfo/default.lua
+lang/CombatText/default.lua
+lang/InfoPanel/default.lua
+lang/SlashCommands/default.lua
+lang/SpellCastBuffs/default.lua
+lang/UnitFrames/default.lua
+lang/Core/$(language).lua
+lang/Shared/$(language).lua
+lang/ActionBar/$(language).lua
+lang/ChatAnnouncements/$(language).lua
+lang/CombatInfo/$(language).lua
+lang/CombatText/$(language).lua
+lang/InfoPanel/$(language).lua
+lang/SlashCommands/$(language).lua
+lang/SpellCastBuffs/$(language).lua
+lang/UnitFrames/$(language).lua
 
 bindings/Bindings.xml
 
@@ -80,6 +96,7 @@ console/Unlock.lua
 
 # Modules - Chat Announcements
 modules/ChatAnnouncements/ChatAnnouncementsConstants.lua
+modules/ChatAnnouncements/_MessageFormatResolver.lua
 modules/ChatAnnouncements/ChatAnnouncementsPlayerToPlayerHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
 modules/ChatAnnouncements/ChatAnnouncementsCSA.lua
@@ -91,6 +108,7 @@ modules/ChatAnnouncements/ChatAnnouncements.lua
 
 # Modules - Combat Text
 modules/CombatText/Namespace.lua
+modules/CombatText/_MessageFormatResolver.lua
 modules/CombatText/CombatText.lua
 modules/CombatText/Animation.lua
 modules/CombatText/PoolManager.lua
@@ -168,6 +186,7 @@ modules/SlashCommands/Social.lua
 
 # Modules - Unit Frames
 modules/UnitFrames/_Namespace.lua
+modules/UnitFrames/_FormatOptions.lua
 modules/UnitFrames/_MostRecentPowerUpdateHandler.lua
 modules/UnitFrames/_CreateCustomFrames.lua
 modules/UnitFrames/_CustomFrames.lua
