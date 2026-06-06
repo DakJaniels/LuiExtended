@@ -49,6 +49,14 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.9
+    "|cFFA500LuiExtended Version 7.2.3.9|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Guard confiscation loot lines no longer falsely list legitimate gear when you weapon swap and are caught with a bounty; only stolen items are announced, with worn-slot cache refresh on weapon pair change.",
+    "",
+
     -- Version Header 7.2.3.8
     "|cFFA500LuiExtended Version 7.2.3.8|r",
     "",

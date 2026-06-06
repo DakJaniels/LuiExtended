@@ -699,6 +699,7 @@ function ChatAnnouncements.RegisterLootEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_TRADE_ITEM_REMOVED)
     -- JUSTICE
     eventManager:UnregisterForEvent(moduleName, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED)
+    eventManager:UnregisterForEvent(moduleName .. "WeaponPair", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
     -- LOOT FAILED
     eventManager:UnregisterForEvent(moduleName, EVENT_QUEST_COMPLETE_ATTEMPT_FAILED_INVENTORY_FULL)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_IS_FULL)
@@ -773,6 +774,9 @@ function ChatAnnouncements.RegisterLootEvents()
     -- JUSTICE
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Notify.NotificationConfiscateCA or ChatAnnouncements.SV.Notify.NotificationConfiscateAlert or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, ChatAnnouncements.JusticeStealRemove)
+    end
+    if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootConfiscate or ChatAnnouncements.SV.Notify.NotificationConfiscateCA or ChatAnnouncements.SV.Notify.NotificationConfiscateAlert then
+        eventManager:RegisterForEvent(moduleName .. "WeaponPair", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, ChatAnnouncements.OnActiveWeaponPairChanged)
     end
 
     --[[if ChatAnnouncements.SV.ShowLootFail then
@@ -2076,7 +2080,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             end
             return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_GUARD or changeReason == CURRENCY_CHANGE_REASON_BOUNTY_CONFISCATED then
-            zo_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 50)
+            zo_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 100)
             return ChatAnnouncements.GetContextMessage("CurrencyMessageConfiscate"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_KILL then
             return (currencyType == CURT_ALLIANCE_POINTS and ChatAnnouncements.GetContextMessage("CurrencyMessageEarn") or ChatAnnouncements.GetContextMessage("CurrencyMessageLoot")), nil, "continue"
@@ -3652,6 +3656,7 @@ end
 
 function ChatAnnouncements.IndexInventory()
     -- d("Debug - Inventory Indexed!")
+    S.g_inventoryStacks = {}
     local bagsize = GetBagSize(BAG_BACKPACK)
 
     for i = 0, bagsize do
@@ -3660,13 +3665,14 @@ function ChatAnnouncements.IndexInventory()
         local itemId = GetItemId(BAG_BACKPACK, i)
         local itemLink = GetItemLink(BAG_BACKPACK, i, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         if itemLink ~= "" then
-            S.g_inventoryStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_inventoryStacks[i] = I.MakeStackEntry(BAG_BACKPACK, i, icon, stack, itemId, itemType, itemLink)
         end
     end
 end
 
 function ChatAnnouncements.IndexEquipped()
     -- d("Debug - Equipped Items Indexed!")
+    S.g_equippedStacks = {}
     local bagsize = GetBagSize(BAG_WORN)
 
     for i = 0, bagsize do
@@ -3675,7 +3681,7 @@ function ChatAnnouncements.IndexEquipped()
         local itemId = GetItemId(BAG_WORN, i)
         local itemLink = GetItemLink(BAG_WORN, i, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         if itemLink ~= "" then
-            S.g_equippedStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_equippedStacks[i] = I.MakeStackEntry(BAG_WORN, i, icon, stack, itemId, itemType, itemLink)
         end
     end
 end
@@ -4991,7 +4997,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
             itemType = GetItemType(bagId, slotId)
             itemId = GetItemId(bagId, slotId)
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            S.g_equippedStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_equippedStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotId == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
                 gainOrLoss = 3
                 receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
@@ -5058,7 +5064,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     S.g_equippedStacks[slotId] = nil
                 end
             else
-                S.g_equippedStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                S.g_equippedStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             end
         end
     end
@@ -5083,7 +5089,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
             itemType = GetItemType(bagId, slotId)
             itemId = GetItemId(bagId, slotId)
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             local mailSender
             local lootMailId
@@ -5316,7 +5322,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     S.g_inventoryStacks[slotId] = nil
                 end
             else
-                S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             end
         end
     end
@@ -5464,7 +5470,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             itemType = GetItemType(bagId, slotId)
             itemId = GetItemId(bagId, slotId)
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            S.g_equippedStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_equippedStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = logPrefixPos
             ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
@@ -5517,7 +5523,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
                     S.g_equippedStacks[slotId] = nil
                 end
             else
-                S.g_equippedStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                S.g_equippedStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             end
         end
     end
@@ -5537,7 +5543,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             itemType = GetItemType(bagId, slotId)
             itemId = GetItemId(bagId, slotId)
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = logPrefixPos
             -- ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
@@ -5598,7 +5604,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
                     S.g_inventoryStacks[slotId] = nil
                 end
             else
-                S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             end
         end
     end
@@ -5812,7 +5818,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             itemType = GetItemType(bagId, slotId)
             itemId = GetItemId(bagId, slotId)
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = S.g_bankBag == 1 and ChatAnnouncements.GetContextMessage("CurrencyMessageWithdraw") or (S.g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawFurnitureVault") or ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawStorage"))
             if S.g_InventoryOn then
@@ -5864,7 +5870,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
                     S.g_inventoryStacks[slotId] = nil
                 end
             else
-                S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             end
 
             if not S.g_itemWasDestroyed then
@@ -6249,7 +6255,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
             itemType = GetItemType(bagId, slotId)
             itemId = GetItemId(bagId, slotId)
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            S.g_inventoryStacks[slotId] = { icon = icon1, stack = stack1, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon1, stack1, itemId, itemType, itemLink)
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageWithdrawGuild")
             S.g_guildBankCarry = {}
@@ -6318,7 +6324,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
                     S.g_inventoryStacks[slotId] = nil
                 end
             else
-                S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             end
         end
     end
@@ -6381,7 +6387,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
             itemType = GetItemType(bagId, slotId)
             itemId = GetItemId(bagId, slotId)
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             -- EXISTING ITEM
         elseif S.g_inventoryStacks[slotId] then
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
@@ -6513,7 +6519,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotId, isNewIte
                     S.g_inventoryStacks[slotId] = nil
                 end
             else
-                S.g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                S.g_inventoryStacks[slotId] = I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
             end
         end
     end
@@ -6583,6 +6589,13 @@ function ChatAnnouncements.BankFixer()
     S.g_bankOn = false
 end
 
+function ChatAnnouncements.OnActiveWeaponPairChanged()
+    zo_callLater(function ()
+        S.g_equippedStacks = {}
+        ChatAnnouncements.IndexEquipped()
+    end, 50)
+end
+
 function ChatAnnouncements.JusticeStealRemove(eventId)
     zo_callLater(ChatAnnouncements.JusticeRemovePrint, 50)
 end
@@ -6607,8 +6620,20 @@ function ChatAnnouncements.JusticeDisplayConfiscate()
     S.g_itemsConfiscated = false
 end
 
+function I.MakeStackEntry(bagId, slotId, icon, stack, itemId, itemType, itemLink)
+    return
+    {
+        icon = icon,
+        stack = stack,
+        itemId = itemId,
+        itemType = itemType,
+        itemLink = itemLink,
+        stolen = IsItemStolen(bagId, slotId),
+    }
+end
+
 function I.BuildItemCountMap(stacksTable)
-    --- @type table<string,{count:integer,sample:{icon:any,stack:integer,itemId:integer,itemType:integer,itemLink:string}}>
+    --- @type table<string,{count:integer,sample:{icon:any,stack:integer,itemId:integer,itemType:integer,itemLink:string,stolen:boolean}}>
     local map = {}
     if not stacksTable then
         return map
@@ -6620,6 +6645,9 @@ function I.BuildItemCountMap(stacksTable)
             local entry = map[key]
             if entry then
                 entry.count = entry.count + stack
+                if item.stolen then
+                    entry.sample.stolen = true
+                end
             else
                 map[key] = { count = stack, sample = item }
             end
@@ -6642,7 +6670,8 @@ function I.DiffRemoved(beforeMap, afterMap)
 end
 
 function ChatAnnouncements.JusticeRemovePrint()
-    S.g_itemsConfiscated = true
+    S.g_itemsConfiscated = false
+    local stolenConfiscatePrinted = 0
 
     -- PART 1 -- INVENTORY
     if ChatAnnouncements.SV.Inventory.LootConfiscate then
@@ -6685,21 +6714,21 @@ function ChatAnnouncements.JusticeRemovePrint()
         local afterMap = I.BuildItemCountMap(afterStacks)
         local removedItems = I.DiffRemoved(beforeMap, afterMap)
 
-        if #removedItems == 0 then
-            -- No items removed, so don't treat this as item-confiscation.
-            S.g_itemsConfiscated = false
-        end
-
         for i = 1, #removedItems do
             local removed = removedItems[i]
             local sample = removed.sample
-            if sample and removed.removedCount > 0 then
+            if sample and removed.removedCount > 0 and sample.stolen then
                 local receivedBy = ""
                 local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                 local logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageConfiscate")
                 ChatAnnouncements.ItemPrinter(sample.icon, removed.removedCount, sample.itemType, sample.itemId, sample.itemLink, receivedBy, logPrefix, gainOrLoss, false)
+                stolenConfiscatePrinted = stolenConfiscatePrinted + 1
             end
         end
+    end
+
+    if stolenConfiscatePrinted > 0 then
+        S.g_itemsConfiscated = true
     end
 
     S.g_JusticeStacks = {} -- Clear the Justice Item Stacks since we don't need this for anything else!
