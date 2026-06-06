@@ -3309,11 +3309,19 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
 end
 
 --- @param index luaindex
+--- @param timedActivityEncodedId id64|nil Event or tracked encoded id when index lookup may be stale
 --- @return string
-function I.GetTimedActivityProgressAnnounceKey(index)
+function I.GetTimedActivityProgressAnnounceKey(index, timedActivityEncodedId)
+    if timedActivityEncodedId ~= nil then
+        return string_format("e:%s", Id64ToString(timedActivityEncodedId))
+    end
     local encodedId = GetTimedActivityEncodedId(index)
     if encodedId ~= nil then
-        return string_format("e:%s", tostring(encodedId))
+        return string_format("e:%s", Id64ToString(encodedId))
+    end
+    local activityId = GetTimedActivityId(index)
+    if activityId and activityId > 0 then
+        return string_format("id:%i", activityId)
     end
     return string_format("i:%i", index)
 end
@@ -3321,9 +3329,10 @@ end
 --- Suppress duplicate chat/alert for the same challenge slot at the same progress (2 game events --> 2 lines, not 4).
 --- @param index luaindex
 --- @param currentProgress integer
+--- @param timedActivityEncodedId id64|nil
 --- @return boolean suppress
-function I.ShouldSuppressTimedActivityProgressAnnounce(index, currentProgress)
-    local key = I.GetTimedActivityProgressAnnounceKey(index)
+function I.ShouldSuppressTimedActivityProgressAnnounce(index, currentProgress, timedActivityEncodedId)
+    local key = I.GetTimedActivityProgressAnnounceKey(index, timedActivityEncodedId)
     local nowMs = GetFrameTimeMilliseconds()
     local last = S.g_lastTimedActivityProgressAnnounce[key]
     if last and last.progress == currentProgress and (nowMs - last.timeMs) < TIMED_ACTIVITY_PROGRESS_ANNOUNCE_DEDUPE_MS then
@@ -3334,8 +3343,9 @@ end
 
 --- @param index luaindex
 --- @param currentProgress integer
-function I.RecordTimedActivityProgressAnnounce(index, currentProgress)
-    local key = I.GetTimedActivityProgressAnnounceKey(index)
+--- @param timedActivityEncodedId id64|nil
+function I.RecordTimedActivityProgressAnnounce(index, currentProgress, timedActivityEncodedId)
+    local key = I.GetTimedActivityProgressAnnounceKey(index, timedActivityEncodedId)
     S.g_lastTimedActivityProgressAnnounce[key] =
     {
         progress = currentProgress,
@@ -3346,10 +3356,13 @@ end
 --- @param message string
 --- @param encodedIdKey string|nil Same-slot key from GetTimedActivityProgressAnnounceKey; skips duplicate queue rows for one print batch
 function I.QueueTimedActivityChatMessage(message, encodedIdKey)
-    if encodedIdKey then
-        for i = 1, ChatAnnouncements.QueuedMessagesCounter - 1 do
-            local queued = ChatAnnouncements.QueuedMessages[i]
-            if queued and queued.type == "MESSAGE" and queued.timedActivityAnnounceKey == encodedIdKey and queued.message == message then
+    for i = 1, ChatAnnouncements.QueuedMessagesCounter - 1 do
+        local queued = ChatAnnouncements.QueuedMessages[i]
+        if queued and queued.type == "MESSAGE" then
+            if queued.message == message then
+                return
+            end
+            if encodedIdKey and queued.timedActivityAnnounceKey == encodedIdKey and queued.message == message then
                 return
             end
         end
@@ -3369,11 +3382,13 @@ end
 --- @param maxProgress integer
 --- @param chatEnabled boolean
 --- @param alertEnabled boolean
-function I.AnnounceTimedActivityProgress(index, currentProgress, maxProgress, chatEnabled, alertEnabled)
-    if I.ShouldSuppressTimedActivityProgressAnnounce(index, currentProgress) then
+--- @param timedActivityEncodedId id64|nil
+function I.AnnounceTimedActivityProgress(index, currentProgress, maxProgress, chatEnabled, alertEnabled, timedActivityEncodedId)
+    if I.ShouldSuppressTimedActivityProgressAnnounce(index, currentProgress, timedActivityEncodedId) then
         return
     end
-    local announceKey = I.GetTimedActivityProgressAnnounceKey(index)
+    I.RecordTimedActivityProgressAnnounce(index, currentProgress, timedActivityEncodedId)
+    local announceKey = I.GetTimedActivityProgressAnnounceKey(index, timedActivityEncodedId)
     if chatEnabled then
         local message = I.BuildTimedActivityMessage(index, currentProgress, maxProgress)
         I.QueueTimedActivityChatMessage(message, announceKey)
@@ -3381,7 +3396,6 @@ function I.AnnounceTimedActivityProgress(index, currentProgress, maxProgress, ch
     if alertEnabled then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, I.BuildTimedActivityMessage(index, currentProgress, maxProgress, true))
     end
-    I.RecordTimedActivityProgressAnnounce(index, currentProgress)
 end
 
 --- Claimed suffix for challenges (matches Timed Activities UI when total claimable > 0).
@@ -3444,20 +3458,19 @@ function ChatAnnouncements.OnTimedActivityTrackingUpdated(eventId, timedActivity
     if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then return end
     local index, trackedEncodedId = GetTrackedTimedActivityInfo()
     if index == nil or trackedEncodedId ~= timedActivityEncodedId then return end
+    -- Progress handler owns kill/update lines when its chat or alert toggles are on.
+    if ChatAnnouncements.SV.Notify.TimedActivityProgressCA or ChatAnnouncements.SV.Notify.TimedActivityProgressAlert then
+        return
+    end
     local currentProgress = GetTimedActivityProgress(index)
     local maxProgress = GetTimedActivityMaxProgress(index)
-    -- When progress announcements are on, tracking uses the same progress text; skip duplicate lines from the same pickup.
-    if ChatAnnouncements.SV.Notify.TimedActivityProgressCA or ChatAnnouncements.SV.Notify.TimedActivityProgressAlert then
-        if I.ShouldSuppressTimedActivityProgressAnnounce(index, currentProgress) then
-            return
-        end
-    end
     I.AnnounceTimedActivityProgress(
         index,
         currentProgress,
         maxProgress,
         ChatAnnouncements.SV.Notify.TimedActivityCA,
-        ChatAnnouncements.SV.Notify.TimedActivityAlert
+        ChatAnnouncements.SV.Notify.TimedActivityAlert,
+        timedActivityEncodedId
     )
 end
 
