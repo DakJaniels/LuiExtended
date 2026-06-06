@@ -62,7 +62,7 @@ local function RegisterEvents()
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_LEFT_GUILD, LUIE.UpdateGuildData)
     end
-    LUIE.ApplySceneLogOverrides()
+    -- LUIE.ApplySceneLogOverrides()
 end
 
 function LUIE:InitializeHooks()
@@ -155,6 +155,9 @@ local function OnAddOnLoaded(eventId, addonName)
         LUIE.ScheduleDebugEnvironmentReloadChat()
         if LUIE_ScheduleLocalizationCoverageReport then
             LUIE_ScheduleLocalizationCoverageReport()
+        end
+        if LuiData_ScheduleLocalizationCoverageReport then
+            LuiData_ScheduleLocalizationCoverageReport()
         end
     end
 end
