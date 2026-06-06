@@ -1,4 +1,4 @@
-﻿-- -----------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ local strings =
     LUIE_STRING_LAM_PNL_UNLOCKPANEL_TP = "Ermöglicht das Verschieben des Info-Panels mit der Maus.",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP = "Info-Panel auf der Weltkarte anzeigen",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP_TP = "Zeigt das Info-Panel an, während du die Weltkarte betrachtest. Diese Option kann deaktiviert werden, wenn dein Info-Panel wichtige Elemente auf der Weltkarte überdeckt.",
-    LUIE_STRING_PNL_FPS_FORMAT = "<<1>> fps",
+    LUIE_STRING_PNL_FPS_FORMAT = "<<1>> FPS",
     LUIE_STRING_PNL_LATENCY_MS_FORMAT = "<<1>> ms",
 
 

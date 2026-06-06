@@ -110,11 +110,11 @@ local strings =
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "Registriert LibCombat-Fertigkeitstimings für Weave-Markierungen auf der Zauberleiste. Wenn aus, nutzt die Zauberleiste nur normale Kampfereignisse (kein SKILL_TIMINGS-Abonnement).",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD = "Gute Leichtangriff-Weave-Schwelle (ms)",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP = "Weaves schneller als dieser Wert nach einem Leichtangriff zeigen einen grünen Rand; langsamere gelb. Skill-Weave zeigt rot.",
-    LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL = "Radial",
+    LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL = "Kreisförmig",
     LUIE_STRING_LAM_AB_GCD_ANIM_VERTICAL_REVEAL = "Vertikal einblenden",
-    LUIE_STRING_LAM_AB_DISPLAY_OPTIONS_HEADER = "Display Options",
-    LUIE_STRING_LAM_AB_OOC_OPACITY_TP = "Action bar and cast bar opacity while out of combat (0–100%).",
-    LUIE_STRING_LAM_AB_IC_OPACITY_TP = "Action bar and cast bar opacity while in combat (0–100%).",
+    LUIE_STRING_LAM_AB_DISPLAY_OPTIONS_HEADER = "Anzeigeoptionen",
+    LUIE_STRING_LAM_AB_OOC_OPACITY_TP = "Deckkraft von Aktionsleiste und Zauberleiste außerhalb des Kampfs (0–100 %).",
+    LUIE_STRING_LAM_AB_IC_OPACITY_TP = "Deckkraft von Aktionsleiste und Zauberleiste im Kampf (0–100 %).",
 
 }
 
