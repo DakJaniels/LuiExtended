@@ -13,6 +13,7 @@
 ### Fixed
 
 - ChatAnnouncements: Guard confiscation loot lines no longer falsely list legitimate gear when you weapon swap and are caught with a bounty; only stolen items are announced, with worn-slot cache refresh on weapon pair change.
+- ChatAnnouncements: Friend online/offline chat and alert text now follow **Player Name Display Method** (single resolved name) instead of the two-name “logged on/off with” template.
 - LuiData: Dragonknight **Landslide** passive stack buffs in the skills menu use the correct Landslide icon instead of Dragon Leap ground effect art.
 
 ## Version 7.2.3.8
