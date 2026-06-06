@@ -53,6 +53,16 @@ local function AppendRegisteredSlashCommandAliases(namespace, aliases)
     end
 end
 
+local function ClearSlashCommandAliasesBeforeRegister(aliases)
+    if type(aliases) == "table" then
+        for aliasIndex = 1, #aliases do
+            SLASH_COMMANDS[aliases[aliasIndex]] = nil
+        end
+    elseif aliases then
+        SLASH_COMMANDS[aliases] = nil
+    end
+end
+
 local function RegisterSubCommandsOnLibSlashCommanderCommand(parentCommand, subCommandDefinitions)
     if not subCommandDefinitions then
         return
@@ -100,6 +110,7 @@ function SlashCommandRegistry.Register(namespace, commandRegistration)
     if not SlashCommandRegistry.IsAvailable() then
         return nil
     end
+    ClearSlashCommandAliasesBeforeRegister(commandRegistration.aliases)
     local libSlashCommanderCommand = LibSlashCommander:Register(commandRegistration.aliases, commandRegistration.callback, commandRegistration.description)
     local registrationRecord = GetSlashCommandRegistrationForNamespace(namespace)
     registrationRecord.libSlashCommanderCommandObjects[#registrationRecord.libSlashCommanderCommandObjects + 1] = libSlashCommanderCommand

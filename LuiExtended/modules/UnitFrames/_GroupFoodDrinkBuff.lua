@@ -632,9 +632,6 @@ function GroupFoodDrinkBuffManager.Initialize()
     EVENT_MANAGER:AddFilterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK, REGISTER_FILTER_IS_NEW_ITEM, false)
 
     SLASH_COMMANDS[SLASH_COMMAND] = OnSlashCommand
-    if LUIE.SlashCommandRegistry and LUIE.SlashCommandRegistry.IsAvailable() then
-        LUIE.SlashCommandRegistry.WrapExisting(LUIE.SlashCommandRegistry.RegistrationNamespace.ModuleExtra, SLASH_COMMAND, GetString(LUIE_STRING_LSC_LUIEFOODBUFF))
-    end
 
     local settings = GetSettings()
     if settings and settings.showRemainingTime then
