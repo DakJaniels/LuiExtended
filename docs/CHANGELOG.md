@@ -9,11 +9,12 @@
 ### Changes
 
 - Localization: LUIE strings are split into per-module **lang** files (**Action Bar**, **Chat Announcements**, **Combat Info**, **Combat Text**, **Info Panel**, **Slash Commands**, **SpellCastBuffs**, **Unit Frames**, and shared **Core**) with expanded default and translation coverage.
+- ChatAnnouncements Social: **Friends List Log On/Off Name Format** dropdown — single name via **Player Name Display Method** (default) or both names in base-game order (**@UserID with Character Name**) with LUIE link styling.
 
 ### Fixed
 
 - ChatAnnouncements: Guard confiscation loot lines no longer falsely list legitimate gear when you weapon swap and are caught with a bounty; only stolen items are announced, with worn-slot cache refresh on weapon pair change.
-- ChatAnnouncements: Friend online/offline chat and alert text now follow **Player Name Display Method** (single resolved name) instead of the two-name “logged on/off with” template.
+- ChatAnnouncements: Friend online/offline messages default to a single name from **Player Name Display Method**; optional Social **Friends List Log On/Off Name Format** restores base-game **@UserID with Character Name** order (fixes reversed dual-name slots from 7.2.3.7).
 - LuiData: Dragonknight **Landslide** passive stack buffs in the skills menu use the correct Landslide icon instead of Dragon Leap ground effect art.
 
 ## Version 7.2.3.8
