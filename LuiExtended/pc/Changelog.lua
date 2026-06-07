@@ -1069,7 +1069,7 @@ function LUIE_Changelog_Manager:ApplyBodyLabelAnchors(label)
     label:SetAnchor(TOPLEFT, nil, TOPLEFT, CHANGELOG_THEME.sectionBodyPadding, CHANGELOG_THEME.sectionBodyPadding)
 end
 
-function LUIE_Changelog_Manager:EnsureSectionPools(scrollChild)
+function LUIE_Changelog_Manager:SetupSectionPools(scrollChild)
     if not self.headerPool then
         self.headerPool = ZO_ControlPool:New(CHANGELOG_SECTION_HEADER_TEMPLATE, scrollChild, "SecHdr")
         self.headerPool:SetCustomResetBehavior(function (header)
@@ -1331,7 +1331,7 @@ function LUIE_Changelog_Manager:BuildTreeUI()
         return
     end
 
-    self:EnsureSectionPools(scrollChild)
+    self:SetupSectionPools(scrollChild)
 
     local treeAnchor = ZO_Anchor:New(TOPLEFT, scrollChild, TOPLEFT, 4, 4)
     local tree = ZO_TreeControl:New(treeAnchor, 14, 8)

@@ -1342,10 +1342,6 @@ function SpellCastBuffs.GetDebuffBorderTexture()
     return IsInGamepadPreferredMode() and "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_debuff.dds" or "EsoUI/Art/ActionBar/abilityFrame_debuff.dds"
 end
 
-function SpellCastBuffs.GetBuffDebuffInsetTexture()
-    return "EsoUI/Art/ActionBar/abilityInset_buffdebuff.dds"
-end
-
 function SpellCastBuffs.GetGenericIconInsetTexture()
     if IsInGamepadPreferredMode() then
         return "EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds"
@@ -1353,10 +1349,9 @@ function SpellCastBuffs.GetGenericIconInsetTexture()
     return "EsoUI/Art/ActionBar/abilityInset.dds"
 end
 
---- Glow ring (buff_frame/debuff_frame) is incompatible with buff/debuff inset; inset forces square abilityFrame chrome.
 --- @return boolean
 function SpellCastBuffs.UseGlowIconBorder()
-    return SpellCastBuffs.SV.GlowIcons and not SpellCastBuffs.SV.BuffDebuffIconInset
+    return SpellCastBuffs.SV.GlowIcons
 end
 
 --- ZO_BUFF_DEBUFF_ICON = frame - 4 (2px per edge at 40px frame). Inset panel must sit under smaller icon art.
@@ -1366,7 +1361,7 @@ function SpellCastBuffs.ShouldShowBuffIconInsetBg(container)
     if container == "player_long" then
         return false
     end
-    return SpellCastBuffs.SV.BuffDebuffIconInset or SpellCastBuffs.SV.RemainingCooldown
+    return SpellCastBuffs.SV.RemainingCooldown
 end
 
 --- @param container string|nil
@@ -1420,7 +1415,6 @@ function SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
     end
 
     local showRadial = SpellCastBuffs.SV.RemainingCooldown
-    local showBuffDebuffInset = SpellCastBuffs.SV.BuffDebuffIconInset
     local showIconBg = SpellCastBuffs.ShouldShowBuffIconInsetBg(container)
 
     if buff.cd then
@@ -1429,11 +1423,7 @@ function SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
     if buff.iconbg then
         buff.iconbg:SetHidden(not showIconBg)
         if showIconBg then
-            if showBuffDebuffInset then
-                buff.iconbg:SetTexture(SpellCastBuffs.GetBuffDebuffInsetTexture())
-            else
-                buff.iconbg:SetTexture(SpellCastBuffs.GetGenericIconInsetTexture())
-            end
+            buff.iconbg:SetTexture(SpellCastBuffs.GetGenericIconInsetTexture())
             buff.iconbg:SetDrawLayer(DL_BACKGROUND)
             buff.iconbg:SetDrawLevel(2)
         end
@@ -1452,12 +1442,8 @@ function SpellCastBuffs.ApplyBuffIconChrome(buff, container, effectContext)
     if buff.frame then
         buff.frame:SetHidden(not useGlow)
     end
-    if buff.drop then
-        if effectContext then
-            buff.drop:SetHidden(not effectContext.backdrop)
-        elseif SpellCastBuffs.SV.BuffDebuffIconInset then
-            buff.drop:SetHidden(true)
-        end
+    if buff.drop and effectContext then
+        buff.drop:SetHidden(not effectContext.backdrop)
     end
     SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
     SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)

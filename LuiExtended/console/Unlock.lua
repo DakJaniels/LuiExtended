@@ -315,7 +315,7 @@ local function RefreshActiveAlertLineAlignment(alertMessages)
     end
 end
 
-function Unlock.EnsureAlertTextSetupHooks()
+function Unlock.InstallAlertTextSetupHooks()
     if Unlock.alertTextSetupHooksInstalled then
         return
     end
@@ -357,7 +357,7 @@ function Unlock.ApplyAlertFrameAlignment()
     if LUIE.SV.HideAlertFrame then
         return
     end
-    Unlock.EnsureAlertTextSetupHooks()
+    Unlock.InstallAlertTextSetupHooks()
     local alignment = GetResolvedAlertFrameAlignment()
 
     local hasCustomPosition = LUIE.SV[ALERT_FRAME_SV_KEY] ~= nil

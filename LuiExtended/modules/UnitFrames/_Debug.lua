@@ -53,7 +53,7 @@ function UnitFrames.ClearDebugAttributeVisualOverrides(visualUnitTag)
     end
 end
 
-local function EnsureSavedHealthForFrame(frameKey, sourceUnitTag)
+local function InitSavedHealthForFrame(frameKey, sourceUnitTag)
     if not UnitFrames.savedHealth[frameKey] then
         UnitFrames.savedHealth[frameKey] = { 1, 1, 1, 0, 0 }
     end
@@ -67,7 +67,7 @@ end
 -- Pushes live power into `frame` while using `frameKey` for savedHealth / visualizer lookups.
 local function PushPowerValuesForFrame(frame, frameKey, sourceUnitTag)
     if not frame then return end
-    EnsureSavedHealthForFrame(frameKey, sourceUnitTag)
+    InitSavedHealthForFrame(frameKey, sourceUnitTag)
     for powerType, control in pairs(frame) do
         if type(powerType) == "number" and control then
             local powerValue, powerMax, powerEffectiveMax = GetUnitPower(sourceUnitTag, powerType)

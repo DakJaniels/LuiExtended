@@ -56,14 +56,13 @@ local function ApplyBuffIconTextureReleasePolicy(textureControl)
     end
 end
 
-local function EnsureBuffIconInsetTexturesPreloaded()
+local function PreloadBuffIconInsetTextures()
     if buffIconInsetPreloadControls then
         return
     end
     buffIconInsetPreloadControls = {}
     local paths =
     {
-        SpellCastBuffs.GetBuffDebuffInsetTexture(),
         "EsoUI/Art/ActionBar/abilityInset.dds",
         "EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds",
     }
@@ -168,7 +167,7 @@ local function SetupBuffIconControlReferences(buff)
     ApplyBuffIconTextureReleasePolicy(buff.back)
     ApplyBuffIconTextureReleasePolicy(buff.frame)
 
-    buff.iconbg:SetTexture(SpellCastBuffs.GetBuffDebuffInsetTexture())
+    buff.iconbg:SetTexture(SpellCastBuffs.GetGenericIconInsetTexture())
 
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
 
@@ -201,7 +200,7 @@ function SpellCastBuffs.InitializeBuffIconPools()
 
     SpellCastBuffs.buffIconControlPool = controlPool
     SpellCastBuffs.buffIconMetaPools = {}
-    EnsureBuffIconInsetTexturesPreloaded()
+    PreloadBuffIconInsetTextures()
 end
 
 --- @param containerKey string

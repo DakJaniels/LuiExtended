@@ -1944,7 +1944,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             default = Defaults.GlowIcons,
             disable = function ()
-                return not LUIE.SV.SpellCastBuff_Enable or Settings.BuffDebuffIconInset
+                return not LUIE.SV.SpellCastBuff_Enable
             end,
         }
 
@@ -1962,27 +1962,6 @@ function SpellCastBuffs.CreateConsoleSettings()
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.RemainingCooldown,
-            disable = function ()
-                return not LUIE.SV.SpellCastBuff_Enable
-            end,
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_BUFF_BUFFDEBUFFICONINSET),
-            tooltip = GetString(LUIE_STRING_LAM_BUFF_BUFFDEBUFFICONINSET_TP),
-            getFunction = function ()
-                return Settings.BuffDebuffIconInset
-            end,
-            setFunction = function (v)
-                Settings.BuffDebuffIconInset = v
-                if v then
-                    Settings.GlowIcons = false
-                end
-                SpellCastBuffs.Reset()
-            end,
-            default = Defaults.BuffDebuffIconInset,
             disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,

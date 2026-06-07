@@ -60,7 +60,7 @@ function UnitFrames.ForEachVisualizerForUnit(unitTag, callback)
     end
 end
 
---- Ensures default-frame visualizers exist for units without custom-frame visualizers.
+--- Initializes default-frame visualizers for units without custom-frame visualizers.
 function UnitFrames.InitializeDefaultVisualizers()
     if UnitFrames.InitializeDefaultVisualizersImpl then
         UnitFrames.InitializeDefaultVisualizersImpl()

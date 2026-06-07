@@ -64,20 +64,6 @@ function UnitFrames.GetAppearanceCategoryForBaseName(baseName)
     return BASE_NAME_TO_CATEGORY[baseName]
 end
 
---- Ensures SV table exists for a category (mutates SV).
---- @param category string
---- @return table
-function UnitFrames.EnsureCustomFrameAppearance(category)
-    local sv = UnitFrames.SV
-    if not sv.CustomFrameAppearance then
-        sv.CustomFrameAppearance = {}
-    end
-    if not sv.CustomFrameAppearance[category] then
-        sv.CustomFrameAppearance[category] = {}
-    end
-    return sv.CustomFrameAppearance[category]
-end
-
 --- @param category string
 --- @return {
 ---    fontBars: integer,

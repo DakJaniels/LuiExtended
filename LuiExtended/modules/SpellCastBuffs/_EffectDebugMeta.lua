@@ -458,7 +458,7 @@ local advancedStatInfoByType
 
 local advancedStatInfoCacheBuilt = false
 
-local function ensureAdvancedStatInfoCache()
+local function buildAdvancedStatInfoCache()
     if advancedStatInfoCacheBuilt then
         return
     end
@@ -487,7 +487,7 @@ end
 --- @param statType AdvancedStatDisplayType|integer
 --- @return string
 local function formatAdvancedStatTypeLabel(statType)
-    ensureAdvancedStatInfoCache()
+    buildAdvancedStatInfoCache()
     local info = advancedStatInfoByType and advancedStatInfoByType[statType]
     if info and info.displayName and info.displayName ~= "" then
         return string.format("%s (%s)", info.displayName, tostring(statType))
@@ -552,7 +552,7 @@ local function addAdvancedStatDebugLines(abilityId, addLine)
         return
     end
 
-    ensureAdvancedStatInfoCache()
+    buildAdvancedStatInfoCache()
 
     addLine("Advanced #", tostring(numAdvanced))
 
