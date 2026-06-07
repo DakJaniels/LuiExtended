@@ -177,6 +177,7 @@ ChatAnnouncements.Brackets =
 --- @field FriendIgnoreAlert boolean
 --- @field FriendStatusCA boolean
 --- @field FriendStatusAlert boolean
+--- @field FriendStatusNameFormat integer
 --- @field DuelCA boolean
 --- @field DuelAlert boolean
 --- @field DuelBoundaryCA boolean
@@ -773,6 +774,7 @@ ChatAnnouncements.Defaults =
         FriendIgnoreAlert = false,
         FriendStatusCA = true,
         FriendStatusAlert = false,
+        FriendStatusNameFormat = 1,
 
         -- Duel
         DuelCA = true,

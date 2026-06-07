@@ -58,6 +58,16 @@ local guildRankDisplayOptions = { "Self Only", "All w/ Permissions", "All Rank C
 local guildRankDisplayOptionsKeys = { ["Self Only"] = 1, ["All w/ Permissions"] = 2, ["All Rank Changes"] = 3 }
 local duelStartOptions = { "Message + Icon", "Message Only", "Icon Only" }
 local duelStartOptionsKeys = { ["Message + Icon"] = 1, ["Message Only"] = 2, ["Icon Only"] = 3 }
+local friendStatusNameFormatOptions =
+{
+    "Player Name Display Method",
+    "@UserID with Character Name",
+}
+local friendStatusNameFormatOptionsKeys =
+{
+    ["Player Name Display Method"] = 1,
+    ["@UserID with Character Name"] = 2,
+}
 
 ---
 --- @param topLevelIndex integer
@@ -7365,6 +7375,24 @@ function ChatAnnouncements.CreateSettings()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
                 default = Defaults.Social.FriendStatusAlert,
+            },
+            {
+                type = "dropdown",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF_FORMAT)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF_FORMAT_TP),
+                choices = friendStatusNameFormatOptions,
+                getFunc = function ()
+                    local index = Settings.Social.FriendStatusNameFormat or Defaults.Social.FriendStatusNameFormat
+                    return friendStatusNameFormatOptions[index]
+                end,
+                setFunc = function (value)
+                    Settings.Social.FriendStatusNameFormat = friendStatusNameFormatOptionsKeys[value]
+                end,
+                width = "full",
+                default = friendStatusNameFormatOptions[Defaults.Social.FriendStatusNameFormat],
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
             },
             {
                 type = "header",

@@ -400,6 +400,11 @@ function ChatAnnouncements.Initialize(enabled)
     ChatAnnouncements.RefreshMessageFormatDefaultsTable()
     ChatAnnouncements.NormalizeStoredMessageFormats()
 
+    ChatAnnouncements.SV.Social = ChatAnnouncements.SV.Social or {}
+    if ChatAnnouncements.SV.Social.FriendStatusNameFormat == nil then
+        ChatAnnouncements.SV.Social.FriendStatusNameFormat = ChatAnnouncements.Defaults.Social.FriendStatusNameFormat
+    end
+
     ChatAnnouncements.InvalidateQuestCounterFilterCache()
 
     -- Some modules might need to pull some of the color settings from CA so we want these to always be set regardless of CA module being enabled/disabled.
@@ -1274,10 +1279,23 @@ function ChatAnnouncements.FriendPlayerStatus(eventId, displayName, characterNam
 
     if wasOnline ~= isOnline then
         local loggedString = isOnline and LUIE_STRING_CA_FRIENDS_LIST_LOGGED_ON or LUIE_STRING_CA_FRIENDS_LIST_LOGGED_OFF
-        local nameLink = ChatAnnouncements.ResolveNameLink(characterName, displayName)
-        local alertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
-        local chatText = zo_strformat(loggedString, nameLink)
-        local alertText = zo_strformat(loggedString, alertName)
+        local loggedCharacterString = isOnline and LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_ON or LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_OFF
+        local nameFormat = ChatAnnouncements.SV.Social.FriendStatusNameFormat or 1
+        local hasChar = NameFieldNonEmpty(characterName)
+        local chatText
+        local alertText
+
+        if nameFormat == 2 and hasChar then
+            local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
+            local characterNameLink = ChatAnnouncements.CreateCharacterLink(characterName)
+            chatText = zo_strformat(loggedCharacterString, displayNameLink, characterNameLink)
+            alertText = zo_strformat(loggedCharacterString, displayName, characterName)
+        else
+            local nameLink = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+            local alertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+            chatText = zo_strformat(loggedString, nameLink)
+            alertText = zo_strformat(loggedString, alertName)
+        end
 
         local social = GetChatOutputSocialSettings()
         if social and social.FriendStatusCA then

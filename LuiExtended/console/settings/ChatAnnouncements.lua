@@ -7035,6 +7035,24 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF_FORMAT_TP),
+            items = SettingsAPI:GetFriendStatusNameFormatOptionsList(),
+            getFunction = function ()
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeFriendStatusNameFormatIndex(Settings.Social.FriendStatusNameFormat, Defaults.Social.FriendStatusNameFormat))
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.Social.FriendStatusNameFormat = item.data
+            end,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Social.FriendStatusNameFormat),
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_HEADER)
         }

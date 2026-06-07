@@ -59,11 +59,12 @@ local changelogMessages =
     -- Changes
     "|cFFFF00Changes:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Localization: LUIE strings are split into per-module lang files (Action Bar, Chat Announcements, Combat Info, Combat Text, Info Panel, Slash Commands, SpellCastBuffs, Unit Frames, and shared Core) with expanded default and translation coverage.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements Social: Friends List Log On/Off Name Format dropdown — single name via Player Name Display Method (default) or both names in base-game order (@UserID with Character Name) with LUIE link styling.",
     "",
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Guard confiscation loot lines no longer falsely list legitimate gear when you weapon swap and are caught with a bounty; only stolen items are announced, with worn-slot cache refresh on weapon pair change.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Friend online/offline chat and alert text now follow Player Name Display Method (single resolved name) instead of the two-name logged on/off with template.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Friend online/offline messages default to a single name from Player Name Display Method; optional Social Friends List Log On/Off Name Format restores base-game @UserID with Character Name order (fixes reversed dual-name slots from 7.2.3.7).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Weekly and other timed challenge progress no longer double-prints in chat or alerts when both Challenges (Tracking) and Challenges (Progress) are enabled; Progress owns update lines in that case.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData: Dragonknight Landslide passive stack buffs in the skills menu use the correct Landslide icon instead of Dragon Leap ground effect art.",
     "",

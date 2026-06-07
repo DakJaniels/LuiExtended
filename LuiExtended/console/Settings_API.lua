@@ -204,6 +204,20 @@ end
 --- @param storedValue any
 --- @param defaultIndex integer
 --- @return integer
+function SettingsAPI:NormalizeFriendStatusNameFormatIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["Player Name Display Method"] = 1,
+                                                  ["@UserID with Character Name"] = 2,
+                                              },
+                                              defaultIndex,
+                                              2)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
 function SettingsAPI:NormalizeLinkBracketDisplayIndex(storedValue, defaultIndex)
     defaultIndex = defaultIndex or 1
     return self:NormalizeNumericIndexDropdown(storedValue,
@@ -513,6 +527,17 @@ function SettingsAPI:GetChatNameDisplayOptionsList()
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID),
     }
     return self:ConvertOptionsToItems(chatNameDisplayOptions)
+end
+
+--- Get friend log on/off name format options for ChatAnnouncements Social
+--- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
+function SettingsAPI:GetFriendStatusNameFormatOptionsList()
+    local friendStatusNameFormatOptions =
+    {
+        GetString(LUIE_STRING_LAM_CA_NAMEDISPLAYMETHOD),
+        GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF_FORMAT_STOCK),
+    }
+    return self:ConvertOptionsToItems(friendStatusNameFormatOptions)
 end
 
 --- Get link bracket display options list for ChatAnnouncements
