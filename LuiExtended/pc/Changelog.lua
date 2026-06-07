@@ -58,6 +58,7 @@ local changelogMessages =
     "",
     -- Changes
     "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t API 101050: Static audit found no removed Lua API usage; ChatAnnouncements adds Update 50 hooks (Tamriel Tomes rollover currency, Veterancy CSAs, overland difficulty alerts, timed-activity reroll reset, season recap notice, hireling mail-list sender fallback, large-group invite threshold aligned with the base game).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Localization: LUIE strings are split into per-module lang files (Action Bar, Chat Announcements, Combat Info, Combat Text, Info Panel, Slash Commands, SpellCastBuffs, Unit Frames, and shared Core) with expanded default and translation coverage.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements Social: Friends List Log On/Off Name Format dropdown — single name via Player Name Display Method (default) or both names in base-game order (@UserID with Character Name) with LUIE link styling.",
     "",

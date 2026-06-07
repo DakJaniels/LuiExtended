@@ -717,6 +717,22 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_QUICKHIDE_UNITMONSTER),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_QUICKHIDE_UNITMONSTER_TP),
+                getFunc = function ()
+                    return Settings.QuickHideDeadUseUnitMonster
+                end,
+                setFunc = function (value)
+                    Settings.QuickHideDeadUseUnitMonster = value
+                end,
+                width = "full",
+                default = Defaults.QuickHideDeadUseUnitMonster,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.QuickHideDead)
+                end,
+            },
+            {
                 -- Hide Player Frame When Dead
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_HIDE_PLAYER_FRAME_DEATH),
@@ -2118,6 +2134,74 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_VETERANCY_RANK),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_VETERANCY_RANK_TP),
+                getFunc = function ()
+                    return Settings.TargetShowVeterancyRank
+                end,
+                setFunc = function (value)
+                    Settings.TargetShowVeterancyRank = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.TargetShowVeterancyRank,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OVERLAND_DIFFICULTY),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OVERLAND_DIFFICULTY_TP),
+                getFunc = function ()
+                    return Settings.TargetShowOverlandDifficulty
+                end,
+                setFunc = function (value)
+                    Settings.TargetShowOverlandDifficulty = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.TargetShowOverlandDifficulty,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MONSTER_OVERLAND),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MONSTER_OVERLAND_TP),
+                getFunc = function ()
+                    return Settings.TargetMonsterOverlandDifficulty
+                end,
+                setFunc = function (value)
+                    Settings.TargetMonsterOverlandDifficulty = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.TargetMonsterOverlandDifficulty,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget and Settings.TargetShowOverlandDifficulty)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MONSTER_CLASSICON),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MONSTER_CLASSICON_TP),
+                getFunc = function ()
+                    return Settings.TargetHighlightMonsterUnits
+                end,
+                setFunc = function (value)
+                    Settings.TargetHighlightMonsterUnits = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.TargetHighlightMonsterUnits,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
                 -- Display rank name on target frame
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_RANK),
@@ -2861,6 +2945,23 @@ function UnitFrames.CreateSettings()
                 end,
                 width = "full",
                 default = Defaults.RoleIconSmallGroup,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESG_VETERANCY_RANK),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_VETERANCY_RANK_TP),
+                getFunc = function ()
+                    return Settings.GroupShowVeterancyRank
+                end,
+                setFunc = function (value)
+                    Settings.GroupShowVeterancyRank = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.GroupShowVeterancyRank,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
                 end,

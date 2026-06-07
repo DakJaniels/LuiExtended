@@ -7,6 +7,9 @@
 --- Saved vars keep English default.lua text when the player has not customized; runtime resolves via GetString.
 --- Custom text in SV is preserved across client languages.
 
+--- @class (partial) LuiExtended
+local LUIE = LUIE
+
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 

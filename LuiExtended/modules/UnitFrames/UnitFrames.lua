@@ -47,6 +47,68 @@ local function FormatTextWithIcon(iconPath, text, iconSize)
     return zo_iconFormat(iconPath, iconSize, iconSize) .. " " .. text
 end
 
+local function IsLuiEGroupFrameTag(unitTag)
+    if ZO_Group_IsGroupUnitTag and ZO_Group_IsGroupUnitTag(unitTag) then
+        return true
+    end
+    return string.sub(unitTag, 1, 10) == "SmallGroup" or string.sub(unitTag, 1, 9) == "RaidGroup"
+end
+
+local function IsOverlandDifficultyDisplayEnabled()
+    return UnitFrames.SV.TargetShowOverlandDifficulty
+        and GetOverlandDifficultyDisabledReason ~= nil
+        and GetOverlandDifficultyDisabledReason() == OVERLAND_DIFFICULTY_DISABLED_REASON_NONE
+        and ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD ~= nil
+end
+
+local function ApplyOverlandDifficultyNameIcon(unitTag, nameText)
+    if not IsOverlandDifficultyDisplayEnabled() or nameText == nil or nameText == "" then
+        return nameText
+    end
+    local difficulty
+    if IsUnitPlayer(unitTag) then
+        if GetUnitOverlandDifficulty == nil then
+            return nameText
+        end
+        difficulty = GetUnitOverlandDifficulty(unitTag)
+    else
+        if GetOverlandDifficulty == nil then
+            return nameText
+        end
+        difficulty = GetOverlandDifficulty()
+        if UnitFrames.SV.TargetMonsterOverlandDifficulty and IsUnitMonster ~= nil and not IsUnitMonster(unitTag) then
+            return nameText
+        end
+        if not IsUnitAttackable(unitTag) then
+            return nameText
+        end
+    end
+    if difficulty == nil or difficulty <= OVERLAND_DIFFICULTY_TYPE_BASEGAME then
+        return nameText
+    end
+    local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty]
+    if iconPath then
+        return FormatTextWithIcon(iconPath, nameText, 20)
+    end
+    return nameText
+end
+
+local function ShouldShowVeterancyRankOnFrame(unitFrame)
+    if not unitFrame.isPlayer or GetUnitVeterancyRank == nil or IsVeterancySeasonActive == nil or IsInVeterancyProgressionZone == nil then
+        return false
+    end
+    if not IsVeterancySeasonActive() or not IsInVeterancyProgressionZone() then
+        return false
+    end
+    if unitFrame.unitTag == "reticleover" or unitFrame.unitTag == "player" then
+        return UnitFrames.SV.TargetShowVeterancyRank
+    end
+    if IsLuiEGroupFrameTag(unitFrame.unitTag) then
+        return UnitFrames.SV.GroupShowVeterancyRank
+    end
+    return false
+end
+
 local g_PendingUpdate =
 {
     Group = { flag = false, delay = 200, name = moduleName .. "PendingGroupUpdate" },
@@ -350,6 +412,12 @@ function UnitFrames.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_CHAMPION_POINT_UPDATE, UnitFrames.OnLevelUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_TITLE_UPDATE, UnitFrames.TitleUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_RANK_POINT_UPDATE, UnitFrames.TitleUpdate)
+    if EVENT_OVERLAND_DIFFICULTY_CHANGED then
+        eventManager:RegisterForEvent(moduleName, EVENT_OVERLAND_DIFFICULTY_CHANGED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
+    end
+    if EVENT_ACTIVE_VETERANCY_SEASON_UPDATED then
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_VETERANCY_SEASON_UPDATED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
+    end
 
     -- Next events make sense only for CustomFrames
     if UnitFrames.CustomFrames["player"] or UnitFrames.CustomFrames["reticleover"] or UnitFrames.CustomFrames["companion"] or UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] or UnitFrames.CustomFrames["boss1"] or UnitFrames.CustomFrames["PetGroup1"] then
@@ -1447,7 +1515,12 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
             -- Finally show custom target frame
             UnitFrames.CustomFrames["reticleover"].control:SetHidden(false)
             if UnitFrames.SV.QuickHideDead then
-                local isMonster = IsGameCameraInteractableUnitMonster()
+                local isMonster
+                if UnitFrames.SV.QuickHideDeadUseUnitMonster and IsUnitMonster then
+                    isMonster = IsUnitMonster("reticleover")
+                else
+                    isMonster = IsGameCameraInteractableUnitMonster()
+                end
                 local isNPC = reactionType == UNIT_REACTION_NEUTRAL
                     or reactionType == UNIT_REACTION_FRIENDLY
                     or reactionType == UNIT_REACTION_NPC_ALLY
@@ -1646,7 +1719,12 @@ function UnitFrames.UpdateStaticControls(unitFrame)
     if unitFrame.classIcon ~= nil then
         local unitDifficulty = GetUnitDifficulty(unitFrame.unitTag)
         local classIcon = LUIE.GetClassIcon(GetUnitClassId(unitFrame.unitTag))
-        local showClass = (unitFrame.isPlayer and classIcon ~= nil) or (unitDifficulty > 1)
+        local isMonsterUnit = IsUnitMonster and IsUnitMonster(unitFrame.unitTag)
+        local showMonsterClassIcon = not unitFrame.isPlayer
+            and UnitFrames.SV.TargetHighlightMonsterUnits
+            and isMonsterUnit
+            and IsUnitAttackable(unitFrame.unitTag)
+        local showClass = (unitFrame.isPlayer and classIcon ~= nil) or (unitDifficulty > 1) or showMonsterClassIcon
         local eliteIconPath
         if ZO_IsConsoleOrGameCoreUI() then
             eliteIconPath = [[/esoui/art/icons/poi/poi_groupboss_complete.dds]]
@@ -1655,7 +1733,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         end
         if unitFrame.isPlayer then
             unitFrame.classIcon:SetTexture(classIcon)
-        elseif unitDifficulty == 2 then
+        elseif unitDifficulty == 2 or showMonsterClassIcon then
             unitFrame.classIcon:SetTexture(eliteIconPath)
         elseif unitDifficulty >= 3 then
             unitFrame.classIcon:SetTexture(eliteIconPath)
@@ -1740,10 +1818,17 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             end
         end
 
+        if unitFrame.isPlayer then
+            nameText = ApplyOverlandDifficultyNameIcon(unitFrame.unitTag, nameText)
+        elseif unitFrame.unitTag == "reticleover" then
+            nameText = ApplyOverlandDifficultyNameIcon(unitFrame.unitTag, nameText)
+        end
+
         unitFrame.name:SetText(nameText)
     end
     -- If unitFrame has level label control
     if unitFrame.level ~= nil then
+        local shouldShowVeterancyInfo = ShouldShowVeterancyRankOnFrame(unitFrame)
         -- Show level for players and non-friendly NPCs
         local showLevel = unitFrame.isPlayer -- or not ( IsUnitInvulnerableGuard( unitFrame.unitTag ) or HIDE_LEVEL_TYPES[GetUnitType( unitFrame.unitTag )] or HIDE_LEVEL_REACTIONS[GetUnitReaction( unitFrame.unitTag )] ) -- No longer need to display level for anything but players
         if showLevel then
@@ -1751,30 +1836,45 @@ function UnitFrames.UpdateStaticControls(unitFrame)
                 unitFrame.levelIcon:ClearAnchors()
                 unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
             end
-            -- Use game API for both champion and normal level icons
             local iconPath
-            if unitFrame.isChampion then
+            local levelText
+            if shouldShowVeterancyInfo then
+                local veterancyRank = GetUnitVeterancyRank(unitFrame.unitTag)
+                if GetVeterancyRankTitle and SI_VETERANCY_RANK_AND_TITLE_FORMATTER then
+                    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
+                    levelText = zo_strformat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, veterancyRank, GetVeterancyRankTitle(veterancyRank, seasonId))
+                else
+                    levelText = tostring(veterancyRank)
+                end
+                if GetVeterancyRankIcon then
+                    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
+                    iconPath = GetVeterancyRankIcon(veterancyRank, seasonId)
+                end
+            elseif unitFrame.isChampion then
                 if IsInGamepadPreferredMode() then
                     iconPath = ZO_GetGamepadChampionPointsIcon()
                 else
                     iconPath = ZO_GetChampionPointsIconSmall()
                 end
+                levelText = tostring(GetUnitChampionPoints(unitFrame.unitTag))
             else
                 if IsInGamepadPreferredMode() then
                     iconPath = ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
                 else
                     iconPath = ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
                 end
+                levelText = tostring(GetUnitLevel(unitFrame.unitTag))
             end
-            unitFrame.levelIcon:SetTexture(iconPath)
+            if iconPath then
+                unitFrame.levelIcon:SetTexture(iconPath)
+            end
             -- Prevent auto-resize and set color to white
             unitFrame.levelIcon:SetResizeToFitFile(false)
             unitFrame.levelIcon:SetColor(1, 1, 1, 1)
             -- Set fixed size
             unitFrame.levelIcon:SetWidth(18)
             unitFrame.levelIcon:SetHeight(18)
-            -- Level label should be already anchored
-            unitFrame.level:SetText(tostring(unitFrame.isChampion and GetUnitChampionPoints(unitFrame.unitTag) or GetUnitLevel(unitFrame.unitTag)))
+            unitFrame.level:SetText(levelText)
         end
         if unitFrame.unitTag == "player" then
             unitFrame.levelIcon:SetHidden(not UnitFrames.SV.PlayerEnableYourname)
@@ -1886,6 +1986,19 @@ function UnitFrames.TitleUpdate(eventCode, unitTag)
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
     UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames[unitTag])
     UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
+end
+
+-- Re-run UpdateStaticControls on player, target, and group after overland/veterancy season changes or related LAM toggles.
+function UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+    if UnitFrames.CustomFrames["reticleover"] then
+        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
+    end
+    if UnitFrames.CustomFrames["player"] then
+        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["player"])
+    end
+    if UnitFrames.CustomFramesGroupUpdate then
+        UnitFrames.CustomFramesGroupUpdate()
+    end
 end
 
 -- Forces to reload static information on unit frames.
