@@ -2587,6 +2587,59 @@ function ChatAnnouncements.CreateSettings()
                 end,
                 default = Defaults.Inventory.LootShowDisguise,
             },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Inventory.AttunableStationCA
+                end,
+                setFunc = function (value)
+                    Settings.Inventory.AttunableStationCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Inventory.AttunableStationCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.Inventory.AttunableStationCSA
+                end,
+                setFunc = function (value)
+                    Settings.Inventory.AttunableStationCSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Inventory.AttunableStationCSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Inventory.AttunableStationAlert
+                end,
+                setFunc = function (value)
+                    Settings.Inventory.AttunableStationAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Inventory.AttunableStationAlert,
+            },
         },
     }
 

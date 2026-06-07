@@ -519,26 +519,14 @@ function LUIE.CreateConsoleSettings()
     --     clickHandler = LUIE.ResetElementPosition
     -- }
 
-    -- Character Profile Settings Section
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_SVPROFILE_HEADER)
-    }
+    local profileSectionRows = {}
 
-    -- Character Profile Description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_SVPROFILE_DESCRIPTION)
-    }
-
-    -- Use Character Specific Settings Toggle
-    settingsData[#settingsData + 1] =
+    -- Character Profile Settings (submenu)
+    profileSectionRows[#profileSectionRows + 1] =
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE),
-        tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE_TP),
+        tooltip = zo_strformat("<<1>>\n\n<<2>>", GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE_TP), GetString(LUIE_STRING_LAM_SVPROFILE_DESCRIPTION)),
         getFunction = function () return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
         setFunction = function (value)
             _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].CharacterSpecificSV = value
@@ -546,19 +534,12 @@ function LUIE.CreateConsoleSettings()
         end
     }
 
-    -- Profile copy (source path + target / cross-megaserver notes)
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = zo_strformat("<<1>>\n\n<<2>>\n\n<<3>>", GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY), GetString(LUIE_STRING_LAM_SVPROFILE_COPY_TARGET_DESC), GetString(LUIE_STRING_LAM_SVPROFILE_COPY_CROSS_TP))
-    }
-
     -- Source megaserver (ZO_SavedVars profile)
-    settingsData[#settingsData + 1] =
+    profileSectionRows[#profileSectionRows + 1] =
     {
         type = LHAS.ST_DROPDOWN,
         label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SERVER),
-        tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SERVER_TP_CONSOLE),
+        tooltip = zo_strformat("<<1>>\n\n<<2>>\n\n<<3>>", GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY), GetString(LUIE_STRING_LAM_SVPROFILE_COPY_TARGET_DESC), GetString(LUIE_STRING_LAM_SVPROFILE_COPY_CROSS_TP)),
         items = function ()
             ProfileCopyRebuildServerItems()
             return serverItems
@@ -603,7 +584,7 @@ function LUIE.CreateConsoleSettings()
     }
 
     -- Source @account
-    settingsData[#settingsData + 1] =
+    profileSectionRows[#profileSectionRows + 1] =
     {
         type = LHAS.ST_DROPDOWN,
         label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_ACCOUNT),
@@ -644,7 +625,7 @@ function LUIE.CreateConsoleSettings()
     }
 
     if profileCopySplitSourceUI then
-        settingsData[#settingsData + 1] =
+        profileSectionRows[#profileSectionRows + 1] =
         {
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_KIND),
@@ -671,7 +652,7 @@ function LUIE.CreateConsoleSettings()
             end
         }
 
-        settingsData[#settingsData + 1] =
+        profileSectionRows[#profileSectionRows + 1] =
         {
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER),
@@ -706,7 +687,7 @@ function LUIE.CreateConsoleSettings()
         }
     else
         -- Source row ($AccountWide or character) — single list when not using character-specific saved vars
-        settingsData[#settingsData + 1] =
+        profileSectionRows[#profileSectionRows + 1] =
         {
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_BUCKET),
@@ -746,7 +727,7 @@ function LUIE.CreateConsoleSettings()
     end
 
     -- Copy Profile Button
-    settingsData[#settingsData + 1] =
+    profileSectionRows[#profileSectionRows + 1] =
     {
         type = LHAS.ST_BUTTON,
         label = GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPYBUTTON),
@@ -757,7 +738,7 @@ function LUIE.CreateConsoleSettings()
     }
 
     -- Reset Current Character Settings Button
-    settingsData[#settingsData + 1] =
+    profileSectionRows[#profileSectionRows + 1] =
     {
         type = LHAS.ST_BUTTON,
         label = GetString(LUIE_STRING_LAM_SVPROFILE_RESETCHAR),
@@ -771,7 +752,7 @@ function LUIE.CreateConsoleSettings()
     }
 
     -- Reset Account Wide Settings Button
-    settingsData[#settingsData + 1] =
+    profileSectionRows[#profileSectionRows + 1] =
     {
         type = LHAS.ST_BUTTON,
         label = GetString(LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT),
@@ -783,30 +764,22 @@ function LUIE.CreateConsoleSettings()
         end
     }
 
-    LUIE.AppendChatOutputConsoleControls(settingsData, LHAS)
+    SettingsAPI:AppendSection(settingsData, GetString(LUIE_STRING_LAM_SVPROFILE_HEADER), profileSectionRows)
 
-    -- Modules Header
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_MODULEHEADER)
-    }
+    local chatOutputSectionRows = {}
+    LUIE.AppendChatOutputConsoleControls(chatOutputSectionRows, LHAS, { omitSectionHeader = true })
+    SettingsAPI:AppendSection(settingsData, GetString(LUIE_STRING_LAM_CHATOUTPUT_HEADER), chatOutputSectionRows)
+    SettingsAPI:AppendSection(settingsData, GetString(LUIE_STRING_LAM_MODULEHEADER), nil, { subMenu = false })
 
     -- Unit Frames Module
     settingsData[#settingsData + 1] =
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_UF_ENABLE),
+        tooltip = GetString(LUIE_STRING_LAM_UF_DESCRIPTION),
         getFunction = function () return Settings.UnitFrames_Enabled end,
         setFunction = function (value) Settings.UnitFrames_Enabled = value end,
         default = Defaults.UnitFrames_Enabled
-    }
-
-    -- Unit Frames module description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_UF_DESCRIPTION)
     }
 
     -- Action Bar Module
@@ -814,16 +787,10 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_AB_SHOWACTIONBAR),
+        tooltip = GetString(LUIE_STRING_LAM_AB_DESCRIPTION),
         getFunction = function () return Settings.ActionBar_Enabled end,
         setFunction = function (value) Settings.ActionBar_Enabled = value end,
         default = Defaults.ActionBar_Enabled
-    }
-
-    -- Action Bar Description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_AB_DESCRIPTION)
     }
 
     -- Combat Info Module
@@ -831,16 +798,10 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_CI_SHOWCOMBATINFO),
+        tooltip = GetString(LUIE_STRING_LAM_CI_DESCRIPTION),
         getFunction = function () return Settings.CombatInfo_Enabled end,
         setFunction = function (value) Settings.CombatInfo_Enabled = value end,
         default = Defaults.CombatInfo_Enabled
-    }
-
-    -- Combat Info Description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_CI_DESCRIPTION)
     }
 
     -- Combat Text Module
@@ -848,16 +809,10 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_CT_SHOWCOMBATTEXT),
+        tooltip = GetString(LUIE_STRING_LAM_CT_DESCRIPTION),
         getFunction = function () return Settings.CombatText_Enabled end,
         setFunction = function (value) Settings.CombatText_Enabled = value end,
         default = Defaults.CombatText_Enabled
-    }
-
-    -- Combat Text Description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_CT_DESCRIPTION)
     }
 
     -- Buffs & Debuffs Module
@@ -865,16 +820,10 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_BUFF_ENABLEEFFECTSTRACK),
+        tooltip = GetString(LUIE_STRING_LAM_BUFFS_DESCRIPTION),
         getFunction = function () return Settings.SpellCastBuff_Enable end,
         setFunction = function (value) Settings.SpellCastBuff_Enable = value end,
         default = Defaults.SpellCastBuff_Enable
-    }
-
-    -- Buffs & Debuffs Description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_BUFFS_DESCRIPTION)
     }
 
     -- Chat Announcements Module
@@ -882,16 +831,10 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_CA_ENABLE),
+        tooltip = GetString(LUIE_STRING_LAM_CA_DESCRIPTION),
         getFunction = function () return Settings.ChatAnnouncements_Enable end,
         setFunction = function (value) Settings.ChatAnnouncements_Enable = value end,
         default = Defaults.ChatAnnouncements_Enable
-    }
-
-    -- Chat Announcements Module Description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_CA_DESCRIPTION)
     }
 
     -- Slash Commands Module
@@ -899,16 +842,10 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_SLASHCMDS_ENABLE),
+        tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_DESCRIPTION),
         getFunction = function () return Settings.SlashCommands_Enable end,
         setFunction = function (value) Settings.SlashCommands_Enable = value end,
         default = Defaults.SlashCommands_Enable
-    }
-
-    -- Slash Commands Module Description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_SLASHCMDS_DESCRIPTION)
     }
 
     -- Show InfoPanel
@@ -916,16 +853,10 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_PNL_ENABLE),
+        tooltip = GetString(LUIE_STRING_LAM_PNL_DESCRIPTION),
         getFunction = function () return Settings.InfoPanel_Enabled end,
         setFunction = function (value) Settings.InfoPanel_Enabled = value end,
         default = Defaults.InfoPanel_Enabled
-    }
-
-    -- InfoPanel Module Description
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_PNL_DESCRIPTION)
     }
 
     -- Misc Settings
@@ -1016,4 +947,14 @@ function LUIE.CreateConsoleSettings()
 
     -- Add all settings to the panel
     panel:AddSettings(settingsData)
+
+    LUIE.consoleMainSettingsPanel = panel
+    local chatOutputHeader = GetString(LUIE_STRING_LAM_CHATOUTPUT_HEADER)
+    for i = 1, #panel.settings do
+        local setting = panel.settings[i]
+        if setting.type == LHAS.ST_SECTION and setting.labelText == chatOutputHeader then
+            LUIE.consoleChatOutputSectionSetting = setting
+            break
+        end
+    end
 end

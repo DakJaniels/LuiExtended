@@ -107,7 +107,7 @@ local strings =
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS = "Show Casts for Heavy Attacks",
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS_TP = "Show a cast bar when using heavy attacks with weapons.",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER = "Weave timing indicators (requires LibCombat)",
-    LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "Registers LibCombat skill timings for weave markers on the cast bar. When off, the cast bar uses normal combat events only (no SKILL_TIMINGS subscription).",
+    LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "Shows colored markers on the cast bar to help you judge light-attack weave timing (green = good, yellow = slow, red = skill weave). When disabled, the cast bar only tracks normal spell and channel durations.",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD = "Good light-attack weave threshold (ms)",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP = "Weaves faster than this after a light attack show a green border; slower show yellow. Skill-weave shows red.",
     LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL = "Radial",

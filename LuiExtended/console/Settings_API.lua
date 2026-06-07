@@ -60,19 +60,26 @@ function SettingsAPI:AppendSettingsList(allSettings, settingsList)
     end
 end
 
---- Appends a native ST_SECTION row and its settings (single registration; no RemoveAllSettings).
+--- Appends ST_SECTION plus optional rows. Console LHAS 2.1.8+: `options.subMenu = false` for a header-only row (no drill-in; following rows stay on the parent list).
 --- @param allSettings table
 --- @param sectionLabel string|integer
---- @param sectionRows table
-function SettingsAPI:AppendSection(allSettings, sectionLabel, sectionRows)
+--- @param sectionRows table|nil
+--- @param options table|nil `{ subMenu = false }`
+function SettingsAPI:AppendSection(allSettings, sectionLabel, sectionRows, options)
     local LHAS = LibHarvensAddonSettings
-    table_insert(allSettings,
-                 {
-                     type = LHAS.ST_SECTION,
-                     label = sectionLabel,
-                 })
-    for i = 1, #sectionRows do
-        table_insert(allSettings, self:NormalizeConsoleSetting(sectionRows[i]))
+    local sectionEntry =
+    {
+        type = LHAS.ST_SECTION,
+        label = sectionLabel,
+    }
+    if options and options.subMenu == false then
+        sectionEntry.subMenu = false
+    end
+    table_insert(allSettings, sectionEntry)
+    if sectionRows then
+        for i = 1, #sectionRows do
+            table_insert(allSettings, self:NormalizeConsoleSetting(sectionRows[i]))
+        end
     end
 end
 
@@ -81,6 +88,77 @@ end
 function SettingsAPI:RefreshPanel(panel)
     if panel and panel.selected and panel.UpdateControls then
         panel:UpdateControls()
+    end
+end
+
+--- @param addonPanel table LibHarvensAddonSettings.AddonSettings
+function SettingsAPI:RefreshConsoleAddonSettingsHeader(addonPanel)
+    local LHAS = LibHarvensAddonSettings
+    local scrollList = LHAS.scrollList
+    if not scrollList.header or not addonPanel then
+        return
+    end
+    local addonName = addonPanel.name
+    local author, name = addonName:match("^(.+)'s%s(.+)")
+    if name == nil then
+        name = addonName
+    end
+    if addonPanel.author then
+        author = addonPanel.author
+    end
+    ZO_GamepadGenericHeader_RefreshData(scrollList.header,
+                                        {
+                                            titleText = name,
+                                            subtitleText = addonPanel.version,
+                                            messageText = author and zo_strformat(GetString(SI_ADD_ON_AUTHOR_LINE), author),
+                                        })
+end
+
+--- Opens LuiExtended main settings → Chat Output (console LHAS section drill-in).
+function SettingsAPI:OpenConsoleChatOutputSettings()
+    local LHAS = LibHarvensAddonSettings
+    local mainPanel = LUIE.consoleMainSettingsPanel
+    local sectionSetting = LUIE.consoleChatOutputSectionSetting
+    if not mainPanel or not sectionSetting then
+        return
+    end
+
+    local scrollList = LHAS.scrollList
+
+    local mainList = scrollList:GetMainList()
+    local sectionList = scrollList:GetList("Section")
+
+    -- Tear down any drilled-in section (e.g. Chat Announcements) so pooled rows are not left visible.
+    if sectionList.currentSection or scrollList:GetCurrentList() == sectionList then
+        sectionList.currentSection = nil
+        sectionList:Clear()
+        sectionList:Commit()
+        scrollList:SetCurrentList(mainList)
+    end
+    mainList:Clear()
+    mainList:Commit()
+
+    if not mainPanel.selected then
+        mainPanel:Select()
+    end
+
+    -- LibHarvensAddonSettings_AddonSelected rebuilds the root list; discard before Chat Output drill-in.
+    mainList:Clear()
+    mainList:Commit()
+
+    sectionList.currentSection = sectionSetting
+    scrollList:SetCurrentList(sectionList)
+    mainPanel:SetupSections()
+    mainPanel:CreateControls()
+    if mainPanel.RefreshSelection then
+        mainPanel:RefreshSelection()
+    end
+
+    self:RefreshConsoleAddonSettingsHeader(mainPanel)
+    PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+
+    if SCENE_MANAGER:IsShowing("LibHarvensAddonSettingsScene") == false then
+        SCENE_MANAGER:Push("LibHarvensAddonSettingsScene")
     end
 end
 

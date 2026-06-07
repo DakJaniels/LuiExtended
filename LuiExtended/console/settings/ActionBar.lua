@@ -1177,11 +1177,15 @@ function ActionBar.CreateConsoleSettings()
                 { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_01),  data = 2 },
                 { name = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_001), data = 3 },
             },
-            getFunction = function () return Settings.CastBarTimerFormat end,
+            getFunction = function ()
+                return SettingsAPI:LHASDropdownGetData(
+                    SettingsAPI:NormalizeNumericIndexDropdown(
+                        Settings.CastBarTimerFormat, nil, Defaults.CastBarTimerFormat, 3))
+            end,
             setFunction = function (combobox, value, item)
                 Settings.CastBarTimerFormat = item.data
             end,
-            default = Defaults.CastBarTimerFormat,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CastBarTimerFormat),
             disable = function ()
                 return castBarOptionDisabled() or not Settings.CastBarTimer
             end,

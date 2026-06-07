@@ -552,6 +552,9 @@ ChatAnnouncements.Brackets =
 --- @field LootRecipeHideAlert boolean
 --- @field LootQuestAdd boolean
 --- @field LootQuestRemove boolean
+--- @field AttunableStationCA boolean
+--- @field AttunableStationCSA boolean
+--- @field AttunableStationAlert boolean
 
 --- Context message strings (loot/currency action labels).
 --- @class CAContextMessagesDefaults
@@ -1184,6 +1187,9 @@ ChatAnnouncements.Defaults =
         LootRecipeHideAlert = true,
         LootQuestAdd = true,
         LootQuestRemove = false,
+        AttunableStationCA = false,
+        AttunableStationCSA = true,
+        AttunableStationAlert = false,
     },
 
     ContextMessages =

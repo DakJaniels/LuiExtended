@@ -107,7 +107,7 @@ local strings =
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS = "Show Casts for Heavy Attacks",
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS_TP = "Affiche une barre d'incantation lors des attaques lourdes à l'arme.",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER = "Indicateurs de timing de weave (nécessite LibCombat)",
-    LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "Enregistre les timings de compétences LibCombat pour les marqueurs de weave sur la barre d'incantation. Si désactivé, la barre n'utilise que les événements de combat normaux (pas d'abonnement SKILL_TIMINGS).",
+    LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "Affiche des marqueurs colorés sur la barre d'incantation pour juger le timing de vos enchaînements avec attaque légère (vert = bon, jaune = trop lent, rouge = enchaînement de compétence). Désactivé : la barre ne suit que la durée normale des sorts et canaux.",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD = "Seuil de bon weave après attaque légère (ms)",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP = "Les weaves plus rapides que cette valeur après une attaque légère affichent un bord vert ; plus lents en jaune. Weave de compétence en rouge.",
     LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL = "Radial",

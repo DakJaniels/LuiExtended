@@ -107,7 +107,7 @@ local strings =
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS = "显示重攻击的施法条",
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS_TP = "使用武器进行重攻击时显示施法条。",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER = "编织时机提示（需要 LibCombat）",
-    LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "注册 LibCombat 技能时机，在施法条上显示编织标记。关闭时施法条仅使用普通战斗事件（不订阅 SKILL_TIMINGS）。",
+    LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "在施法条上显示彩色标记，帮助判断轻攻击编织时机（绿色=良好，黄色=偏慢，红色=技能编织）。关闭后，施法条仅显示普通法术与引导技能的持续时间。",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD = "轻攻击后良好编织阈值（毫秒）",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP = "轻攻击后快于此值的编织显示绿边；更慢为黄。技能编织为红。",
     LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL = "径向",

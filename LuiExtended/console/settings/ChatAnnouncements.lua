@@ -147,8 +147,13 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_LABEL,
-            label = GetString(LUIE_STRING_LAM_CHATOUTPUT_MOVED_NOTE),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_CONSOLE_OPEN_CHATOUTPUT_SETTINGS),
+            tooltip = GetString(LUIE_STRING_CONSOLE_OPEN_CHATOUTPUT_SETTINGS_TP),
+            buttonText = GetString(LUIE_STRING_CONSOLE_OPEN_CHATOUTPUT_SETTINGS),
+            clickHandler = function ()
+                SettingsAPI:OpenConsoleChatOutputSettings()
+            end,
         }
     end)
 
@@ -2529,6 +2534,57 @@ function ChatAnnouncements.CreateConsoleSettings()
         {
             type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+            getFunction = function ()
+                return Settings.Inventory.AttunableStationCA
+            end,
+            setFunction = function (value)
+                Settings.Inventory.AttunableStationCA = value
+            end,
+            default = Defaults.Inventory.AttunableStationCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+            getFunction = function ()
+                return Settings.Inventory.AttunableStationCSA
+            end,
+            setFunction = function (value)
+                Settings.Inventory.AttunableStationCSA = value
+            end,
+            default = Defaults.Inventory.AttunableStationCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_ATTUNABLE_STATION_ENABLE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+            getFunction = function ()
+                return Settings.Inventory.AttunableStationAlert
+            end,
+            setFunction = function (value)
+                Settings.Inventory.AttunableStationAlert = value
+            end,
+            default = Defaults.Inventory.AttunableStationAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
         }
     end)
 

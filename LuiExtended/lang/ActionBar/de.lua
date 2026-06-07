@@ -107,7 +107,7 @@ local strings =
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS = "Zauber für schwere Angriffe anzeigen",
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS_TP = "Zeigt eine Zauberleiste an, wenn schwere Angriffe mit Waffen ausgeführt werden.",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER = "Weave-Timing-Anzeigen (benötigt LibCombat)",
-    LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "Registriert LibCombat-Fertigkeitstimings für Weave-Markierungen auf der Zauberleiste. Wenn aus, nutzt die Zauberleiste nur normale Kampfereignisse (kein SKILL_TIMINGS-Abonnement).",
+    LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "Zeigt farbige Markierungen auf der Zauberleiste, damit du dein Leichtangriff-Weave-Timing einschätzen kannst (Grün = gut, Gelb = zu langsam, Rot = Fertigkeits-Weave). Wenn deaktiviert, zeigt die Leiste nur normale Zauber- und Kanaldauern.",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD = "Gute Leichtangriff-Weave-Schwelle (ms)",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP = "Weaves schneller als dieser Wert nach einem Leichtangriff zeigen einen grünen Rand; langsamere gelb. Skill-Weave zeigt rot.",
     LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL = "Kreisförmig",

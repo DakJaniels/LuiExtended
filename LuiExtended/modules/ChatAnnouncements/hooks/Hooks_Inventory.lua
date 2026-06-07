@@ -225,6 +225,65 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
         return true
     end
 
+    -- EVENT_CONSOLIDATED_STATION_SETS_UPDATED (CSA Handler)
+    local function ConsolidatedStationSetsUpdatedHook(craftingStationFurnitureId)
+        if not HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+            return true
+        end
+
+        local unlockedSetIds = {}
+        local previousSetId
+        while true do
+            local setId = GetNextDirtyUnlockedConsolidatedSmithingItemSetId(previousSetId)
+            if not setId then
+                break
+            end
+            table_insert(unlockedSetIds, setId)
+            previousSetId = setId
+        end
+
+        local numUnlockedSetIds = #unlockedSetIds
+        if numUnlockedSetIds == 0 then
+            return true
+        end
+
+        local inventory = ChatAnnouncements.SV.Inventory
+        local messageTitle = GetString(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_ANNOUNCEMENT_TITLE)
+        local messageSubheading
+        if numUnlockedSetIds == 1 then
+            local setName = GetItemSetName(unlockedSetIds[1])
+            messageSubheading = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_SINGLE_SET_MESSAGE, setName)
+        else
+            messageSubheading = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_MULTI_SET_MESSAGE, numUnlockedSetIds)
+        end
+
+        local stationIcon = select(2, GetPlacedHousingFurnitureInfo(craftingStationFurnitureId))
+
+        if inventory.AttunableStationCA then
+            local formattedIcon = inventory.LootIcons and stationIcon and ("|t16:16:" .. stationIcon .. "|t ") or ""
+            local finalMessage = zo_strformat("<<1>><<2>>: <<3>>", formattedIcon, messageTitle, messageSubheading)
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "MESSAGE" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        if inventory.AttunableStationAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat("<<1>> <<2>>", messageTitle, messageSubheading))
+        end
+
+        if inventory.AttunableStationCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CONSOLIDATED_SMITHING_SET_ADDED)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CONSOLIDATED_STATION_SETS_UPDATED)
+            messageParams:SetIconData(stationIcon)
+            messageParams:SetText(messageTitle, messageSubheading)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        elseif inventory.AttunableStationCA or inventory.AttunableStationAlert then
+            PlaySound(SOUNDS.CONSOLIDATED_SMITHING_SET_ADDED)
+        end
+
+        return true
+    end
+
     ZO_PreHook(alertHandlers, EVENT_STYLE_LEARNED, StyleLearnedHook)
     ZO_PreHook(alertHandlers, EVENT_RECIPE_LEARNED, RecipeLearnedHook)
     ZO_PreHook(alertHandlers, EVENT_MULTIPLE_RECIPES_LEARNED, MultipleRecipeLearnedHook)
@@ -232,6 +291,7 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
     ZO_PreHook(csaHandlers, EVENT_RIDING_SKILL_IMPROVEMENT, RidingSkillImprovementHook)
     ZO_PreHook(csaHandlers, EVENT_INVENTORY_BAG_CAPACITY_CHANGED, InventoryBagCapacityHook)
     ZO_PreHook(csaHandlers, EVENT_INVENTORY_BANK_CAPACITY_CHANGED, InventoryBankCapacityHook)
+    ZO_PreHook(csaHandlers, EVENT_CONSOLIDATED_STATION_SETS_UPDATED, ConsolidatedStationSetsUpdatedHook)
 
     --- @param self ZO_InventoryManager
     --- @param questItem questItem
