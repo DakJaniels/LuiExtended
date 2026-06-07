@@ -7,7 +7,9 @@ local LUIE = LUIE
 
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
+--- @type CAState
 local S = ChatAnnouncements.State
+--- @type CAInternal
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
 local ColorizeColors = ChatAnnouncements.Colors
@@ -233,6 +235,9 @@ function ChatAnnouncements.GuildHeraldrySaved()
     end
     S.g_heraldrySaveGuildId = nil
 end
+
+--- @param eventId integer
+--- @param guildId integer
 function ChatAnnouncements.GuildRanksSaved(eventId, guildId)
     local guildName = GetGuildName(guildId)
     local guildAlliance = GetGuildAlliance(guildId)
@@ -251,6 +256,9 @@ function ChatAnnouncements.GuildRanksSaved(eventId, guildId)
     end
 end
 
+--- @param eventId integer
+--- @param guildId integer
+--- @param rankIndex integer
 function ChatAnnouncements.GuildRankSaved(eventId, guildId, rankIndex)
     local rankName
     local rankNameDefault = GetDefaultGuildRankName(guildId, rankIndex)
@@ -280,6 +288,8 @@ function ChatAnnouncements.GuildRankSaved(eventId, guildId, rankIndex)
     end
 end
 
+--- @param eventId integer
+--- @param guildId integer
 function ChatAnnouncements.GuildTextChanged(eventId, guildId)
     local guildName = GetGuildName(guildId)
     local guildAlliance = GetGuildAlliance(guildId)
@@ -302,6 +312,10 @@ function ChatAnnouncements.GuildTextChanged(eventId, guildId)
     end
 end
 
+--- @param eventId integer
+--- @param guildId integer
+--- @param displayName string
+--- @param newRank integer
 function ChatAnnouncements.GuildRankChanged(eventId, guildId, displayName, newRank)
     -- Don't show this for the player since EVENT_GUILD_PLAYER_RANK_CHANGED will handle that
     if displayName == LUIE.PlayerDisplayName then
@@ -351,6 +365,10 @@ function ChatAnnouncements.GuildRankChanged(eventId, guildId, displayName, newRa
     end
 end
 
+--- @param eventId integer
+--- @param guildId integer
+--- @param rankIndex integer
+--- @param guildRankChangeAction GuildRankChangeAction
 function ChatAnnouncements.GuildPlayerRankChanged(eventId, guildId, rankIndex, guildRankChangeAction)
     local rankText = GetFinalGuildRankName(guildId, rankIndex)
     local icon = GetFinalGuildRankTextureSmall(guildId, rankIndex)
@@ -381,6 +399,10 @@ function ChatAnnouncements.GuildPlayerRankChanged(eventId, guildId, rankIndex, g
     end
 end
 
+--- @param eventId integer
+--- @param displayName string
+--- @param newRankIndex integer
+--- @param guildId integer
 function ChatAnnouncements.GuildMemberPromoteSuccessful(eventId, displayName, newRankIndex, guildId)
     if newRankIndex > 0 then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
@@ -405,6 +427,10 @@ function ChatAnnouncements.GuildMemberPromoteSuccessful(eventId, displayName, ne
     S.g_disableRankMessage = true
 end
 
+--- @param eventId integer
+--- @param displayName string
+--- @param newRankIndex integer
+--- @param guildId integer
 function ChatAnnouncements.GuildMemberDemoteSuccessful(eventId, displayName, newRankIndex, guildId)
     if newRankIndex <= GetNumGuildRanks(guildId) then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
@@ -430,6 +456,9 @@ function ChatAnnouncements.GuildMemberDemoteSuccessful(eventId, displayName, new
 end
 
 -- EVENT_GUILD_SELF_JOINED_GUILD
+--- @param eventId integer
+--- @param guildId integer
+--- @param guildName string
 function ChatAnnouncements.GuildAddedSelf(eventId, guildId, guildName)
     local guilds = GetNumGuilds()
     for i = 1, guilds do
@@ -454,6 +483,11 @@ function ChatAnnouncements.GuildAddedSelf(eventId, guildId, guildName)
 end
 
 -- EVENT_GUILD_INVITE_ADDED
+--- @param eventId integer
+--- @param guildId integer
+--- @param guildName string
+--- @param guildAlliance Alliance
+--- @param inviterName string
 function ChatAnnouncements.GuildInviteAdded(eventId, guildId, guildName, guildAlliance, inviterName)
     local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(inviterName, inviterName)
     local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
@@ -467,7 +501,7 @@ function ChatAnnouncements.GuildInviteAdded(eventId, guildId, guildName, guildAl
     end
 end
 
-
+--- @param ctx CAHookContext
 function ChatAnnouncements.Hooks.RegisterGuild(ctx)
     local alertHandlers = ctx.alertHandlers
     local csaHandlers = ctx.csaHandlers

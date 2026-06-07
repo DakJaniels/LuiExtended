@@ -8,6 +8,7 @@ local LUIE = LUIE
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+--- @type CAInternal
 local Internal = ChatAnnouncements.Internal
 
 ChatAnnouncements.Hooks = ChatAnnouncements.Hooks or {}
@@ -18,9 +19,13 @@ ChatAnnouncements.Hooks = ChatAnnouncements.Hooks or {}
 --- @field csaCallbackHandlers table
 --- @field eventManager table
 --- @field moduleName string
---- @field SV table
+--- @field SV CADefaults
 --- @field FindCsaCallbackHandler fun(registrationName: string, callbackManager?: table): table|nil
 
+--- @param csaCallbackHandlers table
+--- @param registrationName string
+--- @param callbackManager table
+--- @return table|nil
 function Internal.FindCsaCallbackHandler(csaCallbackHandlers, registrationName, callbackManager)
     for index = 1, #csaCallbackHandlers do
         local handler = csaCallbackHandlers[index]
@@ -32,20 +37,29 @@ function Internal.FindCsaCallbackHandler(csaCallbackHandlers, registrationName, 
     end
 end
 
+--- @return boolean
 function Internal.AnyExperienceLevelUpAnnouncementEnabled()
     local xp = ChatAnnouncements.SV.XP
     return xp.ExperienceLevelUpCA or xp.ExperienceLevelUpCSA or xp.ExperienceLevelUpAlert
 end
 
+--- @return boolean
 function Internal.AnyVengeanceLoadoutAnnouncementEnabled()
     return Internal.AnyExperienceLevelUpAnnouncementEnabled()
 end
 
+--- @return boolean
 function Internal.AnyDisplayGeneralAnnouncementEnabled()
     local general = ChatAnnouncements.SV.DisplayAnnouncements.General
     return general.CA or general.CSA or general.Alert
 end
 
+--- @param alertHandlers table
+--- @param csaHandlers table
+--- @param csaCallbackHandlers table
+--- @param eventManager table
+--- @param moduleName string
+--- @return CAHookContext
 function ChatAnnouncements.Hooks.BuildContext(alertHandlers, csaHandlers, csaCallbackHandlers, eventManager, moduleName)
     --- @type CAHookContext
     local ctx =
@@ -83,6 +97,7 @@ local REGISTER_ORDER =
     "RegisterCsaCallbacks",
 }
 
+--- @param ctx CAHookContext
 function ChatAnnouncements.Hooks.RegisterAll(ctx)
     for _, registerName in ipairs(REGISTER_ORDER) do
         local fn = ChatAnnouncements.Hooks[registerName]

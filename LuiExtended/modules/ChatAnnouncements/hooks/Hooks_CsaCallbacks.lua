@@ -8,6 +8,7 @@ local LUIE = LUIE
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+--- @type CAInternal
 local Internal = ChatAnnouncements.Internal
 local ColorizeColors = ChatAnnouncements.Colors
 
@@ -35,6 +36,7 @@ local function PreHookCsaCallback(ctx, registrationName, callbackManager, hookFn
     end
 end
 
+--- @param ctx CAHookContext
 function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
     local eventManager = ctx.eventManager
     local moduleName = ctx.moduleName

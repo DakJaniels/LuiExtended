@@ -7,7 +7,9 @@ local LUIE = LUIE
 
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
+--- @type CAState
 local S = ChatAnnouncements.State
+--- @type CAInternal
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
 local ColorizeColors = ChatAnnouncements.Colors
@@ -22,6 +24,7 @@ local windowManager = GetWindowManager()
 local CHAMPION_UNLOCKED_LIFESPAN_MS = 12000
 local EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
 
+--- @param ctx CAHookContext
 function ChatAnnouncements.Hooks.RegisterXP(ctx)
     local alertHandlers = ctx.alertHandlers
     local csaHandlers = ctx.csaHandlers
@@ -552,5 +555,4 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
             ZO_PreHook(veterancyClaimHandler, "callbackFunction", VeterancyRepeatableRankClaimedHook)
         end
     end
-
 end

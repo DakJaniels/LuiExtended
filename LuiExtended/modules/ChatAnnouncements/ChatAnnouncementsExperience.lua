@@ -49,6 +49,12 @@ local function GetSkillLineInfo(skillType, skillLineIndex)
 end
 
 -- EVENT_EXPERIENCE_GAIN HANDLER
+--- @param eventId integer
+--- @param reason integer
+--- @param level integer
+--- @param previousExperience integer
+--- @param currentExperience integer
+--- @param championPoints integer
 function ChatAnnouncements.OnExperienceGain(eventId, reason, level, previousExperience, currentExperience, championPoints)
     -- d("Experience Gain) previousExperience: " .. previousExperience .. " --- " .. "currentExperience: " .. currentExperience)
     if ChatAnnouncements.SV.XP.Experience and (not (ChatAnnouncements.SV.XP.ExperienceHideCombat and reason == PROGRESS_REASON_KILL) or not reason == PROGRESS_REASON_KILL) then
@@ -81,6 +87,7 @@ function ChatAnnouncements.OnExperienceGain(eventId, reason, level, previousExpe
 end
 
 -- Print Experience Gain
+--- @param change integer
 function ChatAnnouncements.PrintExperienceGain(change)
     local icon = ChatAnnouncements.SV.XP.ExperienceIcon and "|t16:16:/esoui/art/icons/icon_experience.dds|t " or ""
     local xpName = zo_strformat(ChatAnnouncements.GetModuleMessageFormat("XP", "ExperienceName"), change)
@@ -104,6 +111,13 @@ function ChatAnnouncements.PrintBufferedXP()
 end
 
 -- EVENT_SKILL_XP_UPDATE HANDLER
+--- @param eventId integer
+--- @param skillType SkillType
+--- @param skillIndex integer
+--- @param reason integer
+--- @param rank integer
+--- @param previousXP integer
+--- @param currentXP integer
 function ChatAnnouncements.SkillXPUpdate(eventId, skillType, skillIndex, reason, rank, previousXP, currentXP)
     if skillType == SKILL_TYPE_GUILD then
         local lineName, _, _, lineId = GetSkillLineInfo(skillType, skillIndex)
@@ -194,6 +208,10 @@ local GUILD_SKILL_ICONS =
 }
 
 -- Print Guild Rep Gain
+--- @param change integer
+--- @param lineName string
+--- @param lineId integer
+--- @param priority integer
 function ChatAnnouncements.PrintGuildRep(change, lineName, lineId, priority)
     local icon = zo_iconFormatInheritColor(GUILD_SKILL_ICONS[lineId], 16, 16)
     local formattedIcon = ChatAnnouncements.SV.Skills.SkillGuildIcon and (icon .. " ") or ""

@@ -8,8 +8,10 @@ local LUIE = LUIE
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+--- @type CAInternal
 local Internal = ChatAnnouncements.Internal
 
+--- @param ctx CAHookContext
 function ChatAnnouncements.Hooks.RegisterVengeance(ctx)
     if not ZO_VENGEANCE_MANAGER then
         return

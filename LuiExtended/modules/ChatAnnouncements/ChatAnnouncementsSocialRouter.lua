@@ -61,6 +61,8 @@ local function ShouldSuppressSocialErrorRouter(_, error)
     return ShouldShowSocialErrorInChat(error)
 end
 
+--- @param _ integer
+--- @param error integer
 function ChatAnnouncements.OnErrorSocialChat(_, error)
     if not ChatAnnouncements.Enabled or not ChatAnnouncements.SV.Notify.SocialErrorCA then
         return

@@ -7,7 +7,9 @@ local LUIE = LUIE
 
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
+--- @type CAState
 local S = ChatAnnouncements.State
+--- @type CAInternal
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
 local ColorizeColors = ChatAnnouncements.Colors
@@ -18,6 +20,7 @@ local string_format = string.format
 local table_insert = table.insert
 local windowManager = GetWindowManager()
 
+--- @param ctx CAHookContext
 function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
     local alertHandlers = ctx.alertHandlers
     local csaHandlers = ctx.csaHandlers

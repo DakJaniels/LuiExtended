@@ -14,6 +14,7 @@ local Internal = ChatAnnouncements.Internal
 local string_format = string.format
 
 -- EVENT_SKILL_XP CSA hooks
+--- @type table<integer, boolean>
 ChatAnnouncements.GUILD_SKILL_SHOW_REASONS =
 {
     [PROGRESS_REASON_DARK_ANCHOR_CLOSED] = true,
@@ -21,6 +22,7 @@ ChatAnnouncements.GUILD_SKILL_SHOW_REASONS =
     [PROGRESS_REASON_BOSS_KILL] = true,
 }
 
+--- @type table<integer, integer>
 ChatAnnouncements.GUILD_SKILL_SHOW_SOUNDS =
 {
     [PROGRESS_REASON_DARK_ANCHOR_CLOSED] = SOUNDS.SKILL_XP_DARK_ANCHOR_CLOSED,
@@ -29,6 +31,7 @@ ChatAnnouncements.GUILD_SKILL_SHOW_SOUNDS =
 }
 
 -- EVENT_SKILL_POINTS_CHANGED (CSA Handler)
+--- @type table<integer, boolean>
 ChatAnnouncements.SUPPRESS_SKILL_POINT_CSA_REASONS =
 {
     [SKILL_POINT_CHANGE_REASON_IGNORE] = true,
@@ -37,6 +40,7 @@ ChatAnnouncements.SUPPRESS_SKILL_POINT_CSA_REASONS =
 }
 
 --- @param barParams CenterScreenPlayerProgressBarParams
+--- @return nil
 function Internal.ValidateProgressBarParams(barParams)
     local barType = barParams:GetParams()
     if not (barType and PLAYER_PROGRESS_BAR:GetBarTypeInfoByBarType(barType)) then
@@ -45,6 +49,12 @@ function Internal.ValidateProgressBarParams(barParams)
     end
 end
 
+--- @param level integer
+--- @param previousExperience integer
+--- @param currentExperience integer
+--- @param championPoints integer
+--- @param triggeringEvent integer
+--- @return CenterScreenPlayerProgressBarParams|nil
 function Internal.GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, triggeringEvent)
     local championXpToNextPoint
     if CanUnitGainChampionPoints("player") then
@@ -64,6 +74,8 @@ function Internal.GetRelevantBarParams(level, previousExperience, currentExperie
     end
 end
 
+--- @param triggeringEvent integer
+--- @return CenterScreenPlayerProgressBarParams
 function Internal.GetCurrentChampionPointsBarParams(triggeringEvent)
     local championPoints = GetPlayerChampionPointsEarned()
     local currentChampionXP = GetPlayerChampionXP()

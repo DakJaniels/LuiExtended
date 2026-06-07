@@ -6,12 +6,11 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
--- ChatAnnouncements namespace
+-- ChatAnnouncements namespace (see ChatAnnouncementsTypes.lua for full partial class fields)
 --- @class (partial) ChatAnnouncements
---- @field SV CADefaults
+--- @type ChatAnnouncements
 local ChatAnnouncements = {}
 
---- @class (partial) ChatAnnouncements
 LUIE.ChatAnnouncements = ChatAnnouncements
 
 --- @class QueuedMessage
@@ -20,7 +19,7 @@ LUIE.ChatAnnouncements = ChatAnnouncements
 --- @field isSystem? boolean
 --- @field itemId? integer
 --- @field formattedRecipient? string
---- @field color? any
+--- @field color? string
 --- @field logPrefix? string
 --- @field totalString? string
 --- @field groupLoot? boolean
@@ -31,15 +30,22 @@ ChatAnnouncements.QueuedMessages = {} --- @type table<integer,QueuedMessage>
 ChatAnnouncements.QueuedMessagesCounter = 1
 
 -- Setup Color Table
-ChatAnnouncements.Colors = {}
+local caColors = {}
+--- @cast caColors CAColors
+ChatAnnouncements.Colors = caColors
 
 -- Runtime flags, indexes, and session state (see ChatAnnouncements.lua init).
-ChatAnnouncements.State = {}
+local caState = {}
+--- @cast caState CAState
+ChatAnnouncements.State = caState
 
 -- File-scope helpers (Lua 5.1 local limit); defined in ChatAnnouncements.lua / ChatAnnouncementsCSA.lua.
-ChatAnnouncements.Internal = {}
+local caInternal = {}
+--- @cast caInternal CAInternal
+ChatAnnouncements.Internal = caInternal
 
 -- Bracket / link-style options for formatted CA strings (read-only).
+--- @type CABrackets
 ChatAnnouncements.Brackets =
 {
     bracket1 =
@@ -1392,6 +1398,7 @@ ChatAnnouncements.Defaults =
 }
 
 --- Maps ChatAnnouncements.SV.ContextMessages keys to LUIE_STRING_CA_* ids (runtime resolution via _MessageFormatResolver.lua).
+--- @type CAContextMessageDefaultStringIds
 ChatAnnouncements.ContextMessageDefaultStringIds =
 {
     CurrencyMessageConfiscate = LUIE_STRING_CA_CURRENCY_MESSAGE_CONFISCATE,

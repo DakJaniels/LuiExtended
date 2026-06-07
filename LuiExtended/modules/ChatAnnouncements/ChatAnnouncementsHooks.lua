@@ -9,6 +9,7 @@ local LUIE = LUIE
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+--- @type CAState
 local S = ChatAnnouncements.State
 local B = ChatAnnouncements.Brackets
 
@@ -31,6 +32,7 @@ function ChatAnnouncements.HookFunction()
     ChatAnnouncements.Hooks.RegisterAll(ctx)
 end
 
+--- @param eventId integer
 function ChatAnnouncements.TradeInviteAccepted(eventId)
     if ChatAnnouncements.SV.Notify.NotificationTradeCA then
         ChatOutput:Print(GetString(LUIE_STRING_CA_TRADE_INVITE_ACCEPTED), true)
@@ -48,6 +50,10 @@ function ChatAnnouncements.TradeInviteAccepted(eventId)
     S.g_inTrade = true
 end
 
+--- @param eventId integer
+--- @param who string
+--- @param tradeIndex integer
+--- @param itemSoundCategory integer
 function ChatAnnouncements.OnTradeAdded(eventId, who, tradeIndex, itemSoundCategory)
     local index = tradeIndex
     local name, icon, stack = GetTradeItemInfo(who, tradeIndex)
@@ -62,6 +68,10 @@ function ChatAnnouncements.OnTradeAdded(eventId, who, tradeIndex, itemSoundCateg
     end
 end
 
+--- @param eventId integer
+--- @param who string
+--- @param tradeIndex integer
+--- @param itemSoundCategory integer
 function ChatAnnouncements.OnTradeRemoved(eventId, who, tradeIndex, itemSoundCategory)
     local indexOut = tradeIndex
     if who == 0 then

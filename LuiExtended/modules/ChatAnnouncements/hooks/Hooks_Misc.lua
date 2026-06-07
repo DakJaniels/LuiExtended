@@ -8,6 +8,7 @@ local LUIE = LUIE
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+--- @param _ctx CAHookContext
 function ChatAnnouncements.Hooks.RegisterMisc(_ctx)
     ChatAnnouncements.PlayerToPlayerHook()
 end
