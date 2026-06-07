@@ -909,6 +909,7 @@ local barHighlightOverride =
     [253156] = { newId = 253163, combatTrack = true },                                    -- Vengeance Grave Grasp (QUEUED / ON CD / target 253163)
     [246025] = { newId = 246026, combatTrack = true, duration = 20000 },                  -- Vengeance Bone Armor (246025 GAIN DUR; 61694 on player)
     [246026] = { newId = 246026, combatTrack = true, duration = 20000 },                  -- Vengeance Bone Armor (246026 parallel GAIN DUR / FADE)
+    [238178] = { newId = 238178, combatTrack = true, noRemove = true, duration = 4000 },  -- Vengeance Bone Totem (tooltip Duration 4s; log GAIN D 4000 + ground ~2s arm)
     [238258] = { newId = 238258, showFakeAura = true, noRemove = true, duration = 1000 }, -- Vengeance Life amid Death (ground)
     [238137] = { newId = 238137, combatTrack = true },                                    -- Vengeance Death Scythe (ON CD / OOR / STUN / STAGGER)
     [238129] = { newId = 238129, showFakeAura = true, noRemove = true, duration = 3000 }, -- Vengeance Frozen Colossus (ground; log 238129/238130 GAIN)
@@ -925,6 +926,28 @@ local barHighlightOverride =
     [255479] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (255479 GAIN DUR; FADE on detonate cast)
     [255498] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (ground BEGIN; remap to proc bar)
     [255512] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (player track GAIN DUR; FADE with proc)
+
+    -- Alliance War — Vanguard kit (log 2025-06-07)
+    [255681] = { newId = 255682, showFakeAura = true, noRemove = true, duration = 20000 }, -- In The Fray --> player track 255682
+    [255689] = { newId = 255689, combatTrack = true, duration = 6000 },                     -- Warding Interception + Major Protection 61722
+    [255673] = { newId = 269817, noRemove = true },                                          -- Ensnaring Chains --> target ROOT 269817
+    [255789] = { newId = 255789, showFakeAura = true, noRemove = true, duration = 2000 },   -- Unleashed Fury channel
+    [255952] = { newId = 255952, noRemove = true },                                          -- Demoralizing Disruption (silence on target)
+    [255650] = { newId = 255651 },                                                           -- Shoulder Toss (slotted) --> target stun
+    [255651] = { combatTrack = true, noRemove = true, duration = 1400 },                   -- Stun on reticle (~1.4s; log GAIN DUR 1390)
+
+    -- Alliance War — Scout kit (log 2025-06-07)
+    [256557] = { newId = 256560, noRemove = true },                                          -- Blade Bite --> target bleed
+    [256560] = { combatTrack = true, noRemove = true, duration = 6000 },                     -- Bleed track (stacks ≤3)
+    [256690] = { combatTrack = true, noRemove = true, duration = 4000 },                     -- Nimble Feint disorient on reticle (log GAIN DUR 4000)
+    [256692] = { showFakeAura = true, duration = 3000 },                                     -- Nimble Feint Fatigue (3s CD; CheckOnFade durationMod only)
+    [256693] = { showFakeAura = true, duration = 4000 },                                     -- Nimble Feint Dummy (4s window; CheckOnFade duration only)
+    [256715] = { showFakeAura = true, duration = 4000 },                                     -- Cleansing Shadow Dummy (4s CD; CheckOnFade duration only)
+    [256694] = { newId = 256695, showFakeAura = true, noRemove = true, duration = 20000 },   -- Stalker's Quarry --> player track
+    [256695] = { newId = 256695, combatTrack = true, duration = 20000 },                     -- Parallel player GAIN DUR / FADE
+    [256713] = { showFakeAura = true, noRemove = true },                                     -- Cleansing Shadow (player invis 3s; CD 4s -- combat + CheckOnFade)
+    [256716] = { newId = 256716, showFakeAura = true, noRemove = true, duration = 5000 },  -- Burst of Speed
+    [256736] = { newId = 256736, combatTrack = true, noRemove = true, duration = 6000 },   -- Focus Fire ult (target GAIN DUR + Major Brittle)
 
     ---------------------------
     -- Temp -------------------

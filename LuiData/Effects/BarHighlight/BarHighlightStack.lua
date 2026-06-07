@@ -42,6 +42,9 @@ local barHighlightStack =
     [114131] = 3, -- Flame Skull charges (display capped in ActionBar)
     [117625] = 3, -- Venom Skull charges
     [117638] = 3, -- Ricochet Skull charges
+
+    -- Alliance War — Vengeance Scout
+    [256560] = 3, -- Blade Bite bleed stacks on target
 }
 
 --- Slotted bound id consumes one stack on this track buff id when cast (combat may not emit per-stack GAIN).

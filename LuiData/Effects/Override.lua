@@ -3131,6 +3131,8 @@ local effectOverride =
     [118618] = { tooltip = Tooltips.Generic_Magic, tooltipValue2 = 1 }, -- Pure Agony (Agony Totem - Pure Agony Synergy)
     [118404] = { tooltip = Tooltips.Skill_Agony_Totem },                -- Agony Totem (Agony Totem)
     [118411] = { tooltip = Tooltips.Generic_Fear },                     -- Agony Totem (Agony Totem)
+    [238178] = { tooltip = Tooltips.Skill_Bone_Totem },                 -- Vengeance Bone Totem
+    [238179] = { tooltip = Tooltips.Generic_Fear },                     -- Vengeance Bone Totem (fear on target)
 
     -- Grave Grasp / Ghostly Embrace / Empowering Grasp
     [121513] = { tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 },                                                          -- Grave Grasp (Grave Grasp)
@@ -3138,7 +3140,18 @@ local effectOverride =
     [143917] = { icon = "/esoui/art/icons/ability_necromancer_009.dds", tooltip = Tooltips.Generic_Stun },                        -- Grave Grasp (Grave Grasp)
     [253163] = { tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 },                                                          -- Vengeance Grave Grasp
     [253164] = { hide = true },                                                                                                   -- Vengeance Grave Grasp (Minor Maim combat)
+    [255674] = { hide = true },                                                                                                   -- Vengeance Ensnaring Chains (Minor Maim combat)
+    [255940] = { hide = true },                                                                                                   -- Vengeance Unleashed Fury (damage)
+    [255652] = { hide = true },                                                                                                   -- Vengeance Shoulder Toss (knockback combat)
+    [238180] = { hide = true },                                                                                                   -- Vengeance Bone Totem (Major Maim combat; display 61725)
     [238138] = { hide = true },                                                                                                   -- Vengeance Death Scythe (heal tick)
+    [256691] = { hide = true },                                                                                                   -- Vengeance Nimble Feint (leap buff)
+    [256692] = { hide = true },                                                                                                   -- Nimble Feint Fatigue (CheckOnFade durationMod only)
+    [256698] = { hide = true },                                                                                                   -- Vengeance Stalker's Quarry (Minor Force combat; display 61746)
+    [256560] = { tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 },                                                         -- Vengeance Blade Bite bleed on target
+    [256690] = { tooltip = Tooltips.Generic_Disorient },                                                                        -- Vengeance Nimble Feint (disorient on target)
+    [256693] = { hide = true },                                                                                                 -- Nimble Feint dummy (CheckOnFade duration math only)
+    [256715] = { hide = true },                                                                                                 -- Cleansing Shadow dummy (CheckOnFade duration math only)
 
     [118309] = { icon = "/esoui/art/icons/ability_necromancer_009_b.dds", tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 }, -- Ghostly Embrace (Ghostly Embrace)
     [118325] = { icon = "/esoui/art/icons/ability_necromancer_009_b.dds", tooltip = Tooltips.Generic_Immobilize },                -- Ghostly Embrace (Ghostly Embrace)

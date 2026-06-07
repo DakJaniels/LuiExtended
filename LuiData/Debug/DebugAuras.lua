@@ -17484,6 +17484,10 @@ local debugAuras =
     [238129] = true, -- Vengeance Frozen Colossus (ground)
     [238130] = true, -- Vengeance Frozen Colossus (ground bundle)
     [238132] = true, -- Vengeance Frozen Colossus (damage)
+    [238178] = true, -- Vengeance Bone Totem (slotted / ground)
+    [238179] = true, -- Vengeance Bone Totem (fear)
+    [238180] = true, -- Vengeance Bone Totem (Major Maim combat)
+    [238181] = true, -- Vengeance Bone Totem (bar track)
 
     -- Cyrodiil Vengeance — Soldier kit (Vengeance Soldier line)
     [255057] = true, -- Sweeping Assault
@@ -17501,6 +17505,40 @@ local debugAuras =
     [255498] = true, -- Detonating Strike (ground)
     [255512] = true, -- Detonating Strike (player track)
     [255550] = true, -- Detonating Strike (ground tick)
+
+    -- Cyrodiil Vengeance — Vanguard kit (log 2025-06-07)
+    [255952] = true, -- Demoralizing Disruption (slotted ult)
+    [255953] = true, -- Demoralizing Disruption (stun on target)
+    [255650] = true, -- Shoulder Toss (slotted)
+    [255651] = true, -- Shoulder Toss (stun on target)
+    [255652] = true, -- Shoulder Toss (knockback combat)
+    [255673] = true, -- Ensnaring Chains (slotted)
+    [269817] = true, -- Ensnaring Chains (ROOT on target)
+    [255674] = true, -- Ensnaring Chains (Minor Maim combat)
+    [61723] = true,  -- Minor Maim (Ensnaring on target)
+    [255681] = true, -- In The Fray (slotted)
+    [255682] = true, -- In The Fray (player track)
+    [255689] = true, -- Warding Interception (slotted)
+    [61722] = true,  -- Major Protection (Warding on player)
+    [255789] = true, -- Unleashed Fury (slotted / channel)
+    [255940] = true, -- Unleashed Fury (damage)
+
+    -- Cyrodiil Vengeance — Scout kit (log 2025-06-07)
+    [256557] = true, -- Blade Bite (slotted)
+    [256560] = true, -- Blade Bite (bleed on target)
+    [256584] = true, -- Blade Bite (morph chain; optional audit)
+    [256690] = true, -- Nimble Feint (slotted / disorient)
+    [256691] = true, -- Nimble Feint (leap buff)
+    [256692] = true, -- Nimble Feint (fatigue)
+    [256693] = true, -- Nimble Feint dummy
+    [256694] = true, -- Stalker's Quarry (slotted / target mark)
+    [256695] = true, -- Stalker's Quarry (player track)
+    [256698] = true, -- Stalker's Quarry (Minor Force combat)
+    [256713] = true, -- Cleansing Shadow
+    [256714] = true, -- Cleansing Shadow (base id; CheckOnFade fallback)
+    [256715] = true, -- Cleansing Shadow dummy (4s carrier)
+    [256716] = true, -- Burst of Speed
+    [256736] = true, -- Focus Fire (slotted ult)
 
     [117979] = true, -- Accursed Charge (Accursed Charge)
     [117980] = true, -- Accursed Charge (Accursed Charge)

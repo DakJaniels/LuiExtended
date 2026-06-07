@@ -156,6 +156,7 @@ local barHighlightExtraId =
     [238132] = 238129, -- Vengeance Frozen Colossus (damage tick --> ground bar key)
     [255480] = 255479, -- Detonating Strike (damage combat --> proc bar)
     [255550] = 255479, -- Detonating Strike (ground tick --> proc bar)
+    [61722] = 255689,  -- Warding Interception --> Major Protection (player buff drives slotted bar)
 
     -- Two Handed
     [16825] = 38814,  -- Off Balance Exploit stun --> Dizzying Swing (bar slot)
