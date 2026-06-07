@@ -70,6 +70,23 @@ local savedPlayerZ = 0.000000000000000
 local playerX = 0.000000000000000
 local playerZ = 0.000000000000000
 
+local function castBarClearWorldMapFix()
+    g_castbarWorldMapFix = false
+    eventManager:UnregisterForUpdate(moduleName .. "CastBarFix")
+end
+
+local function castBarSyncPlayerMapPosition()
+    playerX, playerZ = GetMapPlayerPosition("player")
+    savedPlayerX = playerX
+    savedPlayerZ = playerZ
+end
+
+--- @param castId integer
+--- @return boolean
+local function castBarShouldBreakCastOnMove(castId)
+    return castId and castId ~= 0 and Castbar.BreakCastOnMove[castId] == true
+end
+
 local WEAVE_EDGE_SLOW_CASTBAR = ZO_ColorDef:New(1, 1, 0)
 local g_castBarLibCombatTimingsActive = false
 local g_castBarLibCombatLastStartMs = 0
@@ -295,6 +312,8 @@ function CastBar.OnPlayerActivated()
     end
     CastBar.StopCastBar()
     castBarClearTransientCastBarState()
+    castBarClearWorldMapFix()
+    castBarSyncPlayerMapPosition()
     g_castBarPostActivateShowSuppressUntilMs = GetFrameTimeMilliseconds() + 2000
     local pair = ActionBar.GetHeldWeaponPair()
     if pair and pair ~= ACTIVE_WEAPON_PAIR_NONE then
@@ -437,6 +456,7 @@ function CastBar.ShowCast(abilityId, startTimeMs, durationMs, channeled, castAbi
         ActionBar.ApplyDisplayAlpha()
     end
     g_casting = true
+    castBarSyncPlayerMapPosition()
     if startedFromLibCombat then
         CastBar.Private.RecordLibCombatCastStart(abilityId, startTimeMs)
     end
@@ -634,8 +654,7 @@ end
 
 -- -----------------------------------------------------------------------------
 local function CastBarWorldMapFix()
-    g_castbarWorldMapFix = false
-    eventManager:UnregisterForUpdate(moduleName .. "CastBarFix")
+    castBarClearWorldMapFix()
 end
 
 -- -----------------------------------------------------------------------------
@@ -644,8 +663,10 @@ end
 function CastBar.OnGameCameraUIModeChanged()
     -- Changing zones in the World Map for some reason changes the player coordinates so when the player clicks on a Wayshrine to teleport the cast gets interrupted
     -- This buffer fixes this issue
-    g_castbarWorldMapFix = true
-    eventManager:RegisterForUpdate(moduleName .. "CastBarFix", 500, CastBarWorldMapFix)
+    if g_casting then
+        g_castbarWorldMapFix = true
+        eventManager:RegisterForUpdate(moduleName .. "CastBarFix", 500, CastBarWorldMapFix)
+    end
     -- Break Siege Deployment casts when opening UI windows
     if Castbar.BreakSiegeOnWindowOpen[g_castBarState.id] then
         CastBar.StopCastBar()
@@ -1342,15 +1363,22 @@ function CastBar.TickInterruptChecks()
     if savedPlayerX == playerX and savedPlayerZ == playerZ then
         return
     else
-        -- Fix if the player clicks on a Wayshrine in the World Map
-        if g_castbarWorldMapFix == false then
-            if Castbar.BreakCastOnMove[g_castBarState.id] then
+        -- Fix if the player clicks on a Wayshrine in the World Map (suppress coord jump while not moving; real movement still breaks)
+        if castBarShouldBreakCastOnMove(g_castBarState.id) then
+            if g_castbarWorldMapFix == false or IsPlayerMoving() then
+                local castId = g_castBarState.id
+                logCastBar(
+                    "TickInterrupt moveBreak ability=%s worldMapFix=%s isMoving=%s",
+                    castBarFormatAbilityRef(castId),
+                    tostring(g_castbarWorldMapFix),
+                    tostring(IsPlayerMoving()))
                 CastBar.StopCastBar()
-                -- TODO: Note probably should make StopCastBar event clear the id on it too. Not doing this right now due to not wanting to troubleshoot possible issues before update release.
+                castBarSuppressAbilityBriefly(castId)
+                castBarClearWorldMapFix()
+            elseif g_castbarWorldMapFix == true then
+                g_castbarWorldMapFix = false
             end
-        end
-        -- Only have this enabled for 1 tick max (the players coordinates only update 1 time after the World Map is closed so if the player moves before 500 ms we want to cancel the cast bar still)
-        if g_castbarWorldMapFix == true then
+        elseif g_castbarWorldMapFix == true then
             g_castbarWorldMapFix = false
         end
     end

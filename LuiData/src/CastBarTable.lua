@@ -168,6 +168,11 @@ local castBarTable =
         [199791] = true, -- Recall of the Crusader
         [181388] = true, -- Recall of the Galen Wilds
         [221093] = true, -- Recall of the Outer Darkness
+        [229849] = true, -- Mages Guild Recall
+        [240795] = true, -- World-Eater's Fiery Recall
+        [259040] = true, -- Codename
+        [247620] = true, -- Recall of the Wingblade
+        [232080] = true, -- Bramblebird Recall
 
         -- Misc Items
         [63427] = true, -- Clean Fish (Filet Fish)
@@ -736,7 +741,7 @@ local castBarTable =
         [221093] = true, -- Recall of the Outer Darkness
         [229849] = true, -- Mages Guild Recall
         [240795] = true, -- World-Eater's Fiery Recall
-        [259040] = true,
+        [259040] = true, -- Codename
         [247620] = true, -- Recall of the Wingblade
         [232080] = true, -- Bramblebird Recall
 
