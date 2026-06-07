@@ -251,6 +251,14 @@ function LUIE_CustomFramePowerData_Base:ApplyShieldBarMode(frame, shieldOverlay)
             powerBar.shieldbackdrop:SetHidden(true)
         end
     end
+
+    if powerBar.trauma then
+        local traumaValue = saved and saved[5] or 0
+        if traumaValue <= 0 then
+            powerBar.trauma:SetValue(0)
+            powerBar.trauma:SetHidden(true)
+        end
+    end
 end
 
 --- @param unitTag string
@@ -453,6 +461,22 @@ function LUIE_CustomFrameData_Base:RefreshDynamicData()
 end
 
 function LUIE_CustomFrameData_Base:OnUnitChanged()
+end
+
+--- Keeps per-frame UAV event filters aligned with `unitTag` after group/pet slot aliasing.
+function LUIE_CustomFrameData_Base:SyncAttributeVisualizerUnitTag()
+    if not self.attributeVisualizer then
+        return
+    end
+
+    local gameTag = self.unitTag
+    if gameTag and (string.sub(gameTag, 1, 5) == "group" or string.sub(gameTag, 1, 9) == "playerpet") then
+        self.visualizerUnitTag = gameTag
+        self.attributeVisualizer:SetUnitTag(gameTag)
+    else
+        self.visualizerUnitTag = nil
+        self.attributeVisualizer:SetUnitTag(nil)
+    end
 end
 
 --- @param mechanic integer|string

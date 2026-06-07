@@ -1212,8 +1212,14 @@ function UnitFrames.CustomFramesUnreferencePetControl(first)
     local last = 7
     for i = first, last do
         local unitTag = "PetGroup" .. i
-        UnitFrames.CustomFrames[unitTag].unitTag = nil
-        UnitFrames.CustomFrames[unitTag].control:SetHidden(true)
+        local frame = UnitFrames.CustomFrames[unitTag]
+        if frame then
+            frame.unitTag = nil
+            if frame.SyncAttributeVisualizerUnitTag then
+                frame:SyncAttributeVisualizerUnitTag()
+            end
+            frame.control:SetHidden(true)
+        end
     end
 end
 
@@ -1293,6 +1299,10 @@ function UnitFrames.CustomPetUpdate()
         if UnitFrames.CustomFrames[v.unitTag] then
             UnitFrames.CustomFrames[v.unitTag].control:SetHidden(false)
             UnitFrames.CustomFrames[v.unitTag].unitTag = v.unitTag
+            local petFrame = UnitFrames.CustomFrames[v.unitTag]
+            if petFrame.SyncAttributeVisualizerUnitTag then
+                petFrame:SyncAttributeVisualizerUnitTag()
+            end
             UnitFrames.ReloadValues(v.unitTag)
         end
     end
@@ -2838,9 +2848,14 @@ function UnitFrames.CustomFramesGroupUpdate()
             end
 
             frame.unitTag = member.unitTag
+            if frame.SyncAttributeVisualizerUnitTag then
+                frame:SyncAttributeVisualizerUnitTag()
+            end
             UnitFrames.ReloadValues(member.unitTag)
         end
     end
+
+    UnitFrames.RefreshCustomFrameShields()
 
     -- Setup LibGroupBroadcast integrations on active frames
     if UnitFrames.GroupCombatStats then
@@ -2904,6 +2919,9 @@ function UnitFrames.CustomFramesUnreferenceGroupControl(groupType, first)
             end
 
             frame.unitTag = nil
+            if frame.SyncAttributeVisualizerUnitTag then
+                frame:SyncAttributeVisualizerUnitTag()
+            end
             frame.control:SetHidden(true)
         end
     end
@@ -3763,19 +3781,36 @@ function UnitFrames.CustomFramesApplyAllLayouts(options)
     end
 end
 
--- Re-apply shield bar visibility after shield mode or layout changes.
+-- Re-apply shield, trauma, and no-healing overlay visibility after shield mode or layout changes.
 function UnitFrames.RefreshCustomFrameShields()
     if not UnitFrames.savedHealth then
         return
     end
     for unitTag, saved in pairs(UnitFrames.savedHealth) do
-        local shieldValue = saved[4] or 0
         UnitFrames.ForEachVisualizerForUnit(unitTag, function (visualizer)
-            if visualizer.visualModules then
-                for module in pairs(visualizer.visualModules) do
-                    if module.UpdateShield then
-                        module:UpdateShield(unitTag, shieldValue, saved[3])
-                    end
+            local vizTag = visualizer.GetUnitTag and visualizer:GetUnitTag() or unitTag
+            if vizTag and DoesUnitExist(vizTag) then
+                UnitFrames.InvalidateAttributeVisualEffectCache(vizTag)
+                visualizer:OnUnitChanged()
+                return
+            end
+
+            if not visualizer.visualModules then
+                return
+            end
+
+            local shieldValue = saved[4] or 0
+            local traumaValue = saved[5] or 0
+            local healthEffectiveMax = saved[3] or 1
+            for module in pairs(visualizer.visualModules) do
+                if module.UpdateShield then
+                    module:UpdateShield(unitTag, shieldValue, healthEffectiveMax)
+                end
+                if module.UpdateTrauma then
+                    module:UpdateTrauma(unitTag, traumaValue, healthEffectiveMax)
+                end
+                if module.UpdateNoHealing then
+                    module:UpdateNoHealing(unitTag, 0)
                 end
             end
         end)
@@ -4128,6 +4163,7 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
     end
 
     UnitFrames.CustomFramesTryUnhideTlw("RaidGroup1", unhide)
+    UnitFrames.RefreshCustomFrameShields()
 end
 
 -- Set dimensions of custom companion frame and anchors

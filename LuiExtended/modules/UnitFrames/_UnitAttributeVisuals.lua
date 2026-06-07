@@ -398,6 +398,9 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
             end
             if trauma then
                 ZO_StatusBar_SmoothTransition(attributeFrame.trauma, powerValue, powerEffectiveMax, forceInit, nil, 250)
+            elseif attributeFrame.trauma then
+                attributeFrame.trauma:SetValue(0)
+                attributeFrame.trauma:SetHidden(true)
             end
         else
             if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
@@ -408,6 +411,9 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
             if trauma then
                 attributeFrame.trauma:SetMinMax(0, powerEffectiveMax)
                 attributeFrame.trauma:SetValue(powerValue)
+            elseif attributeFrame.trauma then
+                attributeFrame.trauma:SetValue(0)
+                attributeFrame.trauma:SetHidden(true)
             end
         end
 

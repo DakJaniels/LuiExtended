@@ -145,6 +145,8 @@ function PowerShieldModule:UpdateTrauma(unitTag, value, maxValue)
 
     if noHealingValue > 0 then
         self:UpdateNoHealing(unitTag, noHealingValue)
+    else
+        self:UpdateNoHealing(unitTag, 0)
     end
 end
 

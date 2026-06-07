@@ -38,6 +38,27 @@ function LUIE_UnitAttributeVisualizer:Initialize(unitTag, soundTable, healthBarC
     self.magickaBarControl = magickaBarControl
     self.staminaBarControl = staminaBarControl
     self.visualModules = {}
+    self:RegisterAttributeVisualEvents()
+end
+
+function LUIE_UnitAttributeVisualizer:UnregisterAttributeVisualEvents()
+    if not self.eventNamespace then
+        return
+    end
+    eventManager:UnregisterForEvent(self.eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED)
+    eventManager:UnregisterForEvent(self.eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_UPDATED)
+    eventManager:UnregisterForEvent(self.eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED)
+    eventManager:UnregisterForEvent(self.eventNamespace, EVENT_RETICLE_TARGET_CHANGED)
+    self.eventNamespace = nil
+end
+
+function LUIE_UnitAttributeVisualizer:RegisterAttributeVisualEvents()
+    self:UnregisterAttributeVisualEvents()
+
+    local unitTag = self.unitTag
+    if not unitTag then
+        return
+    end
 
     local eventNamespace = "LUIE_UnitAttributeVisualizer" .. unitTag .. NEXT_VISUALIZER_NAMESPACE_INDEX
     NEXT_VISUALIZER_NAMESPACE_INDEX = NEXT_VISUALIZER_NAMESPACE_INDEX + 1
@@ -62,6 +83,26 @@ function LUIE_UnitAttributeVisualizer:Initialize(unitTag, soundTable, healthBarC
         eventManager:RegisterForEvent(eventNamespace, EVENT_RETICLE_TARGET_CHANGED, function ()
             self:OnUnitChanged()
         end)
+    end
+end
+
+--- Rebind UAV listeners when a custom frame slot is aliased to a different game unitTag (group roster sort).
+--- @param newUnitTag string|nil
+function LUIE_UnitAttributeVisualizer:SetUnitTag(newUnitTag)
+    if self.unitTag == newUnitTag then
+        return
+    end
+
+    local oldUnitTag = self.unitTag
+    if oldUnitTag and UnitFrames.Visualizers[oldUnitTag] == self then
+        UnitFrames.Visualizers[oldUnitTag] = nil
+    end
+
+    self.unitTag = newUnitTag
+    self:RegisterAttributeVisualEvents()
+
+    if newUnitTag then
+        UnitFrames.Visualizers[newUnitTag] = self
     end
 end
 
@@ -135,10 +176,5 @@ function LUIE_UnitAttributeVisualizer:DoAlphaUpdate(isNearby)
 end
 
 function LUIE_UnitAttributeVisualizer:Destroy()
-    if self.eventNamespace then
-        eventManager:UnregisterForEvent(self.eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED)
-        eventManager:UnregisterForEvent(self.eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_UPDATED)
-        eventManager:UnregisterForEvent(self.eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED)
-        eventManager:UnregisterForEvent(self.eventNamespace, EVENT_RETICLE_TARGET_CHANGED)
-    end
+    self:UnregisterAttributeVisualEvents()
 end
