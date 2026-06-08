@@ -1500,3 +1500,25 @@ ChatAnnouncements.ContextMessageDefaultStringIds =
     CurrencyMessageDisguiseRemove = LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_REMOVE,
     CurrencyMessageDisguiseDestroy = LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_DESTROY,
 }
+
+--- Pre–guild-name context strings still present in saved vars (treat as default, not custom).
+--- @type table<integer|string, string[]>
+ChatAnnouncements.ContextMessageLegacyFormatByStringId =
+{
+    [LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSITGUILD] =
+    {
+        "You deposit %s in the guild bank.",
+        "Du hinterlegst %s in der Gildenbank.",
+        "Vous avez déposé %s dans la banque de guilde.",
+        "Вы вложили %s в гильдейский банк.",
+        "您在公会银行存入 %s。",
+    },
+    [LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAWGUILD] =
+    {
+        "You withdraw %s from the guild bank.",
+        "Du holst %s aus der Gildenbank.",
+        "Vous récupérez %s de votre banque de guilde.",
+        "Вы изъяли %s из гильдейского банка.",
+        "您从公会银行取出 %s。",
+    },
+}

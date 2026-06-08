@@ -20,6 +20,7 @@
 --- @field gainOrLoss integer
 --- @field logPrefix string
 --- @field receivedBy string
+--- @field guildId? integer
 
 --- @class CAFactionRepDedupe
 --- @field delta integer
@@ -200,6 +201,8 @@
 --- @field g_inventoryStacks table<integer, CAItemStackEntry>
 --- @field g_JusticeStacks table<integer, CAItemStackEntry>
 --- @field g_guildBankCarry CAGuildBankCarry?
+--- @field g_selectedGuildBankId integer?
+--- @field g_guildBankAnnounceGuildId integer?
 --- @field g_currentGroupLeaderRawName string?
 --- @field g_currentGroupLeaderDisplayName string?
 --- @field g_currentActivityId integer?
@@ -420,9 +423,14 @@
 --- @field GroupingToolsLFGJoined fun(eventId: integer, locationName: string)
 --- @field GuildAddedSelf fun(eventId: integer, guildId: integer, guildName: string)
 --- @field GuildBankClose fun(eventId: integer)
+--- @field GuildBankSelected fun(eventId: integer, guildId: integer)
 --- @field GuildBankItemAdded fun(eventId: integer, slotId: integer, addedByLocalPlayer: boolean)
 --- @field GuildBankItemRemoved fun(eventId: integer, slotId: integer, addedByLocalPlayer: boolean)
 --- @field GuildBankOpen fun(eventId: integer)
+--- @field GetActiveGuildBankId fun(): integer|nil
+--- @field FormatGuildLabelForChat fun(guildId: integer|nil): string
+--- @field FormatGuildLabelForAlert fun(guildId: integer|nil): string
+--- @field FormatGuildBankContextMessage fun(template: string, formattedPrimary: string, guildLabel: string): string
 --- @field GuildHeraldrySaved fun()
 --- @field GuildInviteAdded fun(eventId: integer, guildId: integer, guildName: string, guildAlliance: Alliance, inviterName: string)
 --- @field GuildMemberDemoteSuccessful fun(eventId: integer, displayName: string, newRankIndex: integer, guildId: integer)

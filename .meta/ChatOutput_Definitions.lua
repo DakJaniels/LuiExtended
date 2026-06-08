@@ -65,7 +65,7 @@ LUIE_ChatOutput = {}
 --- @field GetChatOutputDefaults fun(self: LUIE_ChatOutputSettingsUI): LUIE_ChatOutputDefaults
 --- @field BuildChatOutputLAMControls fun(self: LUIE_ChatOutputSettingsUI, settingsApi: table): table
 --- @field BuildLibChatMessageLAMControls fun(self: LUIE_ChatOutputSettingsUI, settingsApi: table): table
---- @field AppendChatOutputConsoleControls fun(self: LUIE_ChatOutputSettingsUI, settings: table, LHAS: table)
+--- @field AppendChatOutputConsoleControls fun(self: LUIE_ChatOutputSettingsUI, settings: table, LHAS: table, options?: { omitSectionHeader?: boolean })
 --- @field RefreshChatTabRoutingRows fun(self: LUIE_ChatOutputSettingsUI)
 LUIE_ChatOutputSettingsUI = {}
 

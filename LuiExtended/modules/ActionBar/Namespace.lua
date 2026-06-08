@@ -119,6 +119,7 @@ local LUIE = LUIE
 --- @field UpdateCompanionUltimateLabel fun(optionalCurrentPower: number?)
 --- @field ResetCompanionUltimateLabel fun()
 --- @field RefreshCompanionQuickslotAnchors fun()
+--- @field SyncMainRowUltimateAnchor fun()
 --- @field CreateCompanionUltimateLabels fun()
 --- @field OnPowerUpdateCompanion fun(unitTag: string, powerIndex: luaindex?, powerType: CombatMechanicFlags, powerValue: integer, powerMax: integer, powerEffectiveMax: integer)
 --- @field InventoryItemUsed fun()
@@ -182,6 +183,7 @@ ActionBar.CastBar =
 --- @field UpdateActivationHighlight fun(luiSlotNum: number)
 --- @field RefreshAllActivationHighlights fun()
 --- @field OnPhysicalSlotVisualSync fun(physicalSlotIndex: number)
+--- @field SyncDefaultBackRowTimers fun()
 ActionBar.Backbar =
 {
     name = LUIE.name .. "ActionBar" .. "Backbar",
@@ -405,6 +407,9 @@ ActionBar.uiCompanionUltimate =
 --- @field quickslotOffsetXFromFirstSlot number
 --- @field backbarHeightMultiplier number
 --- @field backbarOffsetMultiplier number
+--- @field backbarRowGap number
+--- @field backRowSlotOffsetY number
+--- @field backRowUltimateSlotOffsetY number
 --- @field keybindBGWidth number
 --- @field keybindBGWidthWithoutCompanion number
 --- @field keybindBGHeight number
@@ -421,6 +426,9 @@ ActionBar.uiCompanionUltimate =
 --- @field quickslotOffsetXFromFirstSlot number
 --- @field backbarHeightMultiplier number
 --- @field backbarOffsetMultiplier number
+--- @field backbarRowGap number
+--- @field backRowSlotOffsetY number
+--- @field backRowUltimateSlotOffsetY number
 --- @field keybindBGWidth number
 --- @field keybindBGWidthWithoutCompanion number
 --- @field keybindBGHeight number
@@ -439,6 +447,9 @@ ActionBar.GAMEPAD_CONSTANTS =
     quickslotOffsetXFromFirstSlot = 5,
     backbarHeightMultiplier = 1.6,
     backbarOffsetMultiplier = 0.8,
+    backbarRowGap = -4,
+    backRowSlotOffsetY = -17,
+    backRowUltimateSlotOffsetY = -30,
     keybindBGWidth = 580,
     keybindBGWidthWithoutCompanion = 512,
     keybindBGHeight = 64,
@@ -457,6 +468,9 @@ ActionBar.KEYBOARD_CONSTANTS =
     quickslotOffsetXFromFirstSlot = 5,
     backbarHeightMultiplier = 1.0,
     backbarOffsetMultiplier = 0.8,
+    backbarRowGap = 0,
+    backRowSlotOffsetY = -17,
+    backRowUltimateSlotOffsetY = -20,
     keybindBGWidth = 580,
     keybindBGWidthWithoutCompanion = 512,
     keybindBGHeight = 64,

@@ -111,6 +111,29 @@ ChatAnnouncements.ModuleMessageFormatLegacySiStringIds =
 --- @param stored string|nil
 --- @param stringId integer|string
 --- @return boolean
+local function isLegacyContextFormat(stored, stringId)
+    if not stored or stored == "" then
+        return false
+    end
+    local legacyByStringId = ChatAnnouncements.ContextMessageLegacyFormatByStringId
+    if not legacyByStringId then
+        return false
+    end
+    local legacyList = legacyByStringId[stringId]
+    if not legacyList then
+        return false
+    end
+    for _, legacy in ipairs(legacyList) do
+        if stored == legacy then
+            return true
+        end
+    end
+    return false
+end
+
+--- @param stored string|nil
+--- @param stringId integer|string
+--- @return boolean
 local function isDefaultStoredFormat(stored, stringId)
     if stored == nil or stored == "" then
         return true
@@ -122,6 +145,9 @@ local function isDefaultStoredFormat(stored, stringId)
     -- Legacy: localized default was written into SV (migration / old Defaults using GetString).
     local localized = GetString(stringId)
     if localized and stored == localized then
+        return true
+    end
+    if isLegacyContextFormat(stored, stringId) then
         return true
     end
     return false
@@ -249,6 +275,8 @@ function ChatAnnouncements.NormalizeStoredMessageFormats()
             local stored = sv.ContextMessages[key]
             local canonicalEnglish = LUIE_GetRegisteredDefaultString(stringId)
             if canonicalEnglish and isDefaultStoredFormat(stored, stringId) and stored ~= canonicalEnglish then
+                sv.ContextMessages[key] = canonicalEnglish
+            elseif canonicalEnglish and isLegacyContextFormat(stored, stringId) then
                 sv.ContextMessages[key] = canonicalEnglish
             end
         end
@@ -397,6 +425,9 @@ function ChatAnnouncements.ContextMessageMatches(logPrefix, contextMessageKey)
         if canonicalEnglish and logPrefix == canonicalEnglish then
             return true
         end
+        if isLegacyContextFormat(logPrefix, stringId) then
+            return true
+        end
     end
     return false
 end
@@ -417,6 +448,64 @@ function ChatAnnouncements.ResolveLogPrefix(logPrefix)
         end
     end
     return logPrefix
+end
+
+local string_format_resolver = string.format
+
+--- @param guildId integer|nil
+--- @return string
+function ChatAnnouncements.FormatGuildLabelForChat(guildId)
+    if not guildId or guildId == 0 then
+        return ""
+    end
+    local guildName = GetGuildName(guildId)
+    if not guildName or guildName == "" then
+        return ""
+    end
+    local social = ChatAnnouncements.SV and ChatAnnouncements.SV.Social
+    local guildAlliance = GetGuildAlliance(guildId)
+    local ColorizeColors = ChatAnnouncements.Colors
+    local guildColor = social and social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
+    if social and social.GuildIcon then
+        return guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName))
+    end
+    return guildColor:Colorize(guildName)
+end
+
+--- @param guildId integer|nil
+--- @return string
+function ChatAnnouncements.FormatGuildLabelForAlert(guildId)
+    if not guildId or guildId == 0 then
+        return ""
+    end
+    local guildName = GetGuildName(guildId)
+    if not guildName or guildName == "" then
+        return ""
+    end
+    local social = ChatAnnouncements.SV and ChatAnnouncements.SV.Social
+    local guildAlliance = GetGuildAlliance(guildId)
+    if social and social.GuildIcon then
+        return zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName)
+    end
+    return guildName
+end
+
+--- @param template string
+--- @param formattedPrimary string
+--- @param guildLabel string
+--- @return string
+function ChatAnnouncements.FormatGuildBankContextMessage(template, formattedPrimary, guildLabel)
+    if not template or template == "" then
+        return formattedPrimary or ""
+    end
+    local placeholderCount = 0
+    for _ in template:gmatch("%%s") do
+        placeholderCount = placeholderCount + 1
+    end
+    if placeholderCount >= 2 and guildLabel and guildLabel ~= "" then
+        return string_format_resolver(template, formattedPrimary, guildLabel)
+    end
+    return string_format_resolver(template, formattedPrimary)
 end
 
 ChatAnnouncements.RefreshMessageFormatDefaultsTable()

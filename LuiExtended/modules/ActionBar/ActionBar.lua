@@ -222,7 +222,7 @@ local function ApplyCompanionAnchors(style, weaponSwapControl)
         else
             quickslotBtn:ApplyAnchor(weaponSwapControl, style.quickslotOffsetXFromFirstSlot, IS_ANCHORED_LEFT)
         end
-        if keybindBG then
+        if keybindBG and not IsInGamepadPreferredMode() then
             keybindBG:SetDimensions(style.keybindBGWidth, style.keybindBGHeight)
             keybindBG:SetAnchor(BOTTOM, nil, nil, style.keybindBGAnchorOffsetX, 0)
         end
@@ -231,7 +231,7 @@ local function ApplyCompanionAnchors(style, weaponSwapControl)
             companionBtn:SetEnabled(false)
         end
         quickslotBtn:ApplyAnchor(weaponSwapControl, style.quickslotOffsetXFromFirstSlot, IS_ANCHORED_LEFT)
-        if keybindBG then
+        if keybindBG and not IsInGamepadPreferredMode() then
             keybindBG:SetDimensions(style.keybindBGWidthWithoutCompanion, style.keybindBGHeight)
             keybindBG:SetAnchor(BOTTOM, nil, nil, style.keybindBGAnchorOffsetXWithoutCompanion, 0)
         end
@@ -250,6 +250,29 @@ local function RefreshCompanionQuickslotAnchors()
 end
 
 ActionBar.RefreshCompanionQuickslotAnchors = RefreshCompanionQuickslotAnchors
+
+--- Re-applies ZOS keyboard ultimate anchor after LUIE backbar layout (see `Ingame/ActionBar/ActionBar.lua` `ApplyStyle`).
+function ActionBar.SyncMainRowUltimateAnchor()
+    if isFancyActionBarEnabled or IsInGamepadPreferredMode() then
+        return
+    end
+    local style = KEYBOARD_CONSTANTS
+    local lastNormalSlotIndex = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + ACTION_BAR_SLOTS_PER_PAGE - 1
+    local lastNormalButton = ZO_ActionBar_GetButton(lastNormalSlotIndex)
+    local ultimateButton = ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
+    if lastNormalButton and ultimateButton and lastNormalButton.slot then
+        ultimateButton:ApplyAnchor(lastNormalButton.slot, style.ultimateSlotOffsetX)
+    end
+end
+
+--- Refreshes backbar layout, companion anchors, and overlay fonts when input mode changes.
+local function OnGamepadPreferredModeChanged()
+    ActionBar.BackbarSetupTemplate()
+    RefreshCompanionQuickslotAnchors()
+    ActionBar.ApplyFont()
+    ActionBar.ResetUltimateLabel()
+    ActionBar.ResetPotionTimerLabel()
+end
 
 -- -----------------------------------------------------------------------------
 
@@ -960,6 +983,7 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "CompanionZone", EVENT_ZONE_CHANGED)
     eventManager:UnregisterForEvent(moduleName .. "CompanionState", EVENT_ACTIVE_COMPANION_STATE_CHANGED)
     eventManager:UnregisterForEvent(moduleName .. "CompanionAnchorsWpn", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
+    eventManager:UnregisterForEvent(moduleName .. "GamepadMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED)
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
         eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
@@ -1009,9 +1033,6 @@ function ActionBar.RegisterEvents()
         end)
         eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, function (_)
             ActionBar.OnReticleTargetChanged()
-        end)
-        eventManager:RegisterForEvent(moduleName, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function (_, gamepadPreferred)
-            ActionBar.BackbarSetupTemplate()
         end)
 
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED, function (_, itemSoundCategory)
@@ -1068,6 +1089,10 @@ function ActionBar.RegisterEvents()
     end)
     eventManager:RegisterForEvent(moduleName .. "CompanionAnchorsWpn", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function ()
         RefreshCompanionQuickslotAnchors()
+    end)
+
+    eventManager:RegisterForEvent(moduleName .. "GamepadMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
+        OnGamepadPreferredModeChanged()
     end)
 
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, function (_, hidden)
@@ -1174,6 +1199,7 @@ function ActionBar.OnPlayerActivated()
     ActionBar.CreateCompanionUltimateLabels()
     RefreshCompanionQuickslotAnchors()
     ActionBar.OnSlotsFullUpdate()
+    ActionBar.BackbarSetupTemplate()
     for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
         -- Update Bar Slots on initial load (don't want to do it normally when we do a slot update)
         ActionBar.BarSlotUpdate(i, true, false)
@@ -1404,6 +1430,9 @@ function ActionBar.ApplyFont()
     g_ultimateFont = buildModuleFontString("UltimateFontFace", "UltimateFontStyle", "UltimateFontSize", FONT_STYLE_OUTLINE, 17)
     if uiUltimate.LabelPct then
         uiUltimate.LabelPct:SetFont(g_ultimateFont)
+    end
+    if uiUltimate.LabelVal then
+        uiUltimate.LabelVal:SetFont("$(BOLD_FONT)|16|soft-shadow-thick")
     end
 
     g_companionUltimateFont = buildModuleFontString("CompanionUltimateFontFace", "CompanionUltimateFontStyle", "CompanionUltimateFontSize", FONT_STYLE_OUTLINE, 17)

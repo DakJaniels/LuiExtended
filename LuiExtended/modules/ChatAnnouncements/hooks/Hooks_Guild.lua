@@ -96,12 +96,7 @@ local function AppendGuildMailSentDetails(messageCA, messageAlert, guildId, rank
 end
 
 local function GetGuildFormattedNames(guildId)
-    local guildName = GetGuildName(guildId)
-    local guildAlliance = GetGuildAlliance(guildId)
-    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
-    local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or guildColor:Colorize(guildName)
-    local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
-    return guildNameAlliance, guildNameAllianceAlert
+    return ChatAnnouncements.FormatGuildLabelForChat(guildId), ChatAnnouncements.FormatGuildLabelForAlert(guildId)
 end
 
 local function QueueGuildManageNotification(message)

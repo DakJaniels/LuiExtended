@@ -129,7 +129,9 @@ S.g_furnitureVaultStacks = {} -- Furnishing Vault (BAG_FURNITURE_VAULT) index
 S.g_equippedStacks = {}       -- Equipped Items Index
 S.g_inventoryStacks = {}      -- Inventory Index
 S.g_JusticeStacks = {}        -- Justice Items Index (only filled as a comparison table when items are confiscated)
-S.g_guildBankCarry = nil      -- Saves item data when an item is removed/deposited into the guild bank.
+S.g_guildBankCarry = nil           -- Saves item data when an item is removed/deposited into the guild bank.
+S.g_selectedGuildBankId = nil      -- Active guild bank tab (EVENT_GUILD_BANK_SELECTED / open bank)
+S.g_guildBankAnnounceGuildId = nil -- Guild id for deferred guild-bank item announce (cleared after print)
 
 -- Group
 S.g_currentGroupLeaderRawName = nil     -- Tracks current Group Leader Name
@@ -728,6 +730,7 @@ function ChatAnnouncements.RegisterLootEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_CLOSE_BANK)
     eventManager:UnregisterForEvent(moduleName, EVENT_OPEN_GUILD_BANK)
     eventManager:UnregisterForEvent(moduleName, EVENT_CLOSE_GUILD_BANK)
+    eventManager:UnregisterForEvent(moduleName, EVENT_GUILD_BANK_SELECTED)
     eventManager:UnregisterForEvent(moduleName, EVENT_GUILD_BANK_ITEM_ADDED)
     eventManager:UnregisterForEvent(moduleName, EVENT_GUILD_BANK_ITEM_REMOVED)
     eventManager:UnregisterForEvent(moduleName, EVENT_FURNITURE_ITEMS_TRANSFERRED_TO_FURNITURE_VAULT)
@@ -795,6 +798,9 @@ function ChatAnnouncements.RegisterLootEvents()
         eventManager:RegisterForEvent(moduleName, EVENT_OPEN_GUILD_BANK, ChatAnnouncements.GuildBankOpen)
         eventManager:RegisterForEvent(moduleName, EVENT_CLOSE_GUILD_BANK, ChatAnnouncements.GuildBankClose)
         eventManager:RegisterForEvent(moduleName, EVENT_FURNITURE_ITEMS_TRANSFERRED_TO_FURNITURE_VAULT, ChatAnnouncements.OnFurnitureItemsTransferredToVault)
+    end
+    if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootBank or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
+        eventManager:RegisterForEvent(moduleName, EVENT_GUILD_BANK_SELECTED, ChatAnnouncements.GuildBankSelected)
     end
     if ChatAnnouncements.SV.Inventory.LootTrade then
         eventManager:RegisterForEvent(moduleName, EVENT_TRADE_ITEM_ADDED, ChatAnnouncements.OnTradeAdded)
@@ -1742,6 +1748,8 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     {
         [CURRENCY_CHANGE_REASON_BAGSPACE] = "LUIE_CURRENCY_BAG",
         [CURRENCY_CHANGE_REASON_BANKSPACE] = "LUIE_CURRENCY_BANK",
+        [CURRENCY_CHANGE_REASON_GUILD_BANK_DEPOSIT] = "LUIE_CURRENCY_GUILD_BANK",
+        [CURRENCY_CHANGE_REASON_GUILD_BANK_WITHDRAWAL] = "LUIE_CURRENCY_GUILD_BANK",
     }
     local debugReasonIds =
     {
@@ -2019,6 +2027,9 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         S.g_mailIncomingCurrencySender = ""
         name = string_format("|r" .. mailCurrencyName .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
+    elseif type == "LUIE_CURRENCY_GUILD_BANK" then
+        local guildLabel = ChatAnnouncements.FormatGuildLabelForChat(ChatAnnouncements.GetActiveGuildBankId()) or ""
+        formattedMessageP1 = ChatAnnouncements.FormatGuildBankContextMessage(messageChange, messageP1, guildLabel)
     else
         formattedMessageP1 = (string_format(messageChange, messageP1))
     end
@@ -3633,6 +3644,7 @@ end
 
 function ChatAnnouncements.LogGuildBankChange()
     if S.g_guildBankCarry ~= nil then
+        S.g_guildBankAnnounceGuildId = S.g_guildBankCarry.guildId
         ChatAnnouncements.ItemPrinter(S.g_guildBankCarry.icon, S.g_guildBankCarry.stack, S.g_guildBankCarry.itemType, S.g_guildBankCarry.itemId, S.g_guildBankCarry.itemLink, S.g_guildBankCarry.receivedBy, S.g_guildBankCarry.logPrefix, S.g_guildBankCarry.gainOrLoss, false)
     end
     S.g_guildBankCarry = nil
@@ -3829,9 +3841,34 @@ function ChatAnnouncements.BankClose(eventId)
     S.g_furnitureVaultStacks = {}
 end
 
+--- @return integer|nil
+function ChatAnnouncements.GetActiveGuildBankId()
+    local guildId = GetSelectedGuildBankId()
+    if guildId and guildId ~= 0 then
+        return guildId
+    end
+    if ZO_GUILD_SELECTOR_MANAGER and ZO_GUILD_SELECTOR_MANAGER.GetSelectedGuildBankId then
+        guildId = ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildBankId()
+        if guildId and guildId ~= 0 then
+            return guildId
+        end
+    end
+    return S.g_selectedGuildBankId
+end
+
+--- @param eventId integer
+--- @param guildId integer
+function ChatAnnouncements.GuildBankSelected(eventId, guildId)
+    S.g_selectedGuildBankId = guildId
+end
+
 --- @param eventId integer
 function ChatAnnouncements.GuildBankOpen(eventId)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    local selectedGuildBankId = GetSelectedGuildBankId()
+    if selectedGuildBankId and selectedGuildBankId ~= 0 then
+        S.g_selectedGuildBankId = selectedGuildBankId
+    end
     if ChatAnnouncements.SV.Inventory.LootBank then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdateGuildBank)
         S.g_inventoryStacks = {}
@@ -3841,6 +3878,7 @@ end
 
 --- @param eventId integer
 function ChatAnnouncements.GuildBankClose(eventId)
+    S.g_selectedGuildBankId = nil
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
@@ -4741,6 +4779,11 @@ function ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, f
 
     -- Handle messages without recipient
     if formattedRecipient == "" then
+        if ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageDepositGuild")
+        or ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageWithdrawGuild") then
+            local guildLabel = ChatAnnouncements.FormatGuildLabelForChat(S.g_guildBankAnnounceGuildId) or ""
+            return ChatAnnouncements.FormatGuildBankContextMessage(logPrefix, formattedMessageP1, guildLabel)
+        end
         return string_format(logPrefix, formattedMessageP1, "")
     end
 
@@ -4775,6 +4818,7 @@ function ChatAnnouncements.ResetTrackingVariables()
     S.g_itemCounterLossTracker = 0
     S.g_itemStringGain = ""
     S.g_itemStringLoss = ""
+    S.g_guildBankAnnounceGuildId = nil
 end
 
 -- Simple posthook into ZOS crafting mode functions, based off MultiCraft, thanks Ayantir!
@@ -6376,6 +6420,7 @@ end
 --- @param stackCountChange integer
 function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
     local receivedBy = ""
+    local activeGuildBankId = ChatAnnouncements.GetActiveGuildBankId()
     ---------------------------------- INVENTORY ----------------------------------
     if bagId == BAG_BACKPACK then
         local gainOrLoss
@@ -6405,6 +6450,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
                 itemLink = itemLink,
                 itemId = itemId,
                 itemType = itemType,
+                guildId = activeGuildBankId,
             }
         elseif S.g_inventoryStacks[slotId] then -- EXISTING ITEM
             itemLink = GetItemLink(bagId, slotId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
@@ -6437,6 +6483,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
                     itemLink = itemLink,
                     itemId = itemId,
                     itemType = itemType,
+                    guildId = activeGuildBankId,
                 }
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
@@ -6458,6 +6505,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
                         itemLink = itemLink,
                         itemId = itemId,
                         itemType = itemType,
+                        guildId = activeGuildBankId,
                     }
                 end
             end
@@ -6503,6 +6551,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotId, isNe
             itemLink = itemLink,
             itemId = itemId,
             itemType = itemType,
+            guildId = activeGuildBankId,
         }
     end
 
