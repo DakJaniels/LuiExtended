@@ -77,28 +77,23 @@ local alignmentOptionsKeys =
     [GetString(LUIE_STRING_LAM_UF_ALIGNMENT_CENTER)] = 3
 }
 
-local formatOptions =
+local targetTitlePriorityChoices =
 {
-    GetString(LUIE_STRING_LAM_UF_FORMAT_NOTHING),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_TRAUMA),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_TRAUMA_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_MAX_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_MAX_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_TRAUMA_MAX_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA_MAX_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_TRAUMA_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA_PERCENTAGE)
+    GetString(LUIE_STRING_LAM_UF_CFRAMESPT_RANK_PRIORITY_AVA),
+    GetString(LUIE_STRING_LAM_UF_CFRAMESPT_RANK_PRIORITY_TITLE),
 }
+local targetTitlePriorityValues = { "AVA Rank", "Title" }
+
+local raidLayoutChoices =
+{
+    GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_1X12),
+    GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_2X6),
+    GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_3X4),
+    GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_6X2),
+}
+local raidLayoutValues = { "1 x 12", "2 x 6", "3 x 4", "6 x 2" }
+
+local formatOptionChoices, formatOptionValues = UnitFrames.GetFormatOptionMenus()
 
 local Whitelist, WhitelistValues = {}, {}
 
@@ -149,8 +144,8 @@ function UnitFrames.CreateSettings()
     local panelDataUnitFrames =
     {
         type = "panel",
-        name = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_UF)),
-        displayName = zo_strformat("<<1>> <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_UF)),
+        name = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_UF),
+        displayName = LUIE.FormatAddonSettingsPanelDisplayName(LUIE_STRING_LAM_UF),
         author = LUIE.author .. "\n",
         version = LUIE.version,
         website = LUIE.website,
@@ -161,8 +156,8 @@ function UnitFrames.CreateSettings()
         registerForRefresh = true,
         registerForDefaults = true,
         resetFunc = function ()
-            -- Reset all frame positions when LAM "Reset to Default" is clicked
-            UnitFrames.CustomFramesResetPosition(false)
+            -- LAM resets option values only; frame layout stays on the Reset Position button.
+            UnitFrames.CustomFramesSetMovingState(false)
         end,
     }
 
@@ -202,7 +197,7 @@ function UnitFrames.CreateSettings()
         width = "half",
         default = false,
         resetFunc = function ()
-            UnitFrames.CustomFramesResetPosition(false)
+            UnitFrames.CustomFramesSetMovingState(false)
         end,
     }
 
@@ -210,8 +205,8 @@ function UnitFrames.CreateSettings()
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {
         type = "checkbox",
-        name = "Enable Grid Snap (Unit Frames)",
-        tooltip = "Enable snapping unit frames to a grid when moving them",
+        name = zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_ENABLE), GetString(LUIE_STRING_LAM_UF)),
+        tooltip = zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_ENABLE_TP), GetString(LUIE_STRING_LAM_UF)),
         getFunc = function ()
             return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
         end,
@@ -228,8 +223,8 @@ function UnitFrames.CreateSettings()
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {
         type = "slider",
-        name = "Grid Size (Unit Frames)",
-        tooltip = "Set the size of the grid for snapping unit frames",
+        name = zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_SIZE), GetString(LUIE_STRING_LAM_UF)),
+        tooltip = zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_SIZE_TP), GetString(LUIE_STRING_LAM_UF)),
         min = 5,
         max = 100,
         step = 5,
@@ -424,7 +419,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_DFRAMES_LABEL),
                 tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_LABEL_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.Format
@@ -689,8 +685,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Target Marker
                 type = "checkbox",
-                name = "Format unitFrame names with target marker",
-                tooltip = "Format unitFrame names with target marker",
+                name = GetString(LUIE_STRING_LAM_UF_TARGET_MARKER_NAME_FORMAT_TP),
+                tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_MARKER_NAME_FORMAT_TP),
                 getFunc = function ()
                     return Settings.CustomTargetMarker
                 end,
@@ -706,8 +702,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Target Quick Hide Dead Enemy/Neutral
                 type = "checkbox",
-                name = "Target Frame Quick Hide Dead Enemy/Neutral",
-                tooltip = "Target Frame Quick Hide Dead Enemy/Neutral",
+                name = GetString(LUIE_STRING_LAM_UF_TARGET_QUICK_HIDE_DEAD_TP),
+                tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_QUICK_HIDE_DEAD_TP),
                 getFunc = function ()
                     return Settings.QuickHideDead
                 end,
@@ -718,6 +714,22 @@ function UnitFrames.CreateSettings()
                 default = Defaults.QuickHideDead,
                 disabled = function ()
                     return not LUIE.SV.UnitFrames_Enabled
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_QUICKHIDE_UNITMONSTER),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_QUICKHIDE_UNITMONSTER_TP),
+                getFunc = function ()
+                    return Settings.QuickHideDeadUseUnitMonster
+                end,
+                setFunc = function (value)
+                    Settings.QuickHideDeadUseUnitMonster = value
+                end,
+                width = "full",
+                default = Defaults.QuickHideDeadUseUnitMonster,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.QuickHideDead)
                 end,
             },
             {
@@ -1390,7 +1402,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.CustomFormatOnePlayer
@@ -1411,7 +1424,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.CustomFormatTwoPlayer
@@ -1870,7 +1884,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.CustomFormatOneTarget
@@ -1891,7 +1906,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.CustomFormatTwoTarget
@@ -2118,6 +2134,74 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_VETERANCY_RANK),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_VETERANCY_RANK_TP),
+                getFunc = function ()
+                    return Settings.TargetShowVeterancyRank
+                end,
+                setFunc = function (value)
+                    Settings.TargetShowVeterancyRank = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.TargetShowVeterancyRank,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OVERLAND_DIFFICULTY),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OVERLAND_DIFFICULTY_TP),
+                getFunc = function ()
+                    return Settings.TargetShowOverlandDifficulty
+                end,
+                setFunc = function (value)
+                    Settings.TargetShowOverlandDifficulty = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.TargetShowOverlandDifficulty,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MONSTER_OVERLAND),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MONSTER_OVERLAND_TP),
+                getFunc = function ()
+                    return Settings.TargetMonsterOverlandDifficulty
+                end,
+                setFunc = function (value)
+                    Settings.TargetMonsterOverlandDifficulty = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.TargetMonsterOverlandDifficulty,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget and Settings.TargetShowOverlandDifficulty)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MONSTER_CLASSICON),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MONSTER_CLASSICON_TP),
+                getFunc = function ()
+                    return Settings.TargetHighlightMonsterUnits
+                end,
+                setFunc = function (value)
+                    Settings.TargetHighlightMonsterUnits = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.TargetHighlightMonsterUnits,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
                 -- Display rank name on target frame
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_RANK),
@@ -2140,7 +2224,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_UF_CFRAMESPT_RANK_TITLE_PRIORITY)),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_RANK_TITLE_PRIORITY_TP),
-                choices = { "AVA Rank", "Title" },
+                choices = targetTitlePriorityChoices,
+                choicesValues = targetTitlePriorityValues,
                 getFunc = function ()
                     return Settings.TargetTitlePriority
                 end,
@@ -2374,7 +2459,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_LABEL_CENTER_FORM)),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_LABEL_CENTER_FORM),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 getFunc = function ()
                     return Settings.CustomFormatCenterLabel
                 end,
@@ -2706,7 +2792,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 getFunc = function ()
                     return Settings.CustomFormatOneGroup
                 end,
@@ -2726,7 +2813,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 getFunc = function ()
                     return Settings.CustomFormatTwoGroup
                 end,
@@ -2862,6 +2950,23 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESG_VETERANCY_RANK),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_VETERANCY_RANK_TP),
+                getFunc = function ()
+                    return Settings.GroupShowVeterancyRank
+                end,
+                setFunc = function (value)
+                    Settings.GroupShowVeterancyRank = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.GroupShowVeterancyRank,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
+            {
                 -- Custom Unit Frames Group Color Class
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_GFRAMESBYCLASS),
@@ -2900,8 +3005,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Group Sort by role
                 type = "checkbox",
-                name = "Sort Group Frames by Role",
-                tooltip = "Sort group members by role (Tank -> Healer -> DPS).",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_SORT_BY_ROLE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_SORT_BY_ROLE_TP),
                 getFunc = function ()
                     return Settings.SortRoleGroup
                 end,
@@ -2972,8 +3077,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Group Combat Glow
                 type = "checkbox",
-                name = "Show Combat Glow",
-                tooltip = "Display a red glow around group member health bars when they are in combat (fades in/out smoothly).",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_GLOW),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_GLOW_TP),
                 getFunc = function ()
                     return Settings.GroupCombatGlow
                 end,
@@ -2990,7 +3095,7 @@ function UnitFrames.CreateSettings()
                 -- Group Combat Glow Color
                 type = "colorpicker",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Combat Glow Color"),
-                tooltip = "Set the color of the combat glow border displayed around group frames.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_GLOW_COLOR_TP),
                 getFunc = function ()
                     return unpack(Settings.GroupCombatGlowColor)
                 end,
@@ -3062,7 +3167,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 getFunc = function ()
                     return Settings.CustomFormatRaid
                 end,
@@ -3144,8 +3250,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LAYOUT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LAYOUT_TP),
-                choices = { "1 x 12", "2 x 6", "3 x 4", "6 x 2" },
-                -- sort = "name-up",
+                choices = raidLayoutChoices,
+                choicesValues = raidLayoutValues,
                 getFunc = function ()
                     return Settings.RaidLayout
                 end,
@@ -3328,8 +3434,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Raid Combat Glow
                 type = "checkbox",
-                name = "Show Combat Glow",
-                tooltip = "Display a red glow around raid member health bars when they are in combat (fades in/out smoothly).",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_GLOW),
+                tooltip = GetString(LUIE_STRING_LAM_UF_RAID_COMBAT_GLOW_TP),
                 getFunc = function ()
                     return Settings.RaidCombatGlow
                 end,
@@ -3346,7 +3452,7 @@ function UnitFrames.CreateSettings()
                 -- Raid Combat Glow Color
                 type = "colorpicker",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Combat Glow Color"),
-                tooltip = "Set the color of the combat glow border displayed around raid frames.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_RAID_COMBAT_GLOW_COLOR_TP),
                 getFunc = function ()
                     return unpack(Settings.RaidCombatGlowColor)
                 end,
@@ -3373,14 +3479,14 @@ function UnitFrames.CreateSettings()
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {
         type = "submenu",
-        name = "Group Resources",
+        name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_HEADER),
         controls =
         {
             {
                 -- Enable Group Resources
                 type = "checkbox",
-                name = "Enable Group Resources",
-                tooltip = "Display magicka and stamina bars for group members using LibGroupBroadcast.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_ENABLE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_ENABLE_TP),
                 getFunc = function ()
                     return Settings.GroupResources.enabled
                 end,
@@ -3389,7 +3495,7 @@ function UnitFrames.CreateSettings()
                 end,
                 width = "full",
                 default = Defaults.GroupResources.enabled,
-                warning = "Requires LibGroupBroadcast library. " .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                warning = GetString(LUIE_STRING_LAM_UF_REQUIRES_LIBGROUPBROADCAST) .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and LibGroupBroadcast)
                 end,
@@ -3397,8 +3503,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Stamina First
                 type = "checkbox",
-                name = "Stamina First",
-                tooltip = "Show stamina bar above magicka bar instead of below.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_STAMINA_FIRST),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_STAMINA_FIRST_TP),
                 getFunc = function ()
                     return Settings.GroupResources.staminaFirst
                 end,
@@ -3417,8 +3523,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Enable Fade Effect
                 type = "checkbox",
-                name = "Fade Effect on Resource Loss",
-                tooltip = "Show a fade-out ghost effect when resources decrease for better visibility.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_FADE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_FADE_TP),
                 getFunc = function ()
                     return Settings.GroupResources.enableFadeEffect
                 end,
@@ -3434,8 +3540,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Hide Resource Bars Toggle
                 type = "checkbox",
-                name = "Hide Resource Bars (Timeout)",
-                tooltip = "Hide resource bars after no updates received for set timeout period.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_HIDE_TIMEOUT_TOGGLE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_HIDE_TIMEOUT_TOGGLE_TP),
                 getFunc = function ()
                     return Settings.GroupResources.hideResourceBarsToggle
                 end,
@@ -3451,8 +3557,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Hide Timeout
                 type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "Hide Timeout (seconds)"),
-                tooltip = "Seconds after last resource update before hiding bars.",
+                name = zo_strformat("<<1>>", GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_HIDE_TIMEOUT_LABEL)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_HIDE_TIMEOUT_TP),
                 min = 5,
                 max = 600,
                 step = 5,
@@ -3471,7 +3577,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Group Bar Width
                 type = "slider",
-                name = "Group Frame Bar Width",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_GROUP_BAR_WIDTH),
                 min = 50,
                 max = 300,
                 step = 5,
@@ -3493,7 +3599,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Group Bar Height
                 type = "slider",
-                name = "Group Frame Bar Height",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_GROUP_BAR_HEIGHT),
                 min = 3,
                 max = 15,
                 step = 1,
@@ -3515,7 +3621,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Raid Bar Width
                 type = "slider",
-                name = "Raid Frame Bar Width",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_RAID_BAR_WIDTH),
                 min = 50,
                 max = 250,
                 step = 5,
@@ -3537,7 +3643,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Raid Bar Height
                 type = "slider",
-                name = "Raid Frame Bar Height",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_RAID_BAR_HEIGHT),
                 min = 3,
                 max = 15,
                 step = 1,
@@ -3559,7 +3665,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Magicka Color Start
                 type = "colorpicker",
-                name = "Magicka Gradient Start",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_MAGICKA_GRAD_START),
                 getFunc = function ()
                     return unpack(Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_MAGICKA].gradientStart)
                 end,
@@ -3578,7 +3684,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Magicka Color End
                 type = "colorpicker",
-                name = "Magicka Gradient End",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_MAGICKA_GRAD_END),
                 getFunc = function ()
                     return unpack(Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_MAGICKA].gradientEnd)
                 end,
@@ -3597,7 +3703,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Stamina Color Start
                 type = "colorpicker",
-                name = "Stamina Gradient Start",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_STAMINA_GRAD_START),
                 getFunc = function ()
                     return unpack(Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_STAMINA].gradientStart)
                 end,
@@ -3616,7 +3722,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Stamina Color End
                 type = "colorpicker",
-                name = "Stamina Gradient End",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_RESOURCES_STAMINA_GRAD_END),
                 getFunc = function ()
                     return unpack(Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_STAMINA].gradientEnd)
                 end,
@@ -3639,14 +3745,14 @@ function UnitFrames.CreateSettings()
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {
         type = "submenu",
-        name = "Group Combat Stats",
+        name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_HEADER),
         controls =
         {
             {
                 -- Enable Group Combat Stats
                 type = "checkbox",
-                name = "Enable Combat Stats Display",
-                tooltip = "Display ultimate status, DPS, and HPS for group members using LibGroupCombatStats.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_ENABLE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_ENABLE_TP),
                 getFunc = function ()
                     return Settings.GroupCombatStats.enabled
                 end,
@@ -3655,7 +3761,7 @@ function UnitFrames.CreateSettings()
                 end,
                 width = "full",
                 default = Defaults.GroupCombatStats.enabled,
-                warning = "Requires LibGroupCombatStats library. " .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                warning = GetString(LUIE_STRING_LAM_UF_REQUIRES_LIBGROUPCOMBATSTATS) .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and LibGroupCombatStats)
                 end,
@@ -3663,8 +3769,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Show Ultimate Icon
                 type = "checkbox",
-                name = "Show Ultimate Icons",
-                tooltip = "Display ultimate ability icon with charge indicator on group frames.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_ULTIMATE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_ULTIMATE_TP),
                 getFunc = function ()
                     return Settings.GroupCombatStats.showUltimate
                 end,
@@ -3681,8 +3787,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Show DPS
                 type = "checkbox",
-                name = "Show DPS",
-                tooltip = "Display damage per second values on group frames.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_DPS),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_DPS_TP),
                 getFunc = function ()
                     return Settings.GroupCombatStats.showDPS
                 end,
@@ -3702,8 +3808,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Show HPS
                 type = "checkbox",
-                name = "Show HPS",
-                tooltip = "Display healing per second values on group frames.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_HPS),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_STATS_HPS_TP),
                 getFunc = function ()
                     return Settings.GroupCombatStats.showHPS
                 end,
@@ -3723,13 +3829,13 @@ function UnitFrames.CreateSettings()
             {
                 -- Header for Group (4 player) settings
                 type = "header",
-                name = "Group Frames (4 player)",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_FRAMES_4P),
             },
             {
                 -- Ultimate Icon Size (Group)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Ultimate Icon Size"),
-                tooltip = "Set the size of ultimate icons displayed on group frames (4 player).",
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_ULT_ICON_SIZE_TP),
                 min = 16,
                 max = 36,
                 step = 2,
@@ -3750,7 +3856,7 @@ function UnitFrames.CreateSettings()
                 -- Ultimate Icon Horizontal Offset (Group)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
-                tooltip = "Adjust horizontal position of ultimate icons on group frames.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_ULT_ICON_OFFSET_X_TP),
                 min = -20,
                 max = 20,
                 step = 1,
@@ -3771,7 +3877,7 @@ function UnitFrames.CreateSettings()
                 -- Ultimate Icon Vertical Offset (Group)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
-                tooltip = "Adjust vertical position of ultimate icons on group frames.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_ULT_ICON_OFFSET_Y_TP),
                 min = -20,
                 max = 20,
                 step = 1,
@@ -3791,14 +3897,14 @@ function UnitFrames.CreateSettings()
             -- {
             --     -- Header for Raid (12 player) settings
             --     type = "header",
-            --     name = "Raid Frames (12 player)",
+            --     name = GetString(LUIE_STRING_LAM_UF_RAID_FRAMES_12P),
             -- },
             --[[ Raid ultimate icons commented out - no longer shown on raid frames
             {
                 -- Ultimate Icon Size (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Ultimate Icon Size"),
-                tooltip = "Set the size of ultimate icons displayed on raid frames (12 player).",
+                tooltip = GetString(LUIE_STRING_LAM_UF_RAID_ULT_ICON_SIZE_TP),
                 min = 14,
                 max = 32,
                 step = 2,
@@ -3821,7 +3927,7 @@ function UnitFrames.CreateSettings()
                 -- Ultimate Icon Horizontal Offset (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
-                tooltip = "Adjust horizontal spacing between resource bars and ultimate icons (bottom row positioning).",
+                tooltip = GetString(LUIE_STRING_LAM_UF_RAID_ULT_ICON_OFFSET_X_TP),
                 min = 0,
                 max = 100,
                 step = 1,
@@ -3842,7 +3948,7 @@ function UnitFrames.CreateSettings()
                 -- Ultimate Icon Vertical Offset (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
-                tooltip = "Adjust vertical alignment of icons in the bottom row (relative to resource bars).",
+                tooltip = GetString(LUIE_STRING_LAM_UF_RAID_ULT_ICON_OFFSET_Y_TP),
                 min = -50,
                 max = 50,
                 step = 1,
@@ -3867,14 +3973,14 @@ function UnitFrames.CreateSettings()
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {
         type = "submenu",
-        name = "Group Potion Cooldowns",
+        name = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_HEADER),
         controls =
         {
             {
                 -- Enable Group Potion Cooldowns
                 type = "checkbox",
-                name = "Enable Group Potion Cooldowns",
-                tooltip = "Display potion cooldown status for group members on custom unit frames (requires LibGroupPotionCooldowns).",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_ENABLE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_ENABLE_TP),
                 getFunc = function ()
                     return Settings.GroupPotionCooldowns.enabled
                 end,
@@ -3891,8 +3997,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Show Remaining Time
                 type = "checkbox",
-                name = "Show Remaining Time",
-                tooltip = "Display countdown timer on potion icon when on cooldown.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_REMAINING),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_REMAINING_TP),
                 getFunc = function ()
                     return Settings.GroupPotionCooldowns.showRemainingTime
                 end,
@@ -3909,13 +4015,13 @@ function UnitFrames.CreateSettings()
             {
                 -- Header for Group (4 player) settings
                 type = "header",
-                name = "Group Frames (4 player)",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_FRAMES_4P),
             },
             {
                 -- Potion Icon Size (Group)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Potion Icon Size"),
-                tooltip = "Set the size of potion cooldown icons on group frames (4 player).",
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_ICON_SIZE_TP),
                 min = 14,
                 max = 32,
                 step = 2,
@@ -3936,7 +4042,7 @@ function UnitFrames.CreateSettings()
                 -- Potion Icon Horizontal Offset (Group)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
-                tooltip = "Adjust horizontal position of potion icon on group frames.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_OFFSET_X_TP),
                 min = -20,
                 max = 20,
                 step = 1,
@@ -3957,7 +4063,7 @@ function UnitFrames.CreateSettings()
                 -- Potion Icon Vertical Offset (Group)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
-                tooltip = "Adjust vertical position of potion icon on group frames.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_OFFSET_Y_TP),
                 min = -20,
                 max = 20,
                 step = 1,
@@ -3978,13 +4084,13 @@ function UnitFrames.CreateSettings()
             {
                 -- Header for Raid (12 player) settings
                 type = "header",
-                name = "Raid Frames (12 player)",
+                name = GetString(LUIE_STRING_LAM_UF_RAID_FRAMES_12P),
             },
             {
                 -- Potion Icon Size (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Potion Icon Size"),
-                tooltip = "Set the size of potion cooldown icons on raid frames (12 player).",
+                tooltip = GetString(LUIE_STRING_LAM_UF_RAID_POTION_ICON_SIZE_TP),
                 min = 12,
                 max = 28,
                 step = 2,
@@ -4005,7 +4111,7 @@ function UnitFrames.CreateSettings()
                 -- Potion Icon Horizontal Offset (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
-                tooltip = "Adjust horizontal spacing from resource bars or ultimate icons (if combat stats disabled). Bottom row positioning.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_RAID_POTION_OFFSET_X_TP),
                 min = 0,
                 max = 100,
                 step = 1,
@@ -4026,7 +4132,7 @@ function UnitFrames.CreateSettings()
                 -- Potion Icon Vertical Offset (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
-                tooltip = "Adjust vertical alignment of potion icon in the bottom row (relative to resource bars).",
+                tooltip = GetString(LUIE_STRING_LAM_UF_RAID_POTION_OFFSET_Y_TP),
                 min = -50,
                 max = 50,
                 step = 1,
@@ -4051,13 +4157,13 @@ function UnitFrames.CreateSettings()
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {
         type = "submenu",
-        name = "Group Food & Drink Buffs",
+        name = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_HEADER),
         controls =
         {
             {
                 type = "checkbox",
-                name = "Enable Group Food & Drink Buffs",
-                tooltip = "Display food and drink buff icons for group members.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_ENABLE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_ENABLE_TP),
                 getFunc = function ()
                     return Settings.GroupFoodDrinkBuff.enabled
                 end,
@@ -4076,12 +4182,12 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "description",
-                text = "Food/drink buff icons are only displayed on group frames (4-player groups). Raid frames do not have space for these icons.",
+                text = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_RAID_NOTE_DESC),
             },
             {
                 type = "checkbox",
-                name = "Show \"No Buff\" Icon",
-                tooltip = "Display an icon when a group member has no food or drink buff active.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_NO_BUFF),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_NO_BUFF_TP),
                 getFunc = function ()
                     return Settings.GroupFoodDrinkBuff.showNoBuff
                 end,
@@ -4099,8 +4205,8 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "checkbox",
-                name = "Show Remaining Time",
-                tooltip = "Display countdown timer on food/drink buff icons showing time remaining (hours/minutes/seconds).",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_POTION_REMAINING),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_REMAINING_TP),
                 getFunc = function ()
                     return Settings.GroupFoodDrinkBuff.showRemainingTime
                 end,
@@ -4116,8 +4222,8 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "checkbox",
-                name = "Use Custom Quality Icons",
-                tooltip = "Use custom quality-based icons (green/blue/purple) instead of actual buff icons. Green = single stat, Blue = dual stat, Purple = triple stat.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_QUALITY_ICONS),
+                tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_QUALITY_ICONS_TP),
                 getFunc = function ()
                     return Settings.GroupFoodDrinkBuff.useCustomIcons
                 end,
@@ -4135,7 +4241,7 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "slider",
-                name = "Group Frame Icon Size",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_ICON_SIZE),
                 min = 16,
                 max = 32,
                 step = 2,
@@ -4157,7 +4263,7 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "slider",
-                name = "Group Frame Icon Offset X",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_ICON_OFFSET_X),
                 min = -20,
                 max = 20,
                 step = 1,
@@ -4179,7 +4285,7 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "slider",
-                name = "Group Frame Icon Offset Y",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_ICON_OFFSET_Y),
                 min = -20,
                 max = 20,
                 step = 1,
@@ -4232,7 +4338,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 getFunc = function ()
                     return Settings.CustomFormatCompanion
                 end,
@@ -4340,8 +4447,8 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "checkbox",
-                name = "Show Combat Glow",
-                tooltip = "Display a glow border around the companion health bar when the companion is in combat.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_GLOW),
+                tooltip = GetString(LUIE_STRING_LAM_UF_COMPANION_COMBAT_GLOW_TP),
                 getFunc = function ()
                     return Settings.CompanionCombatGlow
                 end,
@@ -4358,7 +4465,7 @@ function UnitFrames.CreateSettings()
             {
                 type = "colorpicker",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Combat Glow Color"),
-                tooltip = "Set the color of the combat glow border displayed around the companion frame.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_COMPANION_COMBAT_GLOW_COLOR_TP),
                 getFunc = function ()
                     return unpack(Settings.CompanionCombatGlowColor)
                 end,
@@ -4544,6 +4651,25 @@ function UnitFrames.CreateSettings()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionAbilityTrack.enabled)
                 end,
             },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_RAPPORT_FLOURISH),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_RAPPORT_FLOURISH_TP),
+                getFunc = function ()
+                    return Settings.CompanionRapportFlourish.enabled
+                end,
+                setFunc = function (value)
+                    Settings.CompanionRapportFlourish.enabled = value
+                    if not value and UnitFrames.companionRapportFlourish then
+                        UnitFrames.companionRapportFlourish:StopFlourish()
+                    end
+                end,
+                width = "full",
+                default = Defaults.CompanionRapportFlourish.enabled,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
         },
     }
 
@@ -4577,7 +4703,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 getFunc = function ()
                     return Settings.CustomFormatPet
                 end,
@@ -4685,8 +4812,8 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "checkbox",
-                name = "Show Combat Glow",
-                tooltip = "Display a glow border around pet health bars when the pet is in combat.",
+                name = GetString(LUIE_STRING_LAM_UF_GROUP_COMBAT_GLOW),
+                tooltip = GetString(LUIE_STRING_LAM_UF_PET_COMBAT_GLOW_TP),
                 getFunc = function ()
                     return Settings.PetCombatGlow
                 end,
@@ -4703,7 +4830,7 @@ function UnitFrames.CreateSettings()
             {
                 type = "colorpicker",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Combat Glow Color"),
-                tooltip = "Set the color of the combat glow border displayed around pet frames.",
+                tooltip = GetString(LUIE_STRING_LAM_UF_PET_COMBAT_GLOW_COLOR_TP),
                 getFunc = function ()
                     return unpack(Settings.PetCombatGlowColor)
                 end,
@@ -4965,7 +5092,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
-                choices = formatOptions,
+                choices = formatOptionChoices,
+                choicesValues = formatOptionValues,
                 getFunc = function ()
                     return Settings.CustomFormatBoss
                 end,
@@ -5022,8 +5150,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Boss Bars Spacing
                 type = "slider",
-                name = "Boss Frame Vertical Spacing",
-                tooltip = "Vertical spacing between boss frames.",
+                name = GetString(LUIE_STRING_LAM_UF_BOSS_VERTICAL_SPACING),
+                tooltip = GetString(LUIE_STRING_LAM_UF_BOSS_VERTICAL_SPACING_TP),
                 min = 0,
                 max = 20,
                 step = 1,
@@ -5157,8 +5285,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Threshold Label X Offset
                 type = "slider",
-                name = "Threshold Label X Offset",
-                tooltip = "Horizontal nudge applied to both the top percent label and the bottom mechanic-name label.",
+                name = GetString(LUIE_STRING_LAM_UF_BOSS_THRESHOLD_LABEL_X),
+                tooltip = GetString(LUIE_STRING_LAM_UF_BOSS_THRESHOLD_LABEL_X_TP),
                 min = -100,
                 max = 100,
                 step = 1,
@@ -5178,8 +5306,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Threshold Label Y Padding
                 type = "slider",
-                name = "Threshold Label Y Padding",
-                tooltip = "Padding away from the boss stack. Top percent labels are pushed up by this many pixels and bottom rotated mechanic-name labels are pushed down by the same amount.",
+                name = GetString(LUIE_STRING_LAM_UF_BOSS_THRESHOLD_LABEL_Y),
+                tooltip = GetString(LUIE_STRING_LAM_UF_BOSS_THRESHOLD_LABEL_Y_TP),
                 min = -100,
                 max = 100,
                 step = 1,

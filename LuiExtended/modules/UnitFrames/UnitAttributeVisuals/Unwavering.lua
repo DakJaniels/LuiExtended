@@ -13,7 +13,7 @@ local UnitFrames = LUIE.UnitFrames
 
 --- Module for handling Unwavering Power (invulnerability) visuals
 --- @class LUIE_UnwaveringModule : LUIE_UnitAttributeVisualizerModuleBase
-local UnwaveringModule = LUIE_UnitAttributeVisualizerModuleBase:New()
+local UnwaveringModule = LUIE_UnitAttributeVisualizerModuleBase:Subclass()
 
 function UnwaveringModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_UNWAVERING_POWER
@@ -42,16 +42,11 @@ function UnwaveringModule:UpdateInvulnerable(unitTag)
 
     local healthValue, _, healthEffectiveMax, _ = unpack(UnitFrames.savedHealth[unitTag])
 
-    -- Update frames
-    if UnitFrames.DefaultFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, false, false)
-    end
-    if UnitFrames.CustomFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, false, false)
-    end
-    if UnitFrames.AvaCustFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, false, false)
-    end
+    self:ForEachUnitFrameTable(unitTag, function (frameTable)
+        if frameTable[COMBAT_MECHANIC_FLAGS_HEALTH] then
+            UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, frameTable[COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, false, false)
+        end
+    end)
 end
 
 -- -----------------------------------------------------------------------------
@@ -70,6 +65,8 @@ function UnwaveringModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, s
     self:UpdateInvulnerable(unitTag)
 end
 
+LUIE_UnwaveringModule = UnwaveringModule
+UnitFrames.VisualizerModuleClasses.UnwaveringModule = UnwaveringModule
 UnitFrames.VisualizerModules.UnwaveringModule = UnwaveringModule
 
 return UnwaveringModule

@@ -11,6 +11,9 @@ local LUIE = LUIE
 local table_insert = table.insert
 local table_sort = table.sort
 local pairs = pairs
+local type = type
+local zo_strformat = zo_strformat
+local string_gsub = string.gsub
 
 -- ---------------------------------------------------------------------------------------
 -- SettingsAPI Class
@@ -57,19 +60,26 @@ function SettingsAPI:AppendSettingsList(allSettings, settingsList)
     end
 end
 
---- Appends a native ST_SECTION row and its settings (single registration; no RemoveAllSettings).
+--- Appends ST_SECTION plus optional rows. Console LHAS 2.1.8+: `options.subMenu = false` for a header-only row (no drill-in; following rows stay on the parent list).
 --- @param allSettings table
 --- @param sectionLabel string|integer
---- @param sectionRows table
-function SettingsAPI:AppendSection(allSettings, sectionLabel, sectionRows)
+--- @param sectionRows table|nil
+--- @param options table|nil `{ subMenu = false }`
+function SettingsAPI:AppendSection(allSettings, sectionLabel, sectionRows, options)
     local LHAS = LibHarvensAddonSettings
-    table_insert(allSettings,
-                 {
-                     type = LHAS.ST_SECTION,
-                     label = sectionLabel,
-                 })
-    for i = 1, #sectionRows do
-        table_insert(allSettings, self:NormalizeConsoleSetting(sectionRows[i]))
+    local sectionEntry =
+    {
+        type = LHAS.ST_SECTION,
+        label = sectionLabel,
+    }
+    if options and options.subMenu == false then
+        sectionEntry.subMenu = false
+    end
+    table_insert(allSettings, sectionEntry)
+    if sectionRows then
+        for i = 1, #sectionRows do
+            table_insert(allSettings, self:NormalizeConsoleSetting(sectionRows[i]))
+        end
     end
 end
 
@@ -78,6 +88,77 @@ end
 function SettingsAPI:RefreshPanel(panel)
     if panel and panel.selected and panel.UpdateControls then
         panel:UpdateControls()
+    end
+end
+
+--- @param addonPanel table LibHarvensAddonSettings.AddonSettings
+function SettingsAPI:RefreshConsoleAddonSettingsHeader(addonPanel)
+    local LHAS = LibHarvensAddonSettings
+    local scrollList = LHAS.scrollList
+    if not scrollList.header or not addonPanel then
+        return
+    end
+    local addonName = addonPanel.name
+    local author, name = addonName:match("^(.+)'s%s(.+)")
+    if name == nil then
+        name = addonName
+    end
+    if addonPanel.author then
+        author = addonPanel.author
+    end
+    ZO_GamepadGenericHeader_RefreshData(scrollList.header,
+                                        {
+                                            titleText = name,
+                                            subtitleText = addonPanel.version,
+                                            messageText = author and zo_strformat(GetString(SI_ADD_ON_AUTHOR_LINE), author),
+                                        })
+end
+
+--- Opens LuiExtended main settings → Chat Output (console LHAS section drill-in).
+function SettingsAPI:OpenConsoleChatOutputSettings()
+    local LHAS = LibHarvensAddonSettings
+    local mainPanel = LUIE.consoleMainSettingsPanel
+    local sectionSetting = LUIE.consoleChatOutputSectionSetting
+    if not mainPanel or not sectionSetting then
+        return
+    end
+
+    local scrollList = LHAS.scrollList
+
+    local mainList = scrollList:GetMainList()
+    local sectionList = scrollList:GetList("Section")
+
+    -- Tear down any drilled-in section (e.g. Chat Announcements) so pooled rows are not left visible.
+    if sectionList.currentSection or scrollList:GetCurrentList() == sectionList then
+        sectionList.currentSection = nil
+        sectionList:Clear()
+        sectionList:Commit()
+        scrollList:SetCurrentList(mainList)
+    end
+    mainList:Clear()
+    mainList:Commit()
+
+    if not mainPanel.selected then
+        mainPanel:Select()
+    end
+
+    -- LibHarvensAddonSettings_AddonSelected rebuilds the root list; discard before Chat Output drill-in.
+    mainList:Clear()
+    mainList:Commit()
+
+    sectionList.currentSection = sectionSetting
+    scrollList:SetCurrentList(sectionList)
+    mainPanel:SetupSections()
+    mainPanel:CreateControls()
+    if mainPanel.RefreshSelection then
+        mainPanel:RefreshSelection()
+    end
+
+    self:RefreshConsoleAddonSettingsHeader(mainPanel)
+    PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+
+    if SCENE_MANAGER:IsShowing("LibHarvensAddonSettingsScene") == false then
+        SCENE_MANAGER:Push("LibHarvensAddonSettingsScene")
     end
 end
 
@@ -123,6 +204,249 @@ function SettingsAPI:ConsoleFontDeferLabelSetting()
         label = GetString(LUIE_STRING_CONSOLE_FONT_PENDING_LABEL),
         canSelect = false,
     }
+end
+
+-- ---------------------------------------------------------------------------------------
+-- LHAS dropdown + console-safe text
+-- ---------------------------------------------------------------------------------------
+
+--- Value for getFunction/default so LHAS matches items by `data` (see equalityFunctionDropDown).
+--- @param storedValue any
+--- @return table
+function SettingsAPI:LHASDropdownGetData(storedValue)
+    return { data = storedValue }
+end
+
+--- Clamp numeric index dropdown SV; optional English legacy string migration.
+--- @param storedValue any
+--- @param legacyEnglishToIndex table<string, integer>|nil
+--- @param defaultIndex integer
+--- @param maxIndex integer
+--- @return integer
+function SettingsAPI:NormalizeNumericIndexDropdown(storedValue, legacyEnglishToIndex, defaultIndex, maxIndex)
+    local index = storedValue
+    if type(index) == "string" and legacyEnglishToIndex then
+        index = legacyEnglishToIndex[index] or defaultIndex
+    end
+    if type(index) ~= "number" or index < 1 or index > maxIndex then
+        index = defaultIndex
+    end
+    return index
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeGlobalIconOptionIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["All Crowd Control"] = 1,
+                                                  ["NPC CC Only"] = 2,
+                                                  ["Player CC Only"] = 3,
+                                              },
+                                              defaultIndex,
+                                              3)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeGlobalAlertOptionIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["Show All Incoming Abilities"] = 1,
+                                                  ["Only Show Hard CC Effects"] = 2,
+                                                  ["Only Show Unbreakable CC Effects"] = 3,
+                                              },
+                                              defaultIndex,
+                                              3)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeChatNameDisplayIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 2
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["@UserID"] = 1,
+                                                  ["Character Name"] = 2,
+                                                  ["Character Name @UserID"] = 3,
+                                              },
+                                              defaultIndex,
+                                              3)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeFriendStatusNameFormatIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["Player Name Display Method"] = 1,
+                                                  ["@UserID with Character Name"] = 2,
+                                              },
+                                              defaultIndex,
+                                              2)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeLinkBracketDisplayIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["No Brackets"] = 1,
+                                                  ["Display Brackets"] = 2,
+                                              },
+                                              defaultIndex,
+                                              2)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeGuildRankDisplayIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["Self Only"] = 1,
+                                                  ["All w/ Permissions"] = 2,
+                                                  ["All Rank Changes"] = 3,
+                                              },
+                                              defaultIndex,
+                                              3)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeRotationOptionIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 2
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["Horizontal"] = 1,
+                                                  ["Vertical"] = 2,
+                                              },
+                                              defaultIndex,
+                                              2)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeGcdMethodIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["Radial"] = 1,
+                                                  ["Vertical Reveal"] = 2,
+                                              },
+                                              defaultIndex,
+                                              2)
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @return integer
+function SettingsAPI:NormalizeDuelStartDisplayIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    return self:NormalizeNumericIndexDropdown(storedValue,
+                                              {
+                                                  ["Message + Icon"] = 1,
+                                                  ["Message Only"] = 2,
+                                                  ["Icon Only"] = 3,
+                                              },
+                                              defaultIndex,
+                                              3)
+end
+
+--- Unit Frames name display (same indices as chat name display).
+function SettingsAPI:NormalizeUfNameDisplayIndex(storedValue, defaultIndex)
+    return self:NormalizeChatNameDisplayIndex(storedValue, defaultIndex)
+end
+
+function SettingsAPI:NormalizeUfRaidIconIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    local legacy =
+    {
+        ["No Icons"] = 1,
+        ["Class Icons Only"] = 2,
+        ["Role Icons Only"] = 3,
+        ["Class Icon in PVP, Role in PVE"] = 4,
+        ["Class Icon in PVE, Role in PVP"] = 5,
+        [GetString(LUIE_STRING_LAM_UF_RAIDICON_NONE)] = 1,
+        [GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_ONLY)] = 2,
+        [GetString(LUIE_STRING_LAM_UF_RAIDICON_ROLE_ONLY)] = 3,
+        [GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_PVP_ROLE_PVE)] = 4,
+        [GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_PVE_ROLE_PVP)] = 5,
+    }
+    return self:NormalizeNumericIndexDropdown(storedValue, legacy, defaultIndex, 5)
+end
+
+function SettingsAPI:NormalizeUfPlayerFrameIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    local legacy =
+    {
+        ["Vertical Stacked Frames"] = 1,
+        ["Separated Horizontal Frames"] = 2,
+        ["Pyramid"] = 3,
+        [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_VERTICAL)] = 1,
+        [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_HORIZONTAL)] = 2,
+        [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_PYRAMID)] = 3,
+    }
+    return self:NormalizeNumericIndexDropdown(storedValue, legacy, defaultIndex, 3)
+end
+
+function SettingsAPI:NormalizeUfAlignmentIndex(storedValue, defaultIndex)
+    defaultIndex = defaultIndex or 1
+    local legacy =
+    {
+        ["Left to Right (Default)"] = 1,
+        ["Right to Left"] = 2,
+        ["Center"] = 3,
+        [GetString(LUIE_STRING_LAM_UF_ALIGNMENT_LEFT_RIGHT)] = 1,
+        [GetString(LUIE_STRING_LAM_UF_ALIGNMENT_RIGHT_LEFT)] = 2,
+        [GetString(LUIE_STRING_LAM_UF_ALIGNMENT_CENTER)] = 3,
+    }
+    return self:NormalizeNumericIndexDropdown(storedValue, legacy, defaultIndex, 3)
+end
+
+--- Dropdowns that store a fixed token string in SV (e.g. SCB alignment).
+--- @param storedValue any
+--- @param validTokens table
+--- @param defaultToken string
+--- @return string
+function SettingsAPI:NormalizeTokenChoice(storedValue, validTokens, defaultToken)
+    if type(storedValue) == "string" then
+        for i = 1, #validTokens do
+            if storedValue == validTokens[i] then
+                return storedValue
+            end
+        end
+    end
+    return defaultToken
+end
+
+--- Single-line label for LHAS list rows (never use multi-line LAM DESCRIPTION here).
+--- @param stringId string
+--- @return string
+function SettingsAPI:ConsoleLabel(stringId)
+    return GetString(stringId)
+end
+
+--- Tooltip safe for gamepad: collapses newlines/tabs to spaces.
+--- @param stringId string
+--- @return string
+function SettingsAPI:ConsoleTooltip(stringId)
+    local text = GetString(stringId)
+    text = string_gsub(text, "[\r\n\t]+", " ")
+    text = string_gsub(text, "%s%s+", " ")
+    return zo_strtrim(text)
 end
 
 -- ---------------------------------------------------------------------------------------
@@ -250,57 +574,146 @@ end
 --- Get global icon options list (CC icon options)
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetGlobalIconOptionsList()
-    local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
+    local globalIconOptions =
+    {
+        GetString(LUIE_STRING_SHARED_CC_ALL),
+        GetString(LUIE_STRING_SHARED_CC_NPC_ONLY),
+        GetString(LUIE_STRING_SHARED_CC_PLAYER_ONLY),
+    }
     return self:ConvertOptionsToItems(globalIconOptions)
 end
 
 --- Get global alert options list for CombatInfo
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetGlobalAlertOptionsList()
-    local globalAlertOptions = { "Show All Incoming Abilities", "Only Show Hard CC Effects", "Only Show Unbreakable CC Effects" }
+    local globalAlertOptions =
+    {
+        GetString(LUIE_STRING_LAM_CI_ALERT_FILTER_ALL),
+        GetString(LUIE_STRING_LAM_CI_ALERT_FILTER_HARD_CC),
+        GetString(LUIE_STRING_LAM_CI_ALERT_FILTER_UNBREAKABLE_CC),
+    }
     return self:ConvertOptionsToItems(globalAlertOptions)
 end
 
 --- Get chat name display options list for ChatAnnouncements
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetChatNameDisplayOptionsList()
-    local chatNameDisplayOptions = { "@UserID", "Character Name", "Character Name @UserID" }
+    local chatNameDisplayOptions =
+    {
+        GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID),
+        GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME),
+        GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID),
+    }
     return self:ConvertOptionsToItems(chatNameDisplayOptions)
+end
+
+--- Get friend log on/off name format options for ChatAnnouncements Social
+--- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
+function SettingsAPI:GetFriendStatusNameFormatOptionsList()
+    local friendStatusNameFormatOptions =
+    {
+        GetString(LUIE_STRING_LAM_CA_NAMEDISPLAYMETHOD),
+        GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_ONOFF_FORMAT_STOCK),
+    }
+    return self:ConvertOptionsToItems(friendStatusNameFormatOptions)
 end
 
 --- Get link bracket display options list for ChatAnnouncements
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetLinkBracketDisplayOptionsList()
-    local linkBracketDisplayOptions = { "No Brackets", "Display Brackets" }
+    local linkBracketDisplayOptions =
+    {
+        GetString(LUIE_STRING_LAM_CA_CHOICE_NO_BRACKETS),
+        GetString(LUIE_STRING_LAM_CA_CHOICE_DISPLAY_BRACKETS),
+    }
     return self:ConvertOptionsToItems(linkBracketDisplayOptions)
 end
 
 --- Get guild rank display options list for ChatAnnouncements
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetGuildRankDisplayOptionsList()
-    local guildRankDisplayOptions = { "Self Only", "All w/ Permissions", "All Rank Changes" }
+    local guildRankDisplayOptions =
+    {
+        GetString(LUIE_STRING_LAM_CA_CHOICE_GUILD_RANK_SELF),
+        GetString(LUIE_STRING_LAM_CA_CHOICE_GUILD_RANK_PERMISSIONS),
+        GetString(LUIE_STRING_LAM_CA_CHOICE_GUILD_RANK_ALL),
+    }
     return self:ConvertOptionsToItems(guildRankDisplayOptions)
 end
 
 --- Get duel start options list for ChatAnnouncements
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetDuelStartOptionsList()
-    local duelStartOptions = { "Message + Icon", "Message Only", "Icon Only" }
+    local duelStartOptions =
+    {
+        GetString(LUIE_STRING_LAM_CA_CHOICE_DUEL_MESSAGE_ICON),
+        GetString(LUIE_STRING_LAM_CA_CHOICE_DUEL_MESSAGE_ONLY),
+        GetString(LUIE_STRING_LAM_CA_CHOICE_DUEL_ICON_ONLY),
+    }
     return self:ConvertOptionsToItems(duelStartOptions)
 end
 
 --- Get global method options list for ActionBar
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetGlobalMethodOptionsList()
-    local globalMethodOptions = { "Radial", "Vertical Reveal" }
+    local globalMethodOptions =
+    {
+        GetString(LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL),
+        GetString(LUIE_STRING_LAM_AB_GCD_ANIM_VERTICAL_REVEAL),
+    }
     return self:ConvertOptionsToItems(globalMethodOptions)
 end
 
 --- Get rotation options list (Horizontal/Vertical)
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetRotationOptionsList()
-    local rotationOptions = { "Horizontal", "Vertical" }
+    local rotationOptions =
+    {
+        GetString(LUIE_STRING_SHARED_ORIENTATION_HORIZONTAL),
+        GetString(LUIE_STRING_SHARED_ORIENTATION_VERTICAL),
+    }
     return self:ConvertOptionsToItems(rotationOptions)
+end
+
+--- Bracket style dropdown (4 choices); SV stores index 1-4.
+--- @return table
+function SettingsAPI:GetBracketStyleOptions4List()
+    return
+    {
+        { name = "[]",                                             data = 1 },
+        { name = "()",                                             data = 2 },
+        { name = "-",                                              data = 3 },
+        { name = GetString(LUIE_STRING_LAM_CA_CHOICE_NO_BRACKETS), data = 4 },
+    }
+end
+
+--- Bracket style dropdown (5 choices); SV stores index 1-5.
+--- @return table
+function SettingsAPI:GetBracketStyleOptions5List()
+    return
+    {
+        { name = "[]",                                             data = 1 },
+        { name = "()",                                             data = 2 },
+        { name = "-",                                              data = 3 },
+        { name = ":",                                              data = 4 },
+        { name = GetString(LUIE_STRING_LAM_CA_CHOICE_NO_BRACKETS), data = 5 },
+    }
+end
+
+--- @param storedValue any
+--- @param defaultIndex integer
+--- @param maxIndex 4|5
+--- @return integer
+function SettingsAPI:NormalizeBracketStyleIndex(storedValue, defaultIndex, maxIndex)
+    local legacy =
+    {
+        ["[]"] = 1,
+        ["()"] = 2,
+        ["-"] = 3,
+        [":"] = 4,
+        ["No Brackets"] = maxIndex,
+    }
+    return self:NormalizeNumericIndexDropdown(storedValue, legacy, defaultIndex, maxIndex)
 end
 
 -- ---------------------------------------------------------------------------------------

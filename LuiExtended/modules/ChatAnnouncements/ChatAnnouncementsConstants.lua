@@ -6,12 +6,11 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
--- ChatAnnouncements namespace
+-- ChatAnnouncements namespace (see ChatAnnouncementsTypes.lua for full partial class fields)
 --- @class (partial) ChatAnnouncements
---- @field SV CADefaults
+--- @type ChatAnnouncements
 local ChatAnnouncements = {}
 
---- @class (partial) ChatAnnouncements
 LUIE.ChatAnnouncements = ChatAnnouncements
 
 --- @class QueuedMessage
@@ -20,7 +19,7 @@ LUIE.ChatAnnouncements = ChatAnnouncements
 --- @field isSystem? boolean
 --- @field itemId? integer
 --- @field formattedRecipient? string
---- @field color? any
+--- @field color? string
 --- @field logPrefix? string
 --- @field totalString? string
 --- @field groupLoot? boolean
@@ -31,15 +30,22 @@ ChatAnnouncements.QueuedMessages = {} --- @type table<integer,QueuedMessage>
 ChatAnnouncements.QueuedMessagesCounter = 1
 
 -- Setup Color Table
-ChatAnnouncements.Colors = {}
+local caColors = {}
+--- @cast caColors CAColors
+ChatAnnouncements.Colors = caColors
 
 -- Runtime flags, indexes, and session state (see ChatAnnouncements.lua init).
-ChatAnnouncements.State = {}
+local caState = {}
+--- @cast caState CAState
+ChatAnnouncements.State = caState
 
 -- File-scope helpers (Lua 5.1 local limit); defined in ChatAnnouncements.lua / ChatAnnouncementsCSA.lua.
-ChatAnnouncements.Internal = {}
+local caInternal = {}
+--- @cast caInternal CAInternal
+ChatAnnouncements.Internal = caInternal
 
 -- Bracket / link-style options for formatted CA strings (read-only).
+--- @type CABrackets
 ChatAnnouncements.Brackets =
 {
     bracket1 =
@@ -177,6 +183,7 @@ ChatAnnouncements.Brackets =
 --- @field FriendIgnoreAlert boolean
 --- @field FriendStatusCA boolean
 --- @field FriendStatusAlert boolean
+--- @field FriendStatusNameFormat integer
 --- @field DuelCA boolean
 --- @field DuelAlert boolean
 --- @field DuelBoundaryCA boolean
@@ -206,6 +213,16 @@ ChatAnnouncements.Brackets =
 --- @field NotificationMailErrorAlert boolean
 --- @field NotificationTradeCA boolean
 --- @field NotificationTradeAlert boolean
+--- @field SlashHomeCA boolean
+--- @field SlashHomeAlert boolean
+--- @field SlashCampaignCA boolean
+--- @field SlashCampaignAlert boolean
+--- @field CampaignQueueCA boolean
+--- @field CampaignQueueAlert boolean
+--- @field OutfitEquipCA boolean
+--- @field OutfitEquipAlert boolean
+--- @field SocialErrorCA boolean
+--- @field SocialErrorAlert boolean
 --- @field DisguiseCA boolean
 --- @field DisguiseCSA boolean
 --- @field DisguiseAlert boolean
@@ -535,6 +552,9 @@ ChatAnnouncements.Brackets =
 --- @field LootRecipeHideAlert boolean
 --- @field LootQuestAdd boolean
 --- @field LootQuestRemove boolean
+--- @field AttunableStationCA boolean
+--- @field AttunableStationCSA boolean
+--- @field AttunableStationAlert boolean
 
 --- Context message strings (loot/currency action labels).
 --- @class CAContextMessagesDefaults
@@ -695,7 +715,7 @@ ChatAnnouncements.Defaults =
     {
         AchievementCategoryIgnore = {}, -- Inverted list of achievements to be tracked
         AchievementProgressMsg = GetString(LUIE_STRING_CA_ACHIEVEMENT_PROGRESS_MSG),
-        AchievementCompleteMsg = GetString(SI_ACHIEVEMENT_AWARDED_CENTER_SCREEN),
+        AchievementCompleteMsg = GetString(LUIE_STRING_CA_ACHIEVEMENT_COMPLETE_MSG),
         AchievementColorProgress = true,
         AchievementColor1 = { 0.75, 0.75, 0.75, 1 },
         AchievementColor2 = { 1, 1, 1, 1 },
@@ -763,6 +783,7 @@ ChatAnnouncements.Defaults =
         FriendIgnoreAlert = false,
         FriendStatusCA = true,
         FriendStatusAlert = false,
+        FriendStatusNameFormat = 1,
 
         -- Duel
         DuelCA = true,
@@ -799,6 +820,17 @@ ChatAnnouncements.Defaults =
         NotificationMailErrorAlert = false,
         NotificationTradeCA = true,
         NotificationTradeAlert = false,
+
+        SlashHomeCA = true,
+        SlashHomeAlert = false,
+        SlashCampaignCA = true,
+        SlashCampaignAlert = false,
+        CampaignQueueCA = true,
+        CampaignQueueAlert = false,
+        OutfitEquipCA = true,
+        OutfitEquipAlert = false,
+        SocialErrorCA = true,
+        SocialErrorAlert = false,
 
         -- Disguise
         DisguiseCA = false,
@@ -871,8 +903,8 @@ ChatAnnouncements.Defaults =
         LorebookCollectionCA = true,
         LorebookCollectionCSA = true,
         LorebookCollectionAlert = false,
-        LorebookCollectionPrefix = GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE),
-        LorebookPrefix1 = GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED),
+        LorebookCollectionPrefix = GetString(LUIE_STRING_CA_LOREBOOK_COLLECTION_PREFIX),
+        LorebookPrefix1 = GetString(LUIE_STRING_CA_LOREBOOK_PREFIX1),
         LorebookPrefix2 = GetString(LUIE_STRING_CA_LOREBOOK_BOOK),
         LorebookBracket = 4,                      -- Bracket Options
         LorebookColor1 = { 0.75, 0.75, 0.75, 1 }, -- Lorebook Message Color 1
@@ -891,7 +923,7 @@ ChatAnnouncements.Defaults =
         AntiquityBracket = 2,
         AntiquityPrefix = GetString(LUIE_STRING_CA_ANTIQUITY_PREFIX),
         AntiquityPrefixBracket = 4,
-        AntiquitySuffix = "",
+        AntiquitySuffix = GetString(LUIE_STRING_CA_ANTIQUITY_SUFFIX),
         AntiquityColor = { 0.75, 0.75, 0.75, 1 },
         AntiquityIcon = true,
     },
@@ -969,7 +1001,7 @@ ChatAnnouncements.Defaults =
         SkillPointCA = true,
         SkillPointCSA = true,
         SkillPointAlert = false,
-        SkillPointSkyshard = GetString(SI_SKYSHARD_GAINED),
+        SkillPointSkyshard = GetString(LUIE_STRING_CA_SKILL_POINT_SKYSHARD),
         SkillPointBracket = 4,
         SkillPointsPartial = true,
         SkillPointColor1 = { 0.75, 0.75, 0.75, 1 },
@@ -1155,6 +1187,9 @@ ChatAnnouncements.Defaults =
         LootRecipeHideAlert = true,
         LootQuestAdd = true,
         LootQuestRemove = false,
+        AttunableStationCA = false,
+        AttunableStationCSA = true,
+        AttunableStationAlert = false,
     },
 
     ContextMessages =
@@ -1365,5 +1400,125 @@ ChatAnnouncements.Defaults =
             CSA = true,
             Alert = false,
         },
+    },
+}
+
+--- Maps ChatAnnouncements.SV.ContextMessages keys to LUIE_STRING_CA_* ids (runtime resolution via _MessageFormatResolver.lua).
+--- @type CAContextMessageDefaultStringIds
+ChatAnnouncements.ContextMessageDefaultStringIds =
+{
+    CurrencyMessageConfiscate = LUIE_STRING_CA_CURRENCY_MESSAGE_CONFISCATE,
+    CurrencyMessageDeposit = LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSIT,
+    CurrencyMessageDepositStorage = LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSITSTORAGE,
+    CurrencyMessageDepositFurnitureVault = LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT,
+    CurrencyMessageDepositGuild = LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSITGUILD,
+    CurrencyMessageEarn = LUIE_STRING_CA_CURRENCY_MESSAGE_EARN,
+    CurrencyMessageLoot = LUIE_STRING_CA_CURRENCY_MESSAGE_LOOT,
+    CurrencyMessageContainer = LUIE_STRING_CA_CURRENCY_MESSAGE_CONTAINER,
+    CurrencyMessageSteal = LUIE_STRING_CA_CURRENCY_MESSAGE_STEAL,
+    CurrencyMessageLost = LUIE_STRING_CA_CURRENCY_MESSAGE_LOST,
+    CurrencyMessagePickpocket = LUIE_STRING_CA_CURRENCY_MESSAGE_PICKPOCKET,
+    CurrencyMessageReceive = LUIE_STRING_CA_CURRENCY_MESSAGE_RECEIVE,
+    CurrencyMessageSpend = LUIE_STRING_CA_CURRENCY_MESSAGE_SPEND,
+    CurrencyMessagePay = LUIE_STRING_CA_CURRENCY_MESSAGE_PAY,
+    CurrencyMessageUseKit = LUIE_STRING_CA_CURRENCY_MESSAGE_USEKIT,
+    CurrencyMessagePotion = LUIE_STRING_CA_CURRENCY_MESSAGE_POTION,
+    CurrencyMessageFood = LUIE_STRING_CA_CURRENCY_MESSAGE_EAT,
+    CurrencyMessageDrink = LUIE_STRING_CA_CURRENCY_MESSAGE_DRINK,
+    CurrencyMessageDeploy = LUIE_STRING_CA_CURRENCY_MESSAGE_DEPLOY,
+    CurrencyMessageStow = LUIE_STRING_CA_CURRENCY_MESSAGE_STOW,
+    CurrencyMessageFillet = LUIE_STRING_CA_CURRENCY_MESSAGE_FILLET,
+    CurrencyMessageLearnRecipe = LUIE_STRING_CA_CURRENCY_MESSAGE_LEARN_RECIPE,
+    CurrencyMessageLearnMotif = LUIE_STRING_CA_CURRENCY_MESSAGE_LEARN_MOTIF,
+    CurrencyMessageLearnStyle = LUIE_STRING_CA_CURRENCY_MESSAGE_LEARN_STYLE,
+    CurrencyMessageExcavate = LUIE_STRING_CA_CURRENCY_MESSAGE_EXCAVATE,
+    CurrencyMessageTradeIn = LUIE_STRING_CA_CURRENCY_MESSAGE_TRADEIN,
+    CurrencyMessageTradeInNoName = LUIE_STRING_CA_CURRENCY_MESSAGE_TRADEIN_NO_NAME,
+    CurrencyMessageTradeOut = LUIE_STRING_CA_CURRENCY_MESSAGE_TRADEOUT,
+    CurrencyMessageTradeOutNoName = LUIE_STRING_CA_CURRENCY_MESSAGE_TRADEOUT_NO_NAME,
+    CurrencyMessageMailIn = LUIE_STRING_CA_CURRENCY_MESSAGE_MAILIN,
+    CurrencyMessageMailInNoName = LUIE_STRING_CA_CURRENCY_MESSAGE_MAILIN_NO_NAME,
+    CurrencyMessageMailOut = LUIE_STRING_CA_CURRENCY_MESSAGE_MAILOUT,
+    CurrencyMessageMailOutNoName = LUIE_STRING_CA_CURRENCY_MESSAGE_MAILOUT_NO_NAME,
+    CurrencyMessageMailCOD = LUIE_STRING_CA_CURRENCY_MESSAGE_MAILCOD,
+    CurrencyMessagePostage = LUIE_STRING_CA_CURRENCY_MESSAGE_POSTAGE,
+    CurrencyMessageWithdraw = LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAW,
+    CurrencyMessageWithdrawStorage = LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAWSTORAGE,
+    CurrencyMessageWithdrawFurnitureVault = LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT,
+    CurrencyMessageWithdrawGuild = LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAWGUILD,
+    CurrencyMessageStable = LUIE_STRING_CA_CURRENCY_MESSAGE_STABLE,
+    CurrencyMessageStorage = LUIE_STRING_CA_CURRENCY_MESSAGE_STORAGE,
+    CurrencyMessageWayshrine = LUIE_STRING_CA_CURRENCY_MESSAGE_WAYSHRINE,
+    CurrencyMessageUnstuck = LUIE_STRING_CA_CURRENCY_MESSAGE_UNSTUCK,
+    CurrencyMessageChampion = LUIE_STRING_CA_CURRENCY_MESSAGE_CHAMPION,
+    CurrencyMessageAttributes = LUIE_STRING_CA_CURRENCY_MESSAGE_ATTRIBUTES,
+    CurrencyMessageSkills = LUIE_STRING_CA_CURRENCY_MESSAGE_SKILLS,
+    CurrencyMessageMorphs = LUIE_STRING_CA_CURRENCY_MESSAGE_MORPHS,
+    CurrencyMessageSkillLine = LUIE_STRING_CA_CURRENCY_MESSAGE_SKILL_LINE,
+    CurrencyMessageBounty = LUIE_STRING_CA_CURRENCY_MESSAGE_BOUNTY,
+    CurrencyMessageTrader = LUIE_STRING_CA_CURRENCY_MESSAGE_TRADER,
+    CurrencyMessageRepair = LUIE_STRING_CA_CURRENCY_MESSAGE_REPAIR,
+    CurrencyMessageListing = LUIE_STRING_CA_CURRENCY_MESSAGE_LISTING,
+    CurrencyMessageListingValue = LUIE_STRING_CA_CURRENCY_MESSAGE_LISTING_VALUE,
+    CurrencyMessageList = LUIE_STRING_CA_CURRENCY_MESSAGE_LIST,
+    CurrencyMessageCampaign = LUIE_STRING_CA_CURRENCY_MESSAGE_CAMPAIGN,
+    CurrencyMessageFence = LUIE_STRING_CA_CURRENCY_MESSAGE_FENCE_VALUE,
+    CurrencyMessageFenceNoV = LUIE_STRING_CA_CURRENCY_MESSAGE_FENCE,
+    CurrencyMessageSellNoV = LUIE_STRING_CA_CURRENCY_MESSAGE_SELL,
+    CurrencyMessageBuyNoV = LUIE_STRING_CA_CURRENCY_MESSAGE_BUY,
+    CurrencyMessageBuybackNoV = LUIE_STRING_CA_CURRENCY_MESSAGE_BUYBACK,
+    CurrencyMessageSell = LUIE_STRING_CA_CURRENCY_MESSAGE_SELL_VALUE,
+    CurrencyMessageBuy = LUIE_STRING_CA_CURRENCY_MESSAGE_BUY_VALUE,
+    CurrencyMessageBuyback = LUIE_STRING_CA_CURRENCY_MESSAGE_BUYBACK_VALUE,
+    CurrencyMessageLaunder = LUIE_STRING_CA_CURRENCY_MESSAGE_LAUNDER_VALUE,
+    CurrencyMessageLaunderNoV = LUIE_STRING_CA_CURRENCY_MESSAGE_LAUNDER,
+    CurrencyMessageUse = LUIE_STRING_CA_CURRENCY_MESSAGE_USE,
+    CurrencyMessageCraft = LUIE_STRING_CA_CURRENCY_MESSAGE_CRAFT,
+    CurrencyMessageExtract = LUIE_STRING_CA_CURRENCY_MESSAGE_EXTRACT,
+    CurrencyMessageUpgrade = LUIE_STRING_CA_CURRENCY_MESSAGE_UPGRADE,
+    CurrencyMessageUpgradeFail = LUIE_STRING_CA_CURRENCY_MESSAGE_UPGRADE_FAIL,
+    CurrencyMessageRefine = LUIE_STRING_CA_CURRENCY_MESSAGE_REFINE,
+    CurrencyMessageDeconstruct = LUIE_STRING_CA_CURRENCY_MESSAGE_DECONSTRUCT,
+    CurrencyMessageResearch = LUIE_STRING_CA_CURRENCY_MESSAGE_RESEARCH,
+    CurrencyMessageDestroy = LUIE_STRING_CA_CURRENCY_MESSAGE_DESTROY,
+    CurrencyMessageLockpick = LUIE_STRING_CA_CURRENCY_MESSAGE_LOCKPICK,
+    CurrencyMessageRemove = LUIE_STRING_CA_CURRENCY_MESSAGE_REMOVE,
+    CurrencyMessageQuestTurnIn = LUIE_STRING_CA_CURRENCY_MESSAGE_TURNIN,
+    CurrencyMessageQuestUse = LUIE_STRING_CA_CURRENCY_MESSAGE_QUESTUSE,
+    CurrencyMessageQuestExhaust = LUIE_STRING_CA_CURRENCY_MESSAGE_EXHAUST,
+    CurrencyMessageQuestOffer = LUIE_STRING_CA_CURRENCY_MESSAGE_OFFER,
+    CurrencyMessageQuestDiscard = LUIE_STRING_CA_CURRENCY_MESSAGE_DISCARD,
+    CurrencyMessageQuestConfiscate = LUIE_STRING_CA_CURRENCY_MESSAGE_QUESTCONFISCATE,
+    CurrencyMessageQuestOpen = LUIE_STRING_CA_CURRENCY_MESSAGE_QUESTOPEN,
+    CurrencyMessageQuestAdminister = LUIE_STRING_CA_CURRENCY_MESSAGE_QUESTADMINISTER,
+    CurrencyMessageQuestPlace = LUIE_STRING_CA_CURRENCY_MESSAGE_QUESTPLACE,
+    CurrencyMessageQuestCombine = LUIE_STRING_CA_CURRENCY_MESSAGE_COMBINE,
+    CurrencyMessageQuestMix = LUIE_STRING_CA_CURRENCY_MESSAGE_MIX,
+    CurrencyMessageQuestBundle = LUIE_STRING_CA_CURRENCY_MESSAGE_BUNDLE,
+    CurrencyMessageGroup = LUIE_STRING_CA_CURRENCY_MESSAGE_GROUP,
+    CurrencyMessageDisguiseEquip = LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_EQUIP,
+    CurrencyMessageDisguiseRemove = LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_REMOVE,
+    CurrencyMessageDisguiseDestroy = LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_DESTROY,
+}
+
+--- Pre–guild-name context strings still present in saved vars (treat as default, not custom).
+--- @type table<integer|string, string[]>
+ChatAnnouncements.ContextMessageLegacyFormatByStringId =
+{
+    [LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSITGUILD] =
+    {
+        "You deposit %s in the guild bank.",
+        "Du hinterlegst %s in der Gildenbank.",
+        "Vous avez déposé %s dans la banque de guilde.",
+        "Вы вложили %s в гильдейский банк.",
+        "您在公会银行存入 %s。",
+    },
+    [LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAWGUILD] =
+    {
+        "You withdraw %s from the guild bank.",
+        "Du holst %s aus der Gildenbank.",
+        "Vous récupérez %s de votre banque de guilde.",
+        "Вы изъяли %s из гильдейского банка.",
+        "您从公会银行取出 %s。",
     },
 }

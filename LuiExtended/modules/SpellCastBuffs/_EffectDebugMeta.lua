@@ -194,6 +194,9 @@ local abilityTypeNames =
     [ABILITY_TYPE_PACIFY] = "PACIFY",
     [ABILITY_TYPE_OFFBALANCE] = "OFFBALANCE",
 }
+if ABILITY_TYPE_SPECIALMOVEREPLACEMENT then
+    abilityTypeNames[ABILITY_TYPE_SPECIALMOVEREPLACEMENT] = "SPECIALMOVEREPLACEMENT"
+end
 
 --- AbilityType value → label (API order 0..119). Fills gaps without pairs(_G) — insecure scan hits protected globals.
 local ABILITY_TYPE_VALUE_LABELS =
@@ -458,7 +461,7 @@ local advancedStatInfoByType
 
 local advancedStatInfoCacheBuilt = false
 
-local function ensureAdvancedStatInfoCache()
+local function buildAdvancedStatInfoCache()
     if advancedStatInfoCacheBuilt then
         return
     end
@@ -487,7 +490,7 @@ end
 --- @param statType AdvancedStatDisplayType|integer
 --- @return string
 local function formatAdvancedStatTypeLabel(statType)
-    ensureAdvancedStatInfoCache()
+    buildAdvancedStatInfoCache()
     local info = advancedStatInfoByType and advancedStatInfoByType[statType]
     if info and info.displayName and info.displayName ~= "" then
         return string.format("%s (%s)", info.displayName, tostring(statType))
@@ -552,7 +555,7 @@ local function addAdvancedStatDebugLines(abilityId, addLine)
         return
     end
 
-    ensureAdvancedStatInfoCache()
+    buildAdvancedStatInfoCache()
 
     addLine("Advanced #", tostring(numAdvanced))
 

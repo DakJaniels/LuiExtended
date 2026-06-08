@@ -12,6 +12,9 @@ local LUIE = LUIE
 -- Unit Frames namespace
 --- @class (partial) UnitFrames
 --- @field VisualizerModules UnitFrames.VisualizerModules
+--- @field VisualizerModuleClasses UnitFrames.VisualizerModuleClasses
+--- @field defaultVisualizers table<string, LUIE_UnitAttributeVisualizer>
+--- @field CustomFramesManager LUIE_CustomFrames_Manager
 --- @field Visualizers table<string, LUIE_UnitAttributeVisualizer>
 local UnitFrames = ZO_Object:Subclass()
 --- @class (partial) UnitFrames
@@ -19,26 +22,33 @@ LUIE.UnitFrames = UnitFrames
 
 UnitFrames.moduleName = LUIE.name .. "UnitFrames"
 
---- Table holding singleton module instances shared across all unit frames
---- @class UnitFrames.VisualizerModules
+--- Module classes (use :New() per frame visualizer).
+--- @class UnitFrames.VisualizerModuleClasses
+--- @field PossessionModule LUIE_PossessionModule
 --- @field PowerShieldModule LUIE_PowerShieldModule
 --- @field RegenerationModule LUIE_RegenerationModule
 --- @field StatChangeModule LUIE_StatChangeModule
 --- @field UnwaveringModule LUIE_UnwaveringModule
---- @field PossessionModule LUIE_PossessionModule
-UnitFrames.VisualizerModules =
+UnitFrames.VisualizerModuleClasses =
 {
-    PossessionModule = {},
-    PowerShieldModule = {},
-    RegenerationModule = {},
-    StatChangeModule = {},
-    UnwaveringModule = {},
+    PossessionModule = nil,
+    PowerShieldModule = nil,
+    RegenerationModule = nil,
+    StatChangeModule = nil,
+    UnwaveringModule = nil,
 }
 
---- Table holding per-unitTag visualizer coordinator instances
+--- @deprecated Use VisualizerModuleClasses.* :New() instead of singleton instances.
+--- @class UnitFrames.VisualizerModules
+UnitFrames.VisualizerModules = UnitFrames.VisualizerModuleClasses
+
+--- Default-frame visualizers keyed by game unitTag.
+--- @type table<string, LUIE_UnitAttributeVisualizer>
+UnitFrames.defaultVisualizers = {}
+
+--- Per game unitTag attribute visualizer (custom frame or default).
 --- @type table<string, LUIE_UnitAttributeVisualizer>
 UnitFrames.Visualizers = {}
---- Cyrodiil / alternate target mirror of CustomFrames (same per-unit shape when populated).
 --- @type UnitFrames.CustomFramesTable
 UnitFrames.AvaCustFrames = {}
 
@@ -103,87 +113,87 @@ UnitFrames.Defaults =
     DefaultFramesNewTarget = 1,
     DefaultFramesNewGroup = 1,
     DefaultFramesNewBoss = 2,
-    Format = GetString(LUIE_STRING_UF_FORMAT_DEFAULT),
-    DefaultFontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+    Format = "Current + Shield - Trauma (Percentage%)",
+    DefaultFontFace = "LUIE Default Font",
     DefaultFontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
     DefaultFontSize = 16,
     DefaultTextColour = { 1, 1, 1, 1 },
     TargetShowClass = true,
     TargetShowFriend = true,
     TargetColourByReaction = false,
-    CustomFormatOnePlayer = GetString(LUIE_STRING_UF_FORMAT_PT_ONE),
-    CustomFormatTwoPlayer = GetString(LUIE_STRING_UF_FORMAT_PT_TWO),
-    CustomFormatOneTarget = GetString(LUIE_STRING_UF_FORMAT_PT_ONE),
-    CustomFormatTwoTarget = GetString(LUIE_STRING_UF_FORMAT_PT_TWO),
-    CustomFormatOneGroup = GetString(LUIE_STRING_UF_FORMAT_GROUP_ONE),
-    CustomFormatTwoGroup = GetString(LUIE_STRING_UF_FORMAT_GROUP_TWO),
-    CustomFormatRaid = GetString(LUIE_STRING_UF_FORMAT_RAID),
-    CustomFormatBoss = GetString(LUIE_STRING_UF_FORMAT_BOSS),
+    CustomFormatOnePlayer = "Current + Shield - Trauma / Max",
+    CustomFormatTwoPlayer = "Percentage%",
+    CustomFormatOneTarget = "Current + Shield - Trauma / Max",
+    CustomFormatTwoTarget = "Percentage%",
+    CustomFormatOneGroup = "Current + Shield - Trauma / Max",
+    CustomFormatTwoGroup = "Percentage%",
+    CustomFormatRaid = "Current (Percentage%)",
+    CustomFormatBoss = "Percentage%",
     CustomFrameAppearance =
     {
         player =
         {
-            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontFace = "LUIE Default Font",
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 20,
-            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+            texture = "Minimalistic",
         },
         target =
         {
-            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontFace = "LUIE Default Font",
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 20,
-            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+            texture = "Minimalistic",
         },
         group =
         {
-            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontFace = "LUIE Default Font",
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 20,
-            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+            texture = "Minimalistic",
         },
         raid =
         {
-            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontFace = "LUIE Default Font",
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 16,
-            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+            texture = "Minimalistic",
         },
         companion =
         {
-            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontFace = "LUIE Default Font",
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 16,
-            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+            texture = "Minimalistic",
         },
         pet =
         {
-            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontFace = "LUIE Default Font",
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 16,
-            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+            texture = "Minimalistic",
         },
         boss =
         {
-            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontFace = "LUIE Default Font",
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 16,
-            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+            texture = "Minimalistic",
         },
         ava =
         {
-            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontFace = "LUIE Default Font",
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 20,
-            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+            texture = "Minimalistic",
         },
     },
     HideBuffsPlayerOoc = false,
@@ -266,9 +276,15 @@ UnitFrames.Defaults =
     TargetEnableClass = false,
     TargetEnableRank = true,
     TargetEnableRankIcon = true,
-    TargetTitlePriority = GetString(LUIE_STRING_UF_TITLE_PRIORITY),
+    TargetTitlePriority = "Title",
     TargetEnableTitle = true,
     TargetEnableSkull = true,
+    TargetShowVeterancyRank = true,
+    TargetShowOverlandDifficulty = true,
+    TargetMonsterOverlandDifficulty = true,
+    TargetHighlightMonsterUnits = true,
+    QuickHideDeadUseUnitMonster = true,
+    GroupShowVeterancyRank = false,
     CustomFramesGroup = true,
     GroupExcludePlayer = false,
     GroupBarWidth = 260,
@@ -278,7 +294,7 @@ UnitFrames.Defaults =
     RaidNameClip = 94,
     RaidBarWidth = 220,
     RaidBarHeight = 30,
-    RaidLayout = GetString(LUIE_STRING_UF_RAID_LAYOUT),
+    RaidLayout = "1 x 12",
     RoleIconSmallGroup = true,
     ColorRoleGroup = true,
     ColorRoleRaid = true,
@@ -326,7 +342,7 @@ UnitFrames.Defaults =
     ShieldAlpha = 50,
     ReverseResourceBars = false,
     CustomFramesPet = true,
-    CustomFormatPet = GetString(LUIE_STRING_UF_FORMAT_PET),
+    CustomFormatPet = "Current (Percentage%)",
     CustomColourPet = { 202 / 255, 20 / 255, 0, 1 },
     PetHeight = 30,
     PetWidth = 220,
@@ -341,7 +357,7 @@ UnitFrames.Defaults =
     whitelist = {}, -- Whitelist for pet names
     PetNameClip = 88,
     CustomFramesCompanion = true,
-    CustomFormatCompanion = GetString(LUIE_STRING_UF_FORMAT_COMPANION),
+    CustomFormatCompanion = "Current (Percentage%)",
     CustomColourCompanion = { 202 / 255, 20 / 255, 0, 1 },
     CompanionHeight = 30,
     CompanionWidth = 220,
@@ -363,13 +379,17 @@ UnitFrames.Defaults =
         showStacks = true,
         showBuiltinInterrupt = true,
     },
+    CompanionRapportFlourish =
+    {
+        enabled = false,
+    },
     BarAlignPlayerHealth = 1,
     BarAlignPlayerMagicka = 1,
     BarAlignPlayerStamina = 1,
     BarAlignTarget = 1,
     BarAlignCenterLabelPlayer = false,
     BarAlignCenterLabelTarget = false,
-    CustomFormatCenterLabel = GetString(LUIE_STRING_UF_FORMAT_CENTER_LABEL),
+    CustomFormatCenterLabel = "Current + Shield - Trauma / Max (Percentage%)",
     CustomTargetMarker = false,
 
     -- Group Resources (LibGroupBroadcast Integration)
@@ -446,29 +466,87 @@ UnitFrames.Defaults =
 
 UnitFrames.SV = {}
 
+--- Forward declarations for visualizer module classes (defined in UnitAttributeVisuals/*.lua).
+--- @class LUIE_RegenerationModule : LUIE_UnitAttributeVisualizerModuleBase
+--- @field New fun(self, ...): LUIE_RegenerationModule
+--- @class LUIE_StatChangeModule : LUIE_UnitAttributeVisualizerModuleBase
+--- @field New fun(self, ...): LUIE_StatChangeModule
+--- @class LUIE_PowerShieldModule : LUIE_UnitAttributeVisualizerModuleBase
+--- @field New fun(self, ...): LUIE_PowerShieldModule
+--- @class LUIE_UnwaveringModule : LUIE_UnitAttributeVisualizerModuleBase
+--- @field New fun(self, ...): LUIE_UnwaveringModule
+--- @class LUIE_PossessionModule : LUIE_UnitAttributeVisualizerModuleBase
+--- @field New fun(self, ...): LUIE_PossessionModule
+
+--- @class LUIE_CustomFrames_Manager : ZO_InitializingObject
+--- @class LUIE_CustomFrameObject : LUIE_CustomFrameData_Base
+--- @class LUIE_CustomFrameData_Base : LUIE_PooledCustomFrameDataObject
+--- @class LUIE_PooledCustomFrameDataObject : ZO_InitializingObject
+
 --- Power row on a custom frame (health/magicka/stamina bar aggregate); includes regen strips when enabled.
 --- @class UnitFrames.CustomFramePowerEntry
+--- @field backdrop BackdropControl|Control|nil
+--- @field bar StatusBarControl|nil
+--- @field label Control|nil
+--- @field labelOne Control|nil
+--- @field labelTwo Control|nil
+--- @field shield StatusBarControl|nil
+--- @field shieldbackdrop BackdropControl|nil
+--- @field trauma StatusBarControl|nil
+--- @field invulnerable Control|nil
+--- @field invulnerableInlay Control|nil
+--- @field enlightenment StatusBarControl|nil
+--- @field noHealingOverlay StatusBarControl|nil
+--- @field noHealingStripe StatusBarControl|nil
+--- @field noHealingFadeAnimation AnimationTimeline|nil
+--- @field possessionOverlay Control|nil
+--- @field possessionGlowLeft Control|nil
+--- @field possessionGlowRight Control|nil
+--- @field possessionGlowCenter Control|nil
+--- @field possessionHalo table|nil
+--- @field glowFadeAnimation AnimationTimeline|nil
+--- @field combatGlow Control|nil
 --- @field regen1 UnitFrames.RegenStripControl|nil
 --- @field regen2 UnitFrames.RegenStripControl|nil
 --- @field degen1 UnitFrames.RegenStripControl|nil
 --- @field degen2 UnitFrames.RegenStripControl|nil
 --- @field stat table|nil
+--- @field label table|nil
+--- @field format string|nil
+
+--- @class UnitFrames.CustomFrameResourceRow : UnitFrames.CustomFramePowerEntry
 
 --- Per-unit custom frame root (TLW, buff anchors, and numeric COMBAT_MECHANIC_FLAGS_* power rows).
---- @class UnitFrames.CustomFrameUnitEntry
+--- @class UnitFrames.CustomFrameUnitEntry : LUIE_CustomFrameObject
+--- @field unitTag string|nil
+--- @field attributeVisualizer LUIE_UnitAttributeVisualizer|nil
+--- @field hudSceneFragment ZO_HUDFadeSceneFragment|nil
+--- @field frameRegistryKey string|nil Registry key in UnitFrames.CustomFrames (e.g. SmallGroup1).
+--- @field visualizerUnitTag string|nil Game unitTag for UnitFrames.GetVisualizerForUnit when registry key differs (group alias).
+--- @field frameCategory string|nil
+--- @field control Control|nil
+--- @field roleIcon Control|nil
+--- @field resourceMagicka UnitFrames.CustomFrameResourceRow|nil
+--- @field resourceStamina UnitFrames.CustomFrameResourceRow|nil
 --- @field buffs Control|nil
 --- @field debuffs Control|nil
 --- @field tlw LUIE_PositionableTopLevelWindow|nil
 --- @field [number] UnitFrames.CustomFramePowerEntry
+--- @field [string] UnitFrames.CustomFramePowerEntry|Control|TopLevelWindow|nil
 
---- Frame data tables are added by _CreateCustomFrames when each frame is created (virtual templates load from XML; instances created at runtime).
+--- Frame data objects are built by modules/UnitFrames/CustomFrames/* (XML virtual templates; runtime CreateControlFromVirtual).
 --- @class UnitFrames.CustomFramesTable
---- @field [string] UnitFrames.CustomFrameUnitEntry
+--- @field [string] UnitFrames.CustomFrameUnitEntry|LUIE_CustomFrameObject
 
 --- @type UnitFrames.CustomFramesTable
 UnitFrames.CustomFrames =
 {
 }
+
+--[[ CustomFrames registry keys vs UAV visualizer unitTags:
+  player, reticleover, companion, bossN, controlledsiege — 1:1 with visualizers.
+  SmallGroupN / RaidGroupN / PetGroupN — registry slots; alias to groupN / playerpetN via same frame object (visualizerUnitTag on frame data).
+]]
 UnitFrames.CustomFramesMovingState = false
 UnitFrames.reticleoverHostile = false  -- boolean: hostile target and TargetEnableSkull (avoids assign-type-mismatch on frame.hostile)
 UnitFrames.targetFrameLingered = false -- true after we have shown a valid target; prevents blank frame/icons on load when TargetLingerInCursorMode is on

@@ -55,8 +55,8 @@ local GetDeconItems = CreateCollectibleItemsFunction(CollectibleTables.Decon)
 local function GetHomeItems()
     return
     {
-        { name = "Inside",  data = 1 },
-        { name = "Outside", data = 2 }
+        { name = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_INSIDE_LABEL),  data = 1 },
+        { name = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_OUTSIDE_LABEL), data = 2 }
     }
 end
 
@@ -71,7 +71,7 @@ function SlashCommands.CreateConsoleSettings()
     end
 
     -- Create the addon settings panel
-    local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_SLASHCMDS)),
+    local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_SLASHCMDS),
                                 {
                                     allowDefaults = true,
                                     defaultsFunction = function ()
@@ -120,7 +120,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure general slash commands including trade, home, companions, merchants, bankers, and other utility commands.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SLASH_GENERAL),
         }
 
         -- SlashTrade
@@ -155,7 +155,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  Choose Inside or Outside for /home",
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_CHOICE),
             items = GetHomeItems,
             getFunction = function ()
                 return { data = Settings.SlashHomeChoice }
@@ -214,7 +214,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  Choose Companion to Summon",
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION_CHOICE),
             items = GetCompanionItems,
             getFunction = function ()
                 return { data = Settings.SlashCompanionChoice }
@@ -245,7 +245,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  Choose Banker to Summon",
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER_CHOICE),
             items = GetBankerItems,
             getFunction = function ()
                 return { data = Settings.SlashBankerChoice }
@@ -276,7 +276,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  Choose Merchant to Summon",
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT_CHOICE),
             items = GetMerchantItems,
             getFunction = function ()
                 return { data = Settings.SlashMerchantChoice }
@@ -307,7 +307,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  Choose Armory Assistant to Summon",
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY_CHOICE),
             items = GetArmoryItems,
             getFunction = function ()
                 return { data = Settings.SlashArmoryChoice }
@@ -338,7 +338,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  Choose Deconstruction Assistant to Summon",
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_DECON_CHOICE),
             items = GetDeconItems,
             getFunction = function ()
                 return { data = Settings.SlashDeconChoice }
@@ -430,39 +430,6 @@ function SlashCommands.CreateConsoleSettings()
             end,
             default = Defaults.SlashReport
         }
-
-        -- /home Alert (Temp Setting)
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "/home Results - Show Alert (Temp Setting)",
-            tooltip = "Display an alert when the /home command is used.\nNote: This setting will be deprecated in the future when Social Errors Events are implemented in Chat Announcements.",
-            getFunction = function () return LUIE.SV.TempAlertHome end,
-            setFunction = function (value) LUIE.SV.TempAlertHome = value end,
-            default = LUIE.Defaults.TempAlertHome
-        }
-
-        -- /Campaign Results Alert (Temp Setting)
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "/Campaign Results - Show Alert (Temp Setting)",
-            tooltip = "Display an alert when the /campaign command is used.\nNote: This setting will be deprecated in the future when Campaign Queue Events are implemented in Chat Announcements.",
-            getFunction = function () return LUIE.SV.TempAlertCampaign end,
-            setFunction = function (value) LUIE.SV.TempAlertCampaign = value end,
-            default = LUIE.Defaults.TempAlertCampaign
-        }
-
-        -- /Outfit Alert (Temp Setting)
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "/Outfit - Show Alert (Temp Setting)",
-            tooltip = "Display an alert when the /outfit command is used.\nNote: This setting will be deprecated in the future when Outfit Alerts are implemented in Chat Announcements.",
-            getFunction = function () return LUIE.SV.TempAlertOutfit end,
-            setFunction = function (value) LUIE.SV.TempAlertOutfit = value end,
-            default = LUIE.Defaults.TempAlertOutfit
-        }
     end)
 
     -- Build Group Commands Options Section
@@ -477,7 +444,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure group-related slash commands including ready check, regroup, disband, leave, kick, role management, and vote kick.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SLASH_GROUP),
         }
 
         -- SlashReadyCheck
@@ -591,7 +558,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure guild-related slash commands including invite, quit, and kick functionality.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SLASH_GUILD),
         }
 
         -- SlashGuildInvite
@@ -649,7 +616,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure social slash commands for managing friends and ignore lists.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SLASH_SOCIAL),
         }
 
         -- SlashFriend
@@ -721,7 +688,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure holiday event slash commands for special XP boost items during seasonal events.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SLASH_HOLIDAY),
         }
 
         -- SlashCake

@@ -21,11 +21,6 @@ local table_insert = table.insert
 
 local g_BuffsMovingEnabled = false -- Helper local flag
 
-local rotationOptions = { "Horizontal", "Vertical" }
-local rotationOptionsKeys = { ["Horizontal"] = 1, ["Vertical"] = 2 }
-local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
-local globalIconOptionsKeys = { ["All Crowd Control"] = 1, ["NPC CC Only"] = 2, ["Player CC Only"] = 3 }
-
 -- Variables for custom generated tables
 local PromBuffs, PromBuffsValues = {}, {}
 local PromDebuffs, PromDebuffsValues = {}, {}
@@ -222,7 +217,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         end
     )
 
-    local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_BUFFSDEBUFFS)),
+    local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_BUFFSDEBUFFS),
                                 {
                                     allowDefaults = true,
                                     defaultsFunction = function ()
@@ -241,12 +236,6 @@ function SpellCastBuffs.CreateConsoleSettings()
 
     -- Get status bar texture list from SettingsAPI
     local statusbarTextureItems = SettingsAPI:GetStatusbarTexturesList()
-
-    -- Build rotation options list once for reuse
-    local rotationOptionsItems = {}
-    for i, optionName in ipairs(rotationOptions) do
-        rotationOptionsItems[i] = { name = optionName, data = rotationOptionsKeys[optionName] }
-    end
 
     -- Collect initial settings for main menu
     local initialSettings = {}
@@ -284,11 +273,11 @@ function SpellCastBuffs.CreateConsoleSettings()
     -- Build Frame positions section (Unlock, Reset, Hard-Lock, X/Y sliders per container)
     local buffPositionConfig =
     {
-        { key = "playerb",     xKey = "playerbOffsetX",     yKey = "playerbOffsetY",     label = "Player Buffs",   disable = function () return Settings.lockPositionToUnitFrames end },
-        { key = "playerd",     xKey = "playerdOffsetX",     yKey = "playerdOffsetY",     label = "Player Debuffs", disable = function () return Settings.lockPositionToUnitFrames end },
-        { key = "player_long", xKey = "player_longOffsetX", yKey = "player_longOffsetY", label = "Player Long",    disable = function () return false end                             },
-        { key = "targetb",     xKey = "targetbOffsetX",     yKey = "targetbOffsetY",     label = "Target Buffs",   disable = function () return Settings.lockPositionToUnitFrames end },
-        { key = "targetd",     xKey = "targetdOffsetX",     yKey = "targetdOffsetY",     label = "Target Debuffs", disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "playerb",     xKey = "playerbOffsetX",     yKey = "playerbOffsetY",     labelStringId = LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS,           disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "playerd",     xKey = "playerdOffsetX",     yKey = "playerdOffsetY",     labelStringId = LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS,         disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "player_long", xKey = "player_longOffsetX", yKey = "player_longOffsetY", labelStringId = LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS, disable = function () return false end                             },
+        { key = "targetb",     xKey = "targetbOffsetX",     yKey = "targetbOffsetY",     labelStringId = LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS,           disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "targetd",     xKey = "targetdOffsetX",     yKey = "targetdOffsetY",     labelStringId = LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS,         disable = function () return Settings.lockPositionToUnitFrames end },
     }
     buildSectionSettings("FramePositions", function (settings)
         settings[#settings + 1] =
@@ -342,7 +331,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         local gw = GuiRoot:GetWidth()
         local gh = GuiRoot:GetHeight()
         for _, cfg in ipairs(buffPositionConfig) do
-            settings[#settings + 1] = { type = LHAS.ST_LABEL, label = cfg.label }
+            settings[#settings + 1] = { type = LHAS.ST_LABEL, label = GetString(cfg.labelStringId) }
             settings[#settings + 1] =
             {
                 type = LHAS.ST_SLIDER,
@@ -401,7 +390,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             local yKey = vert and "prominentbVOffsetY" or "prominentbHOffsetY"
             return xKey, yKey
         end
-        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = "Prominent Buffs" }
+        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS) }
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
@@ -461,7 +450,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             local yKey = vert and "prominentdVOffsetY" or "prominentdHOffsetY"
             return xKey, yKey
         end
-        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = "Prominent Debuffs" }
+        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS) }
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
@@ -528,7 +517,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure position and display options for buffs and debuffs.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_POSITION),
         }
 
         settings[#settings + 1] =
@@ -773,7 +762,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure long and short term effects filters.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_LONGSHORT),
         }
 
         settings[#settings + 1] =
@@ -880,7 +869,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure miscellaneous buff and debuff display options.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_MISC),
         }
 
         -- Show Rezz Immunity Icon
@@ -1108,7 +1097,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure long term effects display options.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_LONGTERM),
         }
 
         -- Long Term - Disguises
@@ -1721,7 +1710,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure icon display options for buffs and debuffs.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_ICON),
         }
 
         settings[#settings + 1] =
@@ -1955,7 +1944,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             default = Defaults.GlowIcons,
             disable = function ()
-                return not LUIE.SV.SpellCastBuff_Enable or Settings.BuffDebuffIconInset
+                return not LUIE.SV.SpellCastBuff_Enable
             end,
         }
 
@@ -1973,27 +1962,6 @@ function SpellCastBuffs.CreateConsoleSettings()
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.RemainingCooldown,
-            disable = function ()
-                return not LUIE.SV.SpellCastBuff_Enable
-            end,
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_BUFF_BUFFDEBUFFICONINSET),
-            tooltip = GetString(LUIE_STRING_LAM_BUFF_BUFFDEBUFFICONINSET_TP),
-            getFunction = function ()
-                return Settings.BuffDebuffIconInset
-            end,
-            setFunction = function (v)
-                Settings.BuffDebuffIconInset = v
-                if v then
-                    Settings.GlowIcons = false
-                end
-                SpellCastBuffs.Reset()
-            end,
-            default = Defaults.BuffDebuffIconInset,
             disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
@@ -2050,16 +2018,12 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
             items = SettingsAPI:GetGlobalIconOptionsList(),
             getFunction = function ()
-                local index = Settings.DefaultIconOptions
-                if type(index) == "string" then
-                    index = globalIconOptionsKeys[index] or 1
-                end
-                return globalIconOptions[index] or globalIconOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeGlobalIconOptionIndex(Settings.DefaultIconOptions, Defaults.DefaultIconOptions))
             end,
             setFunction = function (combobox, value, item)
                 Settings.DefaultIconOptions = item.data
             end,
-            default = globalIconOptions[Defaults.DefaultIconOptions],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.DefaultIconOptions),
             disable = function ()
                 return not Settings.UseDefaultIcon
             end,
@@ -2078,7 +2042,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure color options for buffs and debuffs.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_COLOR),
         }
 
         -- Basic Color Options
@@ -2528,7 +2492,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure alignment and sorting options for buffs and debuffs.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_ALIGN),
         }
 
         -- Buffs/Debuffs Alignment & Sorting
@@ -2551,18 +2515,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right",    data = "Right"    },
             },
             getFunction = function ()
-                local value = Settings.AlignmentBuffsPlayer
-                if value == "Left" or value == "Centered" or value == "Right" then
-                    return value
-                end
-                return Defaults.AlignmentBuffsPlayer or "Left"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.AlignmentBuffsPlayer, { "Left", "Centered", "Right" }, Defaults.AlignmentBuffsPlayer or "Left"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.AlignmentBuffsPlayer = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentBuffsPlayer or "Left",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.AlignmentBuffsPlayer or "Left"),
         }
 
         -- Buff Sort Direction (BuffsPlayer)
@@ -2577,18 +2537,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right to Left", data = "Right to Left" },
             },
             getFunction = function ()
-                local value = Settings.SortBuffsPlayer
-                if value == "Left to Right" or value == "Right to Left" then
-                    return value
-                end
-                return Defaults.SortBuffsPlayer or "Left to Right"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.SortBuffsPlayer, { "Left to Right", "Right to Left" }, Defaults.SortBuffsPlayer or "Left to Right"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.SortBuffsPlayer = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortBuffsPlayer or "Left to Right",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.SortBuffsPlayer or "Left to Right"),
         }
 
         -- Buff Alignment (DebuffsPlayer)
@@ -2604,18 +2560,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right",    data = "Right"    },
             },
             getFunction = function ()
-                local value = Settings.AlignmentDebuffsPlayer
-                if value == "Left" or value == "Centered" or value == "Right" then
-                    return value
-                end
-                return Defaults.AlignmentDebuffsPlayer or "Left"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.AlignmentDebuffsPlayer, { "Left", "Centered", "Right" }, Defaults.AlignmentDebuffsPlayer or "Left"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.AlignmentDebuffsPlayer = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentDebuffsPlayer or "Left",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.AlignmentDebuffsPlayer or "Left"),
         }
 
         -- Buff Sort Direction (DebuffsPlayer)
@@ -2630,18 +2582,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right to Left", data = "Right to Left" },
             },
             getFunction = function ()
-                local value = Settings.SortDebuffsPlayer
-                if value == "Left to Right" or value == "Right to Left" then
-                    return value
-                end
-                return Defaults.SortDebuffsPlayer or "Left to Right"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.SortDebuffsPlayer, { "Left to Right", "Right to Left" }, Defaults.SortDebuffsPlayer or "Left to Right"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.SortDebuffsPlayer = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortDebuffsPlayer or "Left to Right",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.SortDebuffsPlayer or "Left to Right"),
         }
 
         -- Buff Alignment (BuffsTarget)
@@ -2657,18 +2605,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right",    data = "Right"    },
             },
             getFunction = function ()
-                local value = Settings.AlignmentBuffsTarget
-                if value == "Left" or value == "Centered" or value == "Right" then
-                    return value
-                end
-                return Defaults.AlignmentBuffsTarget or "Left"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.AlignmentBuffsTarget, { "Left", "Centered", "Right" }, Defaults.AlignmentBuffsTarget or "Left"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.AlignmentBuffsTarget = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentBuffsTarget or "Left",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.AlignmentBuffsTarget or "Left"),
         }
 
         -- Buff Sort Direction (BuffsTarget)
@@ -2683,18 +2627,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right to Left", data = "Right to Left" },
             },
             getFunction = function ()
-                local value = Settings.SortBuffsTarget
-                if value == "Left to Right" or value == "Right to Left" then
-                    return value
-                end
-                return Defaults.SortBuffsTarget or "Left to Right"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.SortBuffsTarget, { "Left to Right", "Right to Left" }, Defaults.SortBuffsTarget or "Left to Right"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.SortBuffsTarget = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortBuffsTarget or "Left to Right",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.SortBuffsTarget or "Left to Right"),
         }
 
         -- Buff Alignment (DebuffsTarget)
@@ -2710,18 +2650,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right",    data = "Right"    },
             },
             getFunction = function ()
-                local value = Settings.AlignmentDebuffsTarget
-                if value == "Left" or value == "Centered" or value == "Right" then
-                    return value
-                end
-                return Defaults.AlignmentDebuffsTarget or "Left"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.AlignmentDebuffsTarget, { "Left", "Centered", "Right" }, Defaults.AlignmentDebuffsTarget or "Left"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.AlignmentDebuffsTarget = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentDebuffsTarget or "Left",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.AlignmentDebuffsTarget or "Left"),
         }
 
         -- Buff Sort Direction (DebuffsTarget)
@@ -2736,18 +2672,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right to Left", data = "Right to Left" },
             },
             getFunction = function ()
-                local value = Settings.SortDebuffsTarget
-                if value == "Left to Right" or value == "Right to Left" then
-                    return value
-                end
-                return Defaults.SortDebuffsTarget or "Left to Right"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.SortDebuffsTarget, { "Left to Right", "Right to Left" }, Defaults.SortDebuffsTarget or "Left to Right"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.SortDebuffsTarget = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortDebuffsTarget or "Left to Right",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.SortDebuffsTarget or "Left to Right"),
         }
 
         -- Unanchored Player / Target Buff Options
@@ -2970,18 +2902,14 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CONTAINER_TP),
             items = SettingsAPI:GetRotationOptionsList(),
             getFunction = function ()
-                local index = Settings.LongTermEffectsSeparateAlignment
-                if type(index) == "string" then
-                    index = rotationOptionsKeys[index] or 2
-                end
-                return rotationOptions[index] or rotationOptions[2]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeRotationOptionIndex(Settings.LongTermEffectsSeparateAlignment, Defaults.LongTermEffectsSeparateAlignment))
             end,
             setFunction = function (combobox, value, item)
                 Settings.LongTermEffectsSeparateAlignment = item.data
                 SpellCastBuffs.ResetContainerOrientation()
                 SpellCastBuffs.Reset()
             end,
-            default = rotationOptions[2],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.LongTermEffectsSeparateAlignment),
         }
 
         -- Horizontal Long Term Icons Alignment
@@ -2997,18 +2925,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right",    data = "Right"    },
             },
             getFunction = function ()
-                local value = Settings.AlignmentLongHorz
-                if value == "Left" or value == "Centered" or value == "Right" then
-                    return value
-                end
-                return Defaults.AlignmentLongHorz or "Left"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.AlignmentLongHorz, { "Left", "Centered", "Right" }, Defaults.AlignmentLongHorz or "Left"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.AlignmentLongHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentLongHorz or "Left",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.AlignmentLongHorz or "Left"),
             disable = function ()
                 return Settings.LongTermEffectsSeparateAlignment == 2
             end,
@@ -3026,18 +2950,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right to Left", data = "Right to Left" },
             },
             getFunction = function ()
-                local value = Settings.SortLongHorz
-                if value == "Left to Right" or value == "Right to Left" then
-                    return value
-                end
-                return Defaults.SortLongHorz or "Left to Right"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.SortLongHorz, { "Left to Right", "Right to Left" }, Defaults.SortLongHorz or "Left to Right"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.SortLongHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortLongHorz or "Left to Right",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.SortLongHorz or "Left to Right"),
             disable = function ()
                 return Settings.LongTermEffectsSeparateAlignment == 2
             end,
@@ -3117,18 +3037,14 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFCONTAINER_TP),
             items = SettingsAPI:GetRotationOptionsList(),
             getFunction = function ()
-                local index = Settings.ProminentBuffContainerAlignment
-                if type(index) == "string" then
-                    index = rotationOptionsKeys[index] or 2
-                end
-                return rotationOptions[index] or rotationOptions[2]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeRotationOptionIndex(Settings.ProminentBuffContainerAlignment, Defaults.ProminentBuffContainerAlignment))
             end,
             setFunction = function (combobox, value, item)
                 Settings.ProminentBuffContainerAlignment = item.data
                 SpellCastBuffs.ResetContainerOrientation()
                 SpellCastBuffs.Reset()
             end,
-            default = rotationOptions[2],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.ProminentBuffContainerAlignment),
         }
 
         -- Horizontal Prominent Buffs Icons Alignment
@@ -3144,18 +3060,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right",    data = "Right"    },
             },
             getFunction = function ()
-                local value = Settings.AlignmentPromBuffsHorz
-                if value == "Left" or value == "Centered" or value == "Right" then
-                    return value
-                end
-                return Defaults.AlignmentPromBuffsHorz or "Left"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.AlignmentPromBuffsHorz, { "Left", "Centered", "Right" }, Defaults.AlignmentPromBuffsHorz or "Left"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.AlignmentPromBuffsHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentPromBuffsHorz or "Left",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.AlignmentPromBuffsHorz or "Left"),
             disable = function ()
                 return Settings.ProminentBuffContainerAlignment == 2
             end,
@@ -3173,18 +3085,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right to Left", data = "Right to Left" },
             },
             getFunction = function ()
-                local value = Settings.SortPromBuffsHorz
-                if value == "Left to Right" or value == "Right to Left" then
-                    return value
-                end
-                return Defaults.SortPromBuffsHorz or "Left to Right"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.SortPromBuffsHorz, { "Left to Right", "Right to Left" }, Defaults.SortPromBuffsHorz or "Left to Right"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.SortPromBuffsHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortPromBuffsHorz or "Left to Right",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.SortPromBuffsHorz or "Left to Right"),
             disable = function ()
                 return Settings.ProminentBuffContainerAlignment == 2
             end,
@@ -3257,18 +3165,14 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFCONTAINER_TP),
             items = SettingsAPI:GetRotationOptionsList(),
             getFunction = function ()
-                local index = Settings.ProminentDebuffContainerAlignment
-                if type(index) == "string" then
-                    index = rotationOptionsKeys[index] or 2
-                end
-                return rotationOptions[index] or rotationOptions[2]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeRotationOptionIndex(Settings.ProminentDebuffContainerAlignment, Defaults.ProminentDebuffContainerAlignment))
             end,
             setFunction = function (combobox, value, item)
                 Settings.ProminentDebuffContainerAlignment = item.data
                 SpellCastBuffs.ResetContainerOrientation()
                 SpellCastBuffs.Reset()
             end,
-            default = rotationOptions[2],
+            default = SettingsAPI:LHASDropdownGetData(Defaults.ProminentDebuffContainerAlignment),
         }
 
         -- Horizontal Prominent Debuffs Icons Alignment
@@ -3284,18 +3188,14 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right",    data = "Right"    },
             },
             getFunction = function ()
-                local value = Settings.AlignmentPromDebuffsHorz
-                if value == "Left" or value == "Centered" or value == "Right" then
-                    return value
-                end
-                return Defaults.AlignmentPromDebuffsHorz or "Left"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.AlignmentPromDebuffsHorz, { "Left", "Centered", "Right" }, Defaults.AlignmentPromDebuffsHorz or "Left"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.AlignmentPromDebuffsHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentPromDebuffsHorz or "Left",
+            default = SettingsAPI:LHASDropdownGetData(Defaults.AlignmentPromDebuffsHorz or "Left"),
             disable = function ()
                 return Settings.ProminentDebuffContainerAlignment == 2
             end,
@@ -3313,11 +3213,7 @@ function SpellCastBuffs.CreateConsoleSettings()
                 { name = "Right to Left", data = "Right to Left" },
             },
             getFunction = function ()
-                local value = Settings.SortPromDebuffsHorz
-                if value == "Left to Right" or value == "Right to Left" then
-                    return value
-                end
-                return Defaults.SortPromDebuffsHorz or "Left to Right"
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.SortPromDebuffsHorz, { "Left to Right", "Right to Left" }, Defaults.SortPromDebuffsHorz or "Left to Right"))
             end,
             setFunction = function (combobox, value, item)
                 Settings.SortPromDebuffsHorz = item.data
@@ -3402,7 +3298,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure tooltip display options for buffs and debuffs.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_TOOLTIP),
         }
 
         -- Tooltip Enable
@@ -4324,7 +4220,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Development and debugging options for buffs and debuffs.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_SCB_DEBUG),
         }
 
         -- Show AbilityId on Buffs & Debuffs

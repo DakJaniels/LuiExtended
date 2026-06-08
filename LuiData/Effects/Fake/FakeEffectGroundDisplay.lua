@@ -170,6 +170,7 @@ Effects.EffectGroundDisplay =
     [122388] = { buff = false, debuff = false, ground = true },                                                          -- Glacial Colossus (Glacial Colossus)
 
     [115093] = { buff = true, debuff = false, ground = false },                                                          -- Bone Totem (Bone Totem)
+    [238178] = { buff = true, debuff = false, ground = false },                                                          -- Vengeance Bone Totem (ground GAIN; log 2025-06-07)
     [118380] = { buff = true, debuff = false, ground = false },                                                          -- Remote Totem (Remote Totem)
     [118404] = { buff = true, debuff = false, ground = false },                                                          -- Agony Totem (Agony Totem)
 

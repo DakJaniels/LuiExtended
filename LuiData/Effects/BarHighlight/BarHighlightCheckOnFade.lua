@@ -34,7 +34,6 @@ local TARGET_UNIT_TAG = "reticleover"
 --- @field id3Tag string | nil Unit tag to filter effects ("player" or "reticleover")
 --- @field duration integer | nil Ability ID whose duration to use (passed to GetUpdatedAbilityDuration). When set, fake path is used instead of buff scan.
 --- @field durationMod integer | nil Ability ID whose duration to subtract from duration (e.g. Phantasmal Escape from Major Evasion). Passed to GetUpdatedAbilityDuration.
-
 --- @type table<integer, BarHighlightOverrideEntry>
 local barHighlightCheckOnFade =
 {
@@ -98,6 +97,16 @@ local barHighlightCheckOnFade =
     [114131] = { id1 = 114131, unitTag = PLAYER_UNIT_TAG },                             -- Flame Skull charges (resync stacks after per-cast combat FADE)
     [117625] = { id1 = 117625, unitTag = PLAYER_UNIT_TAG },                             -- Venom Skull charges
     [117638] = { id1 = 117638, unitTag = PLAYER_UNIT_TAG },                             -- Ricochet Skull charges
+    [255682] = { id1 = 255682, unitTag = PLAYER_UNIT_TAG },                             -- In The Fray (post-recast FADE resync)
+    [255689] = { id1 = 61722, unitTag = PLAYER_UNIT_TAG },                              -- Warding Interception --> Major Protection
+    [269817] = { id1 = 269817, id2 = 61723, unitTag = TARGET_UNIT_TAG },                -- Ensnaring Chains ROOT + Minor Maim on reticle
+    [255952] = { id1 = 255952, id2 = 255953, unitTag = TARGET_UNIT_TAG },               -- Demoralizing Disruption silence + stun
+    [255651] = { id1 = 255651, unitTag = TARGET_UNIT_TAG },                             -- Shoulder Toss stun on reticle
+    [256560] = { id1 = 256560, unitTag = TARGET_UNIT_TAG },                             -- Blade Bite bleed on reticle
+    [256690] = { duration = 256693, durationMod = 256692, unitTag = PLAYER_UNIT_TAG },  -- Nimble Feint (dummy 4s − fatigue 3s after disorient fade)
+    [256695] = { id1 = 256695, id2 = 61746, unitTag = PLAYER_UNIT_TAG },               -- Stalker's Quarry + Minor Force
+    [256736] = { id1 = 256736, id2 = 145977, unitTag = TARGET_UNIT_TAG },               -- Focus Fire + Major Brittle
+    [256713] = { duration = 256715, durationMod = 256713, unitTag = PLAYER_UNIT_TAG },  -- Cleansing Shadow (dummy 4s − invis 3s on player)
 
     -- Two Handed
     [131562] = { id1 = 131562, id2 = 16825, id3 = 137807, unitTag = TARGET_UNIT_TAG }, -- Dizzying Swing OB 7s / exploit stun 2s / immune snare 2s

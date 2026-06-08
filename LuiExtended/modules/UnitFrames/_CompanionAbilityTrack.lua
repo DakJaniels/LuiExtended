@@ -69,7 +69,7 @@ end
 --- @return string
 local function GetSlotLabelFont(iconSize)
     local appearance = UnitFrames.GetCustomFrameAppearance("companion")
-    local fontFace = LUIE.Fonts[appearance.fontFace]
+    local fontFace = UnitFrames.ResolveLuiMediaFontPath(appearance.fontFace)
     local fontStyle = appearance.fontStyle
     return LUIE.CreateFontString(fontFace, zo_max(12, iconSize - 6), fontStyle)
 end
@@ -593,6 +593,7 @@ end
 --- @field slottedIds table<integer, boolean>
 --- @field groundTrackToSlotted table<integer, integer>
 --- @field combatTrackEndMs table<integer, integer>
+--- @field slottedIdsWithAlternateTrack table<integer, boolean>
 --- @field eventsRegistered boolean
 --- @field updateTickRegistered boolean
 LUIE_CompanionAbilityTrack = ZO_Object:Subclass()
@@ -605,17 +606,31 @@ function LUIE_CompanionAbilityTrack:New()
     track.slottedIds = {}
     track.groundTrackToSlotted = {}
     track.combatTrackEndMs = {}
+    track.slottedIdsWithAlternateTrack = {}
     track.eventsRegistered = false
     track.updateTickRegistered = false
     return track
+end
+
+--- @param hotbarCategory integer
+--- @param actionSlotIndex integer
+--- @return boolean
+local function IsCompanionBarSlot(hotbarCategory, actionSlotIndex)
+    return hotbarCategory == HOTBAR
+        and actionSlotIndex >= FIRST_SLOT
+        and actionSlotIndex <= LAST_SLOT
 end
 
 function LUIE_CompanionAbilityTrack:BuildLookupTables()
     ZO_ClearTable(self.slottedIds)
     ZO_ClearTable(self.trackIdToSlotted)
     ZO_ClearTable(self.groundTrackToSlotted)
+    ZO_ClearTable(self.slottedIdsWithAlternateTrack)
 
     for slottedId, entry in pairs(CompanionAbilityTrackData) do
+        if entry.alternateTrackId or entry.alternateTrackIds then
+            self.slottedIdsWithAlternateTrack[slottedId] = true
+        end
         self.slottedIds[slottedId] = true
         if entry.trackId then
             self.trackIdToSlotted[entry.trackId] = slottedId
@@ -824,19 +839,31 @@ function LUIE_CompanionAbilityTrack:RegisterUpdateTick()
 end
 
 --- @param hotbarCategory integer
-function LUIE_CompanionAbilityTrack:OnHotbarSlotUpdated(hotbarCategory)
-    if hotbarCategory ~= HOTBAR then
+--- @param actionSlotIndex integer
+function LUIE_CompanionAbilityTrack:OnCompanionHotbarSlotUpdated(hotbarCategory, actionSlotIndex)
+    if not IsCompanionBarSlot(hotbarCategory, actionSlotIndex) then
         return
     end
-    self:RefreshAll()
+    self:RefreshSlot(actionSlotIndex)
+end
+
+--- @param hotbarCategory integer
+--- @param actionSlotIndex integer
+function LUIE_CompanionAbilityTrack:OnActionSlotEffectUpdate(hotbarCategory, actionSlotIndex)
+    if not IsCompanionBarSlot(hotbarCategory, actionSlotIndex) then
+        return
+    end
+    local slottedId = LUIE.GetSlotTrueBoundId(actionSlotIndex, HOTBAR)
+    if slottedId and slottedId > 0 then
+        self:RefreshSlottedAbility(slottedId)
+    else
+        self:RefreshSlot(actionSlotIndex)
+    end
 end
 
 --- @param unitTag string
 --- @param abilityId integer
 function LUIE_CompanionAbilityTrack:OnEffectChanged(unitTag, abilityId)
-    if unitTag ~= "companion" and unitTag ~= "reticleover" and unitTag ~= "player" then
-        return
-    end
     local slottedId = self.trackIdToSlotted[abilityId]
     if not slottedId then
         return
@@ -844,27 +871,61 @@ function LUIE_CompanionAbilityTrack:OnEffectChanged(unitTag, abilityId)
     self:RefreshSlottedAbility(slottedId)
 end
 
---- @param result integer
---- @param sourceType integer
---- @param hitValue integer
+function LUIE_CompanionAbilityTrack:OnReticleTargetChanged()
+    for slottedId in pairs(self.slottedIdsWithAlternateTrack) do
+        self:RefreshSlottedAbility(slottedId)
+    end
+end
+
+--- @param newState CompanionState
+--- @param oldState CompanionState
+function LUIE_CompanionAbilityTrack:OnActiveCompanionStateChanged(newState, oldState)
+    if newState ~= COMPANION_STATE_ACTIVE then
+        ZO_ClearTable(self.combatTrackEndMs)
+    end
+    self:RefreshAll()
+end
+
+--- @param summonResult CompanionSummonResult
+function LUIE_CompanionAbilityTrack:OnCompanionSummonResult(summonResult)
+    if summonResult == COMPANION_SUMMON_RESULT_SUMMON_REQUESTED
+        or summonResult == COMPANION_SUMMON_RESULT_SUMMON_AUTO_REQUESTED
+        or summonResult == COMPANION_SUMMON_RESULT_ADDED_FOR_GROUP_PLAYER then
+        self:RefreshAll()
+    else
+        ZO_ClearTable(self.combatTrackEndMs)
+        self:RefreshAll()
+    end
+end
+
+--- @param result ActionResult
 --- @param abilityId integer
-function LUIE_CompanionAbilityTrack:OnCombatEvent(result, sourceType, hitValue, abilityId)
+function LUIE_CompanionAbilityTrack:OnCombatEventEffectFaded(result, abilityId)
+    if result ~= ACTION_RESULT_EFFECT_FADED then
+        return
+    end
     local slottedFromTrack = self.trackIdToSlotted[abilityId]
     if not slottedFromTrack then
         return
     end
+    self.combatTrackEndMs[slottedFromTrack] = nil
+    self:RefreshSlottedAbility(slottedFromTrack)
+end
 
-    if result == ACTION_RESULT_EFFECT_FADED then
-        self.combatTrackEndMs[slottedFromTrack] = nil
+--- @param result ActionResult
+--- @param hitValue integer
+--- @param abilityId integer
+function LUIE_CompanionAbilityTrack:OnCombatEventCompanion(result, hitValue, abilityId)
+    local slottedFromTrack = self.trackIdToSlotted[abilityId]
+    if not slottedFromTrack then
+        return
+    end
+    if result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION then
+        self:StartCombatTrackTimer(slottedFromTrack, abilityId, hitValue)
         self:RefreshSlottedAbility(slottedFromTrack)
-    elseif sourceType == COMBAT_UNIT_TYPE_PLAYER_COMPANION then
-        if result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION then
-            self:StartCombatTrackTimer(slottedFromTrack, abilityId, hitValue)
-            self:RefreshSlottedAbility(slottedFromTrack)
-        elseif result == ACTION_RESULT_BEGIN and not self.slottedIds[abilityId] then
-            self:StartCombatTrackTimer(slottedFromTrack, abilityId, hitValue)
-            self:RefreshSlottedAbility(slottedFromTrack)
-        end
+    elseif result == ACTION_RESULT_BEGIN and not self.slottedIds[abilityId] then
+        self:StartCombatTrackTimer(slottedFromTrack, abilityId, hitValue)
+        self:RefreshSlottedAbility(slottedFromTrack)
     end
 end
 
@@ -877,27 +938,77 @@ function LUIE_CompanionAbilityTrack:RegisterEvents()
     local handler = moduleName .. "CompanionAbilityTrack"
     local track = self
 
-    eventManager:RegisterForEvent(handler, EVENT_ACTION_SLOT_UPDATED, function (_, _, hotbarCategory)
-        track:OnHotbarSlotUpdated(hotbarCategory)
-    end)
-    eventManager:RegisterForEvent(handler, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function ()
-        track:RefreshAll()
-    end)
-    eventManager:RegisterForEvent(handler, EVENT_ACTIVE_COMPANION_STATE_CHANGED, function ()
-        ZO_ClearTable(track.combatTrackEndMs)
-        track:RefreshAll()
-    end)
-    eventManager:RegisterForEvent(handler, EVENT_EFFECT_CHANGED, function (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, numSeconds, abilityId, sourceType)
-        track:OnEffectChanged(unitTag, abilityId)
-    end)
+    local function RegisterHotbarEvents()
+        eventManager:RegisterForEvent(handler .. "HotbarSlot", EVENT_HOTBAR_SLOT_STATE_UPDATED, function (eventId, actionSlotIndex, hotbarCategory)
+            track:OnCompanionHotbarSlotUpdated(hotbarCategory, actionSlotIndex)
+        end)
+        eventManager:RegisterForEvent(handler .. "SlotEffect", EVENT_ACTION_SLOT_EFFECT_UPDATE, function (eventId, hotbarCategory, actionSlotIndex)
+            track:OnActionSlotEffectUpdate(hotbarCategory, actionSlotIndex)
+        end)
+        eventManager:RegisterForEvent(handler, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function (eventId)
+            track:RefreshAll()
+        end)
+        eventManager:RegisterForEvent(handler, EVENT_COMPANION_SKILLS_FULL_UPDATE, function (eventId, isInit)
+            track:RefreshAll()
+        end)
+        eventManager:RegisterForEvent(handler, EVENT_ACTION_BAR_LOCKED_REASON_CHANGED, function (eventId)
+            track:RefreshAll()
+        end)
+    end
 
-    eventManager:RegisterForEvent(handler .. "Combat", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
-        if isError then
-            return
+    local function RegisterEffectEvents()
+        local function OnEffectChangedEvent(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+            track:OnEffectChanged(unitTag, abilityId)
         end
-        track:OnCombatEvent(result, sourceType, hitValue, abilityId)
-    end)
-    eventManager:AddFilterForEvent(handler .. "Combat", EVENT_COMBAT_EVENT, REGISTER_FILTER_IS_ERROR, false)
+        local effectUnitTags = { "companion", "reticleover", "player" }
+        for index, unitTag in ipairs(effectUnitTags) do
+            local effectHandler = handler .. "Effect" .. tostring(index)
+            eventManager:RegisterForEvent(effectHandler, EVENT_EFFECT_CHANGED, OnEffectChangedEvent)
+            eventManager:AddFilterForEvent(effectHandler, EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, unitTag)
+        end
+    end
+
+    local function RegisterCombatEvents()
+        eventManager:RegisterForEvent(handler .. "CombatFade", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            if isError then
+                return
+            end
+            track:OnCombatEventEffectFaded(result, abilityId)
+        end)
+        eventManager:AddFilterForEvent(handler .. "CombatFade", EVENT_COMBAT_EVENT, REGISTER_FILTER_IS_ERROR, false)
+
+        eventManager:RegisterForEvent(handler .. "CombatCompanion", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            if isError then
+                return
+            end
+            track:OnCombatEventCompanion(result, hitValue, abilityId)
+        end)
+        eventManager:AddFilterForEvent(handler .. "CombatCompanion", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_COMPANION, REGISTER_FILTER_IS_ERROR, false)
+    end
+
+    local function RegisterCompanionLifecycleEvents()
+        eventManager:RegisterForEvent(handler, EVENT_ACTIVE_COMPANION_STATE_CHANGED, function (eventId, newState, oldState)
+            track:OnActiveCompanionStateChanged(newState, oldState)
+        end)
+        eventManager:RegisterForEvent(handler, EVENT_COMPANION_ACTIVATED, function (eventId, companionId)
+            track:RefreshAll()
+        end)
+        eventManager:RegisterForEvent(handler, EVENT_COMPANION_DEACTIVATED, function (eventId)
+            ZO_ClearTable(track.combatTrackEndMs)
+            track:RefreshAll()
+        end)
+        eventManager:RegisterForEvent(handler, EVENT_COMPANION_SUMMON_RESULT, function (eventId, summonResult, companionId)
+            track:OnCompanionSummonResult(summonResult)
+        end)
+        eventManager:RegisterForEvent(handler, EVENT_RETICLE_TARGET_CHANGED, function (eventId)
+            track:OnReticleTargetChanged()
+        end)
+    end
+
+    RegisterHotbarEvents()
+    RegisterEffectEvents()
+    RegisterCombatEvents()
+    RegisterCompanionLifecycleEvents()
 
     self:RegisterUpdateTick()
 end

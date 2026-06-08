@@ -13,7 +13,7 @@ local UnitFrames = LUIE.UnitFrames
 
 --- Module for handling Power Shields, Trauma, and No-Healing overlays
 --- @class LUIE_PowerShieldModule : LUIE_UnitAttributeVisualizerModuleBase
-local PowerShieldModule = LUIE_UnitAttributeVisualizerModuleBase:New()
+local PowerShieldModule = LUIE_UnitAttributeVisualizerModuleBase:Subclass()
 
 function PowerShieldModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_POWER_SHIELDING
@@ -71,19 +71,13 @@ function PowerShieldModule:UpdateShield(unitTag, value, maxValue)
 
     local healthValue, healthEffectiveMax = GetHealthPowerForUnit(unitTag)
 
-    -- Update frames
-    if UnitFrames.DefaultFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, false, false)
-        self:UpdateShieldBar(UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], value, healthEffectiveMax)
-    end
-    if UnitFrames.CustomFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, false, false)
-        self:UpdateShieldBar(UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], value, healthEffectiveMax)
-    end
-    if UnitFrames.AvaCustFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, false, false)
-        self:UpdateShieldBar(UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], value, healthEffectiveMax)
-    end
+    self:ForEachUnitFrameTable(unitTag, function (frameTable)
+        local healthFrame = frameTable[COMBAT_MECHANIC_FLAGS_HEALTH]
+        if healthFrame then
+            UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, healthFrame, healthValue, healthEffectiveMax, false, false)
+            self:UpdateShieldBar(healthFrame, value, healthEffectiveMax)
+        end
+    end)
 end
 
 --- Here actual update of shield bar on attribute is done
@@ -138,25 +132,21 @@ function PowerShieldModule:UpdateTrauma(unitTag, value, maxValue)
 
     local healthValue, healthEffectiveMax = GetHealthPowerForUnit(unitTag)
 
-    -- Update frames
-    if UnitFrames.DefaultFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, true, false)
-        self:UpdateTraumaBar(UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], value, healthValue, healthEffectiveMax)
-    end
-    if UnitFrames.CustomFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, true, false)
-        self:UpdateTraumaBar(UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], value, healthValue, healthEffectiveMax)
-    end
-    if UnitFrames.AvaCustFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], healthValue, healthEffectiveMax, true, false)
-        self:UpdateTraumaBar(UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH], value, healthValue, healthEffectiveMax)
-    end
+    self:ForEachUnitFrameTable(unitTag, function (frameTable)
+        local healthFrame = frameTable[COMBAT_MECHANIC_FLAGS_HEALTH]
+        if healthFrame then
+            UnitFrames.UpdateAttribute(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, healthFrame, healthValue, healthEffectiveMax, true, false)
+            self:UpdateTraumaBar(healthFrame, value, healthValue, healthEffectiveMax)
+        end
+    end)
 
     -- Update no-healing overlay inner ring when trauma changes
     local noHealingValue = UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
 
     if noHealingValue > 0 then
         self:UpdateNoHealing(unitTag, noHealingValue)
+    else
+        self:UpdateNoHealing(unitTag, 0)
     end
 end
 
@@ -249,18 +239,9 @@ function PowerShieldModule:UpdateNoHealing(unitTag, value)
         end
     end
 
-    -- Update frames
-    if UnitFrames.DefaultFrames[unitTag] and UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        updateNoHealingOverlays(UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH])
-    end
-
-    if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        updateNoHealingOverlays(UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH])
-    end
-
-    if UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        updateNoHealingOverlays(UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH])
-    end
+    self:ForEachPowerEntry(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, function (frame)
+        updateNoHealingOverlays(frame)
+    end)
 end
 
 -- -----------------------------------------------------------------------------
@@ -297,6 +278,8 @@ function PowerShieldModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, 
     end
 end
 
+LUIE_PowerShieldModule = PowerShieldModule
+UnitFrames.VisualizerModuleClasses.PowerShieldModule = PowerShieldModule
 UnitFrames.VisualizerModules.PowerShieldModule = PowerShieldModule
 
 return PowerShieldModule

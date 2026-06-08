@@ -26,10 +26,36 @@ local zo_strformat = zo_strformat
 local string_format = string.format
 local alertFrameMovingEnabled = false -- Helper local flag
 
-local globalAlertOptions = { "Show All Incoming Abilities", "Only Show Hard CC Effects", "Only Show Unbreakable CC Effects" }
-local globalAlertOptionsKeys = { ["Show All Incoming Abilities"] = 1, ["Only Show Hard CC Effects"] = 2, ["Only Show Unbreakable CC Effects"] = 3 }
-local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
-local globalIconOptionsKeys = { ["All Crowd Control"] = 1, ["NPC CC Only"] = 2, ["Player CC Only"] = 3 }
+local globalAlertOptions =
+{
+    GetString(LUIE_STRING_LAM_CI_ALERT_FILTER_ALL),
+    GetString(LUIE_STRING_LAM_CI_ALERT_FILTER_HARD_CC),
+    GetString(LUIE_STRING_LAM_CI_ALERT_FILTER_UNBREAKABLE_CC),
+}
+local globalAlertOptionValues = { 1, 2, 3 }
+local globalIconOptions =
+{
+    GetString(LUIE_STRING_SHARED_CC_ALL),
+    GetString(LUIE_STRING_SHARED_CC_NPC_ONLY),
+    GetString(LUIE_STRING_SHARED_CC_PLAYER_ONLY),
+}
+local globalIconOptionValues = { 1, 2, 3 }
+local cctDisplayChoices =
+{
+    GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_ICON_AND_TEXT),
+    GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_ICON_ONLY),
+    GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_TEXT_ONLY),
+}
+local cctDisplayValues = { "all", "icon", "text" }
+local synergyDisplayChoices =
+{
+    GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_SINGLE),
+    GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_MULTI),
+    GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_COMPACT),
+    GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_MINIMAL),
+    GetString(LUIE_STRING_LAM_CI_SYNERGY_MODE_HIDDEN),
+}
+local synergyDisplayValues = { "single", "multi", "compact", "minimal", "hidden" }
 
 local DurationOverridesList, DurationOverridesListValues = {}, {}
 
@@ -45,8 +71,8 @@ function CombatInfo.CreateSettings()
     local panelDataCombatInfo =
     {
         type = "panel",
-        name = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CI)),
-        displayName = zo_strformat("<<1>> <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CI)),
+        name = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_CI),
+        displayName = LUIE.FormatAddonSettingsPanelDisplayName(LUIE_STRING_LAM_CI),
         author = LUIE.author .. "\n",
         version = LUIE.version,
         website = LUIE.website,
@@ -415,17 +441,18 @@ function CombatInfo.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER_TP),
                 choices = globalAlertOptions,
+                choicesValues = globalAlertOptionValues,
                 getFunc = function ()
-                    return globalAlertOptions[Settings.alerts.toggles.alertOptions]
+                    return Settings.alerts.toggles.alertOptions
                 end,
                 setFunc = function (value)
-                    Settings.alerts.toggles.alertOptions = globalAlertOptionsKeys[value]
+                    Settings.alerts.toggles.alertOptions = value
                 end,
                 width = "full",
                 disabled = function ()
                     return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
                 end,
-                default = globalAlertOptions[Defaults.alerts.toggles.alertOptions],
+                default = Defaults.alerts.toggles.alertOptions,
             },
             {
                 -- Show Mitigation Suffix
@@ -2089,27 +2116,16 @@ function CombatInfo.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_STYLE),
                 tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_STYLE_TP),
-                choices = { "Display: Icon & Text", "Display: Icon", "Display: Text" },
+                choices = cctDisplayChoices,
+                choicesValues = cctDisplayValues,
                 getFunc = function ()
-                    if Settings.cct.showOptions == "all" then
-                        return "Display: Icon & Text"
-                    elseif Settings.cct.showOptions == "icon" then
-                        return "Display: Icon"
-                    elseif Settings.cct.showOptions == "text" then
-                        return "Display: Text"
-                    end
+                    return Settings.cct.showOptions
                 end,
                 setFunc = function (newValue)
-                    if newValue == "Display: Icon & Text" then
-                        Settings.cct.showOptions = "all"
-                    elseif newValue == "Icon only" then
-                        Settings.cct.showOptions = "icon"
-                    elseif newValue == "Text only" then
-                        Settings.cct.showOptions = "text"
-                    end
+                    Settings.cct.showOptions = newValue
                     CrowdControlTracker:InitControls()
                 end,
-                default = "Both icon and text",
+                default = Defaults.cct.showOptions,
                 disabled = function ()
                     return not Settings.cct.enabled
                 end,
@@ -2155,15 +2171,16 @@ function CombatInfo.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
                 choices = globalIconOptions,
+                choicesValues = globalIconOptionValues,
                 getFunc = function ()
-                    return globalIconOptions[Settings.cct.defaultIconOptions]
+                    return Settings.cct.defaultIconOptions
                 end,
                 setFunc = function (value)
-                    Settings.cct.defaultIconOptions = globalIconOptionsKeys[value]
+                    Settings.cct.defaultIconOptions = value
                     CrowdControlTracker:InitControls()
                 end,
                 width = "full",
-                default = globalIconOptions[Defaults.cct.defaultIconOptions],
+                default = Defaults.cct.defaultIconOptions,
                 disabled = function ()
                     return not Settings.cct.useDefaultIcon
                 end,
@@ -3112,12 +3129,12 @@ function CombatInfo.CreateSettings()
     {
         {
             type = "description",
-            text = "Track and display multiple available synergies simultaneously. Set custom priorities and manage synergy preferences.",
+            text = GetString(LUIE_STRING_LAM_CI_SYNERGY_HEADER_DESC),
         },
         {
             type = "checkbox",
-            name = "Unlock Synergy Display",
-            tooltip = "Unlock the synergy display to reposition it. Preview synergies will be shown while unlocked.",
+            name = GetString(LUIE_STRING_LAM_CI_SYNERGY_UNLOCK),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_UNLOCK_TP),
             getFunc = function ()
                 return Settings.synergy.unlocked
             end,
@@ -3135,8 +3152,8 @@ function CombatInfo.CreateSettings()
         },
         {
             type = "button",
-            name = "Reset Position",
-            tooltip = "Reset the synergy display to default position.",
+            name = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_RESET_TP),
             func = function ()
                 local tracker = GetSynergyTracker()
                 if tracker then
@@ -3150,8 +3167,8 @@ function CombatInfo.CreateSettings()
         },
         {
             type = "checkbox",
-            name = "Enable Synergy Tracker",
-            tooltip = "Enable the synergy tracking system. This will monitor available synergies and allow you to set priority overrides. Changes require a UI reload (/reloadui).",
+            name = GetString(LUIE_STRING_LAM_CI_SYNERGY_ENABLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_ENABLE_TP),
             default = Defaults.synergy.enabled,
             getFunc = function ()
                 return Settings.synergy.enabled
@@ -3160,17 +3177,17 @@ function CombatInfo.CreateSettings()
                 Settings.synergy.enabled = value
             end,
             width = "full",
-            warning = "Requires UI reload (/reloadui) to take effect.",
+            warning = GetString(LUIE_STRING_LAM_CI_REQUIRES_RELOAD_WARNING),
             requiresReload = true,
         },
         {
             type = "header",
-            name = "Display Options",
+            name = GetString(LUIE_STRING_LAM_CI_DISPLAY_OPTIONS),
         },
         {
             type = "slider",
-            name = zo_strformat("\t\t\t\t\t<<1>>", "Out-of-Combat Opacity"),
-            tooltip = "Synergy tracker opacity while out of combat (0–100%).",
+            name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_SHARED_OOC_OPACITY)),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_OOC_OPACITY_TP),
             min = 0,
             max = 100,
             step = 5,
@@ -3192,8 +3209,8 @@ function CombatInfo.CreateSettings()
         },
         {
             type = "slider",
-            name = zo_strformat("\t\t\t\t\t<<1>>", "In-Combat Opacity"),
-            tooltip = "Synergy tracker opacity while in combat (0–100%).",
+            name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_SHARED_IC_OPACITY)),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_IC_OPACITY_TP),
             min = 0,
             max = 100,
             step = 5,
@@ -3215,34 +3232,15 @@ function CombatInfo.CreateSettings()
         },
         {
             type = "dropdown",
-            name = "Display Mode",
-            tooltip = "Single: Show only highest priority synergy (like default UI)\nMulti: Show all available synergies\nCompact: Show all synergies with short names\nIcon + Cooldown: Icon and cooldown timer only (tooltip shows ability name)\nHidden: No on-screen tracker (detection, sounds, and overrides still run)",
-            choices = { "Single Synergy", "Multi-Synergy", "Compact Multi-Synergy", "Icon + Cooldown", "Hidden" },
+            name = GetString(LUIE_STRING_LAM_CI_SYNERGY_DISPLAY_MODE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_DISPLAY_MODE_TP),
+            choices = synergyDisplayChoices,
+            choicesValues = synergyDisplayValues,
             getFunc = function ()
-                if Settings.synergy.displayMode == "single" then
-                    return "Single Synergy"
-                elseif Settings.synergy.displayMode == "compact" then
-                    return "Compact Multi-Synergy"
-                elseif Settings.synergy.displayMode == "minimal" then
-                    return "Icon + Cooldown"
-                elseif Settings.synergy.displayMode == "hidden" then
-                    return "Hidden"
-                else
-                    return "Multi-Synergy"
-                end
+                return Settings.synergy.displayMode
             end,
             setFunc = function (value)
-                if value == "Single Synergy" then
-                    Settings.synergy.displayMode = "single"
-                elseif value == "Compact Multi-Synergy" then
-                    Settings.synergy.displayMode = "compact"
-                elseif value == "Icon + Cooldown" then
-                    Settings.synergy.displayMode = "minimal"
-                elseif value == "Hidden" then
-                    Settings.synergy.displayMode = "hidden"
-                else
-                    Settings.synergy.displayMode = "multi"
-                end
+                Settings.synergy.displayMode = value
                 local tracker = GetSynergyTracker()
                 if tracker then
                     tracker:ApplyRowLayout(Settings.synergy.displayMode)
@@ -3250,7 +3248,7 @@ function CombatInfo.CreateSettings()
                 end
             end,
             width = "full",
-            default = "Multi-Synergy",
+            default = Defaults.synergy.displayMode,
             disabled = function ()
                 return not Settings.synergy.enabled
             end,
@@ -3258,7 +3256,7 @@ function CombatInfo.CreateSettings()
         {
             type = "checkbox",
             name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Icon Layout"),
-            tooltip = "When using Icon + Cooldown mode, arrange synergy icons in a horizontal row instead of a vertical list.",
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_HORIZONTAL_ICONS_TP),
             getFunc = function ()
                 return Settings.synergy.minimalHorizontal
             end,
@@ -3279,7 +3277,7 @@ function CombatInfo.CreateSettings()
         {
             type = "slider",
             name = zo_strformat("\t\t\t\t\t<<1>>", "Maximum Synergies to Display"),
-            tooltip = "Maximum number of synergies to show simultaneously (1-10). Includes both active and cooldown synergies.",
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_MAX_DISPLAY_TP),
             min = 1,
             max = 10,
             step = 1,
@@ -3302,7 +3300,7 @@ function CombatInfo.CreateSettings()
         {
             type = "checkbox",
             name = zo_strformat("\t\t\t\t\t<<1>>", "Show Priority Numbers"),
-            tooltip = "Display priority numbers next to each synergy.",
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_PRIORITY_TP),
             getFunc = function ()
                 return Settings.synergy.showPriority
             end,
@@ -3322,7 +3320,7 @@ function CombatInfo.CreateSettings()
         {
             type = "checkbox",
             name = zo_strformat("\t\t\t\t\t<<1>>", "Show Position Numbers"),
-            tooltip = "Display position numbers (1-5) next to each synergy to show its order in the list.",
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_POSITION_TP),
             getFunc = function ()
                 return Settings.synergy.showKeybinds
             end,
@@ -3342,7 +3340,7 @@ function CombatInfo.CreateSettings()
         {
             type = "checkbox",
             name = zo_strformat("\t\t\t\t\t<<1>>", "Play Sound on New Synergy"),
-            tooltip = "Play a sound notification when a new synergy becomes available.",
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_SOUND_NEW_TP),
             getFunc = function ()
                 return Settings.synergy.playSound
             end,
@@ -3358,7 +3356,7 @@ function CombatInfo.CreateSettings()
         {
             type = "checkbox",
             name = zo_strformat("\t\t\t\t\t<<1>>", "Show Synergies on Cooldown"),
-            tooltip = "Display synergies that are currently on cooldown. The tracker automatically learns which synergies share cooldowns by detecting when multiple synergies go on cooldown together.",
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_SHOW_COOLDOWN_TP),
             getFunc = function ()
                 return Settings.synergy.showCooldowns
             end,
@@ -3380,16 +3378,16 @@ function CombatInfo.CreateSettings()
         },
         {
             type = "header",
-            name = "Detected Synergies & Priority Overrides",
+            name = GetString(LUIE_STRING_LAM_CI_SYNERGY_DETECTED_HEADER),
         },
         {
             type = "description",
-            text = "Synergies detected during gameplay will appear below. Each synergy has a checkbox to blacklist (hide) it and a slider to set custom priority (0 = game default, 1-10 = higher priority).",
+            text = GetString(LUIE_STRING_LAM_CI_SYNERGY_DETECTED_DESC),
         },
         {
             type = "button",
-            name = "Clear All Priority Overrides",
-            tooltip = "Remove all custom priority overrides and reset to game defaults.",
+            name = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_OVERRIDES),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_OVERRIDES_TP),
             func = function ()
                 local tracker = GetSynergyTracker()
                 if tracker then
@@ -3403,15 +3401,15 @@ function CombatInfo.CreateSettings()
         },
         {
             type = "button",
-            name = "Clear Blacklist",
-            tooltip = "Remove all synergies from the blacklist.",
+            name = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_BLACKLIST),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_CLEAR_BLACKLIST_TP),
             func = function ()
                 Settings.synergy.blacklist = {}
                 local tracker = GetSynergyTracker()
                 if tracker then
                     tracker:RefreshActiveSynergies()
                 end
-                LUIE.ChatOutput:Print("Blacklist cleared.", true)
+                LUIE.ChatOutput:Print(GetString(LUIE_STRING_CI_CHAT_BLACKLIST_CLEARED), true)
             end,
             width = "half",
             disabled = function ()
@@ -3420,8 +3418,8 @@ function CombatInfo.CreateSettings()
         },
         {
             type = "button",
-            name = "Refresh List",
-            tooltip = "Rebuild the detected synergy list from current session data.",
+            name = GetString(LUIE_STRING_LAM_CI_SYNERGY_REFRESH_LIST),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_REFRESH_LIST_TP),
             func = function ()
                 BuildSynergyDetectedControls()
             end,
@@ -3441,7 +3439,7 @@ function CombatInfo.CreateSettings()
     optionsDataCombatInfo[#optionsDataCombatInfo + 1] =
     {
         type = "submenu",
-        name = "Synergy Tracker",
+        name = GetString(LUIE_STRING_LAM_CI_SYNERGY_TRACKER_HEADER),
         controls = synergySubmenuControls,
     }
 
@@ -3449,17 +3447,17 @@ function CombatInfo.CreateSettings()
     optionsDataCombatInfo[#optionsDataCombatInfo + 1] =
     {
         type = "submenu",
-        name = "Block Indicator",
+        name = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_HEADER),
         controls =
         {
             {
                 type = "description",
-                text = "Shows a shield icon while blocking and optional remaining block count. Bloodlord's Embrace tracker appears when the set is equipped.",
+                text = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_DESC),
             },
             {
                 type = "checkbox",
-                name = "Enable Block Indicator",
-                tooltip = "Enable the block indicator system. Changes require a UI reload (/reloadui).",
+                name = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_ENABLE),
+                tooltip = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_ENABLE_TP),
                 default = Defaults.block.enabled,
                 getFunc = function ()
                     return Settings.block.enabled
@@ -3468,13 +3466,13 @@ function CombatInfo.CreateSettings()
                     Settings.block.enabled = value
                 end,
                 width = "full",
-                warning = "Requires UI reload (/reloadui) to take effect.",
+                warning = GetString(LUIE_STRING_LAM_CI_REQUIRES_RELOAD_WARNING),
                 requiresReload = true,
             },
             {
                 type = "slider",
-                name = "Update interval (ms)",
-                tooltip = "How often the block indicator and remaining blocks are updated.",
+                name = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_INTERVAL),
+                tooltip = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_INTERVAL_TP),
                 min = 0,
                 max = 100,
                 step = 1,
@@ -3493,8 +3491,8 @@ function CombatInfo.CreateSettings()
             },
             {
                 type = "checkbox",
-                name = "Show remaining blocks",
-                tooltip = "Display how many blocks you can perform with current stamina/magicka.",
+                name = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_REMAINING),
+                tooltip = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_REMAINING_TP),
                 getFunc = function ()
                     return Settings.block.showRemainingBlocks
                 end,
@@ -3509,8 +3507,8 @@ function CombatInfo.CreateSettings()
                 end,
             },
             SettingsAPI.CreateFontDropdown(
-                "Block Indicator Font Face",
-                "Font used for the block indicator remaining blocks count.",
+                GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_FACE),
+                GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_FACE_TP),
                 function ()
                     return Settings.block.blockIndicatorFontFace
                 end,
@@ -3536,8 +3534,8 @@ function CombatInfo.CreateSettings()
                 end
             ),
             SettingsAPI.CreateFontableDropdownOption(
-                "Block Indicator Font Style",
-                "Font style for the block indicator remaining blocks count.",
+                GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_STYLE),
+                GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_STYLE_TP),
                 LUIE.FONT_STYLE_CHOICES,
                 function ()
                     for i, value in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
@@ -3567,8 +3565,8 @@ function CombatInfo.CreateSettings()
             ),
             {
                 type = "slider",
-                name = "Block Indicator Font Size",
-                tooltip = "Font size for the block indicator remaining blocks count.",
+                name = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_FONT_SIZE),
+                tooltip = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_FONT_SIZE_TP),
                 min = 10,
                 max = 32,
                 step = 1,
@@ -3587,8 +3585,8 @@ function CombatInfo.CreateSettings()
             },
             {
                 type = "checkbox",
-                name = "Color shield by block resource (stamina/magicka)",
-                tooltip = "Tint the shield icon by the resource used for blocking.",
+                name = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_COLOR_RESOURCE),
+                tooltip = GetString(LUIE_STRING_LAM_CI_BLOCK_INDICATOR_COLOR_RESOURCE_TP),
                 getFunc = function ()
                     return Settings.block.colorShieldByResource
                 end,
@@ -3603,8 +3601,8 @@ function CombatInfo.CreateSettings()
                 end,
             },
             SettingsAPI.CreateFontDropdown(
-                "Bloodlord Embrace Font Face",
-                "Font used for Bloodlord's Embrace tracker text.",
+                GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_FACE),
+                GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_FACE_TP),
                 function ()
                     return Settings.block.bloodlordEmbraceFontFace
                 end,
@@ -3630,8 +3628,8 @@ function CombatInfo.CreateSettings()
                 end
             ),
             SettingsAPI.CreateFontableDropdownOption(
-                "Bloodlord Embrace Font Style",
-                "Font style for Bloodlord's Embrace tracker text.",
+                GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_STYLE),
+                GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_STYLE_TP),
                 LUIE.FONT_STYLE_CHOICES,
                 function ()
                     for i, value in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
@@ -3661,8 +3659,8 @@ function CombatInfo.CreateSettings()
             ),
             {
                 type = "slider",
-                name = "Bloodlord Embrace Title Font Size",
-                tooltip = "Font size for Bloodlord's Embrace tracker titles (e.g. 'Current Target').",
+                name = GetString(LUIE_STRING_LAM_CI_BLOODLORD_TITLE_FONT),
+                tooltip = GetString(LUIE_STRING_LAM_CI_BLOODLORD_TITLE_FONT_TP),
                 min = 8,
                 max = 24,
                 step = 1,
@@ -3681,8 +3679,8 @@ function CombatInfo.CreateSettings()
             },
             {
                 type = "slider",
-                name = "Bloodlord Embrace Value Font Size",
-                tooltip = "Font size for Bloodlord's Embrace tracker values (target name, magicka returned).",
+                name = GetString(LUIE_STRING_LAM_CI_BLOODLORD_VALUE_FONT),
+                tooltip = GetString(LUIE_STRING_LAM_CI_BLOODLORD_VALUE_FONT_TP),
                 min = 8,
                 max = 24,
                 step = 1,

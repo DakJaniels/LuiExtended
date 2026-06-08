@@ -26,6 +26,7 @@ ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_MILESTONES = "milestones"
 ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_SUPPRESS_ALL = "suppress_all"
 ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_COMPLETE_ONLY = "complete_only"
 
+--- @type CAQuestCounterFilterStaging
 ChatAnnouncements.QuestCounterFilterStaging =
 {
     questIdentifier = "",
@@ -68,8 +69,8 @@ function ChatAnnouncements.ParseQuestCounterFilterMilestones(milestonesText)
 end
 
 --- @param identifier string
---- @return integer|nil questId
---- @return string|nil questName
+--- @return integer|nil
+--- @return string|nil
 function ChatAnnouncements.ParseQuestCounterFilterIdentifier(identifier)
     if identifier == nil then
         return nil, nil
@@ -375,8 +376,8 @@ function ChatAnnouncements.ClearQuestCounterFilters()
 end
 
 --- LAM dropdown choices (PC settings).
---- @return string[] options
---- @return string[] values rule storage keys
+--- @return string[]
+--- @return string[]
 function ChatAnnouncements.GenerateQuestCounterFilterLAMList()
     local options, values = {}, {}
     local rules = ChatAnnouncements.GetQuestCounterFilterRules()

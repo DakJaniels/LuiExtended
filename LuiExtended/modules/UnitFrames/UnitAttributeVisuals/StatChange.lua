@@ -13,7 +13,7 @@ local UnitFrames = LUIE.UnitFrames
 
 --- Module for handling increased/decreased stat visuals (armor debuffs, etc.)
 --- @class LUIE_StatChangeModule : LUIE_UnitAttributeVisualizerModuleBase
-local StatChangeModule = LUIE_UnitAttributeVisualizerModuleBase:New()
+local StatChangeModule = LUIE_UnitAttributeVisualizerModuleBase:Subclass()
 
 function StatChangeModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_INCREASED_STAT or unitAttributeVisual == ATTRIBUTE_VISUAL_DECREASED_STAT
@@ -52,17 +52,14 @@ end
 --- @param attributeType Attributes
 --- @param powerType CombatMechanicFlags
 function StatChangeModule:UpdateStat(unitTag, statType, attributeType, powerType)
-    -- Build a list of UI controls to hold this statType on different UnitFrames lists
     local statControls = {}
 
-    if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][powerType] and UnitFrames.CustomFrames[unitTag][powerType].stat and UnitFrames.CustomFrames[unitTag][powerType].stat[statType] then
-        table.insert(statControls, UnitFrames.CustomFrames[unitTag][powerType].stat[statType])
-    end
-    if UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][powerType] and UnitFrames.AvaCustFrames[unitTag][powerType].stat and UnitFrames.AvaCustFrames[unitTag][powerType].stat[statType] then
-        table.insert(statControls, UnitFrames.AvaCustFrames[unitTag][powerType].stat[statType])
-    end
+    self:ForEachUnitFrameTable(unitTag, function (frameTable)
+        if frameTable[powerType] and frameTable[powerType].stat and frameTable[powerType].stat[statType] then
+            table.insert(statControls, frameTable[powerType].stat[statType])
+        end
+    end)
 
-    -- If we have a control, proceed next
     if #statControls > 0 then
         local value = UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_INCREASED_STAT, statType, attributeType, powerType)
             + UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_DECREASED_STAT, statType, attributeType, powerType)
@@ -114,6 +111,8 @@ function StatChangeModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, s
     self:UpdateStat(unitTag, statType, attributeType, powerType)
 end
 
+LUIE_StatChangeModule = StatChangeModule
+UnitFrames.VisualizerModuleClasses.StatChangeModule = StatChangeModule
 UnitFrames.VisualizerModules.StatChangeModule = StatChangeModule
 
 return StatChangeModule

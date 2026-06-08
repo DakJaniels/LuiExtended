@@ -1,0 +1,583 @@
+-- -----------------------------------------------------------------------------
+--  LuiExtended — ChatAnnouncements LuaLS type definitions (annotation only)
+-- -----------------------------------------------------------------------------
+
+--- @class CAItemStackEntry
+--- @field icon string
+--- @field stack integer
+--- @field itemId integer
+--- @field itemType integer
+--- @field itemLink string
+--- @field stolen? boolean
+
+--- Deferred guild-bank withdraw/deposit row for ItemPrinter (see g_guildBankCarry).
+--- @class (partial) CAGuildBankCarry
+--- @field icon string
+--- @field stack integer
+--- @field itemType ItemType
+--- @field itemId integer
+--- @field itemLink string
+--- @field gainOrLoss integer
+--- @field logPrefix string
+--- @field receivedBy string
+--- @field guildId? integer
+
+--- @class CAFactionRepDedupe
+--- @field delta integer
+--- @field time integer
+
+--- @class CAMailCurrencyDedupe
+--- @field amount integer
+--- @field senderKey string
+--- @field mailId id64
+--- @field timeMs integer
+
+--- @class CAMailItemSenderFifoEntry
+--- @field mailId id64
+--- @field sender string
+
+--- @class CAPendingGuildMailSend
+--- @field guildId? integer
+--- @field subject? string
+--- @field rankIds? integer[]
+
+--- @class CAPendingGuildMailDelete
+--- @field guildMailId? id64
+--- @field guildId? integer
+--- @field subject? string
+
+--- @class CAQuestIndexEntry
+--- @field questType QuestType
+--- @field zoneDisplayType ZoneDisplayType
+
+--- Bracket option index to delimiter string.
+--- @alias CABracketPair table<integer, string>
+
+--- @class CABrackets
+--- @field bracket1 CABracketPair
+--- @field bracket2 CABracketPair
+--- @field bracket3 CABracketPair
+--- @field bracket4 CABracketPair
+--- @field linkBrackets integer[]
+--- @field linkBracket1 CABracketPair
+--- @field linkBracket2 CABracketPair
+
+--- @class (partial) CAColors
+--- @field CurrencyColorize ZO_ColorDef
+--- @field CurrencyUpColorize ZO_ColorDef
+--- @field CurrencyDownColorize ZO_ColorDef
+--- @field CollectibleColorize1 ZO_ColorDef
+--- @field CollectibleColorize2 ZO_ColorDef
+--- @field CollectibleUseColorize ZO_ColorDef
+--- @field CurrencyGoldColorize ZO_ColorDef
+--- @field CurrencyAPColorize ZO_ColorDef
+--- @field CurrencyTVColorize ZO_ColorDef
+--- @field CurrencyWVColorize ZO_ColorDef
+--- @field CurrencyOutfitTokenColorize ZO_ColorDef
+--- @field CurrencyUndauntedColorize ZO_ColorDef
+--- @field CurrencyTransmuteColorize ZO_ColorDef
+--- @field CurrencyCrownsColorize ZO_ColorDef
+--- @field CurrencyCrownGemsColorize ZO_ColorDef
+--- @field CurrencyEndlessColorize ZO_ColorDef
+--- @field CurrencySealsColorize ZO_ColorDef
+--- @field CurrencyTradeBarsColorize ZO_ColorDef
+--- @field CurrencyTomePointsColorize ZO_ColorDef
+--- @field CurrencyTomePointCachesColorize ZO_ColorDef
+--- @field CurrencyTomeTokensColorize ZO_ColorDef
+--- @field CurrencyTomeChallengeRerollsColorize ZO_ColorDef
+--- @field DisguiseAlertColorize ZO_ColorDef
+--- @field AchievementColorize1 ZO_ColorDef
+--- @field AchievementColorize2 ZO_ColorDef
+--- @field LorebookColorize1 ZO_ColorDef
+--- @field LorebookColorize2 ZO_ColorDef
+--- @field ExperienceMessageColorize string
+--- @field ExperienceNameColorize string
+--- @field ExperienceLevelUpColorize ZO_ColorDef
+--- @field SkillPointColorize1 ZO_ColorDef
+--- @field SkillPointColorize2 ZO_ColorDef
+--- @field SkillLineColorize ZO_ColorDef
+--- @field SkillGuildColorize string
+--- @field SkillGuildColorizeFG string
+--- @field SkillGuildColorizeMG string
+--- @field SkillGuildColorizeUD string
+--- @field SkillGuildColorizeTG string
+--- @field SkillGuildColorizeDB string
+--- @field SkillGuildColorizePO string
+--- @field QuestColorLocNameColorize string
+--- @field QuestColorLocDescriptionColorize string
+--- @field QuestColorQuestNameColorize ZO_ColorDef
+--- @field QuestColorQuestDescriptionColorize string
+--- @field StorageRidingColorize ZO_ColorDef
+--- @field StorageRidingBookColorize ZO_ColorDef
+--- @field StorageBagColorize ZO_ColorDef
+--- @field GuildColorize ZO_ColorDef
+--- @field AntiquityColorize ZO_ColorDef
+
+--- @class CAQuestCounterFilterStaging
+--- @field questIdentifier string
+--- @field conditionText string
+--- @field mode string
+--- @field milestonesText string
+
+--- Maps ContextMessages keys to LUIE_STRING_CA_* ids.
+--- @alias CAContextMessageDefaultStringIds table<string, integer|string>
+
+--- @class (partial) CAState
+--- @field g_activatedFirstLoad boolean
+--- @field g_savedPurchase table
+--- @field g_savedLaunder table
+--- @field g_savedItem table
+--- @field g_isLooted boolean
+--- @field g_isPickpocketed boolean
+--- @field g_isStolen boolean
+--- @field g_containerRecentlyOpened boolean
+--- @field g_deferredContainerCurrency table
+--- @field g_deferredContainerGoldThrottleAmount integer
+--- @field g_deferredContainerGoldThrottleTotal integer
+--- @field g_itemReceivedIsQuestReward boolean
+--- @field g_itemReceivedIsQuestAbandon boolean
+--- @field g_itemsConfiscated boolean
+--- @field g_weAreInAStore boolean
+--- @field g_weAreInAFence boolean
+--- @field g_weAreInAGuildStore boolean
+--- @field g_itemWasDestroyed boolean
+--- @field g_packSiege boolean
+--- @field g_lockpickBroken boolean
+--- @field g_groupLootIndex table
+--- @field g_factionRepAnnounceDedupe CAFactionRepDedupe
+--- @field g_stackSplit boolean
+--- @field g_combinedRecipe boolean
+--- @field g_InventoryOn boolean
+--- @field g_bankOn boolean
+--- @field g_currencyGoldThrottleValue integer
+--- @field g_currencyGoldThrottleTotal integer
+--- @field g_currencyAPThrottleValue integer
+--- @field g_currencyAPThrottleTotal integer
+--- @field g_currencyTVThrottleValue integer
+--- @field g_currencyTVThrottleTotal integer
+--- @field g_smithing table
+--- @field g_enchanting table
+--- @field g_enchant_prefix_pos table
+--- @field g_enchant_prefix_neg table
+--- @field g_smithing_prefix_pos table
+--- @field g_smithing_prefix_neg table
+--- @field g_itemCounterGain integer
+--- @field g_itemCounterGainTracker integer
+--- @field g_itemStringGain string
+--- @field g_itemCounterLoss integer
+--- @field g_itemCounterLossTracker integer
+--- @field g_itemStringLoss string
+--- @field g_oldItem table
+--- @field g_mailCOD integer
+--- @field g_postageAmount integer
+--- @field g_mailAmount integer
+--- @field g_mailCODPresent boolean
+--- @field g_inMail boolean
+--- @field g_mailTarget string
+--- @field g_mailStacksOut table<integer, CAItemStackEntry>
+--- @field g_mailLootQueue table
+--- @field g_mailSenderMap table<string, string>
+--- @field g_mailDelayedLootLines table
+--- @field g_mailLootLineSequence integer
+--- @field g_mailIsTakingMail boolean
+--- @field g_mailBatchTakeAll boolean
+--- @field g_mailIncomingCurrencySender string
+--- @field g_mailPendingCurrencySender string
+--- @field g_mailPendingCurrencyMailId id64|nil
+--- @field g_mailPendingItemSender string
+--- @field g_mailItemSenderFifo CAMailItemSenderFifoEntry[]
+--- @field g_mailNotifySuppressUntilMs integer
+--- @field g_lastMailCurrencyAnnounce CAMailCurrencyDedupe
+--- @field g_lastTimedActivityProgressAnnounce table
+--- @field g_currentDisguise integer?
+--- @field g_disguiseState integer?
+--- @field g_bankBag Bag?
+--- @field g_currentBankBagId Bag?
+--- @field g_bankStacks table<integer, CAItemStackEntry>
+--- @field g_banksubStacks table<integer, CAItemStackEntry>
+--- @field g_houseBags table
+--- @field g_furnitureVaultStacks table<integer, CAItemStackEntry>
+--- @field g_equippedStacks table<integer, CAItemStackEntry>
+--- @field g_inventoryStacks table<integer, CAItemStackEntry>
+--- @field g_JusticeStacks table<integer, CAItemStackEntry>
+--- @field g_guildBankCarry CAGuildBankCarry?
+--- @field g_selectedGuildBankId integer?
+--- @field g_guildBankAnnounceGuildId integer?
+--- @field g_currentGroupLeaderRawName string?
+--- @field g_currentGroupLeaderDisplayName string?
+--- @field g_currentActivityId integer?
+--- @field g_stopGroupLeaveQueue boolean
+--- @field g_lfgDisableGroupEvents boolean
+--- @field g_joinLFGOverride boolean
+--- @field g_leaveLFGOverride boolean
+--- @field g_showActivityStatus boolean
+--- @field g_lfgHideStatusCancel boolean
+--- @field g_showRCUpdates boolean
+--- @field g_weDeclinedTheQueue boolean
+--- @field g_savedQueueValue integer
+--- @field g_rcSpamPrevention boolean
+--- @field g_selectedGuild integer
+--- @field g_pendingHeraldryCost integer
+--- @field g_heraldrySaveGuildId integer?
+--- @field g_disableRankMessage boolean
+--- @field pendingGuildMailSend CAPendingGuildMailSend?
+--- @field pendingGuildMailDelete CAPendingGuildMailDelete?
+--- @field knownGuildMailIds table<string, boolean>
+--- @field g_guildMailIdsSeeded boolean
+--- @field guildMailIncomingSuppressUntilMs integer
+--- @field g_achievementLastPercentage table<integer, integer>
+--- @field currentAssistant integer
+--- @field currentCompanion integer
+--- @field currentVanity integer
+--- @field currentSpecial integer
+--- @field currentHat integer
+--- @field currentHair integer
+--- @field currentHeadMark integer
+--- @field currentFacialHair integer
+--- @field currentMajorAdorn integer
+--- @field currentMinorAdorn integer
+--- @field currentCostume integer
+--- @field currentBodyMarking integer
+--- @field currentSkin integer
+--- @field currentPersonality integer
+--- @field currentPolymorph integer
+--- @field lastCollectibleUsed integer
+--- @field currentPlayerFxHarvest table<PlayerFxWhileHarvestingType, integer>
+--- @field currentPlayerFxAbility integer
+--- @field g_stopDisplaySpam boolean
+--- @field g_questIndex table<string, CAQuestIndexEntry>
+--- @field g_questItemAdded table
+--- @field g_questItemRemoved table
+--- @field g_loginHideQuestLoot boolean
+--- @field g_talkingToNPC boolean
+--- @field g_tradeTarget string
+--- @field g_tradeStacksIn table<integer, CAItemStackEntry>
+--- @field g_tradeStacksOut table<integer, CAItemStackEntry>
+--- @field g_inTrade boolean
+--- @field pendingHomeJump boolean
+--- @field g_weAreInADig boolean
+--- @field g_notableIDs table<integer, boolean>
+--- @field g_removableIDs table<integer, boolean>
+--- @field g_blacklistIDs table<integer, boolean>
+--- @field g_previousEndlessDungeonProgression integer[]
+
+--- @class (partial) CAInternal
+--- @field AchievementPctToColor fun(pct: number): string
+--- @field AnnounceTimedActivityProgress fun(index: luaindex, currentProgress: integer, maxProgress: integer, chatEnabled: boolean, alertEnabled: boolean, timedActivityEncodedId: id64|nil)
+--- @field AnyDisplayGeneralAnnouncementEnabled fun(): boolean
+--- @field AnyExperienceLevelUpAnnouncementEnabled fun(): boolean
+--- @field AnyVengeanceLoadoutAnnouncementEnabled fun(): boolean
+--- @field BeginContainerLootOrderingWindow fun()
+--- @field BuildItemCountMap fun(stacksTable: table<integer, CAItemStackEntry>): table<string, {count: integer, sample: CAItemStackEntry}>
+--- @field BuildTimedActivityClaimedSuffix fun(index: luaindex, forAlert: boolean|nil): string
+--- @field BuildTimedActivityMessage fun(index: luaindex, currentProgress: integer|nil, maxProgress: integer|nil, forAlert: boolean|nil): string
+--- @field CheckLibLazyCraftingActive fun(): boolean
+--- @field DiffRemoved fun(beforeMap: table<string, {count: integer, sample: CAItemStackEntry}>, afterMap: table<string, {count: integer, sample: CAItemStackEntry}>): {removedCount: integer, sample: CAItemStackEntry}[]
+--- @field DisplayQuestItem fun(itemId: integer, stackCount: integer, icon: string, reset: boolean)
+--- @field EnqueueMailLootEntry fun(mailId: id64, mailTarget: string)
+--- @field FindCsaCallbackHandler fun(csaCallbackHandlers: table, registrationName: string, callbackManager: table): table|nil
+--- @field FlushDelayedItemPoolInDisplayOrder fun(pool: table)
+--- @field GetActivePlayerFxAbilityCollectibleId fun(): integer
+--- @field GetActivePlayerFxHarvestCollectibleId fun(harvestingType: PlayerFxWhileHarvestingType): integer
+--- @field GetActivityName fun(activityType: LFGActivity): string|nil
+--- @field GetCarriedCurrencyAmount fun(currencyType: CurrencyType): integer
+--- @field GetCategoryInfoFromAchievementIdDetailed fun(achievementId: integer): integer|nil
+--- @field GetCurrentChampionPointsBarParams fun(triggeringEvent: integer): CenterScreenPlayerProgressBarParams
+--- @field GetDelayedPoolDisplaySortOrder fun(itemType: ItemType, itemLink: string): integer|nil
+--- @field GetMailSenderForInventoryLoot fun(): string, string, id64|nil
+--- @field GetProvisionerIngredientSortOrder fun(itemLink: string): integer|nil
+--- @field GetRelevantBarParams fun(level: integer, previousExperience: integer, currentExperience: integer, championPoints: integer, triggeringEvent: integer): CenterScreenPlayerProgressBarParams|nil
+--- @field GetTimedActivityProgressAnnounceKey fun(index: luaindex, timedActivityEncodedId: id64|nil): string
+--- @field InitPlayerFxOverrideState fun()
+--- @field IsContainerLootCurrencyReason fun(changeReason: CurrencyChangeReason): boolean
+--- @field IsGuildStoreItemSoldMail fun(fromSystem: boolean, subject: string): boolean
+--- @field IsLootLikeCurrencyReason fun(changeReason: CurrencyChangeReason): boolean
+--- @field IsMailInLootLogPrefix fun(logPrefix: string): boolean
+--- @field IsMailLootActive fun(): boolean
+--- @field IsPlayerFxHarvestTypeTracked fun(harvestingType: PlayerFxWhileHarvestingType): boolean
+--- @field MailCurrencyDedupeIdsMatch fun(a: id64, b: id64): boolean
+--- @field MakeStackEntry fun(bagId: Bag, slotId: integer, icon: string, stack: integer, itemId: integer, itemType: ItemType, itemLink: string): CAItemStackEntry
+--- @field OnPreTakeAllMailAttachmentsInCategory fun(category: MailCategory, deleteOnClaim: boolean)
+--- @field PopMailLootEntry fun(): table|nil
+--- @field PopulateMailSenderQueue fun(categoryFilter: MailCategory)
+--- @field PrintMailDelayedLootLines fun(sortByMailId: boolean)
+--- @field QueueTimedActivityChatMessage fun(message: string, encodedIdKey: string|nil)
+--- @field RecordTimedActivityProgressAnnounce fun(index: luaindex, currentProgress: integer, timedActivityEncodedId: id64|nil)
+--- @field ResolveGuildStoreSaleMailSender fun(authoritativeSender: string): string
+--- @field ResolveMailSender fun(mailId: id64): string, boolean, integer, integer
+--- @field ShouldSkipMailReceivedDeletedNotifications fun(): boolean
+--- @field ShouldSuppressTimedActivityProgressAnnounce fun(index: luaindex, currentProgress: integer, timedActivityEncodedId: id64|nil): boolean
+--- @field StoreMailSenderForMailId fun(mailId: id64, mailTarget: string)
+--- @field TouchMailNotifySuppressWindow fun()
+--- @field TryGetSenderFromHirelingMailList fun(subject: string): string|nil
+--- @field ValidateProgressBarParams fun(barParams: CenterScreenPlayerProgressBarParams): nil
+--- @field isQuestWritQuest fun(questId: integer): boolean|nil
+--- @field rejectQuest fun(questIndex: integer): string|false
+
+--- @class CAHooks
+--- @field BuildContext fun(alertHandlers: table, csaHandlers: table, csaCallbackHandlers: table, eventManager: table, moduleName: string): CAHookContext
+--- @field RegisterAchievement fun(ctx: CAHookContext)
+--- @field RegisterAll fun(ctx: CAHookContext)
+--- @field RegisterAntiquities fun(ctx: CAHookContext)
+--- @field RegisterCollectibles fun(ctx: CAHookContext)
+--- @field RegisterCsaCallbacks fun(ctx: CAHookContext)
+--- @field RegisterDisplayAnnouncements fun(ctx: CAHookContext)
+--- @field RegisterGroup fun(ctx: CAHookContext)
+--- @field RegisterGuild fun(ctx: CAHookContext)
+--- @field RegisterInventory fun(ctx: CAHookContext)
+--- @field RegisterLorebooks fun(ctx: CAHookContext)
+--- @field RegisterMisc fun(_ctx: CAHookContext)
+--- @field RegisterNotify fun(ctx: CAHookContext)
+--- @field RegisterQuests fun(ctx: CAHookContext)
+--- @field RegisterSkills fun(ctx: CAHookContext)
+--- @field RegisterSocial fun(ctx: CAHookContext)
+--- @field RegisterVengeance fun(ctx: CAHookContext)
+--- @field RegisterXP fun(ctx: CAHookContext)
+
+--- @class (partial) ChatAnnouncements
+--- @field SV CADefaults
+--- @field Defaults CADefaults
+--- @field Enabled boolean
+--- @field QueuedMessages table<integer, QueuedMessage>
+--- @field QueuedMessagesCounter integer
+--- @field Colors CAColors
+--- @field State CAState
+--- @field Internal CAInternal
+--- @field Brackets CABrackets
+--- @field Hooks CAHooks
+--- @field ContextMessageDefaultStringIds CAContextMessageDefaultStringIds
+--- @field CurrencyMessageFormatStringIds table<string, integer|string>
+--- @field CurrencyDisplayNameStringIds table<string, integer|string>
+--- @field ModuleMessageFormatStringIds table<string, table<string, integer|string>>
+--- @field ModuleMessageFormatLegacySiStringIds table<string, table<string, integer>>
+--- @field QUEST_COUNTER_FILTER_MODE_MILESTONES string
+--- @field QUEST_COUNTER_FILTER_MODE_SUPPRESS_ALL string
+--- @field QUEST_COUNTER_FILTER_MODE_COMPLETE_ONLY string
+--- @field QuestCounterFilterStaging CAQuestCounterFilterStaging
+--- @field GUILD_SKILL_SHOW_REASONS table<integer, boolean>
+--- @field GUILD_SKILL_SHOW_SOUNDS table<integer, integer>
+--- @field SUPPRESS_SKILL_POINT_CSA_REASONS table<integer, boolean>
+--- @field _lootHistoryHooksInstalled boolean?
+--- @field _takeAllMailHookInstalled boolean?
+--- @field _alertHooksInstalled boolean?
+--- @field ActivityStatusUpdate fun(eventId: integer, status: integer)
+--- @field AddQuestCounterFilter fun(rule: table): boolean success
+--- @field AddQuestItemsToIndex fun()
+--- @field AnnounceMemento fun()
+--- @field AnnounceNotify fun(message: string, alertCategory: integer, sound: integer|nil, caEnabled: boolean, alertEnabled: boolean)
+--- @field AnnounceNotifyAlert fun(message: string, alertCategory: integer, sound: integer|nil)
+--- @field AnnounceNotifySetting fun(message: string, alertCategory: integer, sound: integer|nil, caKey: string, alertKey: string)
+--- @field AppendQuestCounterFilterSettings fun(settings: table, Settings: table, Defaults: CADefaults, panel: table|nil, settingsApi: table|nil)
+--- @field BankClose fun(eventId: integer)
+--- @field BankFixer fun()
+--- @field BankOpen fun(eventId: integer, bankBag: Bag)
+--- @field BuildQuestCounterFilterPCControls fun(Settings: CADefaults, Defaults: CADefaults, listChoices: string[], listValues: string[]): table[]
+--- @field ChainChatRouterSocialSuppressions fun()
+--- @field CheckLFGStatusJoin fun()
+--- @field CheckLFGStatusLeave fun(WasKicked: boolean)
+--- @field ClearQuestCounterFilters fun()
+--- @field CollectibleResult fun()
+--- @field CollectibleUsed fun(eventId: integer, result: integer, isAttemptingActivation: boolean)
+--- @field ContextMessageMatches fun(logPrefix: string, contextMessageKey: string): boolean
+--- @field CraftModeOverrides fun()
+--- @field CraftingClose fun(eventId: integer, craftSkill: TradeskillType)
+--- @field CraftingOpen fun(eventId: integer, craftSkill: TradeskillType, sameStation: boolean)
+--- @field CreateCharacterLink fun(characterName: string|nil): string
+--- @field CreateDisplayNameLink fun(linkText: string, undecoratedDisplayName: string|nil): string
+--- @field CurrencyAPThrottlePrinter fun()
+--- @field CurrencyGoldThrottlePrinter fun()
+--- @field CurrencyPrinter fun(baseCurrencyType: CurrencyType, formattedValue: string, changeColor: string, changeType: string, currencyTypeColor: string, currencyIcon: string, currencyName: string, currencyTotal: integer|nil, messageChange: string, messageTotal: string, type: string, carriedItem: string|nil, carriedItemTotal: integer|nil)
+--- @field CurrencyTVThrottlePrinter fun()
+--- @field DecodeQuestCounterFilterRuleKey fun(ruleKey: string): table|nil rule
+--- @field DestroyItem fun(eventId: integer, itemSoundCategory: integer)
+--- @field DisguiseState fun(eventId: integer, unitTag: string, disguiseState: DisguiseState)
+--- @field DuelStarted fun(eventId: integer)
+--- @field Dummy fun()
+--- @field EncodeQuestCounterFilterRuleKey fun(rule: table): string
+--- @field FenceOpen fun(eventId: integer, allowSell: boolean, allowLaunder: boolean)
+--- @field FenceSuccess fun(eventId: integer, result: integer)
+--- @field FlushDeferredContainerLootCurrency fun()
+--- @field FlushMailDelayedLootLines fun()
+--- @field FormatContextMessage fun(logPrefix: string, formattedMessageP1: string, formattedRecipient: string, color: string, groupLoot: boolean): string
+--- @field FormatQuestCounterFilterRuleLabel fun(rule: table): string
+--- @field FriendAdded fun(eventId: integer, displayName: string)
+--- @field FriendInviteAdded fun(eventId: integer, displayName: string)
+--- @field FriendPlayerStatus fun(eventId: integer, displayName: string, characterName: string, oldStatus: integer, newStatus: integer)
+--- @field FriendRemoved fun(eventId: integer, displayName: string)
+--- @field GMCS fun(eventId: integer, unitTag: string, isOnline: boolean)
+--- @field GMRC fun(eventId: integer, unitTag: string, dps: boolean, healer: boolean, tank: boolean)
+--- @field GenerateQuestCounterFilterLAMList fun(): string[], string[]
+--- @field GenerateQuestCounterFilterListItems fun(): table { name: string, data: string }[]
+--- @field GetContextMessage fun(contextMessageKey: string): string
+--- @field GetContextMessagePrefix fun(): string
+--- @field GetCurrencyDisplayNameFormat fun(currencyNameKey: string): string
+--- @field GetCurrencyMessageFormat fun(currencyMessageKey: string): string
+--- @field GetFormattedCollectionStatusIcon fun(itemLink: string): string
+--- @field GetFormattedIcon fun(icon: string): string
+--- @field GetItemLinkFromItemId fun(itemId: integer): string
+--- @field GetItemLinkSetCollectionStatus fun(itemLink: string): integer collectionStatus 0 not collectible; 1/3 not collected; 2/4 collected
+--- @field GetLootTotalString fun(): string
+--- @field GetModuleMessageFormat fun(sectionKey: string, fieldKey: string): string
+--- @field GetNextMailSender fun(): string
+--- @field GetQuestCounterFilterRules fun(): table[]
+--- @field GroupingToolsLFGJoined fun(eventId: integer, locationName: string)
+--- @field GuildAddedSelf fun(eventId: integer, guildId: integer, guildName: string)
+--- @field GuildBankClose fun(eventId: integer)
+--- @field GuildBankSelected fun(eventId: integer, guildId: integer)
+--- @field GuildBankItemAdded fun(eventId: integer, slotId: integer, addedByLocalPlayer: boolean)
+--- @field GuildBankItemRemoved fun(eventId: integer, slotId: integer, addedByLocalPlayer: boolean)
+--- @field GuildBankOpen fun(eventId: integer)
+--- @field GetActiveGuildBankId fun(): integer|nil
+--- @field FormatGuildLabelForChat fun(guildId: integer|nil): string
+--- @field FormatGuildLabelForAlert fun(guildId: integer|nil): string
+--- @field FormatGuildBankContextMessage fun(template: string, formattedPrimary: string, guildLabel: string): string
+--- @field GuildHeraldrySaved fun()
+--- @field GuildInviteAdded fun(eventId: integer, guildId: integer, guildName: string, guildAlliance: Alliance, inviterName: string)
+--- @field GuildMemberDemoteSuccessful fun(eventId: integer, displayName: string, newRankIndex: integer, guildId: integer)
+--- @field GuildMemberPromoteSuccessful fun(eventId: integer, displayName: string, newRankIndex: integer, guildId: integer)
+--- @field GuildPlayerRankChanged fun(eventId: integer, guildId: integer, rankIndex: integer, guildRankChangeAction: GuildRankChangeAction)
+--- @field GuildRankChanged fun(eventId: integer, guildId: integer, displayName: string, newRank: integer)
+--- @field GuildRankSaved fun(eventId: integer, guildId: integer, rankIndex: integer)
+--- @field GuildRanksSaved fun(eventId: integer, guildId: integer)
+--- @field GuildStoreClose fun(eventId: integer)
+--- @field GuildStoreOpen fun(eventId: integer)
+--- @field GuildTextChanged fun(eventId: integer, guildId: integer)
+--- @field HookFunction fun()
+--- @field IgnoreAdded fun(eventId: integer, displayName: string)
+--- @field IgnoreRemoved fun(eventId: integer, displayName: string)
+--- @field IndexBank fun()
+--- @field IndexEquipped fun()
+--- @field IndexFurnitureVault fun()
+--- @field IndexGroupLoot fun()
+--- @field IndexHouseBags fun()
+--- @field IndexInventory fun()
+--- @field Initialize fun(enabled: boolean)
+--- @field InstallTakeAllMailHook fun()
+--- @field InvalidateQuestCounterFilterCache fun()
+--- @field InventoryFull fun(eventId: integer, numSlotsRequested: integer, numSlotsFree: integer)
+--- @field InventoryFullQuest fun(eventId: integer)
+--- @field InventoryUpdate fun(eventId: integer, bagId: Bag, slotId: integer, isNewItem: boolean, itemSoundCategory: integer, inventoryUpdateReason: InventoryUpdateReason, stackCountChange: integer)
+--- @field InventoryUpdateBank fun(eventId: integer, bagId: Bag, slotId: integer, isNewItem: boolean, itemSoundCategory: integer, inventoryUpdateReason: InventoryUpdateReason, stackCountChange: integer)
+--- @field InventoryUpdateCraft fun(eventId: integer, bagId: Bag, slotId: integer, isNewItem: boolean, itemSoundCategory: integer, inventoryUpdateReason: InventoryUpdateReason, stackCountChange: integer)
+--- @field InventoryUpdateFence fun(eventId: integer, bagId: Bag, slotId: integer, isNewItem: boolean, itemSoundCategory: integer, inventoryUpdateReason: InventoryUpdateReason, stackCountChange: integer)
+--- @field InventoryUpdateGuildBank fun(eventId: integer, bagId: Bag, slotId: integer, isNewItem: boolean, itemSoundCategory: integer, inventoryUpdateReason: InventoryUpdateReason, stackCountChange: integer)
+--- @field IsValidOldItem fun(): boolean
+--- @field ItemCounterDelay fun(icon: string, stack: integer, itemType: ItemType, itemId: integer, itemLink: string, receivedBy: string, logPrefix: string, gainOrLoss: integer, filter: boolean, groupLoot: boolean, alwaysFirst: boolean, delay: boolean, lootMailId: id64|nil, showCollectionStatus: boolean)
+--- @field ItemCounterDelayOut fun(icon: string, stack: integer, itemType: ItemType, itemId: integer, itemLink: string, receivedBy: string, logPrefix: string, gainOrLoss: integer, filter: boolean, groupLoot: boolean, alwaysFirst: boolean, delay: boolean)
+--- @field ItemFilter fun(itemType: ItemType, itemId: integer, itemLink: string, groupLoot: boolean): boolean
+--- @field ItemPrinter fun(icon: string, stack: integer, itemType: ItemType, itemId: integer, itemLink: string, receivedBy: string, logPrefix: string, gainOrLoss: integer, filter: boolean, groupLoot: boolean, alwaysFirst: boolean, delay: boolean, showCollectionStatus: boolean)
+--- @field JusticeDisplayConfiscate fun()
+--- @field JusticeRemovePrint fun()
+--- @field JusticeStealRemove fun(eventId: integer)
+--- @field LFGLeft fun(eventId: integer)
+--- @field LogGuildBankChange fun()
+--- @field LootItemFailed fun(eventId: integer, reason: integer, itemName: string)
+--- @field MailCODChanged fun(eventId: integer)
+--- @field MailMoneyChanged fun(eventId: integer)
+--- @field MailRemoved fun(eventId: integer)
+--- @field MaraOffer fun(eventId: integer, characterName: string, isSender: boolean, displayName: string)
+--- @field MiscAlertLockBroke fun(eventId: integer, inactivityLengthMs: integer)
+--- @field MiscAlertLockSuccess fun(eventId: integer)
+--- @field NormalizeStoredMessageFormats fun()
+--- @field OnAchievementUpdated fun(eventId: integer, id: integer)
+--- @field OnActiveWeaponPairChanged fun()
+--- @field OnAdventureZoneFactionReputationChanged fun(eventId: integer, newReputation: integer, deltaReputation: integer)
+--- @field OnBuyItem fun(eventId: integer, itemName: string, entryType: integer, quantity: integer, money: integer, specialCurrencyType1: integer, specialCurrencyInfo1: string, specialCurrencyQuantity1: integer, specialCurrencyType2: integer, specialCurrencyInfo2: string, specialCurrencyQuantity2: integer, itemSoundCategory: integer)
+--- @field OnBuybackItem fun(eventId: integer, itemName: string, quantity: integer, money: integer, itemSound: integer)
+--- @field OnCampaignQueueJoined fun(_: integer, campaignId: integer)
+--- @field OnCampaignQueueLeft fun(_: integer, campaignId: integer)
+--- @field OnCampaignQueueStateChanged fun(_: integer, campaignId: integer, isGroup: boolean, state: CampaignQueueRequestState)
+--- @field OnChatterBegin fun()
+--- @field OnChatterEnd fun()
+--- @field OnCraftedAbilityLockStateChanged fun(eventId: integer, craftedAbilityDefId: integer, isUnlocked: boolean, isFromInit: boolean)
+--- @field OnCraftedAbilityScriptLockStateChanged fun(eventId: integer, craftedAbilityScriptDefId: integer, isUnlocked: boolean)
+--- @field OnCurrencyUpdate fun(eventId: integer, currency: CurrencyType, currencyLocation: CurrencyLocation, newValue: integer, oldValue: integer, reason: CurrencyChangeReason, reasonSupplementaryInfo: integer)
+--- @field OnDigEnd fun()
+--- @field OnDigStart fun()
+--- @field OnErrorSocialChat fun(_: integer, error: integer)
+--- @field OnExperienceGain fun(eventId: integer, reason: integer, level: integer, previousExperience: integer, currentExperience: integer, championPoints: integer)
+--- @field OnFurnitureItemsTransferredToVault fun(eventId: integer, numEligibleSlotsTransferred: integer, numEligibleSlots: integer)
+--- @field OnGroupInviteReceived fun(eventId: integer, inviterName: string, inviterDisplayName: string)
+--- @field OnGroupTypeChanged fun(eventId: integer, largeGroup: boolean)
+--- @field OnGuildMailUpdate fun()
+--- @field OnInventoryItemUsed fun(eventId: integer, itemSoundCategory: integer)
+--- @field OnLootReceived fun(eventId: integer, receivedBy: string, itemLink: string, quantity: integer, itemSound: integer, lootType: integer, lootedBySelf: boolean, isPickpocketLoot: boolean, questItemIcon: string, itemId: integer, isStolen: boolean)
+--- @field OnLootUpdated fun(eventId: integer)
+--- @field OnMailAttach fun(eventId: integer, attachmentSlot: integer)
+--- @field OnMailAttachRemove fun(eventId: integer, attachmentSlot: integer)
+--- @field OnMailCloseBox fun(eventId: integer)
+--- @field OnMailInboxUpdate fun(eventId: integer)
+--- @field OnMailListsUpdated fun()
+--- @field OnMailOpenBox fun(eventId: integer)
+--- @field OnMailReadable fun(eventId: integer, mailId: id64)
+--- @field OnMailSuccess fun(eventId: integer)
+--- @field OnMailTakeAllResponse fun(eventId: integer, result: integer, category: MailCategory, headersRemoved: boolean)
+--- @field OnMailTakeAttachedItem fun(eventId: integer, mailId: id64)
+--- @field OnMailTakeAttachedMoney fun(eventId: integer, mailId: id64)
+--- @field OnPackSiege fun()
+--- @field OnPendingCurrencyRewardCached fun(eventId: integer, currencyType: CurrencyType, currencyLocation: CurrencyLocation, amount: integer, reason: CurrencyChangeReason, reasonSupplementaryInfo: integer)
+--- @field OnPlayerActivated fun(eventId: integer)
+--- @field OnPromotionalEventsActivityProgressUpdated fun(eventId: integer, campaignKey: id64, activityIndex: luaindex, previousProgress: integer, newProgress: integer, rewardFlags: PromotionalEventRewardFlags)
+--- @field OnSellItem fun(eventId: integer, itemName: string, quantity: integer, money: integer)
+--- @field OnTamrielTomesEndOfSeasonRecapAvailable fun()
+--- @field OnTimedActivitiesRerollPriceReset fun()
+--- @field OnTimedActivityProgressUpdated fun(eventId: number, index: luaindex, previousProgress: integer, currentProgress: integer, complete: boolean)
+--- @field OnTimedActivityTrackingUpdated fun(eventId: number, timedActivityEncodedId: id64)
+--- @field OnTradeAdded fun(eventId: integer, who: string, tradeIndex: integer, itemSoundCategory: integer)
+--- @field OnTradeRemoved fun(eventId: integer, who: string, tradeIndex: integer, itemSoundCategory: integer)
+--- @field ParseQuestCounterFilterIdentifier fun(identifier: string): integer|nil, string|nil
+--- @field ParseQuestCounterFilterMilestones fun(milestonesText: string): integer[]
+--- @field PlayerToPlayerHook fun()
+--- @field PointRespecDisplay fun(respecType: integer)
+--- @field PrintBufferedGuildRep fun()
+--- @field PrintBufferedXP fun()
+--- @field PrintExperienceGain fun(change: integer)
+--- @field PrintGuildRep fun(change: integer, lineName: string, lineId: integer, priority: integer)
+--- @field PrintJoinStatusNotSelf fun(SendMessage: boolean, SendAlert: boolean)
+--- @field PrintQueuedMessages fun()
+--- @field QuestShared fun(eventId: integer, questId: integer)
+--- @field QueueAdventureZoneFactionReputationGain fun(deltaReputation: integer, playerReputationTotal: integer|nil)
+--- @field ReadyCheckUpdate fun(eventId: integer)
+--- @field RefreshMessageFormatDefaultsTable fun()
+--- @field RegisterAchievementsEvent fun()
+--- @field RegisterCampaignQueueEvents fun()
+--- @field RegisterColorEvents fun()
+--- @field RegisterDisguiseEvents fun()
+--- @field RegisterGoldEvents fun()
+--- @field RegisterGuildEvents fun()
+--- @field RegisterLootEvents fun()
+--- @field RegisterLootHistoryHooks fun()
+--- @field RegisterMailEvents fun()
+--- @field RegisterQuestCounterFilterClearDialog fun()
+--- @field RegisterQuestCounterFilterDialogs fun()
+--- @field RegisterQuestEvents fun()
+--- @field RegisterSocialChatRouter fun()
+--- @field RegisterSocialEvents fun()
+--- @field RegisterXPEvents fun()
+--- @field RemoveQuestCounterFilter fun(ruleKey: string)
+--- @field ResetMailSession fun(preserveMailboxOpen: boolean|nil)
+--- @field ResetStackSplit fun()
+--- @field ResetTrackingVariables fun()
+--- @field ResolveItemMessage fun(message: string, formattedRecipient: string, color: string, logPrefix: string, totalString: string, groupLoot: boolean)
+--- @field ResolveLogPrefix fun(logPrefix: string): string
+--- @field ResolveNameLink fun(characterName: string, displayName: string): string
+--- @field ResolveNameNoLink fun(characterName: string, displayName: string): string
+--- @field ResolveNightMarketDisplayAnnouncement fun(primaryText: string|nil, secondaryText: string|nil): CADisplayAnnouncementSection|nil settings
+--- @field ResolveQuestItemChange fun()
+--- @field SendDelayedItems fun()
+--- @field SendDelayedItemsOut fun()
+--- @field SendDelayedMailItems fun()
+--- @field SetPendingHomeJump fun(value: boolean)
+--- @field ShouldAllowQuestConditionCounter fun(journalIndex: integer, questName: string, conditionText: string, newConditionVal: integer, isConditionComplete: boolean, conditionMax: integer): boolean true = allow CSA/alerts; false = suppress
+--- @field ShowQuestCounterFilterClearDialog fun()
+--- @field ShowQuestCounterFilterManageDialog fun()
+--- @field SkillXPUpdate fun(eventId: integer, skillType: SkillType, skillIndex: integer, reason: integer, rank: integer, previousXP: integer, currentXP: integer)
+--- @field StorageBag fun(eventId: integer, previousCapacity: integer, currentCapacity: integer, previousUpgrade: integer, currentUpgrade: integer)
+--- @field StorageBank fun(eventId: integer, previousCapacity: integer, currentCapacity: integer, previousUpgrade: integer, currentUpgrade: integer)
+--- @field StoreClose fun(eventId: integer)
+--- @field StoreOpen fun(eventId: integer)
+--- @field StuckOnCooldown fun(eventId: integer)
+--- @field TradeInviteAccepted fun(eventId: integer)
+--- @field TradingHouseResponseReceived fun(eventId: integer, TradingHouseResult: TradingHouseResult, result: integer)
+--- @field TryAddQuestCounterFilterFromStaging fun(): boolean
+--- @field VoteNotify fun(eventId: integer)

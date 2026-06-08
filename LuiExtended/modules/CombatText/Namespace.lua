@@ -308,27 +308,27 @@ CombatText.Defaults =
         hotcritical = "%t %a!",
 
         -- Mitigation
-        miss = GetString(LUIE_STRING_CT_MISS_DEFAULT),
-        immune = GetString(LUIE_STRING_CT_IMMUNE_DEFAULT),
-        parried = GetString(LUIE_STRING_CT_PARRIED_DEFAULT),
-        reflected = GetString(LUIE_STRING_CT_REFLECTED_DEFAULT),
+        miss = "Missed %t",
+        immune = "Immune %t",
+        parried = "Parried %t",
+        reflected = "Reflected %t",
         damageShield = "(%a) %t",
-        dodged = GetString(LUIE_STRING_CT_DODGED_DEFAULT),
+        dodged = "Dodged %t",
         blocked = "*%t %a",
-        interrupted = GetString(LUIE_STRING_CT_INTERRUPTED_DEFAULT),
+        interrupted = "Interrupted",
 
         -- Crowd Control
-        disoriented = GetString(LUIE_STRING_LAM_CT_SHARED_DISORIENTED),
-        feared = GetString(LUIE_STRING_LAM_CT_SHARED_FEARED),
-        offBalanced = GetString(LUIE_STRING_LAM_CT_SHARED_OFF_BALANCE),
-        silenced = GetString(LUIE_STRING_LAM_CT_SHARED_SILENCED),
-        stunned = GetString(LUIE_STRING_LAM_CT_SHARED_STUNNED),
-        charmed = GetString(LUIE_STRING_LAM_CT_SHARED_CHARMED),
+        disoriented = "Disoriented",
+        feared = "Feared",
+        offBalanced = "Off-Balance",
+        silenced = "Silenced",
+        stunned = "Stunned",
+        charmed = "Charmed",
 
         -- Combat State
-        inCombat = GetString(LUIE_STRING_CT_COMBAT_IN_DEFAULT),
-        outCombat = GetString(LUIE_STRING_CT_COMBAT_OUT_DEFAULT),
-        death = GetString(LUIE_STRING_CT_DEATH_DEFAULT),
+        inCombat = "Entered Combat",
+        outCombat = "Left Combat",
+        death = "%t died!",
 
         -- Points
         pointsAlliance = "%a AP",
@@ -339,8 +339,8 @@ CombatText.Defaults =
         resourceHealth = "%t! (%a)",
         resourceMagicka = "%t! (%a)",
         resourceStamina = "%t! (%a)",
-        ultimateReady = GetString(LUIE_STRING_LAM_CT_SHARED_ULTIMATE_READY),
-        potionReady = GetString(LUIE_STRING_LAM_CT_SHARED_POTION_READY),
+        ultimateReady = "Ultimate Ready",
+        potionReady = "Potion Ready",
     },
 
     -- Animation defaults

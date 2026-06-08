@@ -47,6 +47,68 @@ local function FormatTextWithIcon(iconPath, text, iconSize)
     return zo_iconFormat(iconPath, iconSize, iconSize) .. " " .. text
 end
 
+local function IsLuiEGroupFrameTag(unitTag)
+    if ZO_Group_IsGroupUnitTag and ZO_Group_IsGroupUnitTag(unitTag) then
+        return true
+    end
+    return string.sub(unitTag, 1, 10) == "SmallGroup" or string.sub(unitTag, 1, 9) == "RaidGroup"
+end
+
+local function IsOverlandDifficultyDisplayEnabled()
+    return UnitFrames.SV.TargetShowOverlandDifficulty
+        and GetOverlandDifficultyDisabledReason ~= nil
+        and GetOverlandDifficultyDisabledReason() == OVERLAND_DIFFICULTY_DISABLED_REASON_NONE
+        and ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD ~= nil
+end
+
+local function ApplyOverlandDifficultyNameIcon(unitTag, nameText)
+    if not IsOverlandDifficultyDisplayEnabled() or nameText == nil or nameText == "" then
+        return nameText
+    end
+    local difficulty
+    if IsUnitPlayer(unitTag) then
+        if GetUnitOverlandDifficulty == nil then
+            return nameText
+        end
+        difficulty = GetUnitOverlandDifficulty(unitTag)
+    else
+        if GetOverlandDifficulty == nil then
+            return nameText
+        end
+        difficulty = GetOverlandDifficulty()
+        if UnitFrames.SV.TargetMonsterOverlandDifficulty and IsUnitMonster ~= nil and not IsUnitMonster(unitTag) then
+            return nameText
+        end
+        if not IsUnitAttackable(unitTag) then
+            return nameText
+        end
+    end
+    if difficulty == nil or difficulty <= OVERLAND_DIFFICULTY_TYPE_BASEGAME then
+        return nameText
+    end
+    local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty]
+    if iconPath then
+        return FormatTextWithIcon(iconPath, nameText, 20)
+    end
+    return nameText
+end
+
+local function ShouldShowVeterancyRankOnFrame(unitFrame)
+    if not unitFrame.isPlayer or GetUnitVeterancyRank == nil or IsVeterancySeasonActive == nil or IsInVeterancyProgressionZone == nil then
+        return false
+    end
+    if not IsVeterancySeasonActive() or not IsInVeterancyProgressionZone() then
+        return false
+    end
+    if unitFrame.unitTag == "reticleover" or unitFrame.unitTag == "player" then
+        return UnitFrames.SV.TargetShowVeterancyRank
+    end
+    if IsLuiEGroupFrameTag(unitFrame.unitTag) then
+        return UnitFrames.SV.GroupShowVeterancyRank
+    end
+    return false
+end
+
 local g_PendingUpdate =
 {
     Group = { flag = false, delay = 200, name = moduleName .. "PendingGroupUpdate" },
@@ -54,7 +116,6 @@ local g_PendingUpdate =
 }
 
 local pendingCrutchAlertsVersionWarning = false
-local CRUTCH_ALERTS_MIN_VERSION_WARNING = "CrutchAlerts was detected but is below the minimum supported version (v2.15.0). Reinstall or update CrutchAlerts to restore boss threshold markers."
 
 --- Chat is not ready during addon load; queue warning until primaryContainer exists.
 local function TryShowPendingCrutchAlertsVersionWarning()
@@ -65,7 +126,7 @@ local function TryShowPendingCrutchAlertsVersionWarning()
         return
     end
     pendingCrutchAlertsVersionWarning = false
-    LUIE.ChatOutput:Print(CRUTCH_ALERTS_MIN_VERSION_WARNING, true)
+    LUIE.ChatOutput:Print(GetString(LUIE_STRING_UF_CRUTCH_ALERTS_MIN_VERSION), true)
 end
 
 local BOSS_THRESHOLD_MARKER_WIDTH = 2
@@ -194,7 +255,9 @@ function UnitFrames.Initialize(enabled)
 
     UnitFrames.MigrateCustomFrameAppearance()
     UnitFrames.MigrateCustomFrameAppearanceCompactFontSync()
+    UnitFrames.MigrateLuiMediaAppearanceKeys()
     UnitFrames.MigratePlayerTargetLabelFormats()
+    UnitFrames.MigrateCanonicalFormatStrings()
     UnitFrames.MigratePlayerTargetOverlayFlags()
     UnitFrames.MigratePowerOverlayDefaultOff()
 
@@ -269,6 +332,9 @@ function UnitFrames.Initialize(enabled)
     if not UnitFrames.companionAbilityTrack then
         UnitFrames.companionAbilityTrack = LUIE_CompanionAbilityTrack:New()
     end
+    if not UnitFrames.companionRapportFlourish then
+        UnitFrames.companionRapportFlourish = LUIE_CompanionRapportFlourish:New()
+    end
 
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()
@@ -330,7 +396,7 @@ function UnitFrames.Initialize(enabled)
 
     -- Initialize visualizer coordinators for all tracked units
     -- Each coordinator registers its own attribute visual events with unit tag filtering
-    UnitFrames.InitializeVisualizers()
+    UnitFrames.InitializeDefaultVisualizers()
 
     -- Set event handlers
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, UnitFrames.OnPlayerActivated)
@@ -346,6 +412,12 @@ function UnitFrames.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_CHAMPION_POINT_UPDATE, UnitFrames.OnLevelUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_TITLE_UPDATE, UnitFrames.TitleUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_RANK_POINT_UPDATE, UnitFrames.TitleUpdate)
+    if EVENT_OVERLAND_DIFFICULTY_CHANGED then
+        eventManager:RegisterForEvent(moduleName, EVENT_OVERLAND_DIFFICULTY_CHANGED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
+    end
+    if EVENT_ACTIVE_VETERANCY_SEASON_UPDATED then
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_VETERANCY_SEASON_UPDATED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
+    end
 
     -- Next events make sense only for CustomFrames
     if UnitFrames.CustomFrames["player"] or UnitFrames.CustomFrames["reticleover"] or UnitFrames.CustomFrames["companion"] or UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] or UnitFrames.CustomFrames["boss1"] or UnitFrames.CustomFrames["PetGroup1"] then
@@ -1140,8 +1212,14 @@ function UnitFrames.CustomFramesUnreferencePetControl(first)
     local last = 7
     for i = first, last do
         local unitTag = "PetGroup" .. i
-        UnitFrames.CustomFrames[unitTag].unitTag = nil
-        UnitFrames.CustomFrames[unitTag].control:SetHidden(true)
+        local frame = UnitFrames.CustomFrames[unitTag]
+        if frame then
+            frame.unitTag = nil
+            if frame.SyncAttributeVisualizerUnitTag then
+                frame:SyncAttributeVisualizerUnitTag()
+            end
+            frame.control:SetHidden(true)
+        end
     end
 end
 
@@ -1221,6 +1299,10 @@ function UnitFrames.CustomPetUpdate()
         if UnitFrames.CustomFrames[v.unitTag] then
             UnitFrames.CustomFrames[v.unitTag].control:SetHidden(false)
             UnitFrames.CustomFrames[v.unitTag].unitTag = v.unitTag
+            local petFrame = UnitFrames.CustomFrames[v.unitTag]
+            if petFrame.SyncAttributeVisualizerUnitTag then
+                petFrame:SyncAttributeVisualizerUnitTag()
+            end
             UnitFrames.ReloadValues(v.unitTag)
         end
     end
@@ -1443,7 +1525,12 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
             -- Finally show custom target frame
             UnitFrames.CustomFrames["reticleover"].control:SetHidden(false)
             if UnitFrames.SV.QuickHideDead then
-                local isMonster = IsGameCameraInteractableUnitMonster()
+                local isMonster
+                if UnitFrames.SV.QuickHideDeadUseUnitMonster and IsUnitMonster then
+                    isMonster = IsUnitMonster("reticleover")
+                else
+                    isMonster = IsGameCameraInteractableUnitMonster()
+                end
                 local isNPC = reactionType == UNIT_REACTION_NEUTRAL
                     or reactionType == UNIT_REACTION_FRIENDLY
                     or reactionType == UNIT_REACTION_NPC_ALLY
@@ -1557,10 +1644,9 @@ function UnitFrames.ReloadValues(unitTag)
 
     -- Trigger visualizer reinitialization (handles all visual states with proper sequence IDs)
     -- This replaces the manual module Update calls to keep sequence IDs in order
-    local coordinator = UnitFrames.GetVisualizerForUnit(unitTag)
-    if coordinator then
+    UnitFrames.ForEachVisualizerForUnit(unitTag, function (coordinator)
         coordinator:OnUnitChanged()
-    end
+    end)
 
     -- Now we need to update Name labels, classIcon
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
@@ -1643,7 +1729,12 @@ function UnitFrames.UpdateStaticControls(unitFrame)
     if unitFrame.classIcon ~= nil then
         local unitDifficulty = GetUnitDifficulty(unitFrame.unitTag)
         local classIcon = LUIE.GetClassIcon(GetUnitClassId(unitFrame.unitTag))
-        local showClass = (unitFrame.isPlayer and classIcon ~= nil) or (unitDifficulty > 1)
+        local isMonsterUnit = IsUnitMonster and IsUnitMonster(unitFrame.unitTag)
+        local showMonsterClassIcon = not unitFrame.isPlayer
+            and UnitFrames.SV.TargetHighlightMonsterUnits
+            and isMonsterUnit
+            and IsUnitAttackable(unitFrame.unitTag)
+        local showClass = (unitFrame.isPlayer and classIcon ~= nil) or (unitDifficulty > 1) or showMonsterClassIcon
         local eliteIconPath
         if ZO_IsConsoleOrGameCoreUI() then
             eliteIconPath = [[/esoui/art/icons/poi/poi_groupboss_complete.dds]]
@@ -1652,7 +1743,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         end
         if unitFrame.isPlayer then
             unitFrame.classIcon:SetTexture(classIcon)
-        elseif unitDifficulty == 2 then
+        elseif unitDifficulty == 2 or showMonsterClassIcon then
             unitFrame.classIcon:SetTexture(eliteIconPath)
         elseif unitDifficulty >= 3 then
             unitFrame.classIcon:SetTexture(eliteIconPath)
@@ -1737,10 +1828,17 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             end
         end
 
+        if unitFrame.isPlayer then
+            nameText = ApplyOverlandDifficultyNameIcon(unitFrame.unitTag, nameText)
+        elseif unitFrame.unitTag == "reticleover" then
+            nameText = ApplyOverlandDifficultyNameIcon(unitFrame.unitTag, nameText)
+        end
+
         unitFrame.name:SetText(nameText)
     end
     -- If unitFrame has level label control
     if unitFrame.level ~= nil then
+        local shouldShowVeterancyInfo = ShouldShowVeterancyRankOnFrame(unitFrame)
         -- Show level for players and non-friendly NPCs
         local showLevel = unitFrame.isPlayer -- or not ( IsUnitInvulnerableGuard( unitFrame.unitTag ) or HIDE_LEVEL_TYPES[GetUnitType( unitFrame.unitTag )] or HIDE_LEVEL_REACTIONS[GetUnitReaction( unitFrame.unitTag )] ) -- No longer need to display level for anything but players
         if showLevel then
@@ -1748,30 +1846,45 @@ function UnitFrames.UpdateStaticControls(unitFrame)
                 unitFrame.levelIcon:ClearAnchors()
                 unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
             end
-            -- Use game API for both champion and normal level icons
             local iconPath
-            if unitFrame.isChampion then
+            local levelText
+            if shouldShowVeterancyInfo then
+                local veterancyRank = GetUnitVeterancyRank(unitFrame.unitTag)
+                if GetVeterancyRankTitle and SI_VETERANCY_RANK_AND_TITLE_FORMATTER then
+                    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
+                    levelText = zo_strformat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, veterancyRank, GetVeterancyRankTitle(veterancyRank, seasonId))
+                else
+                    levelText = tostring(veterancyRank)
+                end
+                if GetVeterancyRankIcon then
+                    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
+                    iconPath = GetVeterancyRankIcon(veterancyRank, seasonId)
+                end
+            elseif unitFrame.isChampion then
                 if IsInGamepadPreferredMode() then
                     iconPath = ZO_GetGamepadChampionPointsIcon()
                 else
                     iconPath = ZO_GetChampionPointsIconSmall()
                 end
+                levelText = tostring(GetUnitChampionPoints(unitFrame.unitTag))
             else
                 if IsInGamepadPreferredMode() then
                     iconPath = ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
                 else
                     iconPath = ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
                 end
+                levelText = tostring(GetUnitLevel(unitFrame.unitTag))
             end
-            unitFrame.levelIcon:SetTexture(iconPath)
+            if iconPath then
+                unitFrame.levelIcon:SetTexture(iconPath)
+            end
             -- Prevent auto-resize and set color to white
             unitFrame.levelIcon:SetResizeToFitFile(false)
             unitFrame.levelIcon:SetColor(1, 1, 1, 1)
             -- Set fixed size
             unitFrame.levelIcon:SetWidth(18)
             unitFrame.levelIcon:SetHeight(18)
-            -- Level label should be already anchored
-            unitFrame.level:SetText(tostring(unitFrame.isChampion and GetUnitChampionPoints(unitFrame.unitTag) or GetUnitLevel(unitFrame.unitTag)))
+            unitFrame.level:SetText(levelText)
         end
         if unitFrame.unitTag == "player" then
             unitFrame.levelIcon:SetHidden(not UnitFrames.SV.PlayerEnableYourname)
@@ -1883,6 +1996,19 @@ function UnitFrames.TitleUpdate(eventCode, unitTag)
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
     UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames[unitTag])
     UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
+end
+
+-- Re-run UpdateStaticControls on player, target, and group after overland/veterancy season changes or related LAM toggles.
+function UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+    if UnitFrames.CustomFrames["reticleover"] then
+        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
+    end
+    if UnitFrames.CustomFrames["player"] then
+        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["player"])
+    end
+    if UnitFrames.CustomFramesGroupUpdate then
+        UnitFrames.CustomFramesGroupUpdate()
+    end
 end
 
 -- Forces to reload static information on unit frames.
@@ -2096,10 +2222,11 @@ function UnitFrames.OnDeath(eventCode, unitTag, isDead)
     if isDead and UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
         local thb = UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
         -- 1. Regen/degen
-        UnitFrames.VisualizerModules.RegenerationModule:DisplayRegen(thb.regen1, false)
-        UnitFrames.VisualizerModules.RegenerationModule:DisplayRegen(thb.regen2, false)
-        UnitFrames.VisualizerModules.RegenerationModule:DisplayRegen(thb.degen1, false)
-        UnitFrames.VisualizerModules.RegenerationModule:DisplayRegen(thb.degen2, false)
+        local regenModule = LUIE_RegenerationModule
+        regenModule:DisplayRegen(thb.regen1, false)
+        regenModule:DisplayRegen(thb.regen2, false)
+        regenModule:DisplayRegen(thb.degen1, false)
+        regenModule:DisplayRegen(thb.degen2, false)
         -- 2. Stats
         if thb.stat then
             for _, statControls in pairs(thb.stat) do
@@ -2721,9 +2848,14 @@ function UnitFrames.CustomFramesGroupUpdate()
             end
 
             frame.unitTag = member.unitTag
+            if frame.SyncAttributeVisualizerUnitTag then
+                frame:SyncAttributeVisualizerUnitTag()
+            end
             UnitFrames.ReloadValues(member.unitTag)
         end
     end
+
+    UnitFrames.RefreshCustomFrameShields()
 
     -- Setup LibGroupBroadcast integrations on active frames
     if UnitFrames.GroupCombatStats then
@@ -2787,6 +2919,9 @@ function UnitFrames.CustomFramesUnreferenceGroupControl(groupType, first)
             end
 
             frame.unitTag = nil
+            if frame.SyncAttributeVisualizerUnitTag then
+                frame:SyncAttributeVisualizerUnitTag()
+            end
             frame.control:SetHidden(true)
         end
     end
@@ -2893,17 +3028,9 @@ function UnitFrames.CustomFramesSetPositions()
     default_anchors["boss1"] = { TOPLEFT, CENTER, coords.boss1[1], coords.boss1[2] }
     default_anchors["AvaPlayerTarget"] = { CENTER, CENTER, coords.AvaPlayerTarget[1], coords.AvaPlayerTarget[2] }
 
-    for _, unitTag in pairs(
-        {
-            "player",
-            "reticleover",
-            "companion",
-            "SmallGroup1",
-            "RaidGroup1",
-            "boss1",
-            "AvaPlayerTarget",
-            "PetGroup1",
-        }) do
+    local customFramesShared = LUIE.CustomFramesShared
+    for keyIndex = 1, #customFramesShared.MOVER_ANCHOR_REGISTRY_KEYS do
+        local unitTag = customFramesShared.MOVER_ANCHOR_REGISTRY_KEYS[keyIndex]
         if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
             local savedPos = UnitFrames.SV[UnitFrames.CustomFrames[unitTag].tlw.customPositionAttr]
             local anchors = (savedPos ~= nil and #savedPos == 2) and { TOPLEFT, TOPLEFT, savedPos[1], savedPos[2] } or default_anchors[unitTag]
@@ -3561,17 +3688,132 @@ function UnitFrames.CustomFramesApplyLayoutPlayer(unhide)
     UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
 end
 
--- Re-apply shield bar visibility after shield mode or layout changes.
+--- Applies layout across custom frame categories (single orchestration site).
+--- @class UnitFrames.CustomFramesApplyAllLayoutsOptions
+--- @field unhide boolean|nil Shorthand for unhidePlayer
+--- @field unhidePlayer boolean|nil
+--- @field unhideReticle boolean|nil
+--- @field unhideAva boolean|nil
+--- @field group boolean|nil Unhide flag for group layout
+--- @field raid boolean|nil Unhide flag for raid layout
+--- @field layoutAllRaidSlots boolean|nil Passed to CustomFramesApplyLayoutRaid
+--- @field playerTriadOnly boolean|nil When true, only player / reticleover / AvA layouts run
+--- @field includeGroup boolean|nil Default true unless playerTriadOnly
+--- @field includeRaid boolean|nil Default false
+--- @field includeCompanion boolean|nil Default matches includeGroup
+--- @field includePet boolean|nil Default matches includeGroup
+--- @field includeBosses boolean|nil Default false
+--- @field includeCompanionPetUpdates boolean|nil Default false
+--- @param options UnitFrames.CustomFramesApplyAllLayoutsOptions|nil
+function UnitFrames.CustomFramesApplyAllLayouts(options)
+    options = options or {}
+    local unhidePlayer = options.unhidePlayer
+    if unhidePlayer == nil then
+        unhidePlayer = options.unhide
+    end
+    if unhidePlayer == nil then
+        unhidePlayer = false
+    end
+    local unhideReticle = options.unhideReticle
+    if unhideReticle == nil then
+        unhideReticle = unhidePlayer
+    end
+    local unhideAva = options.unhideAva
+    if unhideAva == nil then
+        unhideAva = unhideReticle
+    end
+
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhidePlayer)
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhideReticle)
+    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhideAva)
+
+    if options.playerTriadOnly then
+        return
+    end
+
+    local includeGroup = options.includeGroup
+    if includeGroup == nil then
+        includeGroup = true
+    end
+    if includeGroup then
+        local groupUnhide = options.group
+        if groupUnhide == nil then
+            groupUnhide = unhidePlayer
+        end
+        UnitFrames.CustomFramesApplyLayoutGroup(groupUnhide)
+    end
+
+    if options.includeRaid then
+        local raidUnhide = options.raid
+        if raidUnhide == nil then
+            raidUnhide = unhidePlayer
+        end
+        UnitFrames.CustomFramesApplyLayoutRaid(raidUnhide, options.layoutAllRaidSlots)
+    end
+
+    local includeCompanion = options.includeCompanion
+    if includeCompanion == nil then
+        includeCompanion = includeGroup
+    end
+    if includeCompanion then
+        UnitFrames.CustomFramesApplyLayoutCompanion(unhidePlayer)
+    end
+
+    local includePet = options.includePet
+    if includePet == nil then
+        includePet = includeGroup
+    end
+    if includePet then
+        UnitFrames.CustomFramesApplyLayoutPet(unhidePlayer)
+    end
+
+    if options.includeCompanionPetUpdates then
+        UnitFrames.CustomPetUpdate()
+        UnitFrames.CompanionUpdate()
+        UnitFrames.CustomFramesApplyCompanionInCombat(true)
+        UnitFrames.UpdateCompanionCombatGlow()
+        UnitFrames.CustomFramesApplyPetInCombat(true)
+        UnitFrames.UpdatePetCombatGlow()
+    end
+
+    if options.includeBosses then
+        UnitFrames.CustomFramesApplyLayoutBosses(unhidePlayer)
+    end
+end
+
+-- Re-apply shield, trauma, and no-healing overlay visibility after shield mode or layout changes.
 function UnitFrames.RefreshCustomFrameShields()
-    local powerShield = UnitFrames.VisualizerModules and UnitFrames.VisualizerModules.PowerShieldModule
-    if not powerShield or not UnitFrames.savedHealth then
+    if not UnitFrames.savedHealth then
         return
     end
     for unitTag, saved in pairs(UnitFrames.savedHealth) do
-        local shieldValue = saved[4]
-        if shieldValue and shieldValue > 0 then
-            powerShield:UpdateShield(unitTag, shieldValue, saved[3])
-        end
+        UnitFrames.ForEachVisualizerForUnit(unitTag, function (visualizer)
+            local vizTag = visualizer.GetUnitTag and visualizer:GetUnitTag() or unitTag
+            if vizTag and DoesUnitExist(vizTag) then
+                UnitFrames.InvalidateAttributeVisualEffectCache(vizTag)
+                visualizer:OnUnitChanged()
+                return
+            end
+
+            if not visualizer.visualModules then
+                return
+            end
+
+            local shieldValue = saved[4] or 0
+            local traumaValue = saved[5] or 0
+            local healthEffectiveMax = saved[3] or 1
+            for module in pairs(visualizer.visualModules) do
+                if module.UpdateShield then
+                    module:UpdateShield(unitTag, shieldValue, healthEffectiveMax)
+                end
+                if module.UpdateTrauma then
+                    module:UpdateTrauma(unitTag, traumaValue, healthEffectiveMax)
+                end
+                if module.UpdateNoHealing then
+                    module:UpdateNoHealing(unitTag, 0)
+                end
+            end
+        end)
     end
 end
 
@@ -3672,6 +3914,7 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     end
 
     UnitFrames.CustomFramesTryUnhideTlw("SmallGroup1", unhide)
+    UnitFrames.RefreshCustomFrameShields()
 end
 
 --- @param index number
@@ -3920,6 +4163,7 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
     end
 
     UnitFrames.CustomFramesTryUnhideTlw("RaidGroup1", unhide)
+    UnitFrames.RefreshCustomFrameShields()
 end
 
 -- Set dimensions of custom companion frame and anchors

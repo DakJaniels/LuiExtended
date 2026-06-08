@@ -20,10 +20,57 @@ local table_insert = table.insert
 
 local g_BuffsMovingEnabled = false -- Helper local flag
 
-local rotationOptions = { "Horizontal", "Vertical" }
-local rotationOptionsKeys = { ["Horizontal"] = 1, ["Vertical"] = 2 }
-local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
-local globalIconOptionsKeys = { ["All Crowd Control"] = 1, ["NPC CC Only"] = 2, ["Player CC Only"] = 3 }
+local rotationOptions =
+{
+    GetString(LUIE_STRING_SHARED_ORIENTATION_HORIZONTAL),
+    GetString(LUIE_STRING_SHARED_ORIENTATION_VERTICAL),
+}
+local rotationOptionValues = { 1, 2 }
+local globalIconOptions =
+{
+    GetString(LUIE_STRING_SHARED_CC_ALL),
+    GetString(LUIE_STRING_SHARED_CC_NPC_ONLY),
+    GetString(LUIE_STRING_SHARED_CC_PLAYER_ONLY),
+}
+local globalIconOptionValues = { 1, 2, 3 }
+local alignHorizChoices =
+{
+    GetString(LUIE_STRING_SHARED_ALIGN_LEFT),
+    GetString(LUIE_STRING_SHARED_ALIGN_CENTERED),
+    GetString(LUIE_STRING_SHARED_ALIGN_RIGHT),
+}
+local alignHorizValues = { "Left", "Centered", "Right" }
+local sortHorizChoices =
+{
+    GetString(LUIE_STRING_SHARED_SORT_LEFT_TO_RIGHT),
+    GetString(LUIE_STRING_SHARED_SORT_RIGHT_TO_LEFT),
+}
+local sortHorizValues = { "Left to Right", "Right to Left" }
+local alignVertChoices =
+{
+    GetString(LUIE_STRING_SHARED_ALIGN_TOP),
+    GetString(LUIE_STRING_SHARED_ALIGN_CENTERED),
+    GetString(LUIE_STRING_SHARED_ALIGN_BOTTOM),
+}
+local alignVertValues = { "Top", "Centered", "Bottom" }
+local sortVertChoices =
+{
+    GetString(LUIE_STRING_SHARED_SORT_BOTTOM_TO_TOP),
+    GetString(LUIE_STRING_SHARED_SORT_TOP_TO_BOTTOM),
+}
+local sortVertValues = { "Bottom to Top", "Top to Bottom" }
+local stackRowChoices =
+{
+    GetString(LUIE_STRING_SHARED_STACK_DOWN),
+    GetString(LUIE_STRING_SHARED_STACK_UP),
+}
+local stackRowValues = { "Down", "Up" }
+local promLabelDirChoices =
+{
+    GetString(LUIE_STRING_SHARED_ALIGN_RIGHT),
+    GetString(LUIE_STRING_SHARED_ALIGN_LEFT),
+}
+local promLabelDirValues = { "Right", "Left" }
 
 -- Variables for custom generated tables
 local PromBuffs, PromBuffsValues = {}, {}
@@ -122,8 +169,8 @@ function SpellCastBuffs.CreateSettings()
     local panelDataBuffsDebuffs =
     {
         type = "panel",
-        name = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_BUFFSDEBUFFS)),
-        displayName = zo_strformat("<<1>> <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_BUFFSDEBUFFS)),
+        name = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_BUFFSDEBUFFS),
+        displayName = LUIE.FormatAddonSettingsPanelDisplayName(LUIE_STRING_LAM_BUFFSDEBUFFS),
         author = LUIE.author .. "\n",
         version = LUIE.version,
         website = LUIE.website,
@@ -186,8 +233,8 @@ function SpellCastBuffs.CreateSettings()
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
         type = "checkbox",
-        name = "Enable Grid Snap (Buffs)",
-        tooltip = "Enable snapping buff frames to a grid when moving them",
+        name = zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_ENABLE), GetString(LUIE_STRING_LAM_BUFFSDEBUFFS)),
+        tooltip = zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_ENABLE_TP), GetString(LUIE_STRING_LAM_BUFFSDEBUFFS)),
         getFunc = function ()
             return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_buffs
         end,
@@ -204,8 +251,8 @@ function SpellCastBuffs.CreateSettings()
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
         type = "slider",
-        name = "Grid Size (Buffs)",
-        tooltip = "Set the size of the grid for snapping buff frames",
+        name = zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_SIZE), GetString(LUIE_STRING_LAM_BUFFSDEBUFFS)),
+        tooltip = zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_SIZE_TP), GetString(LUIE_STRING_LAM_BUFFSDEBUFFS)),
         min = 5,
         max = 100,
         step = 5,
@@ -260,7 +307,7 @@ function SpellCastBuffs.CreateSettings()
         {
             {
                 type = "header",
-                name = "Display Options",
+                name = GetString(LUIE_STRING_LAM_SCB_DISPLAY_OPTIONS),
             },
             {
                 -- Hide OakenSoul
@@ -1409,8 +1456,8 @@ function SpellCastBuffs.CreateSettings()
         {
             {
                 type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "Out-of-Combat Opacity"),
-                tooltip = "Buff and debuff display opacity while out of combat (0–100%).",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_SHARED_OOC_OPACITY)),
+                tooltip = GetString(LUIE_STRING_LAM_SCB_OOC_OPACITY_TP),
                 min = 0,
                 max = 100,
                 step = 5,
@@ -1429,8 +1476,8 @@ function SpellCastBuffs.CreateSettings()
             },
             {
                 type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "In-Combat Opacity"),
-                tooltip = "Buff and debuff display opacity while in combat (0–100%).",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_SHARED_IC_OPACITY)),
+                tooltip = GetString(LUIE_STRING_LAM_SCB_IC_OPACITY_TP),
                 min = 0,
                 max = 100,
                 step = 5,
@@ -1616,7 +1663,7 @@ function SpellCastBuffs.CreateSettings()
                 width = "full",
                 default = Defaults.GlowIcons,
                 disabled = function ()
-                    return not LUIE.SV.SpellCastBuff_Enable or Settings.BuffDebuffIconInset
+                    return not LUIE.SV.SpellCastBuff_Enable
                 end,
             },
             {
@@ -1633,26 +1680,6 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 width = "full",
                 default = Defaults.RemainingCooldown,
-                disabled = function ()
-                    return not LUIE.SV.SpellCastBuff_Enable
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_BUFF_BUFFDEBUFFICONINSET),
-                tooltip = GetString(LUIE_STRING_LAM_BUFF_BUFFDEBUFFICONINSET_TP),
-                getFunc = function ()
-                    return Settings.BuffDebuffIconInset
-                end,
-                setFunc = function (value)
-                    Settings.BuffDebuffIconInset = value
-                    if value then
-                        Settings.GlowIcons = false
-                    end
-                    SpellCastBuffs.Reset()
-                end,
-                width = "full",
-                default = Defaults.BuffDebuffIconInset,
                 disabled = function ()
                     return not LUIE.SV.SpellCastBuff_Enable
                 end,
@@ -1703,17 +1730,18 @@ function SpellCastBuffs.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
                 choices = globalIconOptions,
+                choicesValues = globalIconOptionValues,
                 getFunc = function ()
-                    return globalIconOptions[Settings.DefaultIconOptions]
+                    return Settings.DefaultIconOptions
                 end,
                 setFunc = function (value)
-                    Settings.DefaultIconOptions = globalIconOptionsKeys[value]
+                    Settings.DefaultIconOptions = value
                 end,
                 width = "full",
                 disabled = function ()
                     return not Settings.UseDefaultIcon
                 end,
-                default = globalIconOptions[Defaults.DefaultIconOptions],
+                default = Defaults.DefaultIconOptions,
             },
         },
     }
@@ -2184,14 +2212,14 @@ function SpellCastBuffs.CreateSettings()
             {
                 -- Damage Type Fallback Header
                 type = "header",
-                name = "Damage Type Fallback",
+                name = GetString(LUIE_STRING_LAM_SCB_DAMAGE_TYPE_FALLBACK),
                 width = "full",
             },
             {
                 -- Damage Type Fallback Toggle
                 type = "checkbox",
-                name = "Color non-CC debuffs by damage type (cooldown fill)",
-                tooltip = "When Color Debuffs by Crowd Control Type is on and a debuff has no CC classification, use the debuff's damage type (from combat) to color the cooldown fill.",
+                name = GetString(LUIE_STRING_LAM_SCB_DAMAGE_TYPE_CC_FILL),
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_TYPE_CC_FILL_TP),
                 getFunc = function ()
                     return Settings.DamageTypeFallback
                 end,
@@ -2208,13 +2236,13 @@ function SpellCastBuffs.CreateSettings()
             {
                 -- Damage Type Colors Header
                 type = "header",
-                name = "Damage Type Colors",
+                name = GetString(LUIE_STRING_LAM_SCB_DAMAGE_TYPE_COLORS),
                 width = "full",
             },
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE2),
-                tooltip = "Cooldown fill color for Physical damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_PHYSICAL_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_PHYSICAL]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_PHYSICAL] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_PHYSICAL][1], g = Defaults.colors.damage[DAMAGE_TYPE_PHYSICAL][2], b = Defaults.colors.damage[DAMAGE_TYPE_PHYSICAL][3], a = Defaults.colors.damage[DAMAGE_TYPE_PHYSICAL][4] },
@@ -2224,7 +2252,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE3),
-                tooltip = "Cooldown fill color for Flame damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_FLAME_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_FIRE]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_FIRE] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_FIRE][1], g = Defaults.colors.damage[DAMAGE_TYPE_FIRE][2], b = Defaults.colors.damage[DAMAGE_TYPE_FIRE][3], a = Defaults.colors.damage[DAMAGE_TYPE_FIRE][4] },
@@ -2234,7 +2262,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE4),
-                tooltip = "Cooldown fill color for Shock damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_SHOCK_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_SHOCK]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_SHOCK] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_SHOCK][1], g = Defaults.colors.damage[DAMAGE_TYPE_SHOCK][2], b = Defaults.colors.damage[DAMAGE_TYPE_SHOCK][3], a = Defaults.colors.damage[DAMAGE_TYPE_SHOCK][4] },
@@ -2244,7 +2272,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE5),
-                tooltip = "Cooldown fill color for Daedric/Oblivion damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_DAEDRIC_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_OBLIVION]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_OBLIVION] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_OBLIVION][1], g = Defaults.colors.damage[DAMAGE_TYPE_OBLIVION][2], b = Defaults.colors.damage[DAMAGE_TYPE_OBLIVION][3], a = Defaults.colors.damage[DAMAGE_TYPE_OBLIVION][4] },
@@ -2254,7 +2282,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE6),
-                tooltip = "Cooldown fill color for Frost damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_FROST_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_COLD]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_COLD] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_COLD][1], g = Defaults.colors.damage[DAMAGE_TYPE_COLD][2], b = Defaults.colors.damage[DAMAGE_TYPE_COLD][3], a = Defaults.colors.damage[DAMAGE_TYPE_COLD][4] },
@@ -2264,7 +2292,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE7),
-                tooltip = "Cooldown fill color for Earth damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_EARTH_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_EARTH]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_EARTH] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_EARTH][1], g = Defaults.colors.damage[DAMAGE_TYPE_EARTH][2], b = Defaults.colors.damage[DAMAGE_TYPE_EARTH][3], a = Defaults.colors.damage[DAMAGE_TYPE_EARTH][4] },
@@ -2274,7 +2302,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE8),
-                tooltip = "Cooldown fill color for Magic damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_MAGIC_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_MAGIC]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_MAGIC] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_MAGIC][1], g = Defaults.colors.damage[DAMAGE_TYPE_MAGIC][2], b = Defaults.colors.damage[DAMAGE_TYPE_MAGIC][3], a = Defaults.colors.damage[DAMAGE_TYPE_MAGIC][4] },
@@ -2284,7 +2312,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE9),
-                tooltip = "Cooldown fill color for Drowning damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_DROWNING_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_DROWN]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_DROWN] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_DROWN][1], g = Defaults.colors.damage[DAMAGE_TYPE_DROWN][2], b = Defaults.colors.damage[DAMAGE_TYPE_DROWN][3], a = Defaults.colors.damage[DAMAGE_TYPE_DROWN][4] },
@@ -2294,7 +2322,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE10),
-                tooltip = "Cooldown fill color for Disease damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_DISEASE_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_DISEASE]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_DISEASE] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_DISEASE][1], g = Defaults.colors.damage[DAMAGE_TYPE_DISEASE][2], b = Defaults.colors.damage[DAMAGE_TYPE_DISEASE][3], a = Defaults.colors.damage[DAMAGE_TYPE_DISEASE][4] },
@@ -2304,7 +2332,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE11),
-                tooltip = "Cooldown fill color for Poison damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_POISON_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_POISON]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_POISON] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_POISON][1], g = Defaults.colors.damage[DAMAGE_TYPE_POISON][2], b = Defaults.colors.damage[DAMAGE_TYPE_POISON][3], a = Defaults.colors.damage[DAMAGE_TYPE_POISON][4] },
@@ -2314,7 +2342,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 type = "colorpicker",
                 name = GetString(SI_DAMAGETYPE12),
-                tooltip = "Cooldown fill color for Bleed damage debuffs.",
+                tooltip = GetString(LUIE_STRING_LAM_SCB_DAMAGE_BLEED_TP),
                 getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_BLEED]) end,
                 setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_BLEED] = { r, g, b, a } end,
                 default = { r = Defaults.colors.damage[DAMAGE_TYPE_BLEED][1], g = Defaults.colors.damage[DAMAGE_TYPE_BLEED][2], b = Defaults.colors.damage[DAMAGE_TYPE_BLEED][3], a = Defaults.colors.damage[DAMAGE_TYPE_BLEED][4] },
@@ -2342,7 +2370,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
-                choices = { "Left", "Centered", "Right" },
+                choices = alignHorizChoices,
+                choicesValues = alignHorizValues,
                 getFunc = function ()
                     return Settings.AlignmentBuffsPlayer
                 end,
@@ -2359,7 +2388,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
-                choices = { "Left to Right", "Right to Left" },
+                choices = sortHorizChoices,
+                choicesValues = sortHorizValues,
                 getFunc = function ()
                     return Settings.SortBuffsPlayer
                 end,
@@ -2376,7 +2406,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
-                choices = { "Left", "Centered", "Right" },
+                choices = alignHorizChoices,
+                choicesValues = alignHorizValues,
                 getFunc = function ()
                     return Settings.AlignmentDebuffsPlayer
                 end,
@@ -2393,7 +2424,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
-                choices = { "Left to Right", "Right to Left" },
+                choices = sortHorizChoices,
+                choicesValues = sortHorizValues,
                 getFunc = function ()
                     return Settings.SortDebuffsPlayer
                 end,
@@ -2410,7 +2442,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
-                choices = { "Left", "Centered", "Right" },
+                choices = alignHorizChoices,
+                choicesValues = alignHorizValues,
                 getFunc = function ()
                     return Settings.AlignmentBuffsTarget
                 end,
@@ -2427,7 +2460,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
-                choices = { "Left to Right", "Right to Left" },
+                choices = sortHorizChoices,
+                choicesValues = sortHorizValues,
                 getFunc = function ()
                     return Settings.SortBuffsTarget
                 end,
@@ -2444,7 +2478,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
-                choices = { "Left", "Centered", "Right" },
+                choices = alignHorizChoices,
+                choicesValues = alignHorizValues,
                 getFunc = function ()
                     return Settings.AlignmentDebuffsTarget
                 end,
@@ -2461,7 +2496,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
-                choices = { "Left to Right", "Right to Left" },
+                choices = sortHorizChoices,
+                choicesValues = sortHorizValues,
                 getFunc = function ()
                     return Settings.SortDebuffsTarget
                 end,
@@ -2512,7 +2548,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
-                choices = { "Down", "Up" },
+                choices = stackRowChoices,
+                choicesValues = stackRowValues,
                 getFunc = function ()
                     return Settings.StackPlayerBuffs
                 end,
@@ -2555,7 +2592,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
-                choices = { "Down", "Up" },
+                choices = stackRowChoices,
+                choicesValues = stackRowValues,
                 getFunc = function ()
                     return Settings.StackPlayerDebuffs
                 end,
@@ -2598,7 +2636,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
-                choices = { "Down", "Up" },
+                choices = stackRowChoices,
+                choicesValues = stackRowValues,
                 getFunc = function ()
                     return Settings.StackTargetBuffs
                 end,
@@ -2641,7 +2680,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
-                choices = { "Down", "Up" },
+                choices = stackRowChoices,
+                choicesValues = stackRowValues,
                 getFunc = function ()
                     return Settings.StackTargetDebuffs
                 end,
@@ -2669,23 +2709,25 @@ function SpellCastBuffs.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CONTAINER),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CONTAINER_TP),
                 choices = rotationOptions,
+                choicesValues = rotationOptionValues,
                 getFunc = function ()
-                    return rotationOptions[Settings.LongTermEffectsSeparateAlignment]
+                    return Settings.LongTermEffectsSeparateAlignment
                 end,
                 setFunc = function (value)
-                    Settings.LongTermEffectsSeparateAlignment = rotationOptionsKeys[value]
+                    Settings.LongTermEffectsSeparateAlignment = value
                     SpellCastBuffs.ResetContainerOrientation()
                     SpellCastBuffs.Reset()
                 end,
                 width = "full",
-                default = rotationOptions[2],
+                default = Defaults.LongTermEffectsSeparateAlignment,
             },
             {
                 -- Horizontal Long Term Icons Alignment
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
-                choices = { "Left", "Centered", "Right" },
+                choices = alignHorizChoices,
+                choicesValues = alignHorizValues,
                 getFunc = function ()
                     return Settings.AlignmentLongHorz
                 end,
@@ -2705,7 +2747,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
-                choices = { "Left to Right", "Right to Left" },
+                choices = sortHorizChoices,
+                choicesValues = sortHorizValues,
                 getFunc = function ()
                     return Settings.SortLongHorz
                 end,
@@ -2725,7 +2768,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
-                choices = { "Top", "Centered", "Bottom" },
+                choices = alignVertChoices,
+                choicesValues = alignVertValues,
                 getFunc = function ()
                     return Settings.AlignmentLongVert
                 end,
@@ -2745,7 +2789,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
-                choices = { "Bottom to Top", "Top to Bottom" },
+                choices = sortVertChoices,
+                choicesValues = sortVertValues,
                 getFunc = function ()
                     return Settings.SortLongVert
                 end,
@@ -2774,23 +2819,25 @@ function SpellCastBuffs.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFCONTAINER),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFCONTAINER_TP),
                 choices = rotationOptions,
+                choicesValues = rotationOptionValues,
                 getFunc = function ()
-                    return rotationOptions[Settings.ProminentBuffContainerAlignment]
+                    return Settings.ProminentBuffContainerAlignment
                 end,
                 setFunc = function (value)
-                    Settings.ProminentBuffContainerAlignment = rotationOptionsKeys[value]
+                    Settings.ProminentBuffContainerAlignment = value
                     SpellCastBuffs.ResetContainerOrientation()
                     SpellCastBuffs.Reset()
                 end,
                 width = "full",
-                default = rotationOptions[2],
+                default = Defaults.ProminentBuffContainerAlignment,
             },
             {
                 -- Horizontal Prominent Buffs Icons Alignment
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
-                choices = { "Left", "Centered", "Right" },
+                choices = alignHorizChoices,
+                choicesValues = alignHorizValues,
                 getFunc = function ()
                     return Settings.AlignmentPromBuffsHorz
                 end,
@@ -2810,7 +2857,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
-                choices = { "Left to Right", "Right to Left" },
+                choices = sortHorizChoices,
+                choicesValues = sortHorizValues,
                 getFunc = function ()
                     return Settings.SortPromBuffsHorz
                 end,
@@ -2830,7 +2878,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
-                choices = { "Top", "Centered", "Bottom" },
+                choices = alignVertChoices,
+                choicesValues = alignVertValues,
                 getFunc = function ()
                     return Settings.AlignmentPromBuffsVert
                 end,
@@ -2850,7 +2899,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
-                choices = { "Bottom to Top", "Top to Bottom" },
+                choices = sortVertChoices,
+                choicesValues = sortVertValues,
                 getFunc = function ()
                     return Settings.SortPromBuffsVert
                 end,
@@ -2874,23 +2924,25 @@ function SpellCastBuffs.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFCONTAINER),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFCONTAINER_TP),
                 choices = rotationOptions,
+                choicesValues = rotationOptionValues,
                 getFunc = function ()
-                    return rotationOptions[Settings.ProminentDebuffContainerAlignment]
+                    return Settings.ProminentDebuffContainerAlignment
                 end,
                 setFunc = function (value)
-                    Settings.ProminentDebuffContainerAlignment = rotationOptionsKeys[value]
+                    Settings.ProminentDebuffContainerAlignment = value
                     SpellCastBuffs.ResetContainerOrientation()
                     SpellCastBuffs.Reset()
                 end,
                 width = "full",
-                default = rotationOptions[2],
+                default = Defaults.ProminentDebuffContainerAlignment,
             },
             {
                 -- Horizontal Prominent Debuffs Icons Alignment
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
-                choices = { "Left", "Centered", "Right" },
+                choices = alignHorizChoices,
+                choicesValues = alignHorizValues,
                 getFunc = function ()
                     return Settings.AlignmentPromDebuffsHorz
                 end,
@@ -2910,7 +2962,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
-                choices = { "Left to Right", "Right to Left" },
+                choices = sortHorizChoices,
+                choicesValues = sortHorizValues,
                 getFunc = function ()
                     return Settings.SortPromDebuffsHorz
                 end,
@@ -2930,7 +2983,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
-                choices = { "Top", "Centered", "Bottom" },
+                choices = alignVertChoices,
+                choicesValues = alignVertValues,
                 getFunc = function ()
                     return Settings.AlignmentPromDebuffsVert
                 end,
@@ -2950,7 +3004,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
                 tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
-                choices = { "Bottom to Top", "Top to Bottom" },
+                choices = sortVertChoices,
+                choicesValues = sortVertValues,
                 getFunc = function ()
                     return Settings.SortPromDebuffsVert
                 end,
@@ -3518,7 +3573,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFLABELDIRECTION),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFLABELDIRECTION_TP),
-                choices = { "Right", "Left" },
+                choices = promLabelDirChoices,
+                choicesValues = promLabelDirValues,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.ProminentBuffLabelDirection
@@ -3538,7 +3594,8 @@ function SpellCastBuffs.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFLABELDIRECTION),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFLABELDIRECTION_TP),
-                choices = { "Right", "Left" },
+                choices = promLabelDirChoices,
+                choicesValues = promLabelDirValues,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.ProminentDebuffLabelDirection
@@ -3772,7 +3829,7 @@ function SpellCastBuffs.CreateSettings()
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
         type = "header",
-        name = "Debug Options",
+        name = GetString(LUIE_STRING_LAM_SCB_DEBUG_HEADER),
         width = "full",
     }
 
@@ -3780,8 +3837,8 @@ function SpellCastBuffs.CreateSettings()
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
         type = "checkbox",
-        name = "Show AbilityId on Buffs & Debuffs",
-        tooltip = "Toggle the display of AbilityId on buffs and debuffs - useful for adding auras to Prominent Buffs & Debuffs or the Aura Blacklist.",
+        name = GetString(LUIE_STRING_LAM_SCB_DEBUG_SHOW_ABILITYID),
+        tooltip = GetString(LUIE_STRING_LAM_SCB_DEBUG_SHOW_ABILITYID_TP),
         getFunc = function ()
             return Settings.ShowDebugAbilityId
         end,
@@ -3800,8 +3857,8 @@ function SpellCastBuffs.CreateSettings()
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
         type = "checkbox",
-        name = "Show Debug for Combat Events",
-        tooltip = "Display debug information for combat events - used for development.",
+        name = GetString(LUIE_STRING_LAM_SCB_DEBUG_COMBAT_EVENTS),
+        tooltip = GetString(LUIE_STRING_LAM_SCB_DEBUG_COMBAT_EVENTS_TP),
         getFunc = function ()
             return Settings.ShowDebugCombat
         end,
@@ -3820,8 +3877,8 @@ function SpellCastBuffs.CreateSettings()
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
         type = "checkbox",
-        name = "Show Debug for Effect Change Events",
-        tooltip = "Display debug information for effect change events - used for development.",
+        name = GetString(LUIE_STRING_LAM_SCB_DEBUG_EFFECT_CHANGE),
+        tooltip = GetString(LUIE_STRING_LAM_SCB_DEBUG_EFFECT_CHANGE_TP),
         getFunc = function ()
             return Settings.ShowDebugEffect
         end,
@@ -3840,8 +3897,8 @@ function SpellCastBuffs.CreateSettings()
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
         type = "checkbox",
-        name = "Filter Debug Events & Effects",
-        tooltip = "Filter out events and effects that have already been processed - used for development.",
+        name = GetString(LUIE_STRING_LAM_SCB_DEBUG_FILTER),
+        tooltip = GetString(LUIE_STRING_LAM_SCB_DEBUG_FILTER_TP),
         getFunc = function ()
             return Settings.ShowDebugFilter
         end,

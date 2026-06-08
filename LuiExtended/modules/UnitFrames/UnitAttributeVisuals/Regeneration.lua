@@ -13,7 +13,7 @@ local UnitFrames = LUIE.UnitFrames
 
 --- Module for handling increased/decreased regeneration power visuals
 --- @class LUIE_RegenerationModule : LUIE_UnitAttributeVisualizerModuleBase
-local RegenerationModule = LUIE_UnitAttributeVisualizerModuleBase:New()
+local RegenerationModule = LUIE_UnitAttributeVisualizerModuleBase:Subclass()
 
 function RegenerationModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER or unitAttributeVisual == ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER
@@ -90,25 +90,12 @@ function RegenerationModule:UpdateRegen(unitTag, statType, attributeType, powerT
     end
     local value = value1 + value2
 
-    -- Update regen/degen animations for all frame types
-    if UnitFrames.DefaultFrames[unitTag] and UnitFrames.DefaultFrames[unitTag][powerType] then
-        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][powerType].regen1, value > 0)
-        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][powerType].regen2, value > 0)
-        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][powerType].degen1, value < 0)
-        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][powerType].degen2, value < 0)
-    end
-    if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][powerType] then
-        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][powerType].regen1, value > 0)
-        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][powerType].regen2, value > 0)
-        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][powerType].degen1, value < 0)
-        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][powerType].degen2, value < 0)
-    end
-    if UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][powerType] then
-        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][powerType].regen1, value > 0)
-        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][powerType].regen2, value > 0)
-        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][powerType].degen1, value < 0)
-        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][powerType].degen2, value < 0)
-    end
+    self:ForEachPowerEntry(unitTag, powerType, function (powerEntry)
+        self:DisplayRegen(powerEntry.regen1, value > 0)
+        self:DisplayRegen(powerEntry.regen2, value > 0)
+        self:DisplayRegen(powerEntry.degen1, value < 0)
+        self:DisplayRegen(powerEntry.degen2, value < 0)
+    end)
 end
 
 -- -----------------------------------------------------------------------------
@@ -127,6 +114,8 @@ function RegenerationModule:OnVisualizationUpdated(unitTag, unitAttributeVisual,
     self:UpdateRegen(unitTag, statType, attributeType, powerType)
 end
 
+LUIE_RegenerationModule = RegenerationModule
+UnitFrames.VisualizerModuleClasses.RegenerationModule = RegenerationModule
 UnitFrames.VisualizerModules.RegenerationModule = RegenerationModule
 
 return RegenerationModule

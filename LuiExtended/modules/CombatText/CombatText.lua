@@ -361,6 +361,9 @@ function CombatText.Initialize(enabled)
         CombatText.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.CombatText, LUIE.SVVer, nil, CombatText.Defaults, LUIE.SavedVarsProfile)
     end
 
+    CombatText.RefreshMessageFormatDefaultsTable()
+    CombatText.NormalizeStoredMessageFormats()
+
     -- Migrate old string-based font styles to numeric constants (run once)
     -- Migrate font style (string/display/nil -> valid 0-7); run once per account
     if not LUIE.IsMigrationDone("combattext_fontstyles_v2") then

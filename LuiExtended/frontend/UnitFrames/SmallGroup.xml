@@ -6,7 +6,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
   <!-- Virtual Control Templates -->
   <Controls>
-    <!-- Unit frame virtual templates (instances created in _CreateCustomFrames.lua) -->
+    <!-- Unit frame virtual templates (instances created in modules/UnitFrames/CustomFrames/) -->
     <Control virtual="true"
              name="LUIE_UF_SmallGroupMember_Template"
              mouseEnabled="true"

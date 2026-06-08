@@ -14,6 +14,13 @@ local LAM_NO_DELIVERABLE_WARNING_HEIGHT = 52
 local LAM_TOGGLE_ON_TEXT = GetString(SI_CHECK_BUTTON_ON):upper()
 local LAM_TOGGLE_OFF_TEXT = GetString(SI_CHECK_BUTTON_OFF):upper()
 
+--- LHAS console dropdown equality uses `item.data`; getFunction and default must return `{ data = value }`.
+--- @param storedValue any
+--- @return table
+local function ConsoleLHASDropdownGetData(storedValue)
+    return { data = storedValue }
+end
+
 local CHAT_TAB_TOGGLE_COL_WIDTH = 48
 local CHAT_TAB_COL_SYSTEM_WIDTH = 56
 local CHAT_TAB_COL_GAP = 8
@@ -554,9 +561,11 @@ local function GetLibChatMessageTagPrefixValues()
     return { 1, 2, 3 }
 end
 
+local LCM_TAG_PREFIX_DEFAULT = 1
+
 local function GetLibChatMessageTagPrefixMode()
     if not LibChatMessage then
-        return 2
+        return LCM_TAG_PREFIX_DEFAULT
     end
     return LibChatMessage:GetTagPrefixMode()
 end
@@ -580,7 +589,7 @@ local function AppendLibChatMessageTimeLAMControls(controls, SettingsAPI)
         SetLibChatMessageTagPrefixMode,
         "full",
         nil,
-        LibChatMessage and LibChatMessage.TAG_PREFIX_LONG or 2,
+        LibChatMessage and LibChatMessage.TAG_PREFIX_OFF or LCM_TAG_PREFIX_DEFAULT,
         nil,
         "name-up",
         nil,
@@ -647,11 +656,13 @@ local function AppendLibChatMessageTimeConsoleControls(settings, LHAS)
             end
             return items
         end,
-        getFunction = GetLibChatMessageTagPrefixMode,
+        getFunction = function ()
+            return ConsoleLHASDropdownGetData(GetLibChatMessageTagPrefixMode())
+        end,
         setFunction = function (_combobox, _value, item)
             SetLibChatMessageTagPrefixMode(item.data or _value)
         end,
-        default = 2,
+        default = ConsoleLHASDropdownGetData(LibChatMessage and LibChatMessage.TAG_PREFIX_OFF or LCM_TAG_PREFIX_DEFAULT),
     }
 
     settings[#settings + 1] =
@@ -668,11 +679,13 @@ local function AppendLibChatMessageTimeConsoleControls(settings, LHAS)
             end
             return items
         end,
-        getFunction = GetLibChatMessageTimeFormatPresetDropdownValue,
+        getFunction = function ()
+            return ConsoleLHASDropdownGetData(GetLibChatMessageTimeFormatPresetDropdownValue())
+        end,
         setFunction = function (_combobox, _value, item)
             SetLibChatMessageTimeFormatPresetDropdownValue(item.data or _value)
         end,
-        default = LCM_TIME_FORMAT_FALLBACK,
+        default = ConsoleLHASDropdownGetData(LCM_TIME_FORMAT_FALLBACK),
         disable = IsLibChatMessageTimeFormatPresetDropdownDisabled,
     }
 
@@ -826,6 +839,21 @@ local function AppendLuiExtendedTimestampConsoleControls(settings, LHAS, Setting
             return IsLuiExtendedTimestampFormatFieldDisabled(Settings)
         end,
     }
+end
+
+local CHAT_METHOD_SV_ALL_TABS = "Print to All Tabs"
+local CHAT_METHOD_SV_SPECIFIC_TABS = "Print to Specific Tabs"
+
+local function GetChatMethodDropdownChoices()
+    return
+    {
+        GetString(LUIE_STRING_LAM_CA_CHATMETHOD_ALL_TABS),
+        GetString(LUIE_STRING_LAM_CA_CHATMETHOD_SPECIFIC_TABS),
+    }
+end
+
+local function GetChatMethodDropdownValues()
+    return { CHAT_METHOD_SV_ALL_TABS, CHAT_METHOD_SV_SPECIFIC_TABS }
 end
 
 local function GetChatOutputIntegrationNote()
@@ -1222,7 +1250,7 @@ function LUIE_ChatOutputSettingsUI:BuildChatOutputLAMControls(SettingsAPI)
     controls[#controls + 1] = SettingsAPI.CreateDropdownOption(
         GetString(LUIE_STRING_LAM_CA_CHATMETHOD),
         GetString(LUIE_STRING_LAM_CA_CHATMETHOD_TP),
-        { "Print to All Tabs", "Print to Specific Tabs" },
+        GetChatMethodDropdownChoices(),
         function ()
             return Settings.ChatMethod
         end,
@@ -1233,7 +1261,9 @@ function LUIE_ChatOutputSettingsUI:BuildChatOutputLAMControls(SettingsAPI)
         nil,
         Defaults.ChatMethod,
         nil,
-        "name-up"
+        "name-up",
+        nil,
+        GetChatMethodDropdownValues()
     )
 
     controls[#controls + 1] = SettingsAPI.CreateDividerOption()
@@ -1247,15 +1277,19 @@ end
 
 --- @param settings table LHAS settings array to append to
 --- @param LHAS table LibHarvensAddonSettings
-function LUIE_ChatOutputSettingsUI:AppendChatOutputConsoleControls(settings, LHAS)
+--- @param options table|nil `{ omitSectionHeader = true }` when rows live under an ST_SECTION titled Chat Output
+function LUIE_ChatOutputSettingsUI:AppendChatOutputConsoleControls(settings, LHAS, options)
     local Settings = GetChatOutputSettings()
     local Defaults = GetChatOutputDefaults()
+    options = options or {}
 
-    settings[#settings + 1] =
-    {
-        type = LHAS.ST_LABEL,
-        label = GetString(LUIE_STRING_LAM_CHATOUTPUT_HEADER),
-    }
+    if not options.omitSectionHeader then
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CHATOUTPUT_HEADER),
+        }
+    end
 
     settings[#settings + 1] =
     {
@@ -1301,6 +1335,7 @@ end
 
 --- @param settings table
 --- @param LHAS table
-function LUIE.AppendChatOutputConsoleControls(settings, LHAS)
-    GetChatOutputSettingsUI():AppendChatOutputConsoleControls(settings, LHAS)
+--- @param options table|nil
+function LUIE.AppendChatOutputConsoleControls(settings, LHAS, options)
+    GetChatOutputSettingsUI():AppendChatOutputConsoleControls(settings, LHAS, options)
 end

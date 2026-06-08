@@ -12,6 +12,19 @@ local UnitFrames = LUIE.UnitFrames
 
 local separateCaptionFontCategories = UnitFrames.APPEARANCE_SEPARATE_CAPTION_FONT_CATEGORIES
 
+UnitFrames.LUIE_DEFAULT_FONT_FACE = "LUIE Default Font"
+
+--- Resolves a LuiMedia font registry key to a ZO_CreateFontString face path.
+--- @param fontFaceKey string|nil
+--- @return string
+function UnitFrames.ResolveLuiMediaFontPath(fontFaceKey)
+    local fontName = fontFaceKey and LUIE.Fonts[fontFaceKey]
+    if not fontName or fontName == "" then
+        fontName = LUIE.Fonts[UnitFrames.LUIE_DEFAULT_FONT_FACE] or UnitFrames.LUIE_DEFAULT_FONT_FACE
+    end
+    return fontName
+end
+
 --- @param category string
 --- @return boolean
 local function categoryUsesSeparateCaptionFont(category)
@@ -20,13 +33,7 @@ end
 
 local function __applyFont(unitTag)
     -- First try selecting font face
-    local fontName = LUIE.Fonts[UnitFrames.SV.DefaultFontFace]
-    if not fontName or fontName == "" then
-        -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE:Log("Debug",GetString(LUIE_STRING_ERROR_FONT))
-        -- end
-        fontName = "LUIE Default Font"
-    end
+    local fontName = UnitFrames.ResolveLuiMediaFontPath(UnitFrames.SV.DefaultFontFace)
 
     local fontStyle = UnitFrames.SV.DefaultFontStyle
     local fontSize = (UnitFrames.SV.DefaultFontSize and UnitFrames.SV.DefaultFontSize > 0) and UnitFrames.SV.DefaultFontSize or 16
@@ -62,10 +69,7 @@ local function CustomFramesMakeFont(fontName, fontStyle, size)
 end
 
 local function ResolveCustomFrameFont(appearance)
-    local fontName = LUIE.Fonts[appearance.fontFace]
-    if not fontName or fontName == "" then
-        fontName = "LUIE Default Font"
-    end
+    local fontName = UnitFrames.ResolveLuiMediaFontPath(appearance.fontFace)
     local fontStyle = appearance.fontStyle
     local sizeCaption = (appearance.fontOther and appearance.fontOther > 0) and appearance.fontOther or 16
     local sizeBars = (appearance.fontBars and appearance.fontBars > 0) and appearance.fontBars or 14

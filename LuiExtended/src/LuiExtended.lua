@@ -28,8 +28,31 @@ LUIE.__index = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.3.8"
-LUIE.addonVersion = 7238
+
+--- @return string
+function LUIE.FormatStartupChatMessage()
+    return zo_strformat(GetString(LUIE_STRING_CORE_STARTUP_CHAT), LUIE.name, LUIE.author, LUIE.version)
+end
+
+--- @return string
+function LUIE.FormatChangelogWindowTitle()
+    return zo_strformat(GetString(LUIE_STRING_CORE_CHANGELOG_WINDOW_TITLE), LUIE.name)
+end
+
+--- @param moduleStringId integer
+--- @return string
+function LUIE.FormatAddonSettingsPanelTitle(moduleStringId)
+    return zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(moduleStringId))
+end
+
+--- @param moduleStringId integer
+--- @return string
+function LUIE.FormatAddonSettingsPanelDisplayName(moduleStringId)
+    return zo_strformat("<<1>> <<2>>", LUIE.name, GetString(moduleStringId))
+end
+
+LUIE.version = "7.2.3.9"
+LUIE.addonVersion = 7239
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -216,9 +239,6 @@ LUIE.Defaults =
     HideAlertFrame              = false,
     AlertFrameAlignment         = 3,
     HideXPBar                   = false,
-    TempAlertHome               = false,
-    TempAlertCampaign           = false,
-    TempAlertOutfit             = false,
     WelcomeVersion              = 0,
     ShowChangeLog               = false,
 
@@ -365,8 +385,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {

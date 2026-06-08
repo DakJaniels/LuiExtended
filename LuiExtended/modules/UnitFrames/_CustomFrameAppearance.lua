@@ -24,7 +24,7 @@ UnitFrames.APPEARANCE_CATEGORY_IDS =
     "ava",
 }
 
---- Categories whose custom frames use a separate `_TopInfo` caption row (see _CreateCustomFrames.lua).
+--- Categories whose custom frames use a separate `_TopInfo` caption row (see CustomFrames/*CustomFrameData.lua).
 UnitFrames.APPEARANCE_SEPARATE_CAPTION_FONT_CATEGORIES =
 {
     player = true,
@@ -62,20 +62,6 @@ end
 --- @return string|nil
 function UnitFrames.GetAppearanceCategoryForBaseName(baseName)
     return BASE_NAME_TO_CATEGORY[baseName]
-end
-
---- Ensures SV table exists for a category (mutates SV).
---- @param category string
---- @return table
-function UnitFrames.EnsureCustomFrameAppearance(category)
-    local sv = UnitFrames.SV
-    if not sv.CustomFrameAppearance then
-        sv.CustomFrameAppearance = {}
-    end
-    if not sv.CustomFrameAppearance[category] then
-        sv.CustomFrameAppearance[category] = {}
-    end
-    return sv.CustomFrameAppearance[category]
 end
 
 --- @param category string
@@ -190,4 +176,59 @@ function UnitFrames.MigrateCustomFrameAppearanceCompactFontSync()
         end
     end
     LUIE.MarkMigrationDone("unitframes_custom_appearance_v3")
+end
+
+local LUIE_DEFAULT_FONT_FACE = "LUIE Default Font"
+local LUIE_DEFAULT_TEXTURE = "Minimalistic"
+
+local FONT_FACE_ALIASES =
+{
+    ["LUIE-Standardschrift"] = LUIE_DEFAULT_FONT_FACE,
+}
+
+local TEXTURE_ALIASES =
+{
+    ["Minimalistisch"] = LUIE_DEFAULT_TEXTURE,
+}
+
+local function NormalizeLuiMediaFontFaceKey(fontFace)
+    if not fontFace or fontFace == "" then
+        return fontFace
+    end
+    if LUIE.Fonts[fontFace] then
+        return fontFace
+    end
+    return FONT_FACE_ALIASES[fontFace] or fontFace
+end
+
+local function NormalizeLuiMediaTextureKey(texture)
+    if not texture or texture == "" then
+        return texture
+    end
+    return TEXTURE_ALIASES[texture] or texture
+end
+
+--- Fixes saved font/texture keys that were localized (must match LuiMedia registry names).
+function UnitFrames.MigrateLuiMediaAppearanceKeys()
+    if LUIE.IsMigrationDone("unitframes_luimedia_registry_keys") then
+        return
+    end
+    local sv = UnitFrames.SV
+    if sv.DefaultFontFace then
+        sv.DefaultFontFace = NormalizeLuiMediaFontFaceKey(sv.DefaultFontFace)
+    end
+    if sv.CustomFrameAppearance then
+        for _, category in ipairs(UnitFrames.APPEARANCE_CATEGORY_IDS) do
+            local entry = sv.CustomFrameAppearance[category]
+            if entry then
+                if entry.fontFace then
+                    entry.fontFace = NormalizeLuiMediaFontFaceKey(entry.fontFace)
+                end
+                if entry.texture then
+                    entry.texture = NormalizeLuiMediaTextureKey(entry.texture)
+                end
+            end
+        end
+    end
+    LUIE.MarkMigrationDone("unitframes_luimedia_registry_keys")
 end

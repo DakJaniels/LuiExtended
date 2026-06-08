@@ -34,6 +34,25 @@ local BOUNCE_DURATION_MS = ActionBar.BOUNCE_DURATION_MS
 local g_backbarButtons = {}
 local g_backbarContainer
 
+local function ShouldHideDefaultBackRowTimers()
+    if not ActionBar.SV.BarShowBack or not g_backbarContainer or g_backbarContainer:IsHidden() then
+        return false
+    end
+    if GetUnitLevel("player") < GetWeaponSwapUnlockedLevel() then
+        return false
+    end
+    if Backbar.OakensoulEquipped() then
+        return false
+    end
+    for buffIndex = 1, GetNumBuffs("player") do
+        local _, _, _, _, _, _, _, _, abilityType = GetUnitBuffInfo("player", buffIndex)
+        if abilityType == ABILITY_TYPE_SETHOTBAR then
+            return false
+        end
+    end
+    return true
+end
+
 local function GetActionBarControl()
     return ZO_ActionBar1
 end
@@ -400,6 +419,22 @@ end
 
 -- -----------------------------------------------------------------------------
 
+--- While Show Backbar is on, hide the game's default back-row timer slots so they do not stack on LUIE's row.
+function Backbar.SyncDefaultBackRowTimers()
+    local shouldHide = ShouldHideDefaultBackRowTimers()
+    local inactiveHotbar = Backbar.GetInactiveHotbarCategory()
+    for i = BAR_INDEX_START, BACKBAR_INDEX_END do
+        local defaultBackRowButton = ZO_ActionBar_GetButton(i, inactiveHotbar)
+        if defaultBackRowButton and defaultBackRowButton.slot then
+            if shouldHide then
+                defaultBackRowButton.slot:SetHidden(true)
+            elseif defaultBackRowButton.SetupBackRowSlot then
+                defaultBackRowButton:SetupBackRowSlot(i, inactiveHotbar)
+            end
+        end
+    end
+end
+
 local function ApplyStyle(self, template)
     WINDOW_MANAGER:ApplyTemplateToControl(self.slot, template)
 
@@ -407,6 +442,9 @@ local function ApplyStyle(self, template)
     self.button:SetNormalTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.normal)
     self.button:SetPressedTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown)
     self.countText:SetFont(isGamepad and "ZoFontGamepadBold27" or "ZoFontGameShadow")
+    if self.buttonText then
+        self.buttonText:SetHidden(true)
+    end
     self:ApplySwapAnimationStyle()
 
     if ZO_ActionBar_IsUltimateSlot(self:GetSlot(), self:GetHotbarCategory()) then
@@ -444,38 +482,50 @@ end
 function Backbar.BackbarSetupTemplate()
     local style = GetPlatformConstants()
     local weaponSwapControl = style.weaponSwapControl
-
-    -- Set positions for new buttons, modified from actionbar.lua - function ApplyStyle(style) )
-    local lastButton
     local buttonTemplate = ZO_GetPlatformTemplate("ZO_ActionButton")
-    for i = BAR_INDEX_START, BAR_INDEX_END do
-        -- Get our backbar button
-        local targetButton = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
+    local isGamepad = IsInGamepadPreferredMode()
 
-        -- Normal slots
-        if i > 2 and i < 8 then
+    if isGamepad then
+        for i = BAR_INDEX_START, BACKBAR_INDEX_END do
+            if i > 2 and i < 8 then
+                local targetButton = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
+                local frontButton = ZO_ActionBar_GetButton(i)
+                if targetButton and frontButton and frontButton.slot then
+                    targetButton.slot:ClearAnchors()
+                    targetButton.slot:SetAnchor(BOTTOM, frontButton.slot, TOP, 0, style.backbarRowGap)
+                    if targetButton.ApplySwapAnimationStyle then
+                        targetButton:ApplySwapAnimationStyle()
+                    end
+                    ApplyStyle(targetButton, buttonTemplate)
+                end
+            end
+        end
+    else
+        local lastButton
+        for i = BAR_INDEX_START, BACKBAR_INDEX_END do
+            local targetButton = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
             local anchorTarget = lastButton and lastButton.slot
             if not lastButton then
                 anchorTarget = weaponSwapControl
             end
             targetButton:ApplyAnchor(anchorTarget, style.abilitySlotOffsetX)
             ApplyStyle(targetButton, buttonTemplate)
+            lastButton = targetButton
         end
 
-        lastButton = targetButton
+        local offsetY = GetActionBarControl():GetHeight() * style.backbarHeightMultiplier
+        local finalOffset = -(offsetY * style.backbarOffsetMultiplier)
+        local ActionButton3 = GetControl("ActionButton3")
+        local ActionButton53 = GetControl("ActionButton53")
+        if ActionButton53 and ActionButton3 then
+            ActionButton53:ClearAnchors()
+            ActionButton53:SetAnchor(CENTER, ActionButton3, CENTER, 0, finalOffset)
+        end
     end
 
-    -- Anchor the backbar to the normal action bar with spacing
-    local offsetY = GetActionBarControl():GetHeight() * style.backbarHeightMultiplier
-    local finalOffset = -(offsetY * style.backbarOffsetMultiplier)
-    local ActionButton3 = GetControl("ActionButton3")
-    local ActionButton53 = GetControl("ActionButton53")
-    if ActionButton53 then
-        ActionButton53:ClearAnchors()
-        ActionButton53:SetAnchor(CENTER, ActionButton3, CENTER, 0, finalOffset)
-    end
-
+    Backbar.SyncDefaultBackRowTimers()
     ActionBar.RefreshCompanionQuickslotAnchors()
+    ActionBar.SyncMainRowUltimateAnchor()
     ActionBar.ApplyDisplayAlpha()
 end
 
@@ -487,15 +537,18 @@ function Backbar.BackbarToggleSettings()
     if ActionBar.SV.BarShowBack and g_backbarContainer then
         if GetUnitLevel("player") < GetWeaponSwapUnlockedLevel() then
             g_backbarContainer:SetHidden(true)
+            Backbar.SyncDefaultBackRowTimers()
             return
         elseif Backbar.OakensoulEquipped() then
             g_backbarContainer:SetHidden(true)
+            Backbar.SyncDefaultBackRowTimers()
             return
         end
         for i = 1, GetNumBuffs("player") do
             local _, _, _, _, _, _, _, _, abilityType = GetUnitBuffInfo("player", i)
             if abilityType == ABILITY_TYPE_SETHOTBAR then
                 g_backbarContainer:SetHidden(true)
+                Backbar.SyncDefaultBackRowTimers()
                 return
             end
         end
@@ -520,6 +573,7 @@ function Backbar.BackbarToggleSettings()
             targetButton.slot:SetHidden(true)
         end
     end
+    Backbar.SyncDefaultBackRowTimers()
 end
 
 function Backbar.CreateUI()
@@ -639,7 +693,7 @@ end
 local forward =
 {
     "SetupBackBarIcons", "BackbarHideSlot", "BackbarShowSlot", "ToggleBackbarSaturation",
-    "BackbarSetupTemplate", "BackbarToggleSettings",
+    "BackbarSetupTemplate", "BackbarToggleSettings", "SyncDefaultBackRowTimers",
     "HideAllAbilityActionButtonDropCallouts", "ShowAppropriateAbilityActionButtonDropCallouts",
     "OakensoulEquipped", "GetInactiveHotbarCategory", "UpdateActivationHighlight", "RefreshAllActivationHighlights",
     "OnPhysicalSlotVisualSync",

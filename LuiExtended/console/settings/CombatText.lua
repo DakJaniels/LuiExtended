@@ -18,8 +18,24 @@ local LHAS = LibHarvensAddonSettings
 local type, pairs = type, pairs
 local zo_strformat = zo_strformat
 
-local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
-local globalIconOptionsKeys = { ["All Crowd Control"] = 1, ["NPC CC Only"] = 2, ["Player CC Only"] = 3 }
+local animationTypeLabels =
+{
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_CLOUD),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_HYBRID),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_SCROLL),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ELLIPSE),
+}
+local directionTypeLabels =
+{
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_UP),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_DOWN),
+}
+local iconSideLabels =
+{
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ICON_NONE),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ICON_LEFT),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ICON_RIGHT),
+}
 
 -- Convert to LHAS format {name, data}
 local function GenerateCustomListLHAS(input)
@@ -75,7 +91,7 @@ function CombatText.CreateConsoleSettings()
     end
 
     -- Create the addon settings panel
-    local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CT)),
+    local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_CT),
                                 {
                                     allowDefaults = true,
                                     defaultsFunction = function ()
@@ -286,7 +302,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure common combat text display options.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CT_COMMON),
         }
 
         settings[#settings + 1] =
@@ -302,7 +318,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_CT_OOC_TRANSPARENCY),
+            label = GetString(LUIE_STRING_SHARED_OOC_OPACITY),
             tooltip = GetString(LUIE_STRING_LAM_CT_OOC_TRANSPARENCY_TP),
             min = 0,
             max = 100,
@@ -316,7 +332,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_CT_IC_TRANSPARENCY),
+            label = GetString(LUIE_STRING_SHARED_IC_OPACITY),
             tooltip = GetString(LUIE_STRING_LAM_CT_IC_TRANSPARENCY_TP),
             min = 0,
             max = 100,
@@ -374,20 +390,13 @@ function CombatText.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
             items = SettingsAPI:GetGlobalIconOptionsList(),
             getFunction = function ()
-                local index = Settings.common.defaultIconOptions
-                if type(index) == "string" then
-                    index = globalIconOptionsKeys[index] or 1
-                end
-                if type(index) ~= "number" or index < 1 or index > #globalIconOptions then
-                    index = 1
-                end
-                return globalIconOptions[index] or globalIconOptions[1]
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeGlobalIconOptionIndex(Settings.common.defaultIconOptions, Defaults.common.defaultIconOptions))
             end,
             setFunction = function (combobox, value, item)
                 Settings.common.defaultIconOptions = item.data or 1
             end,
             disable = function () return not Settings.common.useDefaultIcon end,
-            default = globalIconOptions[Defaults.common.defaultIconOptions]
+            default = SettingsAPI:LHASDropdownGetData(Defaults.common.defaultIconOptions)
         }
     end)
 
@@ -633,8 +642,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DAMAGE_TP),
-            getFunction = function () return Settings.formats.damage end,
-            setFunction = function (v) Settings.formats.damage = v end,
+            getFunction = function () return CombatText.GetFormat("damage") end,
+            setFunction = function (v) CombatText.SetFormat("damage", v) end,
             default = Defaults.formats.damage
         }
 
@@ -643,8 +652,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DAMAGE_CRITICAL_TP),
-            getFunction = function () return Settings.formats.damagecritical end,
-            setFunction = function (v) Settings.formats.damagecritical = v end,
+            getFunction = function () return CombatText.GetFormat("damagecritical") end,
+            setFunction = function (v) CombatText.SetFormat("damagecritical", v) end,
             default = Defaults.formats.damagecritical
         }
 
@@ -707,8 +716,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DOT_TP),
-            getFunction = function () return Settings.formats.dot end,
-            setFunction = function (v) Settings.formats.dot = v end,
+            getFunction = function () return CombatText.GetFormat("dot") end,
+            setFunction = function (v) CombatText.SetFormat("dot", v) end,
             default = Defaults.formats.dot
         }
 
@@ -717,8 +726,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DOT_CRITICAL_TP),
-            getFunction = function () return Settings.formats.dotcritical end,
-            setFunction = function (v) Settings.formats.dotcritical = v end,
+            getFunction = function () return CombatText.GetFormat("dotcritical") end,
+            setFunction = function (v) CombatText.SetFormat("dotcritical", v) end,
             default = Defaults.formats.dotcritical
         }
 
@@ -958,8 +967,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HEALING_TP),
-            getFunction = function () return Settings.formats.healing end,
-            setFunction = function (v) Settings.formats.healing = v end,
+            getFunction = function () return CombatText.GetFormat("healing") end,
+            setFunction = function (v) CombatText.SetFormat("healing", v) end,
             default = Defaults.formats.healing
         }
 
@@ -968,8 +977,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HEALING_CRITICAL_TP),
-            getFunction = function () return Settings.formats.healingcritical end,
-            setFunction = function (v) Settings.formats.healingcritical = v end,
+            getFunction = function () return CombatText.GetFormat("healingcritical") end,
+            setFunction = function (v) CombatText.SetFormat("healingcritical", v) end,
             default = Defaults.formats.healingcritical
         }
 
@@ -1032,8 +1041,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HOT_TP),
-            getFunction = function () return Settings.formats.hot end,
-            setFunction = function (v) Settings.formats.hot = v end,
+            getFunction = function () return CombatText.GetFormat("hot") end,
+            setFunction = function (v) CombatText.SetFormat("hot", v) end,
             default = Defaults.formats.hot
         }
 
@@ -1042,8 +1051,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HOT_CRITICAL_TP),
-            getFunction = function () return Settings.formats.hotcritical end,
-            setFunction = function (v) Settings.formats.hotcritical = v end,
+            getFunction = function () return CombatText.GetFormat("hotcritical") end,
+            setFunction = function (v) CombatText.SetFormat("hotcritical", v) end,
             default = Defaults.formats.hotcritical
         }
 
@@ -1178,8 +1187,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_ENERGIZE_TP),
-            getFunction = function () return Settings.formats.energize end,
-            setFunction = function (v) Settings.formats.energize = v end,
+            getFunction = function () return CombatText.GetFormat("energize") end,
+            setFunction = function (v) CombatText.SetFormat("energize", v) end,
             default = Defaults.formats.energize
         }
 
@@ -1234,8 +1243,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_ENERGIZE_ULTIMATE_TP),
-            getFunction = function () return Settings.formats.ultimateEnergize end,
-            setFunction = function (v) Settings.formats.ultimateEnergize = v end,
+            getFunction = function () return CombatText.GetFormat("ultimateEnergize") end,
+            setFunction = function (v) CombatText.SetFormat("ultimateEnergize", v) end,
             default = Defaults.formats.ultimateEnergize
         }
 
@@ -1291,8 +1300,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DRAIN_TP),
-            getFunction = function () return Settings.formats.drain end,
-            setFunction = function (v) Settings.formats.drain = v end,
+            getFunction = function () return CombatText.GetFormat("drain") end,
+            setFunction = function (v) CombatText.SetFormat("drain", v) end,
             default = Defaults.formats.drain
         }
 
@@ -1555,8 +1564,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_COMBAT_IN)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_COMBAT_IN_TP),
-            getFunction = function () return Settings.formats.inCombat end,
-            setFunction = function (v) Settings.formats.inCombat = v end,
+            getFunction = function () return CombatText.GetFormat("inCombat") end,
+            setFunction = function (v) CombatText.SetFormat("inCombat", v) end,
             default = Defaults.formats.inCombat
         }
 
@@ -1565,8 +1574,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_COMBAT_OUT)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_COMBAT_OUT_TP),
-            getFunction = function () return Settings.formats.outCombat end,
-            setFunction = function (v) Settings.formats.outCombat = v end,
+            getFunction = function () return CombatText.GetFormat("outCombat") end,
+            setFunction = function (v) CombatText.SetFormat("outCombat", v) end,
             default = Defaults.formats.outCombat
         }
 
@@ -1636,8 +1645,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_DEATH_FORMAT_TP),
-            getFunction = function () return Settings.formats.death end,
-            setFunction = function (v) Settings.formats.death = v end,
+            getFunction = function () return CombatText.GetFormat("death") end,
+            setFunction = function (v) CombatText.SetFormat("death", v) end,
             default = Defaults.formats.death
         }
 
@@ -1776,8 +1785,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_ULTIMATE_READY)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_ULTIMATE_TP),
-            getFunction = function () return Settings.formats.ultimateReady end,
-            setFunction = function (v) Settings.formats.ultimateReady = v end,
+            getFunction = function () return CombatText.GetFormat("ultimateReady") end,
+            setFunction = function (v) CombatText.SetFormat("ultimateReady", v) end,
             default = Defaults.formats.ultimateReady
         }
 
@@ -1786,8 +1795,8 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_POTION_READY)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_POTION_TP),
-            getFunction = function () return Settings.formats.potionReady end,
-            setFunction = function (v) Settings.formats.potionReady = v end,
+            getFunction = function () return CombatText.GetFormat("potionReady") end,
+            setFunction = function (v) CombatText.SetFormat("potionReady", v) end,
             default = Defaults.formats.potionReady
         }
 
@@ -1905,7 +1914,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure font settings for combat text display.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CT_FONT),
             canSelect = false,
         }
 
@@ -1996,7 +2005,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure animation settings for combat text display.",
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CT_ANIMATION),
         }
 
         settings[#settings + 1] =
@@ -2007,7 +2016,7 @@ function CombatText.CreateConsoleSettings()
             items = function ()
                 local items = {}
                 for i, option in ipairs(CombatTextConstants.animationType) do
-                    items[i] = { name = option, data = option }
+                    items[i] = { name = animationTypeLabels[i], data = option }
                 end
                 return items
             end,
@@ -2050,7 +2059,7 @@ function CombatText.CreateConsoleSettings()
             items = function ()
                 local items = {}
                 for i, option in ipairs(CombatTextConstants.directionType) do
-                    items[i] = { name = option, data = option }
+                    items[i] = { name = directionTypeLabels[i], data = option }
                 end
                 return items
             end,
@@ -2071,7 +2080,7 @@ function CombatText.CreateConsoleSettings()
             items = function ()
                 local items = {}
                 for i, option in ipairs(CombatTextConstants.iconSide) do
-                    items[i] = { name = option, data = option }
+                    items[i] = { name = iconSideLabels[i], data = option }
                 end
                 return items
             end,
@@ -2092,7 +2101,7 @@ function CombatText.CreateConsoleSettings()
             items = function ()
                 local items = {}
                 for i, option in ipairs(CombatTextConstants.directionType) do
-                    items[i] = { name = option, data = option }
+                    items[i] = { name = directionTypeLabels[i], data = option }
                 end
                 return items
             end,
@@ -2113,7 +2122,7 @@ function CombatText.CreateConsoleSettings()
             items = function ()
                 local items = {}
                 for i, option in ipairs(CombatTextConstants.iconSide) do
-                    items[i] = { name = option, data = option }
+                    items[i] = { name = iconSideLabels[i], data = option }
                 end
                 return items
             end,

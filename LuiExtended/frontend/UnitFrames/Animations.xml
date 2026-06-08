@@ -75,5 +75,19 @@
                           framerate="32" />
       </Animations>
     </AnimationTimeline>
+    <!-- Companion rapport delta: float up and fade (offsets configured in Lua) -->
+    <AnimationTimeline name="LUIE_CompanionRapportFlourishAnimation">
+      <Animations>
+        <TranslateAnimation duration="2800"
+                            anchorIndex="0" />
+        <AlphaAnimation duration="2050"
+                        startAlpha="1"
+                        endAlpha="0">
+          <EasingFunction>
+						return ZO_EaseOutQuadratic(progress)
+					</EasingFunction>
+        </AlphaAnimation>
+      </Animations>
+    </AnimationTimeline>
   </Animations>
 </GuiXml>

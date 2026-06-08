@@ -17,8 +17,37 @@ local BlacklistPresets = LuiData.Data.CombatTextBlacklistPresets
 local type, pairs = type, pairs
 local zo_strformat = zo_strformat
 
-local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
-local globalIconOptionsKeys = { ["All Crowd Control"] = 1, ["NPC CC Only"] = 2, ["Player CC Only"] = 3 }
+local globalIconOptions =
+{
+    GetString(LUIE_STRING_SHARED_CC_ALL),
+    GetString(LUIE_STRING_SHARED_CC_NPC_ONLY),
+    GetString(LUIE_STRING_SHARED_CC_PLAYER_ONLY),
+}
+local globalIconOptionValues = { 1, 2, 3 }
+
+local animationTypeLabels =
+{
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_CLOUD),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_HYBRID),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_SCROLL),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ELLIPSE),
+}
+local animationTypeValues = CombatTextConstants.animationType
+
+local directionTypeLabels =
+{
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_UP),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_DOWN),
+}
+local directionTypeValues = CombatTextConstants.directionType
+
+local iconSideLabels =
+{
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ICON_NONE),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ICON_LEFT),
+    GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ICON_RIGHT),
+}
+local iconSideValues = CombatTextConstants.iconSide
 
 local Blacklist, BlacklistValues = {}, {}
 
@@ -74,8 +103,8 @@ function CombatText.CreateSettings()
     local panelDataCombatText =
     {
         type = "panel",
-        name = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CT)),
-        displayName = zo_strformat("<<1>> <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CT)),
+        name = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_CT),
+        displayName = LUIE.FormatAddonSettingsPanelDisplayName(LUIE_STRING_LAM_CT),
         author = LUIE.author .. "\n",
         version = LUIE.version,
         website = LUIE.website,
@@ -163,7 +192,7 @@ function CombatText.CreateSettings()
             },
             {
                 type = "slider",
-                name = GetString(LUIE_STRING_LAM_CT_OOC_TRANSPARENCY),
+                name = GetString(LUIE_STRING_SHARED_OOC_OPACITY),
                 tooltip = GetString(LUIE_STRING_LAM_CT_OOC_TRANSPARENCY_TP),
                 min = 0,
                 max = 100,
@@ -178,7 +207,7 @@ function CombatText.CreateSettings()
             },
             {
                 type = "slider",
-                name = GetString(LUIE_STRING_LAM_CT_IC_TRANSPARENCY),
+                name = GetString(LUIE_STRING_SHARED_IC_OPACITY),
                 tooltip = GetString(LUIE_STRING_LAM_CT_IC_TRANSPARENCY_TP),
                 min = 0,
                 max = 100,
@@ -253,24 +282,33 @@ function CombatText.CreateSettings()
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
                 choices = globalIconOptions,
+                choicesValues = globalIconOptionValues,
                 getFunc = function ()
                     local index = Settings.common.defaultIconOptions
                     if type(index) == "string" then
-                        index = globalIconOptionsKeys[index] or 1
+                        if index == "All Crowd Control" then
+                            index = 1
+                        elseif index == "NPC CC Only" then
+                            index = 2
+                        elseif index == "Player CC Only" then
+                            index = 3
+                        else
+                            index = 1
+                        end
                     end
-                    if type(index) ~= "number" or index < 1 or index > #globalIconOptions then
+                    if type(index) ~= "number" or index < 1 or index > #globalIconOptionValues then
                         index = 1
                     end
-                    return globalIconOptions[index]
+                    return index
                 end,
                 setFunc = function (value)
-                    Settings.common.defaultIconOptions = globalIconOptionsKeys[value] or 1
+                    Settings.common.defaultIconOptions = value or 1
                 end,
                 width = "full",
                 disabled = function ()
                     return not Settings.common.useDefaultIcon
                 end,
-                default = globalIconOptions[Defaults.common.defaultIconOptions],
+                default = Defaults.common.defaultIconOptions,
             },
         },
     }
@@ -468,10 +506,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DAMAGE_TP),
                 getFunc = function ()
-                    return Settings.formats.damage
+                    return CombatText.GetFormat("damage")
                 end,
                 setFunc = function (v)
-                    Settings.formats.damage = v
+                    CombatText.SetFormat("damage", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.damage,
@@ -483,10 +521,10 @@ function CombatText.CreateSettings()
                 name = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DAMAGE_CRITICAL_TP),
                 getFunc = function ()
-                    return Settings.formats.damagecritical
+                    return CombatText.GetFormat("damagecritical")
                 end,
                 setFunc = function (v)
-                    Settings.formats.damagecritical = v
+                    CombatText.SetFormat("damagecritical", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.damagecritical,
@@ -565,10 +603,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DOT_TP),
                 getFunc = function ()
-                    return Settings.formats.dot
+                    return CombatText.GetFormat("dot")
                 end,
                 setFunc = function (v)
-                    Settings.formats.dot = v
+                    CombatText.SetFormat("dot", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.dot,
@@ -580,10 +618,10 @@ function CombatText.CreateSettings()
                 name = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DOT_CRITICAL_TP),
                 getFunc = function ()
-                    return Settings.formats.dotcritical
+                    return CombatText.GetFormat("dotcritical")
                 end,
                 setFunc = function (v)
-                    Settings.formats.dotcritical = v
+                    CombatText.SetFormat("dotcritical", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.dotcritical,
@@ -979,10 +1017,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HEALING_TP),
                 getFunc = function ()
-                    return Settings.formats.healing
+                    return CombatText.GetFormat("healing")
                 end,
                 setFunc = function (v)
-                    Settings.formats.healing = v
+                    CombatText.SetFormat("healing", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.healing,
@@ -994,10 +1032,10 @@ function CombatText.CreateSettings()
                 name = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HEALING_CRITICAL_TP),
                 getFunc = function ()
-                    return Settings.formats.healingcritical
+                    return CombatText.GetFormat("healingcritical")
                 end,
                 setFunc = function (v)
-                    Settings.formats.healingcritical = v
+                    CombatText.SetFormat("healingcritical", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.healingcritical,
@@ -1076,10 +1114,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HOT_TP),
                 getFunc = function ()
-                    return Settings.formats.hot
+                    return CombatText.GetFormat("hot")
                 end,
                 setFunc = function (v)
-                    Settings.formats.hot = v
+                    CombatText.SetFormat("hot", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.hot,
@@ -1091,10 +1129,10 @@ function CombatText.CreateSettings()
                 name = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HOT_CRITICAL_TP),
                 getFunc = function ()
-                    return Settings.formats.hotcritical
+                    return CombatText.GetFormat("hotcritical")
                 end,
                 setFunc = function (v)
-                    Settings.formats.hotcritical = v
+                    CombatText.SetFormat("hotcritical", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.hotcritical,
@@ -1264,10 +1302,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_ENERGIZE_TP),
                 getFunc = function ()
-                    return Settings.formats.energize
+                    return CombatText.GetFormat("energize")
                 end,
                 setFunc = function (v)
-                    Settings.formats.energize = v
+                    CombatText.SetFormat("energize", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.energize,
@@ -1351,10 +1389,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_ENERGIZE_ULTIMATE_TP),
                 getFunc = function ()
-                    return Settings.formats.ultimateEnergize
+                    return CombatText.GetFormat("ultimateEnergize")
                 end,
                 setFunc = function (v)
-                    Settings.formats.ultimateEnergize = v
+                    CombatText.SetFormat("ultimateEnergize", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.ultimateEnergize,
@@ -1433,10 +1471,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DRAIN_TP),
                 getFunc = function ()
-                    return Settings.formats.drain
+                    return CombatText.GetFormat("drain")
                 end,
                 setFunc = function (v)
-                    Settings.formats.drain = v
+                    CombatText.SetFormat("drain", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.drain,
@@ -1555,10 +1593,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_MISS_TP),
                 getFunc = function ()
-                    return Settings.formats.miss
+                    return CombatText.GetFormat("miss")
                 end,
                 setFunc = function (v)
-                    Settings.formats.miss = v
+                    CombatText.SetFormat("miss", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.miss,
@@ -1615,10 +1653,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_IMMUNE_TP),
                 getFunc = function ()
-                    return Settings.formats.immune
+                    return CombatText.GetFormat("immune")
                 end,
                 setFunc = function (v)
-                    Settings.formats.immune = v
+                    CombatText.SetFormat("immune", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.immune,
@@ -1681,10 +1719,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_PARRIED_TP),
                 getFunc = function ()
-                    return Settings.formats.parried
+                    return CombatText.GetFormat("parried")
                 end,
                 setFunc = function (v)
-                    Settings.formats.parried = v
+                    CombatText.SetFormat("parried", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.parried,
@@ -1747,10 +1785,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_REFLECTED_TP),
                 getFunc = function ()
-                    return Settings.formats.reflected
+                    return CombatText.GetFormat("reflected")
                 end,
                 setFunc = function (v)
-                    Settings.formats.reflected = v
+                    CombatText.SetFormat("reflected", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.reflected,
@@ -1813,10 +1851,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DAMAGE_SHIELD_TP),
                 getFunc = function ()
-                    return Settings.formats.damageShield
+                    return CombatText.GetFormat("damageShield")
                 end,
                 setFunc = function (v)
-                    Settings.formats.damageShield = v
+                    CombatText.SetFormat("damageShield", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.damageShield,
@@ -1879,10 +1917,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DODGED_TP),
                 getFunc = function ()
-                    return Settings.formats.dodged
+                    return CombatText.GetFormat("dodged")
                 end,
                 setFunc = function (v)
-                    Settings.formats.dodged = v
+                    CombatText.SetFormat("dodged", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.dodged,
@@ -1945,10 +1983,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_BLOCKED_TP),
                 getFunc = function ()
-                    return Settings.formats.blocked
+                    return CombatText.GetFormat("blocked")
                 end,
                 setFunc = function (v)
-                    Settings.formats.blocked = v
+                    CombatText.SetFormat("blocked", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.blocked,
@@ -2011,10 +2049,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_INTERRUPTED_TP),
                 getFunc = function ()
-                    return Settings.formats.interrupted
+                    return CombatText.GetFormat("interrupted")
                 end,
                 setFunc = function (v)
-                    Settings.formats.interrupted = v
+                    CombatText.SetFormat("interrupted", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.interrupted,
@@ -2112,10 +2150,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DISORIENTED_TP),
                 getFunc = function ()
-                    return Settings.formats.disoriented
+                    return CombatText.GetFormat("disoriented")
                 end,
                 setFunc = function (v)
-                    Settings.formats.disoriented = v
+                    CombatText.SetFormat("disoriented", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.disoriented,
@@ -2178,10 +2216,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_FEARED_TP),
                 getFunc = function ()
-                    return Settings.formats.feared
+                    return CombatText.GetFormat("feared")
                 end,
                 setFunc = function (v)
-                    Settings.formats.feared = v
+                    CombatText.SetFormat("feared", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.feared,
@@ -2244,10 +2282,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_OFF_BALANCE_TP),
                 getFunc = function ()
-                    return Settings.formats.offBalanced
+                    return CombatText.GetFormat("offBalanced")
                 end,
                 setFunc = function (v)
-                    Settings.formats.offBalanced = v
+                    CombatText.SetFormat("offBalanced", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.offBalanced,
@@ -2310,10 +2348,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_SILENCED_TP),
                 getFunc = function ()
-                    return Settings.formats.silenced
+                    return CombatText.GetFormat("silenced")
                 end,
                 setFunc = function (v)
-                    Settings.formats.silenced = v
+                    CombatText.SetFormat("silenced", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.silenced,
@@ -2376,10 +2414,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_STUNNED_TP),
                 getFunc = function ()
-                    return Settings.formats.stunned
+                    return CombatText.GetFormat("stunned")
                 end,
                 setFunc = function (v)
-                    Settings.formats.stunned = v
+                    CombatText.SetFormat("stunned", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.stunned,
@@ -2442,10 +2480,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_CHARMED_TP),
                 getFunc = function ()
-                    return Settings.formats.charmed
+                    return CombatText.GetFormat("charmed")
                 end,
                 setFunc = function (v)
-                    Settings.formats.charmed = v
+                    CombatText.SetFormat("charmed", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.charmed,
@@ -2523,10 +2561,10 @@ function CombatText.CreateSettings()
                 name = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_COMBAT_IN)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_COMBAT_IN_TP),
                 getFunc = function ()
-                    return Settings.formats.inCombat
+                    return CombatText.GetFormat("inCombat")
                 end,
                 setFunc = function (v)
-                    Settings.formats.inCombat = v
+                    CombatText.SetFormat("inCombat", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.inCombat,
@@ -2538,10 +2576,10 @@ function CombatText.CreateSettings()
                 name = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_COMBAT_OUT)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_COMBAT_OUT_TP),
                 getFunc = function ()
-                    return Settings.formats.outCombat
+                    return CombatText.GetFormat("outCombat")
                 end,
                 setFunc = function (v)
-                    Settings.formats.outCombat = v
+                    CombatText.SetFormat("outCombat", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.outCombat,
@@ -2642,10 +2680,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_DEATH_FORMAT_TP),
                 getFunc = function ()
-                    return Settings.formats.death
+                    return CombatText.GetFormat("death")
                 end,
                 setFunc = function (v)
-                    Settings.formats.death = v
+                    CombatText.SetFormat("death", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.death,
@@ -2724,10 +2762,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_ALLIANCE_TP),
                 getFunc = function ()
-                    return Settings.formats.pointsAlliance
+                    return CombatText.GetFormat("pointsAlliance")
                 end,
                 setFunc = function (v)
-                    Settings.formats.pointsAlliance = v
+                    CombatText.SetFormat("pointsAlliance", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.pointsAlliance,
@@ -2775,10 +2813,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_EXPERIENCE_TP),
                 getFunc = function ()
-                    return Settings.formats.pointsExperience
+                    return CombatText.GetFormat("pointsExperience")
                 end,
                 setFunc = function (v)
-                    Settings.formats.pointsExperience = v
+                    CombatText.SetFormat("pointsExperience", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.pointsExperience,
@@ -2826,10 +2864,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_CHAMPION_TP),
                 getFunc = function ()
-                    return Settings.formats.pointsChampion
+                    return CombatText.GetFormat("pointsChampion")
                 end,
                 setFunc = function (v)
-                    Settings.formats.pointsChampion = v
+                    CombatText.SetFormat("pointsChampion", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.pointsChampion,
@@ -2909,10 +2947,10 @@ function CombatText.CreateSettings()
                 name = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_ULTIMATE_READY)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_ULTIMATE_TP),
                 getFunc = function ()
-                    return Settings.formats.ultimateReady
+                    return CombatText.GetFormat("ultimateReady")
                 end,
                 setFunc = function (v)
-                    Settings.formats.ultimateReady = v
+                    CombatText.SetFormat("ultimateReady", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.ultimateReady,
@@ -2924,10 +2962,10 @@ function CombatText.CreateSettings()
                 name = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_POTION_READY)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_POTION_TP),
                 getFunc = function ()
-                    return Settings.formats.potionReady
+                    return CombatText.GetFormat("potionReady")
                 end,
                 setFunc = function (v)
-                    Settings.formats.potionReady = v
+                    CombatText.SetFormat("potionReady", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.potionReady,
@@ -3066,10 +3104,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_RESOURCE_TP),
                 getFunc = function ()
-                    return Settings.formats.resourceHealth
+                    return CombatText.GetFormat("resourceHealth")
                 end,
                 setFunc = function (v)
-                    Settings.formats.resourceHealth = v
+                    CombatText.SetFormat("resourceHealth", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.resourceHealth,
@@ -3136,10 +3174,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_RESOURCE_TP),
                 getFunc = function ()
-                    return Settings.formats.resourceMagicka
+                    return CombatText.GetFormat("resourceMagicka")
                 end,
                 setFunc = function (v)
-                    Settings.formats.resourceMagicka = v
+                    CombatText.SetFormat("resourceMagicka", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.resourceMagicka,
@@ -3206,10 +3244,10 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_RESOURCE_TP),
                 getFunc = function ()
-                    return Settings.formats.resourceStamina
+                    return CombatText.GetFormat("resourceStamina")
                 end,
                 setFunc = function (v)
-                    Settings.formats.resourceStamina = v
+                    CombatText.SetFormat("resourceStamina", v)
                 end,
                 isMultiline = false,
                 default = Defaults.formats.resourceStamina,
@@ -3340,7 +3378,8 @@ function CombatText.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_CT_ANIMATION_TYPE),
                 tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_TYPE_TP),
-                choices = CombatTextConstants.animationType,
+                choices = animationTypeLabels,
+                choicesValues = animationTypeValues,
                 getFunc = function ()
                     return Settings.animation.animationType
                 end,
@@ -3375,7 +3414,8 @@ function CombatText.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_CT_ANIMATION_DIRECTION_IN),
                 tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_DIRECTION_IN_TP),
-                choices = CombatTextConstants.directionType,
+                choices = directionTypeLabels,
+                choicesValues = directionTypeValues,
                 getFunc = function ()
                     return Settings.animation.incoming.directionType
                 end,
@@ -3389,7 +3429,8 @@ function CombatText.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_IN),
                 tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_IN_TP),
-                choices = CombatTextConstants.iconSide,
+                choices = iconSideLabels,
+                choicesValues = iconSideValues,
                 getFunc = function ()
                     return Settings.animation.incomingIcon
                 end,
@@ -3403,7 +3444,8 @@ function CombatText.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_CT_ANIMATION_DIRECTION_OUT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_DIRECTION_OUT_TP),
-                choices = CombatTextConstants.directionType,
+                choices = directionTypeLabels,
+                choicesValues = directionTypeValues,
                 getFunc = function ()
                     return Settings.animation.outgoing.directionType
                 end,
@@ -3417,7 +3459,8 @@ function CombatText.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_OUT),
                 tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_OUT_TP),
-                choices = CombatTextConstants.iconSide,
+                choices = iconSideLabels,
+                choicesValues = iconSideValues,
                 getFunc = function ()
                     return Settings.animation.outgoingIcon
                 end,

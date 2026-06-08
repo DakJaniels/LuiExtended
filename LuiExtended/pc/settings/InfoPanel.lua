@@ -24,8 +24,8 @@ function InfoPanel.CreateSettings()
     local panelDataInfoPanel =
     {
         type = "panel",
-        name = zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_PNL)),
-        displayName = zo_strformat("<<1>> <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_PNL)),
+        name = LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_PNL),
+        displayName = LUIE.FormatAddonSettingsPanelDisplayName(LUIE_STRING_LAM_PNL),
         author = LUIE.author .. "\n",
         version = LUIE.version,
         website = LUIE.website,

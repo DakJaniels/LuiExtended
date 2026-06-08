@@ -36,6 +36,9 @@ local function IsRChatAvailable()
 end
 
 local function ShouldShowSocialErrorInChat(error)
+    if ChatAnnouncements.Enabled and ChatAnnouncements.SV and ChatAnnouncements.SV.Notify.SocialErrorCA then
+        return not IsSocialErrorIgnoreResponse(error)
+    end
     return not ShouldShowSocialErrorInAlert(error)
 end
 
@@ -58,8 +61,13 @@ local function ShouldSuppressSocialErrorRouter(_, error)
     return ShouldShowSocialErrorInChat(error)
 end
 
+--- @param _ integer
+--- @param error integer
 function ChatAnnouncements.OnErrorSocialChat(_, error)
-    if not IsSocialErrorIgnoreResponse(error) and ShouldShowSocialErrorInChat(error) then
+    if not ChatAnnouncements.Enabled or not ChatAnnouncements.SV.Notify.SocialErrorCA then
+        return
+    end
+    if not IsSocialErrorIgnoreResponse(error) then
         ChatOutput:Print(zo_strformat(GetString("SI_SOCIALACTIONRESULT", error)))
     end
 end

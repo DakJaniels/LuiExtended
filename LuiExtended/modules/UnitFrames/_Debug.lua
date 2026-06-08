@@ -53,7 +53,7 @@ function UnitFrames.ClearDebugAttributeVisualOverrides(visualUnitTag)
     end
 end
 
-local function EnsureSavedHealthForFrame(frameKey, sourceUnitTag)
+local function InitSavedHealthForFrame(frameKey, sourceUnitTag)
     if not UnitFrames.savedHealth[frameKey] then
         UnitFrames.savedHealth[frameKey] = { 1, 1, 1, 0, 0 }
     end
@@ -67,7 +67,7 @@ end
 -- Pushes live power into `frame` while using `frameKey` for savedHealth / visualizer lookups.
 local function PushPowerValuesForFrame(frame, frameKey, sourceUnitTag)
     if not frame then return end
-    EnsureSavedHealthForFrame(frameKey, sourceUnitTag)
+    InitSavedHealthForFrame(frameKey, sourceUnitTag)
     for powerType, control in pairs(frame) do
         if type(powerType) == "number" and control then
             local powerValue, powerMax, powerEffectiveMax = GetUnitPower(sourceUnitTag, powerType)
@@ -99,9 +99,6 @@ local function ResolveFrameKey(frameArg)
 end
 
 local function RefreshDebugAttributeVisualizers(visualUnitTag)
-    local mods = UnitFrames.VisualizerModules
-    if not mods then return end
-
     local healthEffectiveMax = 1
     if UnitFrames.savedHealth[visualUnitTag] then
         healthEffectiveMax = UnitFrames.savedHealth[visualUnitTag][3] or 1
@@ -110,30 +107,34 @@ local function RefreshDebugAttributeVisualizers(visualUnitTag)
         healthEffectiveMax = 1
     end
 
-    if mods.StatChangeModule then
-        mods.StatChangeModule:UpdateStat(visualUnitTag, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-        mods.StatChangeModule:UpdateStat(visualUnitTag, STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-    end
-    if mods.RegenerationModule then
-        mods.RegenerationModule:UpdateRegen(visualUnitTag, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-        mods.RegenerationModule:UpdateRegen(visualUnitTag, STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
-        mods.RegenerationModule:UpdateRegen(visualUnitTag, STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA)
-    end
-    if mods.PossessionModule then
-        local possessionValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_POSSESSION, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-        mods.PossessionModule:UpdatePossession(visualUnitTag, possessionValue)
-    end
-    if mods.UnwaveringModule then
-        mods.UnwaveringModule:UpdateInvulnerable(visualUnitTag)
-    end
-    if mods.PowerShieldModule then
-        local shieldValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-        local traumaValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_TRAUMA, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-        local noHealValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-        mods.PowerShieldModule:UpdateShield(visualUnitTag, shieldValue, healthEffectiveMax)
-        mods.PowerShieldModule:UpdateTrauma(visualUnitTag, traumaValue, healthEffectiveMax)
-        mods.PowerShieldModule:UpdateNoHealing(visualUnitTag, noHealValue)
-    end
+    UnitFrames.ForEachVisualizerForUnit(visualUnitTag, function (visualizer)
+        for module in pairs(visualizer.visualModules or {}) do
+            if module.UpdateStat then
+                module:UpdateStat(visualUnitTag, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+                module:UpdateStat(visualUnitTag, STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+            end
+            if module.UpdateRegen then
+                module:UpdateRegen(visualUnitTag, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+                module:UpdateRegen(visualUnitTag, STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
+                module:UpdateRegen(visualUnitTag, STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA)
+            end
+            if module.UpdatePossession then
+                local possessionValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_POSSESSION, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+                module:UpdatePossession(visualUnitTag, possessionValue)
+            end
+            if module.UpdateInvulnerable then
+                module:UpdateInvulnerable(visualUnitTag)
+            end
+            if module.UpdateShield then
+                local shieldValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+                local traumaValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_TRAUMA, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+                local noHealValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+                module:UpdateShield(visualUnitTag, shieldValue, healthEffectiveMax)
+                module:UpdateTrauma(visualUnitTag, traumaValue, healthEffectiveMax)
+                module:UpdateNoHealing(visualUnitTag, noHealValue)
+            end
+        end
+    end)
 end
 
 local DEBUG_VISUAL_PRESET_NAMES =

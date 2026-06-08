@@ -1861,6 +1861,9 @@ local effectOverride =
 
     -- Earthen Heart
     -- Battle Roar slotted name id 259223 (offset 33273852); do not use Landslide combat ids 29463–29467 here.
+    -- Landslide passive stack (Earthen Heart skill menu: weapon_005; not Dragon Leap ground 29465/009).
+    [29463] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide passive (rank 1 / stack buff)
+    [44984] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide passive (rank 2 / stack buff)
     [29468] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 1)
     [44996] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 2)
     [29474] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS, hide = true }, -- Blessing at the Peak (passive POWER clutter; table 198758357)
@@ -2075,9 +2078,8 @@ local effectOverride =
     [29466] = { hide = true },                                                                              -- Landslide (ground tick)
     [29467] = { hide = true },                                                                              -- Landslide
     [259228] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Landslide (U49)
-    [44984] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
-    [44987] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
-    [44988] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
+    [44987] = { hide = true },                                                                              -- Landslide (ground tick, rank 2)
+    [44988] = { hide = true },                                                                              -- Landslide (rank 2)
     [118928] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Dragon Leap (combat bundle)
     [32719] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds" },                                 -- Take Flight (slotted)
     [259372] = { hide = true },                                                                             -- Take Flight (travel)
@@ -3129,6 +3131,8 @@ local effectOverride =
     [118618] = { tooltip = Tooltips.Generic_Magic, tooltipValue2 = 1 }, -- Pure Agony (Agony Totem - Pure Agony Synergy)
     [118404] = { tooltip = Tooltips.Skill_Agony_Totem },                -- Agony Totem (Agony Totem)
     [118411] = { tooltip = Tooltips.Generic_Fear },                     -- Agony Totem (Agony Totem)
+    [238178] = { tooltip = Tooltips.Skill_Bone_Totem },                 -- Vengeance Bone Totem
+    [238179] = { tooltip = Tooltips.Generic_Fear },                     -- Vengeance Bone Totem (fear on target)
 
     -- Grave Grasp / Ghostly Embrace / Empowering Grasp
     [121513] = { tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 },                                                          -- Grave Grasp (Grave Grasp)
@@ -3136,7 +3140,18 @@ local effectOverride =
     [143917] = { icon = "/esoui/art/icons/ability_necromancer_009.dds", tooltip = Tooltips.Generic_Stun },                        -- Grave Grasp (Grave Grasp)
     [253163] = { tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 },                                                          -- Vengeance Grave Grasp
     [253164] = { hide = true },                                                                                                   -- Vengeance Grave Grasp (Minor Maim combat)
+    [255674] = { hide = true },                                                                                                   -- Vengeance Ensnaring Chains (Minor Maim combat)
+    [255940] = { hide = true },                                                                                                   -- Vengeance Unleashed Fury (damage)
+    [255652] = { hide = true },                                                                                                   -- Vengeance Shoulder Toss (knockback combat)
+    [238180] = { hide = true },                                                                                                   -- Vengeance Bone Totem (Major Maim combat; display 61725)
     [238138] = { hide = true },                                                                                                   -- Vengeance Death Scythe (heal tick)
+    [256691] = { hide = true },                                                                                                   -- Vengeance Nimble Feint (leap buff)
+    [256692] = { hide = true },                                                                                                   -- Nimble Feint Fatigue (CheckOnFade durationMod only)
+    [256698] = { hide = true },                                                                                                   -- Vengeance Stalker's Quarry (Minor Force combat; display 61746)
+    [256560] = { tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 },                                                         -- Vengeance Blade Bite bleed on target
+    [256690] = { tooltip = Tooltips.Generic_Disorient },                                                                        -- Vengeance Nimble Feint (disorient on target)
+    [256693] = { hide = true },                                                                                                 -- Nimble Feint dummy (CheckOnFade duration math only)
+    [256715] = { hide = true },                                                                                                 -- Cleansing Shadow dummy (CheckOnFade duration math only)
 
     [118309] = { icon = "/esoui/art/icons/ability_necromancer_009_b.dds", tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 }, -- Ghostly Embrace (Ghostly Embrace)
     [118325] = { icon = "/esoui/art/icons/ability_necromancer_009_b.dds", tooltip = Tooltips.Generic_Immobilize },                -- Ghostly Embrace (Ghostly Embrace)

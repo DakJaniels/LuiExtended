@@ -242,6 +242,20 @@
                 </Label>
               </Controls>
             </Backdrop>
+            <Label name="$(parent)_RapportFlourish"
+                   text=""
+                   font="ZoFontGameSmall"
+                   color="FFFFFF"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   layer="OVERLAY"
+                   tier="HIGH"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_Health"
+                      relativePoint="RIGHT"
+                      offsetX="10" />
+            </Label>
             <!-- Hotbar slot suffixes 3–8: ACTION_BAR_FIRST_NORMAL_SLOT_INDEX+1 ..
             ACTION_BAR_ULTIMATE_SLOT_INDEX+1 -->
             <Control name="$(parent)_CompanionAbilities"

@@ -49,6 +49,12 @@ local function GetSkillLineInfo(skillType, skillLineIndex)
 end
 
 -- EVENT_EXPERIENCE_GAIN HANDLER
+--- @param eventId integer
+--- @param reason integer
+--- @param level integer
+--- @param previousExperience integer
+--- @param currentExperience integer
+--- @param championPoints integer
 function ChatAnnouncements.OnExperienceGain(eventId, reason, level, previousExperience, currentExperience, championPoints)
     -- d("Experience Gain) previousExperience: " .. previousExperience .. " --- " .. "currentExperience: " .. currentExperience)
     if ChatAnnouncements.SV.XP.Experience and (not (ChatAnnouncements.SV.XP.ExperienceHideCombat and reason == PROGRESS_REASON_KILL) or not reason == PROGRESS_REASON_KILL) then
@@ -81,11 +87,12 @@ function ChatAnnouncements.OnExperienceGain(eventId, reason, level, previousExpe
 end
 
 -- Print Experience Gain
+--- @param change integer
 function ChatAnnouncements.PrintExperienceGain(change)
     local icon = ChatAnnouncements.SV.XP.ExperienceIcon and "|t16:16:/esoui/art/icons/icon_experience.dds|t " or ""
-    local xpName = zo_strformat(ChatAnnouncements.SV.XP.ExperienceName, change)
+    local xpName = zo_strformat(ChatAnnouncements.GetModuleMessageFormat("XP", "ExperienceName"), change)
     local messageP1 = ("|r|c" .. ColorizeColors.ExperienceNameColorize .. icon .. ZO_CommaDelimitDecimalNumber(change) .. " " .. xpName .. "|r|c" .. ColorizeColors.ExperienceMessageColorize)
-    local formattedMessageP1 = (string_format(ChatAnnouncements.SV.XP.ExperienceMessage, messageP1))
+    local formattedMessageP1 = (string_format(ChatAnnouncements.GetModuleMessageFormat("XP", "ExperienceMessage"), messageP1))
     local finalMessage = string_format("|c%s%s|r", ColorizeColors.ExperienceMessageColorize, formattedMessageP1)
 
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "EXPERIENCE" }
@@ -104,6 +111,13 @@ function ChatAnnouncements.PrintBufferedXP()
 end
 
 -- EVENT_SKILL_XP_UPDATE HANDLER
+--- @param eventId integer
+--- @param skillType SkillType
+--- @param skillIndex integer
+--- @param reason integer
+--- @param rank integer
+--- @param previousXP integer
+--- @param currentXP integer
 function ChatAnnouncements.SkillXPUpdate(eventId, skillType, skillIndex, reason, rank, previousXP, currentXP)
     if skillType == SKILL_TYPE_GUILD then
         local lineName, _, _, lineId = GetSkillLineInfo(skillType, skillIndex)
@@ -194,14 +208,18 @@ local GUILD_SKILL_ICONS =
 }
 
 -- Print Guild Rep Gain
+--- @param change integer
+--- @param lineName string
+--- @param lineId integer
+--- @param priority integer
 function ChatAnnouncements.PrintGuildRep(change, lineName, lineId, priority)
     local icon = zo_iconFormatInheritColor(GUILD_SKILL_ICONS[lineId], 16, 16)
     local formattedIcon = ChatAnnouncements.SV.Skills.SkillGuildIcon and (icon .. " ") or ""
 
-    local guildString = zo_strformat(ChatAnnouncements.SV.Skills.SkillGuildRepName, change)
+    local guildString = zo_strformat(ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillGuildRepName"), change)
     local colorize = GetGuildColor(lineId)
     local messageP1 = ("|r|c" .. colorize .. formattedIcon .. change .. " " .. lineName .. " " .. guildString .. "|r|c" .. ColorizeColors.SkillGuildColorize)
-    local formattedMessageP1 = (string_format(ChatAnnouncements.SV.Skills.SkillGuildMsg, messageP1))
+    local formattedMessageP1 = (string_format(ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillGuildMsg"), messageP1))
     local finalMessage = string_format("|c%s%s|r", ColorizeColors.SkillGuildColorize, formattedMessageP1)
 
     -- We set this to skill gain, so as to avoid creating an entire additional chat message category (we want it to show after XP but before any other skill gains or level up so we place it on top of the level up priority).
