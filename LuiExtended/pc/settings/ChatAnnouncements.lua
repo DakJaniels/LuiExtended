@@ -7817,6 +7817,43 @@ function ChatAnnouncements.CreateSettings()
             },
             {
                 type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Notify.ChallengeDifficultyCA
+                end,
+                setFunc = function (value)
+                    Settings.Notify.ChallengeDifficultyCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.ChallengeDifficultyCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Notify.ChallengeDifficultyAlert
+                end,
+                setFunc = function (value)
+                    Settings.Notify.ChallengeDifficultyAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Notify.ChallengeDifficultyAlert,
+            },
+            {
+                type = "header",
                 name = GetString(LUIE_STRING_LAM_CA_NOTIFY_SOCIAL_ERROR_HEADER),
                 width = "full",
             },

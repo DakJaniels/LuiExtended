@@ -932,7 +932,7 @@ function InfoPanel.RearrangePanel()
         return fallbackEnabled
     end
     -- Reset scale of panel
-    uiPanel:SetScale(1)
+    uiPanel:SetTransformScale(1)
     -- Top row
     local anchorTop = nil
     local sizeTop = 0
@@ -1253,7 +1253,7 @@ function InfoPanel.SetScale()
     if not InfoPanel.Enabled then
         return
     end
-    uiPanel:SetScale(InfoPanel.SV.panelScale and InfoPanel.SV.panelScale / 100 or 1)
+    uiPanel:SetTransformScale(InfoPanel.SV.panelScale and InfoPanel.SV.panelScale / 100 or 1)
 end
 
 -- Schedules a deferred bag/gems refresh for inventory-related events (signatures vary by eventId).

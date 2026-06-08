@@ -1,5 +1,12 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.1
+
+### Fixed
+
+- ChatAnnouncements: Other players' overland challenge tier changes no longer spam chat; your own tier still announces once under **Notify → Challenge Difficulty**. Cooldown and combat failure alerts use the same Notify toggles.
+- Unit Frames: Custom **target**, **group**, and **raid** frames now show other players' overland challenge tier icons on their names.
+
 ## Version 7.2.4.0
 
 ### Changes

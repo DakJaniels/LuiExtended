@@ -489,6 +489,51 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         return true
     end
 
+    local Notify = ChatAnnouncements.SV.Notify
+    local lastLocalOverlandDifficulty = GetOverlandDifficulty()
+
+    local function OnOverlandDifficultyChanged(_eventId, newValue)
+        if not (Notify.ChallengeDifficultyCA or Notify.ChallengeDifficultyAlert) then
+            return
+        end
+        local localDifficulty = GetOverlandDifficulty()
+        if newValue ~= localDifficulty then
+            return
+        end
+        if newValue == lastLocalOverlandDifficulty then
+            return
+        end
+        lastLocalOverlandDifficulty = newValue
+
+        local message = GetString("SI_OVERLANDDIFFICULTYTYPE", newValue)
+        if Notify.ChallengeDifficultyCA then
+            ChatOutput:Print(message, true)
+        end
+        if Notify.ChallengeDifficultyAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
+        end
+    end
+
+    eventManager:RegisterForEvent(moduleName, EVENT_OVERLAND_DIFFICULTY_CHANGED, OnOverlandDifficultyChanged)
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function ()
+        lastLocalOverlandDifficulty = GetOverlandDifficulty()
+    end)
+
+    ZO_PreHook("ZO_Alert", function (category, sound, message, ...)
+        if message ~= GetString(SI_CHALLENGE_DIFFICULTY_COOLDOWN_ALERT) and message ~= GetString(SI_CHALLENGE_DIFFICULTY_COMBAT_ALERT) then
+            return
+        end
+        if not (Notify.ChallengeDifficultyCA or Notify.ChallengeDifficultyAlert) then
+            return true
+        end
+        if Notify.ChallengeDifficultyCA then
+            ChatOutput:Print(message, true)
+        end
+        if not Notify.ChallengeDifficultyAlert then
+            return true
+        end
+    end)
+
     ZO_PreHook(alertHandlers, EVENT_LOCKPICK_FAILED, LockpickFailedAlert)
     ZO_PreHook(alertHandlers, EVENT_CLIENT_INTERACT_RESULT, ClientInteractResult)
     ZO_PreHook(alertHandlers, EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE, QueueForCampaignResponseAlert)

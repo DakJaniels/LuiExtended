@@ -47,6 +47,21 @@ local function FormatTextWithIcon(iconPath, text, iconSize)
     return zo_iconFormat(iconPath, iconSize, iconSize) .. " " .. text
 end
 
+--- Target names use TEXT_WRAP_MODE_TRUNCATE; suffix icons (vanilla aligned-right) clip off the end. Prefix on target keeps tier visible before CP layout.
+local function FormatNameWithOverlandDifficultyIcon(iconPath, nameText, frameCategory)
+    if frameCategory == "target" then
+        return zo_iconFormat(iconPath, 23, 23) .. " " .. nameText
+    end
+    return zo_iconTextFormatNoSpaceAlignedRight(iconPath, "115%", "115%", nameText)
+end
+
+local function FormatNameWithTargetMarkerIcon(iconPath, nameText, alignIconRight)
+    if alignIconRight then
+        return zo_iconTextFormatNoSpaceAlignedRight(iconPath, "100%", "100%", nameText)
+    end
+    return FormatTextWithIcon(iconPath, nameText)
+end
+
 --- @param unitFrame LUIE_CustomFrameObject|nil
 --- @return "player"|"target"|"group"|"raid"|nil
 local function GetCustomFrameDisplayCategory(unitFrame)
@@ -79,6 +94,47 @@ local function GetCustomFrameDisplayCategory(unitFrame)
             return "raid"
         end
     end
+    local frameCategory = unitFrame.frameCategory
+    if frameCategory == "smallGroup" then
+        return "group"
+    end
+    if frameCategory == "raid" then
+        return "raid"
+    end
+    if frameCategory == "avaTarget" then
+        return "target"
+    end
+    return nil
+end
+
+local function IsOverlandGameUnitTag(unitTag)
+    if unitTag == nil or unitTag == "" then
+        return false
+    end
+    if unitTag == "player" or unitTag == "reticleover" then
+        return true
+    end
+    return ZO_Group_IsGroupUnitTag(unitTag)
+end
+
+--- @param unitFrame LUIE_CustomFrameObject|nil
+--- @return string|nil
+local function ResolveOverlandGameUnitTag(unitFrame)
+    if unitFrame == nil then
+        return nil
+    end
+    if unitFrame.unitTag and DoesUnitExist(unitFrame.unitTag) and IsOverlandGameUnitTag(unitFrame.unitTag) then
+        return unitFrame.unitTag
+    end
+    if unitFrame.visualizerUnitTag and DoesUnitExist(unitFrame.visualizerUnitTag) and IsOverlandGameUnitTag(unitFrame.visualizerUnitTag) then
+        return unitFrame.visualizerUnitTag
+    end
+    if unitFrame.GetVisualizerUnitTag then
+        local tag = unitFrame:GetVisualizerUnitTag()
+        if tag and DoesUnitExist(tag) and IsOverlandGameUnitTag(tag) then
+            return tag
+        end
+    end
     return nil
 end
 
@@ -106,28 +162,68 @@ local function IsOverlandDifficultyEnabledForCategory(frameCategory)
     return false
 end
 
+--- Every defined OverlandDifficultyType in ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD has an icon, including BASEGAME (see ZO_Stats_Gamepad.lua).
+local function GetChallengeDifficultyIconPath(difficulty)
+    if difficulty ~= nil then
+        local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty]
+        if iconPath then
+            return iconPath
+        end
+    end
+    return ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[OVERLAND_DIFFICULTY_TYPE_BASEGAME]
+end
+
+--- Reticle can briefly report IsUnitPlayer=false / IsUnitMonster=true during target handoff; PLAYER_ALLY is still another player.
+local function IsOverlandDifficultyPlayerUnit(unitTag)
+    if unitTag == nil or not DoesUnitExist(unitTag) then
+        return false
+    end
+    if IsUnitPlayer(unitTag) then
+        return true
+    end
+    return GetUnitReaction(unitTag) == UNIT_REACTION_PLAYER_ALLY
+end
+
+local function GetPlayerUnitOverlandDifficultyForDisplay(unitTag)
+    return GetUnitOverlandDifficulty(unitTag)
+end
+
+local function ScheduleReticleoverOverlandStaticRefresh()
+    if not UnitFrames.SV.TargetShowOverlandDifficulty or not UnitFrames.CustomFrames["reticleover"] then
+        return
+    end
+    local function refreshIfPlayerTarget()
+        if not DoesUnitExist("reticleover") or not IsOverlandDifficultyPlayerUnit("reticleover") then
+            return
+        end
+        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
+    end
+    zo_callLater(refreshIfPlayerTarget, 0)
+    zo_callLater(refreshIfPlayerTarget, 100)
+end
+
 local function ApplyOverlandDifficultyNameIcon(unitTag, nameText, frameCategory)
-    if not IsOverlandDifficultyEnabledForCategory(frameCategory) or nameText == nil or nameText == "" then
+    if not IsOverlandDifficultyEnabledForCategory(frameCategory) or nameText == nil or nameText == "" or unitTag == nil then
         return nameText
     end
     local difficulty
-    if frameCategory == "target" and not IsUnitPlayer(unitTag) then
+    local isPlayerUnit = IsOverlandDifficultyPlayerUnit(unitTag)
+    if isPlayerUnit then
+        difficulty = GetPlayerUnitOverlandDifficultyForDisplay(unitTag)
+    elseif frameCategory == "target" then
         difficulty = GetOverlandDifficulty()
         if UnitFrames.SV.TargetMonsterOverlandDifficulty and not IsUnitMonster(unitTag) then
             return nameText
         end
-        if not IsUnitAttackable(unitTag) then
+        if not IsUnitMonster(unitTag) or not IsUnitAttackable(unitTag) then
             return nameText
         end
     else
-        difficulty = GetUnitOverlandDifficulty(unitTag)
-    end
-    if difficulty == nil or difficulty <= OVERLAND_DIFFICULTY_TYPE_BASEGAME then
         return nameText
     end
-    local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty]
+    local iconPath = GetChallengeDifficultyIconPath(difficulty)
     if iconPath then
-        return FormatTextWithIcon(iconPath, nameText, 20)
+        return FormatNameWithOverlandDifficultyIcon(iconPath, nameText, frameCategory)
     end
     return nameText
 end
@@ -439,12 +535,8 @@ function UnitFrames.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_CHAMPION_POINT_UPDATE, UnitFrames.OnLevelUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_TITLE_UPDATE, UnitFrames.TitleUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_RANK_POINT_UPDATE, UnitFrames.TitleUpdate)
-    if EVENT_OVERLAND_DIFFICULTY_CHANGED then
-        eventManager:RegisterForEvent(moduleName, EVENT_OVERLAND_DIFFICULTY_CHANGED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
-    end
-    if EVENT_ACTIVE_VETERANCY_SEASON_UPDATED then
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_VETERANCY_SEASON_UPDATED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
-    end
+    eventManager:RegisterForEvent(moduleName, EVENT_OVERLAND_DIFFICULTY_CHANGED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
+    eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_VETERANCY_SEASON_UPDATED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
 
     -- Next events make sense only for CustomFrames
     if UnitFrames.CustomFrames["player"] or UnitFrames.CustomFrames["reticleover"] or UnitFrames.CustomFrames["companion"] or UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] or UnitFrames.CustomFrames["boss1"] or UnitFrames.CustomFrames["PetGroup1"] then
@@ -1471,6 +1563,10 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
         end
         UnitFrames.ReloadValues("reticleover")
 
+        if UnitFrames.SV.TargetShowOverlandDifficulty and UnitFrames.CustomFrames["reticleover"] then
+            ScheduleReticleoverOverlandStaticRefresh()
+        end
+
         local isWithinRange = IsUnitInGroupSupportRange("reticleover")
 
         -- Now select appropriate custom color to target name and (possibly) reticle
@@ -1840,24 +1936,37 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             nameText = GetUnitName(unitFrame.unitTag) .. " " .. GetUnitDisplayName(unitFrame.unitTag)
         elseif unitFrame.isPlayer and DisplayOption == 1 then
             nameText = GetUnitDisplayName(unitFrame.unitTag)
+        elseif unitFrame.isPlayer and ZO_GetPrimaryPlayerNameFromUnitTag then
+            nameText = ZO_GetPrimaryPlayerNameFromUnitTag(unitFrame.unitTag)
         else
             nameText = GetUnitName(unitFrame.unitTag)
         end
 
+        local alignTargetMarkerIconRight = unitFrame.unitTag == "reticleover" or GetCustomFrameDisplayCategory(unitFrame) == "target"
         -- Add target marker icon if present
         if UnitFrames.SV.CustomTargetMarker then
             local targetMarkerType = GetUnitTargetMarkerType(unitFrame.unitTag)
             if targetMarkerType ~= TARGET_MARKER_TYPE_NONE then
                 local iconPath = ZO_GetPlatformTargetMarkerIcon(targetMarkerType)
                 if iconPath then
-                    nameText = FormatTextWithIcon(iconPath, nameText)
+                    nameText = FormatNameWithTargetMarkerIcon(iconPath, nameText, alignTargetMarkerIconRight)
                 end
             end
         end
 
         local overlandCategory = GetCustomFrameDisplayCategory(unitFrame)
-        if overlandCategory then
-            nameText = ApplyOverlandDifficultyNameIcon(unitFrame.unitTag, nameText, overlandCategory)
+        local applyOverlandToThisName = true
+        if unitFrame.unitTag == "reticleover" and UnitFrames.SV.CustomFramesTarget then
+            local customReticle = UnitFrames.CustomFrames["reticleover"]
+            if customReticle and unitFrame.name ~= customReticle.name then
+                applyOverlandToThisName = false
+            end
+        end
+        if overlandCategory and applyOverlandToThisName then
+            local overlandUnitTag = ResolveOverlandGameUnitTag(unitFrame)
+            if overlandUnitTag then
+                nameText = ApplyOverlandDifficultyNameIcon(overlandUnitTag, nameText, overlandCategory)
+            end
         end
 
         unitFrame.name:SetText(nameText)
@@ -2029,8 +2138,17 @@ function UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
     if UnitFrames.CustomFrames["reticleover"] then
         UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
     end
+    if UnitFrames.CustomFrames["AvaPlayerTarget"] then
+        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["AvaPlayerTarget"])
+    end
     if UnitFrames.CustomFrames["player"] then
         UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["player"])
+    end
+    for i = 1, 12 do
+        local unitTag = "group" .. i
+        if UnitFrames.DefaultFrames[unitTag] and DoesUnitExist(unitTag) then
+            UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
+        end
     end
     if UnitFrames.CustomFramesGroupUpdate then
         UnitFrames.CustomFramesGroupUpdate()

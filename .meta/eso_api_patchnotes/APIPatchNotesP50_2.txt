@@ -1,0 +1,60 @@
+******************
+***Enums Added ***
+******************
+
+* QUEUE_FOR_CAMPAIGN_RESULT_VENGEANCE_UNAVAILABLE
+
+* TUTORIAL_TRIGGER_VETERANCY_OPENED
+
+
+********************
+***Enums Removed ***
+********************
+
+
+* TUTORIAL_TRIGGER_VETERANCY_INITIAL_CLAIMABLE_REWARDS_AVAILABLE
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* GetEndOfSeasonTomePointToGoldConversionRate()
+** _Returns:_ *number* _conversionRate_
+
+* GetEndOfSeasonTomePointsConvertedToGold()
+** _Returns:_ *integer* _tomePointsConverted_
+
+* GetGoldGainedFromEndOfSeasonTomePointConversion()
+** _Returns:_ *integer* _goldGained_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+
+Removed _useGold_
+* RerollTimedActivity(*luaindex* _index_, *bool* _useGold_)
+** _Returns:_ *[TamrielTomeChallengeRerollResult|#TamrielTomeChallengeRerollResult]* _result_
+to 
+* RerollTimedActivity(*luaindex* _index_)
+** _Returns:_ *[TamrielTomeChallengeRerollResult|#TamrielTomeChallengeRerollResult]* _result_
+
+
+Return type changed from *integer* to *luaindex*
+* GetVengeancePerkRankRequirementAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *luaindex* _rankRequirement_
+
+* GetVengeancePerkRankRequirement(*integer* _perkDefId_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *luaindex* _rankRequirement_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_TIMED_ACTIVITY_REROLL_RESULT (*[TamrielTomeChallengeRerollResult|#TamrielTomeChallengeRerollResult]* _result_, *luaindex:nilable* _index_)

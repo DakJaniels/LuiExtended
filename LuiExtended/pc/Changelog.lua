@@ -49,6 +49,15 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.4.1
+    "|cFFA500LuiExtended Version 7.2.4.1|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Other players' overland challenge tier changes no longer spam chat; your own tier still announces once under Notify → Challenge Difficulty. Cooldown and combat failure alerts use the same Notify toggles.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom target, group, and raid frames now show other players' overland challenge tier icons on their names.",
+    "",
+
     -- Version Header 7.2.4.0
     "|cFFA500LuiExtended Version 7.2.4.0|r",
     "",
