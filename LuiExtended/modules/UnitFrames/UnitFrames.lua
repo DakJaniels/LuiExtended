@@ -285,6 +285,13 @@ local THRESHOLD_STAGE_COLORS_FALLBACK =
 local BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS = { 48, 16 }
 local BOSS_THRESHOLD_BOTTOM_LABEL_DIMENSIONS = { 120, 16 }
 local DEFAULT_BOSS_THRESHOLD_PERCENTS = { 25, 50, 75 }
+-- Slash/debug boss preview: dense same-name mechanics (Saint Olms–style) for fade + next-upcoming testing.
+local BOSS_THRESHOLD_SLASH_DEBUG_PERCENTS = { 90, 75, 50, 25 }
+local BOSS_THRESHOLD_SLASH_DEBUG_MECHANIC = "Big Jump"
+local BOSS_THRESHOLD_SLASH_DEBUG_BOSS_NAME = "Saint Olms the Just (debug)"
+local BOSS_THRESHOLD_MECHANIC_FADE_MS = 300
+local BOSS_THRESHOLD_MECHANIC_STAGE_FADE_MS = 200
+local BOSS_THRESHOLD_MECHANIC_STAGE_FADE_FROM_ALPHA = 0.4
 
 -- -----------------------------------------------------------------------------
 -- CrutchAlerts BossHealthBar integration (optional dependency)
@@ -767,6 +774,55 @@ local function HidePool(pool)
     end
 end
 
+local function GetBottomThresholdLabelFadeAnim(label)
+    if not label.thresholdFadeAnim then
+        label.thresholdFadeAnim = ZO_AlphaAnimation:New(label)
+        label.thresholdFadeAnim:SetMinMaxAlpha(0, 1)
+    end
+    return label.thresholdFadeAnim
+end
+
+local function StopBottomThresholdLabelFade(label, preventCallback)
+    if label.thresholdFadeAnim then
+        local stopOption = preventCallback and ZO_ALPHA_ANIMATION_OPTION_PREVENT_CALLBACK or nil
+        label.thresholdFadeAnim:Stop(stopOption)
+    end
+end
+
+local function HideBottomThresholdLabel(label, animateOut)
+    if not label then
+        return
+    end
+    StopBottomThresholdLabelFade(label, true)
+    if animateOut and not label:IsHidden() then
+        local anim = GetBottomThresholdLabelFadeAnim(label)
+        anim:FadeOut(
+            0,
+            BOSS_THRESHOLD_MECHANIC_FADE_MS / 1000,
+            ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA,
+            function (control)
+                control:SetHidden(true)
+                control:SetAlpha(1)
+            end
+        )
+    else
+        label:SetHidden(true)
+        label:SetAlpha(1)
+    end
+end
+
+local function ResetBossThresholdMechanicAnimationState(stack)
+    UnitFrames.bossThresholdMechanicBottomAnimByIdx = nil
+    if not stack or not stack.bottomLabels then
+        return
+    end
+    for _, label in ipairs(stack.bottomLabels) do
+        StopBottomThresholdLabelFade(label, true)
+        label:SetAlpha(1)
+        label:SetHidden(true)
+    end
+end
+
 --- Hides the stack-level container plus every per-bar marker.
 local function HideAllBossThresholdMarkers()
     if UnitFrames.CustomFrames then
@@ -781,11 +837,13 @@ local function HideAllBossThresholdMarkers()
     local stack = UnitFrames.bossThresholdStack
     if stack then
         HidePool(stack.topLabels)
-        HidePool(stack.bottomLabels)
+        ResetBossThresholdMechanicAnimationState(stack)
         HidePool(stack.commonLines)
         if stack.control then
             stack.control:SetHidden(true)
         end
+    else
+        UnitFrames.bossThresholdMechanicBottomAnimByIdx = nil
     end
 end
 
@@ -863,11 +921,20 @@ local function GetRoundedBossHealthPercent(bossIndex)
     return RoundBossThresholdHealthPercent(100 * pv / pmax)
 end
 
+local function BossHasThresholdHealthData(bossIndex)
+    local tag = "boss" .. bossIndex
+    if DoesUnitExist(tag) then
+        return true
+    end
+    local saved = UnitFrames.savedHealth and UnitFrames.savedHealth[tag]
+    return saved ~= nil and saved[2] ~= nil and saved[2] > 0
+end
+
 local function GetHighestVisibleBossRoundedHealthPercent()
     local highest = 0
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local frame = UnitFrames.CustomFrames["boss" .. i]
-        if frame and frame.control and not frame.control:IsHidden() and DoesUnitExist("boss" .. i) then
+        if frame and frame.control and not frame.control:IsHidden() and BossHasThresholdHealthData(i) then
             local h = GetRoundedBossHealthPercent(i)
             if h > highest then
                 highest = h
@@ -896,6 +963,76 @@ local function AdvanceBossThresholdStage(column, healthToCheck)
     end
     UnitFrames.bossThresholdStageState[key] = state
     return state
+end
+
+--- @param columns table
+--- @param columnStages table idx -> ACTIVE|IMMINENT|PASSED
+--- @return table idx -> true for columns that should show the bottom mechanic label
+local function ComputeMechanicHighlightIndices(columns, columnStages)
+    local highlights = {}
+    if not columns or #columns == 0 then
+        return highlights
+    end
+
+    local isMulti = columns[1].scope == "multi"
+    if isMulti then
+        local bestPercentByBoss = {}
+        for idx, column in ipairs(columns) do
+            if column.mechanic and column.mechanic ~= "" and columnStages[idx] ~= "PASSED" then
+                local bossIndex = column.bossIndex or 0
+                local best = bestPercentByBoss[bossIndex]
+                if not best or column.percent > best.percent then
+                    bestPercentByBoss[bossIndex] = { idx = idx, percent = column.percent }
+                end
+            end
+        end
+        for _, best in pairs(bestPercentByBoss) do
+            highlights[best.idx] = true
+        end
+    else
+        local bestIdx
+        local bestPct = -1
+        for idx, column in ipairs(columns) do
+            if column.mechanic and column.mechanic ~= "" and columnStages[idx] ~= "PASSED" then
+                if column.percent > bestPct then
+                    bestPct = column.percent
+                    bestIdx = idx
+                end
+            end
+        end
+        if bestIdx then
+            highlights[bestIdx] = true
+        end
+    end
+    return highlights
+end
+
+local function PlayBottomMechanicLabelFadeIn(bottomLabel, durationMs, fromAlpha)
+    StopBottomThresholdLabelFade(bottomLabel, true)
+    local anim = GetBottomThresholdLabelFadeAnim(bottomLabel)
+    if fromAlpha then
+        anim:SetMinMaxAlpha(fromAlpha, 1)
+        bottomLabel:SetAlpha(fromAlpha)
+        anim:FadeIn(
+            0,
+            durationMs / 1000,
+            ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA,
+            function (control)
+                control:SetAlpha(1)
+                anim:SetMinMaxAlpha(0, 1)
+            end,
+            ZO_ALPHA_ANIMATION_OPTION_FORCE_SHOWN
+        )
+    else
+        anim:SetMinMaxAlpha(0, 1)
+        anim:FadeIn(
+            0,
+            durationMs / 1000,
+            ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA,
+            nil,
+            ZO_ALPHA_ANIMATION_OPTION_FORCE_SHOWN
+        )
+    end
 end
 
 local function ApplyThresholdStageToBackdrop(backdrop, state)
@@ -1081,6 +1218,7 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
     if UnitFrames.lastBossThresholdColumnSig ~= sig then
         UnitFrames.bossThresholdStageState = {}
         UnitFrames.lastBossThresholdColumnSig = sig
+        ResetBossThresholdMechanicAnimationState(stack)
     end
 
     local labelOffsetX = (UnitFrames.SV and UnitFrames.SV.BossThresholdLabelOffsetX) or 0
@@ -1091,6 +1229,22 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
     local bottomDim = BOSS_THRESHOLD_BOTTOM_LABEL_DIMENSIONS
 
     local highestHealth = GetHighestVisibleBossRoundedHealthPercent()
+
+    local columnStages = {}
+    for idx, column in ipairs(thresholdInfo.columns) do
+        local healthToCheck = highestHealth
+        if column.scope == "multi" and column.bossIndex then
+            healthToCheck = GetRoundedBossHealthPercent(column.bossIndex)
+        end
+        columnStages[idx] = AdvanceBossThresholdStage(column, healthToCheck)
+    end
+
+    local mechanicHighlights = ComputeMechanicHighlightIndices(thresholdInfo.columns, columnStages)
+
+    if not UnitFrames.bossThresholdMechanicBottomAnimByIdx then
+        UnitFrames.bossThresholdMechanicBottomAnimByIdx = {}
+    end
+    local mechanicAnimByIdx = UnitFrames.bossThresholdMechanicBottomAnimByIdx
 
     for idx, column in ipairs(thresholdInfo.columns) do
         local topLabel = stack.topLabels[idx]
@@ -1111,11 +1265,7 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
             stack.commonLines[idx] = commonLine
         end
 
-        local healthToCheck = highestHealth
-        if column.scope == "multi" and column.bossIndex then
-            healthToCheck = GetRoundedBossHealthPercent(column.bossIndex)
-        end
-        local stage = AdvanceBossThresholdStage(column, healthToCheck)
+        local stage = columnStages[idx]
 
         local normalized = zo_clamp(column.percent / 100, 0, 1)
         local lineX = zo_clamp(
@@ -1134,13 +1284,58 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
 
         bottomLabel:ClearAnchors()
         bottomLabel:SetDimensions(bottomDim[1], bottomDim[2])
-        if column.mechanic and column.mechanic ~= "" then
+
+        local stageKey = BossThresholdStageKey(column)
+        local prevMechanicAnim = mechanicAnimByIdx[idx]
+        local showMechanic = mechanicHighlights[idx]
+            and column.mechanic
+            and column.mechanic ~= ""
+        local bottomFadeAnim = GetBottomThresholdLabelFadeAnim(bottomLabel)
+
+        if showMechanic then
             bottomLabel:SetAnchor(TOP, container, BOTTOMLEFT, cx, labelOffsetY)
             bottomLabel:SetText(column.mechanic)
             ApplyThresholdStageToLabel(bottomLabel, stage)
             bottomLabel:SetHidden(false)
+
+            local wasHighlighted = prevMechanicAnim and prevMechanicAnim.highlighted
+            local stageChanged = wasHighlighted
+                and prevMechanicAnim.stageKey == stageKey
+                and prevMechanicAnim.stage ~= stage
+            local newlyVisible = not wasHighlighted
+
+            if newlyVisible then
+                PlayBottomMechanicLabelFadeIn(bottomLabel, BOSS_THRESHOLD_MECHANIC_FADE_MS, nil)
+            elseif stageChanged then
+                PlayBottomMechanicLabelFadeIn(
+                    bottomLabel,
+                    BOSS_THRESHOLD_MECHANIC_STAGE_FADE_MS,
+                    BOSS_THRESHOLD_MECHANIC_STAGE_FADE_FROM_ALPHA
+                )
+            elseif not bottomFadeAnim:IsPlaying() then
+                bottomLabel:SetAlpha(1)
+            end
+
+            mechanicAnimByIdx[idx] =
+            {
+                highlighted = true,
+                stageKey = stageKey,
+                stage = stage,
+            }
         else
-            bottomLabel:SetHidden(true)
+            if prevMechanicAnim and prevMechanicAnim.highlighted then
+                if not bottomFadeAnim:IsPlaying() then
+                    HideBottomThresholdLabel(bottomLabel, true)
+                end
+            elseif not bottomFadeAnim:IsPlaying() then
+                HideBottomThresholdLabel(bottomLabel, false)
+            end
+            mechanicAnimByIdx[idx] =
+            {
+                highlighted = false,
+                stageKey = stageKey,
+                stage = stage,
+            }
         end
 
         if column.scope == "common" then
@@ -1183,7 +1378,10 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
     local poolMax = zo_max(#stack.topLabels, #stack.bottomLabels, #stack.commonLines)
     for idx = lastUsed + 1, poolMax do
         if stack.topLabels[idx] then stack.topLabels[idx]:SetHidden(true) end
-        if stack.bottomLabels[idx] then stack.bottomLabels[idx]:SetHidden(true) end
+        if stack.bottomLabels[idx] then
+            HideBottomThresholdLabel(stack.bottomLabels[idx], false)
+            mechanicAnimByIdx[idx] = nil
+        end
         if stack.commonLines[idx] then stack.commonLines[idx]:SetHidden(true) end
     end
 end
@@ -1199,6 +1397,7 @@ function UnitFrames.UpdateBossThresholds()
         UnitFrames.activeBossThresholds = nil
         UnitFrames.lastBossThresholdColumnSig = nil
         UnitFrames.bossThresholdMechanicPadding = 0
+        UnitFrames.bossThresholdMechanicBottomAnimByIdx = nil
         return
     end
 
@@ -1206,6 +1405,7 @@ function UnitFrames.UpdateBossThresholds()
         UnitFrames.activeBossThresholds = nil
         UnitFrames.lastBossThresholdColumnSig = nil
         UnitFrames.bossThresholdMechanicPadding = 0
+        UnitFrames.bossThresholdMechanicBottomAnimByIdx = nil
         ApplyBossThresholdMarkers(nil)
         UnitFrames.CustomFramesApplyLayoutBosses()
         return
@@ -1245,28 +1445,82 @@ function UnitFrames.UpdateBossThresholds()
     UnitFrames.CustomFramesApplyLayoutBosses()
 end
 
+local function BuildBossThresholdSlashDebugColumns()
+    local columns = {}
+    for _, pct in ipairs(BOSS_THRESHOLD_SLASH_DEBUG_PERCENTS) do
+        table_insert(columns,
+                     {
+                         percent = pct,
+                         mechanic = BOSS_THRESHOLD_SLASH_DEBUG_MECHANIC,
+                         scope = "common",
+                     })
+    end
+    table_sort(columns, function (a, b) return a.percent > b.percent end)
+    return { columns = columns }
+end
+
 --- Used by UnitFrames slash debug only. Paints threshold markers from built-in percentages;
 --- does not call CrutchAlerts (GetBossThresholds requires live boss units).
 function UnitFrames.ApplyBossThresholdMarkersSlashDebugPreview()
     if not UnitFrames.CustomFrames or not UnitFrames.CustomFrames["boss1"] then
-        return
+        return false
     end
 
     if not UnitFrames.SV.BossShowThresholdMarkers then
         UnitFrames.activeBossThresholds = nil
         UnitFrames.lastBossThresholdColumnSig = nil
+        UnitFrames.debugBossThresholdPreviewActive = false
         ApplyBossThresholdMarkers(nil)
-        return
+        return false
     end
 
-    local columns = {}
-    for _, pct in ipairs(DEFAULT_BOSS_THRESHOLD_PERCENTS) do
-        table_insert(columns, { percent = pct, mechanic = "", scope = "common" })
-    end
-    table_sort(columns, function (a, b) return a.percent > b.percent end)
-    local thresholdInfo = { columns = columns }
+    local thresholdInfo = BuildBossThresholdSlashDebugColumns()
+    UnitFrames.debugBossThresholdPreviewActive = true
+    UnitFrames.lastBossThresholdColumnSig = nil
+    UnitFrames.bossThresholdStageState = {}
+    UnitFrames.bossThresholdMechanicBottomAnimByIdx = nil
     UnitFrames.activeBossThresholds = thresholdInfo
+
+    local rawOffsetY = (UnitFrames.SV and UnitFrames.SV.BossThresholdLabelOffsetY) or -2
+    local labelOffsetY = zo_abs(rawOffsetY)
+    UnitFrames.bossThresholdMechanicPadding = labelOffsetY + BOSS_THRESHOLD_BOTTOM_LABEL_DIMENSIONS[2] + 2
+
     ApplyBossThresholdMarkers(thresholdInfo)
+    UnitFrames.CustomFramesApplyLayoutBosses()
+    return true
+end
+
+--- Sets simulated boss1 HP (0–100) for slash threshold preview and repaints markers.
+--- Resets stage state so HP can be stepped up or down during debug.
+function UnitFrames.SetBossThresholdDebugPreviewHealth(percentRounded)
+    if not UnitFrames.debugBossThresholdPreviewActive or not UnitFrames.CustomFrames["boss1"] then
+        return false
+    end
+
+    local percent = zo_clamp(zo_round(percentRounded or 0), 0, 100)
+    local unitTag = "boss1"
+    local powerMax = 1000000
+    local powerValue = zo_floor(powerMax * percent / 100)
+
+    UnitFrames.savedHealth[unitTag] = { powerValue, powerMax, powerMax, 0, 0 }
+    UnitFrames.bossThresholdStageState = {}
+    UnitFrames.bossThresholdMechanicBottomAnimByIdx = nil
+
+    UnitFrames.UpdateCustomFramePower(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH, powerValue, powerMax, powerMax, false, nil)
+    UnitFrames.RepaintBossThresholdMarkers()
+    return true
+end
+
+function UnitFrames.ClearBossThresholdDebugPreview()
+    if not UnitFrames.debugBossThresholdPreviewActive then
+        return
+    end
+    UnitFrames.debugBossThresholdPreviewActive = false
+    UnitFrames.activeBossThresholds = nil
+    UnitFrames.lastBossThresholdColumnSig = nil
+    UnitFrames.bossThresholdMechanicBottomAnimByIdx = nil
+    UnitFrames.bossThresholdMechanicPadding = 0
+    ApplyBossThresholdMarkers(nil)
 end
 
 --- Re-applies stage colors and marker positions from cached threshold columns (no Crutch API call).
