@@ -38,6 +38,20 @@ local MINIMAL_SLOT_GAP = 2
 local CONTROL_WIDTH_DEFAULT = 320
 local CONTROL_HEIGHT_DEFAULT = 440
 
+--- @param slotCount integer
+--- @return integer
+local function GetMinimalHorizontalWidth(slotCount)
+    if slotCount <= 0 then
+        return 0
+    end
+    return slotCount * ROW_WIDTH_MINIMAL + (slotCount - 1) * MINIMAL_SLOT_GAP
+end
+
+--- @return integer
+local function GetMinimalHorizontalSlotStep()
+    return ROW_WIDTH_MINIMAL + MINIMAL_SLOT_GAP
+end
+
 --- Hardcoded shared cooldown groups
 --- Wiki: "Luminous Shards and Energy Orb's synergies uniquely share the same cooldown"
 --- These are the ONLY synergies that share cooldowns in ESO
@@ -156,7 +170,16 @@ function SynergyTracker:ApplySlotAnchors(displayMode, visibleCount)
         if isMinimal then
             if slotCount > 0 and i <= slotCount then
                 if horizontal then
-                    local offsetX = (i - 1) * (ROW_WIDTH_MINIMAL + MINIMAL_SLOT_GAP)
+                    local slotStep = GetMinimalHorizontalSlotStep()
+                    local layoutSlots = Settings.maxDisplay or MAX_SYNERGY_SLOTS
+                    local containerWidth = GetMinimalHorizontalWidth(layoutSlots)
+                    local contentWidth = GetMinimalHorizontalWidth(slotCount)
+                    local align = Settings.minimalHorizontalAlign
+                    if align ~= "right" then
+                        align = "left"
+                    end
+                    local startX = align == "right" and (containerWidth - contentWidth) or 0
+                    local offsetX = startX + (i - 1) * slotStep
                     row:SetAnchor(TOPLEFT, self.control, TOPLEFT, offsetX, 0)
                 else
                     local offsetY = (i - 1) * ROW_HEIGHT
@@ -217,7 +240,8 @@ function SynergyTracker:ApplyContainerDimensions(displayMode, visibleCount)
     local Settings = CombatInfo.SV.synergy
     if displayMode == "minimal" and visibleCount > 0 then
         if Settings.minimalHorizontal then
-            local width = visibleCount * ROW_WIDTH_MINIMAL + (visibleCount - 1) * MINIMAL_SLOT_GAP
+            local layoutSlots = Settings.maxDisplay or MAX_SYNERGY_SLOTS
+            local width = GetMinimalHorizontalWidth(layoutSlots)
             self.control:SetDimensions(width, ROW_HEIGHT)
         else
             self.control:SetDimensions(ROW_WIDTH_MINIMAL, visibleCount * ROW_HEIGHT)
@@ -460,7 +484,12 @@ end
 
 --- Called when HUD scene is showing
 function SynergyTracker:OnShowing()
-    self:RefreshActiveSynergies()
+    local Settings = CombatInfo.SV.synergy
+    if Settings.unlocked then
+        self:ShowPreview()
+    else
+        self:RefreshActiveSynergies()
+    end
 end
 
 --- Called when HUD scene is hidden
@@ -534,6 +563,16 @@ end
 
 --- Update the multi-synergy display
 function SynergyTracker:UpdateDisplay()
+    if not self.synergyControls or not self.synergyControls[1] then
+        return
+    end
+
+    local Settings = CombatInfo.SV.synergy
+    if Settings.unlocked then
+        self:ShowPreview()
+        return
+    end
+
     local currentScene = sceneManager:GetCurrentScene()
     local hudScene = sceneManager:GetScene(HUD_SCENE)
     local hudUIScene = sceneManager:GetScene(HUDUI_SCENE)
@@ -541,11 +580,6 @@ function SynergyTracker:UpdateDisplay()
         return
     end
 
-    if not self.synergyControls or not self.synergyControls[1] then
-        return
-    end
-
-    local Settings = CombatInfo.SV.synergy
     local numSynergies = GetNumberOfAvailableSynergies()
     local displayMode = Settings.displayMode
     local maxDisplay = Settings.maxDisplay or MAX_SYNERGY_SLOTS

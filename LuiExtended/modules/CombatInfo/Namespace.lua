@@ -230,6 +230,7 @@ CombatInfo.Defaults =
         unlocked = false,
         displayMode = "multi",
         minimalHorizontal = false,
+        minimalHorizontalAlign = "left",
         maxDisplay = 10,
         showPriority = true,
         showKeybinds = true,

@@ -3330,6 +3330,44 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.synergy.minimalHorizontal
         }
 
+        local horizontalAlignItems =
+        {
+            { name = GetString(LUIE_STRING_SHARED_ALIGN_LEFT),  data = "left"  },
+            { name = GetString(LUIE_STRING_SHARED_ALIGN_RIGHT), data = "right" },
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_CI_SYNERGY_HORIZONTAL_ALIGN),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_HORIZONTAL_ALIGN_TP),
+            items = horizontalAlignItems,
+            getFunction = function ()
+                local align = Settings.synergy.minimalHorizontalAlign
+                if align ~= "right" then
+                    align = "left"
+                end
+                for _, item in ipairs(horizontalAlignItems) do
+                    if item.data == align then
+                        return item
+                    end
+                end
+                return horizontalAlignItems[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.synergy.minimalHorizontalAlign = item.data
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:ApplyRowLayout(Settings.synergy.displayMode)
+                    tracker:UpdateDisplay()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled or Settings.synergy.displayMode ~= "minimal" or not Settings.synergy.minimalHorizontal
+            end,
+            default = horizontalAlignItems[1]
+        }
+
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
@@ -3346,6 +3384,7 @@ function CombatInfo.CreateConsoleSettings()
                 Settings.synergy.maxDisplay = v
                 local tracker = CombatInfo.SynergyTrackerInstance
                 if tracker then
+                    tracker:ApplyRowLayout(Settings.synergy.displayMode)
                     tracker:UpdateDisplay()
                 end
             end,
