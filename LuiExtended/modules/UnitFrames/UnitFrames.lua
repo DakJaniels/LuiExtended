@@ -536,9 +536,7 @@ function UnitFrames.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_TITLE_UPDATE, UnitFrames.TitleUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_RANK_POINT_UPDATE, UnitFrames.TitleUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_OVERLAND_DIFFICULTY_CHANGED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
-    if EVENT_ACTIVE_VETERANCY_SEASON_UPDATED then
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_VETERANCY_SEASON_UPDATED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
-    end
+    eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_VETERANCY_SEASON_UPDATED, UnitFrames.RefreshVeterancyOverlandFrameStaticControls)
 
     -- Next events make sense only for CustomFrames
     if UnitFrames.CustomFrames["player"] or UnitFrames.CustomFrames["reticleover"] or UnitFrames.CustomFrames["companion"] or UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] or UnitFrames.CustomFrames["boss1"] or UnitFrames.CustomFrames["PetGroup1"] then
