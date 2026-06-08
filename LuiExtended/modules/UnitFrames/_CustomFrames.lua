@@ -212,3 +212,23 @@ function UnitFrames.MigratePowerOverlayDefaultOff()
     end
     LUIE.MarkMigrationDone("unitframes_power_overlay_default_off")
 end
+
+--- Split veterancy/overland toggles from target-only settings to per custom frame type (one-time).
+function UnitFrames.MigrateVeterancyOverlandPerFrameType()
+    if LUIE.IsMigrationDone("unitframes_veterancy_overland_per_frame") then
+        return
+    end
+    local sv = UnitFrames.SV
+    if sv.TargetShowVeterancyRank ~= nil then
+        sv.PlayerShowVeterancyRank = sv.TargetShowVeterancyRank
+    end
+    if sv.TargetShowOverlandDifficulty ~= nil then
+        sv.PlayerShowOverlandDifficulty = sv.TargetShowOverlandDifficulty
+        sv.GroupShowOverlandDifficulty = sv.TargetShowOverlandDifficulty
+        sv.RaidShowOverlandDifficulty = sv.TargetShowOverlandDifficulty
+    end
+    if sv.GroupShowVeterancyRank ~= nil then
+        sv.RaidShowVeterancyRank = sv.GroupShowVeterancyRank
+    end
+    LUIE.MarkMigrationDone("unitframes_veterancy_overland_per_frame")
+end

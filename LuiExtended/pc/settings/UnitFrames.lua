@@ -1814,6 +1814,40 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_VETERANCY_RANK),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_VETERANCY_RANK_TP),
+                getFunc = function ()
+                    return Settings.PlayerShowVeterancyRank
+                end,
+                setFunc = function (value)
+                    Settings.PlayerShowVeterancyRank = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.PlayerShowVeterancyRank,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_OVERLAND_DIFFICULTY),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_OVERLAND_DIFFICULTY_TP),
+                getFunc = function ()
+                    return Settings.PlayerShowOverlandDifficulty
+                end,
+                setFunc = function (value)
+                    Settings.PlayerShowOverlandDifficulty = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.PlayerShowOverlandDifficulty,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                end,
+            },
+            {
                 -- Treat Missing Power as In-Combat
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MISSPOWERCOMBAT),
@@ -2967,6 +3001,23 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESG_OVERLAND_DIFFICULTY),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_OVERLAND_DIFFICULTY_TP),
+                getFunc = function ()
+                    return Settings.GroupShowOverlandDifficulty
+                end,
+                setFunc = function (value)
+                    Settings.GroupShowOverlandDifficulty = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.GroupShowOverlandDifficulty,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
+            {
                 -- Custom Unit Frames Group Color Class
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_GFRAMESBYCLASS),
@@ -3319,6 +3370,40 @@ function UnitFrames.CreateSettings()
                 end,
                 width = "full",
                 default = raidIconOptions[Defaults.RaidIconOptions],
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_VETERANCY_RANK),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_VETERANCY_RANK_TP),
+                getFunc = function ()
+                    return Settings.RaidShowVeterancyRank
+                end,
+                setFunc = function (value)
+                    Settings.RaidShowVeterancyRank = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.RaidShowVeterancyRank,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_OVERLAND_DIFFICULTY),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_OVERLAND_DIFFICULTY_TP),
+                getFunc = function ()
+                    return Settings.RaidShowOverlandDifficulty
+                end,
+                setFunc = function (value)
+                    Settings.RaidShowOverlandDifficulty = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.RaidShowOverlandDifficulty,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
                 end,

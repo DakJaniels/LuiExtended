@@ -47,41 +47,79 @@ local function FormatTextWithIcon(iconPath, text, iconSize)
     return zo_iconFormat(iconPath, iconSize, iconSize) .. " " .. text
 end
 
-local function IsLuiEGroupFrameTag(unitTag)
-    if ZO_Group_IsGroupUnitTag and ZO_Group_IsGroupUnitTag(unitTag) then
-        return true
+--- @return "player"|"target"|"group"|"raid"|nil
+local function GetCustomFrameDisplayCategory(unitFrame)
+    if unitFrame == nil then
+        return nil
     end
-    return string.sub(unitTag, 1, 10) == "SmallGroup" or string.sub(unitTag, 1, 9) == "RaidGroup"
+    local unitTag = unitFrame.unitTag
+    if unitTag == "player" then
+        return "player"
+    end
+    if unitTag == "reticleover" then
+        return "target"
+    end
+    if unitTag and ZO_Group_IsGroupUnitTag(unitTag) then
+        return UnitFrames.isRaid and "raid" or "group"
+    end
+    local registryKey = unitFrame.frameRegistryKey
+    if registryKey == nil and unitTag then
+        if string.sub(unitTag, 1, 10) == "SmallGroup" then
+            registryKey = unitTag
+        elseif string.sub(unitTag, 1, 9) == "RaidGroup" then
+            registryKey = unitTag
+        end
+    end
+    if registryKey then
+        if string.sub(registryKey, 1, 10) == "SmallGroup" then
+            return "group"
+        end
+        if string.sub(registryKey, 1, 9) == "RaidGroup" then
+            return "raid"
+        end
+    end
+    return nil
 end
 
-local function IsOverlandDifficultyDisplayEnabled()
-    return UnitFrames.SV.TargetShowOverlandDifficulty
-        and GetOverlandDifficultyDisabledReason ~= nil
-        and GetOverlandDifficultyDisabledReason() == OVERLAND_DIFFICULTY_DISABLED_REASON_NONE
-        and ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD ~= nil
+local function IsOverlandDifficultyGloballyAvailable()
+    return GetOverlandDifficultyDisabledReason() == OVERLAND_DIFFICULTY_DISABLED_REASON_NONE
 end
 
-local function ApplyOverlandDifficultyNameIcon(unitTag, nameText)
-    if not IsOverlandDifficultyDisplayEnabled() or nameText == nil or nameText == "" then
+local function IsOverlandDifficultyEnabledForCategory(frameCategory)
+    if not IsOverlandDifficultyGloballyAvailable() or frameCategory == nil then
+        return false
+    end
+    local sv = UnitFrames.SV
+    if frameCategory == "player" then
+        return sv.PlayerShowOverlandDifficulty
+    end
+    if frameCategory == "target" then
+        return sv.TargetShowOverlandDifficulty
+    end
+    if frameCategory == "group" then
+        return sv.GroupShowOverlandDifficulty
+    end
+    if frameCategory == "raid" then
+        return sv.RaidShowOverlandDifficulty
+    end
+    return false
+end
+
+local function ApplyOverlandDifficultyNameIcon(unitTag, nameText, frameCategory)
+    if not IsOverlandDifficultyEnabledForCategory(frameCategory) or nameText == nil or nameText == "" then
         return nameText
     end
     local difficulty
-    if IsUnitPlayer(unitTag) then
-        if GetUnitOverlandDifficulty == nil then
-            return nameText
-        end
-        difficulty = GetUnitOverlandDifficulty(unitTag)
-    else
-        if GetOverlandDifficulty == nil then
-            return nameText
-        end
+    if frameCategory == "target" and not IsUnitPlayer(unitTag) then
         difficulty = GetOverlandDifficulty()
-        if UnitFrames.SV.TargetMonsterOverlandDifficulty and IsUnitMonster ~= nil and not IsUnitMonster(unitTag) then
+        if UnitFrames.SV.TargetMonsterOverlandDifficulty and not IsUnitMonster(unitTag) then
             return nameText
         end
         if not IsUnitAttackable(unitTag) then
             return nameText
         end
+    else
+        difficulty = GetUnitOverlandDifficulty(unitTag)
     end
     if difficulty == nil or difficulty <= OVERLAND_DIFFICULTY_TYPE_BASEGAME then
         return nameText
@@ -100,11 +138,19 @@ local function ShouldShowVeterancyRankOnFrame(unitFrame)
     if not IsVeterancySeasonActive() or not IsInVeterancyProgressionZone() then
         return false
     end
-    if unitFrame.unitTag == "reticleover" or unitFrame.unitTag == "player" then
-        return UnitFrames.SV.TargetShowVeterancyRank
+    local frameCategory = GetCustomFrameDisplayCategory(unitFrame)
+    local sv = UnitFrames.SV
+    if frameCategory == "player" then
+        return sv.PlayerShowVeterancyRank
     end
-    if IsLuiEGroupFrameTag(unitFrame.unitTag) then
-        return UnitFrames.SV.GroupShowVeterancyRank
+    if frameCategory == "target" then
+        return sv.TargetShowVeterancyRank
+    end
+    if frameCategory == "group" then
+        return sv.GroupShowVeterancyRank
+    end
+    if frameCategory == "raid" then
+        return sv.RaidShowVeterancyRank
     end
     return false
 end
@@ -260,6 +306,7 @@ function UnitFrames.Initialize(enabled)
     UnitFrames.MigrateCanonicalFormatStrings()
     UnitFrames.MigratePlayerTargetOverlayFlags()
     UnitFrames.MigratePowerOverlayDefaultOff()
+    UnitFrames.MigrateVeterancyOverlandPerFrameType()
 
     if UnitFrames.SV.DefaultOocTransparency < 0 or UnitFrames.SV.DefaultOocTransparency > 100 then
         UnitFrames.SV.DefaultOocTransparency = UnitFrames.Defaults.DefaultOocTransparency
@@ -367,28 +414,7 @@ function UnitFrames.Initialize(enabled)
         UnitFrames.companionAbilityTrack:Initialize()
     end
 
-    local function RefreshBossHealthBar(self, smoothAnimate)
-        local totalHealth = 0
-        local totalMaxHealth = 0
-
-        for unitTag, bossEntry in pairs(self.bossHealthValues) do
-            totalHealth = totalHealth + bossEntry.health
-            totalMaxHealth = totalMaxHealth + bossEntry.maxHealth
-        end
-
-        local halfHealth = zo_floor(totalHealth / 2)
-        local halfMax = zo_floor(totalMaxHealth / 2)
-        for i = 1, #self.bars do
-            ZO_StatusBar_SmoothTransition(self.bars[i], halfHealth, halfMax, not smoothAnimate)
-        end
-        self.healthText:SetText(ZO_FormatResourceBarCurrentAndMax(totalHealth, totalMaxHealth))
-
-        if UnitFrames.SV.DefaultFramesNewBoss == 2 then
-            COMPASS_FRAME:SetBossBarActive(totalHealth > 0)
-        end
-    end
-
-    rawset(BOSS_BAR, "RefreshBossHealthBar", RefreshBossHealthBar)
+    UnitFrames.ResetCompassBarMenu()
 
     UnitFrames.SaveDefaultFramePositions()
     UnitFrames.RepositionDefaultFrames()
@@ -1828,10 +1854,9 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             end
         end
 
-        if unitFrame.isPlayer then
-            nameText = ApplyOverlandDifficultyNameIcon(unitFrame.unitTag, nameText)
-        elseif unitFrame.unitTag == "reticleover" then
-            nameText = ApplyOverlandDifficultyNameIcon(unitFrame.unitTag, nameText)
+        local overlandCategory = GetCustomFrameDisplayCategory(unitFrame)
+        if overlandCategory then
+            nameText = ApplyOverlandDifficultyNameIcon(unitFrame.unitTag, nameText, overlandCategory)
         end
 
         unitFrame.name:SetText(nameText)

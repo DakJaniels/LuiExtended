@@ -51,8 +51,15 @@ function UnitFrames.MenuUpdatePlayerFrameOptions(option)
     UnitFrames.CustomFramesApplyAllLayouts({ playerTriadOnly = true })
 end
 
+local LUIE_COMPASS_BOSS_BAR_HIDDEN_REASON = "LUIE_CustomBossFrames"
+
 function UnitFrames.ResetCompassBarMenu()
-    if UnitFrames.SV.DefaultFramesNewBoss == 2 then
+    if not COMPASS_FRAME then
+        return
+    end
+    local useCompassBossBar = UnitFrames.SV.DefaultFramesNewBoss == 2
+    COMPASS_FRAME:SetBossBarHiddenForReason(LUIE_COMPASS_BOSS_BAR_HIDDEN_REASON, not useCompassBossBar)
+    if useCompassBossBar then
         for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
             local unitTag = "boss" .. i
             if DoesUnitExist(unitTag) then
