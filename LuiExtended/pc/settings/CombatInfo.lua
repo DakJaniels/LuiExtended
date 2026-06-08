@@ -3275,6 +3275,37 @@ function CombatInfo.CreateSettings()
             end,
         },
         {
+            type = "dropdown",
+            name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CI_SYNERGY_HORIZONTAL_ALIGN)),
+            tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_HORIZONTAL_ALIGN_TP),
+            choices =
+            {
+                GetString(LUIE_STRING_SHARED_ALIGN_LEFT),
+                GetString(LUIE_STRING_SHARED_ALIGN_RIGHT),
+            },
+            choicesValues = { "left", "right" },
+            getFunc = function ()
+                local align = Settings.synergy.minimalHorizontalAlign
+                if align ~= "right" then
+                    return "left"
+                end
+                return align
+            end,
+            setFunc = function (value)
+                Settings.synergy.minimalHorizontalAlign = value
+                local tracker = GetSynergyTracker()
+                if tracker then
+                    tracker:ApplyRowLayout(Settings.synergy.displayMode)
+                    tracker:UpdateDisplay()
+                end
+            end,
+            width = "full",
+            default = Defaults.synergy.minimalHorizontalAlign,
+            disabled = function ()
+                return not Settings.synergy.enabled or Settings.synergy.displayMode ~= "minimal" or not Settings.synergy.minimalHorizontal
+            end,
+        },
+        {
             type = "slider",
             name = zo_strformat("\t\t\t\t\t<<1>>", "Maximum Synergies to Display"),
             tooltip = GetString(LUIE_STRING_LAM_CI_SYNERGY_MAX_DISPLAY_TP),
@@ -3288,6 +3319,7 @@ function CombatInfo.CreateSettings()
                 Settings.synergy.maxDisplay = value
                 local tracker = GetSynergyTracker()
                 if tracker then
+                    tracker:ApplyRowLayout(Settings.synergy.displayMode)
                     tracker:UpdateDisplay()
                 end
             end,
