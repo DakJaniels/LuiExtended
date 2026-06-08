@@ -51,8 +51,8 @@ function LUIE.FormatAddonSettingsPanelDisplayName(moduleStringId)
     return zo_strformat("<<1>> <<2>>", LUIE.name, GetString(moduleStringId))
 end
 
-LUIE.version = "7.2.3.8"
-LUIE.addonVersion = 7238
+LUIE.version = "7.2.3.9"
+LUIE.addonVersion = 7239
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
