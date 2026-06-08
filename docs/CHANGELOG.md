@@ -4,18 +4,29 @@
 
 ### New
 
-- Unit Frames: Optional **Show Rapport Change** on custom companion frames animates a green **+** or red **-** rapport delta beside the companion bar when rapport changes.
+- Unit Frames: Optional **Show Rapport Change** on custom companion frames shows a green **+** or red **-** beside the companion bar when rapport goes up or down.
 
 ### Changes
 
-- Localization: LUIE strings are split into per-module **lang** files (**Action Bar**, **Chat Announcements**, **Combat Info**, **Combat Text**, **Info Panel**, **Slash Commands**, **SpellCastBuffs**, **Unit Frames**, and shared **Core**) with expanded default and translation coverage.
-- ChatAnnouncements Social: **Friends List Log On/Off Name Format** dropdown — single name via **Player Name Display Method** (default) or both names in base-game order (**@UserID with Character Name**) with LUIE link styling.
+- ChatAnnouncements: **Update 50** announcements cover Tamriel Tomes rollover currency, veterancy rank-up notices, overland difficulty alerts, timed activity reroll reset, season recap, clearer hireling mail sender names, and large-group invite messaging aligned with the base game.
+- Translations: Settings and in-game text are grouped by module (**Action Bar**, **Chat Announcements**, **Combat Info**, **Combat Text**, **Info Panel**, **Slash Commands**, **SpellCastBuffs**, **Unit Frames**, and shared options) with expanded English and updated language files.
+- ChatAnnouncements Social: **Friends List Log On/Off Name Format** lets you show one name using **Player Name Display Method** (default) or both names in base-game order (**@UserID with Character Name**) with LUIE link styling.
+- Unit Frames: In veterancy zones, optional **Display Veterancy Rank** on custom player, target, group, and raid frames; optional **Overland Difficulty Icon** on target names (with a monsters-only option) to match base-game nameplates.
+- ChatAnnouncements: Optional notices when you unlock a set at a consolidated attunable crafting station in your home (separate toggles for chat, center-screen messages, and alerts).
+- ChatAnnouncements: Optional chat and alert notices for LuiExtended **/home** and primary home, **/campaign** checks, Cyrodiil queue updates, outfit changes, and common social errors (invites, ignore list, and similar).
+- ChatAnnouncements: Guild bank deposits, withdrawals, and moved items show which guild's bank you used.
+- Action Bar / LuiData: Better bar highlights and stack timers for more Cyrodiil **Vengeance** kits (Vanguard, Scout, Bone Totem, and related Alliance War abilities).
+- Action Bar: Cast bar supports more recall and teleport items (Mages Guild Recall, DLC-style recalls, and similar consumables).
 
 ### Fixed
 
-- ChatAnnouncements: Guard confiscation loot lines no longer falsely list legitimate gear when you weapon swap and are caught with a bounty; only stolen items are announced, with worn-slot cache refresh on weapon pair change.
-- ChatAnnouncements: Friend online/offline messages default to a single name from **Player Name Display Method**; optional Social **Friends List Log On/Off Name Format** restores base-game **@UserID with Character Name** order (fixes reversed dual-name slots from 7.2.3.7).
-- LuiData: Dragonknight **Landslide** passive stack buffs in the skills menu use the correct Landslide icon instead of Dragon Leap ground effect art.
+- ChatAnnouncements: Guard confiscation loot no longer lists your legitimately worn gear after a weapon swap when you are caught with a bounty; only stolen items are announced.
+- ChatAnnouncements: Friend online/offline messages default to a single name from **Player Name Display Method**; optional **Friends List Log On/Off Name Format** restores base-game **@UserID with Character Name** order (fixes reversed name order from 7.2.3.7).
+- ChatAnnouncements: Weekly and other timed challenge updates no longer print twice when both challenge tracking and progress announcements are enabled.
+- LuiData: Dragonknight **Landslide** passive stacks in the skills menu use the Landslide icon instead of Dragon Leap ground art.
+- Action Bar: Recalls no longer cancel when you click a wayshrine on the world map while standing still.
+- Slash Commands (PC): With **LibSlashCommander** installed, LUIE slash commands no longer register twice after **/reloadui**.
+- Unit Frames: Shield, trauma, and related health bar overlays update more reliably on custom player, target, group, companion, pet, and boss frames.
 
 ## Version 7.2.3.8
 
@@ -203,7 +214,7 @@
 
 ### New
 
-- ChatAnnouncements: Display Announcements — **Event Zone: Night Market** (PC and console). Separate chat, center-screen, and alert toggles for **Daring Race**, **Arachnid Invasion**, and **Guiding Light** Still missing some; will be added when I see them.
+- ChatAnnouncements: Display Announcements for **Event Zone: Night Market** (PC and console). Separate chat, center-screen, and alert toggles for **Daring Race**, **Arachnid Invasion**, and **Guiding Light** Still missing some; will be added when I see them.
 - Classified Night Market [C]EVENT_DISPLAY_ANNOUNCEMENT[/C] lines by activity text (not whole zone 1559): Daring Race (for example Tempest earned, race objectives, Daring Race: … Complete, Void Collapse); Arachnid Invasion (invasion begins, defense complete, invasion repelled); Guiding Light (countdown, begins, complete, and reward earned lines such as Agonizing Tether or Exsanguinate).
 
 ### Changes
