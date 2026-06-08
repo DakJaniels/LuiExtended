@@ -13,7 +13,7 @@
 
 - Unit Frames: **Display Veterancy Rank** and **Overland Difficulty Icon** are configured per custom frame type (**Player**, **Target**, **Small Group**, **Raid**); prior target-only toggles migrate on first load after upgrade.
 - Unit Frames: Veterancy and overland difficulty display default **off** for new installs; upgraded profiles keep enabled options via migration.
-- Unit Frames: Compass-integrated default boss bar no longer hides the compass boss UI unless **Compass Boss Bar** is selected.
+- Unit Frames: Compass-integrated default boss bar uses the base-game compass **SetBossBarHiddenForReason** stack instead of replacing boss bar refresh, so the compass boss UI stays hidden unless **Compass Boss Bar** is selected.
 
 ### Fixed
 
