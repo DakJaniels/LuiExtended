@@ -672,13 +672,21 @@ end
 
 --- Move deprecated core `TempAlert*` slash toggles into Chat Announcements `Notify.*` and remove legacy keys.
 function LUIE.MigrateTempSlashAlertsToChatAnnouncements()
-    if LUIE.IsMigrationDone("temp_slash_alerts_to_ca") then
+    if not LUIE.SV or LUIE.IsMigrationDone("temp_slash_alerts_to_ca") then
         return
     end
 
     local core = LUIE.GetCoreAccountWideRawTable()
     local globalName = LUIE.ModuleSavedVarNames.ChatAnnouncements
-    local dest = LUIE.GetRawModuleAccountWideLeaf(globalName)
+    local profile = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+    local defaults = LUIE.ChatAnnouncements.Defaults
+    local dest
+    if LUIE.SV.CharacterSpecificSV then
+        dest = ZO_SavedVars:New(globalName, LUIE.SVVer, nil, defaults, profile)
+    else
+        dest = ZO_SavedVars:NewAccountWide(globalName, LUIE.SVVer, nil, defaults, profile)
+    end
+
     dest.Notify = dest.Notify or {}
     local notify = dest.Notify
 
