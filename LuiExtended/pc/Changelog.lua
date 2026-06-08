@@ -54,7 +54,8 @@ local changelogMessages =
     "",
     -- Fix
     "|cFFFF00Fix:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Overland challenge difficulty tier names no longer spam chat from nearby players; your own tier change still announces once under Notify → Challenge Difficulty (no longer tied to Group CA). Cooldown and combat failure alerts use the same Notify toggles.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Other players' overland challenge tier changes no longer spam chat; your own tier still announces once under Notify → Challenge Difficulty. Cooldown and combat failure alerts use the same Notify toggles.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom target, group, and raid frames now show other players' overland challenge tier icons on their names.",
     "",
 
     -- Version Header 7.2.4.0
@@ -64,7 +65,7 @@ local changelogMessages =
     "|cFFFF00Changes:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Display Veterancy Rank and Overland Difficulty Icon are configured per custom frame type (Player, Target, Small Group, Raid); prior target-only toggles migrate on first load after upgrade.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Veterancy and overland difficulty display default off for new installs; upgraded profiles keep enabled options via migration.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Compass-integrated default boss bar uses the base-game compass SetBossBarHiddenForReason stack instead of replacing boss bar refresh, so the compass boss UI stays hidden unless Compass Boss Bar is selected.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Compass-integrated default boss bar no longer hides the compass boss UI unless Compass Boss Bar is selected.",
     "",
     -- Fix
     "|cFFFF00Fix:|r",
