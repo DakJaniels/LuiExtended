@@ -3640,8 +3640,8 @@ local effectOverride =
     ----------------------------------------------------------------
 
     -- Two Handed
-    [29387] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_FORCEFUL_DDS },                                                                    -- Forceful (Rank 1)
-    [45444] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_FORCEFUL_DDS },                                                                    -- Forceful (Rank 2)
+    [29387] = { icon = "/esoui/art/icons/ability_weapon_027.dds" },                                                                                 -- Forceful (Rank 1)
+    [45444] = { icon = "/esoui/art/icons/ability_weapon_027.dds" },                                                                                 -- Forceful (Rank 2)
     [30821] = { hide = true },                                                                                                                      -- Forceful (stale equip id)
     [45445] = { hide = true },                                                                                                                      -- Forceful (stale equip id)
     [29375] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_WEAPON_HEAVY_WEAPONS_DDS },                                                               -- Heavy Weapons (Rank 1)
