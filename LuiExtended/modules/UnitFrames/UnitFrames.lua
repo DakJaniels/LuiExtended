@@ -47,6 +47,7 @@ local function FormatTextWithIcon(iconPath, text, iconSize)
     return zo_iconFormat(iconPath, iconSize, iconSize) .. " " .. text
 end
 
+--- @param unitFrame LUIE_CustomFrameObject|nil
 --- @return "player"|"target"|"group"|"raid"|nil
 local function GetCustomFrameDisplayCategory(unitFrame)
     if unitFrame == nil then
