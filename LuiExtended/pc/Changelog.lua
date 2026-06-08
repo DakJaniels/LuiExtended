@@ -49,6 +49,14 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.4.1
+    "|cFFA500LuiExtended Version 7.2.4.1|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Overland challenge difficulty tier names no longer spam chat from nearby players; your own tier change still announces once under Notify → Challenge Difficulty (no longer tied to Group CA). Cooldown and combat failure alerts use the same Notify toggles.",
+    "",
+
     -- Version Header 7.2.4.0
     "|cFFA500LuiExtended Version 7.2.4.0|r",
     "",

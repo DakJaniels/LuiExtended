@@ -9162,6 +9162,40 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+            getFunction = function ()
+                return Settings.Notify.ChallengeDifficultyCA
+            end,
+            setFunction = function (value)
+                Settings.Notify.ChallengeDifficultyCA = value
+            end,
+            default = Defaults.Notify.ChallengeDifficultyCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+            getFunction = function ()
+                return Settings.Notify.ChallengeDifficultyAlert
+            end,
+            setFunction = function (value)
+                Settings.Notify.ChallengeDifficultyAlert = value
+            end,
+            default = Defaults.Notify.ChallengeDifficultyAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), timedActivitiesTrackingLabel),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), timedActivitiesTrackingLabel),
             getFunction = function ()

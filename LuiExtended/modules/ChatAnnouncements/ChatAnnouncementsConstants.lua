@@ -221,6 +221,8 @@ ChatAnnouncements.Brackets =
 --- @field CampaignQueueAlert boolean
 --- @field OutfitEquipCA boolean
 --- @field OutfitEquipAlert boolean
+--- @field ChallengeDifficultyCA boolean
+--- @field ChallengeDifficultyAlert boolean
 --- @field SocialErrorCA boolean
 --- @field SocialErrorAlert boolean
 --- @field DisguiseCA boolean
@@ -829,6 +831,8 @@ ChatAnnouncements.Defaults =
         CampaignQueueAlert = false,
         OutfitEquipCA = true,
         OutfitEquipAlert = false,
+        ChallengeDifficultyCA = true,
+        ChallengeDifficultyAlert = false,
         SocialErrorCA = true,
         SocialErrorAlert = false,
 

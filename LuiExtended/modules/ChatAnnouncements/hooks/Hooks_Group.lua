@@ -29,62 +29,6 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
     local moduleName = ctx.moduleName
     local FindCsaCallbackHandler = ctx.FindCsaCallbackHandler
 
-    if EVENT_OVERLAND_DIFFICULTY_CHANGED then
-        local function GetOverlandDifficultyTierName(difficulty)
-            local tierName = GetString("SI_OVERLANDDIFFICULTYTYPE", difficulty)
-            if tierName == nil or tierName == "" then
-                return nil
-            end
-            return tierName
-        end
-
-        local function OnOverlandDifficultyChanged(_eventId, newDifficulty)
-            local message = GetOverlandDifficultyTierName(newDifficulty)
-            if message == nil or message == "" then
-                return
-            end
-            if ChatAnnouncements.SV.Group.GroupCA then
-                ChatOutput:Print(message, true)
-            end
-            if ChatAnnouncements.SV.Group.GroupAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
-            end
-        end
-        eventManager:RegisterForEvent(moduleName, EVENT_OVERLAND_DIFFICULTY_CHANGED, OnOverlandDifficultyChanged)
-
-        if SI_CHALLENGE_DIFFICULTY_COOLDOWN_ALERT or SI_CHALLENGE_DIFFICULTY_COMBAT_ALERT then
-            local function IsChallengeDifficultyZOAlertMessage(message)
-                if type(message) ~= "string" then
-                    return false
-                end
-                if SI_CHALLENGE_DIFFICULTY_COOLDOWN_ALERT and message == GetString(SI_CHALLENGE_DIFFICULTY_COOLDOWN_ALERT) then
-                    return true
-                end
-                if SI_CHALLENGE_DIFFICULTY_COMBAT_ALERT and message == GetString(SI_CHALLENGE_DIFFICULTY_COMBAT_ALERT) then
-                    return true
-                end
-                return false
-            end
-
-            ZO_PreHook("ZO_Alert", function (category, sound, message, ...)
-                if not IsChallengeDifficultyZOAlertMessage(message) then
-                    return
-                end
-                local groupCA = ChatAnnouncements.SV.Group.GroupCA
-                local groupAlert = ChatAnnouncements.SV.Group.GroupAlert
-                if not groupCA and not groupAlert then
-                    return true
-                end
-                if groupCA then
-                    ChatOutput:Print(message, true)
-                end
-                if not groupAlert then
-                    return true
-                end
-            end)
-        end
-    end
-
     local function GroupInviteResponseAlert(characterName, response, displayName)
         local finalName
         local finalAlertName
