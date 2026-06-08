@@ -204,6 +204,16 @@ function Unlock.ApplyActiveCombatTipsAnchors()
 
     ZO_ActiveCombatTipsTip:ClearAnchors()
     ZO_ActiveCombatTipsTip:SetAnchor(CENTER, anchor, CENTER, 0, 0)
+
+    if ZO_ActiveCombatTips then
+        ZO_ActiveCombatTips:SetDrawTier(DT_HIGH)
+    end
+    ZO_ActiveCombatTipsTip:SetDrawTier(DT_HIGH)
+    ZO_ActiveCombatTipsTip:SetDrawLayer(DL_OVERLAY)
+    if ZO_ActiveCombatTipsTipText then
+        ZO_ActiveCombatTipsTipText:SetDrawTier(DT_HIGH)
+        ZO_ActiveCombatTipsTipText:SetDrawLayer(DL_OVERLAY)
+    end
 end
 
 function Unlock.RegisterUnlockPositionHooks()
