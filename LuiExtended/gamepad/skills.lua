@@ -25,11 +25,19 @@ LUIE.HookGamePadStats = function ()
         ADVANCED_ATTRIBUTES = 8,
         MUNDUS = 9,
         GUILD = 10,
+        DIFFICULTY = 11,
     }
 
-
+    local function ArtificialEffectsRowComparator(left, right)
+        return left.sortOrder < right.sortOrder
+    end
 
     function ZO_GamepadStats:RefreshMainList()
+        if self.currentDifficultyDropdown and self.currentDifficultyDropdown:IsDropdownVisible() then
+            self.refreshMainListOnDropdownClose = true
+            return
+        end
+
         if self.currentTitleDropdown and self.currentTitleDropdown:IsDropdownVisible() then
             self.refreshMainListOnDropdownClose = true
             return
@@ -48,6 +56,9 @@ LUIE.HookGamePadStats = function ()
         elseif HasUpcomingLevelUpReward() then
             self.mainList:AddEntry("ZO_GamepadMenuEntryTemplate", self.upcomingRewardsEntry)
         end
+
+        -- Difficulty
+        self.mainList:AddEntryWithHeader("ZO_GamepadStatDifficultyRow", self.difficultyEntry)
 
         -- Title
         self.mainList:AddEntryWithHeader("ZO_GamepadStatTitleRow", self.titleEntry)
@@ -192,9 +203,7 @@ LUIE.HookGamePadStats = function ()
             end
         end
 
-        table.sort(sortedArtificialEffectsTable, function (left, right)
-            return left.sortOrder < right.sortOrder
-        end)
+        table.sort(sortedArtificialEffectsTable, ArtificialEffectsRowComparator)
 
         for i, data in ipairs(sortedArtificialEffectsTable) do
             self:AddActiveEffectData(data)
