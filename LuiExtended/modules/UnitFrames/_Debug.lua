@@ -421,20 +421,74 @@ local function DebugPets()
     end
 end
 
+local DEBUG_BOSS_THRESHOLD_HP_STEPS = { 100, 88, 76, 74, 49, 24, 5 }
+local debugBossThresholdHpStepIndex = 1
+
+local function DebugBossThresholdHp(arg)
+    if not UnitFrames.debugBossThresholdPreviewActive then
+        LUIE.ChatOutput:AddSystemMessage("[LUIE] Run /luiufboss first to enable boss threshold mechanic preview.")
+        return
+    end
+
+    local percent
+    local trimmed = (arg and arg:match("^%s*(.-)%s*$")) or ""
+    if trimmed == "" then
+        debugBossThresholdHpStepIndex = (debugBossThresholdHpStepIndex % #DEBUG_BOSS_THRESHOLD_HP_STEPS) + 1
+        percent = DEBUG_BOSS_THRESHOLD_HP_STEPS[debugBossThresholdHpStepIndex]
+    elseif string.lower(trimmed) == "reset" then
+        debugBossThresholdHpStepIndex = 1
+        percent = DEBUG_BOSS_THRESHOLD_HP_STEPS[1]
+    else
+        percent = tonumber(trimmed)
+        if not percent then
+            LUIE.ChatOutput:AddSystemMessage("[LUIE] /luiufbosshp [percent|reset] — e.g. 88, 74, or empty to step through demo HP.")
+            return
+        end
+    end
+
+    if UnitFrames.SetBossThresholdDebugPreviewHealth(percent) then
+        LUIE.ChatOutput:AddSystemMessage(string.format(
+            "[LUIE] Boss threshold debug HP set to %d%% (next-upcoming mechanic + fade).",
+            zo_clamp(zo_round(percent), 0, 100)
+        ))
+    end
+end
+
 local function DebugBosses()
     local first = UnitFrames.CustomFrames["boss1"]
     if not first then
         NotifyMissing("boss")
         return
     end
-    ApplyPositions()
-    -- CustomFramesApplyLayoutBosses already unhides the boss TLW at the end;
-    -- still safe to call ShowFrame on each child to flip their controls.
-    UnitFrames.CustomFramesApplyLayoutBosses(true)
-    for i = 1, 7 do
-        PreviewFrame(UnitFrames.CustomFrames["boss" .. i], PREVIEW_SOURCE_UNIT)
+
+    if not UnitFrames.SV.BossShowThresholdMarkers then
+        LUIE.ChatOutput:AddSystemMessage("[LUIE] Enable Unit Frames → Boss → Show threshold markers, then run /luiufboss again.")
     end
-    UnitFrames.ApplyBossThresholdMarkersSlashDebugPreview()
+
+    ApplyPositions()
+    UnitFrames.CustomFramesApplyLayoutBosses(true)
+
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+        local frame = UnitFrames.CustomFrames["boss" .. i]
+        if frame and frame.control then
+            if i == BOSS_RANK_ITERATION_BEGIN then
+                ShowFrame(frame)
+                if frame.name then
+                    frame.name:SetText("Saint Olms the Just (debug)")
+                end
+            else
+                frame.control:SetHidden(true)
+            end
+        end
+    end
+
+    debugBossThresholdHpStepIndex = 1
+    if UnitFrames.ApplyBossThresholdMarkersSlashDebugPreview() then
+        UnitFrames.SetBossThresholdDebugPreviewHealth(DEBUG_BOSS_THRESHOLD_HP_STEPS[1])
+        LUIE.ChatOutput:AddSystemMessage(
+            "[LUIE] Boss threshold preview: 90/75/50/25 \"Big Jump\" at 100%% HP. Use /luiufbosshp to step HP (88→76→74…) or /luiufbosshp 77 for imminent band."
+        )
+    end
 end
 
 -- -----------------------------------------------------------------------------
@@ -481,6 +535,10 @@ local function DisableAllPreviews()
 
     if (UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"]) and UnitFrames.CustomFramesGroupUpdate then
         UnitFrames.CustomFramesGroupUpdate()
+    end
+
+    if UnitFrames.ClearBossThresholdDebugPreview then
+        UnitFrames.ClearBossThresholdDebugPreview()
     end
 
     if UnitFrames.CustomFrames["boss1"] and UnitFrames.OnBossesChanged then
@@ -684,4 +742,8 @@ end
 
 for command, handler in pairs(DEBUG_COMMANDS) do
     SLASH_COMMANDS[command] = handler
+end
+
+SLASH_COMMANDS["/luiufbosshp"] = function (text)
+    DebugBossThresholdHp(text)
 end
