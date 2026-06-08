@@ -1657,6 +1657,42 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_VETERANCY_RANK),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_VETERANCY_RANK_TP),
+            getFunction = function ()
+                return Settings.PlayerShowVeterancyRank
+            end,
+            setFunction = function (value)
+                Settings.PlayerShowVeterancyRank = value
+                UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+            end,
+            default = Defaults.PlayerShowVeterancyRank,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_OVERLAND_DIFFICULTY),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_OVERLAND_DIFFICULTY_TP),
+            getFunction = function ()
+                return Settings.PlayerShowOverlandDifficulty
+            end,
+            setFunction = function (value)
+                Settings.PlayerShowOverlandDifficulty = value
+                UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+            end,
+            default = Defaults.PlayerShowOverlandDifficulty,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MISSPOWERCOMBAT),
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MISSPOWERCOMBAT_TP),
             getFunction = function ()
@@ -2962,6 +2998,24 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESG_OVERLAND_DIFFICULTY),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_OVERLAND_DIFFICULTY_TP),
+            getFunction = function ()
+                return Settings.GroupShowOverlandDifficulty
+            end,
+            setFunction = function (value)
+                Settings.GroupShowOverlandDifficulty = value
+                UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+            end,
+            default = Defaults.GroupShowOverlandDifficulty,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_GFRAMESBYCLASS),
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_GFRAMESBYCLASS_TP),
             getFunction = function ()
@@ -3326,6 +3380,42 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
             end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESR_VETERANCY_RANK),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_VETERANCY_RANK_TP),
+            getFunction = function ()
+                return Settings.RaidShowVeterancyRank
+            end,
+            setFunction = function (value)
+                Settings.RaidShowVeterancyRank = value
+                UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+            end,
+            default = Defaults.RaidShowVeterancyRank,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESR_OVERLAND_DIFFICULTY),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_OVERLAND_DIFFICULTY_TP),
+            getFunction = function ()
+                return Settings.RaidShowOverlandDifficulty
+            end,
+            setFunction = function (value)
+                Settings.RaidShowOverlandDifficulty = value
+                UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+            end,
+            default = Defaults.RaidShowOverlandDifficulty,
         }
 
         settings[#settings + 1] =

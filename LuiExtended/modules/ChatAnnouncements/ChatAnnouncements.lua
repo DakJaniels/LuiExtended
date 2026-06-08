@@ -2777,6 +2777,9 @@ function I.PopulateMailSenderQueue(categoryFilter)
                         I.EnqueueMailLootEntry(mailId, mailTarget)
                     end
                     I.StoreMailSenderForMailId(mailId, mailTarget)
+                    for _ = 1, (numAttachments or 0) do
+                        S.g_mailItemSenderFifo[#S.g_mailItemSenderFifo + 1] = { mailId = mailId, sender = mailTarget }
+                    end
                 end
             end
         end
@@ -2832,6 +2835,7 @@ function I.OnPreTakeAllMailAttachmentsInCategory(category, deleteOnClaim)
     S.g_mailPendingCurrencySender = ""
     S.g_mailPendingCurrencyMailId = nil
     S.g_mailPendingItemSender = ""
+    S.g_mailItemSenderFifo = {}
     S.g_mailDelayedLootLines = {}
     S.g_mailLootLineSequence = 0
     eventManager:UnregisterForUpdate(moduleName .. "SendDelayedItems")
@@ -2892,11 +2896,13 @@ function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
     I.StoreMailSenderForMailId(mailId, mailTarget)
     S.g_mailCODPresent = hasCOD
     numAttachments = numAttachments or 0
-    if numAttachments < 1 then
-        numAttachments = 1
-    end
-    for _ = 1, numAttachments do
-        S.g_mailItemSenderFifo[#S.g_mailItemSenderFifo + 1] = { mailId = mailId, sender = mailTarget }
+    if not S.g_mailBatchTakeAll then
+        if numAttachments < 1 then
+            numAttachments = 1
+        end
+        for _ = 1, numAttachments do
+            S.g_mailItemSenderFifo[#S.g_mailItemSenderFifo + 1] = { mailId = mailId, sender = mailTarget }
+        end
     end
     if not S.g_mailBatchTakeAll then
         I.EnqueueMailLootEntry(mailId, mailTarget)
