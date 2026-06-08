@@ -49,6 +49,15 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.4.2
+    "|cFFA500LuiExtended Version 7.2.4.2|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Gamepad Character Sheet: The Challenge Difficulty row and dropdown are visible again after Update 50.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Gamepad Skills and Skills Advisor: Custom ability icons on skill lists still display correctly after Update 50 compatibility updates.",
+    "",
+
     -- Version Header 7.2.4.1
     "|cFFA500LuiExtended Version 7.2.4.1|r",
     "",
