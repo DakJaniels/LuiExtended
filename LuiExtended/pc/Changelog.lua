@@ -49,6 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.4.5
+    "|cFFA500LuiExtended Version 7.2.4.5|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Character Profile: |cFFFFFFEnable Character-Specific Settings|r now correctly applies to all LuiExtended module saved variables (including |cFFFFFFUnit Frames|r repositioning); custom frame positions no longer carry over between characters when profiles are enabled. Module data that was written to the account-wide bucket while the toggle was on may seed into the current character on first login after this update.",
+    "",
     -- Version Header 7.2.4.4
     "|cFFA500LuiExtended Version 7.2.4.4|r",
     "",
