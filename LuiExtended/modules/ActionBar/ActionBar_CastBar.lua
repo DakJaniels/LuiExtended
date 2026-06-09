@@ -29,12 +29,12 @@ local zo_strformat = zo_strformat
 local LOG_PREFIX_CASTBAR = "[CastBar] "
 local g_castBarDevDebugLog = false
 
-local function logCastBar(message, ...)
-    if not g_castBarDevDebugLog then
-        return
-    end
-    LUIE:Log("Verbose", LOG_PREFIX_CASTBAR .. string_format(message, ...))
-end
+-- local function logCastBar(message, ...)
+--     if not g_castBarDevDebugLog then
+--         return
+--     end
+--     LUIE:Log("Verbose", LOG_PREFIX_CASTBAR .. string_format(message, ...))
+-- end
 
 --- @param abilityId integer|nil
 --- @return string
@@ -377,39 +377,34 @@ end
 --- @param castAbilityName string|nil
 --- @param startedFromLibCombat boolean|nil
 function CastBar.ShowCast(abilityId, startTimeMs, durationMs, channeled, castAbilityIcon, castAbilityName, startedFromLibCombat)
-    logCastBar(
-        "ShowCast call ability=%s durationMs=%s channeled=%s libCombat=%s",
-        castBarFormatAbilityRef(abilityId),
-        tostring(durationMs),
-        tostring(channeled),
-        tostring(startedFromLibCombat))
+    -- logCastBar(("ShowCast call ability=%s durationMs=%s channeled=%s libCombat=%s", castBarFormatAbilityRef(abilityId), tostring(durationMs), tostring(channeled), tostring(startedFromLibCombat))
     if durationMs <= 0 then
-        logCastBar("ShowCast skipped ability=%s reason=duration", castBarFormatAbilityRef(abilityId))
+        -- logCastBar(("ShowCast skipped ability=%s reason=duration", castBarFormatAbilityRef(abilityId))
         return
     end
     if castBarIsPostActivateShowSuppressed(abilityId) then
-        logCastBar("ShowCast skipped ability=%s reason=postActivate", castBarFormatAbilityRef(abilityId))
+        -- logCastBar(("ShowCast skipped ability=%s reason=postActivate", castBarFormatAbilityRef(abilityId))
         return
     end
     if castBarIsChannelUiDismissed(abilityId) then
         if startedFromLibCombat then
             local clearSlottedId = castBarResolveChannelSlottedCastId(abilityId) or abilityId
             castBarClearChannelSuppressForSlotted(clearSlottedId)
-            logCastBar("ShowCast cleared channelDismiss for libCombat ability=%s", castBarFormatAbilityRef(abilityId))
+            -- logCastBar(("ShowCast cleared channelDismiss for libCombat ability=%s", castBarFormatAbilityRef(abilityId))
         else
-            logCastBar("ShowCast skipped ability=%s reason=channelDismissed", castBarFormatAbilityRef(abilityId))
+            -- logCastBar(("ShowCast skipped ability=%s reason=channelDismissed", castBarFormatAbilityRef(abilityId))
             return
         end
     end
     if castBarIsAbilityShowCastSuppressed(abilityId) and not startedFromLibCombat then
-        logCastBar("ShowCast skipped ability=%s reason=showCastSuppress", castBarFormatAbilityRef(abilityId))
+        -- logCastBar(("ShowCast skipped ability=%s reason=showCastSuppress", castBarFormatAbilityRef(abilityId))
         return
     end
     if g_casting and channeled then
         local castId = g_castBarState.id
         local nowMs = GetFrameTimeMilliseconds()
         if castId == abilityId and g_castBarState.remain and nowMs < g_castBarState.remain then
-            logCastBar("ShowCast skipped ability=%s reason=sameChannelActive", castBarFormatAbilityRef(abilityId))
+            -- logCastBar(("ShowCast skipped ability=%s reason=sameChannelActive", castBarFormatAbilityRef(abilityId))
             return
         end
     end
@@ -460,13 +455,7 @@ function CastBar.ShowCast(abilityId, startTimeMs, durationMs, channeled, castAbi
     if startedFromLibCombat then
         CastBar.Private.RecordLibCombatCastStart(abilityId, startTimeMs)
     end
-    logCastBar(
-        "ShowCast started ability=%s durationMs=%s channeled=%s startTimeMs=%s libCombat=%s",
-        castBarFormatAbilityRef(abilityId),
-        tostring(durationMs),
-        tostring(channeled),
-        tostring(startTimeMs),
-        tostring(startedFromLibCombat))
+    -- logCastBar("ShowCast started ability=%s durationMs=%s channeled=%s startTimeMs=%s libCombat=%s", castBarFormatAbilityRef(abilityId), tostring(durationMs), tostring(channeled), tostring(startTimeMs), tostring(startedFromLibCombat))
     eventManager:RegisterForUpdate(moduleName .. "CastBar", 20, CastBar.OnUpdateCastbar)
 end
 
@@ -1153,31 +1142,21 @@ function CastBar.HandleCombatEvent(result, isError, abilityName, abilityGraphic,
                 castBarClearChannelSuppressForSlotted(channelTrack.slottedId)
             end
             if castBarIsChannelUiDismissed(channelTrack.slottedId) or castBarIsAbilityShowCastSuppressed(channelTrack.slottedId) then
-                logCastBar(
-                    "HandleCombatEvent skip trackAbility=%s slotted=%s reason=channelDismissedOrSuppress",
-                    castBarFormatAbilityRef(abilityId),
-                    castBarFormatAbilityRef(channelTrack.slottedId))
+                -- logCastBar(("HandleCombatEvent skip trackAbility=%s slotted=%s reason=channelDismissedOrSuppress", castBarFormatAbilityRef(abilityId), castBarFormatAbilityRef(channelTrack.slottedId))
                 return
             end
             if CastBar.Private.IsCasting() then
                 local castId = CastBar.Private.GetState().id
                 if castId == channelTrack.slottedId or castId == abilityId then
-                    logCastBar(
-                        "HandleCombatEvent skip trackAbility=%s slotted=%s reason=channelSameCast",
-                        castBarFormatAbilityRef(abilityId),
-                        castBarFormatAbilityRef(channelTrack.slottedId))
+                    -- logCastBar(("HandleCombatEvent skip trackAbility=%s slotted=%s reason=channelSameCast", castBarFormatAbilityRef(abilityId), castBarFormatAbilityRef(channelTrack.slottedId))
                     return
                 end
                 -- Channel buff ticks while another cast is shown: do not override in-progress bar.
-                logCastBar(
-                    "HandleCombatEvent skip trackAbility=%s slotted=%s reason=channelOtherCast cast=%s",
-                    castBarFormatAbilityRef(abilityId),
-                    castBarFormatAbilityRef(channelTrack.slottedId),
-                    castBarFormatAbilityRef(castId))
+                -- logCastBar(("HandleCombatEvent skip trackAbility=%s slotted=%s reason=channelOtherCast cast=%s", castBarFormatAbilityRef(abilityId), castBarFormatAbilityRef(channelTrack.slottedId), castBarFormatAbilityRef(castId))
                 return
             end
             if CastBar.Private.ShouldDedupeCombatCastStart(channelTrack.slottedId) then
-                logCastBar("HandleCombatEvent skip slotted=%s reason=channelDedupe", castBarFormatAbilityRef(channelTrack.slottedId))
+                -- logCastBar(("HandleCombatEvent skip slotted=%s reason=channelDedupe", castBarFormatAbilityRef(channelTrack.slottedId))
                 return
             end
             local durationMs = CastBar.ComputeCastDurationMs(
@@ -1199,12 +1178,7 @@ function CastBar.HandleCombatEvent(result, isError, abilityName, abilityGraphic,
 
     if not CastBar.ShouldShowOnCastBar(abilityId, castAbilityName) then
         local chInfo, castTimeMs = GetAbilityCastInfo(abilityId)
-        logCastBar(
-            "HandleCombatEvent skip ability=%s result=%s reason=notCastBarEligible channeled=%s castTimeMs=%s",
-            castBarFormatAbilityRef(abilityId),
-            tostring(result),
-            tostring(chInfo),
-            tostring(castTimeMs or 0))
+        -- logCastBar(("HandleCombatEvent skip ability=%s result=%s reason=notCastBarEligible channeled=%s castTimeMs=%s", castBarFormatAbilityRef(abilityId), tostring(result), tostring(chInfo), tostring(castTimeMs or 0))
         return
     end
 
@@ -1225,31 +1199,22 @@ function CastBar.HandleCombatEvent(result, isError, abilityName, abilityGraphic,
     if channelSlottedId and channeled then
         if result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION then
             if castBarIsChannelUiDismissed(channelSlottedId) or castBarIsAbilityShowCastSuppressed(channelSlottedId) then
-                logCastBar(
-                    "HandleCombatEvent skip ability=%s slotted=%s reason=channelGateSuppress",
-                    castBarFormatAbilityRef(abilityId),
-                    castBarFormatAbilityRef(channelSlottedId))
+                -- logCastBar(("HandleCombatEvent skip ability=%s slotted=%s reason=channelGateSuppress", castBarFormatAbilityRef(abilityId), castBarFormatAbilityRef(channelSlottedId))
                 return
             end
             if CastBar.Private.IsCasting() then
                 local castId = CastBar.Private.GetState().id
                 if castId == channelSlottedId then
-                    logCastBar("HandleCombatEvent skip ability=%s reason=channelGateSameCast", castBarFormatAbilityRef(abilityId))
+                    -- logCastBar(("HandleCombatEvent skip ability=%s reason=channelGateSameCast", castBarFormatAbilityRef(abilityId))
                     return
                 end
                 if castId and castId ~= 0 then
-                    logCastBar(
-                        "HandleCombatEvent skip ability=%s reason=channelGateOtherCast cast=%s",
-                        castBarFormatAbilityRef(abilityId),
-                        castBarFormatAbilityRef(castId))
+                    -- logCastBar(("HandleCombatEvent skip ability=%s reason=channelGateOtherCast cast=%s", castBarFormatAbilityRef(abilityId), castBarFormatAbilityRef(castId))
                     return
                 end
             end
             if CastBar.Private.ShouldDedupeCombatCastStart(channelSlottedId) then
-                logCastBar(
-                    "HandleCombatEvent skip ability=%s slotted=%s reason=channelGateDedupe",
-                    castBarFormatAbilityRef(abilityId),
-                    castBarFormatAbilityRef(channelSlottedId))
+                -- logCastBar(("HandleCombatEvent skip ability=%s slotted=%s reason=channelGateDedupe", castBarFormatAbilityRef(abilityId), castBarFormatAbilityRef(channelSlottedId))
                 return
             end
         end
@@ -1296,23 +1261,15 @@ function CastBar.HandleCombatEvent(result, isError, abilityName, abilityGraphic,
         local combatShowFromGain = (result == ACTION_RESULT_EFFECT_GAINED and (Castbar.CastDurationFix[abilityId] or channeled))
             or (result == ACTION_RESULT_EFFECT_GAINED_DURATION and (Castbar.CastDurationFix[abilityId] or channeled))
         if trackedSlottedChannel and channeled and combatShowFromGain then
-            logCastBar(
-                "HandleCombatEvent skip ability=%s result=%s reason=trackedChannelUseCombatTrack",
-                castBarFormatAbilityRef(abilityId),
-                tostring(result))
+            -- logCastBar(("HandleCombatEvent skip ability=%s result=%s reason=trackedChannelUseCombatTrack", castBarFormatAbilityRef(abilityId), tostring(result))
         elseif (not forceChanneled and (((result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_BEGIN_CHANNEL) and not channeled) or combatShowFromGain)) or (forceChanneled and result == ACTION_RESULT_BEGIN) then
             if CastBar.Private.ShouldDedupeCombatCastStart(abilityId) then
-                logCastBar("HandleCombatEvent skip ability=%s result=%s reason=combatDedupe", castBarFormatAbilityRef(abilityId), tostring(result))
+                -- logCastBar(("HandleCombatEvent skip ability=%s result=%s reason=combatDedupe", castBarFormatAbilityRef(abilityId), tostring(result))
                 return
             end
             CastBar.ShowCast(abilityId, GetFrameTimeMilliseconds(), duration, channeled, castAbilityIcon, castAbilityName, false)
         else
-            logCastBar(
-                "HandleCombatEvent skip ability=%s result=%s duration=%s channeled=%s reason=resultGate",
-                castBarFormatAbilityRef(abilityId),
-                tostring(result),
-                tostring(duration),
-                tostring(channeled))
+            -- logCastBar(("HandleCombatEvent skip ability=%s result=%s duration=%s channeled=%s reason=resultGate", castBarFormatAbilityRef(abilityId), tostring(result), tostring(duration), tostring(channeled))
         end
     end
 
@@ -1367,11 +1324,7 @@ function CastBar.TickInterruptChecks()
         if castBarShouldBreakCastOnMove(g_castBarState.id) then
             if g_castbarWorldMapFix == false or IsPlayerMoving() then
                 local castId = g_castBarState.id
-                logCastBar(
-                    "TickInterrupt moveBreak ability=%s worldMapFix=%s isMoving=%s",
-                    castBarFormatAbilityRef(castId),
-                    tostring(g_castbarWorldMapFix),
-                    tostring(IsPlayerMoving()))
+                -- logCastBar(("TickInterrupt moveBreak ability=%s worldMapFix=%s isMoving=%s", castBarFormatAbilityRef(castId), tostring(g_castbarWorldMapFix), tostring(IsPlayerMoving()))
                 CastBar.StopCastBar()
                 castBarSuppressAbilityBriefly(castId)
                 castBarClearWorldMapFix()
