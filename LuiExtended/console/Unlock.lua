@@ -210,9 +210,9 @@ function Unlock.ApplyActiveCombatTipsAnchors()
     end
     ZO_ActiveCombatTipsTip:SetDrawTier(DT_HIGH)
     ZO_ActiveCombatTipsTip:SetDrawLayer(DL_OVERLAY)
-    if ZO_ActiveCombatTipsTipText then
-        ZO_ActiveCombatTipsTipText:SetDrawTier(DT_HIGH)
-        ZO_ActiveCombatTipsTipText:SetDrawLayer(DL_OVERLAY)
+    if ZO_ActiveCombatTipsTipTipText then
+        ZO_ActiveCombatTipsTipTipText:SetDrawTier(DT_HIGH)
+        ZO_ActiveCombatTipsTipTipText:SetDrawLayer(DL_OVERLAY)
     end
 end
 
