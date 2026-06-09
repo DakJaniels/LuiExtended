@@ -39,8 +39,8 @@ local strings =
     LUIE_STRING_LAM_PNL_UNLOCKPANEL_TP = "允许鼠标拖动信息面板。",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP = "在世界地图屏幕上显示信息面板",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP_TP = "在查看世界地图时显示信息面板。如果信息面板位置与世界地图屏幕上的任何重要元素重叠，可以切换此选项。",
-    LUIE_STRING_PNL_FPS_FORMAT = "<<1>> fps",
-    LUIE_STRING_PNL_LATENCY_MS_FORMAT = "<<1>> ms",
+    LUIE_STRING_PNL_FPS_FORMAT = "<<1>> 帧率",
+    LUIE_STRING_PNL_LATENCY_MS_FORMAT = "<<1>> 毫秒",
 
 
 }
