@@ -1,5 +1,16 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.4
+
+### Changes
+
+- Info Panel: Top and bottom rows reflow from a single layout pass when enabled meters change; nested rearrange calls no longer double-refresh meters. Label padding and minimum widths are adjusted for FPS, memory, latency, and bags.
+
+### Fixed
+
+- Unit Frames: **Reset to defaults** (and other settings that refresh boss threshold markers) no longer cause a Lua error when **CrutchAlerts** is loaded and no boss unit is present; default 25/50/75 markers apply until a boss is active.
+- Unlock: Repositioned **Active Combat Tips** again apply the higher draw tier to the visible tip label text (correct control after **Update 50**).
+
 ## Version 7.2.4.3
 
 ### New
