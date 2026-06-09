@@ -305,7 +305,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideLatency = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -323,7 +323,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideClock = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -343,7 +343,7 @@ function InfoPanel.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.ClockFormat = value
                 InfoPanel.RefreshClockMeterUpdateInterval()
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = Defaults.ClockFormat,
             disable = function ()
@@ -361,7 +361,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideFPS = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -380,7 +380,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideMemory = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -399,7 +399,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideMountFeed = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -417,7 +417,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideArmour = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -435,7 +435,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideWeapons = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -453,7 +453,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideBags = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -471,7 +471,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideGems = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()
@@ -489,7 +489,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideGold = not value
-                InfoPanel.RearrangePanel()
+                InfoPanel.RearrangePanel(true)
             end,
             default = true,
             disable = function ()

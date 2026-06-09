@@ -148,7 +148,11 @@ local uiBags =
 
 local panelFragment
 
-local infoPanelLayoutDepth = 0
+--- @type ZO_OrderedRefreshGroup|nil
+local infoPanelRefreshGroup = nil
+
+local INFO_PANEL_REFRESH_DIRTY_FULL = "Full"
+local INFO_PANEL_REFRESH_DIRTY_LAYOUT = "Layout"
 
 local function FormatInfoPanelMemoryText()
     if ZO_IsConsoleOrGameCoreUI() then
@@ -339,6 +343,7 @@ function ClockMeter:RefreshUpdateInterval()
     end
     self:SetInterval(intervalMs)
     self.lastUpdateMs = nil
+    self.lastClockText = nil
     self:RegisterMeterUpdate()
 end
 
@@ -350,13 +355,23 @@ function ClockMeter:ApplyFont(fontString)
     if uiClock.label then
         uiClock.label:SetFont(fontString)
         ClearInfoPanelLayoutWidth(uiClock.control, uiClock.label)
+        self.lastClockText = nil
     end
 end
 
 function ClockMeter:Update(nowMs)
     if not self:IsEnabled() or not uiClock.label then return end
     local timestring = GetTimeString()
-    local clockText = LUIE.ChatOutput:CreateTimestamp(timestring, self.infoPanel.SV.ClockFormat)
+    local clockFormat = self.infoPanel.SV.ClockFormat
+    local milliseconds
+    if InfoPanelClockFormatUsesMilliseconds(clockFormat) then
+        milliseconds = string_format("%03d", nowMs % 1000)
+    end
+    local clockText = LUIE.ChatOutput:CreateTimestamp(timestring, clockFormat, milliseconds)
+    if clockText == self.lastClockText then
+        return
+    end
+    self.lastClockText = clockText
     uiClock.label:SetText(clockText)
     if FitInfoPanelLabelToText(uiClock.label, clockText, INFO_PANEL_CLOCK_LABEL_MIN_WIDTH) then
         if uiClock.control then
@@ -908,6 +923,37 @@ local function ApplyInfoPanelDividerAnchors()
     divider:SetAnchor(RIGHT, uiPanel, RIGHT, 0, 0)
 end
 
+local function PerformInfoPanelLayout()
+    if not InfoPanel.Enabled or not uiPanel then
+        return
+    end
+
+    uiPanel:SetTransformScale(1)
+
+    local topWidth = LayoutInfoPanelRow(uiTopRow, INFO_PANEL_TOP_ROW_LAYOUT)
+    local botWidth = LayoutInfoPanelRow(uiBotRow, INFO_PANEL_BOTTOM_ROW_LAYOUT)
+
+    uiPanel:SetWidth(zo_max(topWidth, botWidth))
+    ApplyInfoPanelDividerAnchors()
+    InfoPanel.SetScale()
+    InfoPanel.ApplyTransparency()
+end
+
+local function InfoPanelRefreshGroupIsActive()
+    return InfoPanel.Enabled and uiPanel and not uiPanel:IsHidden()
+end
+
+local function InitializeInfoPanelRefreshGroup()
+    local refreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
+    refreshGroup:AddDirtyState(INFO_PANEL_REFRESH_DIRTY_FULL, function ()
+        RefreshEnabledInfoPanelMetersForLayout()
+        PerformInfoPanelLayout()
+    end)
+    refreshGroup:AddDirtyState(INFO_PANEL_REFRESH_DIRTY_LAYOUT, PerformInfoPanelLayout)
+    refreshGroup:SetActive(InfoPanelRefreshGroupIsActive)
+    infoPanelRefreshGroup = refreshGroup
+end
+
 function InfoPanel.RegisterAllMeterUpdates()
     ForEachMeter(function (meter)
         meter:RegisterMeterUpdate()
@@ -959,7 +1005,7 @@ function InfoPanel.ApplyFont()
         end
     end)
     if InfoPanel.Enabled and uiPanel then
-        InfoPanel.RearrangePanel()
+        InfoPanel.RearrangePanel(true)
     end
 end
 
@@ -980,12 +1026,18 @@ function InfoPanel.CancelCombatHideAndShow()
     if not panelHiddenByCombat then
         uiPanel:SetHidden(false)
         InfoPanel.ApplyTransparency()
+        if infoPanelRefreshGroup then
+            infoPanelRefreshGroup:TryClean()
+        end
         return
     end
     panelHiddenByCombat = false
     local targetAlpha = (InfoPanel.SV.transparency and InfoPanel.SV.transparency / 100) or 1
     uiPanel:SetHidden(false)
     uiPanel:SetAlpha(0)
+    if infoPanelRefreshGroup then
+        infoPanelRefreshGroup:TryClean()
+    end
     local startTime = GetFrameTimeMilliseconds()
     eventManager:RegisterForUpdate(combatFadeUpdateName, 16, function ()
         if not InfoPanel.Enabled or not uiPanel then
@@ -1043,30 +1095,18 @@ function InfoPanel.OnPlayerCombatState(inCombat)
     end
 end
 
--- Rearranges panel elements. Called from Initialize and settings menu.
-function InfoPanel.RearrangePanel()
-    if not InfoPanel.Enabled then
+--- Queues panel layout (coalesced per frame via ZO_OrderedRefreshGroup). Called from Initialize and settings menu.
+--- @param refreshMeters boolean|nil When true, updates all enabled meters before layout (settings/init/font). Default false for layout-only reflows.
+function InfoPanel.RearrangePanel(refreshMeters)
+    if not InfoPanel.Enabled or not infoPanelRefreshGroup then
         return
     end
 
-    local refreshMeters = (infoPanelLayoutDepth == 0)
-    infoPanelLayoutDepth = infoPanelLayoutDepth + 1
-
     if refreshMeters then
-        RefreshEnabledInfoPanelMetersForLayout()
+        infoPanelRefreshGroup:MarkDirty(INFO_PANEL_REFRESH_DIRTY_FULL)
+    else
+        infoPanelRefreshGroup:MarkDirty(INFO_PANEL_REFRESH_DIRTY_LAYOUT)
     end
-
-    uiPanel:SetTransformScale(1)
-
-    local topWidth = LayoutInfoPanelRow(uiTopRow, INFO_PANEL_TOP_ROW_LAYOUT)
-    local botWidth = LayoutInfoPanelRow(uiBotRow, INFO_PANEL_BOTTOM_ROW_LAYOUT)
-
-    uiPanel:SetWidth(zo_max(topWidth, botWidth))
-    ApplyInfoPanelDividerAnchors()
-    InfoPanel.SetScale()
-    InfoPanel.ApplyTransparency()
-
-    infoPanelLayoutDepth = infoPanelLayoutDepth - 1
 end
 
 function InfoPanel.Initialize(enabled)
@@ -1166,8 +1206,7 @@ function InfoPanel.Initialize(enabled)
     -- Build meter registry now that controls exist
     InfoPanel.BuildMeters()
     InfoPanel.RefreshClockMeterUpdateInterval()
-
-    InfoPanel.RearrangePanel()
+    InitializeInfoPanelRefreshGroup()
 
     -- add control to global list so it can be hidden
     LUIE.Components[moduleName] = uiPanel
@@ -1184,6 +1223,8 @@ function InfoPanel.Initialize(enabled)
         meter:Update(nowMs)
         meter:MarkUpdated(nowMs)
     end)
+
+    InfoPanel.RearrangePanel()
 
     -- Set event handlers
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_RECEIVED, InfoPanel.OnBagUpdate)
@@ -1208,6 +1249,10 @@ function InfoPanel.Initialize(enabled)
     else
         -- Sync initial visibility when option is on (e.g. show panel if not in combat)
         InfoPanel.OnPlayerCombatState(IsUnitInCombat("player"))
+    end
+
+    if infoPanelRefreshGroup then
+        infoPanelRefreshGroup:TryClean()
     end
 end
 
