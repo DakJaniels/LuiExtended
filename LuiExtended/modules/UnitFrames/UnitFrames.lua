@@ -705,6 +705,25 @@ local function FetchCrutchBossThresholds()
         return nil
     end
 
+    -- GetBossThresholds requires a live boss unit (see ApplyBossThresholdMarkersSlashDebugPreview).
+    if crutchBossHealthBar and crutchBossHealthBar.GetFirstValidBossTag then
+        local bossTag = crutchBossHealthBar.GetFirstValidBossTag()
+        if bossTag == "" or bossTag == nil then
+            return nil
+        end
+    else
+        local hasBoss = false
+        for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+            if DoesUnitExist("boss" .. i) then
+                hasBoss = true
+                break
+            end
+        end
+        if not hasBoss then
+            return nil
+        end
+    end
+
     local data = crutchGetBossThresholds()
     if type(data) ~= "table" then
         return nil
