@@ -55,6 +55,7 @@ local changelogMessages =
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Character Profile: |cFFFFFFEnable Character-Specific Settings|r now correctly applies to all LuiExtended module saved variables (including |cFFFFFFUnit Frames|r repositioning); custom frame positions no longer carry over between characters when profiles are enabled. Module data that was written to the account-wide bucket while the toggle was on may seed into the current character on first login after this update.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: |cFFFFFFCharacter Name|r name display on custom player and target bars now shows the character name instead of following the game UI primary name preference (which could show |cFFFFFF@UserID|r when |cFFFFFFCharacter Name|r was selected).",
     "",
     -- Version Header 7.2.4.4
     "|cFFA500LuiExtended Version 7.2.4.4|r",

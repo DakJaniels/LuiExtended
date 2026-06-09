@@ -2203,14 +2203,16 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             unitFrame.name:SetWidth(width)
         end
 
-        -- Handle name text formatting
+        -- Handle name text formatting (DisplayOption 1 = @UserID, 2 = character name, 3 = both; do not use ZO_GetPrimaryPlayerNameFromUnitTag — it follows game UI settings, not LUIE)
         local nameText
-        if unitFrame.isPlayer and DisplayOption == 3 then
-            nameText = GetUnitName(unitFrame.unitTag) .. " " .. GetUnitDisplayName(unitFrame.unitTag)
-        elseif unitFrame.isPlayer and DisplayOption == 1 then
-            nameText = GetUnitDisplayName(unitFrame.unitTag)
-        elseif unitFrame.isPlayer and ZO_GetPrimaryPlayerNameFromUnitTag then
-            nameText = ZO_GetPrimaryPlayerNameFromUnitTag(unitFrame.unitTag)
+        if unitFrame.isPlayer then
+            if DisplayOption == 3 then
+                nameText = GetUnitName(unitFrame.unitTag) .. " " .. GetUnitDisplayName(unitFrame.unitTag)
+            elseif DisplayOption == 1 then
+                nameText = GetUnitDisplayName(unitFrame.unitTag)
+            else
+                nameText = GetUnitName(unitFrame.unitTag)
+            end
         else
             nameText = GetUnitName(unitFrame.unitTag)
         end
