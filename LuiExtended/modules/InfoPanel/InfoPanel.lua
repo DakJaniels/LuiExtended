@@ -148,6 +148,8 @@ local uiBags =
 
 local panelFragment
 
+local infoPanelLayoutDepth = 0
+
 local function FormatInfoPanelMemoryText()
     if ZO_IsConsoleOrGameCoreUI() then
         local usage = GetTotalUserAddOnMemoryPoolUsageMB()
@@ -256,7 +258,7 @@ end
 -- Meter implementations
 -- -----------------------------------------------------------------------------
 
-local INFO_PANEL_LABEL_PADDING = 4
+local INFO_PANEL_LABEL_PADDING = 6
 local INFO_PANEL_CLOCK_LABEL_MIN_WIDTH = 60
 
 --- @param label LabelControl
@@ -400,7 +402,7 @@ function FpsMeter:Update(nowMs)
     local fpsText = zo_strformat(GetString(LUIE_STRING_PNL_FPS_FORMAT), fps)
     uiFps.label:SetText(fpsText)
     uiFps.label:SetColor(color.r, color.g, color.b, 1)
-    if FitInfoPanelLabelToText(uiFps.label, fpsText, 44) then
+    if FitInfoPanelLabelToText(uiFps.label, fpsText, 48) then
         self.infoPanel.RearrangePanel()
     end
 end
@@ -429,7 +431,7 @@ function MemoryMeter:Update(nowMs)
     if not self:IsEnabled() or not uiMemory.label then return end
     local text, usage, cap = FormatInfoPanelMemoryText()
     uiMemory.label:SetText(text)
-    if FitInfoPanelLabelToText(uiMemory.label, text, 40) then
+    if FitInfoPanelLabelToText(uiMemory.label, text, 44) then
         self.infoPanel.RearrangePanel()
     end
 
@@ -479,7 +481,7 @@ function LatencyMeter:Update(nowMs)
     local latText = zo_strformat(GetString(LUIE_STRING_PNL_LATENCY_MS_FORMAT), lat)
     uiLatency.label:SetText(latText)
     uiLatency.label:SetColor(color.r, color.g, color.b, 1)
-    if FitInfoPanelIconLabelRow(uiLatency.control, uiLatency.icon, uiLatency.label, latText, 40, 0) then
+    if FitInfoPanelIconLabelRow(uiLatency.control, uiLatency.icon, uiLatency.label, latText, 44, 0) then
         self.infoPanel.RearrangePanel()
     end
 end
@@ -550,7 +552,7 @@ function BagsMeter:UpdateWithCapacity(bagSize)
     local bagsText = ZO_FormatFraction(bagUsed, bagSize)
     uiBags.label:SetText(bagsText)
     uiBags.label:SetColor(color.r, color.g, color.b, 1)
-    if FitInfoPanelIconLabelRow(uiBags.control, uiBags.icon, uiBags.label, bagsText, 44, 0) then
+    if FitInfoPanelIconLabelRow(uiBags.control, uiBags.icon, uiBags.label, bagsText, 48, 0) then
         self.infoPanel.RearrangePanel()
     end
 end
@@ -779,6 +781,133 @@ function InfoPanel.BuildMeters()
     AddMeter(GoldMeter:New(InfoPanel))
 end
 
+--- @class InfoPanelLayoutEntry
+--- @field meterId string
+--- @field fallbackEnabled fun(): boolean
+--- @field getControl fun(): Control|nil
+--- @field onShow fun()|nil
+
+--- @type InfoPanelLayoutEntry[]
+local INFO_PANEL_TOP_ROW_LAYOUT =
+{
+    {
+        meterId = "Latency",
+        fallbackEnabled = function () return not InfoPanel.SV.HideLatency end,
+        getControl = function () return uiLatency.control end,
+    },
+    {
+        meterId = "FPS",
+        fallbackEnabled = function () return not InfoPanel.SV.HideFPS end,
+        getControl = function () return uiFps.control end,
+    },
+    {
+        meterId = "Memory",
+        fallbackEnabled = function () return not InfoPanel.SV.HideMemory end,
+        getControl = function () return uiMemory.control end,
+    },
+    {
+        meterId = "Clock",
+        fallbackEnabled = function () return not InfoPanel.SV.HideClock end,
+        getControl = function () return uiClock.control end,
+    },
+    {
+        meterId = "SoulGems",
+        fallbackEnabled = function () return not InfoPanel.SV.HideGems end,
+        getControl = function () return uiGems.control end,
+    },
+}
+
+--- @type InfoPanelLayoutEntry[]
+local INFO_PANEL_BOTTOM_ROW_LAYOUT =
+{
+    {
+        meterId = "MountFeed",
+        fallbackEnabled = function () return not InfoPanel.SV.HideMountFeed end,
+        getControl = function () return uiFeedTimer.control end,
+    },
+    {
+        meterId = "Armour",
+        fallbackEnabled = function () return not InfoPanel.SV.HideArmour end,
+        getControl = function () return uiArmour.control end,
+    },
+    {
+        meterId = "WeaponCharges",
+        fallbackEnabled = function () return not InfoPanel.SV.HideWeapons end,
+        getControl = function () return uiWeapons.control end,
+    },
+    {
+        meterId = "Bags",
+        fallbackEnabled = function () return not InfoPanel.SV.HideBags end,
+        getControl = function () return uiBags.control end,
+    },
+    {
+        meterId = "Gold",
+        fallbackEnabled = function () return not InfoPanel.SV.HideGold end,
+        getControl = function () return uiGold.control end,
+        onShow = function () InfoPanel.UpdateGoldDisplay() end,
+    },
+}
+
+--- @param id string
+--- @param fallbackEnabled boolean
+--- @return boolean
+local function InfoPanelMeterEnabled(id, fallbackEnabled)
+    local meter = InfoPanel.GetMeter(id)
+    if meter and meter.IsEnabled then
+        return meter:IsEnabled()
+    end
+    return fallbackEnabled
+end
+
+--- @param rowControl Control
+--- @param entries InfoPanelLayoutEntry[]
+--- @return number
+local function LayoutInfoPanelRow(rowControl, entries)
+    local anchorControl = nil
+    local rowWidth = 0
+    for i = 1, #entries do
+        local entry = entries[i]
+        local control = entry.getControl()
+        if control then
+            if not InfoPanelMeterEnabled(entry.meterId, entry.fallbackEnabled()) then
+                control:SetHidden(true)
+                control:ClearAnchors()
+            else
+                control:ClearAnchors()
+                control:SetAnchor(LEFT, anchorControl or rowControl, (anchorControl == nil) and LEFT or RIGHT, 0, 0)
+                control:SetHidden(false)
+                if entry.onShow then
+                    entry.onShow()
+                end
+                rowWidth = rowWidth + control:GetWidth()
+                anchorControl = control
+            end
+        end
+    end
+    rowControl:SetWidth((rowWidth > 0) and rowWidth or 10)
+    return rowWidth
+end
+
+local function RefreshEnabledInfoPanelMetersForLayout()
+    local nowMs = GetFrameTimeMilliseconds()
+    ForEachMeter(function (meter)
+        if meter:IsEnabled() then
+            meter:Update(nowMs)
+            meter:MarkUpdated(nowMs)
+        end
+    end)
+end
+
+local function ApplyInfoPanelDividerAnchors()
+    local divider = uiPanel and uiPanel.div
+    if not divider then
+        return
+    end
+    divider:ClearAnchors()
+    divider:SetAnchor(LEFT, uiPanel, LEFT, 0, 0)
+    divider:SetAnchor(RIGHT, uiPanel, RIGHT, 0, 0)
+end
+
 function InfoPanel.RegisterAllMeterUpdates()
     ForEachMeter(function (meter)
         meter:RegisterMeterUpdate()
@@ -830,11 +959,6 @@ function InfoPanel.ApplyFont()
         end
     end)
     if InfoPanel.Enabled and uiPanel then
-        local nowMs = GetFrameTimeMilliseconds()
-        ForEachMeter(function (meter)
-            meter:Update(nowMs)
-            meter:MarkUpdated(nowMs)
-        end)
         InfoPanel.RearrangePanel()
     end
 end
@@ -924,133 +1048,25 @@ function InfoPanel.RearrangePanel()
     if not InfoPanel.Enabled then
         return
     end
-    local function MeterEnabled(id, fallbackEnabled)
-        local meter = InfoPanel.GetMeter(id)
-        if meter and meter.IsEnabled then
-            return meter:IsEnabled()
-        end
-        return fallbackEnabled
+
+    local refreshMeters = (infoPanelLayoutDepth == 0)
+    infoPanelLayoutDepth = infoPanelLayoutDepth + 1
+
+    if refreshMeters then
+        RefreshEnabledInfoPanelMetersForLayout()
     end
-    -- Reset scale of panel
+
     uiPanel:SetTransformScale(1)
-    -- Top row
-    local anchorTop = nil
-    local sizeTop = 0
-    -- Latency
-    if not MeterEnabled("Latency", not InfoPanel.SV.HideLatency) then
-        uiLatency.control:SetHidden(true)
-    else
-        uiLatency.control:ClearAnchors()
-        uiLatency.control:SetAnchor(LEFT, anchorTop or uiTopRow, (anchorTop == nil) and LEFT or RIGHT, 0, 0)
-        uiLatency.control:SetHidden(false)
-        sizeTop = sizeTop + uiLatency.control:GetWidth()
-        anchorTop = uiLatency.control
-    end
-    -- FPS
-    if not MeterEnabled("FPS", not InfoPanel.SV.HideFPS) then
-        uiFps.control:SetHidden(true)
-    else
-        uiFps.control:ClearAnchors()
-        uiFps.control:SetAnchor(LEFT, anchorTop or uiTopRow, (anchorTop == nil) and LEFT or RIGHT, 0, 0)
-        uiFps.control:SetHidden(false)
-        sizeTop = sizeTop + uiFps.control:GetWidth()
-        anchorTop = uiFps.control
-    end
-    -- Memory
-    if not MeterEnabled("Memory", not InfoPanel.SV.HideMemory) then
-        uiMemory.control:SetHidden(true)
-    else
-        uiMemory.control:ClearAnchors()
-        uiMemory.control:SetAnchor(LEFT, anchorTop or uiTopRow, (anchorTop == nil) and LEFT or RIGHT, 0, 0)
-        uiMemory.control:SetHidden(false)
-        sizeTop = sizeTop + uiMemory.control:GetWidth()
-        anchorTop = uiMemory.control
-    end
-    -- Time
-    if not MeterEnabled("Clock", not InfoPanel.SV.HideClock) then
-        uiClock.control:SetHidden(true)
-    else
-        uiClock.control:ClearAnchors()
-        uiClock.control:SetAnchor(LEFT, anchorTop or uiTopRow, (anchorTop == nil) and LEFT or RIGHT, 0, 0)
-        uiClock.control:SetHidden(false)
-        sizeTop = sizeTop + uiClock.control:GetWidth()
-        anchorTop = uiClock.control
-    end
-    -- Soulgems
-    if not MeterEnabled("SoulGems", not InfoPanel.SV.HideGems) then
-        uiGems.control:SetHidden(true)
-    else
-        uiGems.control:ClearAnchors()
-        uiGems.control:SetAnchor(LEFT, anchorTop or uiTopRow, (anchorTop == nil) and LEFT or RIGHT, 0, 0)
-        uiGems.control:SetHidden(false)
-        sizeTop = sizeTop + uiGems.control:GetWidth()
-        anchorTop = uiGems.control
-    end
-    -- Set row size
-    uiTopRow:SetWidth((sizeTop > 0) and sizeTop or 10)
-    -- Bottom row
-    local anchorBot = nil
-    local sizeBot = 0
-    -- Feed timer
-    if not MeterEnabled("MountFeed", not InfoPanel.SV.HideMountFeed) then
-        uiFeedTimer.control:SetHidden(true)
-        sizeBot = sizeBot - (uiFeedTimer.control:GetWidth() * 0.15)
-    else
-        uiFeedTimer.control:ClearAnchors()
-        uiFeedTimer.control:SetAnchor(LEFT, anchorBot or uiBotRow, (anchorBot == nil) and LEFT or RIGHT, 0, 0)
-        uiFeedTimer.control:SetHidden(false)
-        sizeBot = sizeBot + uiFeedTimer.control:GetWidth()
-        anchorBot = uiFeedTimer.control
-    end
-    -- Durability
-    if not MeterEnabled("Armour", not InfoPanel.SV.HideArmour) then
-        uiArmour.control:SetHidden(true)
-    else
-        uiArmour.control:ClearAnchors()
-        uiArmour.control:SetAnchor(LEFT, anchorBot or uiBotRow, (anchorBot == nil) and LEFT or RIGHT, 0, 0)
-        uiArmour.control:SetHidden(false)
-        sizeBot = sizeBot + uiArmour.control:GetWidth()
-        anchorBot = uiArmour.control
-    end
-    -- Charges
-    if not MeterEnabled("WeaponCharges", not InfoPanel.SV.HideWeapons) then
-        uiWeapons.control:SetHidden(true)
-    else
-        uiWeapons.control:ClearAnchors()
-        uiWeapons.control:SetAnchor(LEFT, anchorBot or uiBotRow, (anchorBot == nil) and LEFT or RIGHT, 0, 0)
-        uiWeapons.control:SetHidden(false)
-        sizeBot = sizeBot + uiWeapons.control:GetWidth()
-        anchorBot = uiWeapons.control
-    end
-    -- Bags
-    if not MeterEnabled("Bags", not InfoPanel.SV.HideBags) then
-        uiBags.control:SetHidden(true)
-    else
-        uiBags.control:ClearAnchors()
-        uiBags.control:SetAnchor(LEFT, anchorBot or uiBotRow, (anchorBot == nil) and LEFT or RIGHT, 0, 0)
-        uiBags.control:SetHidden(false)
-        sizeBot = sizeBot + uiBags.control:GetWidth()
-        anchorBot = uiBags.control
-    end
-    -- Gold (moved to end for right positioning)
-    if not MeterEnabled("Gold", not InfoPanel.SV.HideGold) then
-        uiGold.control:SetHidden(true)
-    else
-        uiGold.control:ClearAnchors()
-        uiGold.control:SetAnchor(LEFT, anchorBot or uiBotRow, (anchorBot == nil) and LEFT or RIGHT, 0, 0)
-        uiGold.control:SetHidden(false)
-        InfoPanel.UpdateGoldDisplay()
-        sizeBot = sizeBot + uiGold.control:GetWidth()
-        anchorBot = uiGold.control
-    end
-    -- Set row size
-    uiBotRow:SetWidth((sizeBot > 0) and sizeBot or 10)
-    -- Set size of panel (rows already sum visible meter widths)
-    uiPanel:SetWidth(zo_max(uiTopRow:GetWidth(), uiBotRow:GetWidth()))
-    -- Set scale of panel again
+
+    local topWidth = LayoutInfoPanelRow(uiTopRow, INFO_PANEL_TOP_ROW_LAYOUT)
+    local botWidth = LayoutInfoPanelRow(uiBotRow, INFO_PANEL_BOTTOM_ROW_LAYOUT)
+
+    uiPanel:SetWidth(zo_max(topWidth, botWidth))
+    ApplyInfoPanelDividerAnchors()
     InfoPanel.SetScale()
-    -- Apply transparency
     InfoPanel.ApplyTransparency()
+
+    infoPanelLayoutDepth = infoPanelLayoutDepth - 1
 end
 
 function InfoPanel.Initialize(enabled)
