@@ -1,5 +1,23 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.3
+
+### New
+
+- Combat Info **Synergy Tracker**: Optional **Horizontal Icon Alignment** (left or right) when minimal display uses **Horizontal Icon Layout**; row width follows **Maximum Synergies to Display**.
+
+### Changes
+
+- Unit Frames: **CrutchAlerts** boss threshold mechanic labels fade in and out and only the next upcoming mechanic is highlighted when several thresholds share the same name; markers still update from cached boss health when the boss unit is absent.
+- Unlock: Repositioned **Active Combat Tips** use a higher draw tier so tip text stays visible above overlapping UI.
+- Combat Info **Synergy Tracker**: Unlock positioning preview stays visible during HUD refreshes while you drag the frame.
+- LuiData / SpellCastBuffs: **Forceful** and **Feeding Frenzy** (stage 3) use corrected ability icons; Feeding Frenzy max-stage player buff shows in the buff tracker again.
+- Unit Frames (debug): **/luiufboss** and **/luiufbosshp** preview threshold markers and step simulated boss HP (requires **Show threshold markers**).
+
+### Fixed
+
+- ChatAnnouncements: Legacy **TempAlert** home, campaign, and outfit slash toggles migrate into **Notify** options correctly for character-specific saved variables.
+
 ## Version 7.2.4.2
 
 ### Fixed
