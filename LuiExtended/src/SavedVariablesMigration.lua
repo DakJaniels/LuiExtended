@@ -76,6 +76,13 @@ function LUIE.GetCoreAccountWideRawTable()
     return root[profile][dn]["$AccountWide"]
 end
 
+--- Account-wide toggle for per-character LuiExtended profiles (stored on `$AccountWide`, not on character core `LUIE.SV`).
+--- @return boolean
+function LUIE.IsCharacterSpecificSavedVarsEnabled()
+    local aw = LUIE.GetCoreAccountWideRawTable()
+    return aw.CharacterSpecificSV == true
+end
+
 --- If legacy ZO profile `"Default"` holds this @DisplayName, merge or copy into the megaserver profile branch.
 function LUIE.MigrateDisplaySubtreeFromLegacyProfile()
     local root = _G[LUIE.SVName]
@@ -233,7 +240,7 @@ function LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
 
     local profile = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
     local dn = GetDisplayName()
-    local charSpecific = LUIE.SV.CharacterSpecificSV
+    local charSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     local ver = LUIE.SVVer
     local moduleDefaults = BuildModuleDefaultsLookup()
     local luiRoot = _G[LUIE.SVName]
@@ -257,7 +264,7 @@ function LUIE.RepairSplitModuleSavedVarsFromLegacy()
         return
     end
 
-    local charSpecific = LUIE.SV.CharacterSpecificSV
+    local charSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     local ver = LUIE.SVVer
     local dn = GetDisplayName()
     local moduleDefaults = BuildModuleDefaultsLookup()
@@ -289,7 +296,7 @@ function LUIE.LuiESVLegacyModuleNamespacesEmptyForDisplay(displayName)
     if not luiRoot then
         return true
     end
-    local charSpecific = LUIE.SV.CharacterSpecificSV
+    local charSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     local world = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
     local legacy = LUIE.LegacySavedVarsProfile
     if CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, world, displayName, charSpecific) > 0 then
@@ -327,7 +334,7 @@ function LUIE.PrintSavedVariablesMigrationStatus()
     local world = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
     local legacy = LUIE.LegacySavedVarsProfile
     local dn = GetDisplayName()
-    local charSpec = LUIE.SV and LUIE.SV.CharacterSpecificSV or false
+    local charSpec = LUIE.IsCharacterSpecificSavedVarsEnabled()
 
     LUIE.ChatOutput:Print(GetString(LUIE_STRING_SV_STATUS_HEADER), true)
     LUIE.ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_SV_STATUS_WORLD_PROFILE), tostring(world)), true)
@@ -603,6 +610,38 @@ function LUIE.InstallExternalSavedVarsLegacyCompat()
     LUIE.isExternalSavedVarsLegacyCompatInstalled = true
 end
 
+--- When character profiles were enabled but modules still bound account-wide, module data may only exist on `$AccountWide` split leaves. Seed the current character raw leaf from account-wide for keys not yet present (does not overwrite).
+function LUIE.SeedCharacterModuleSavedVarsFromAccountWide()
+    if not LUIE.IsCharacterSpecificSavedVarsEnabled() then
+        return
+    end
+
+    local profile = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+    local dn = GetDisplayName()
+    local charKey = GetUnitName("player")
+
+    for _, moduleKey in ipairs(LUIE.ModuleSavedVarNamespaceKeys) do
+        local globalName = LUIE.ModuleSavedVarNames[moduleKey]
+        if globalName then
+            local srcAw = GetRawAccountWideLeaf(globalName, profile, dn)
+            if type(srcAw) == "table" and LUIE.SavedVarsRawLeafNonVersionKeyCount(srcAw) > 0 then
+                local charLeaf = GetRawCharacterLeaf(globalName, profile, dn, charKey)
+                local charKeyCount = LUIE.SavedVarsRawLeafNonVersionKeyCount(charLeaf)
+                if charLeaf == nil or charKeyCount == 0 then
+                    local g = _G[globalName]
+                    g[profile] = g[profile] or {}
+                    g[profile][dn] = g[profile][dn] or {}
+                    if charLeaf == nil then
+                        g[profile][dn][charKey] = {}
+                        charLeaf = g[profile][dn][charKey]
+                    end
+                    ShallowMergeTableSkipVersion(charLeaf, srcAw)
+                end
+            end
+        end
+    end
+end
+
 -- -----------------------------------------------------------------------------
 --  Chat output settings: LUIE_ChatAnnouncements_SV -> LUIESV.ChatOutput (account-wide routing)
 -- -----------------------------------------------------------------------------
@@ -628,7 +667,7 @@ function LUIE.MigrateChatOutputToCore()
 
     local globalName = LUIE.ModuleSavedVarNames.ChatAnnouncements
     local src = LUIE.GetRawModuleAccountWideLeaf(globalName)
-    if LUIE.SV.CharacterSpecificSV then
+    if LUIE.IsCharacterSpecificSavedVarsEnabled() then
         local charSrc = LUIE.GetRawModuleCharacterLeaf(globalName)
         if charSrc then
             src = charSrc
@@ -681,7 +720,7 @@ function LUIE.MigrateTempSlashAlertsToChatAnnouncements()
     local profile = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
     local defaults = LUIE.ChatAnnouncements.Defaults
     local dest
-    if LUIE.SV.CharacterSpecificSV then
+    if LUIE.IsCharacterSpecificSavedVarsEnabled() then
         dest = ZO_SavedVars:New(globalName, LUIE.SVVer, nil, defaults, profile)
     else
         dest = ZO_SavedVars:NewAccountWide(globalName, LUIE.SVVer, nil, defaults, profile)

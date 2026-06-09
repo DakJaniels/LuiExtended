@@ -354,7 +354,7 @@ end
 -- Module initialization
 function CombatText.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
+    local isCharacterSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     if isCharacterSpecific then
         CombatText.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.CombatText, LUIE.SVVer, nil, CombatText.Defaults, LUIE.SavedVarsProfile)
     else

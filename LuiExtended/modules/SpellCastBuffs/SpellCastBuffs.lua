@@ -374,7 +374,7 @@ end
 -- Initialization
 function SpellCastBuffs.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
+    local isCharacterSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     if isCharacterSpecific then
         SpellCastBuffs.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.SpellCastBuffs, LUIE.SVVer, nil, SpellCastBuffs.Defaults, LUIE.SavedVarsProfile)
     else

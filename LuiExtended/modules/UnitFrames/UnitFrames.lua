@@ -387,7 +387,7 @@ end
 -- Main entry point to this module
 function UnitFrames.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
+    local isCharacterSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     if isCharacterSpecific then
         UnitFrames.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.UnitFrames, LUIE.SVVer, nil, UnitFrames.Defaults, LUIE.SavedVarsProfile)
     else
