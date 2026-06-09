@@ -3,6 +3,7 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
+-- -----------------------------------------------------------------------------
 --- **LuiExtended** namespace
 ---
 --- @class (partial) LuiExtended
@@ -25,9 +26,21 @@
 --- @field ChatOutputClass LUIE_ChatOutput
 LUIE = {}
 LUIE.__index = LUIE
--- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
+LUIE.version = "7.2.4.4"
+LUIE.addonVersion = 7244
+LUIE.author = "@dack_janiels[PC]"
+LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
+LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
+LUIE.github = "https://github.com/DakJaniels/LuiExtended"
+LUIE.feedback = "https://github.com/DakJaniels/LuiExtended/issues"
+LUIE.translation = "https://github.com/DakJaniels/LuiExtended/tree/translations"
+LUIE.donation = "https://paypal.me/dakjaniels"
+if not ZO_IsConsoleOrGameCoreUI() then
+    LUIE.LAM = LibAddonMenu2
+end
+-- -----------------------------------------------------------------------------
 
 --- @return string
 function LUIE.FormatStartupChatMessage()
@@ -49,20 +62,6 @@ end
 --- @return string
 function LUIE.FormatAddonSettingsPanelDisplayName(moduleStringId)
     return zo_strformat("<<1>> <<2>>", LUIE.name, GetString(moduleStringId))
-end
-
-LUIE.version = "7.2.4.3"
-LUIE.addonVersion = 7243
-LUIE.author = "@dack_janiels[PC]"
-LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
-LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
-LUIE.github = "https://github.com/DakJaniels/LuiExtended"
-LUIE.feedback = "https://github.com/DakJaniels/LuiExtended/issues"
-LUIE.translation = "https://github.com/DakJaniels/LuiExtended/tree/translations"
-LUIE.donation = "https://paypal.me/dakjaniels"
--- -----------------------------------------------------------------------------
-if not ZO_IsConsoleOrGameCoreUI() then
-    LUIE.LAM = LibAddonMenu2
 end
 
 --- Stock ZOS font for movable-frame coordinate overlays (readable on gamepad / console UI scale).
