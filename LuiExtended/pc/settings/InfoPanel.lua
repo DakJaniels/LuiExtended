@@ -181,7 +181,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideLatency end,
         function (value)
             Settings.HideLatency = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -195,7 +195,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideClock end,
         function (value)
             Settings.HideClock = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -210,7 +210,7 @@ function InfoPanel.CreateSettings()
         function (value)
             Settings.ClockFormat = value
             InfoPanel.RefreshClockMeterUpdateInterval()
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         1,
         "full",
@@ -225,7 +225,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideFPS end,
         function (value)
             Settings.HideFPS = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -239,7 +239,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideMemory end,
         function (value)
             Settings.HideMemory = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -253,7 +253,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideMountFeed end,
         function (value)
             Settings.HideMountFeed = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -267,7 +267,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideArmour end,
         function (value)
             Settings.HideArmour = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -281,7 +281,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideWeapons end,
         function (value)
             Settings.HideWeapons = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -295,7 +295,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideBags end,
         function (value)
             Settings.HideBags = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -309,7 +309,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideGems end,
         function (value)
             Settings.HideGems = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
@@ -323,7 +323,7 @@ function InfoPanel.CreateSettings()
         function () return not Settings.HideGold end,
         function (value)
             Settings.HideGold = not value
-            InfoPanel.RearrangePanel()
+            InfoPanel.RearrangePanel(true)
         end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
