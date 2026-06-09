@@ -1,5 +1,12 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.5
+
+### Fixed
+
+- Character Profile: **Enable Character-Specific Settings** now correctly applies to all LuiExtended module saved variables (including **Unit Frames** repositioning); custom frame positions no longer carry over between characters when profiles are enabled. Module data that was written to the account-wide bucket while the toggle was on may seed into the current character on first login after this update.
+- Unit Frames: **Character Name** name display on custom player and target bars now shows the character name instead of following the game UI primary name preference (which could show **@UserID** when **Character Name** was selected).
+
 ## Version 7.2.4.4
 
 ### Changes
