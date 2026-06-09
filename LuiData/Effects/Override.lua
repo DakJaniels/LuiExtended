@@ -4251,7 +4251,7 @@ local effectOverride =
 
     [137287] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },                                        -- Feeding Frenzy stage 1 player buff 10s
     [58813] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },                                         -- Feeding Frenzy stage 2 player buff 20s
-    [131353] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },                                        -- Feeding Frenzy stage 3 player buff 30s
+    [131353] = { icon = "/esoui/art/icons/ability_werewolf_005_b.dds", hide = false },                                        -- Feeding Frenzy stage 3 player buff 30s
     [58775] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },                                         -- Feeding Frenzy synergy registration
 
     [150999] = { hide = true },                                                                                              -- Call of the Hunt passive (Pack Leader)
