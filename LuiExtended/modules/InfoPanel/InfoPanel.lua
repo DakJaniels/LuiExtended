@@ -1111,7 +1111,7 @@ end
 
 function InfoPanel.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
+    local isCharacterSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     if isCharacterSpecific then
         InfoPanel.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.InfoPanel, LUIE.SVVer, nil, InfoPanel.Defaults, LUIE.SavedVarsProfile)
     else

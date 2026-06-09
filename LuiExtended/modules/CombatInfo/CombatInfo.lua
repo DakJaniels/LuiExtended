@@ -116,7 +116,7 @@ end
 
 -- Module initialization
 function CombatInfo.Initialize(enabled)
-    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
+    local isCharacterSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     if isCharacterSpecific then
         CombatInfo.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.CombatInfo, LUIE.SVVer, nil, CombatInfo.Defaults, LUIE.SavedVarsProfile)
     else

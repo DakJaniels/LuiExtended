@@ -40,11 +40,12 @@ local function OnAddOnLoaded(eventId, addonName)
     -- Load saved variables
     -- Addon options
     LUIE.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults, LUIE.SavedVarsProfile)
-    if LUIE.SV.CharacterSpecificSV then
+    if LUIE.IsCharacterSpecificSavedVarsEnabled() then
         LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults, LUIE.SavedVarsProfile)
     end
     LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
+    LUIE.SeedCharacterModuleSavedVarsFromAccountWide()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     LUIE.MigrateChatOutputToCore()
     LUIE.MigrateTempSlashAlertsToChatAnnouncements()

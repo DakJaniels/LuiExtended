@@ -420,7 +420,7 @@ end
 --- @param enabled boolean
 function ChatAnnouncements.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
+    local isCharacterSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     if isCharacterSpecific then
         ChatAnnouncements.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.ChatAnnouncements, LUIE.SVVer, nil, ChatAnnouncements.Defaults, LUIE.SavedVarsProfile)
     else

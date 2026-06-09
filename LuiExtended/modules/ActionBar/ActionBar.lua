@@ -383,7 +383,7 @@ end
 function ActionBar.Initialize(enabled)
     -- -----------------------------------------------------------------------------
     -- Load settings
-    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
+    local isCharacterSpecific = LUIE.IsCharacterSpecificSavedVarsEnabled()
     if isCharacterSpecific then
         ActionBar.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.ActionBar, LUIE.SVVer, nil, ActionBar.Defaults, LUIE.SavedVarsProfile)
     else
