@@ -43,7 +43,7 @@ local strings =
     LUIE_STRING_LAM_FONT_SIZE = "Police - Taille",
     LUIE_STRING_LAM_FONT_OUTLINE = "Contour de la police",
     LUIE_STRING_LAM_FONT_STYLE = "Police - Style",
-    LUIE_FONT_STYLE_NORMAL = "Normal",
+    LUIE_FONT_STYLE_NORMAL = "Normale",
     LUIE_FONT_STYLE_OUTLINE = "Contour",
     LUIE_FONT_STYLE_THICK_OUTLINE = "Contour épais",
     LUIE_FONT_STYLE_SHADOW = "Ombre",
@@ -185,8 +185,8 @@ local strings =
     LUIE_STRING_SV_STATUS_LEGACY_NS_WORLD = "Espaces de noms de modules hérités encore dans LUIESV (profil monde) : <<1>>",
     LUIE_STRING_SV_STATUS_ROOT_MISSING = "Racine LUIESV manquante.",
     LUIE_STRING_SV_STATUS_RAW_LEAF_KEYS = "<<1>> : rawLeafKeys(excl.version)=<<2>>",
-    LUIE_STRING_CORE_CHANGELOG_WINDOW_TITLE = "<<1>> Changelog",
-    LUIE_STRING_CORE_CHANGELOG_ABOUT_LINE = "v<<1>> by <<2>>",
+    LUIE_STRING_CORE_CHANGELOG_WINDOW_TITLE = "<<1>> Journal des modifications",
+    LUIE_STRING_CORE_CHANGELOG_ABOUT_LINE = "v<<1>> par <<2>>",
 
 
 }

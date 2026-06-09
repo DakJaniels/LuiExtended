@@ -26,7 +26,7 @@ local strings =
     LUIE_STRING_LAM_PNL_SHOWARMORDURABILITY = "Прочность брони",
     LUIE_STRING_LAM_PNL_SHOWBAGSPACE = "Сумка",
     LUIE_STRING_LAM_PNL_SHOWCLOCK = "Часы",
-    LUIE_STRING_LAM_PNL_CLOCKFORMAT = "Clock Format",
+    LUIE_STRING_LAM_PNL_CLOCKFORMAT = "Формат часов",
     LUIE_STRING_LAM_PNL_SHOWEAPONCHARGES = "Заряд оружия",
     LUIE_STRING_LAM_PNL_SHOWFPS = "FPS",
     LUIE_STRING_LAM_PNL_SHOWMEMORY = "Использование памяти",
@@ -39,8 +39,8 @@ local strings =
     LUIE_STRING_LAM_PNL_UNLOCKPANEL_TP = "Позволяет мышью перемещать Инфо-панель.",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP = "Отображение Инфо-панели на экране карты мира",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP_TP = "Отображение Инфо-панели при просмотре карты мира. Эта опция может быть выключена, если ваша Инфо-панель обрезает какие-либо важные элементы на экране карты мира.",
-    LUIE_STRING_PNL_FPS_FORMAT = "<<1>> fps",
-    LUIE_STRING_PNL_LATENCY_MS_FORMAT = "<<1>> ms",
+    LUIE_STRING_PNL_FPS_FORMAT = "<<1>> кадров в секунду",
+    LUIE_STRING_PNL_LATENCY_MS_FORMAT = "<<1>> мс",
 
 
 }

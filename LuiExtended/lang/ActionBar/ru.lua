@@ -103,8 +103,8 @@ local strings =
     LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC1_TP = "Выберите начальный цвет градиента на кастбаре.",
     LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC2 = "Цвет градиента (Конец)",
     LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC2_TP = "Выберите конечный цвет градиента на кастбаре.",
-    LUIE_STRING_LAM_AB_CASTBAR_FILTERS_HEADER = "Cast Bar Filters",
-    LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS = "Show Casts for Heavy Attacks",
+    LUIE_STRING_LAM_AB_CASTBAR_FILTERS_HEADER = "Литые стержневые фильтры",
+    LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS = "Показать касты для тяжелых атак",
     LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS_TP = "Показывает кастбар при тяжёлых атаках оружием.",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER = "Подсказки тайминга вейва (нужен LibCombat)",
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP = "Показывает цветные метки на полосе каста, чтобы оценивать тайминг вейва с лёгкой атакой (зелёный — хорошо, жёлтый — медленно, красный — вейв способностью). Если выкл., полоса отображает только обычную длительность заклинаний и каналов.",
@@ -112,9 +112,9 @@ local strings =
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP = "Вейвы быстрее этого значения после лёгкой атаки — зелёная рамка; медленнее — жёлтая. Вейв способности — красный.",
     LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL = "Радиальная",
     LUIE_STRING_LAM_AB_GCD_ANIM_VERTICAL_REVEAL = "Вертикальное появление",
-    LUIE_STRING_LAM_AB_DISPLAY_OPTIONS_HEADER = "Display Options",
-    LUIE_STRING_LAM_AB_OOC_OPACITY_TP = "Action bar and cast bar opacity while out of combat (0–100%).",
-    LUIE_STRING_LAM_AB_IC_OPACITY_TP = "Action bar and cast bar opacity while in combat (0–100%).",
+    LUIE_STRING_LAM_AB_DISPLAY_OPTIONS_HEADER = "Параметры отображения",
+    LUIE_STRING_LAM_AB_OOC_OPACITY_TP = "Непрозрачность панели действий и применения вне боя (0–100%).",
+    LUIE_STRING_LAM_AB_IC_OPACITY_TP = "Непрозрачность панели действий и каста во время боя (0–100%).",
 
 }
 

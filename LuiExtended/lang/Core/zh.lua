@@ -185,7 +185,7 @@ local strings =
     LUIE_STRING_SV_STATUS_LEGACY_NS_WORLD = "LUIESV 中仍存在的旧版模块命名空间（世界配置）：<<1>>",
     LUIE_STRING_SV_STATUS_ROOT_MISSING = "缺少 LUIESV 根节点。",
     LUIE_STRING_SV_STATUS_RAW_LEAF_KEYS = "<<1>>：rawLeafKeys(excl.version)=<<2>>",
-    LUIE_STRING_CORE_CHANGELOG_WINDOW_TITLE = "<<1>> Changelog",
+    LUIE_STRING_CORE_CHANGELOG_WINDOW_TITLE = "<<1>> 变更日志",
     LUIE_STRING_CORE_CHANGELOG_ABOUT_LINE = "v<<1>> by <<2>>",
 
 

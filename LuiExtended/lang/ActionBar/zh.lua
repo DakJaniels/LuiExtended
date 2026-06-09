@@ -112,9 +112,9 @@ local strings =
     LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP = "轻攻击后快于此值的编织显示绿边；更慢为黄。技能编织为红。",
     LUIE_STRING_LAM_AB_GCD_ANIM_RADIAL = "径向",
     LUIE_STRING_LAM_AB_GCD_ANIM_VERTICAL_REVEAL = "垂直展开",
-    LUIE_STRING_LAM_AB_DISPLAY_OPTIONS_HEADER = "Display Options",
-    LUIE_STRING_LAM_AB_OOC_OPACITY_TP = "Action bar and cast bar opacity while out of combat (0–100%).",
-    LUIE_STRING_LAM_AB_IC_OPACITY_TP = "Action bar and cast bar opacity while in combat (0–100%).",
+    LUIE_STRING_LAM_AB_DISPLAY_OPTIONS_HEADER = "显示选项",
+    LUIE_STRING_LAM_AB_OOC_OPACITY_TP = "非战斗时的操作栏和施法栏不透明度 (0–100%)。",
+    LUIE_STRING_LAM_AB_IC_OPACITY_TP = "战斗中操作栏和施法栏的不透明度 (0–100%)。",
 
 }
 
