@@ -65,20 +65,20 @@ local function libCombatSkillTimingsEventType()
     return LIBCOMBAT_EVENT_SKILL_TIMINGS or 19
 end
 
-local function logCastBarLibCombat(message, ...)
-    if not g_castBarLibCombatDevDebugLog then
-        return
-    end
-    LUIE:Log("Verbose", LOG_PREFIX .. string_format(message, ...))
-end
+-- local function logCastBarLibCombat(message, ...)
+--     if not g_castBarLibCombatDevDebugLog then
+--         return
+--     end
+--     LUIE:Log("Verbose", LOG_PREFIX .. string_format(message, ...))
+-- end
 
-local function formatAbilityRefForLog(abilityId)
-    local formatter = Private.FormatAbilityRefForLog
-    if formatter then
-        return formatter(abilityId)
-    end
-    return tostring(abilityId)
-end
+-- local function formatAbilityRefForLog(abilityId)
+    -- local formatter = Private.FormatAbilityRefForLog
+    -- if formatter then
+        -- return formatter(abilityId)
+    -- end
+    -- return tostring(abilityId)
+-- end
 
 local function castBarUi()
     return Private.GetState().bar
@@ -140,41 +140,41 @@ end
 function CastBar.UnregisterLibCombatEvents()
     if OtherAddonCompatability.isLibCombatEnabled and LibCombat and LibCombat.UnregisterForCombatEvent then
         LibCombat:UnregisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType())
-        logCastBarLibCombat("Unregister SKILL_TIMINGS (%s)", Private.moduleName)
+        -- logCastBarLibCombat("Unregister SKILL_TIMINGS (%s)", Private.moduleName)
     end
     g_skillTimingsRegistered = false
     Private.SetLibCombatTimingsActive(false)
     resetCastBarSlotPressTracking()
-    logCastBarLibCombat("LibCombat timings inactive")
+    -- logCastBarLibCombat("LibCombat timings inactive")
 end
 
 --- Call `CastBar.UnregisterLibCombatEvents()` first (e.g. via `CastBar.RegisterEvents` / `UnregisterEvents`).
 function CastBar.RegisterLibCombatEvents()
     if not OtherAddonCompatability.isLibCombatEnabled then
         CastBar.UnregisterLibCombatEvents()
-        logCastBarLibCombat("Register skipped: LibCombat addon not enabled")
+        -- logCastBarLibCombat("Register skipped: LibCombat addon not enabled")
         return
     end
     if not ActionBar.SV.CastBarEnable then
         CastBar.UnregisterLibCombatEvents()
-        logCastBarLibCombat("Register skipped: CastBarEnable is false")
+        -- logCastBarLibCombat("Register skipped: CastBarEnable is false")
         return
     end
     if not ActionBar.SV.CastBarWeaveHelper then
         CastBar.UnregisterLibCombatEvents()
-        logCastBarLibCombat("SKILL_TIMINGS not registered (weave helper off; cast bar uses combat events)")
+        -- logCastBarLibCombat("SKILL_TIMINGS not registered (weave helper off; cast bar uses combat events)")
         return
     end
     CastBar.UnregisterLibCombatEvents()
     resetCastBarSlotPressTracking()
     if not LibCombat or not LibCombat.RegisterForCombatEvent then
-        logCastBarLibCombat("Register skipped: LibCombat API missing")
+        -- logCastBarLibCombat("Register skipped: LibCombat API missing")
         return
     end
     local registered = LibCombat:RegisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType(), CastBar.OnLibCombatSkillTimings)
     g_skillTimingsRegistered = registered == true
     Private.SetLibCombatTimingsActive(g_skillTimingsRegistered)
-    logCastBarLibCombat("Register SKILL_TIMINGS (%s) ok=%s", Private.moduleName, tostring(g_skillTimingsRegistered))
+    -- logCastBarLibCombat("Register SKILL_TIMINGS (%s) ok=%s", Private.moduleName, tostring(g_skillTimingsRegistered))
 end
 
 --- Toggle weave UI + LibCombat SKILL_TIMINGS without full cast bar event teardown.
@@ -182,14 +182,14 @@ function CastBar.OnWeaveHelperSettingChanged()
     if not ActionBar.SV.CastBarWeaveHelper then
         CastBar.HideWeaveLines()
         CastBar.UnregisterLibCombatEvents()
-        logCastBarLibCombat("Weave helper disabled")
+        -- logCastBarLibCombat("Weave helper disabled")
         return
     end
     if not ActionBar.SV.CastBarEnable or not OtherAddonCompatability.isLibCombatEnabled then
         return
     end
     CastBar.RegisterLibCombatEvents()
-    logCastBarLibCombat("Weave helper enabled")
+    -- logCastBarLibCombat("Weave helper enabled")
 end
 
 local function setWeaveLineOnProgress(barControl, lineControl)
@@ -210,7 +210,7 @@ end
 
 local function markSlotRegistered(timems, reducedSlot, slotIndex)
     g_castBarSlotPressMs[reducedSlot] = timems
-    logCastBarLibCombat("REGISTERED reducedSlot=%s slotIndex=%s timems=%s", reducedSlot, slotIndex, timems)
+    -- logCastBarLibCombat("REGISTERED reducedSlot=%s slotIndex=%s timems=%s", reducedSlot, slotIndex, timems)
     if not weaveMarkersEnabled() or not Private.IsCasting() then
         return
     end
@@ -259,7 +259,7 @@ local function updateWeaveDelayMarker(timems, durationMs, abilityId, reducedSlot
     local offsetEndMs = pressMs > 0 and (pressMs + durationMs) or castEndMs
     if offsetEndMs <= timems + WEAVE_OFFSET_MIN_MS then
         bar.lineDelay:SetHidden(true)
-        logCastBarLibCombat("Weave delay hidden (offsetEndMs=%s <= min)", offsetEndMs)
+        -- logCastBarLibCombat("Weave delay hidden (offsetEndMs=%s <= min)", offsetEndMs)
         return
     end
     local rel = zo_clamp((offsetEndMs - timems) / (castEndMs - timems), 0, 1)
@@ -295,15 +295,7 @@ local function updateWeaveDelayMarker(timems, durationMs, abilityId, reducedSlot
     bar.lineDelay:SetHidden(false)
     local r, g, b = edge:UnpackRGB()
     bar.backdrop:SetEdgeColor(r, g, b, 1)
-    logCastBarLibCombat(
-        "Weave delay shown ability=%s reducedSlot=%s rel=%.2f displayRel=%.2f gapMs=%s gcdRemainMs=%s afterLA=%s",
-        formatAbilityRefForLog(abilityId),
-        reducedSlot,
-        rel,
-        displayRel,
-        gapMs,
-        gcdRemainMs,
-        tostring(g_castBarWeaveAfterLightAttack))
+    -- logCastBarLibCombat("Weave delay shown ability=%s reducedSlot=%s rel=%.2f displayRel=%.2f gapMs=%s gcdRemainMs=%s afterLA=%s", formatAbilityRefForLog(abilityId), reducedSlot, rel, displayRel, gapMs, gcdRemainMs, tostring(g_castBarWeaveAfterLightAttack))
 end
 
 local function durationMsFromSkillTiming(abilityId, skillStatus, skillDuration)
@@ -337,15 +329,7 @@ function CastBar.OnLibCombatSkillTimings(_, timems, reducedSlot, abilityId, skil
 
     local slotIndex = reducedSlot % 10
     local statusLabel = SKILL_STATUS_LABEL[skillStatus] or tostring(skillStatus)
-    logCastBarLibCombat(
-        "SKILL_TIMINGS %s ability=%s reducedSlot=%s slotIndex=%s timems=%s skillDelay=%s skillDuration=%s",
-        statusLabel,
-        formatAbilityRefForLog(abilityId),
-        reducedSlot,
-        slotIndex,
-        timems,
-        tostring(skillDelay),
-        tostring(skillDuration))
+    -- logCastBarLibCombat("SKILL_TIMINGS %s ability=%s reducedSlot=%s slotIndex=%s timems=%s skillDelay=%s skillDuration=%s", statusLabel, formatAbilityRefForLog(abilityId), reducedSlot, slotIndex, timems, tostring(skillDelay), tostring(skillDuration))
 
     if skillStatus == SKILLSTATUS_REGISTERED then
         markSlotRegistered(timems, reducedSlot, slotIndex)
@@ -354,34 +338,34 @@ function CastBar.OnLibCombatSkillTimings(_, timems, reducedSlot, abilityId, skil
 
     if skillStatus == SKILLSTATUS_QUEUE then
         g_castBarQueuedPressMs[abilityId] = timems
-        logCastBarLibCombat("QUEUE ability=%s timems=%s", formatAbilityRefForLog(abilityId), timems)
+        -- logCastBarLibCombat("QUEUE ability=%s timems=%s", formatAbilityRefForLog(abilityId), timems)
         return
     end
 
     if skillStatus == SKILLSTATUS_SUCCESS then
-        logCastBarLibCombat("SUCCESS ignored ability=%s", formatAbilityRefForLog(abilityId))
+        -- logCastBarLibCombat("SUCCESS ignored ability=%s", formatAbilityRefForLog(abilityId))
         return
     end
 
     if slotIndex == SKILL_SLOT_LIGHT_ATTACK then
         g_castBarWeaveAfterLightAttack = true
-        logCastBarLibCombat("Light attack weave flag set")
+        -- logCastBarLibCombat("Light attack weave flag set")
         return
     end
 
     local icon, name = CastBar.GetCastDisplayNameAndIcon(abilityId)
     if not CastBar.ShouldShowOnCastBar(abilityId, name) then
-        logCastBarLibCombat("Filtered from cast bar: ability=%s", formatAbilityRefForLog(abilityId))
+        -- logCastBarLibCombat("Filtered from cast bar: ability=%s", formatAbilityRefForLog(abilityId))
         return
     end
 
     local durationMs, channeled = durationMsFromSkillTiming(abilityId, skillStatus, skillDuration)
     if durationMs <= 0 then
-        logCastBarLibCombat("durationMs<=0 ability=%s status=%s", formatAbilityRefForLog(abilityId), statusLabel)
+        -- logCastBarLibCombat("durationMs<=0 ability=%s status=%s", formatAbilityRefForLog(abilityId), statusLabel)
         return
     end
 
-    logCastBarLibCombat("ShowCast LibCombat ability=%s durationMs=%s channeled=%s", formatAbilityRefForLog(abilityId), durationMs, tostring(channeled))
+    -- logCastBarLibCombat("ShowCast LibCombat ability=%s durationMs=%s channeled=%s", formatAbilityRefForLog(abilityId), durationMs, tostring(channeled))
     CastBar.ShowCast(abilityId, timems, durationMs, channeled, icon, name, true)
     ageWeaveMarkers()
     updateWeaveDelayMarker(timems, durationMs, abilityId, reducedSlot)
