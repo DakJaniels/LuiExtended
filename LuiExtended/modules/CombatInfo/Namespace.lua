@@ -20,12 +20,6 @@ CombatInfo.CrowdControlTracker =
     name = LUIE.name .. "CombatInfo" .. "CrowdControlTracker",
 }
 
---- @class (partial) SynergyTracker
-CombatInfo.SynergyTracker =
-{
-    name = LUIE.name .. "CombatInfo" .. "SynergyTracker",
-}
-
 --- @class (partial) Block
 CombatInfo.Block =
 {
@@ -223,26 +217,6 @@ CombatInfo.Defaults =
             unbreakable = { 224 / 255, 224 / 255, 1, 1 },
         },
         RemainingTextColoured = { 1, 1, 1, 1 }
-    },
-    synergy =
-    {
-        enabled = false,
-        unlocked = false,
-        displayMode = "multi",
-        minimalHorizontal = false,
-        minimalHorizontalAlign = "left",
-        maxDisplay = 10,
-        showPriority = true,
-        showKeybinds = true,
-        playSound = true,
-        showCooldowns = true,
-        oocAlpha = 100,
-        incAlpha = 100,
-        offsetX = 0,
-        offsetY = 200,
-        detectedSynergies = {},
-        priorityOverrides = {},
-        blacklist = {},
     },
     block =
     {
