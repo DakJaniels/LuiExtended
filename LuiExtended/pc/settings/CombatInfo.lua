@@ -3103,10 +3103,7 @@ function CombatInfo.CreateSettings()
                                  return Settings.synergy.priorityOverrides[abilityId] or 0
                              end,
                              setFunc = function (value)
-                                 local tracker = GetSynergyTracker()
-                                 if tracker then
-                                     tracker:SetPriorityOverride(abilityId, value > 0 and value or nil)
-                                 elseif value > 0 then
+                                 if value > 0 then
                                      Settings.synergy.priorityOverrides[abilityId] = value
                                      SetSynergyPriorityOverride(abilityId, value)
                                  else
