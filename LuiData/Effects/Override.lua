@@ -1841,6 +1841,62 @@ local effectOverride =
     [48899] = { icon = "/esoui/art/icons/achievement_newlifefestival_007.dds", tooltip = Tooltips.Innate_Firelight },                                                                                           -- Firelight
 
     ----------------------------------------------------------------
+    -- CLASS MASTERY (primary class; SkillDumper class_mastery.txt) -
+    ----------------------------------------------------------------
+
+    -- Dragonknight (skillLineId 351, line 43)
+    [238232] = { icon = "/esoui/art/icons/ability_weapon_005.dds", dynamicTooltip = true },           -- Inexorable Descent (skill sheet / mastery passive)
+    [263197] = { icon = "/esoui/art/icons/ability_weapon_005.dds", dynamicTooltip = true, tooltipMorphId = 238232 }, -- Inexorable Descent (player buff; log: with 29465 Landslide stacks)
+    [240268] = { icon = "/esoui/art/icons/ability_dragonknight_031.dds", dynamicTooltip = true },      -- Booming Voice
+    [259224] = { icon = "/esoui/art/icons/ability_dragonknight_028.dds", dynamicTooltip = true },      -- Wildfire Embers (mastery passive / skill sheet)
+    [263208] = { icon = "/esoui/art/icons/ability_dragonknight_028.dds", dynamicTooltip = true, tooltipMorphId = 259224, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Wildfire Embers (target DoT; table 198758357)
+    [263309] = { icon = "/esoui/art/icons/ability_dragonknight_028.dds", dynamicTooltip = true, tooltipMorphId = 259224, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Wildfire Embers (alt id; same name hash 33791935)
+    [263220] = { icon = "/esoui/art/icons/passive_dragonknight_015.dds", dynamicTooltip = true },      -- Resolute Defense
+    [263247] = { icon = "/esoui/art/icons/passive_dragonknight_009.dds", dynamicTooltip = true },      -- Lead from the Front
+
+    -- Arcanist (skillLineId 352, line 44)
+    [263316] = { icon = "/esoui/art/icons/passive_arcanist_09.dds", dynamicTooltip = true },           -- Abyssal Emergence
+    [263398] = { icon = "/esoui/art/icons/passive_arcanist_08.dds", dynamicTooltip = true },           -- Fate Realigned
+    [263410] = { icon = "/esoui/art/icons/passive_arcanist_03.dds", dynamicTooltip = true },           -- Unbound Potential
+    [263412] = { icon = "/esoui/art/icons/passive_arcanist_07.dds", dynamicTooltip = true },           -- Erudite's Rigor
+    [263416] = { icon = "/esoui/art/icons/passive_arcanist_04.dds", dynamicTooltip = true },           -- Ink-Scribe's Verve
+
+    -- Necromancer (skillLineId 353, line 45)
+    [263448] = { icon = "/esoui/art/icons/passive_necromancer_011.dds", dynamicTooltip = true },       -- Nothing Wasted
+    [263465] = { icon = "/esoui/art/icons/passive_armor_003.dds", dynamicTooltip = true },              -- Malevolent Promise
+    [263509] = { icon = "/esoui/art/icons/passive_armor_001.dds", dynamicTooltip = true },              -- Cycle Unending
+    [263549] = { icon = "/esoui/art/icons/passive_necromancer_010.dds", dynamicTooltip = true },       -- Pound of Flesh
+    [263554] = { icon = "/esoui/art/icons/passive_necromancer_009.dds", dynamicTooltip = true },       -- Veil's Forfeit
+
+    -- Warden (skillLineId 354, line 46)
+    [263519] = { icon = "/esoui/art/icons/passive_warden_001.dds", dynamicTooltip = true },             -- Tundra's Maw
+    [263520] = { icon = "/esoui/art/icons/passive_warden_005.dds", dynamicTooltip = true },             -- Wild Adaptation
+    [263521] = { icon = "/esoui/art/icons/passive_warden_004.dds", dynamicTooltip = true },             -- Glacial Obstinance
+    [263522] = { icon = "/esoui/art/icons/passive_warden_012.dds", dynamicTooltip = true },             -- Green-Keeper's Hide
+    [263523] = { icon = "/esoui/art/icons/passive_warden_006.dds", dynamicTooltip = true },             -- Bountiful Harvest
+
+    -- Templar (skillLineId 355, line 47)
+    [263585] = { icon = "/esoui/art/icons/ability_templar_025.dds", dynamicTooltip = true },            -- Bastion of Light
+    [263586] = { icon = "/esoui/art/icons/ability_templar_018.dds", dynamicTooltip = true },            -- Devout Guardian
+    [263587] = { icon = "/esoui/art/icons/ability_templar_005.dds", dynamicTooltip = true },            -- Bright Harbinger
+    [263588] = { icon = "/esoui/art/icons/ability_templar_004.dds", dynamicTooltip = true },            -- Judgment's Brand
+    [263589] = { icon = "/esoui/art/icons/ability_templar_027.dds", dynamicTooltip = true },            -- Steadfast Candescence
+
+    -- Nightblade (skillLineId 356, line 48)
+    [263603] = { icon = "/esoui/art/icons/passive_sorcerer_017.dds", dynamicTooltip = true },           -- Nocturnal Inspiration
+    [263604] = { icon = "/esoui/art/icons/passive_weapon_026.dds", dynamicTooltip = true },             -- An Eye for Exploitation
+    [263605] = { icon = "/esoui/art/icons/passive_armor_008.dds", dynamicTooltip = true },              -- Above and Beyond
+    [263606] = { icon = "/esoui/art/icons/passive_sorcerer_025.dds", dynamicTooltip = true },           -- Cutthroat's Focus
+    [263607] = { icon = "/esoui/art/icons/passive_sorcerer_002.dds", dynamicTooltip = true },           -- Share the Spoils
+
+    -- Sorcerer (skillLineId 357, line 49)
+    [263870] = { icon = "/esoui/art/icons/ability_sorcerer_044.dds", dynamicTooltip = true },           -- Conservation of Energy
+    [263871] = { icon = "/esoui/art/icons/ability_sorcerer_063.dds", dynamicTooltip = true },           -- Font of Power
+    [263872] = { icon = "/esoui/art/icons/ability_sorcerer_023.dds", dynamicTooltip = true },           -- Static Reverberation
+    [263873] = { icon = "/esoui/art/icons/ability_sorcerer_037.dds", dynamicTooltip = true },           -- Calculated Defense
+    [263874] = { icon = "/esoui/art/icons/ability_sorcerer_047.dds", dynamicTooltip = true },           -- Sphere of Influence
+
+    ----------------------------------------------------------------
     -- DRAGONKNIGHT PASSIVES ---------------------------------------
     ----------------------------------------------------------------
 
@@ -1918,7 +1974,7 @@ local effectOverride =
     [44369] = { tooltip = Tooltips.Skill_Venomous_Claw },                      -- Searing Claw (target DOT; tooltip string pre-U49 name)
     [44373] = { tooltip = Tooltips.Skill_Burning_Embers },                     -- Burning Embers (target DOT)
     [261752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 }, -- Burning Embers (self-heal combat at DOT end)
-    [263208] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 }, -- Burning Embers (Wildfire Embers; heal/combat on kill or DOT end)
+    -- Wildfire Embers target DoT [263208]/[263309] — CLASS MASTERY block (not Burning Embers)
     -- On cast hit: 160949 Traumatic Burns (visible), 18084 Burning (~4s); 243742 hidden snare/bundle
 
     -- Dragonfire Breath / Disintegrating Dragonfire / Engulfing Dragonfire (U49+)
