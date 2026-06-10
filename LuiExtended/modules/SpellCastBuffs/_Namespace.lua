@@ -247,6 +247,7 @@ local SpellCastBuffs = ZO_Object:Subclass()
 SpellCastBuffs.moduleName = LUIE.name .. "SpellCastBuffs"
 
 SpellCastBuffs.Enabled = false
+SpellCastBuffs.devDebugEnabled = false
 --- @type SCBDefaults
 SpellCastBuffs.Defaults =
 {
