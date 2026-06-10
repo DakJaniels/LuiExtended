@@ -49,6 +49,20 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.4.6
+    "|cFFA500LuiExtended Version 7.2.4.6|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info: |cFFFFFFSynergy Tracker|r has been temporarily removed from the addon while it is reworked (settings and UI will return in a future update).",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Fixed repeated UI errors when multiple guild bank item deposit or withdraw lines printed in the same loot queue batch.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Guild bank loot announcements now retain the guild id per queued message so the guild name stays correct when several items are moved quickly.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Guild bank context message formatting always passes enough arguments for multi-placeholder withdraw/deposit strings (including when the guild label is empty).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData: |cFFFFFFWildfire Embers|r target debuff auras are no longer overridden as |cFFFFFFBurning Embers|r.",
+    "",
     -- Version Header 7.2.4.5
     "|cFFA500LuiExtended Version 7.2.4.5|r",
     "",

@@ -1,5 +1,18 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.6
+
+### Changes
+
+- Combat Info: **Synergy Tracker** has been temporarily removed from the addon while it is reworked (settings and UI will return in a future update).
+
+### Fixed
+
+- Chat Announcements: Fixed repeated UI errors when multiple guild bank item deposit or withdraw lines printed in the same loot queue batch.
+- Chat Announcements: Guild bank loot announcements now retain the guild id per queued message so the guild name stays correct when several items are moved quickly.
+- Chat Announcements: Guild bank context message formatting always passes enough arguments for multi-placeholder withdraw/deposit strings (including when the guild label is empty).
+- LuiData: **Wildfire Embers** target debuff auras are no longer overridden as **Burning Embers**.
+
 ## Version 7.2.4.5
 
 ### Fixed
