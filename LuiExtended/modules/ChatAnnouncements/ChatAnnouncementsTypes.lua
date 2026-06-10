@@ -22,6 +22,16 @@
 --- @field receivedBy string
 --- @field guildId? integer
 
+--- @class CAQueuedItemMessage
+--- @field message string
+--- @field type string
+--- @field formattedRecipient string
+--- @field color string|table
+--- @field logPrefix string
+--- @field totalString string
+--- @field groupLoot boolean
+--- @field guildAnnounceGuildId? integer
+
 --- @class CAFactionRepDedupe
 --- @field delta integer
 --- @field time integer
@@ -398,7 +408,7 @@
 --- @field FenceSuccess fun(eventId: integer, result: integer)
 --- @field FlushDeferredContainerLootCurrency fun()
 --- @field FlushMailDelayedLootLines fun()
---- @field FormatContextMessage fun(logPrefix: string, formattedMessageP1: string, formattedRecipient: string, color: string, groupLoot: boolean): string
+--- @field FormatContextMessage fun(logPrefix: string, formattedMessageP1: string, formattedRecipient: string, color: string, groupLoot: boolean, guildAnnounceGuildId?: integer|nil): string
 --- @field FormatQuestCounterFilterRuleLabel fun(rule: table): string
 --- @field FriendAdded fun(eventId: integer, displayName: string)
 --- @field FriendInviteAdded fun(eventId: integer, displayName: string)
@@ -558,7 +568,7 @@
 --- @field ResetMailSession fun(preserveMailboxOpen: boolean|nil)
 --- @field ResetStackSplit fun()
 --- @field ResetTrackingVariables fun()
---- @field ResolveItemMessage fun(message: string, formattedRecipient: string, color: string, logPrefix: string, totalString: string, groupLoot: boolean)
+--- @field ResolveItemMessage fun(message: string, formattedRecipient: string, color: string, logPrefix: string, totalString: string, groupLoot: boolean, guildAnnounceGuildId?: integer|nil)
 --- @field ResolveLogPrefix fun(logPrefix: string): string
 --- @field ResolveNameLink fun(characterName: string, displayName: string): string
 --- @field ResolveNameNoLink fun(characterName: string, displayName: string): string

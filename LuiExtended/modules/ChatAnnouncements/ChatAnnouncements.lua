@@ -4623,6 +4623,12 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     local delayTimer = 50
     local messageType = alwaysFirst and "CONTAINER" or "LOOT"
 
+    local guildAnnounceGuildId = nil
+    if ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageDepositGuild")
+    or ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageWithdrawGuild") then
+        guildAnnounceGuildId = S.g_guildBankAnnounceGuildId or ChatAnnouncements.GetActiveGuildBankId()
+    end
+
     -- Printer function, separate handling for listed entires (from crafting) or simple function that sends a message over to the printer.
     if receivedBy == "LUIE_RECEIVE_CRAFT" and (gainOrLoss == 1 or gainOrLoss == 3) and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail") then
         local itemString2 = itemString
@@ -4655,6 +4661,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
             logPrefix = logPrefix,
             totalString = "",
             groupLoot = groupLoot,
+            guildAnnounceGuildId = guildAnnounceGuildId,
         }
         eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages)
     elseif receivedBy == "LUIE_RECEIVE_CRAFT" and (gainOrLoss == 2 or gainOrLoss == 4) and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail") then
@@ -4687,10 +4694,11 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
             logPrefix = logPrefix,
             totalString = "",
             groupLoot = groupLoot,
+            guildAnnounceGuildId = guildAnnounceGuildId,
         }
         eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages)
     elseif ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageContainer") and alwaysFirst then
-        ChatAnnouncements.ResolveItemMessage(itemString, formattedRecipient, color, logPrefix, formattedTotal, groupLoot)
+        ChatAnnouncements.ResolveItemMessage(itemString, formattedRecipient, color, logPrefix, formattedTotal, groupLoot, guildAnnounceGuildId)
         ChatAnnouncements.FlushDeferredContainerLootCurrency()
     else
         local totalString = formattedTotal
@@ -4703,6 +4711,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
             logPrefix = logPrefix,
             totalString = totalString,
             groupLoot = groupLoot,
+            guildAnnounceGuildId = guildAnnounceGuildId,
         }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         if delay then
@@ -4719,7 +4728,8 @@ end
 --- @param logPrefix string
 --- @param totalString string
 --- @param groupLoot boolean
-function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color, logPrefix, totalString, groupLoot)
+--- @param guildAnnounceGuildId integer|nil
+function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color, logPrefix, totalString, groupLoot, guildAnnounceGuildId)
     -- Default missing parameters to valid values
     message = message or ""
     formattedRecipient = formattedRecipient or ""
@@ -4736,7 +4746,7 @@ function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color
 
     -- Format the message parts with nil checks
     local formattedMessageP1 = string_format("|r%s|c%s", message, color:ToHex()) or ""
-    local formattedMessageP2 = ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, formattedRecipient, color:ToHex(), groupLoot) or ""
+    local formattedMessageP2 = ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, formattedRecipient, color:ToHex(), groupLoot, guildAnnounceGuildId) or ""
 
     -- Construct and output the final message with additional safety checks
     local finalMessage = string_format("|c%s%s|r%s", color:ToHex(), formattedMessageP2 or "", totalString or "")
@@ -4767,8 +4777,9 @@ end
 --- @param formattedRecipient string
 --- @param color string
 --- @param groupLoot boolean
+--- @param guildAnnounceGuildId integer|nil
 --- @return string
-function ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, formattedRecipient, color, groupLoot)
+function ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, formattedRecipient, color, groupLoot, guildAnnounceGuildId)
     -- Handle upgrade messages
     if ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgrade") and ChatAnnouncements.IsValidOldItem() then
         local formattedIcon = ChatAnnouncements.GetFormattedIcon(S.g_oldItem.icon)
@@ -4787,7 +4798,8 @@ function ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, f
     if formattedRecipient == "" then
         if ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageDepositGuild")
         or ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageWithdrawGuild") then
-            local guildLabel = ChatAnnouncements.FormatGuildLabelForChat(S.g_guildBankAnnounceGuildId) or ""
+            local guildId = guildAnnounceGuildId or S.g_guildBankAnnounceGuildId or ChatAnnouncements.GetActiveGuildBankId()
+            local guildLabel = ChatAnnouncements.FormatGuildLabelForChat(guildId) or ""
             return ChatAnnouncements.FormatGuildBankContextMessage(logPrefix, formattedMessageP1, guildLabel)
         end
         return string_format(logPrefix, formattedMessageP1, "")
@@ -7450,7 +7462,7 @@ function ChatAnnouncements.PrintQueuedMessages()
                         ChatOutput:Print(message.message)
                     end
                 elseif messageType == "CONTAINER" or messageType == "LOOT" then
-                    ChatAnnouncements.ResolveItemMessage(message.message, message.formattedRecipient, message.color, message.logPrefix, message.totalString, message.groupLoot)
+                    ChatAnnouncements.ResolveItemMessage(message.message, message.formattedRecipient, message.color, message.logPrefix, message.totalString, message.groupLoot, message.guildAnnounceGuildId)
                 elseif messageType == "QUEST LOOT ADD" then
                     local itemId = message.itemId
                     if not S.g_questItemRemoved[itemId] then
