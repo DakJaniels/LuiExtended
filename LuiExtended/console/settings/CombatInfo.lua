@@ -3593,10 +3593,7 @@ function CombatInfo.CreateConsoleSettings()
                         return Settings.synergy.priorityOverrides[abilityId] or 0
                     end,
                     setFunction = function (v)
-                        local tracker = CombatInfo.SynergyTrackerInstance
-                        if tracker then
-                            tracker:SetPriorityOverride(abilityId, v > 0 and v or nil)
-                        elseif v > 0 then
+                        if v > 0 then
                             Settings.synergy.priorityOverrides[abilityId] = v
                             SetSynergyPriorityOverride(abilityId, v)
                         else
