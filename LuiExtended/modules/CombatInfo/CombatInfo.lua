@@ -148,8 +148,6 @@ function CombatInfo.Initialize(enabled)
     CombatInfo.CrowdControlTracker.UpdateAOEList()
     CombatInfo.CrowdControlTracker.Initialize()
 
-    CombatInfo.InitializeSynergyTracker()
-
     CombatInfo.Block.Initialize()
 
     local coreAw = LUIE.GetCoreAccountWideRawTable()

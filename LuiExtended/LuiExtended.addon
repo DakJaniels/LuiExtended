@@ -73,7 +73,6 @@ frontend/AbilityAlerts.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml
-frontend/SynergyTracker.xml
 frontend/GridOverlay.xml
 frontend/UnitFrames/Animations.xml
 frontend/UnitFrames/SharedTemplates.xml
@@ -165,7 +164,6 @@ modules/ActionBar/ActionBar_EventReg.lua
 modules/CombatInfo/Namespace.lua
 modules/CombatInfo/AbilityAlerts.lua
 modules/CombatInfo/CrowdControlTracker.lua
-modules/CombatInfo/SynergyTracker.lua
 modules/CombatInfo/Block.lua
 modules/CombatInfo/CombatInfo.lua
 
