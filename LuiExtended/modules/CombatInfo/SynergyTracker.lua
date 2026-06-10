@@ -142,6 +142,8 @@ end
 --- @field synergyControls table[] UI controls for each synergy slot
 --- @field synergyCooldowns table<integer, table> Synergies currently on cooldown
 --- @field lastCooldownUpdate integer Last cooldown UI update time
+--- @field isRefreshingSynergies boolean Guards RefreshActiveSynergies against event re-entry
+--- @field isApplyingPriorityOverrides boolean Guards while SetSynergyPriorityOverride runs (fires synergy events)
 local SynergyTracker = ZO_InitializingObject:Subclass()
 CombatInfo.SynergyTracker = SynergyTracker
 
@@ -461,7 +463,8 @@ function SynergyTracker:Initialize()
     end)
 
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function ()
-        self:OnSynergyAbilityChanged()
+        self:ApplySavedPriorityOverrides()
+        self:RefreshActiveSynergies()
         self:ApplyDisplayAlpha()
     end)
     eventManager:RegisterForEvent(moduleName, EVENT_SYNERGY_ABILITY_CHANGED, function () self:OnSynergyAbilityChanged() end)
@@ -479,7 +482,12 @@ function SynergyTracker:Initialize()
 
     self:ApplyDisplayAlpha()
 
-    zo_callLater(function () self:RefreshActiveSynergies() end, 100)
+    zo_callLater(function ()
+        if IsPlayerActivated() then
+            self:ApplySavedPriorityOverrides()
+        end
+        self:RefreshActiveSynergies()
+    end, 100)
 end
 
 --- Called when HUD scene is showing
@@ -497,8 +505,49 @@ function SynergyTracker:OnHidden()
     ClearTooltip(GameTooltip)
 end
 
+--- Push one priority override to the client when it differs from the current client value.
+--- @param abilityId integer
+--- @param priority integer
+function SynergyTracker:PushPriorityOverrideToClient(abilityId, priority)
+    if not abilityId or abilityId <= 0 or not priority or priority <= 0 then
+        return
+    end
+
+    if GetSynergyPriorityOverride(abilityId) ~= priority then
+        SetSynergyPriorityOverride(abilityId, priority)
+    end
+end
+
+--- Push all saved priority overrides to the game client (survives /reloadui and login).
+--- Must not run from RefreshActiveSynergies: SetSynergyPriorityOverride can fire EVENT_SYNERGY_ABILITY_CHANGED.
+function SynergyTracker:ApplySavedPriorityOverrides()
+    if self.isApplyingPriorityOverrides then
+        return
+    end
+
+    local Settings = CombatInfo.SV.synergy
+    local priorityOverrides = Settings and Settings.priorityOverrides
+    if not priorityOverrides then
+        return
+    end
+
+    self.isApplyingPriorityOverrides = true
+    for abilityId, priority in pairs(priorityOverrides) do
+        if type(abilityId) == "number" and priority and priority > 0 then
+            self:PushPriorityOverrideToClient(abilityId, priority)
+        end
+    end
+    self.isApplyingPriorityOverrides = false
+end
+
 --- Refresh all active synergies (event-driven)
 function SynergyTracker:RefreshActiveSynergies()
+    if self.isRefreshingSynergies then
+        return
+    end
+
+    self.isRefreshingSynergies = true
+
     local Settings = CombatInfo.SV.synergy
     local newSynergies = {}
     local numSynergies = GetNumberOfAvailableSynergies()
@@ -510,7 +559,6 @@ function SynergyTracker:RefreshActiveSynergies()
         if abilityId and abilityId > 0 and not Settings.blacklist[abilityId] then
             local overridePriority = Settings.priorityOverrides[abilityId]
             if overridePriority then
-                SetSynergyPriorityOverride(abilityId, overridePriority)
                 priority = overridePriority
             end
 
@@ -559,6 +607,8 @@ function SynergyTracker:RefreshActiveSynergies()
     if hadNewSynergy and Settings.playSound then
         PlaySound(SOUNDS.ABILITY_SYNERGY_READY)
     end
+
+    self.isRefreshingSynergies = false
 end
 
 --- Update the multi-synergy display
@@ -947,6 +997,9 @@ end
 
 --- Event: Synergy ability changed (primary event)
 function SynergyTracker:OnSynergyAbilityChanged()
+    if self.isApplyingPriorityOverrides then
+        return
+    end
     self:RefreshActiveSynergies()
 end
 
@@ -1217,7 +1270,7 @@ function SynergyTracker:SetPriorityOverride(abilityId, priority)
 
     if priority and priority > 0 then
         Settings.priorityOverrides[abilityId] = priority
-        SetSynergyPriorityOverride(abilityId, priority)
+        self:PushPriorityOverrideToClient(abilityId, priority)
     else
         Settings.priorityOverrides[abilityId] = nil
         ClearSynergyPriorityOverride(abilityId)
