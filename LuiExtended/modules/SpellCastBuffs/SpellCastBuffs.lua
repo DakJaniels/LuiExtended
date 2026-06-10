@@ -371,6 +371,10 @@ local function InitializeContainerLayout(containerKey)
     ApplyFlexContainerConfig(containerKey)
 end
 
+function SpellCastBuffs.RefreshDevDebugEnabled()
+    SpellCastBuffs.devDebugEnabled = LUIE.IsDevDebugEnabled()
+end
+
 -- Initialization
 function SpellCastBuffs.Initialize(enabled)
     -- Load settings
@@ -404,6 +408,8 @@ function SpellCastBuffs.Initialize(enabled)
     if SpellCastBuffs.SV.IconSize < 30 or SpellCastBuffs.SV.IconSize > 60 then
         SpellCastBuffs.SV.IconSize = SpellCastBuffs.Defaults.IconSize
     end
+
+    SpellCastBuffs.RefreshDevDebugEnabled()
 
     -- Disable module if setting not toggled on
     if not enabled then
@@ -735,7 +741,7 @@ function SpellCastBuffs.RegisterDebugEvents()
     end
 
     -- Author-specific debug events
-    if LUIE.IsDevDebugEnabled() then
+    if SpellCastBuffs.devDebugEnabled then
         eventManager:UnregisterForEvent(moduleName .. "AuthorDebugCombat", EVENT_COMBAT_EVENT)
         if SpellCastBuffs.SV.ShowDebugCombat then
             eventManager:RegisterForEvent(moduleName .. "AuthorDebugCombat", EVENT_COMBAT_EVENT, function (eventId, ...)
@@ -2015,7 +2021,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
         -- Debug show default Tooltip on my account
         -- if LUIE.PlayerDisplayName == "@ArtOfShred" or LUIE.PlayerDisplayName == "@ArtOfShredPTS" --[[or LUIE.PlayerDisplayName == '@dack_janiels']] then
-        if LUIE.IsDevDebugEnabled() then
+        if SpellCastBuffs.devDebugEnabled then
             InformationTooltip:AddLine("Default Tooltip Below:", "", colorText:UnpackRGBA())
 
             local newtooltipText = GetAbilityEffectDescription(control.buffSlot)

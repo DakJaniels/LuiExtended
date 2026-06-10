@@ -824,7 +824,7 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
         end
     end
 
-    if LUIE.IsDevDebugEnabled() then
+    if SpellCastBuffs.devDebugEnabled then
         SpellCastBuffs.RecordBuffIconPoolHighWater()
     end
 

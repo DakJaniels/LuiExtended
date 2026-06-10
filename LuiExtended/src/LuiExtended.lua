@@ -384,8 +384,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {
@@ -398,10 +398,21 @@ local DEVS = readonlytable
 -- LUIE.DEVS = DEVS
 
 -- -----------------------------------------------------------------------------
+
+local devDebugEnabledCache
+local devDebugEnabledCacheForDisplayName
+
 -- Helper function to check if debug is enabled for current user
 function LUIE.IsDevDebugEnabled()
-    local currentUser = zo_strformat("<<1>>", GetUnitDisplayName("player"))
-    return DEVS[currentUser] and DEVS[currentUser].enabled and DEVS[currentUser].debug
+    local displayName = GetUnitDisplayName("player")
+    if displayName == devDebugEnabledCacheForDisplayName then
+        return devDebugEnabledCache
+    end
+    devDebugEnabledCacheForDisplayName = displayName
+    local currentUser = zo_strformat("<<1>>", displayName)
+    local devEntry = DEVS[currentUser]
+    devDebugEnabledCache = devEntry and devEntry.enabled and devEntry.debug or false
+    return devDebugEnabledCache
 end
 
 -- -----------------------------------------------------------------------------
