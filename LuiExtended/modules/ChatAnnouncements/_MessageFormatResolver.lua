@@ -502,10 +502,13 @@ function ChatAnnouncements.FormatGuildBankContextMessage(template, formattedPrim
     for _ in template:gmatch("%%s") do
         placeholderCount = placeholderCount + 1
     end
-    if placeholderCount >= 2 and guildLabel and guildLabel ~= "" then
-        return string_format_resolver(template, formattedPrimary, guildLabel)
+    if placeholderCount >= 2 then
+        return string_format_resolver(template, formattedPrimary, guildLabel or "")
     end
-    return string_format_resolver(template, formattedPrimary)
+    if placeholderCount == 1 then
+        return string_format_resolver(template, formattedPrimary)
+    end
+    return formattedPrimary or ""
 end
 
 ChatAnnouncements.RefreshMessageFormatDefaultsTable()
