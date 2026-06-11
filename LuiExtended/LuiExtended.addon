@@ -20,6 +20,7 @@
 
 # Language Files
 lang/_RegisterStrings.lua
+;lang/_LocalizationCoverage_Dev.lua
 lang/Core/default.lua
 lang/Shared/default.lua
 lang/ActionBar/default.lua
@@ -45,6 +46,7 @@ bindings/Bindings.xml
 
 # Addon Base
 src/LuiExtended.lua
+src/_ZO_BuffDebuffSuppression.lua
 src/ChatOutput/Namespace.lua
 src/ChatOutput/TimestampAndFormat.lua
 src/ChatOutput/ChatOutput.lua
@@ -216,6 +218,7 @@ modules/UnitFrames/CustomFrames/CompanionCustomFrameData.lua
 modules/UnitFrames/CustomFrames/BossCustomFrameData.lua
 modules/UnitFrames/CustomFrames/_PostCreate.lua
 modules/UnitFrames/_CustomFrames.lua
+modules/UnitFrames/_ZO_FrameSuppression.lua
 modules/UnitFrames/_DefaultFrames.lua
 modules/UnitFrames/_Handlers.lua
 modules/UnitFrames/_GroupElectionInfo.lua
@@ -248,10 +251,21 @@ modules/UnitFrames/_DynamicPositioning.lua
 modules/UnitFrames/_PlayerDodgePrediction.lua
 modules/UnitFrames/_CompanionAbilityTrack.lua
 modules/UnitFrames/_CompanionRapportFlourish.lua
+modules/UnitFrames/_StaticControls/Shared.lua
+modules/UnitFrames/_StaticControls/Player.lua
+modules/UnitFrames/_StaticControls/Target.lua
+modules/UnitFrames/_StaticControls/Group.lua
+modules/UnitFrames/_StaticControls/Raid.lua
+modules/UnitFrames/_StaticControls/Generic.lua
 modules/UnitFrames/UnitFrames.lua
 
 # SavedVariables migration (requires module Defaults tables)
 src/SavedVariablesMigration.lua
+
+# Settings - Shared
+shared/SlashCommands/SlashCommandRegistry.lua
+shared/SlashCommands/SlashCommands_LSC.lua
+shared/SlashCommands/SettingsSlashCommandLSC.lua
 
 # Settings - Console
 console/Settings_API.lua
@@ -275,9 +289,6 @@ pc/frontend/Changelog.xml
 pc/Changelog.lua
 
 # Settings - PC
-pc/SlashCommandRegistry.lua
-pc/SlashCommands_LSC.lua
-pc/SettingsSlashCommandLSC.lua
 pc/Settings_API.lua
 pc/lam_extension/LUIE_ComboBoxStatusbarEntry.xml
 pc/lam_extension/fontable_dropdown.lua
