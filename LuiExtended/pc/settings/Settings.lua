@@ -1069,6 +1069,17 @@ function LUIE.CreateSettings()
         Defaults.HideXPBar
     )
 
+    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SUPPRESS_ZO_BUFFDEBUFF_WHEN_HIDDEN),
+        LUIE.GetLAMSuppressZOBuffDebuffWhenHiddenTooltip(),
+        function () return Settings.SuppressZOBuffDebuffWhenHidden end,
+        function (value) Settings.SuppressZOBuffDebuffWhenHidden = value end,
+        "full",
+        nil,
+        Defaults.SuppressZOBuffDebuffWhenHidden,
+        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+    )
+
     -- Startup Message Options
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_STARTUPMSG),

@@ -22,10 +22,6 @@ if LUIE.IsDevDebugEnabled() then
     LUIE.show_log = true
 end
 LUIE.loggerName = "LUIE"
-if LibDebugLogger then
-    -- LibDebugLogger.internal.verboseWhitelist[LUIE.loggerName] = true
-    LUIE.logger = LibDebugLogger.Create(LUIE.loggerName)
-end
 
 local logger
 local viewer
@@ -35,6 +31,8 @@ else
     viewer = false
 end
 if LibDebugLogger then
+    -- LibDebugLogger.internal.verboseWhitelist[LUIE.loggerName] = true
+    LUIE.logger = LibDebugLogger.Create(LUIE.loggerName)
     logger = true
 else
     logger = false

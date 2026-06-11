@@ -923,6 +923,16 @@ function LUIE.CreateConsoleSettings()
         default = Defaults.HideXPBar
     }
 
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_SUPPRESS_ZO_BUFFDEBUFF_WHEN_HIDDEN),
+        tooltip = zo_strformat("<<1>> <<2>>", LUIE.GetLAMSuppressZOBuffDebuffWhenHiddenTooltip(), GetString(LUIE_STRING_LAM_RELOADUI_WARNING)),
+        getFunction = function () return Settings.SuppressZOBuffDebuffWhenHidden end,
+        setFunction = function (value) Settings.SuppressZOBuffDebuffWhenHidden = value end,
+        default = Defaults.SuppressZOBuffDebuffWhenHidden
+    }
+
     -- Startup Message Options
     settingsData[#settingsData + 1] =
     {

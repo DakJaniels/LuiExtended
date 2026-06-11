@@ -889,8 +889,8 @@ end
 --- @param summonResult CompanionSummonResult
 function LUIE_CompanionAbilityTrack:OnCompanionSummonResult(summonResult)
     if summonResult == COMPANION_SUMMON_RESULT_SUMMON_REQUESTED
-        or summonResult == COMPANION_SUMMON_RESULT_SUMMON_AUTO_REQUESTED
-        or summonResult == COMPANION_SUMMON_RESULT_ADDED_FOR_GROUP_PLAYER then
+    or summonResult == COMPANION_SUMMON_RESULT_SUMMON_AUTO_REQUESTED
+    or summonResult == COMPANION_SUMMON_RESULT_ADDED_FOR_GROUP_PLAYER then
         self:RefreshAll()
     else
         ZO_ClearTable(self.combatTrackEndMs)

@@ -126,6 +126,9 @@ local function OnAddOnLoaded(eventId, addonName)
         LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
         LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
         -- -----------------------------------------------------------------------------
+        LUIE.ApplyZOBuffDebuffSuppression()
+        LUIE.RegisterZOBuffDebuffSuppressionSettingListener()
+        -- -----------------------------------------------------------------------------
         -- Load Timestamp Color
         LUIE.ChatOutput:UpdateTimeStampColor()
         -- -----------------------------------------------------------------------------
@@ -154,9 +157,8 @@ local function OnAddOnLoaded(eventId, addonName)
         -- Register global event listeners
         RegisterEvents()
         LUIE.ScheduleDebugEnvironmentReloadChat()
-        -- if LUIE_ScheduleLocalizationCoverageReport then
-        --     LUIE_ScheduleLocalizationCoverageReport()
-        -- end
+        -- Dev locale audit: enable lang/_LocalizationCoverage_Dev.lua in LuiExtended.addon, then:
+        -- if LUIE_ScheduleLocalizationCoverageReport then LUIE_ScheduleLocalizationCoverageReport() end
     end
 end
 

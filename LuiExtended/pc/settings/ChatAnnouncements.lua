@@ -5,7 +5,7 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-
+local LAM = LUIE.LAM
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
@@ -88,12 +88,6 @@ local function GetAchievementCategoryInfoName(topLevelIndex)
 end
 
 function ChatAnnouncements.CreateSettings()
-    -- Load LibAddonMenu
-    local LAM = LibAddonMenu2
-    if LAM == nil then
-        return
-    end
-
     loadQuestCounterFilterDialogs()
 
     local Defaults = ChatAnnouncements.Defaults

@@ -21,8 +21,8 @@ local FLOURISH_DURATION_MS = 2800
 local FLOURISH_RISE_PX = 28
 local FLOURISH_FADE_DELAY_MS = 750
 local FLOURISH_FADE_DURATION_MS = 2050
-local RAPPORT_GRADIENT_START = ZO_ColorDef:New("722323") --Red
-local RAPPORT_GRADIENT_END = ZO_ColorDef:New("009966") --Green
+local RAPPORT_GRADIENT_START = ZO_ColorDef:New("722323") -- Red
+local RAPPORT_GRADIENT_END = ZO_ColorDef:New("009966")   -- Green
 
 --- @param label LabelControl
 --- @return AnimationTimeline

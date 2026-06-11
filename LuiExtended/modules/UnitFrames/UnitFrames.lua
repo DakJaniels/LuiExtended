@@ -37,221 +37,6 @@ local moduleName = UnitFrames.moduleName
 -- local playerTlw
 local CP_BAR_COLORS = ZO_CP_BAR_GRADIENT_COLORS
 
----
---- @param iconPath string
---- @param text string
---- @param iconSize number?
---- @return string
-local function FormatTextWithIcon(iconPath, text, iconSize)
-    iconSize = iconSize or 20
-    return zo_iconFormat(iconPath, iconSize, iconSize) .. " " .. text
-end
-
---- Target names use TEXT_WRAP_MODE_TRUNCATE; suffix icons (vanilla aligned-right) clip off the end. Prefix on target keeps tier visible before CP layout.
-local function FormatNameWithOverlandDifficultyIcon(iconPath, nameText, frameCategory)
-    if frameCategory == "target" then
-        return zo_iconFormat(iconPath, 23, 23) .. " " .. nameText
-    end
-    return zo_iconTextFormatNoSpaceAlignedRight(iconPath, "115%", "115%", nameText)
-end
-
-local function FormatNameWithTargetMarkerIcon(iconPath, nameText, alignIconRight)
-    if alignIconRight then
-        return zo_iconTextFormatNoSpaceAlignedRight(iconPath, "100%", "100%", nameText)
-    end
-    return FormatTextWithIcon(iconPath, nameText)
-end
-
---- @param unitFrame LUIE_CustomFrameObject|nil
---- @return "player"|"target"|"group"|"raid"|nil
-local function GetCustomFrameDisplayCategory(unitFrame)
-    if unitFrame == nil then
-        return nil
-    end
-    local unitTag = unitFrame.unitTag
-    if unitTag == "player" then
-        return "player"
-    end
-    if unitTag == "reticleover" then
-        return "target"
-    end
-    if unitTag and ZO_Group_IsGroupUnitTag(unitTag) then
-        return UnitFrames.isRaid and "raid" or "group"
-    end
-    local registryKey = unitFrame.frameRegistryKey
-    if registryKey == nil and unitTag then
-        if string.sub(unitTag, 1, 10) == "SmallGroup" then
-            registryKey = unitTag
-        elseif string.sub(unitTag, 1, 9) == "RaidGroup" then
-            registryKey = unitTag
-        end
-    end
-    if registryKey then
-        if string.sub(registryKey, 1, 10) == "SmallGroup" then
-            return "group"
-        end
-        if string.sub(registryKey, 1, 9) == "RaidGroup" then
-            return "raid"
-        end
-    end
-    local frameCategory = unitFrame.frameCategory
-    if frameCategory == "smallGroup" then
-        return "group"
-    end
-    if frameCategory == "raid" then
-        return "raid"
-    end
-    if frameCategory == "avaTarget" then
-        return "target"
-    end
-    return nil
-end
-
-local function IsOverlandGameUnitTag(unitTag)
-    if unitTag == nil or unitTag == "" then
-        return false
-    end
-    if unitTag == "player" or unitTag == "reticleover" then
-        return true
-    end
-    return ZO_Group_IsGroupUnitTag(unitTag)
-end
-
---- @param unitFrame LUIE_CustomFrameObject|nil
---- @return string|nil
-local function ResolveOverlandGameUnitTag(unitFrame)
-    if unitFrame == nil then
-        return nil
-    end
-    if unitFrame.unitTag and DoesUnitExist(unitFrame.unitTag) and IsOverlandGameUnitTag(unitFrame.unitTag) then
-        return unitFrame.unitTag
-    end
-    if unitFrame.visualizerUnitTag and DoesUnitExist(unitFrame.visualizerUnitTag) and IsOverlandGameUnitTag(unitFrame.visualizerUnitTag) then
-        return unitFrame.visualizerUnitTag
-    end
-    if unitFrame.GetVisualizerUnitTag then
-        local tag = unitFrame:GetVisualizerUnitTag()
-        if tag and DoesUnitExist(tag) and IsOverlandGameUnitTag(tag) then
-            return tag
-        end
-    end
-    return nil
-end
-
-local function IsOverlandDifficultyGloballyAvailable()
-    return GetOverlandDifficultyDisabledReason() == OVERLAND_DIFFICULTY_DISABLED_REASON_NONE
-end
-
-local function IsOverlandDifficultyEnabledForCategory(frameCategory)
-    if not IsOverlandDifficultyGloballyAvailable() or frameCategory == nil then
-        return false
-    end
-    local sv = UnitFrames.SV
-    if frameCategory == "player" then
-        return sv.PlayerShowOverlandDifficulty
-    end
-    if frameCategory == "target" then
-        return sv.TargetShowOverlandDifficulty
-    end
-    if frameCategory == "group" then
-        return sv.GroupShowOverlandDifficulty
-    end
-    if frameCategory == "raid" then
-        return sv.RaidShowOverlandDifficulty
-    end
-    return false
-end
-
---- Every defined OverlandDifficultyType in ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD has an icon, including BASEGAME (see ZO_Stats_Gamepad.lua).
-local function GetChallengeDifficultyIconPath(difficulty)
-    if difficulty ~= nil then
-        local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty]
-        if iconPath then
-            return iconPath
-        end
-    end
-    return ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[OVERLAND_DIFFICULTY_TYPE_BASEGAME]
-end
-
---- Reticle can briefly report IsUnitPlayer=false / IsUnitMonster=true during target handoff; PLAYER_ALLY is still another player.
-local function IsOverlandDifficultyPlayerUnit(unitTag)
-    if unitTag == nil or not DoesUnitExist(unitTag) then
-        return false
-    end
-    if IsUnitPlayer(unitTag) then
-        return true
-    end
-    return GetUnitReaction(unitTag) == UNIT_REACTION_PLAYER_ALLY
-end
-
-local function GetPlayerUnitOverlandDifficultyForDisplay(unitTag)
-    return GetUnitOverlandDifficulty(unitTag)
-end
-
-local function ScheduleReticleoverOverlandStaticRefresh()
-    if not UnitFrames.SV.TargetShowOverlandDifficulty or not UnitFrames.CustomFrames["reticleover"] then
-        return
-    end
-    local function refreshIfPlayerTarget()
-        if not DoesUnitExist("reticleover") or not IsOverlandDifficultyPlayerUnit("reticleover") then
-            return
-        end
-        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
-    end
-    zo_callLater(refreshIfPlayerTarget, 0)
-    zo_callLater(refreshIfPlayerTarget, 100)
-end
-
-local function ApplyOverlandDifficultyNameIcon(unitTag, nameText, frameCategory)
-    if not IsOverlandDifficultyEnabledForCategory(frameCategory) or nameText == nil or nameText == "" or unitTag == nil then
-        return nameText
-    end
-    local difficulty
-    local isPlayerUnit = IsOverlandDifficultyPlayerUnit(unitTag)
-    if isPlayerUnit then
-        difficulty = GetPlayerUnitOverlandDifficultyForDisplay(unitTag)
-    elseif frameCategory == "target" then
-        difficulty = GetOverlandDifficulty()
-        if UnitFrames.SV.TargetMonsterOverlandDifficulty and not IsUnitMonster(unitTag) then
-            return nameText
-        end
-        if not IsUnitMonster(unitTag) or not IsUnitAttackable(unitTag) then
-            return nameText
-        end
-    else
-        return nameText
-    end
-    local iconPath = GetChallengeDifficultyIconPath(difficulty)
-    if iconPath then
-        return FormatNameWithOverlandDifficultyIcon(iconPath, nameText, frameCategory)
-    end
-    return nameText
-end
-
-local function ShouldShowVeterancyRankOnFrame(unitFrame)
-    if not unitFrame.isPlayer or GetUnitVeterancyRank == nil or IsVeterancySeasonActive == nil or IsInVeterancyProgressionZone == nil then
-        return false
-    end
-    if not IsVeterancySeasonActive() or not IsInVeterancyProgressionZone() then
-        return false
-    end
-    local frameCategory = GetCustomFrameDisplayCategory(unitFrame)
-    local sv = UnitFrames.SV
-    if frameCategory == "player" then
-        return sv.PlayerShowVeterancyRank
-    end
-    if frameCategory == "target" then
-        return sv.TargetShowVeterancyRank
-    end
-    if frameCategory == "group" then
-        return sv.GroupShowVeterancyRank
-    end
-    if frameCategory == "raid" then
-        return sv.RaidShowVeterancyRank
-    end
-    return false
-end
-
 local g_PendingUpdate =
 {
     Group = { flag = false, delay = 200, name = moduleName .. "PendingGroupUpdate" },
@@ -528,6 +313,8 @@ function UnitFrames.Initialize(enabled)
     -- Each coordinator registers its own attribute visual events with unit tag filtering
     UnitFrames.InitializeDefaultVisualizers()
 
+    UnitFrames.ApplyZOUnitFrameSuppression()
+
     -- Set event handlers
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, UnitFrames.OnPlayerActivated)
     -- eventManager:RegisterForEvent(moduleName, EVENT_POWER_UPDATE, UnitFrames.OnPowerUpdate) -- Now handled by UnitFrames_MostRecentPowerUpdateHandler
@@ -579,7 +366,11 @@ function UnitFrames.Initialize(enabled)
         -- See CrutchAlerts/bosshealthbar/BossHealthBarAPI.lua:117-135.
         if LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
             if crutchRegisterThresholdsChangeListener then
-                crutchRegisterThresholdsChangeListener("LUIE_UnitFrames", UnitFrames.OnCrutchThresholdsChanged)
+                --- Listener fired by CrutchAlerts when a threshold override is added/removed
+                --- (e.g. Z'Maja stage detection). Re-runs the fetch + render pipeline.
+                crutchRegisterThresholdsChangeListener("LUIE_UnitFrames", function ()
+                    UnitFrames.UpdateBossThresholds()
+                end)
             else
                 pendingCrutchAlertsVersionWarning = true
                 zo_callLater(TryShowPendingCrutchAlertsVersionWarning, 0)
@@ -1405,12 +1196,6 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
     end
 end
 
---- Listener fired by CrutchAlerts when a threshold override is added/removed
---- (e.g. Z'Maja stage detection). Re-runs the fetch + render pipeline.
-function UnitFrames.OnCrutchThresholdsChanged(_, _)
-    UnitFrames.UpdateBossThresholds()
-end
-
 function UnitFrames.UpdateBossThresholds()
     if not UnitFrames.CustomFrames or not UnitFrames.CustomFrames["boss1"] then
         UnitFrames.activeBossThresholds = nil
@@ -1837,7 +1622,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
         UnitFrames.ReloadValues("reticleover")
 
         if UnitFrames.SV.TargetShowOverlandDifficulty and UnitFrames.CustomFrames["reticleover"] then
-            ScheduleReticleoverOverlandStaticRefresh()
+            UnitFrames.ScheduleReticleoverOverlandStaticRefresh()
         end
 
         local isWithinRange = IsUnitInGroupSupportRange("reticleover")
@@ -2072,335 +1857,8 @@ local HIDE_LEVEL_TYPES =
     [UNIT_TYPE_SIMPLEINTERACTOBJ] = true,
 }
  ]]
-local function IsGuildMate(unitTag)
-    local displayName = GetUnitDisplayName(unitTag)
-    if displayName == UnitFrames.playerDisplayName then
-        return
-    end
-    for i = 1, GetNumGuilds() do
-        local guildId = GetGuildId(i)
-        if GetGuildMemberIndexFromDisplayName(guildId, displayName) ~= nil then
-            return true
-        end
-    end
-    return false
-end
 
--- Updates text labels, classIcon, etc
-function UnitFrames.UpdateStaticControls(unitFrame)
-    if unitFrame == nil then
-        return
-    end
-
-    -- Get the unitTag to determine the method of name display
-    local DisplayOption
-    if unitFrame.unitTag == "player" then
-        DisplayOption = UnitFrames.SV.DisplayOptionsPlayer
-    elseif unitFrame.unitTag == "reticleover" then
-        DisplayOption = UnitFrames.SV.DisplayOptionsTarget
-    else
-        DisplayOption = UnitFrames.SV.DisplayOptionsGroupRaid
-    end
-
-    unitFrame.isPlayer = IsUnitPlayer(unitFrame.unitTag)
-    unitFrame.isChampion = IsUnitChampion(unitFrame.unitTag)
-    unitFrame.isLevelCap = (GetUnitChampionPoints(unitFrame.unitTag) == UnitFrames.MaxChampionPoint)
-    unitFrame.avaRankValue = GetUnitAvARank(unitFrame.unitTag)
-
-    -- First update roleIcon, classIcon and friendIcon, so then we can set maximal length of name label
-    if unitFrame.roleIcon ~= nil then
-        local role = GetGroupMemberSelectedRole(unitFrame.unitTag)
-        -- d (unitFrame.unitTag.." - "..role)
-        local unitRole = LUIE.GetRoleIcon(role)
-        unitFrame.roleIcon:SetTexture(unitRole)
-    end
-    -- If unitFrame has difficulty stars
-    if unitFrame.star1 ~= nil and unitFrame.star2 ~= nil and unitFrame.star3 ~= nil then
-        local unitDifficulty = GetUnitDifficulty(unitFrame.unitTag)
-        unitFrame.star1:SetHidden(unitDifficulty < 2)
-        unitFrame.star2:SetHidden(unitDifficulty < 3)
-        unitFrame.star3:SetHidden(unitDifficulty < 4)
-    end
-    -- If unitFrame has unit classIcon control
-    if unitFrame.classIcon ~= nil then
-        local unitDifficulty = GetUnitDifficulty(unitFrame.unitTag)
-        local classIcon = LUIE.GetClassIcon(GetUnitClassId(unitFrame.unitTag))
-        local isMonsterUnit = IsUnitMonster and IsUnitMonster(unitFrame.unitTag)
-        local showMonsterClassIcon = not unitFrame.isPlayer
-            and UnitFrames.SV.TargetHighlightMonsterUnits
-            and isMonsterUnit
-            and IsUnitAttackable(unitFrame.unitTag)
-        local showClass = (unitFrame.isPlayer and classIcon ~= nil) or (unitDifficulty > 1) or showMonsterClassIcon
-        local eliteIconPath
-        if ZO_IsConsoleOrGameCoreUI() then
-            eliteIconPath = [[/esoui/art/icons/poi/poi_groupboss_complete.dds]]
-        else
-            eliteIconPath = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_ELITE_DDS
-        end
-        if unitFrame.isPlayer then
-            unitFrame.classIcon:SetTexture(classIcon)
-        elseif unitDifficulty == 2 or showMonsterClassIcon then
-            unitFrame.classIcon:SetTexture(eliteIconPath)
-        elseif unitDifficulty >= 3 then
-            unitFrame.classIcon:SetTexture(eliteIconPath)
-        end
-        if unitFrame.unitTag == "player" then
-            unitFrame.classIcon:SetHidden(not UnitFrames.SV.PlayerEnableYourname)
-        else
-            unitFrame.classIcon:SetHidden(not showClass)
-        end
-    end
-    -- unitFrame frame also have a text label for class name: right now only target
-    if unitFrame.className then
-        local classId = GetUnitClassId(unitFrame.unitTag)
-        local className = zo_strformat(GetString(SI_CLASS_NAME), GetClassName(GENDER_MALE, classId))
-        local showClass = unitFrame.isPlayer and className ~= nil and UnitFrames.SV.TargetEnableClass
-        if showClass then
-            local classNameText = StringOnlyGSUB(className, "%^%a+", "")
-            unitFrame.className:SetText(classNameText)
-        end
-        -- this condition is somehow extra, but let keep it to be in consistency with all others
-        if unitFrame.unitTag == "player" then
-            unitFrame.className:SetHidden(not UnitFrames.SV.PlayerEnableYourname)
-        else
-            unitFrame.className:SetHidden(not showClass)
-        end
-    end
-    -- If unitFrame has unit classIcon control
-    if unitFrame.friendIcon ~= nil then
-        local isIgnored = unitFrame.isPlayer and IsUnitIgnored(unitFrame.unitTag)
-        local isFriend = unitFrame.isPlayer and IsUnitFriend(unitFrame.unitTag)
-        local isGuild = unitFrame.isPlayer and not isFriend and not isIgnored and IsGuildMate(unitFrame.unitTag)
-        local ignoredIconPath
-        if ZO_IsConsoleOrGameCoreUI() then
-            ignoredIconPath = [[EsoUI/Art/Contacts/tabIcon_ignored_up.dds]]
-        else
-            ignoredIconPath = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_SOCIAL_IGNORE_DDS
-        end
-        if isIgnored or isFriend or isGuild then
-            unitFrame.friendIcon:SetTexture(isIgnored and ignoredIconPath or isFriend and "/esoui/art/campaign/campaignbrowser_friends.dds" or "/esoui/art/campaign/campaignbrowser_guild.dds")
-            unitFrame.friendIcon:SetHidden(false)
-        else
-            unitFrame.friendIcon:SetHidden(true)
-        end
-    end
-    -- If unitFrame has unit name label control
-    if unitFrame.name ~= nil then
-        -- Only apply this formatting to non-group frames
-        if unitFrame.name:GetParent() == unitFrame.topInfo and unitFrame.unitTag == "reticleover" then
-            local width = unitFrame.topInfo:GetWidth()
-            if unitFrame.classIcon then
-                width = width - unitFrame.classIcon:GetWidth()
-            end
-            if unitFrame.isPlayer then
-                if unitFrame.friendIcon then
-                    width = width - unitFrame.friendIcon:GetWidth()
-                end
-                if unitFrame.level then
-                    width = width - 2.3 * unitFrame.levelIcon:GetWidth()
-                end
-            end
-            unitFrame.name:SetWidth(width)
-        end
-
-        -- Handle name text formatting (DisplayOption 1 = @UserID, 2 = character name, 3 = both; do not use ZO_GetPrimaryPlayerNameFromUnitTag — it follows game UI settings, not LUIE)
-        local nameText
-        if unitFrame.isPlayer then
-            if DisplayOption == 3 then
-                nameText = GetUnitName(unitFrame.unitTag) .. " " .. GetUnitDisplayName(unitFrame.unitTag)
-            elseif DisplayOption == 1 then
-                nameText = GetUnitDisplayName(unitFrame.unitTag)
-            else
-                nameText = GetUnitName(unitFrame.unitTag)
-            end
-        else
-            nameText = GetUnitName(unitFrame.unitTag)
-        end
-
-        local alignTargetMarkerIconRight = unitFrame.unitTag == "reticleover" or GetCustomFrameDisplayCategory(unitFrame) == "target"
-        -- Add target marker icon if present
-        if UnitFrames.SV.CustomTargetMarker then
-            local targetMarkerType = GetUnitTargetMarkerType(unitFrame.unitTag)
-            if targetMarkerType ~= TARGET_MARKER_TYPE_NONE then
-                local iconPath = ZO_GetPlatformTargetMarkerIcon(targetMarkerType)
-                if iconPath then
-                    nameText = FormatNameWithTargetMarkerIcon(iconPath, nameText, alignTargetMarkerIconRight)
-                end
-            end
-        end
-
-        local overlandCategory = GetCustomFrameDisplayCategory(unitFrame)
-        local applyOverlandToThisName = true
-        if unitFrame.unitTag == "reticleover" and UnitFrames.SV.CustomFramesTarget then
-            local customReticle = UnitFrames.CustomFrames["reticleover"]
-            if customReticle and unitFrame.name ~= customReticle.name then
-                applyOverlandToThisName = false
-            end
-        end
-        if overlandCategory and applyOverlandToThisName then
-            local overlandUnitTag = ResolveOverlandGameUnitTag(unitFrame)
-            if overlandUnitTag then
-                nameText = ApplyOverlandDifficultyNameIcon(overlandUnitTag, nameText, overlandCategory)
-            end
-        end
-
-        unitFrame.name:SetText(nameText)
-    end
-    -- If unitFrame has level label control
-    if unitFrame.level ~= nil then
-        local shouldShowVeterancyInfo = ShouldShowVeterancyRankOnFrame(unitFrame)
-        -- Show level for players and non-friendly NPCs
-        local showLevel = unitFrame.isPlayer -- or not ( IsUnitInvulnerableGuard( unitFrame.unitTag ) or HIDE_LEVEL_TYPES[GetUnitType( unitFrame.unitTag )] or HIDE_LEVEL_REACTIONS[GetUnitReaction( unitFrame.unitTag )] ) -- No longer need to display level for anything but players
-        if showLevel then
-            if unitFrame.unitTag == "player" or unitFrame.unitTag == "reticleover" then
-                unitFrame.levelIcon:ClearAnchors()
-                unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
-            end
-            local iconPath
-            local levelText
-            if shouldShowVeterancyInfo then
-                local veterancyRank = GetUnitVeterancyRank(unitFrame.unitTag)
-                if GetVeterancyRankTitle and SI_VETERANCY_RANK_AND_TITLE_FORMATTER then
-                    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
-                    levelText = zo_strformat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, veterancyRank, GetVeterancyRankTitle(veterancyRank, seasonId))
-                else
-                    levelText = tostring(veterancyRank)
-                end
-                if GetVeterancyRankIcon then
-                    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
-                    iconPath = GetVeterancyRankIcon(veterancyRank, seasonId)
-                end
-            elseif unitFrame.isChampion then
-                if IsInGamepadPreferredMode() then
-                    iconPath = ZO_GetGamepadChampionPointsIcon()
-                else
-                    iconPath = ZO_GetChampionPointsIconSmall()
-                end
-                levelText = tostring(GetUnitChampionPoints(unitFrame.unitTag))
-            else
-                if IsInGamepadPreferredMode() then
-                    iconPath = ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
-                else
-                    iconPath = ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
-                end
-                levelText = tostring(GetUnitLevel(unitFrame.unitTag))
-            end
-            if iconPath then
-                unitFrame.levelIcon:SetTexture(iconPath)
-            end
-            -- Prevent auto-resize and set color to white
-            unitFrame.levelIcon:SetResizeToFitFile(false)
-            unitFrame.levelIcon:SetColor(1, 1, 1, 1)
-            -- Set fixed size
-            unitFrame.levelIcon:SetWidth(18)
-            unitFrame.levelIcon:SetHeight(18)
-            unitFrame.level:SetText(levelText)
-        end
-        if unitFrame.unitTag == "player" then
-            unitFrame.levelIcon:SetHidden(not UnitFrames.SV.PlayerEnableYourname)
-            unitFrame.level:SetHidden(not UnitFrames.SV.PlayerEnableYourname)
-        else
-            unitFrame.levelIcon:SetHidden(not showLevel)
-            unitFrame.level:SetHidden(not showLevel)
-        end
-    end
-    local savedTitle
-    -- If unitFrame has unit title label control
-    if unitFrame.title ~= nil then
-        local title
-        local ava = ""
-        if unitFrame.isPlayer then
-            title = GetUnitTitle(unitFrame.unitTag)
-            ava = GetAvARankName(GetUnitGender(unitFrame.unitTag), unitFrame.avaRankValue)
-            if UnitFrames.SV.TargetEnableRank and not UnitFrames.SV.TargetEnableTitle then
-                title = (ava ~= "") and ava or ""
-            elseif UnitFrames.SV.TargetEnableTitle and not UnitFrames.SV.TargetEnableRank then
-                title = (title ~= "") and title or ""
-            elseif UnitFrames.SV.TargetEnableTitle and UnitFrames.SV.TargetEnableRank then
-                if UnitFrames.SV.TargetTitlePriority == "Title" then
-                    title = (title ~= "") and title or (ava ~= "") and ava or ""
-                else
-                    title = (ava ~= "") and ava or (title ~= "") and title or ""
-                end
-            end
-            title = title or ""
-        else
-            local unitCaption = GetUnitCaption(unitFrame.unitTag)
-            title = unitCaption and zo_strformat(SI_TOOLTIP_UNIT_CAPTION, unitCaption) or ""
-        end
-        local titletext = StringOnlyGSUB(title, "%^%a+", "")
-        unitFrame.title:SetText(titletext)
-        unitFrame.title:SetWidth(unitFrame.title:GetStringWidth(titletext))
-        if unitFrame.unitTag == "reticleover" then
-            unitFrame.title:SetHidden(not UnitFrames.SV.TargetEnableRank and not UnitFrames.SV.TargetEnableTitle)
-        end
-
-        if title == "" then
-            savedTitle = ""
-        end
-    end
-    -- If unitFrame has unit AVA rank control
-    if unitFrame.avaRank ~= nil then
-        if unitFrame.isPlayer then
-            unitFrame.avaRankIcon:SetTexture(GetAvARankIcon(unitFrame.avaRankValue))
-            local alliance = GetUnitAlliance(unitFrame.unitTag)
-            unitFrame.avaRankIcon:SetColor(GetAllianceColor(alliance):UnpackRGBA())
-
-            if unitFrame.unitTag == "reticleover" and UnitFrames.SV.TargetEnableRankIcon then
-                unitFrame.avaRank:SetText(tostring(unitFrame.avaRankValue))
-                if unitFrame.avaRankValue > 0 then
-                    unitFrame.avaRank:SetHidden(false)
-                    unitFrame.avaRankIcon:SetHidden(false)
-                else
-                    unitFrame.avaRank:SetHidden(true)
-                    unitFrame.avaRankIcon:SetHidden(true)
-                end
-            else
-                unitFrame.avaRank:SetHidden(true)
-                unitFrame.avaRankIcon:SetHidden(true)
-            end
-        else
-            unitFrame.avaRank:SetHidden(true)
-            unitFrame.avaRankIcon:SetHidden(true)
-        end
-    end
-    -- Reanchor buffs if title changes
-    if unitFrame.buffs and unitFrame.unitTag == "reticleover" then
-        if UnitFrames.SV.PlayerFrameOptions ~= 1 then
-            if (not UnitFrames.SV.TargetEnableRank and not UnitFrames.SV.TargetEnableTitle and not UnitFrames.SV.TargetEnableRankIcon) or (savedTitle == "" and not UnitFrames.SV.TargetEnableRankIcon and unitFrame.isPlayer) or (savedTitle == "" and not unitFrame.isPlayer) then
-                unitFrame.debuffs:ClearAnchors()
-                unitFrame.debuffs:SetAnchor(TOP, unitFrame.control, BOTTOM, 0, 5)
-            else
-                unitFrame.debuffs:ClearAnchors()
-                unitFrame.debuffs:SetAnchor(TOP, unitFrame.buffAnchor, BOTTOM, 0, 5)
-            end
-        else
-            if (not UnitFrames.SV.TargetEnableRank and not UnitFrames.SV.TargetEnableTitle and not UnitFrames.SV.TargetEnableRankIcon) or (savedTitle == "" and not UnitFrames.SV.TargetEnableRankIcon and unitFrame.isPlayer) or (savedTitle == "" and not unitFrame.isPlayer) then
-                unitFrame.buffs:ClearAnchors()
-                unitFrame.buffs:SetAnchor(TOP, unitFrame.control, BOTTOM, 0, 5)
-            else
-                unitFrame.buffs:ClearAnchors()
-                unitFrame.buffs:SetAnchor(TOP, unitFrame.buffAnchor, BOTTOM, 0, 5)
-            end
-        end
-    end
-    -- If unitFrame has dead/offline indicator, then query its state and act accordingly
-    if unitFrame.dead ~= nil then
-        if not IsUnitOnline(unitFrame.unitTag) then
-            UnitFrames.OnGroupMemberConnectedStatus(nil, unitFrame.unitTag, false)
-        elseif IsUnitDead(unitFrame.unitTag) then
-            UnitFrames.OnDeath(nil, unitFrame.unitTag, true)
-        else
-            UnitFrames.CustomFramesSetDeadLabel(unitFrame, nil)
-        end
-    end
-    -- Finally set transparency for group frames that has .control field
-    if unitFrame.unitTag and "group" == (zo_strsub(unitFrame.unitTag, 0, 5)) and unitFrame.control then
-        unitFrame.control:SetAlpha(IsUnitInGroupSupportRange(unitFrame.unitTag) and (UnitFrames.SV.GroupAlpha * 0.01) or (UnitFrames.SV.GroupAlpha * 0.01) / 2)
-    end
-end
-
--- Updates title for unit if changed, and also re-anchors buffs or toggles display on/off if the unitTag had no title selected previously
+-- Updates text labels, classIcon, etc (see _StaticControls/Generic.lua)
 -- Called from EVENT_TITLE_UPDATE & EVENT_RANK_POINT_UPDATE
 function UnitFrames.TitleUpdate(eventCode, unitTag)
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
@@ -2438,7 +1896,7 @@ function UnitFrames.OnLevelUpdate(eventCode, unitTag, level)
     UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
 
     -- For Custom Player Frame we have to setup experience bar
-    if unitTag == "player" and UnitFrames.CustomFrames["player"] and UnitFrames.CustomFrames["player"].Experience then
+    if unitTag == "player" and UnitFrames.CustomFrames["player"] and (UnitFrames.CustomFrames["player"].Experience or UnitFrames.CustomFrames["player"].ChampionXP) then
         UnitFrames.CustomFramesSetupAlternative()
     end
 end
@@ -2731,7 +2189,7 @@ function UnitFrames.OnTargetMarkerUpdate(eventId)
                     local nameText = GetUnitName(baseType)
                     local iconPath = ZO_GetPlatformTargetMarkerIcon(markerType)
                     if iconPath then
-                        nameText = FormatTextWithIcon(iconPath, nameText)
+                        nameText = UnitFrames.FormatTextWithIcon(iconPath, nameText)
                         baseFrame.name:SetText(nameText)
                     end
                 else
@@ -2772,7 +2230,7 @@ function UnitFrames.OnTargetMarkerUpdate(eventId)
                         local nameText = GetUnitName(unitTag)
                         local iconPath = ZO_GetPlatformTargetMarkerIcon(markerType)
                         if iconPath then
-                            nameText = FormatTextWithIcon(iconPath, nameText)
+                            nameText = UnitFrames.FormatTextWithIcon(iconPath, nameText)
                             unitFrame.name:SetText(nameText)
                         end
                     else
@@ -2810,6 +2268,18 @@ local function CustomFramesClearAltBarReferences(player)
     player[COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA] = nil
     player.ChampionXP = nil
     player.Experience = nil
+    UnitFrames.ClearPowerUpdateSnapshot("player", COMBAT_MECHANIC_FLAGS_WEREWOLF)
+    UnitFrames.ClearPowerUpdateSnapshot("player", COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA)
+    UnitFrames.ClearPowerUpdateSnapshot("controlledsiege", COMBAT_MECHANIC_FLAGS_HEALTH)
+end
+
+--- Clears power dedup state and forces alt bar min/max refresh after dynamic powerType binding.
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags
+local function CustomFramesApplyAltBarPowerUpdate(unitTag, powerType)
+    UnitFrames.ClearPowerUpdateSnapshot(unitTag, powerType)
+    local powerValue, powerMax, powerEffectiveMax = GetUnitPower(unitTag, powerType)
+    UnitFrames.UpdateCustomFramePower(unitTag, powerType, powerValue, powerMax, powerEffectiveMax, false, true)
 end
 
 local function CustomFramesSetupAltBarInteraction(alt, mouseEnterHandler, showEnlightenment)
@@ -2868,8 +2338,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         CustomFramesClearAltBarReferences(player)
         player[COMBAT_MECHANIC_FLAGS_WEREWOLF] = alt
 
-        local powerValue, powerMax, powerEffectiveMax = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_WEREWOLF)
-        UnitFrames.OnPowerUpdate("player", nil, COMBAT_MECHANIC_FLAGS_WEREWOLF, powerValue, powerMax, powerEffectiveMax)
+        CustomFramesApplyAltBarPowerUpdate("player", COMBAT_MECHANIC_FLAGS_WEREWOLF)
         CustomFramesSetupAltBarInteraction(alt, UnitFrames.AltBar_OnMouseEnterWerewolf, false)
     elseif UnitFrames.SV.PlayerEnableAltbarMSW and isSiege then
         mode = "siege"
@@ -2881,8 +2350,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         CustomFramesClearAltBarReferences(player)
         UnitFrames.CustomFrames["controlledsiege"][COMBAT_MECHANIC_FLAGS_HEALTH] = alt
 
-        local powerValue, powerMax, powerEffectiveMax = GetUnitPower("controlledsiege", COMBAT_MECHANIC_FLAGS_HEALTH)
-        UnitFrames.OnPowerUpdate("controlledsiege", nil, COMBAT_MECHANIC_FLAGS_HEALTH, powerValue, powerMax, powerEffectiveMax)
+        CustomFramesApplyAltBarPowerUpdate("controlledsiege", COMBAT_MECHANIC_FLAGS_HEALTH)
         CustomFramesSetupAltBarInteraction(alt, UnitFrames.AltBar_OnMouseEnterSiege, false)
     elseif UnitFrames.SV.PlayerEnableAltbarMSW and isMounted then
         mode = "mount"
@@ -2906,8 +2374,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         CustomFramesClearAltBarReferences(player)
         player[COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA] = alt
 
-        local powerValue, powerMax, powerEffectiveMax = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA)
-        UnitFrames.OnPowerUpdate("player", nil, COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA, powerValue, powerMax, powerEffectiveMax)
+        CustomFramesApplyAltBarPowerUpdate("player", COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA)
         CustomFramesSetupAltBarInteraction(alt, UnitFrames.AltBar_OnMouseEnterMounted, false)
     elseif UnitFrames.SV.PlayerEnableAltbarXP and (player.isLevelCap or player.isChampion) then
         mode = "championXP"
@@ -3152,17 +2619,7 @@ function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
 end
 
 local function CustomFramesHideDefaultGroupFrames(groupSize)
-    local shouldHide = false
-    if UnitFrames.SV.CustomFramesGroup and groupSize <= 4 then
-        shouldHide = true
-    elseif UnitFrames.SV.CustomFramesRaid then
-        if groupSize > 4 or (not UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["RaidGroup1"]) then
-            shouldHide = true
-        end
-    end
-    if shouldHide then
-        ZO_UnitFramesGroups:SetHidden(true)
-    end
+    UnitFrames.HideVanillaGroupAndRaidFramesForCustomFrames(groupSize)
 end
 
 -- Returns true for raid frames, false for small group frames, nil if neither available.

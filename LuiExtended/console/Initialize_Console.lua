@@ -86,6 +86,9 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
     LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
     -- -----------------------------------------------------------------------------
+    LUIE.ApplyZOBuffDebuffSuppression()
+    LUIE.RegisterZOBuffDebuffSuppressionSettingListener()
+    -- -----------------------------------------------------------------------------
     -- Load Timestamp Color
     LUIE.ChatOutput:UpdateTimeStampColor()
     -- -----------------------------------------------------------------------------
@@ -103,7 +106,11 @@ local function OnAddOnLoaded(eventId, addonName)
     -- Register global event listeners
     eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
     --
-    SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+    if LUIE.SlashCommandRegistry then
+        LUIE.SlashCommandRegistry.ApplyPostInitSlashCommandIntegration()
+    else
+        SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+    end
     --
     -- Event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
@@ -112,9 +119,8 @@ local function OnAddOnLoaded(eventId, addonName)
     end
     -- -----------------------------------------------------------------------------
     LUIE.ScheduleDebugEnvironmentReloadChat()
-    -- if LUIE_ScheduleLocalizationCoverageReport then
-    --     LUIE_ScheduleLocalizationCoverageReport()
-    -- end
+    -- Dev locale audit: enable lang/_LocalizationCoverage_Dev.lua in LuiExtended.addon, then:
+    -- if LUIE_ScheduleLocalizationCoverageReport then LUIE_ScheduleLocalizationCoverageReport() end
     eventManager:UnregisterForEvent(addonName, eventId)
 end
 
