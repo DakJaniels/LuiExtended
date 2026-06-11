@@ -26,7 +26,6 @@
 --- @field ChatOutputClass LUIE_ChatOutput
 LUIE = {}
 LUIE.__index = LUIE
-LUIE.__newindex = NewIndexHandler
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
 LUIE.version = "7.2.4.6"
