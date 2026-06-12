@@ -38,14 +38,6 @@ end
 --- @param initial boolean
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, eventId)
-    --
-    -- -----------------------------------------------------------------------------
-
-    if _G["Srendarr"] then
-        LUIE.InstallExternalSavedVarsLegacyCompat()
-    end
-    -- -----------------------------------------------------------------------------
-
     -- Set Positions for moved Default UI elements
     LUIE.SetElementPosition()
     if not LUIE.SV.StartupInfo then
@@ -57,7 +49,6 @@ end
 local function RegisterEvents()
     eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
     -- -----------------------------------------------------------------------------
-
     -- Event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)

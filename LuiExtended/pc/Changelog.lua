@@ -55,6 +55,7 @@ local changelogMessages =
     -- Changes
     "|cFFFF00Changes:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info: |cFFFFFFSynergy Tracker|r has been temporarily removed from the addon while it is reworked (settings and UI will return in a future update).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SavedVariables: Removed the `LUIESV.Default` metatable compat layer (`InstallExternalSavedVarsLegacyCompat`). Third-party addons (for example |cFFFFFFS'rendarr|r group aura anchoring) should read |cFFFFFFLUIE.SV|r and |cFFFFFFLUIE.UnitFrames.SV|r at runtime after LuiExtended loads, not raw `LUIESV` / split module globals.",
     "",
     -- Fix
     "|cFFFF00Fix:|r",
