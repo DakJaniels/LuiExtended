@@ -21,3 +21,6 @@ $RECYCLE.BIN/
 tools/*
 
 LuiDevTool
+
+.remarkignore
+LuiExtended2/*

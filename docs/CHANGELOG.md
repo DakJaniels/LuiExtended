@@ -5,6 +5,7 @@
 ### Changes
 
 - Combat Info: **Synergy Tracker** has been temporarily removed from the addon while it is reworked (settings and UI will return in a future update).
+- SavedVariables: Removed the `LUIESV.Default` metatable compat layer (`InstallExternalSavedVarsLegacyCompat`). Third-party addons (for example S'rendarr group aura anchoring) should read `LUIE.SV` and `LUIE.UnitFrames.SV` at runtime after LuiExtended loads, not raw `LUIESV` or split module globals.
 
 ### Fixed
 
