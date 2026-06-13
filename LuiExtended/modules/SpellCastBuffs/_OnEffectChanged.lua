@@ -150,7 +150,7 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
     end
 
     -- If this effect isn't a prominent buff or debuff and we have certain buffs set to hidden - then hide those.
-    if not (SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName] or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName]) then
+    if not (SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName]) then
         if SpellCastBuffs.SV.HidePlayerBuffs and effectType == BUFF_EFFECT_TYPE_BUFF and unitTag == "player" then
             return
         end

@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.7
+
+### Fixed
+
+- SpellCastBuffs: Off Balance is no longer auto-added to **Prominent Debuffs** on first load (existing saved entries are unchanged). Prominent debuff remove list and right-click menu now match prominent routing, including the canonical Off Balance name entry.
+
 ## Version 7.2.4.6
 
 ### Changes

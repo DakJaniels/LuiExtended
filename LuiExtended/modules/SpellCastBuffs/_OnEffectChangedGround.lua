@@ -93,7 +93,7 @@ function SpellCastBuffs.OnEffectChangedGround(eventId, changeType, effectSlot, e
                 if groundType[i].info == true then
                     -- Set container context
                     local context
-                    if SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName] then
+                    if SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) then
                         context = groundType[i].promD
                     elseif SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] then
                         context = groundType[i].promB
@@ -128,7 +128,7 @@ function SpellCastBuffs.OnEffectChangedGround(eventId, changeType, effectSlot, e
             if groundType[i].info == true then
                 -- Set container context
                 local context
-                if SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName] then
+                if SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) then
                     context = groundType[i].promD
                 elseif SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] then
                     context = groundType[i].promB

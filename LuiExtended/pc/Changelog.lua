@@ -49,6 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.4.7
+    "|cFFA500LuiExtended Version 7.2.4.7|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Off Balance is no longer auto-added to |cFFFFFFProminent Debuffs|r on first load (existing saved entries are unchanged). Prominent debuff remove list and right-click menu now match prominent routing, including the canonical Off Balance name entry.",
+    "",
     -- Version Header 7.2.4.6
     "|cFFA500LuiExtended Version 7.2.4.6|r",
     "",

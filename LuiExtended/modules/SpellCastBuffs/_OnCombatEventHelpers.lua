@@ -602,7 +602,7 @@ function SpellCastBuffs.HandleIncomingFakePlayerBuff(result, abilityId, sourceNa
     end
 
     local effectName = config.name or GetAbilityName(abilityId)
-    if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName] or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName]) then
+    if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName]) then
         return
     end
     if config.onlyExtra and not SpellCastBuffs.SV.ExtraBuffs then
@@ -762,7 +762,7 @@ local function resolveGroundMineEffectContext(compareId)
     if Effects.FakePlayerOfflineAura[compareId] and Effects.FakePlayerOfflineAura[compareId].ground then
         context = "ground"
     end
-    if SpellCastBuffs.SV.PromDebuffTable[compareId] then
+    if SpellCastBuffs.WantsProminentDebuff(compareId, nil) then
         context = "promd_player"
     elseif SpellCastBuffs.SV.PromBuffTable[compareId] then
         context = "promb_player"
@@ -802,7 +802,7 @@ local function resolveFakePlayerOfflineAuraContext(config, abilityId, effectName
     else
         context = "player1"
     end
-    if SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName] then
+    if SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) then
         context = "promd_player"
     elseif SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] then
         context = "promb_player"
@@ -827,7 +827,7 @@ function SpellCastBuffs.HandleOutgoingFakePlayerOfflineAura(result, abilityId, s
     end
 
     local effectName = config.name or GetAbilityName(abilityId)
-    if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName] or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] or config.ground) then
+    if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] or config.ground) then
         return
     end
 
