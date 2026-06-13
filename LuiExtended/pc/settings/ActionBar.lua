@@ -953,7 +953,10 @@ function ActionBar.CreateSettings()
                 name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_LABEL), 1),
                 tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_LABEL_TP),
                 getFunc = function () return Settings.CastBarLabel end,
-                setFunc = function (value) Settings.CastBarLabel = value end,
+                setFunc = function (value)
+                    Settings.CastBarLabel = value
+                    ActionBar.CastBar.RefreshCastBarLabelVisibility()
+                end,
                 width = "full",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
                 default = Defaults.CastBarLabel,
@@ -1071,6 +1074,19 @@ function ActionBar.CreateSettings()
                 width = "half",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
                 default = Defaults.CastBarGradientC2 and { r = Defaults.CastBarGradientC2[1], g = Defaults.CastBarGradientC2[2], b = Defaults.CastBarGradientC2[3], a = Defaults.CastBarGradientC2[4] } or nil,
+            },
+            {
+                type = "colorpicker",
+                name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_ICON_FRAME_COLOR), 1),
+                tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_ICON_FRAME_COLOR_TP),
+                getFunc = function () return unpack(Settings.CastBarIconFrameColor) end,
+                setFunc = function (r, g, b, a)
+                    Settings.CastBarIconFrameColor = { r, g, b, a }
+                    ActionBar.UpdateCastBar()
+                end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
+                default = Defaults.CastBarIconFrameColor and { r = Defaults.CastBarIconFrameColor[1], g = Defaults.CastBarIconFrameColor[2], b = Defaults.CastBarIconFrameColor[3], a = Defaults.CastBarIconFrameColor[4] } or nil,
             },
             {
                 type = "header",

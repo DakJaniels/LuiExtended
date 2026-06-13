@@ -492,6 +492,8 @@ function ActionBar.Initialize(enabled)
         ActionBar.SV.CastBarGradientC1, ActionBar.Defaults.CastBarGradientC1)
     ActionBar.SV.CastBarGradientC2 = BackfillCastBarGradientSavedColor(
         ActionBar.SV.CastBarGradientC2, ActionBar.Defaults.CastBarGradientC2)
+    ActionBar.SV.CastBarIconFrameColor = BackfillCastBarGradientSavedColor(
+        ActionBar.SV.CastBarIconFrameColor, ActionBar.Defaults.CastBarIconFrameColor)
 
     -- -----------------------------------------------------------------------------
     -- Disable module if setting not toggled on

@@ -1142,6 +1142,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarLabel end,
             setFunction = function (value)
                 Settings.CastBarLabel = value
+                ActionBar.CastBar.RefreshCastBarLabelVisibility()
                 if ActionBar.consoleSettingsPanel then
                     SettingsAPI:RefreshPanel(ActionBar.consoleSettingsPanel)
                 end
@@ -1290,6 +1291,20 @@ function ActionBar.CreateConsoleSettings()
                 ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarGradientC2,
+            disable = castBarOptionDisabled,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_ICON_FRAME_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_ICON_FRAME_COLOR_TP),
+            getFunction = function () return Settings.CastBarIconFrameColor[1], Settings.CastBarIconFrameColor[2], Settings.CastBarIconFrameColor[3], Settings.CastBarIconFrameColor[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.CastBarIconFrameColor = { r, g, b, a }
+                ActionBar.UpdateCastBar()
+            end,
+            default = Defaults.CastBarIconFrameColor,
             disable = castBarOptionDisabled,
         }
 

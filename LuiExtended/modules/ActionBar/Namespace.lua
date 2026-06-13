@@ -242,6 +242,7 @@ ActionBar.Backbar =
 --- @field CastBarFontSize integer
 --- @field CastBarGradientC1 AB_Color
 --- @field CastBarGradientC2 AB_Color
+--- @field CastBarIconFrameColor AB_Color
 --- @field CastBarHeavy boolean
 --- @field CastBarTimerFormat integer
 --- @field CastBarWeaveHelper boolean
@@ -318,6 +319,7 @@ ActionBar.Defaults =
     CastBarFontSize = 16,
     CastBarGradientC1 = { 0, 47 / 255, 130 / 255, 1 },
     CastBarGradientC2 = { 82 / 255, 215 / 255, 1, 1 },
+    CastBarIconFrameColor = { 0, 0, 0, 1 },
     CastBarHeavy = false,
     CastBarTimerFormat = 1,
     CastBarWeaveHelper = false,
