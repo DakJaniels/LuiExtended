@@ -360,6 +360,7 @@
 --- @field CurrencyDisplayNameStringIds table<string, integer|string>
 --- @field ModuleMessageFormatStringIds table<string, table<string, integer|string>>
 --- @field ModuleMessageFormatLegacySiStringIds table<string, table<string, integer>>
+--- @field ContextMessageLegacyFormatByStringId table<integer|string, string[]>
 --- @field QUEST_COUNTER_FILTER_MODE_MILESTONES string
 --- @field QUEST_COUNTER_FILTER_MODE_SUPPRESS_ALL string
 --- @field QUEST_COUNTER_FILTER_MODE_COMPLETE_ONLY string

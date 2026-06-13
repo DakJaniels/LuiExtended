@@ -23,6 +23,7 @@ LUIE.ChatAnnouncements = ChatAnnouncements
 --- @field logPrefix? string
 --- @field totalString? string
 --- @field groupLoot? boolean
+--- @field guildAnnounceGuildId? integer Guild id for guild-bank LOOT/CONTAINER context (see ResolveItemMessage)
 --- @field timedActivityAnnounceKey? string Dedupe key from GetTimedActivityProgressAnnounceKey (MESSAGE rows only)
 
 -- Queued Messages Storage for CA Modules
