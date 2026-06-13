@@ -3862,6 +3862,9 @@ local effectOverride =
     [62522] = { hide = true },                                                                    -- Blade Cloak (player buff id; track 247975)
 
     -- Hidden Blade / Shrouded Daggers / Flying Blade
+    [68807] = { hide = true },   -- Major Brutality combat (Hidden Blade)
+    [168270] = { hide = true },  -- Major Sorcery combat (Hidden Blade line)
+    [126647] = { hide = true },  -- Major Brutality combat (Shrouded Daggers)
     [126641] = { icon = "" },                                                                                                                          -- Hidden Blade (Hidden Blade)
     [126640] = { icon = "/esoui/art/icons/ability_dualwield_003.dds", name = Abilities.Skill_Hidden_Blade, tooltip = Tooltips.Generic_Stagger },       -- Stagger (Hidden Blade)
     [126639] = { tooltip = Tooltips.Generic_Stun },                                                                                                    -- Hidden Blade (Hidden Blade)

@@ -52,6 +52,7 @@ Effects/BarHighlight/BarHighlightCheckOnFade.lua
 Effects/BarHighlight/BarHighlightCruxMap.lua
 Effects/BarHighlight/BarHighlightDestroFix.lua
 Effects/BarHighlight/BarHighlightExtraId.lua
+Effects/BarHighlight/BarHighlightSlottedMajorCap.lua
 Effects/BarHighlight/BarHighlightOverride.lua
 Effects/BarHighlight/BarHighlightStack.lua
 Effects/BarHighlight/BarHighlightStackFromCast.lua
