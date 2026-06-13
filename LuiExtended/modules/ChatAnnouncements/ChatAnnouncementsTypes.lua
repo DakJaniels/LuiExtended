@@ -422,6 +422,8 @@
 --- @field GetContextMessagePrefix fun(): string
 --- @field GetCurrencyDisplayNameFormat fun(currencyNameKey: string): string
 --- @field GetCurrencyMessageFormat fun(currencyMessageKey: string): string
+--- @field GetLootItemTypeDisplayText fun(itemLink: string): string
+--- @field FormatLootItemTypeSlotLine fun(text1: string|nil, text2: string|nil, text3: string|nil): string
 --- @field GetFormattedCollectionStatusIcon fun(itemLink: string): string
 --- @field GetFormattedIcon fun(icon: string): string
 --- @field GetItemLinkFromItemId fun(itemId: integer): string
@@ -512,6 +514,9 @@
 --- @field OnGuildMailUpdate fun()
 --- @field OnInventoryItemUsed fun(eventId: integer, itemSoundCategory: integer)
 --- @field OnLootReceived fun(eventId: integer, receivedBy: string, itemLink: string, quantity: integer, itemSound: integer, lootType: integer, lootedBySelf: boolean, isPickpocketLoot: boolean, questItemIcon: string, itemId: integer, isStolen: boolean)
+--- @field OnJusticeGoldPickpocketed fun(eventId: integer, goldAmount: integer)
+--- @field MarkPickpocketLootContext fun()
+--- @field ResolveLootLogPrefix fun(logPrefix: string): string
 --- @field OnLootUpdated fun(eventId: integer)
 --- @field OnMailAttach fun(eventId: integer, attachmentSlot: integer)
 --- @field OnMailAttachRemove fun(eventId: integer, attachmentSlot: integer)

@@ -1839,6 +1839,23 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWITEMTYPE),
+            tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWITEMTYPE_TP),
+            getFunction = function ()
+                return Settings.Inventory.LootShowItemType
+            end,
+            setFunction = function (value)
+                Settings.Inventory.LootShowItemType = value
+            end,
+            default = Defaults.Inventory.LootShowItemType,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_CA_LOOT_TOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_TOTAL_TP),
             getFunction = function ()

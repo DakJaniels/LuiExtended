@@ -1888,6 +1888,23 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.Inventory.LootShowTrait,
             },
             {
+                -- Show Item Type
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWITEMTYPE),
+                tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWITEMTYPE_TP),
+                getFunc = function ()
+                    return Settings.Inventory.LootShowItemType
+                end,
+                setFunc = function (value)
+                    Settings.Inventory.LootShowItemType = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Inventory.LootShowItemType,
+            },
+            {
                 -- Show loot total
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_CA_LOOT_TOTAL),

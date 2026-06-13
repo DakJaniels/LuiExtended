@@ -526,6 +526,7 @@ ChatAnnouncements.Brackets =
 --- @field LootShowArmorType boolean
 --- @field LootShowStyle boolean
 --- @field LootShowTrait boolean
+--- @field LootShowItemType boolean
 --- @field LootConfiscate boolean
 --- @field LootTrade boolean
 --- @field LootVendor boolean
@@ -1163,6 +1164,7 @@ ChatAnnouncements.Defaults =
         LootShowArmorType = false,
         LootShowStyle = false,
         LootShowTrait = false,
+        LootShowItemType = false,
         LootConfiscate = true,
         LootTrade = true,
         LootVendor = true,
