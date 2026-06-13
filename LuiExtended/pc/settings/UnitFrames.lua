@@ -336,6 +336,78 @@ function UnitFrames.CreateSettings()
                 default = UnitFrames.GetDefaultFramesSetting("Boss", true),
             },
             {
+                type = "description",
+                text = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_DESC),
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_PLAYER),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_PLAYER_TP),
+                getFunc = function ()
+                    return Settings.SuppressZOPlayerAttributeBarsWhenReplaced
+                end,
+                setFunc = function (value)
+                    Settings.SuppressZOPlayerAttributeBarsWhenReplaced = value
+                end,
+                width = "full",
+                default = Defaults.SuppressZOPlayerAttributeBarsWhenReplaced,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.DefaultFramesNewPlayer == 1)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_TARGET),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_TARGET_TP),
+                getFunc = function ()
+                    return Settings.SuppressZOTargetFrameWhenReplaced
+                end,
+                setFunc = function (value)
+                    Settings.SuppressZOTargetFrameWhenReplaced = value
+                end,
+                width = "full",
+                default = Defaults.SuppressZOTargetFrameWhenReplaced,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget and Settings.DefaultFramesNewTarget == 1)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_GROUP),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_GROUP_TP),
+                getFunc = function ()
+                    return Settings.SuppressZOGroupFramesWhenReplaced
+                end,
+                setFunc = function (value)
+                    Settings.SuppressZOGroupFramesWhenReplaced = value
+                end,
+                width = "full",
+                default = Defaults.SuppressZOGroupFramesWhenReplaced,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.DefaultFramesNewGroup == 1 and (Settings.CustomFramesGroup or Settings.CustomFramesRaid))
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_COMPANION),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_COMPANION_TP),
+                getFunc = function ()
+                    return Settings.SuppressZOCompanionFrameWhenReplaced
+                end,
+                setFunc = function (value)
+                    Settings.SuppressZOCompanionFrameWhenReplaced = value
+                end,
+                width = "full",
+                default = Defaults.SuppressZOCompanionFrameWhenReplaced,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
+            {
                 -- Reposition default player bars
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_DFRAMES_REPOSIT),

@@ -25,6 +25,9 @@ local PLAYER_ATTRIBUTE_BAR_SUFFIXES =
 }
 
 function UnitFrames.ShouldSuppressZOPlayerAttributeBars()
+    if not UnitFrames.SV.SuppressZOPlayerAttributeBarsWhenReplaced then
+        return false
+    end
     if UnitFrames.SV.DefaultFramesNewPlayer ~= 1 then
         return false
     end
@@ -32,6 +35,9 @@ function UnitFrames.ShouldSuppressZOPlayerAttributeBars()
 end
 
 function UnitFrames.ShouldSuppressZOTarget()
+    if not UnitFrames.SV.SuppressZOTargetFrameWhenReplaced then
+        return false
+    end
     if UnitFrames.SV.DefaultFramesNewTarget ~= 1 then
         return false
     end
@@ -39,6 +45,9 @@ function UnitFrames.ShouldSuppressZOTarget()
 end
 
 function UnitFrames.ShouldSuppressZOGroup()
+    if not UnitFrames.SV.SuppressZOGroupFramesWhenReplaced then
+        return false
+    end
     if UnitFrames.SV.DefaultFramesNewGroup ~= 1 then
         return false
     end
@@ -48,6 +57,9 @@ function UnitFrames.ShouldSuppressZOGroup()
 end
 
 function UnitFrames.ShouldSuppressZOCompanion()
+    if not UnitFrames.SV.SuppressZOCompanionFrameWhenReplaced then
+        return false
+    end
     if not UnitFrames.SV.CustomFramesCompanion then
         return false
     end
@@ -133,22 +145,19 @@ end
 --- @param groupSize integer?
 function UnitFrames.HideVanillaGroupAndRaidFramesForCustomFrames(groupSize)
     groupSize = groupSize or GetGroupSize()
-    local shouldHide = false
+    local layoutUsesCustomGroupFrames = false
     if UnitFrames.SV.CustomFramesGroup and groupSize <= 4 then
-        shouldHide = true
+        layoutUsesCustomGroupFrames = true
     elseif UnitFrames.SV.CustomFramesRaid then
         if groupSize > 4 or (not UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["RaidGroup1"]) then
-            shouldHide = true
+            layoutUsesCustomGroupFrames = true
         end
     end
-    if not shouldHide then
+    if not layoutUsesCustomGroupFrames or not UnitFrames.ShouldSuppressZOGroup() then
         return
     end
     if ZO_UnitFramesGroups then
         ZO_UnitFramesGroups:SetHidden(true)
-    end
-    if not UnitFrames.ShouldSuppressZOGroup() then
-        return
     end
     local hiddenReason = UnitFrames.ZO_FRAME_SUPPRESSION_HIDDEN_REASON
     if UNIT_FRAMES then

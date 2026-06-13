@@ -194,8 +194,7 @@ function UnitFrames.CreateDefaultFrames()
     -- Apply fonts
     UnitFrames.DefaultFramesApplyFont()
 
-    -- Disable vanilla player attribute bars (legacy: whenever DefaultFramesNewPlayer is Disable)
-    if UnitFrames.SV.DefaultFramesNewPlayer == 1 then
+    if UnitFrames.ShouldSuppressZOPlayerAttributeBars() then
         UnitFrames.SuppressZOPlayerAttributeBars()
     end
 end
