@@ -4268,7 +4268,7 @@ local effectOverride =
     [111788] = { hide = true },                                                                                                                               -- Major Cowardice internal (Deafening Roar; display 147643)
     [171003] = { hide = true },                                                                                                                               -- Deafening Roar target fear marker
 
-    [267744] = { icon = "/esoui/art/icons/ability_werewolf_003.dds", tooltip = Tooltips.Skill_Blood_Hunger, displayStacks = true, maxStacks = 3, stack = 1 }, -- Blood Hunger (Roar - All Morphs)
+    [267744] = { icon = "/esoui/art/icons/ability_werewolf_003.dds", tooltip = Tooltips.Skill_Blood_Hunger, displayStacks = true, maxStacks = 4, stack = 1 }, -- Blood Hunger (Roar - All Morphs)
 
     [266875] = { hide = true },                                                                                                                               -- Fury (Werewolf resource counter)
     [266744] = { hide = true },                                                                                                                               -- Fury per-target generation throttle (ON CD marker)
