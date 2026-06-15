@@ -252,6 +252,7 @@ modules/UnitFrames/_PlayerDodgePrediction.lua
 modules/UnitFrames/_CompanionAbilityTrack.lua
 modules/UnitFrames/_CompanionRapportFlourish.lua
 modules/UnitFrames/_StaticControls/Shared.lua
+modules/UnitFrames/_StaticControls/TopInfoLayout.lua
 modules/UnitFrames/_StaticControls/Player.lua
 modules/UnitFrames/_StaticControls/Target.lua
 modules/UnitFrames/_StaticControls/Group.lua

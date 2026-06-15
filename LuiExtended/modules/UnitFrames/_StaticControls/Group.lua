@@ -8,9 +8,10 @@ local FrameObject = LUIE_CustomFrameObject
 function FrameObject:UpdateGroupFrameStaticControls()
     FrameObject.UpdateStaticControlRoleIcon(self)
     FrameObject.UpdateStaticControlClassIcon(self)
-    if self.name ~= nil then
-        FrameObject.UpdateStaticControlNameLabel(self, "group")
-    end
+    self.friendIcon:SetHidden(true)
+    FrameObject.UpdateTopInfoOverlandIcon(self)
+    FrameObject.UpdateStaticControlNameLabel(self, "group")
     FrameObject.UpdateStaticControlLevelRow(self)
+    FrameObject.LayoutTopInfoSmallGroup(self)
     FrameObject.UpdateStaticControlDeadAndGroupAlpha(self)
 end

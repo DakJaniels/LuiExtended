@@ -189,9 +189,27 @@
                       relativeTo="$(parent)"
                       relativePoint="BOTTOMLEFT" />
             </Label>
+            <Texture name="$(parent)_OverlandDifficultyIcon"
+                     textureFile=""
+                     hidden="true">
+              <Dimensions x="18"
+                          y="18" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT" />
+            </Texture>
             <Texture name="$(parent)_LevelIcon"
                      textureFile=""
-                     hidden="false">
+                     hidden="true">
+              <Dimensions x="20"
+                          y="20" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT" />
+            </Texture>
+            <Texture name="$(parent)_VeterancyRankIcon"
+                     textureFile=""
+                     hidden="true">
               <Dimensions x="20"
                           y="20" />
               <Anchor point="LEFT"
@@ -203,7 +221,8 @@
                    font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="LEFT"
-                   verticalAlignment="CENTER"
+                   verticalAlignment="TOP"
+                   maxLineCount="1"
                    hidden="false">
               <Anchor point="LEFT"
                       relativeTo="$(parent)_LevelIcon"
@@ -224,7 +243,7 @@
             </Texture>
             <Texture name="$(parent)_FriendIcon"
                      textureFile=""
-                     hidden="false">
+                     hidden="true">
               <Dimensions x="22"
                           y="22" />
               <Anchor point="RIGHT"

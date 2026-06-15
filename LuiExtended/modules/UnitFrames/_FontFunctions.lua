@@ -31,6 +31,12 @@ local function categoryUsesSeparateCaptionFont(category)
     return separateCaptionFontCategories[category] == true
 end
 
+--- @param unitFrame table|nil
+--- @return boolean
+local function IsSmallGroupCustomUnitFrame(unitFrame)
+    return unitFrame ~= nil and unitFrame.frameCategory == "smallGroup"
+end
+
 local function __applyFont(unitTag)
     -- First try selecting font face
     local fontName = UnitFrames.ResolveLuiMediaFontPath(UnitFrames.SV.DefaultFontFace)
@@ -140,16 +146,22 @@ local function ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
     unitFrame.name:SetHeight(2 * sizeCaption)
     local nameHeight = unitFrame.name:GetTextHeight()
     unitFrame.topInfo:SetHeight(nameHeight)
-    if unitFrame.levelIcon then
+    local FrameObject = LUIE_CustomFrameObject
+    local usesTopInfoLayout = FrameObject and FrameObject.HasCustomTopInfoFrameCategory(unitFrame)
+    if unitFrame.levelIcon and not usesTopInfoLayout then
         unitFrame.levelIcon:SetDimensions(nameHeight, nameHeight)
         unitFrame.levelIcon:ClearAnchors()
         unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
     end
     unitFrame.classIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
     if unitFrame.friendIcon then
-        unitFrame.friendIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
-        unitFrame.friendIcon:ClearAnchors()
-        unitFrame.friendIcon:SetAnchor(RIGHT, unitFrame.classIcon, LEFT, nameHeight / 6, 0)
+        if IsSmallGroupCustomUnitFrame(unitFrame) then
+            unitFrame.friendIcon:SetHidden(true)
+        elseif unitFrame.frameCategory ~= "target" then
+            unitFrame.friendIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
+            unitFrame.friendIcon:ClearAnchors()
+            unitFrame.friendIcon:SetAnchor(RIGHT, unitFrame.classIcon, LEFT, nameHeight / 6, 0)
+        end
     end
     if unitFrame.botInfo then
         unitFrame.botInfo:SetHeight(nameHeight)
@@ -163,6 +175,9 @@ local function ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
     end
     if unitFrame.buffAnchor then
         unitFrame.buffAnchor:SetHeight(nameHeight)
+    end
+    if usesTopInfoLayout then
+        FrameObject.LayoutTopInfoForFrame(unitFrame)
     end
 end
 

@@ -26,17 +26,26 @@ end
 
 function FrameObject:UpdateStaticControls()
     FrameObject.ApplyStaticControlUnitFields(self)
-    local category = FrameObject.GetStaticControlDisplayCategory(self)
-    if category == "player" then
-        FrameObject.UpdatePlayerFrameStaticControls(self)
-    elseif category == "target" then
-        FrameObject.UpdateTargetFrameStaticControls(self)
-    elseif category == "group" then
+    local frameCategory = self.frameCategory
+    if frameCategory == "smallGroup" then
         FrameObject.UpdateGroupFrameStaticControls(self)
-    elseif category == "raid" then
+    elseif frameCategory == "player" then
+        FrameObject.UpdatePlayerFrameStaticControls(self)
+    elseif frameCategory == "target" or frameCategory == "avaTarget" then
+        FrameObject.UpdateTargetFrameStaticControls(self)
+    elseif frameCategory == "raid" then
         FrameObject.UpdateRaidFrameStaticControls(self)
     else
-        FrameObject.UpdateGenericFrameStaticControls(self)
+        local category = FrameObject.GetStaticControlDisplayCategory(self)
+        if category == "target" and self.unitTag == "reticleover" then
+            FrameObject.UpdateDefaultReticleoverStaticControls(self)
+        elseif category == "group" then
+            FrameObject.UpdateGroupFrameStaticControls(self)
+        elseif category == "raid" then
+            FrameObject.UpdateRaidFrameStaticControls(self)
+        else
+            FrameObject.UpdateGenericFrameStaticControls(self)
+        end
     end
 end
 

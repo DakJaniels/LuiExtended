@@ -3306,16 +3306,21 @@ local function CustomFramesLayoutSetupPlayerCommon(player, buffsWidth)
     player.topInfo:SetWidth(UnitFrames.SV.PlayerBarWidth)
     player.botInfo:SetWidth(UnitFrames.SV.PlayerBarWidth)
     player.buffAnchor:SetWidth(UnitFrames.SV.PlayerBarWidth)
-    player.name:SetWidth(UnitFrames.SV.PlayerBarWidth - 90)
     player.buffs:SetWidth(buffsWidth or UnitFrames.SV.PlayerBarWidth)
     player.debuffs:SetWidth(buffsWidth or UnitFrames.SV.PlayerBarWidth)
-    player.levelIcon:ClearAnchors()
-    player.levelIcon:SetAnchor(LEFT, player.topInfo, LEFT, player.name:GetTextWidth() + 1, 0)
     local showName = UnitFrames.SV.PlayerEnableYourname
     player.name:SetHidden(not showName)
     player.level:SetHidden(not showName)
-    player.levelIcon:SetHidden(not showName)
+    if player.levelIcon then
+        player.levelIcon:SetHidden(not showName)
+    end
+    if player.veterancyRankIcon then
+        player.veterancyRankIcon:SetHidden(not showName)
+    end
     player.classIcon:SetHidden(not showName)
+    if player.frameCategory == "player" then
+        LUIE_CustomFrameObject.LayoutTopInfoPlayer(player)
+    end
 end
 
 local function CustomFramesLayoutSetupShieldBackdrop(shieldbackdrop, healthBackdrop, width, anchorPoint)
@@ -3488,7 +3493,6 @@ function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
     target.topInfo:SetWidth(UnitFrames.SV.TargetBarWidth)
     target.botInfo:SetWidth(UnitFrames.SV.TargetBarWidth)
     target.buffAnchor:SetWidth(UnitFrames.SV.TargetBarWidth)
-    target.name:SetWidth(UnitFrames.SV.TargetBarWidth - 50)
     target.title:SetWidth(UnitFrames.SV.TargetBarWidth - 50)
 
     local buffsWidth = UnitFrames.SV.PlayerFrameOptions == 1 and UnitFrames.SV.TargetBarWidth or 1000
@@ -3508,8 +3512,11 @@ function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
         target.debuffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
     end
 
-    target.levelIcon:ClearAnchors()
-    target.levelIcon:SetAnchor(LEFT, target.topInfo, LEFT, target.name:GetTextWidth() + 1, 0)
+    if target.frameCategory == "avaTarget" then
+        LUIE_CustomFrameObject.LayoutTopInfoAvaTarget(target)
+    elseif target.frameCategory == "target" then
+        LUIE_CustomFrameObject.LayoutTopInfoTarget(target)
+    end
     target.skull:SetDimensions(2 * UnitFrames.SV.TargetBarHeight, 2 * UnitFrames.SV.TargetBarHeight)
 
     thb.backdrop:SetDimensions(UnitFrames.SV.TargetBarWidth, UnitFrames.SV.TargetBarHeight)
@@ -3541,7 +3548,10 @@ function UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
     target.topInfo:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
     target.botInfo:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
     target.buffAnchor:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
-    target.name:SetWidth(UnitFrames.SV.AvaTargetBarWidth - 50)
+
+    if target.frameCategory == "avaTarget" then
+        LUIE_CustomFrameObject.LayoutTopInfoAvaTarget(target)
+    end
 
     thb.backdrop:SetDimensions(UnitFrames.SV.AvaTargetBarWidth, UnitFrames.SV.AvaTargetBarHeight)
     CustomFramesLayoutSetupShieldBackdrop(thb.shieldbackdrop, thb.backdrop, UnitFrames.SV.AvaTargetBarWidth)
@@ -3751,22 +3761,14 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
             unitFrame.control:SetDimensions(UnitFrames.SV.GroupBarWidth, totalFrameHeight)
             unitFrame.topInfo:SetWidth(UnitFrames.SV.GroupBarWidth - 5)
 
-            -- Setup leader icon and name positioning
-            unitFrame.levelIcon:ClearAnchors()
             local isLeader = IsUnitGroupLeader(unitTag)
-
             if isLeader then
-                unitFrame.name:SetWidth(UnitFrames.SV.GroupBarWidth - 137)
-                unitFrame.name:ClearAnchors()
-                unitFrame.name:SetAnchor(LEFT, unitFrame.topInfo, LEFT, 22, -8)
-                unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 23, 0)
                 unitFrame.leader:SetTexture(leaderIcons[1])
             else
-                unitFrame.name:SetWidth(UnitFrames.SV.GroupBarWidth - 115)
-                unitFrame.name:ClearAnchors()
-                unitFrame.name:SetAnchor(LEFT, unitFrame.topInfo, LEFT, 0, -8)
-                unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
                 unitFrame.leader:SetTexture(leaderIcons[0])
+            end
+            if unitFrame.frameCategory == "smallGroup" then
+                LUIE_CustomFrameObject.LayoutTopInfoSmallGroup(unitFrame)
             end
 
             -- Health bar dimensions

@@ -71,6 +71,8 @@ function LUIE.CustomFramesBuildPlayer()
             ["topInfo"] = topInfo,
             ["name"] = topInfo:GetNamedChild("_Name"),
             ["levelIcon"] = pli,
+            ["veterancyRankIcon"] = topInfo:GetNamedChild("_VeterancyRankIcon"),
+            ["overlandDifficultyIcon"] = topInfo:GetNamedChild("_OverlandDifficultyIcon"),
             ["level"] = topInfo:GetNamedChild("_Level"),
             ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
             ["botInfo"] = botInfo,

@@ -143,7 +143,14 @@ local function IsOverlandDifficultyEnabledForCategory(frameCategory)
     return false
 end
 
-local function GetChallengeDifficultyIconPath(difficulty)
+--- @param self LUIE_CustomFrameObject
+--- @return boolean
+function FrameObject.IsOverlandDifficultyEnabledOnFrame(self)
+    local frameCategory = FrameObject.GetStaticControlDisplayCategory(self)
+    return IsOverlandDifficultyEnabledForCategory(frameCategory)
+end
+
+function FrameObject.GetOverlandChallengeDifficultyIconPath(difficulty)
     if difficulty ~= nil then
         local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty]
         if iconPath then
@@ -151,6 +158,14 @@ local function GetChallengeDifficultyIconPath(difficulty)
         end
     end
     return ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[OVERLAND_DIFFICULTY_TYPE_BASEGAME]
+end
+
+--- LUIE custom frames with dedicated TopInfo level row controls.
+--- @param self LUIE_CustomFrameObject
+--- @return boolean
+function FrameObject.HasCustomTopInfoFrameCategory(self)
+    local frameCategory = self.frameCategory
+    return frameCategory == "player" or frameCategory == "target" or frameCategory == "smallGroup" or frameCategory == "avaTarget"
 end
 
 local function IsOverlandDifficultyPlayerUnit(unitTag)
@@ -163,30 +178,63 @@ local function IsOverlandDifficultyPlayerUnit(unitTag)
     return GetUnitReaction(unitTag) == UNIT_REACTION_PLAYER_ALLY
 end
 
+--- @param unitTag string|nil
+--- @param frameCategory "player"|"target"|"group"|"raid"|nil
+--- @return number|nil
+function FrameObject.ResolveOverlandDifficultyForUnitTag(unitTag, frameCategory)
+    if not IsOverlandDifficultyEnabledForCategory(frameCategory) or unitTag == nil then
+        return nil
+    end
+    if frameCategory == "target" and UnitFrames.SV.TargetMonsterOverlandDifficulty then
+        if not IsUnitMonster(unitTag) or not IsUnitAttackable(unitTag) then
+            return nil
+        end
+        return GetOverlandDifficulty()
+    elseif IsOverlandDifficultyPlayerUnit(unitTag) then
+        return GetUnitOverlandDifficulty(unitTag)
+    elseif frameCategory == "target" then
+        if not IsUnitMonster(unitTag) or not IsUnitAttackable(unitTag) then
+            return nil
+        end
+        return GetOverlandDifficulty()
+    elseif frameCategory == "group" or frameCategory == "player" then
+        if IsOverlandDifficultyPlayerUnit(unitTag) then
+            return GetUnitOverlandDifficulty(unitTag)
+        end
+    end
+    return nil
+end
+
+--- @param self LUIE_CustomFrameObject
+--- @return number|nil
+function FrameObject.ResolveTopInfoOverlandDifficulty(self)
+    local overlandUnitTag = FrameObject.ResolveOverlandGameUnitTag(self)
+    if overlandUnitTag == nil then
+        return nil
+    end
+    local frameCategory = FrameObject.GetStaticControlDisplayCategory(self)
+    return FrameObject.ResolveOverlandDifficultyForUnitTag(overlandUnitTag, frameCategory)
+end
+
+--- @param self LUIE_CustomFrameObject
+--- @return boolean
+function FrameObject.ShouldShowTopInfoOverlandIcon(self)
+    return FrameObject.ResolveTopInfoOverlandDifficulty(self) ~= nil
+end
+
 --- @param unitTag string
 --- @param nameText string
 --- @param frameCategory UnitFrames.StaticControlDisplayCategory|string|nil
 --- @return string
 function UnitFrames.ApplyOverlandDifficultyNameIcon(unitTag, nameText, frameCategory)
-    if not IsOverlandDifficultyEnabledForCategory(frameCategory) or nameText == nil or nameText == "" or unitTag == nil then
+    if nameText == nil or nameText == "" or unitTag == nil then
         return nameText
     end
-    local difficulty
-    local isPlayerUnit = IsOverlandDifficultyPlayerUnit(unitTag)
-    if isPlayerUnit then
-        difficulty = GetUnitOverlandDifficulty(unitTag)
-    elseif frameCategory == "target" then
-        difficulty = GetOverlandDifficulty()
-        if UnitFrames.SV.TargetMonsterOverlandDifficulty and not IsUnitMonster(unitTag) then
-            return nameText
-        end
-        if not IsUnitMonster(unitTag) or not IsUnitAttackable(unitTag) then
-            return nameText
-        end
-    else
+    local difficulty = FrameObject.ResolveOverlandDifficultyForUnitTag(unitTag, frameCategory)
+    if difficulty == nil then
         return nameText
     end
-    local iconPath = GetChallengeDifficultyIconPath(difficulty)
+    local iconPath = FrameObject.GetOverlandChallengeDifficultyIconPath(difficulty)
     if iconPath then
         return UnitFrames.FormatNameWithOverlandDifficultyIcon(iconPath, nameText, frameCategory)
     end
@@ -194,10 +242,7 @@ function UnitFrames.ApplyOverlandDifficultyNameIcon(unitTag, nameText, frameCate
 end
 
 function FrameObject:ShouldShowVeterancyRankOnFrame()
-    if not self.isPlayer or GetUnitVeterancyRank == nil or IsVeterancySeasonActive == nil or IsInVeterancyProgressionZone == nil then
-        return false
-    end
-    if not IsVeterancySeasonActive() or not IsInVeterancyProgressionZone() then
+    if not self.isPlayer or not IsVeterancySeasonActive() or not IsInVeterancyProgressionZone() then
         return false
     end
     local frameCategory = FrameObject.GetStaticControlDisplayCategory(self)
@@ -306,6 +351,10 @@ end
 --- @return string
 function FrameObject:ApplyStaticControlOverlandToName(nameText, frameCategory)
     if not frameCategory then
+        return nameText
+    end
+    -- Custom player/target/group/AvA frames use _OverlandDifficultyIcon in TopInfo, not name markup.
+    if FrameObject.HasCustomTopInfoFrameCategory(self) then
         return nameText
     end
     local applyOverlandToThisName = true
@@ -436,6 +485,9 @@ function FrameObject:UpdateStaticControlReticleNameWidth()
     if self.name == nil or self.topInfo == nil then
         return
     end
+    if FrameObject.HasCustomTopInfoFrameCategory(self) then
+        return
+    end
     if self.name:GetParent() == self.topInfo and self.unitTag == "reticleover" then
         local width = self.topInfo:GetWidth()
         if self.classIcon then
@@ -455,6 +507,10 @@ end
 
 function FrameObject:UpdateStaticControlLevelRow()
     if self.level == nil then
+        return
+    end
+    if FrameObject.HasCustomTopInfoFrameCategory(self) then
+        FrameObject.UpdateTopInfoLevelRow(self)
         return
     end
     local shouldShowVeterancyInfo = FrameObject.ShouldShowVeterancyRankOnFrame(self)

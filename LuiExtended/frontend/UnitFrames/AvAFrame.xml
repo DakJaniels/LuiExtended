@@ -201,6 +201,47 @@
                           relativeTo="$(parent)"
                           relativePoint="LEFT" />
                 </Texture>
+                <Texture name="$(parent)_OverlandDifficultyIcon"
+                         textureFile=""
+                         hidden="true">
+                  <Dimensions x="18"
+                              y="18" />
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_ClassIcon"
+                          relativePoint="RIGHT"
+                          offsetX="2" />
+                </Texture>
+                <Texture name="$(parent)_LevelIcon"
+                         textureFile=""
+                         hidden="true">
+                  <Dimensions x="20"
+                              y="20" />
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT" />
+                </Texture>
+                <Texture name="$(parent)_VeterancyRankIcon"
+                         textureFile=""
+                         hidden="true">
+                  <Dimensions x="20"
+                              y="20" />
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT" />
+                </Texture>
+                <Label name="$(parent)_Level"
+                       text="level"
+                       font="ZoFontGameSmall"
+                       color="FFFFFF"
+                       horizontalAlignment="LEFT"
+                       verticalAlignment="TOP"
+                       maxLineCount="1"
+                       hidden="true">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_LevelIcon"
+                          relativePoint="RIGHT"
+                          offsetX="1" />
+                </Label>
                 <Texture name="$(parent)_AvaRankIcon"
                          textureFile=""
                          hidden="false">
