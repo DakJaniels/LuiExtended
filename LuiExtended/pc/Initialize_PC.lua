@@ -89,6 +89,7 @@ local function OnAddOnLoaded(eventId, addonName)
         -- Initialize Hooks
         LUIE:InitializeHooks()
         --
+        LUIE.OtherAddonCompatability.isCombatMetricsEnabled = LUIE.IsItEnabled("CombatMetrics")
         LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
         LUIE.OtherAddonCompatability.isCrutchAlertsEnabled = LUIE.IsItEnabled("CrutchAlerts")
         LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")

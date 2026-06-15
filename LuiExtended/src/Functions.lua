@@ -452,6 +452,22 @@ function LUIE.ResolvePVPZone()
     end
 end
 
+--- ArtificialEffectId rows with BUFF_EFFECT_TYPE_NOT_AN_EFFECT are transient placeholders (e.g. Cyro Vengeance id 1).
+--- @param effectType BuffEffectType|integer|nil
+--- @return boolean
+function LUIE.IsDisplayableArtificialEffectType(effectType)
+    return effectType ~= nil and effectType ~= BUFF_EFFECT_TYPE_NOT_AN_EFFECT
+end
+
+--- Cyrodiil Vengeance campaigns do not use Battle Spirit (client may still flicker artificial id 1 as NOT_AN_EFFECT).
+--- @return boolean
+function LUIE.ShouldShowPlayerBattleSpirit()
+    if IsInCyrodiil() and IsCurrentCampaignVengeanceRuleset() then
+        return false
+    end
+    return true
+end
+
 -- -----------------------------------------------------------------------------
 --- Pulls the name for the current morph of a skill.
 --- @param abilityId number: The AbilityId of the skill.
@@ -774,6 +790,7 @@ end
 do
     -- LuiData is a required addon dependency (see LuiExtended.addon DependsOn).
     local EffectOverride = LuiData.Data.Effects.EffectOverride
+    local ArtificialEffectOverride = LuiData.Data.Effects.ArtificialEffectOverride
 
     --- @param armorType ArmorType
     --- @return integer counter
@@ -912,6 +929,86 @@ do
         local values = ResolveEffectTooltipValues(ov, durationSec, unitTag)
         return zo_strformat(
             tooltipString,
+            values[1], values[2], values[3], values[4], values[5], values[6], values[7])
+    end
+
+    --- @param zosTooltipText string|nil
+    --- @return number
+    local function ExtractPercentFromArtificialZosTooltip(zosTooltipText)
+        if not zosTooltipText or zosTooltipText == "" then
+            return 0
+        end
+        local colored = zosTooltipText:match("|c%x+(%d+)|r")
+        if colored then
+            return tonumber(colored) or 0
+        end
+        local plain = zosTooltipText:match("(%d+)%%")
+        if plain then
+            return tonumber(plain) or 0
+        end
+        return 0
+    end
+
+    local ArtificialTooltipHandlers = {}
+
+    --- @param artificialEffectId integer
+    --- @return fun(): number
+    local function CreateArtificialPercentPlaceholderHandler(artificialEffectId)
+        return function ()
+            if not LUIE.zos_GetArtificialEffectTooltipText then
+                return 0
+            end
+            local zosText = LUIE.zos_GetArtificialEffectTooltipText(artificialEffectId)
+            return ExtractPercentFromArtificialZosTooltip(zosText)
+        end
+    end
+
+    for artificialEffectIndex = 5, 8 do
+        ArtificialTooltipHandlers[artificialEffectIndex] = CreateArtificialPercentPlaceholderHandler(artificialEffectIndex)
+    end
+
+    --- @param ov ArtificialEffectOverrideEntry
+    --- @param artificialEffectId integer
+    --- @param unitTag string
+    --- @return (number|string)[]
+    local function ResolveArtificialEffectTooltipValues(ov, artificialEffectId, unitTag)
+        local values = {}
+        local placeholderHandler = ArtificialTooltipHandlers[artificialEffectId]
+        for index = 1, TOOLTIP_FORMAT_PLACEHOLDER_MAX do
+            local valueKey = index == 1 and "tooltipValue1" or ("tooltipValue" .. index)
+            local idKey = index == 1 and "tooltipValue1Id" or ("tooltipValue" .. index .. "Id")
+            if index == 1 and placeholderHandler and ov[valueKey] == nil and not ov.tooltipValue1Id then
+                values[1] = placeholderHandler()
+            elseif ov[valueKey] ~= nil then
+                values[index] = ov[valueKey]
+            elseif ov[idKey] then
+                values[index] = zo_floor((GetAbilityDuration(ov[idKey], nil, unitTag) or 0) + 0.5) / 1000
+            end
+        end
+        if ov.tooltipSetAbilityId then
+            ApplySetAbilityDescriptionToTooltipValues(values, ov.tooltipSetAbilityId, unitTag or "player")
+        end
+        for index = 1, TOOLTIP_FORMAT_PLACEHOLDER_MAX do
+            if values[index] == nil then
+                values[index] = 0
+            end
+        end
+        return values
+    end
+
+    --- @param artificialEffectId integer
+    --- @return string
+    local function FormatArtificialEffectTooltip(artificialEffectId)
+        local ov = ArtificialEffectOverride[artificialEffectId]
+        if not ov or not ov.tooltip then
+            if LUIE.zos_GetArtificialEffectTooltipText then
+                return LUIE.zos_GetArtificialEffectTooltipText(artificialEffectId) or ""
+            end
+            return ""
+        end
+        local values = ResolveArtificialEffectTooltipValues(ov, artificialEffectId, "player")
+        return zo_strformat(
+            ov.tooltip,
             values[1], values[2], values[3], values[4], values[5], values[6], values[7])
     end
 
@@ -1075,6 +1172,7 @@ do
 
     LUIE.DynamicTooltip = DynamicTooltip
     LUIE.FormatOverrideTooltip = FormatOverrideTooltip
+    LUIE.FormatArtificialEffectTooltip = FormatArtificialEffectTooltip
 end
 -- -----------------------------------------------------------------------------
 

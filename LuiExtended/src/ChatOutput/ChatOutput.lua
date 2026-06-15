@@ -728,9 +728,15 @@ function LUIE_ChatOutput:WouldDeliverToPrimaryTab(chatOutputSettings, tabIndex)
     if not primaryContainer or not primaryContainer.windows or tabIndex < 1 or tabIndex > #primaryContainer.windows then
         return false
     end
-    if CMX and CMX.db and CMX.db.chatLog and primaryContainer.GetTabName then
-        if primaryContainer:GetTabName(tabIndex) == CMX.db.chatLog.name then
-            return false
+    if LUIE.OtherAddonCompatability.isCombatMetricsEnabled then
+        local CMX = CMX
+        local db = CMX.db
+        if not db then return false end
+        local do_chat_logging = db.chatlog and db.chatlog.enabled
+        if do_chat_logging and primaryContainer.GetTabName then
+            if primaryContainer:GetTabName(tabIndex) == db.chatLog.name then
+                return false
+            end
         end
     end
     return self:IsChatCategoryEnabledOnTab(primaryContainer, tabIndex, CHAT_CATEGORY_SYSTEM)

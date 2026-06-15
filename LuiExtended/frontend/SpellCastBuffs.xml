@@ -52,7 +52,10 @@
                   inherits="ZO_DefaultCooldown"
                   level="1"
                   alpha="0.5"
-                  hidden="true" />
+                  hidden="true">
+          <Dimensions x="64"
+                      y="64" />
+        </Cooldown>
         <Texture name="$(parent)_Icon"
                  textureFile="EsoUI/Art/Icons/icon_missing.dds"
                  level="2"

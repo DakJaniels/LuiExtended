@@ -433,6 +433,8 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
             buff.buffType = effect.type
             buff.buffSlot = effect.buffSlot
             buff.tooltip = effect.tooltip
+            buff.isArtificial = effect.artificial == true
+            buff.artificialEffectId = effect.artificialEffectId or effect.uid
             buff.duration = effect.dur or 0
             buff.debugMeta = effect.debugMeta
 

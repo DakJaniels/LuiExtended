@@ -67,8 +67,12 @@ local strings =
     LUIE_STRING_SKILL_BATTLE_SPIRIT_TP = "• Reduce damage taken and shield strength by |cFFFFFF50|r%\n• Reduce healing received by |cFFFFFF55|r%\n• Reduce Health Recovery by |cFFFFFF50|r%\n• Increase the range of abilities with a range greater than |cFFFFFF28|r meters by |cFFFFFF8|r meters\n• Reduce current healing received by |cFFFFFF33|r% when you have 8 or more healing over time effects active",
     LUIE_STRING_SKILL_BATTLE_SPIRIT_IMPERIAL_CITY_TP = "• Reduce damage taken and shield strength by |cFFFFFF50|r%\n• Reduce healing received by |cFFFFFF55|r%\n• Reduce Health Recovery by |cFFFFFF50|r%\n• Reduce current healing received by |cFFFFFF33|r% when you have 8 or more healing over time effects active",
     LUIE_STRING_SKILL_RECALL_PENALTY_TP = "You have recently recalled to a Wayshrine and must pay an additional gold fee to do so again.",
-    LUIE_STRING_SKILL_BATTLEGROUND_DESERTER_TP = "You left a Battleground match early and cannot queue again or earn Alliance points from any PvP sources.",
-    LUIE_STRING_SKILL_LOOKING_FOR_GROUP_TP = "• Increase Max Health by |cFFFFFF20|r%\n• Increase Weapon and Spell Damage by |cFFFFFF25|r%",
+    LUIE_STRING_SKILL_BATTLEGROUND_DESERTER_TP = "• You cannot queue for a Battleground match.\n• You cannot earn Alliance Points from any PvP sources.",
+    LUIE_STRING_SKILL_LOOKING_FOR_GROUP_TP = "• Max Health increased by |cFFFFFF20|r%\n• Weapon Damage and Spell Damage increased by |cFFFFFF25|r%",
+    LUIE_STRING_SKILL_UNDERDOG_DAMAGE_TP = "Damage done increased by |cFFFFFF<<1>>|r%.\n\nThis effect is influenced by the number of missing players on your team.",
+    LUIE_STRING_SKILL_UNDERDOG_HEALING_TP = "Healing done increased by |cFFFFFF<<1>>|r%.\n\nThis effect is influenced by the number of missing players on your team.",
+    LUIE_STRING_SKILL_SOLO_QUEUE_XP_TP = "Increases Experience gained by |cFFFFFF<<1>>|r%.",
+    LUIE_STRING_SKILL_SOLO_QUEUE_AP_TP = "Increases Alliance Points gained by |cFFFFFF<<1>>|r%.",
 
     ----------------------------------------------------------------
     -- ITEM / CONSUMABLE TOOLTIPS ----------------------------------
@@ -94,7 +98,7 @@ local strings =
     LUIE_STRING_SKILL_REMOVE_TOOLTIP_PACK_LEADERS_BROTH = "If you are a werewolf, the rich marrow will also slightly ease your transformation.\nThese effects are scaled based on your level.",                                                    -- Must be exact match in each localization
     LUIE_STRING_SKILL_ADD_TOOLTIP_PACK_LEADERS_BROTH = "\nIf you are a werewolf, the rich marrow will also slightly ease your transformation.",
     LUIE_STRING_SKILL_REMOVE_TOOLTIP_DISASTROUSLY_BLOODY = "If you are a vampire, the tainted blood in this drink will corrupt you, increasing your Stage to 4.\nThese effects are scaled based on your level.",                                   -- Must be exact match in each localization
-    LUIE_STRING_SKILL_ESO_PLUS_TP = "Increased by |cFFFFFF10|r%:\n• Experience (all sources)\n• Gold found (all sources)\n• Crafting Inspiration (crafting activities)\n• Alliance Points (skill lines and rank only)\n• Tel Var (monster kills only)\n• Archival Fortunes (Infinite Archive sources)\n• Trait Research speed",
+    LUIE_STRING_SKILL_ESO_PLUS_TP = "Increased by |cFFFFFF10|r%:\n• Experience (all sources)\n• Gold found (all sources)\n• Tome Points (Challenges only)\n• Crafting Inspiration (crafting activities)\n• Alliance Points (skill lines and rank only)\n• Tel Var Stones (monster kills only)\n• Archival Fortunes (Infinite Archive sources)\n• Trait Research speed",
     -- Collectible
     LUIE_STRING_SKILL_COLLECTIBLE_MYSTERY_MEAT = "Mystery Meat",
     LUIE_STRING_SKILL_COLLECTIBLE_VANITY_PET_TP = "You have an active Non-Combat Pet.",

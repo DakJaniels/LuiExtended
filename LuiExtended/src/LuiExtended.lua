@@ -200,6 +200,7 @@ LUIE.Components = {}
 -- Table to hold cached values so we don't have to ask addon manager each time we run a function.
 LUIE.OtherAddonCompatability =
 {
+    isCombatMetricsEnabled = false,
     isActionDurationReminderEnabled = false,
     isCrutchAlertsEnabled = false,
     isFancyActionBarEnabled = false,

@@ -141,6 +141,7 @@ local function BuildModuleDefaultsLookup()
         InfoPanel = LUIE.InfoPanel.Defaults,
         SlashCommands = LUIE.SlashCommands.Defaults,
         CombatInfo = LUIE.CombatInfo.Defaults,
+        MiniMap = LUIE.MiniMap.Defaults,
     }
 end
 

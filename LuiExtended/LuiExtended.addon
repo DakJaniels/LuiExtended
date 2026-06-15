@@ -52,6 +52,7 @@ src/ChatOutput/TimestampAndFormat.lua
 src/ChatOutput/ChatOutput.lua
 src/LuiExtended_Log.lua
 src/Functions.lua
+src/StatsActiveEffects.lua
 src/DebugEnvironment.lua
 src/ProtectedHooks.lua
 src/Hooks.lua

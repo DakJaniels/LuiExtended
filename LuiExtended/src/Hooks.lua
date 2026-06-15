@@ -362,21 +362,16 @@ function LUIE.API_Hooks()
         end
 
         local zos_GetArtificialEffectTooltipText = GetArtificialEffectTooltipText
+        LUIE.zos_GetArtificialEffectTooltipText = zos_GetArtificialEffectTooltipText
         --- Hook support to pull custom tooltips for ArtificialEffectId's
         --- @param artificialEffectId integer
         --- @return string tooltipText
         GetArtificialEffectTooltipText = function (artificialEffectId)
-            local function GenArtificialEffectTooltipText(tooltip)
-                if Effects.ArtificialEffectOverride[artificialEffectId] and Effects.ArtificialEffectOverride[artificialEffectId].tooltip then
-                    tooltip = Effects.ArtificialEffectOverride[artificialEffectId].tooltip
-                    return tooltip
-                else
-                    tooltip = zos_GetArtificialEffectTooltipText(artificialEffectId)
-                    return tooltip
-                end
+            local ov = Effects.ArtificialEffectOverride[artificialEffectId]
+            if ov and ov.tooltip and LUIE.FormatArtificialEffectTooltip then
+                return LUIE.FormatArtificialEffectTooltip(artificialEffectId)
             end
-            local tooltip = GenArtificialEffectTooltipText("")
-            return tooltip
+            return zos_GetArtificialEffectTooltipText(artificialEffectId)
         end
     end
 end

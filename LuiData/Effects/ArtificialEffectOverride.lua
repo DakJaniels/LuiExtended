@@ -18,63 +18,102 @@ local function ESO_Plus_Member()
     local displayName, _, _, _, _, _ = GetArtificialEffectInfo(0)
     return displayName
 end
+
 --------------------------------------------------------------------------------------------------------------------------------
--- Using a separate chart for ZOS Artificial Effects just in case this is significantly expanded at any point -- Overrides Artificial Effect id name or icon.
+-- ZOS ArtificialEffectId (live 12.0.5): 0 ESO Plus, 1 Battle Spirit, 2 LFG, 3 Battle Spirit IC,
+-- 4 BG Deserter, 5 Underdog Damage, 6 Underdog Healing, 7 Solo Queue XP, 8 Solo Queue AP.
+--
+-- Tooltip Functionality (same semantics as Effects/Override.lua):
+-- - tooltip = Tooltips.Innate_* -- LUIE lang string (zo_strformat via LUIE.FormatArtificialEffectTooltip)
+-- - tooltipValue1 .. tooltipValue7 -- Override <<1>> .. <<7>>
+-- - tooltipValue1Id .. tooltipValue7Id -- Pull <<n>> from GetAbilityDuration(id)/1000
+-- - tooltipSetAbilityId -- Fill unset <<n>> from GetAbilityDescription(set ability)
+-- - tooltipValue2Mod -- Derive value 2 from duration + mod (abilities only; unused on artificial rows)
 --------------------------------------------------------------------------------------------------------------------------------
 
 --- @class (partial) ArtificialEffectOverride
+--- @field [integer] ArtificialEffectOverrideEntry
+
+--- @class ArtificialEffectOverrideEntry
+--- @field override boolean
+--- @field name string|nil
+--- @field tooltip string|nil
+--- @field tooltipValue1 number|string|nil
+--- @field tooltipValue2 number|string|nil
+--- @field tooltipValue3 number|string|nil
+--- @field tooltipValue4 number|string|nil
+--- @field tooltipValue5 number|string|nil
+--- @field tooltipValue6 number|string|nil
+--- @field tooltipValue7 number|string|nil
+--- @field tooltipValue1Id integer|nil
+--- @field tooltipValue2Id integer|nil
+--- @field tooltipValue3Id integer|nil
+--- @field tooltipValue4Id integer|nil
+--- @field tooltipValue5Id integer|nil
+--- @field tooltipValue6Id integer|nil
+--- @field tooltipValue7Id integer|nil
+--- @field tooltipSetAbilityId integer|nil
+--- @field tooltipValue2Mod number|nil
+
 local artificialEffectOverride =
 {
-    -- ESO Plus Subscription Status
-    -- Index 0: Displays active ESO Plus membership status in the Active Effects window
-    -- Uses ESO_Plus_Member() function to dynamically fetch the display name
     [0] =
     {
         override = true,
-        name = ESO_Plus_Member(),          -- Gets current ESO Plus membership display name
-        tooltip = Tooltips.Innate_ESO_Plus -- Custom tooltip for ESO Plus status
+        name = ESO_Plus_Member(),
+        tooltip = Tooltips.Innate_ESO_Plus,
     },
 
-    -- Battle Spirit (PvP Combat Modifier)
-    -- Index 1: Applied in Cyrodiil, Duels, and Battlegrounds
-    -- Modifies player stats for PvP balance
     [1] =
     {
         override = true,
-        tooltip = Tooltips.Innate_Battle_Spirit -- Custom tooltip explaining Battle Spirit effects
+        name = Abilities.Skill_Battle_Spirit,
+        tooltip = Tooltips.Innate_Battle_Spirit,
     },
 
-    -- Looking For Group Status
-    -- Index 2: Shows Dungeon Finder queue status
-    -- Uses StringOnlyGSUB to modify the default text, replacing "For" with "for"
     [2] =
     {
         override = true,
-        name = StringOnlyGSUB(GetArtificialEffectInfo(2), "For", "for"), -- Adjusts capitalization in LFG text
-        tooltip = Tooltips.Innate_Looking_for_Group                      -- Custom tooltip for LFG status
+        name = StringOnlyGSUB(GetArtificialEffectInfo(2), "For", "for"),
+        tooltip = Tooltips.Innate_Looking_for_Group,
     },
 
-    -- Imperial City Battle Spirit
-    -- Index 3: Specific version of Battle Spirit for Imperial City PvP zone
-    -- Uses custom name from Abilities table
     [3] =
     {
         override = true,
-        name = Abilities.Skill_Battle_Spirit,                 -- Custom name for Imperial City Battle Spirit
-        tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City -- Custom tooltip for IC Battle Spirit
+        name = Abilities.Skill_Battle_Spirit,
+        tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City,
     },
 
-    -- Battleground Deserter Penalty
-    -- Index 4: Applied when leaving Battleground matches early
-    -- Only overrides the tooltip
     [4] =
     {
         override = true,
-        tooltip = Tooltips.Innate_Battleground_Deserter -- Custom tooltip for deserter penalty
+        tooltip = Tooltips.Innate_Battleground_Deserter,
+    },
+
+    [5] =
+    {
+        override = true,
+        tooltip = Tooltips.Innate_Underdog_Damage,
+    },
+
+    [6] =
+    {
+        override = true,
+        tooltip = Tooltips.Innate_Underdog_Healing,
+    },
+
+    [7] =
+    {
+        override = true,
+        tooltip = Tooltips.Innate_Solo_Queue_XP,
+    },
+
+    [8] =
+    {
+        override = true,
+        tooltip = Tooltips.Innate_Solo_Queue_AP,
     },
 }
 
-
---- @class (partial) ArtificialEffectOverride
---- @field [integer] {override:boolean,name:string,tooltip:string}
 Effects.ArtificialEffectOverride = artificialEffectOverride
