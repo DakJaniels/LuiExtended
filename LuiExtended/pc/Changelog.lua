@@ -52,6 +52,26 @@ local changelogMessages =
     -- Version Header 7.2.4.7
     "|cFFA500LuiExtended Version 7.2.4.7|r",
     "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t |cFFFFFFMiniMap (BETA)|r: Optional HUD minimap module (`/luimm`). Zoom (default, subzone, dungeon, battleground, mounted), follow player, lock position and size, per-category pin scales, visibility rules (HUD, combat, looting, mounted, housing, draw tier), waypoint click behavior, and keybinds for zoom, recenter, visibility, combat, and fixed position. Enable under Misc Settings; requires UI reload.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Optional suppress vanilla player attribute bars, target frame, group and raid frames, and companion frame while the matching LUIE custom frames are enabled (PC and console).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Misc Settings: |cFFFFFFUnregister Hidden Buff/Debuff UI|r stops vanilla buff and debuff UI from running in the background when the game buff UI is disabled.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Optional |cFFFFFFShow Item Type|r on loot lines (same pattern as trait and style display).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Cast bar |cFFFFFFicon frame color|r picker under cast bar settings.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap / Info Panel: Optional anchor Info Panel below the minimap with zone name above the map; legacy minimap clock mode removed.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Shared pin draw sizing for overlays and world-map container pins; improved quest pin sync and layout recovery.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: |cFFFFFFTopInfo|r row on player, target, small group, and AvA frames with level, veterancy rank, and overland difficulty icons in the caption area.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar / LuiData: Bar highlight tracks |cFFFFFFHidden Blade|r and |cFFFFFFShrouded Daggers|r major brutality and major sorcery with slotted major duration caps tied to player buffs.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Artificial effect overrides and tooltips for |cFFFFFFUnderdog|r damage and healing and |cFFFFFFSolo Queue|r XP and AP bonuses.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Cast bar label normalization for additional wayshrine recall cast abilities.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Companion |cFFFFFFAbility Track|r uses an aura cache for duration and stack feedback on companion buffs and hotbar effects.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: Announcements use updated tab routing so active chat tabs receive lines reliably; deprecated system-message options removed from Chat Output settings.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData 7.2.2.1: Dragonknight effect overrides and tooltip visibility fixes; LuiExtended dependency updated accordingly.",
+    "",
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Off Balance is no longer auto-added to |cFFFFFFProminent Debuffs|r on first load (existing saved entries are unchanged). Prominent debuff remove list and right-click menu now match prominent routing, including the canonical Off Balance name entry.",
