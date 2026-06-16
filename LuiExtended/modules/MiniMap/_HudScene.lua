@@ -151,7 +151,7 @@ function MiniMap.IsMiniMapHudScene(scene)
         return false
     end
     if scene == LOOT_SCENE then
-        return MiniMap.SV.showWhileLooting == true
+        return MiniMap.SV.allowOnLootScene == true
     end
     return true
 end
@@ -194,11 +194,11 @@ function MiniMap.ApplyFragmentHiddenReasons()
         end
     end
 
-    local sessionHidden = MiniMap.sessionMapVisible == false or MiniMap.SV.showInHud == false
+    local sessionHidden = MiniMap.sessionMapVisible == false or MiniMap.SV.allowOnGameplayHud == false
     setHiddenReasonIfChanged("MiniMapSession", sessionHidden)
-    setHiddenReasonIfChanged("MiniMapCombat", IsUnitInCombat("player") and MiniMap.SV.showInCombat ~= true)
-    setHiddenReasonIfChanged("MiniMapMounted", IsMounted() and MiniMap.SV.showWhileMounted ~= true)
-    setHiddenReasonIfChanged("MiniMapHousing", MiniMap.IsPlayerInHouse() and MiniMap.SV.showInHousing ~= true)
+    setHiddenReasonIfChanged("MiniMapCombat", IsUnitInCombat("player") and MiniMap.SV.allowDuringCombat ~= true)
+    setHiddenReasonIfChanged("MiniMapMounted", IsMounted() and MiniMap.SV.allowWhileMounted ~= true)
+    setHiddenReasonIfChanged("MiniMapHousing", MiniMap.IsPlayerInHouse() and MiniMap.SV.allowInPlayerHousing ~= true)
 end
 
 function MiniMap.OnWorldMapOpening(sceneName)
@@ -271,7 +271,7 @@ function MiniMap.SyncLootSceneFragmentAttachment()
     if not hudSceneFragment then
         return
     end
-    if MiniMap.SV.showWhileLooting == true then
+    if MiniMap.SV.allowOnLootScene == true then
         HudScene.AddFragmentToScenes(hudSceneFragment, { LOOT_SCENE })
     else
         HudScene.RemoveFragmentFromScenes(hudSceneFragment, { LOOT_SCENE })

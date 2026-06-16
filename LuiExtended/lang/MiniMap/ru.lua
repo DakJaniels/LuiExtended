@@ -35,6 +35,9 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Показывать название текущей карты. Перемещайте рамку элементом внизу слева при наведении на миникарту.",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Перетащите, чтобы переместить миникарту.",
     LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Заблокировать или разблокировать позицию миникарты.",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Как в игре",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Скрыть компас на HUD",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Показывать компас на HUD",
 }
 
 for stringId, stringValue in pairs(strings) do

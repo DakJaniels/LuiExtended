@@ -11,22 +11,22 @@ local MiniMap = LUIE.MiniMap
 local zo_strformat = zo_strformat
 local LAM = LUIE.LAM
 
-local miniMapVisibilityOptions =
+local miniMapHudVisibilityOptions =
 {
-    { key = "showInHud",        name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP     },
-    { key = "showInCombat",     name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP  },
-    { key = "showWhileLooting", name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,    tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP    },
-    { key = "showWhileMounted", name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED, tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP },
-    { key = "showInHousing",    name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING, tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP },
-    { key = "showOnTop",        name = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP  },
+    { key = "allowOnGameplayHud",   name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP     },
+    { key = "allowDuringCombat",    name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP  },
+    { key = "allowOnLootScene",     name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,    tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP    },
+    { key = "allowWhileMounted",    name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED, tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP },
+    { key = "allowInPlayerHousing", name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING, tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP },
+    { key = "preferElevatedDrawTier", name = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP  },
 }
 
-local miniMapZoomSliders =
+local miniMapRegionZoomSliders =
 {
-    { key = "subZoneZoom",      name = LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM_TP                      },
-    { key = "dungeonZoom",      name = LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM_TP                      },
-    { key = "battlegroundZoom", name = LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM, tp = LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM_TP                 },
-    { key = "mountedZoomScale", name = LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM_TP,     scale100 = true },
+    { key = "overworldMultiTileZoom", name = LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM_TP                      },
+    { key = "dungeonMapZoom",         name = LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM_TP                      },
+    { key = "battlegroundMapZoom",    name = LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM, tp = LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM_TP                 },
+    { key = "mountedZoomMultiplier",  name = LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM_TP,     scale100 = true },
 }
 
 local miniMapPinCategoryScales =
@@ -40,6 +40,11 @@ local miniMapPinCategoryScales =
 
 function MiniMap.CreateSettings()
     local Defaults = MiniMap.Defaults
+
+    if not LUIE.SV.MiniMap_Enabled then
+        return
+    end
+
     local disabled = function () return not LUIE.SV.MiniMap_Enabled end
 
     local panelDataMiniMap =
@@ -74,16 +79,16 @@ function MiniMap.CreateSettings()
         min = 10,
         max = 180,
         step = 1,
-        getFunc = function () return (MiniMap.SV.defaultZoom or Defaults.defaultZoom) * 100 end,
+        getFunc = function () return (MiniMap.SV.resetZoomLevel or Defaults.resetZoomLevel) * 100 end,
         setFunc = function (value)
-            MiniMap.SV.defaultZoom = value / 100
+            MiniMap.SV.resetZoomLevel = value / 100
             MiniMap.ClampSavedDefaultZoom()
             if MiniMap.mapController and MiniMap.mapController:IsReady() then
                 MiniMap.mapController:ApplyZoom(0)
             end
         end,
         width = "full",
-        default = Defaults.defaultZoom * 100,
+        default = Defaults.resetZoomLevel * 100,
         disabled = disabled,
     }
 
@@ -232,8 +237,8 @@ function MiniMap.CreateSettings()
         width = "full",
     }
 
-    for optionIndex = 1, #miniMapVisibilityOptions do
-        local option = miniMapVisibilityOptions[optionIndex]
+    for optionIndex = 1, #miniMapHudVisibilityOptions do
+        local option = miniMapHudVisibilityOptions[optionIndex]
         local settingKey = option.key
         optionsDataMiniMap[#optionsDataMiniMap + 1] =
         {
@@ -258,8 +263,8 @@ function MiniMap.CreateSettings()
         width = "full",
     }
 
-    for sliderIndex = 1, #miniMapZoomSliders do
-        local slider = miniMapZoomSliders[sliderIndex]
+    for sliderIndex = 1, #miniMapRegionZoomSliders do
+        local slider = miniMapRegionZoomSliders[sliderIndex]
         optionsDataMiniMap[#optionsDataMiniMap + 1] =
         {
             type = "slider",
@@ -335,11 +340,15 @@ function MiniMap.CreateSettings()
         type = "dropdown",
         name = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE),
         tooltip = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE_TP),
-        choices = { "Untouched", "Hidden", "Shown" },
+        choices = {
+            GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT),
+            GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE),
+            GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW),
+        },
         choicesValues = { 0, 1, 2 },
-        getFunc = function () return MiniMap.SV.compassMode or 0 end,
+        getFunc = function () return MiniMap.SV.compassOverride or 0 end,
         setFunc = function (value)
-            MiniMap.SV.compassMode = value
+            MiniMap.SV.compassOverride = value
             MiniMap.ApplyLiveSettings()
         end,
         width = "full",
@@ -468,7 +477,7 @@ function MiniMap.CreateSettings()
             disabled = disabled,
         }
     end
-
+    -- Register the settings panel
     LAM:RegisterAddonPanel(LUIE.name .. "MiniMapOptions", panelDataMiniMap)
     LAM:RegisterOptionControls(LUIE.name .. "MiniMapOptions", optionsDataMiniMap)
 end

@@ -35,6 +35,9 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Affiche le nom de la carte actuelle. Déplacez le cadre avec le contrôle en bas à gauche au survol.",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Glisser pour déplacer la mini-carte.",
     LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Verrouiller ou déverrouiller la position de la mini-carte.",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Paramètre du jeu",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Masquer la boussole sur le HUD",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Afficher la boussole sur le HUD",
 }
 
 for stringId, stringValue in pairs(strings) do

@@ -26,16 +26,16 @@ function MiniMap.GetContextAllowsMiniMap()
     if MiniMap.sessionMapVisible == false then
         return false
     end
-    if MiniMap.SV.showInHud == false then
+    if MiniMap.SV.allowOnGameplayHud == false then
         return false
     end
-    if IsUnitInCombat("player") and MiniMap.SV.showInCombat ~= true then
+    if IsUnitInCombat("player") and MiniMap.SV.allowDuringCombat ~= true then
         return false
     end
-    if IsMounted() and MiniMap.SV.showWhileMounted ~= true then
+    if IsMounted() and MiniMap.SV.allowWhileMounted ~= true then
         return false
     end
-    if MiniMap.IsPlayerInHouse() and MiniMap.SV.showInHousing ~= true then
+    if MiniMap.IsPlayerInHouse() and MiniMap.SV.allowInPlayerHousing ~= true then
         return false
     end
     return true
@@ -71,7 +71,7 @@ function MiniMap.ToggleShowInCombatSetting()
     if not MiniMap.SV then
         return
     end
-    MiniMap.SV.showInCombat = not MiniMap.SV.showInCombat
+    MiniMap.SV.allowDuringCombat = not MiniMap.SV.allowDuringCombat
     MiniMap.UpdateConditionalVisibility()
 end
 
@@ -80,7 +80,7 @@ function MiniMap.ApplyDrawLayerPreference()
         return
     end
     local root = MiniMap.view.root
-    if MiniMap.SV and MiniMap.SV.showOnTop == true then
+    if MiniMap.SV and MiniMap.SV.preferElevatedDrawTier == true then
         root:SetDrawLayer(DL_OVERLAY)
         root:SetDrawTier(DT_HIGH)
     else

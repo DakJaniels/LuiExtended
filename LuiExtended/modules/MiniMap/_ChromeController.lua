@@ -8,9 +8,9 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
-local COMPASS_MODE_UNTOUCHED = 0
-local COMPASS_MODE_HIDDEN = 1
-local COMPASS_MODE_SHOWN = 2
+local MINIMAP_COMPASS_OVERRIDE_DEFAULT = 0
+local MINIMAP_COMPASS_OVERRIDE_HIDE = 1
+local MINIMAP_COMPASS_OVERRIDE_SHOW = 2
 
 local COMPASS_CONTROLS =
 {
@@ -32,8 +32,8 @@ end
 
 function MiniMap.ApplyCompassMode()
     local settings = MiniMap.SV or MiniMap.Defaults
-    local mode = settings.compassMode or COMPASS_MODE_UNTOUCHED
-    if mode == COMPASS_MODE_UNTOUCHED then
+    local mode = settings.compassOverride or MINIMAP_COMPASS_OVERRIDE_DEFAULT
+    if mode == MINIMAP_COMPASS_OVERRIDE_DEFAULT then
         if MiniMap.compassChromeOverrideActive then
             SetCompassControlsHidden(false)
             MiniMap.compassChromeOverrideActive = false
@@ -43,7 +43,7 @@ function MiniMap.ApplyCompassMode()
 
     MiniMap.compassChromeOverrideActive = true
     local minimapContextAllowsCompassChrome = MiniMap.GetContextAllowsMiniMap()
-    local compassControlsHidden = minimapContextAllowsCompassChrome and mode ~= COMPASS_MODE_SHOWN
+    local compassControlsHidden = minimapContextAllowsCompassChrome and mode ~= MINIMAP_COMPASS_OVERRIDE_SHOW
     SetCompassControlsHidden(compassControlsHidden)
 end
 

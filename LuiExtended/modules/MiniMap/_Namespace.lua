@@ -134,7 +134,7 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field offsetY number
 --- @field width number
 --- @field height number
---- @field defaultZoom number
+--- @field resetZoomLevel number
 --- @field defaultPinScale number
 --- @field playerPinScale number
 --- @field followPlayer boolean
@@ -144,21 +144,19 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field lockSize boolean
 --- @field waypointClickRequiresShift boolean
 --- @field showZoomButtons boolean
---- @field showInHud boolean
---- @field showInCombat boolean
---- @field showWhileLooting boolean
---- @field showWhileMounted boolean
---- @field showInHousing boolean
---- @field showOnTop boolean
---- @field subZoneZoom number
---- @field dungeonZoom number
---- @field battlegroundZoom number
---- @field mountedZoomScale number
+--- @field allowOnGameplayHud boolean
+--- @field allowDuringCombat boolean
+--- @field allowOnLootScene boolean
+--- @field allowWhileMounted boolean
+--- @field allowInPlayerHousing boolean
+--- @field preferElevatedDrawTier boolean
+--- @field overworldMultiTileZoom number
+--- @field dungeonMapZoom number
+--- @field battlegroundMapZoom number
+--- @field mountedZoomMultiplier number
 --- @field autoZoomOutAtEdge boolean
---- @field enableFixedMapPosition boolean
---- @field fixedMaps table
---- @field holdZoomInFactor number
---- @field holdZoomOutFactor number
+--- @field zoneScrollLockEnabled boolean
+--- @field zoneScrollLockByMapName table
 --- @field pinScaleQuest number
 --- @field pinScaleGroup number
 --- @field pinScalePoi number
@@ -166,7 +164,7 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field pinScaleDigSite number
 --- @field pinScaleOther number
 --- @field pinTypeScales table
---- @field compassMode number
+--- @field compassOverride number
 --- @field keepSquareAspect boolean
 --- @field positionGridDivisor number
 --- @field cameraWedgeScale number
@@ -215,11 +213,11 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @type MiniMapDefaults
 MiniMap.Defaults =
 {
-    offsetX = -50,
-    offsetY = -50,
-    width = 260,
-    height = 260,
-    defaultZoom = 0.5,
+    offsetX = -36,
+    offsetY = -36,
+    width = 272,
+    height = 272,
+    resetZoomLevel = 0.65,
     defaultPinScale = 1,
     playerPinScale = 1,
     followPlayer = true,
@@ -229,21 +227,19 @@ MiniMap.Defaults =
     lockSize = false,
     waypointClickRequiresShift = true,
     showZoomButtons = false,
-    showInHud = true,
-    showInCombat = false,
-    showWhileLooting = true,
-    showWhileMounted = true,
-    showInHousing = true,
-    showOnTop = false,
-    subZoneZoom = 0.5,
-    dungeonZoom = 0.5,
-    battlegroundZoom = 0.5,
-    mountedZoomScale = 1.15,
+    allowOnGameplayHud = true,
+    allowDuringCombat = true,
+    allowOnLootScene = true,
+    allowWhileMounted = true,
+    allowInPlayerHousing = true,
+    preferElevatedDrawTier = false,
+    overworldMultiTileZoom = 0.6,
+    dungeonMapZoom = 0.75,
+    battlegroundMapZoom = 0.55,
+    mountedZoomMultiplier = 1.0,
     autoZoomOutAtEdge = true,
-    enableFixedMapPosition = false,
-    fixedMaps = {},
-    holdZoomInFactor = 0.35,
-    holdZoomOutFactor = 1.4,
+    zoneScrollLockEnabled = false,
+    zoneScrollLockByMapName = {},
     pinScaleQuest = 1,
     pinScaleGroup = 1,
     pinScalePoi = 1,
@@ -251,7 +247,7 @@ MiniMap.Defaults =
     pinScaleDigSite = 1,
     pinScaleOther = 1,
     pinTypeScales = {},
-    compassMode = 0,
+    compassOverride = 0,
     keepSquareAspect = false,
     positionGridDivisor = 0,
     cameraWedgeScale = 1,
@@ -315,7 +311,7 @@ end
 
 --- @return boolean
 function MiniMap.GetMapFollowsPlayer()
-    if MiniMap.SV and MiniMap.SV.enableFixedMapPosition == true then
+    if MiniMap.SV and MiniMap.SV.zoneScrollLockEnabled == true then
         return false
     end
     if MiniMap.runtime then
@@ -341,10 +337,10 @@ function MiniMap.ClampSavedDefaultZoom()
     if MiniMap.mapController then
         zoomMinimum = MiniMap.mapController:GetMinimumZoom()
     end
-    if MiniMap.SV.defaultZoom < zoomMinimum then
-        MiniMap.SV.defaultZoom = zoomMinimum
-    elseif MiniMap.SV.defaultZoom > 1.8 then
-        MiniMap.SV.defaultZoom = 1.8
+    if MiniMap.SV.resetZoomLevel < zoomMinimum then
+        MiniMap.SV.resetZoomLevel = zoomMinimum
+    elseif MiniMap.SV.resetZoomLevel > 1.8 then
+        MiniMap.SV.resetZoomLevel = 1.8
     end
 end
 

@@ -517,7 +517,7 @@ function MiniMapMapController:ApplyZoom(delta, revealZoomLabel)
     local previousContentHeight = self:GetMapContentHeight()
 
     if delta == 0 then
-        MiniMap.zoom = MiniMap.SV.defaultZoom
+        MiniMap.zoom = MiniMap.SV.resetZoomLevel
     else
         MiniMap.zoom = MiniMap.zoom + (delta / 10)
     end

@@ -35,6 +35,9 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "显示当前地图区域名。悬停小地图时使用左下角控件拖动框架。",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "拖动以移动小地图。",
     LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "锁定或解锁小地图位置。",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "使用游戏默认",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "在 HUD 上隐藏罗盘",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "在 HUD 上显示罗盘",
 }
 
 for stringId, stringValue in pairs(strings) do

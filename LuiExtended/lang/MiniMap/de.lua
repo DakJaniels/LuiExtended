@@ -34,7 +34,10 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Zonennamen anzeigen",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Aktuellen Zonennamen an der Minimap anzeigen. Zum Verschieben beim Darüberfahren die Steuerung unten links nutzen.",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Ziehen, um die Minimap zu verschieben.",
-    LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Minimap-Position sperren oder entsperren.",
+    LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Lock or unlock minimap position.",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Spielstandard",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Kompass am HUD ausblenden",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Kompass am HUD anzeigen",
 }
 
 for stringId, stringValue in pairs(strings) do

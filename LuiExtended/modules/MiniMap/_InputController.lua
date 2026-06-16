@@ -96,7 +96,7 @@ function MiniMapInputController:StartPanDrag(mouseX, mouseY)
     local scroll = self.view.scroll
     self.panScrollStartX = scroll:GetHorizontalScroll()
     self.panScrollStartY = scroll:GetVerticalScroll()
-    if MiniMap.runtime and MiniMap.SV and MiniMap.SV.followPlayer == true and MiniMap.SV.enableFixedMapPosition ~= true then
+    if MiniMap.runtime and MiniMap.SV and MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true then
         MiniMap.runtime:SetMapFollowsPlayer(false)
     end
 end
@@ -106,7 +106,7 @@ function MiniMapInputController:CompletePanDragSession()
         return
     end
     local scroll = self.view.scroll
-    if MiniMap.SV.enableFixedMapPosition == true then
+    if MiniMap.SV.zoneScrollLockEnabled == true then
         MiniMap.SV.panOffsetX = scroll:GetHorizontalScroll()
         MiniMap.SV.panOffsetY = scroll:GetVerticalScroll()
         return

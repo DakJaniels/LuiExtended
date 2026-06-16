@@ -13,22 +13,22 @@ local MiniMap = LUIE.MiniMap
 
 local LHAS = LibHarvensAddonSettings
 
-local miniMapVisibilityOptions =
+local miniMapHudVisibilityOptions =
 {
-    { key = "showInHud",        name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP     },
-    { key = "showInCombat",     name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP  },
-    { key = "showWhileLooting", name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,    tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP    },
-    { key = "showWhileMounted", name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED, tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP },
-    { key = "showInHousing",    name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING, tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP },
-    { key = "showOnTop",        name = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP  },
+    { key = "allowOnGameplayHud",   name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP     },
+    { key = "allowDuringCombat",    name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP  },
+    { key = "allowOnLootScene",     name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,    tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP    },
+    { key = "allowWhileMounted",    name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED, tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP },
+    { key = "allowInPlayerHousing", name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING, tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP },
+    { key = "preferElevatedDrawTier", name = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP  },
 }
 
-local miniMapZoomSliders =
+local miniMapRegionZoomSliders =
 {
-    { key = "subZoneZoom",      name = LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM_TP                      },
-    { key = "dungeonZoom",      name = LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM_TP                      },
-    { key = "battlegroundZoom", name = LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM, tp = LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM_TP                 },
-    { key = "mountedZoomScale", name = LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM_TP,     scale100 = true },
+    { key = "overworldMultiTileZoom", name = LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM_TP                      },
+    { key = "dungeonMapZoom",         name = LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM_TP                      },
+    { key = "battlegroundMapZoom",    name = LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM, tp = LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM_TP                 },
+    { key = "mountedZoomMultiplier",  name = LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM,      tp = LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM_TP,     scale100 = true },
 }
 
 local miniMapPinCategoryScales =
@@ -40,15 +40,22 @@ local miniMapPinCategoryScales =
     { key = "pinScaleOther",     name = LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER     },
 }
 
-local miniMapCompassModeItems =
-{
-    { name = "Untouched", data = 0 },
-    { name = "Hidden",    data = 1 },
-    { name = "Shown",     data = 2 },
-}
+local function GetMiniMapCompassOverrideDropdownItems()
+    return
+    {
+        { name = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT), data = 0 },
+        { name = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE),    data = 1 },
+        { name = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW),    data = 2 },
+    }
+end
 
 function MiniMap.CreateConsoleSettings()
     local Defaults = MiniMap.Defaults
+
+    if not LUIE.SV.MiniMap_Enabled then
+        return
+    end
+
     local disable = function () return not LUIE.SV.MiniMap_Enabled end
 
     local panel = LHAS:AddAddon(LUIE.FormatAddonSettingsPanelTitle(LUIE_STRING_LAM_MINIMAP),
@@ -87,15 +94,15 @@ function MiniMap.CreateConsoleSettings()
             max = 180,
             step = 1,
             format = "%.0f",
-            getFunction = function () return (MiniMap.SV.defaultZoom or Defaults.defaultZoom) * 100 end,
+            getFunction = function () return (MiniMap.SV.resetZoomLevel or Defaults.resetZoomLevel) * 100 end,
             setFunction = function (value)
-                MiniMap.SV.defaultZoom = value / 100
+                MiniMap.SV.resetZoomLevel = value / 100
                 MiniMap.ClampSavedDefaultZoom()
                 if MiniMap.mapController and MiniMap.mapController:IsReady() then
                     MiniMap.mapController:ApplyZoom(0)
                 end
             end,
-            default = Defaults.defaultZoom * 100,
+            default = Defaults.resetZoomLevel * 100,
             disable = disable,
         })
 
@@ -230,8 +237,8 @@ function MiniMap.CreateConsoleSettings()
             canSelect = false,
         })
 
-    for optionIndex = 1, #miniMapVisibilityOptions do
-        local option = miniMapVisibilityOptions[optionIndex]
+    for optionIndex = 1, #miniMapHudVisibilityOptions do
+        local option = miniMapHudVisibilityOptions[optionIndex]
         local settingKey = option.key
         panel:AddSetting(
             {
@@ -255,8 +262,8 @@ function MiniMap.CreateConsoleSettings()
             canSelect = false,
         })
 
-    for sliderIndex = 1, #miniMapZoomSliders do
-        local slider = miniMapZoomSliders[sliderIndex]
+    for sliderIndex = 1, #miniMapRegionZoomSliders do
+        local slider = miniMapRegionZoomSliders[sliderIndex]
         panel:AddSetting(
             {
                 type = LHAS.ST_SLIDER,
@@ -331,15 +338,15 @@ function MiniMap.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE_TP),
-            items = miniMapCompassModeItems,
+            items = GetMiniMapCompassOverrideDropdownItems(),
             getFunction = function ()
-                return { data = MiniMap.SV.compassMode or 0 }
+                return { data = MiniMap.SV.compassOverride or 0 }
             end,
             setFunction = function (_combobox, _value, item)
-                MiniMap.SV.compassMode = item.data
+                MiniMap.SV.compassOverride = item.data
                 MiniMap.ApplyLiveSettings()
             end,
-            default = Defaults.compassMode or 0,
+            default = Defaults.compassOverride or 0,
             disable = disable,
         })
 

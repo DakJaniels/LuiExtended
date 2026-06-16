@@ -9,7 +9,7 @@ ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_ZOOMRESET", "Zoom reset")
 ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_RECENTER", "Recenter MiniMap")
 ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_SHOW", "Toggle MiniMap visibility")
 ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_COMBAT", "Toggle MiniMap in combat")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED", "Toggle fixed MiniMap position")
+ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED", "Toggle zone scroll lock")
 ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMIN", "Hold zoom in MiniMap")
 ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMOUT", "Hold zoom out MiniMap")
 
@@ -54,16 +54,16 @@ function MiniMap.Initialize(enabled)
     MiniMap.sessionMapVisible = true
 
     MiniMap.Enabled = true
-    MiniMap.zoom = MiniMap.SV.defaultZoom
+    MiniMap.zoom = MiniMap.SV.resetZoomLevel
 
     MiniMap.view = MiniMap.MiniMapView:New(LUIE_MiniMap)
     MiniMap.mapController = MiniMap.MiniMapMapController:New(MiniMap.view)
     MiniMap.ClampSavedDefaultZoom()
-    MiniMap.zoom = MiniMap.SV.defaultZoom
+    MiniMap.zoom = MiniMap.SV.resetZoomLevel
     MiniMap.mapController:ClampZoomToLimits(false)
     MiniMap.pinController = MiniMap.MiniMapPinController:New(MiniMap.view, MiniMap.mapController)
     MiniMap.runtime = MiniMap.MiniMapRuntime:New(MiniMap.view, MiniMap.mapController, MiniMap.pinController)
-    local followPlayer = MiniMap.SV.followPlayer == true and MiniMap.SV.enableFixedMapPosition ~= true
+    local followPlayer = MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true
     MiniMap.runtime.mapFollowsPlayer = followPlayer
     MiniMap.pinMirrorStateMachine = MiniMap.MiniMapPinMirrorStateMachine:New(nil, MiniMap.mapController, MiniMap.pinController)
     MiniMap.mapEventController = MiniMap.MiniMapMapEventController:New(
