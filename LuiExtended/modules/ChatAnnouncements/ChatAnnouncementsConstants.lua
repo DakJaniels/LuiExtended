@@ -23,6 +23,7 @@ LUIE.ChatAnnouncements = ChatAnnouncements
 --- @field logPrefix? string
 --- @field totalString? string
 --- @field groupLoot? boolean
+--- @field guildAnnounceGuildId? integer Guild id for guild-bank LOOT/CONTAINER context (see ResolveItemMessage)
 --- @field timedActivityAnnounceKey? string Dedupe key from GetTimedActivityProgressAnnounceKey (MESSAGE rows only)
 
 -- Queued Messages Storage for CA Modules
@@ -526,6 +527,7 @@ ChatAnnouncements.Brackets =
 --- @field LootShowArmorType boolean
 --- @field LootShowStyle boolean
 --- @field LootShowTrait boolean
+--- @field LootShowItemType boolean
 --- @field LootConfiscate boolean
 --- @field LootTrade boolean
 --- @field LootVendor boolean
@@ -1163,6 +1165,7 @@ ChatAnnouncements.Defaults =
         LootShowArmorType = false,
         LootShowStyle = false,
         LootShowTrait = false,
+        LootShowItemType = false,
         LootConfiscate = true,
         LootTrade = true,
         LootVendor = true,

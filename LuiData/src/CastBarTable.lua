@@ -35,6 +35,26 @@ local castBarTable =
         [18429] = true, -- Unarmed
     },
 
+    -- Combat ability ids for wayshrine / Customized Actions Recalling (cast bar label normalization)
+    WayshrineRecallCastAbilityIds =
+    {
+        [6811] = true,   -- Recall
+        [209299] = true, -- Accursed Recall
+        [187552] = true, -- Bitter Coast Recall
+        [215092] = true, -- Coldharbour Recall
+        [200161] = true, -- Frostfall Recall
+        [215089] = true, -- Gold Road Recall
+        [191859] = true, -- Legionnaire's Recall
+        [199791] = true, -- Recall of the Crusader
+        [181388] = true, -- Recall of the Galen Wilds
+        [221093] = true, -- Recall of the Outer Darkness
+        [229849] = true, -- Mages Guild Recall
+        [240795] = true, -- World-Eater's Fiery Recall
+        [259040] = true, -- Codename
+        [247620] = true, -- Recall of the Wingblade
+        [232080] = true, -- Bramblebird Recall
+    },
+
     -- First ability slot GCD probe (PerfectWeave-style; GetSlotCooldownInfo)
     GcdReferenceSlot = 3,
     -- Brief ShowCast suppress after block-dismiss (cleared on weapon pair change in ActionBar_CastBar.lua).

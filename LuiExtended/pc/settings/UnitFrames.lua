@@ -336,6 +336,10 @@ function UnitFrames.CreateSettings()
                 default = UnitFrames.GetDefaultFramesSetting("Boss", true),
             },
             {
+                type = "description",
+                text = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_DESC),
+            },
+            {
                 -- Reposition default player bars
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_DFRAMES_REPOSIT),
@@ -4094,7 +4098,7 @@ function UnitFrames.CreateSettings()
                 default = Defaults.GroupPotionCooldowns.showRemainingTime,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                    return not (LUIE.SV.UnitFrames_Enabled and LibGroupPotionCooldowns and Settings.GroupPotionCooldowns.enabled)
                 end,
             },
             {
@@ -4120,7 +4124,7 @@ function UnitFrames.CreateSettings()
                 default = Defaults.GroupPotionCooldowns.potionIconGroupSize,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                    return not (LUIE.SV.UnitFrames_Enabled and LibGroupPotionCooldowns and Settings.GroupPotionCooldowns.enabled)
                 end,
             },
             {
@@ -4141,7 +4145,7 @@ function UnitFrames.CreateSettings()
                 default = Defaults.GroupPotionCooldowns.potionIconGroupOffsetX,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                    return not (LUIE.SV.UnitFrames_Enabled and LibGroupPotionCooldowns and Settings.GroupPotionCooldowns.enabled)
                 end,
             },
             {
@@ -4162,7 +4166,7 @@ function UnitFrames.CreateSettings()
                 default = Defaults.GroupPotionCooldowns.potionIconGroupOffsetY,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                    return not (LUIE.SV.UnitFrames_Enabled and LibGroupPotionCooldowns and Settings.GroupPotionCooldowns.enabled)
                 end,
             },
             --[[ Raid potion cooldown settings commented out - no longer shown on raid frames

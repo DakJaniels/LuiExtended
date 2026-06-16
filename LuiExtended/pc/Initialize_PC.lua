@@ -38,14 +38,6 @@ end
 --- @param initial boolean
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, eventId)
-    --
-    -- -----------------------------------------------------------------------------
-
-    if _G["Srendarr"] then
-        LUIE.InstallExternalSavedVarsLegacyCompat()
-    end
-    -- -----------------------------------------------------------------------------
-
     -- Set Positions for moved Default UI elements
     LUIE.SetElementPosition()
     if not LUIE.SV.StartupInfo then
@@ -57,7 +49,6 @@ end
 local function RegisterEvents()
     eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
     -- -----------------------------------------------------------------------------
-
     -- Event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
@@ -98,6 +89,7 @@ local function OnAddOnLoaded(eventId, addonName)
         -- Initialize Hooks
         LUIE:InitializeHooks()
         --
+        LUIE.OtherAddonCompatability.isCombatMetricsEnabled = LUIE.IsItEnabled("CombatMetrics")
         LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
         LUIE.OtherAddonCompatability.isCrutchAlertsEnabled = LUIE.IsItEnabled("CrutchAlerts")
         LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
@@ -124,7 +116,11 @@ local function OnAddOnLoaded(eventId, addonName)
         LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
         LUIE.UnitFrames.Initialize(LUIE.SV.UnitFrames_Enabled)
         LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
+        LUIE.MiniMap.Initialize(LUIE.SV.MiniMap_Enabled)
         LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
+        -- -----------------------------------------------------------------------------
+        LUIE.ApplyZOBuffDebuffSuppression()
+        LUIE.RegisterZOBuffDebuffSuppressionSettingListener()
         -- -----------------------------------------------------------------------------
         -- Load Timestamp Color
         LUIE.ChatOutput:UpdateTimeStampColor()
@@ -138,6 +134,7 @@ local function OnAddOnLoaded(eventId, addonName)
         LUIE.InfoPanel.CreateSettings()
         LUIE.UnitFrames.CreateSettings()
         LUIE.SpellCastBuffs.CreateSettings()
+        LUIE.MiniMap.CreateSettings()
         LUIE.SlashCommands.CreateSettings()
         LUIE.SlashCommands.MigrateSettings()
         -- -----------------------------------------------------------------------------
@@ -154,9 +151,8 @@ local function OnAddOnLoaded(eventId, addonName)
         -- Register global event listeners
         RegisterEvents()
         LUIE.ScheduleDebugEnvironmentReloadChat()
-        -- if LUIE_ScheduleLocalizationCoverageReport then
-        --     LUIE_ScheduleLocalizationCoverageReport()
-        -- end
+        -- Dev locale audit: enable lang/_LocalizationCoverage_Dev.lua in LuiExtended.addon, then:
+        -- if LUIE_ScheduleLocalizationCoverageReport then LUIE_ScheduleLocalizationCoverageReport() end
     end
 end
 

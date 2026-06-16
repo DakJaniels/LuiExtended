@@ -104,6 +104,119 @@ local g_castBarBlockHeldAtStart = false
 --- Set when block was released during a cast that started while blocking; re-blocking cancels the bar.
 local g_castBarBlockReleasedDuringCast = false
 
+local INNATE_RECALL_ABILITY_ID = 6811
+--- Customized Recalling cast ability ids (reference id + innate recall); built in BuildWayshrineRecallCastAbilityLookup.
+local g_castBarWayshrineRecallAbilityIds = {}
+--- Progression index for innate Recall; used with GetAbilityFxOverrideProgressionId fallback.
+local g_castBarRecallProgressionIndex
+
+--- Cast bar ability icon chrome (matches ZOS action bar / buff slot layering).
+local CAST_BAR_ICON_FRAME_TEXTURE = "EsoUI/Art/ActionBar/iconFrame.dds"
+local CAST_BAR_ICON_INSET_TEXTURE_KEYBOARD = "EsoUI/Art/ActionBar/abilityInset.dds"
+local CAST_BAR_ICON_INSET_TEXTURE_GAMEPAD = "EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds"
+--- Inset between outer cell edge and ability art (ZO_BUFF_DEBUFF uses frame size - 4).
+local CAST_BAR_ICON_ABILITY_INSET_PIXELS = 2
+
+--- @return string
+local function castBarGetIconInsetTexture()
+    if IsInGamepadPreferredMode() then
+        return CAST_BAR_ICON_INSET_TEXTURE_GAMEPAD
+    end
+    return CAST_BAR_ICON_INSET_TEXTURE_KEYBOARD
+end
+
+--- Frame texture + tint and inset background; safe to call after CreateCastBar / on settings refresh.
+function CastBar.ApplyCastBarIconFrameVisual()
+    if not g_castBarState or not g_castBarState.back then
+        return
+    end
+    g_castBarState.back:SetTexture(CAST_BAR_ICON_FRAME_TEXTURE)
+    local frameColor = ActionBar.SV.CastBarIconFrameColor or ActionBar.Defaults.CastBarIconFrameColor
+    g_castBarState.back:SetColor(frameColor[1], frameColor[2], frameColor[3], frameColor[4])
+    if g_castBarState.iconbg then
+        g_castBarState.iconbg:SetTexture(castBarGetIconInsetTexture())
+    end
+end
+
+--- Populates g_castBarWayshrineRecallAbilityIds from PLAYER_FX_OVERRIDE wayshrine collectibles.
+function CastBar.BuildWayshrineRecallCastAbilityLookup()
+    for abilityId in pairs(g_castBarWayshrineRecallAbilityIds) do
+        g_castBarWayshrineRecallAbilityIds[abilityId] = nil
+    end
+    g_castBarWayshrineRecallAbilityIds[INNATE_RECALL_ABILITY_ID] = true
+
+    local hasRecallProgression, recallProgressionIndex = GetAbilityProgressionXPInfoFromAbilityId(INNATE_RECALL_ABILITY_ID)
+    g_castBarRecallProgressionIndex = hasRecallProgression and recallProgressionIndex or nil
+
+    if Castbar.WayshrineRecallCastAbilityIds then
+        for recallCastAbilityId in pairs(Castbar.WayshrineRecallCastAbilityIds) do
+            g_castBarWayshrineRecallAbilityIds[recallCastAbilityId] = true
+        end
+    end
+
+    local collectibleTotal = GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE)
+    for collectibleIndex = 1, collectibleTotal do
+        local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE, collectibleIndex)
+        if collectibleId and collectibleId > 0 then
+            if GetCollectiblePlayerFxOverrideType(collectibleId) == PLAYER_FX_OVERRIDE_TYPE_ABILITY
+            and GetCollectiblePlayerFxOverrideAbilityType(collectibleId) == PLAYER_FX_OVERRIDE_ABILITY_TYPE_WAYSHRINE then
+                local referenceAbilityId = GetCollectibleReferenceId(collectibleId)
+                if referenceAbilityId and referenceAbilityId > 0 then
+                    g_castBarWayshrineRecallAbilityIds[referenceAbilityId] = true
+                end
+            end
+        end
+    end
+end
+
+--- @return boolean
+local function castBarHasActiveWayshrineRecallPlayerFxOverride()
+    local collectibleTotal = GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE)
+    for collectibleIndex = 1, collectibleTotal do
+        local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE, collectibleIndex)
+        if collectibleId and collectibleId > 0 then
+            if GetCollectiblePlayerFxOverrideType(collectibleId) == PLAYER_FX_OVERRIDE_TYPE_ABILITY
+            and GetCollectiblePlayerFxOverrideAbilityType(collectibleId) == PLAYER_FX_OVERRIDE_ABILITY_TYPE_WAYSHRINE
+            and IsCollectibleActive(collectibleId, GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+--- @param abilityId integer
+--- @return boolean
+local function castBarAbilityCastInfoMatchesInnateRecall(abilityId)
+    local recallChanneled, recallCastTimeMs = GetAbilityCastInfo(INNATE_RECALL_ABILITY_ID)
+    local channeled, castTimeMs = GetAbilityCastInfo(abilityId)
+    if (recallCastTimeMs or 0) <= 0 or (castTimeMs or 0) <= 0 then
+        return false
+    end
+    return channeled == recallChanneled and castTimeMs == recallCastTimeMs
+end
+
+--- @param abilityId integer|nil
+--- @return boolean
+local function castBarIsWayshrineRecallCastAbility(abilityId)
+    if not abilityId or abilityId == 0 then
+        return false
+    end
+    if g_castBarWayshrineRecallAbilityIds[abilityId] then
+        return true
+    end
+    if g_castBarRecallProgressionIndex then
+        local fxOverrideProgressionId = GetAbilityFxOverrideProgressionId(abilityId)
+        if fxOverrideProgressionId ~= 0 and fxOverrideProgressionId == g_castBarRecallProgressionIndex then
+            return true
+        end
+    end
+    if castBarHasActiveWayshrineRecallPlayerFxOverride() and castBarAbilityCastInfoMatchesInnateRecall(abilityId) then
+        return true
+    end
+    return false
+end
+
 --- Input lag for cast/weave display (PerfectWeave: zo_min(GetLatency() / 2 - 1, 48)).
 --- @return integer
 function CastBar.GetCastBarInputLagMs()
@@ -307,6 +420,7 @@ end
 
 --- Clears in-progress cast UI and channel dismiss/suppress latches after zoning (combat buff replay otherwise reopens bars).
 function CastBar.OnPlayerActivated()
+    CastBar.BuildWayshrineRecallCastAbilityLookup()
     if not ActionBar.SV.CastBarEnable then
         return
     end
@@ -329,21 +443,49 @@ function CastBar.ShouldShowCastBarLabel(abilityId)
     return ActionBar.SV.CastBarLabel
 end
 
+--- Applies CastBarLabel to the name label during casts and unlock preview.
+function CastBar.RefreshCastBarLabelVisibility()
+    if not g_castBarState or not g_castBarState.bar or not g_castBarState.bar.name then
+        return
+    end
+    if not ActionBar.SV.CastBarLabel then
+        g_castBarState.bar.name:SetHidden(true)
+        return
+    end
+    if g_casting then
+        g_castBarState.bar.name:SetHidden(false)
+        return
+    end
+    if ActionBar.CastBarUnlocked then
+        CastBar.GenerateCastbarPreview(true)
+    else
+        g_castBarState.bar.name:SetHidden(true)
+    end
+end
+
 function CastBar.GetCastDisplayNameAndIcon(abilityId)
     local displayAbilityId = abilityId
     if ActionBar.SV.CastBarHeavy and Castbar.IsHeavy[abilityId] then
         displayAbilityId = Castbar.HeavyCastMediumDisplay[abilityId] or abilityId
     end
+    local icon
+    local name
     local override = Effects.EffectOverride[displayAbilityId]
     if override and (override.icon or override.name) then
-        local icon = override.icon or GetAbilityIcon(abilityId)
-        local name = override.name or zo_strformat("<<C:1>>", GetAbilityName(abilityId))
-        return icon, name
+        icon = override.icon or GetAbilityIcon(abilityId)
+        name = override.name or zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+    elseif OtherAddonCompatability.isLibCombatEnabled then
+        icon = LibCombat.GetFormattedAbilityIcon(abilityId)
+        name = LibCombat.GetFormattedAbilityName(abilityId)
+    else
+        icon = GetAbilityIcon(abilityId)
+        name = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
     end
-    if OtherAddonCompatability.isLibCombatEnabled then
-        return LibCombat.GetFormattedAbilityIcon(abilityId), LibCombat.GetFormattedAbilityName(abilityId)
+    if castBarIsWayshrineRecallCastAbility(abilityId) then
+        name = Abilities.Innate_Recall
+        icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RECALL_DDS
     end
-    return GetAbilityIcon(abilityId), zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+    return icon, name
 end
 
 --- @param abilityId integer
@@ -413,6 +555,9 @@ function CastBar.ShowCast(abilityId, startTimeMs, durationMs, channeled, castAbi
     end
     if not castAbilityIcon or not castAbilityName then
         castAbilityIcon, castAbilityName = CastBar.GetCastDisplayNameAndIcon(abilityId)
+    elseif castBarIsWayshrineRecallCastAbility(abilityId) then
+        castAbilityName = Abilities.Innate_Recall
+        castAbilityIcon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RECALL_DDS
     end
 
     local castEndTimeMs = startTimeMs + durationMs
@@ -501,6 +646,7 @@ function CastBar.RegisterEvents()
     if not ActionBar.SV.CastBarEnable then
         return
     end
+    CastBar.BuildWayshrineRecallCastAbilityLookup()
 
     CastBar.RegisterLibCombatEvents()
 
@@ -563,6 +709,7 @@ end
 
 function CastBar.Initialize()
     CastBar.RefreshDevDebugLogCache()
+    CastBar.BuildWayshrineRecallCastAbilityLookup()
     CastBar.CreateCastBar()
     CastBar.UpdateCastBar()
     CastBar.SetCastBarPosition()
@@ -859,24 +1006,25 @@ function CastBar.CreateCastBar()
     g_castBarState:SetDimensions(ActionBar.SV.CastBarIconSize, ActionBar.SV.CastBarIconSize)
 
     g_castBarState.back = g_castBarState:CreateControl("$(parent)Back", CT_TEXTURE)
-    g_castBarState.back:SetTexture(LUIE_MEDIA_ICONS_ICON_BORDER_ICON_BORDER_DDS)
     g_castBarState.back:SetAnchor(TOPLEFT, g_castBarState, TOPLEFT)
     g_castBarState.back:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT)
+    g_castBarState.back:SetDrawLayer(DL_OVERLAY)
+    g_castBarState.back:SetDrawTier(DT_MEDIUM)
 
-    g_castBarState.iconbg = g_castBarState:CreateControl("$(parent)IconBg", CT_BACKDROP)
-    g_castBarState.iconbg:SetCenterColor(0, 0, 0, 0.9)
-    g_castBarState.iconbg:SetEdgeColor(0, 0, 0, 0.9)
-    g_castBarState.iconbg:SetEdgeTexture("", 8, 1, 1, 1)
+    g_castBarState.iconbg = g_castBarState:CreateControl("$(parent)IconBg", CT_TEXTURE)
     g_castBarState.iconbg:SetDrawLayer(DL_BACKGROUND)
     g_castBarState.iconbg:SetDrawLevel(g_castBarState:GetDrawLevel() + 1)
-    g_castBarState.iconbg:SetAnchor(TOPLEFT, g_castBarState, TOPLEFT, 3, 3)
-    g_castBarState.iconbg:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT, -3, -3)
+    g_castBarState.iconbg:SetAnchor(TOPLEFT, g_castBarState, TOPLEFT)
+    g_castBarState.iconbg:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT)
 
     g_castBarState.icon = g_castBarState:CreateControl("$(parent)Icon", CT_TEXTURE)
     g_castBarState.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
     g_castBarState.icon:SetDrawLayer(DL_CONTROLS)
-    g_castBarState.icon:SetAnchor(TOPLEFT, g_castBarState, TOPLEFT, 3, 3)
-    g_castBarState.icon:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT, -3, -3)
+    local iconArtInset = CAST_BAR_ICON_ABILITY_INSET_PIXELS
+    g_castBarState.icon:SetAnchor(TOPLEFT, g_castBarState, TOPLEFT, iconArtInset, iconArtInset)
+    g_castBarState.icon:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT, -iconArtInset, -iconArtInset)
+
+    CastBar.ApplyCastBarIconFrameVisual()
 
     g_castBarState.bar =
     {
@@ -992,6 +1140,8 @@ function CastBar.UpdateCastBar()
     local gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha = ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], ActionBar.SV.CastBarGradientC1[4]
     local gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha = ActionBar.SV.CastBarGradientC2[1], ActionBar.SV.CastBarGradientC2[2], ActionBar.SV.CastBarGradientC2[3], ActionBar.SV.CastBarGradientC2[4]
     g_castBarState.bar.bar:SetGradientColors(gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha, gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha)
+    CastBar.ApplyCastBarIconFrameVisual()
+    CastBar.RefreshCastBarLabelVisibility()
 end
 
 -- -----------------------------------------------------------------------------
@@ -1072,6 +1222,8 @@ function CastBar.GenerateCastbarPreview(showPreview)
         local previewName = "Test"
         g_castBarState.bar.name:SetText(previewName)
         g_castBarState.bar.name:SetHidden(not showPreview)
+    else
+        g_castBarState.bar.name:SetHidden(true)
     end
     if ActionBar.SV.CastBarTimer then
         g_castBarState.bar.timer:SetText(CastBar.FormatCastBarTimerText(1000))

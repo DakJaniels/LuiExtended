@@ -492,6 +492,8 @@ function ActionBar.Initialize(enabled)
         ActionBar.SV.CastBarGradientC1, ActionBar.Defaults.CastBarGradientC1)
     ActionBar.SV.CastBarGradientC2 = BackfillCastBarGradientSavedColor(
         ActionBar.SV.CastBarGradientC2, ActionBar.Defaults.CastBarGradientC2)
+    ActionBar.SV.CastBarIconFrameColor = BackfillCastBarGradientSavedColor(
+        ActionBar.SV.CastBarIconFrameColor, ActionBar.Defaults.CastBarIconFrameColor)
 
     -- -----------------------------------------------------------------------------
     -- Disable module if setting not toggled on
@@ -790,6 +792,22 @@ local function GetUpdatedAbilityDuration(abilityId)
     return duration or 0
 end
 
+--- @param tableKeyAbilityId integer BarHighlightOverride row key (slotted or combat source id)
+--- @param overrideRow BarHighlightOverrideData
+local function ApplyBarHighlightDurationOverride(tableKeyAbilityId, overrideRow)
+    if not overrideRow.duration then
+        return
+    end
+    local trackId = overrideRow.newId
+    if trackId and trackId ~= tableKeyAbilityId then
+        g_barDurationOverride[tableKeyAbilityId] = overrideRow.duration
+    elseif trackId then
+        g_barDurationOverride[trackId] = overrideRow.duration
+    else
+        g_barDurationOverride[tableKeyAbilityId] = overrideRow.duration
+    end
+end
+
 -- -----------------------------------------------------------------------------
 -- Called on initialization and menu changes
 -- Pull data from Effects.BarHighlightOverride Tables to filter the display of Bar Highlight abilities based off menu settings.
@@ -835,18 +853,14 @@ function ActionBar.UpdateBarHighlightTables()
             if value.showFakeAura == true then
                 if value.newId then
                     g_barOverrideCI[value.newId] = true
-                    if value.duration then
-                        g_barDurationOverride[value.newId] = value.duration
-                    end
+                    ApplyBarHighlightDurationOverride(abilityId, value)
                     if value.noRemove then
                         g_barNoRemove[value.newId] = true
                     end
                     g_barFakeAura[value.newId] = true
                 else
                     g_barOverrideCI[abilityId] = true
-                    if value.duration then
-                        g_barDurationOverride[abilityId] = value.duration
-                    end
+                    ApplyBarHighlightDurationOverride(abilityId, value)
                     if value.noRemove then
                         g_barNoRemove[abilityId] = true
                     end
@@ -856,9 +870,7 @@ function ActionBar.UpdateBarHighlightTables()
                 local combatTrackAbilityId = value.newId or abilityId
                 g_barOverrideCI[combatTrackAbilityId] = true
                 g_barCombatTrack[combatTrackAbilityId] = true
-                if value.duration then
-                    g_barDurationOverride[combatTrackAbilityId] = value.duration
-                end
+                ApplyBarHighlightDurationOverride(abilityId, value)
                 if value.noRemove or value.combatStackNoExpire then
                     g_barNoRemove[combatTrackAbilityId] = true
                 end
@@ -874,10 +886,14 @@ function ActionBar.UpdateBarHighlightTables()
                     g_barCombatTrackRemainOnSlotted[combatTrackAbilityId] = true
                 end
             else
-                if value.noRemove then
-                    if value.newId then
+                if value.newId then
+                    ApplyBarHighlightDurationOverride(abilityId, value)
+                    if value.noRemove then
                         g_barNoRemove[value.newId] = true
-                    else
+                    end
+                else
+                    ApplyBarHighlightDurationOverride(abilityId, value)
+                    if value.noRemove then
                         g_barNoRemove[abilityId] = true
                     end
                 end
@@ -2221,6 +2237,64 @@ local function OnGroundEffectGained(abilityId, endTime, stackCount)
     end
 end
 
+local BAR_SLOTTED_MAJOR_CAP_TOLERANCE_MS = 1000
+
+--- True when the player still has a player-cast buff with this ability id (shared majors refresh with FADE then GAIN).
+local function PlayerStillHasCastBuff(unitTag, buffAbilityId)
+    if not DoesUnitExist(unitTag) then
+        return false
+    end
+    for buffIndex = 1, GetNumBuffs(unitTag) do
+        local _, _, _, _, _, _, _, _, _, _, abilityIdOnBuff, _, castByPlayer = GetUnitBuffInfo(unitTag, buffIndex)
+        if abilityIdOnBuff == buffAbilityId and castByPlayer then
+            return true
+        end
+    end
+    return false
+end
+
+--- Clear slotted bar timers tied to a shared Major/Minor display id (see Effects.BarHighlightSlottedMajorCap).
+local function ClearSlottedMajorDisplayCap(majorDisplayAbilityId)
+    local capTable = Effects.BarHighlightSlottedMajorCap and Effects.BarHighlightSlottedMajorCap[majorDisplayAbilityId]
+    if not capTable then
+        return
+    end
+    for slottedAbilityId in pairs(capTable) do
+        if g_toggledSlotsRemain[slottedAbilityId] then
+            g_toggledSlotsRemain[slottedAbilityId] = nil
+            if not isStackBaseAbility[slottedAbilityId] then
+                g_toggledSlotsStack[slottedAbilityId] = nil
+            end
+            HideToggledSlots(slottedAbilityId)
+        end
+    end
+end
+
+--- Apply player Major/Minor display buff time to slotted bar keys only when duration matches that skill's cap (blade.txt timings).
+local function ApplySlottedMajorDisplayCap(majorDisplayAbilityId, unitTag, endTime)
+    if unitTag ~= "player" or not ActionBar.SV.ShowToggled then
+        return
+    end
+    local capTable = Effects.BarHighlightSlottedMajorCap and Effects.BarHighlightSlottedMajorCap[majorDisplayAbilityId]
+    if not capTable then
+        return
+    end
+    local remainEndMs = 1000 * endTime
+    local currentTimeMs = GetGameTimeMilliseconds()
+    local incomingRemainMs = remainEndMs - currentTimeMs
+    if incomingRemainMs <= 0 then
+        return
+    end
+    for slottedAbilityId, capMs in pairs(capTable) do
+        if incomingRemainMs <= capMs + BAR_SLOTTED_MAJOR_CAP_TOLERANCE_MS then
+            if g_toggledSlotsFront[slottedAbilityId] or g_toggledSlotsBack[slottedAbilityId] then
+                g_toggledSlotsRemain[slottedAbilityId] = remainEndMs
+                ShowToggledSlots(slottedAbilityId, currentTimeMs)
+            end
+        end
+    end
+end
+
 --- Handle non-ground effect FADED: Grim Focus stack clear, proc stop, toggle hide, BarHighlightSwap.
 local function OnEffectFaded(abilityId)
     if isStackCounter[abilityId] then
@@ -2238,6 +2312,15 @@ local function OnEffectFaded(abilityId)
                 g_toggledSlotsStack[slottedId] = nil
             end
         end
+    end
+
+    if Effects.BarHighlightSlottedMajorCap and Effects.BarHighlightSlottedMajorCap[abilityId] then
+        local majorDisplayAbilityId = abilityId
+        zo_callLater(function ()
+                         if not PlayerStillHasCastBuff("player", majorDisplayAbilityId) then
+                             ClearSlottedMajorDisplayCap(majorDisplayAbilityId)
+                         end
+                     end, 0)
     end
 
     if g_barNoRemove[abilityId] then
@@ -2429,6 +2512,8 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
             end
         end
     end
+
+    ApplySlottedMajorDisplayCap(abilityId, unitTag, endTime)
 end
 
 -- Extra returns here - passThrough & savedId
@@ -2455,11 +2540,22 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
     -- If we're displaying a fake bar highlight then bail out here (sometimes we need a fake aura that doesn't end to simulate effects that can be overwritten, such as Major/Minor buffs.
     -- Technically we don't want to stop the highlight of the original ability since we can only track one buff per slot and overwriting the buff with a longer duration buff shouldn't throw the player off by making the glow disappear earlier.
     if g_barFakeAura[abilityId] and not passThrough then
-        return
+        local allowLiveMajorMinor = unitTag == "player" and Effects.MajorMinor[abilityId]
+        if not allowLiveMajorMinor then
+            return
+        end
     end
     -- Bail out if this effect wasn't cast by the player.
     if sourceType ~= COMBAT_UNIT_TYPE_PLAYER then
         return
+    end
+
+    -- Slotted bar keys (BarHighlightExtraId) before combatTrack newId remap (e.g. DK molten 76518 --> 31874, not 61665).
+    if not isFancyActionBarEnabled and not passThrough then
+        local slottedBarKey = Effects.BarHighlightExtraId and Effects.BarHighlightExtraId[abilityId]
+        if slottedBarKey then
+            abilityId = slottedBarKey
+        end
     end
 
     local combatTrackRemap = g_barCombatEventRemap[abilityId]
@@ -2660,7 +2756,7 @@ local function GetCombatTrackToggleDurationMs(combatAbilityId, result, hitValue)
     and type(hitValue) == "number" and hitValue >= 500 then
         return hitValue
     end
-    return g_barDurationOverride[combatTrackAbilityId]
+    return g_barDurationOverride[combatAbilityId] or g_barDurationOverride[combatTrackAbilityId]
 end
 
 --- @param barAbilityId integer Highlight / remain key (usually combatTrack newId)
@@ -3041,7 +3137,7 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
 
     local abilityName = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].name or GetAbilityName(abilityId, "player") -- GetSlotName(slotNum)
     -- local _, _, channel = GetAbilityCastInfo(abilityId)
-    local duration = GetUpdatedAbilityDuration(durationAbilityId)
+    local duration = g_barDurationOverride[slottedAbilityId] or GetUpdatedAbilityDuration(durationAbilityId)
     local currentTime = GetGameTimeMilliseconds()
 
     local triggeredSlots

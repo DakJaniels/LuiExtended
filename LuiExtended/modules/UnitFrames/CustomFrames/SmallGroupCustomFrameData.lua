@@ -61,6 +61,8 @@ function LUIE.CustomFramesBuildSmallGroup()
                 ["topInfo"] = topInfo,
                 ["name"] = topInfo:GetNamedChild("_Name"),
                 ["levelIcon"] = gli,
+                ["veterancyRankIcon"] = topInfo:GetNamedChild("_VeterancyRankIcon"),
+                ["overlandDifficultyIcon"] = topInfo:GetNamedChild("_OverlandDifficultyIcon"),
                 ["level"] = topInfo:GetNamedChild("_Level"),
                 ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
                 ["friendIcon"] = topInfo:GetNamedChild("_FriendIcon"),
@@ -81,6 +83,10 @@ function LUIE.CustomFramesBuildSmallGroup()
             }
 
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
+            local friendIcon = UnitFrames.CustomFrames[unitTag].friendIcon
+            if friendIcon then
+                friendIcon:SetHidden(true)
+            end
             control.defaultUnitTag = GetGroupUnitTagByIndex(i)
             control:SetMouseEnabled(true)
             control:SetHandler("OnMouseUp", UnitFrames.GroupFrames_OnMouseUp)

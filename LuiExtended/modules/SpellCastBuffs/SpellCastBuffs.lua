@@ -393,17 +393,6 @@ function SpellCastBuffs.Initialize(enabled)
         LUIE.MarkMigrationDone("spellcastbuffs_fontstyles_v2")
     end
 
-    -- Seed the canonical Off Balance name into Prominent Debuffs once so the
-    -- new OB routing works out of the box. Users can still remove it from the
-    -- list and it will not be re-added.
-    if not LUIE.IsMigrationDone("spellcastbuffs_seed_offbalance_prom") then
-        local obName = Abilities.Skill_Off_Balance
-        if obName and SpellCastBuffs.SV.PromDebuffTable[obName] == nil then
-            SpellCastBuffs.SV.PromDebuffTable[obName] = true
-        end
-        LUIE.MarkMigrationDone("spellcastbuffs_seed_offbalance_prom")
-    end
-
     -- Correct read values
     if SpellCastBuffs.SV.IconSize < 30 or SpellCastBuffs.SV.IconSize > 60 then
         SpellCastBuffs.SV.IconSize = SpellCastBuffs.Defaults.IconSize
@@ -1696,11 +1685,17 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
 
         -- Prominent Debuffs
         local promDebuffs = SpellCastBuffs.SV.PromDebuffTable
-        local isPromDebuff = promDebuffs[id] or promDebuffs[name]
+        local isPromDebuff = SpellCastBuffs.WantsProminentDebuff(id, name)
         AddMenuItem(isPromDebuff and "Remove from Prominent Debuffs" or "Add to Prominent Debuffs", function ()
             if isPromDebuff then
                 SpellCastBuffs.RemoveFromCustomList(promDebuffs, id)
                 SpellCastBuffs.RemoveFromCustomList(promDebuffs, name)
+                local obName = Abilities.Skill_Off_Balance
+                if obName and promDebuffs[obName] then
+                    if (id and SpellCastBuffs.offBalanceDebuffById[id]) or id == Effects.OffBalanceImmunityAbilityId then
+                        SpellCastBuffs.RemoveFromCustomList(promDebuffs, obName)
+                    end
+                end
             else
                 SpellCastBuffs.AddToCustomList(promDebuffs, id)
                 SpellCastBuffs.AddToCustomList(promDebuffs, name)
@@ -1858,7 +1853,11 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
     local colorText = ZO_NORMAL_TEXT
     local tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, control.effectName)
     if control.isArtificial then
-        tooltipText = GetArtificialEffectTooltipText(control.effectId)
+        local artificialEffectId = control.artificialEffectId
+        if artificialEffectId == nil and type(control.effectId) == "number" and control.effectId >= 0 and control.effectId <= 8 then
+            artificialEffectId = control.effectId
+        end
+        tooltipText = GetArtificialEffectTooltipText(artificialEffectId)
         InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
         detailsLine = 3
         if SpellCastBuffs.SV.TooltipEnable then
@@ -2275,25 +2274,27 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
         return
     end
 
-    if artificialEffectId then
-        local removeEffect = artificialEffectId
-        -- Battle Spirit: API id 1 (Cyrodiil / BG / duel) and id 3 (Imperial City) --> fake id matches target frame (999014). Id 2 is LFG, not Battle Spirit.
-        if artificialEffectId == 1 or artificialEffectId == 3 then
-            removeEffect = 999014
-        end
-        -- Artificial effects are always stored under "player1"; remove from there.
+    if artificialEffectId and artificialEffectId ~= 1 and artificialEffectId ~= 3 then
+        -- Battle Spirit ids 1/3 remap to 999014; managed after the iterator pass (avoid clearing on NOT_AN_EFFECT flicker).
         local context = "player1"
-        SpellCastBuffs.EffectsList[context][removeEffect] = nil
+        SpellCastBuffs.EffectsList[context][artificialEffectId] = nil
     end
+
+    local hasValidPlayerBattleSpiritArtificial = false
 
     for effectId in ZO_GetNextActiveArtificialEffectIdIter do
         -- Skip only this effect when its "show" setting is off; do not bail out of the loop.
         local skip = (effectId == 0 and SpellCastBuffs.SV.IgnoreEsoPlusPlayer) or
-            ((effectId == 1 or effectId == 3) and SpellCastBuffs.SV.IgnoreBattleSpiritPlayer)
+            ((effectId == 1 or effectId == 3) and SpellCastBuffs.SV.IgnoreBattleSpiritPlayer) or
+            ((effectId == 1 or effectId == 3) and not LUIE.ShouldShowPlayerBattleSpirit())
         if skip then
             -- continue to next effect
         else
+            local storeArtificialEffectId = effectId
             local displayName, iconFile, effectType, _, timeStartedS, timeEndingS = GetArtificialEffectInfo(effectId)
+            if not LUIE.IsDisplayableArtificialEffectType(effectType) then
+                -- continue (e.g. transient NOT_AN_EFFECT placeholder for artificial id 1)
+            else
             local duration = 0
 
             -- ArtificialEffectId (live): 0 ESO Plus, 1 Battle Spirit, 2 LFG, 3 Battle Spirit Imperial City,
@@ -2316,14 +2317,24 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
                 tooltip = Tooltips.Innate_Battle_Spirit
                 effectId = 999014
                 artificial = false
+                hasValidPlayerBattleSpiritArtificial = true
             elseif effectId == 2 then
                 tooltip = Tooltips.Innate_Looking_for_Group
             elseif effectId == 3 then
                 tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
                 effectId = 999014
                 artificial = false
+                hasValidPlayerBattleSpiritArtificial = true
             elseif effectId == 4 then
                 tooltip = Tooltips.Innate_Battleground_Deserter
+            elseif effectId == 5 then
+                tooltip = Tooltips.Innate_Underdog_Damage
+            elseif effectId == 6 then
+                tooltip = Tooltips.Innate_Underdog_Healing
+            elseif effectId == 7 then
+                tooltip = Tooltips.Innate_Solo_Queue_XP
+            elseif effectId == 8 then
+                tooltip = Tooltips.Innate_Solo_Queue_AP
             end
 
             -- Route artificial effects (Battle Spirit, ESO Plus, BG Deserter, etc.) always to player context
@@ -2333,7 +2344,8 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
             local context = "player1"
             SpellCastBuffs.EffectsList[context][effectId] =
             {
-                uid = effectId,
+                uid = storeArtificialEffectId,
+                artificialEffectId = storeArtificialEffectId,
                 target = SpellCastBuffs.DetermineTarget(context),
                 type = effectType,
                 id = effectId,
@@ -2348,8 +2360,21 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
                 iconNum = 0,
                 artificial = artificial,
             }
+            end
         end
     end
+
+    local playerContext = "player1"
+    if not LUIE.ShouldShowPlayerBattleSpirit() then
+        SpellCastBuffs.EffectsList[playerContext][999014] = nil
+    elseif hasValidPlayerBattleSpiritArtificial then
+        -- Written in loop as 999014.
+    elseif SpellCastBuffs.ShouldCreatePlayerBattleSpiritFallback() then
+        SpellCastBuffs.CreatePlayerBattleSpiritListEntry(1, Tooltips.Innate_Battle_Spirit)
+    else
+        SpellCastBuffs.EffectsList[playerContext][999014] = nil
+    end
+
     SpellCastBuffs.MarkDisplayDirty()
 end
 

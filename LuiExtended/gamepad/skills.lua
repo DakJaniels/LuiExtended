@@ -7,9 +7,6 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
-local Data = LuiData.Data
-local Effects = Data.Effects
-
 LUIE.HookGamePadStats = function ()
     -- Hook GAMEPAD Stats List
 
@@ -27,10 +24,6 @@ LUIE.HookGamePadStats = function ()
         GUILD = 10,
         DIFFICULTY = 11,
     }
-
-    local function ArtificialEffectsRowComparator(left, right)
-        return left.sortOrder < right.sortOrder
-    end
 
     function ZO_GamepadStats:RefreshMainList()
         if self.currentDifficultyDropdown and self.currentDifficultyDropdown:IsDropdownVisible() then
@@ -161,7 +154,7 @@ LUIE.HookGamePadStats = function ()
         -- Active Effects--
         self.numActiveEffects = 0
 
-        local function GetActiveEffectNarration(entryData, entryControl)
+    local function GetActiveEffectNarration(entryData, entryControl)
             local narrations = {}
 
             -- Generate the standard parametric list entry narration
@@ -176,72 +169,46 @@ LUIE.HookGamePadStats = function ()
             return narrations
         end
 
-        -- Artificial effects
-        local sortedArtificialEffectsTable = {}
-        for effectId in ZO_GetNextActiveArtificialEffectIdIter do
-            -- Skip ESO Plus buff (effectId == 0)
-            if effectId ~= 0 then
-                local displayName, iconFile, effectType, sortOrder, startTime, endTime = GetArtificialEffectInfo(effectId)
-
-                local data = ZO_GamepadEntryData:New(zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName), iconFile)
-                data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.EFFECTS
-                data.canClickOff = false
-                data.artificialEffectId = effectId
-                data.tooltipTitle = displayName
-                data.sortOrder = sortOrder
-                data.isArtificial = true
-
-                local duration = endTime - startTime
-                if duration > 0 then
-                    local timeLeft = (endTime * 1000.0) - GetFrameTimeMilliseconds()
-                    data:SetCooldown(timeLeft, duration * 1000.0)
-                end
-
-                data.narrationText = GetActiveEffectNarration
-
-                table.insert(sortedArtificialEffectsTable, data)
+        local function ApplyStatsRowCooldown(data, startTime, endTime)
+            local duration = endTime - startTime
+            if duration > 0 then
+                local timeLeft = (endTime * 1000.0) - GetFrameTimeMilliseconds()
+                data:SetCooldown(timeLeft, duration * 1000.0)
             end
         end
 
-        table.sort(sortedArtificialEffectsTable, ArtificialEffectsRowComparator)
+        local function GamepadEntryFromStatsRow(row)
+            local data = ZO_GamepadEntryData:New(zo_strformat(SI_ABILITY_TOOLTIP_NAME, row.displayName), row.displayIcon)
+            data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.EFFECTS
+            data.canClickOff = false
+            data.isArtificial = row.isArtificial
+            data.narrationText = GetActiveEffectNarration
+            data.startTime = row.startTime
+            data.endTime = row.endTime
+            data.effectType = row.effectType
 
-        for i, data in ipairs(sortedArtificialEffectsTable) do
-            self:AddActiveEffectData(data)
+            if row.isArtificial then
+                data.artificialEffectId = row.artificialEffectId
+                data.tooltipTitle = row.displayName
+                data.sortOrder = row.sortOrder
+                ApplyStatsRowCooldown(data, row.startTime, row.endTime)
+            else
+                data.buffIndex = row.buffIndex
+                data.buffSlot = row.buffSlot
+                data.abilityId = row.abilityId
+                data.isSyntheticFromScb = row.isSyntheticFromScb
+                data.scbTooltipText = row.tooltipText
+                if row.stackCount and row.stackCount > 1 then
+                    data.stackCount = row.stackCount
+                end
+                ApplyStatsRowCooldown(data, row.startTime, row.endTime)
+            end
+
+            return data
         end
 
-        -- Real Effects
-        local numBuffs = GetNumBuffs("player")
-        local hasActiveEffects = numBuffs > 0
-        if hasActiveEffects then
-            for i = 1, numBuffs do
-                local buffName, startTime, endTime, buffSlot, stackCount, iconFile, deprecatedBuffType, effectType, abilityType, statusEffectType, abilityId, canClickOff = GetUnitBuffInfo("player", i)
-
-                if buffSlot > 0 and buffName ~= "" then
-                    local data = ZO_GamepadEntryData:New(zo_strformat(SI_ABILITY_TOOLTIP_NAME, buffName), iconFile)
-                    data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.EFFECTS
-                    data.buffIndex = i
-                    data.buffSlot = buffSlot
-                    data.canClickOff = canClickOff
-                    data.isArtificial = false
-
-                    if stackCount > 1 then
-                        data.stackCount = stackCount
-                    end
-
-                    local duration = endTime - startTime
-                    if duration > 0 then
-                        local timeLeft = (endTime * 1000.0) - GetFrameTimeMilliseconds()
-                        data:SetCooldown(timeLeft, duration * 1000.0)
-                    end
-
-                    data.narrationText = GetActiveEffectNarration
-
-                    -- Hide effects if they are set to hide on the override.
-                    if not Effects.EffectOverride[abilityId] or (Effects.EffectOverride[abilityId] and not Effects.EffectOverride[abilityId].hide) then
-                        self:AddActiveEffectData(data)
-                    end
-                end
-            end
+        for _, row in ipairs(LUIE.BuildStatsActiveEffectRows()) do
+            self:AddActiveEffectData(GamepadEntryFromStatsRow(row))
         end
 
         if self.numActiveEffects == 0 then
@@ -279,82 +246,19 @@ LUIE.HookGamePadStats = function ()
             buffType = BUFF_EFFECT_TYPE_BUFF
             contentTitle, _, _, _, contentStartTime, contentEndTime = GetArtificialEffectInfo(selectedData.artificialEffectId)
             contentDescription = GetArtificialEffectTooltipText(selectedData.artificialEffectId)
+        elseif selectedData.isSyntheticFromScb then
+            abilityId = selectedData.abilityId
+            buffType = selectedData.effectType or BUFF_EFFECT_TYPE_BUFF
+            contentTitle = selectedData:GetDisplayName()
+            contentStartTime = selectedData.startTime
+            contentEndTime = selectedData.endTime
+            contentDescription = selectedData.scbTooltipText or ""
         else
             contentTitle, contentStartTime, contentEndTime, buffSlot, _, _, _, buffType, _, _, abilityId = GetUnitBuffInfo("player", selectedData.buffIndex)
 
-            if DoesAbilityExist(abilityId) then
+            contentDescription = LUIE.GetStatsActiveEffectTooltipText(abilityId, buffSlot, contentStartTime, contentEndTime)
+            if (contentDescription == "" or contentDescription == nil) and buffSlot then
                 contentDescription = GetAbilityEffectDescription(buffSlot)
-
-                local timer = contentEndTime - contentStartTime
-                local value2
-                local value3
-                if Effects.EffectOverride[abilityId] then
-                    if Effects.EffectOverride[abilityId].tooltipValue2 then
-                        value2 = Effects.EffectOverride[abilityId].tooltipValue2
-                    elseif Effects.EffectOverride[abilityId].tooltipValue2Mod then
-                        value2 = zo_floor(timer + Effects.EffectOverride[abilityId].tooltipValue2Mod + 0.5)
-                    elseif Effects.EffectOverride[abilityId].tooltipValue2Id then
-                        value2 = zo_floor((GetAbilityDuration(Effects.EffectOverride[abilityId].tooltipValue2Id) or 0) + 0.5) / 1000
-                    else
-                        value2 = 0
-                    end
-                else
-                    value2 = 0
-                end
-                if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].tooltipValue3 then
-                    value3 = Effects.EffectOverride[abilityId].tooltipValue3
-                else
-                    value3 = 0
-                end
-                timer = zo_floor((timer * 10) + 0.5) / 10
-
-                local tooltipText
-                if LUIE.ResolveVeteranDifficulty() == true and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].tooltipVeteran then
-                    tooltipText = zo_strformat(Effects.EffectOverride[abilityId].tooltipVeteran, timer, value2, value3)
-                else
-                    tooltipText = (Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].tooltip) and zo_strformat(Effects.EffectOverride[abilityId].tooltip, timer, value2, value3) or ""
-                end
-
-                -- Display Default Tooltip Description if no custom tooltip is present
-                if tooltipText == "" or tooltipText == nil then
-                    if GetAbilityEffectDescription(buffSlot) ~= "" then
-                        tooltipText = GetAbilityEffectDescription(buffSlot)
-                    end
-                end
-
-                -- Display Default Description if no internal effect description is present
-                if tooltipText == "" or tooltipText == nil then
-                    if GetAbilityDescription(abilityId) ~= "" then
-                        tooltipText = GetAbilityDescription(abilityId)
-                    end
-                end
-
-                -- Override custom tooltip with default tooltip if this ability is flagged to do so (scaling buffs like Mundus Stones)
-                if Effects.TooltipUseDefault[abilityId] then
-                    if GetAbilityEffectDescription(buffSlot) ~= "" then
-                        tooltipText = GetAbilityEffectDescription(buffSlot)
-                        tooltipText = LUIE.UpdateMundusTooltipSyntax(abilityId, tooltipText)
-                    end
-                end
-
-                -- Set the Tooltip to be default if custom tooltips aren't enabled
-                if not LUIE.SpellCastBuffs.SV.TooltipCustom then
-                    tooltipText = GetAbilityEffectDescription(buffSlot)
-                end
-
-                if tooltipText ~= "" then
-                    tooltipText = string.match(tooltipText, ".*%S")
-                end
-                local thirdLine
-                local timer2 = (contentEndTime - contentStartTime)
-                if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].duration then
-                    timer2 = timer2 + Effects.EffectOverride[abilityId].duration
-                end
-
-                contentDescription = tooltipText
-                if thirdLine ~= "" and thirdLine ~= nil then
-                    contentDescription = thirdLine
-                end
             end
         end
 
@@ -362,57 +266,20 @@ LUIE.HookGamePadStats = function ()
         if LUIE.SpellCastBuffs.SV.TooltipAbilityId or LUIE.SpellCastBuffs.SV.TooltipBuffType then
             -- Add Ability ID Line
             if LUIE.SpellCastBuffs.SV.TooltipAbilityId then
-                local labelAbilityId
-                labelAbilityId = abilityId or "None"
+                local labelAbilityId = abilityId or "None"
                 if labelAbilityId == "Fake" then
                     selectedData.isArtificial = true
                 end
                 if selectedData.isArtificial then
-                    -- ArtificialEffectId (live): 0 ESO Plus, 1 Battle Spirit, 2 LFG, 3 Battle Spirit Imperial City,
-                    -- 4 Battleground Deserter, 5–8 Underdog / Solo Queue bonuses.
-                    if abilityId == 0 then
-                        labelAbilityId = 63601
-                    elseif abilityId == 1 or abilityId == 3 then
-                        labelAbilityId = 999014
-                    elseif abilityId == 2 then
-                        labelAbilityId = "2 (LFG)"
-                    elseif abilityId == 4 then
-                        labelAbilityId = "4 (BG Deserter)"
-                    elseif abilityId >= 5 and abilityId <= 8 then
-                        labelAbilityId = abilityId
-                    else
-                        labelAbilityId = "Artificial"
-                    end
+                    labelAbilityId = LUIE.FormatStatsActiveEffectAbilityIdLabel(abilityId, true)
                 end
                 contentDescription = contentDescription .. "\n\nAbility ID: " .. labelAbilityId
             end
 
             -- Add Buff Type Line
             if LUIE.SpellCastBuffs.SV.TooltipBuffType then
-                buffType = buffType or LUIE_BUFF_TYPE_NONE
-                if abilityId and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].unbreakable then
-                    buffType = buffType + 2
-                end
-
-                -- Setup tooltips for player aoe trackers
-                if abilityId and Effects.EffectGroundDisplay[abilityId] then
-                    buffType = buffType + 4
-                end
-
-                -- Setup tooltips for ground buff/debuff effects
-                if abilityId and (Effects.AddGroundDamageAura[abilityId] or (Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].groundLabel)) then
-                    buffType = buffType + 6
-                end
-
-                -- Setup tooltips for Fake Player Offline Auras
-                if abilityId and Effects.FakePlayerOfflineAura[abilityId] then
-                    if Effects.FakePlayerOfflineAura[abilityId].ground then
-                        buffType = 6
-                    else
-                        buffType = 5
-                    end
-                end
-
+                local buffTypeLookupId = selectedData.isArtificial and nil or abilityId
+                buffType = LUIE.GetStatsActiveEffectTooltipBuffType(buffTypeLookupId, buffType)
                 local endLine = LUIE.buffTypes[buffType] --- @type string
                 contentDescription = contentDescription .. "\nType: " .. endLine
             end

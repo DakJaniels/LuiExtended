@@ -42,6 +42,7 @@ local strings =
     LUIE_STRING_LAM_UF_DFRAMES_HEADER = "Cadres d'unité par défaut",
     LUIE_STRING_LAM_UF_DFRAMES_PLAYER = "Cadre PLAYER par défaut",
     LUIE_STRING_LAM_UF_DFRAMES_TARGET = "Cadre CIBLE par défaut",
+    LUIE_STRING_LAM_UF_SUPPRESS_ZO_DESC = "Lorsqu'un menu ci-dessus est sur Désactiver et que le cadre LUIE correspondant est activé, LUIE masque les contrôles vanilla et désinscrit leurs gestionnaires d'événements UI (y compris les barres d'attributs joueur). Utilisez Ne rien faire ou Extender pour garder l'UI vanilla. Peut entrer en conflit avec d'autres addons.",
     LUIE_STRING_LAM_UF_DFRAMES_GROUPSMALL = "Cadre GROUPE par défaut",
     LUIE_STRING_LAM_UF_DFRAMES_BOSS_COMPASS = "Cadre BOSS par défaut (Boussole)",
     LUIE_STRING_LAM_UF_DFRAMES_REPOSIT = "Repositionner les images du lecteur par défaut",

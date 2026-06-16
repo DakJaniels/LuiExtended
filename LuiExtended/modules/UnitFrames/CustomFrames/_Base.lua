@@ -1,6 +1,7 @@
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
+--  LuaLS: canonical frame types in modules/UnitFrames/_annotations/*.meta.lua
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended

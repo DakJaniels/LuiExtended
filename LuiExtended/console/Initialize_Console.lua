@@ -84,7 +84,11 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
     LUIE.UnitFrames.Initialize(LUIE.SV.UnitFrames_Enabled)
     LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
+    LUIE.MiniMap.Initialize(LUIE.SV.MiniMap_Enabled)
     LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
+    -- -----------------------------------------------------------------------------
+    LUIE.ApplyZOBuffDebuffSuppression()
+    LUIE.RegisterZOBuffDebuffSuppressionSettingListener()
     -- -----------------------------------------------------------------------------
     -- Load Timestamp Color
     LUIE.ChatOutput:UpdateTimeStampColor()
@@ -98,12 +102,17 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.InfoPanel.CreateConsoleSettings()
     LUIE.UnitFrames.CreateConsoleSettings()
     LUIE.SpellCastBuffs.CreateConsoleSettings()
+    LUIE.MiniMap.CreateConsoleSettings()
     LUIE.SlashCommands.CreateConsoleSettings()
     -- -----------------------------------------------------------------------------
     -- Register global event listeners
     eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
     --
-    SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+    if LUIE.SlashCommandRegistry then
+        LUIE.SlashCommandRegistry.ApplyPostInitSlashCommandIntegration()
+    else
+        SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+    end
     --
     -- Event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
@@ -112,9 +121,8 @@ local function OnAddOnLoaded(eventId, addonName)
     end
     -- -----------------------------------------------------------------------------
     LUIE.ScheduleDebugEnvironmentReloadChat()
-    -- if LUIE_ScheduleLocalizationCoverageReport then
-    --     LUIE_ScheduleLocalizationCoverageReport()
-    -- end
+    -- Dev locale audit: enable lang/_LocalizationCoverage_Dev.lua in LuiExtended.addon, then:
+    -- if LUIE_ScheduleLocalizationCoverageReport then LUIE_ScheduleLocalizationCoverageReport() end
     eventManager:UnregisterForEvent(addonName, eventId)
 end
 

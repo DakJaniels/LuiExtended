@@ -20,8 +20,6 @@ local UnitFrames = LUIE.UnitFrames
 --- @class ZO_PlayerAttributeStamina : ZO_PlayerAttributeBarControl
 
 local pairs = pairs
-local eventManager = GetEventManager()
-
 
 local defaultPos = {}
 
@@ -196,17 +194,8 @@ function UnitFrames.CreateDefaultFrames()
     -- Apply fonts
     UnitFrames.DefaultFramesApplyFont()
 
-    -- Instead of using Default Unit Frames Extender, the player could wish simply to disable and hide default UI frames
-    if UnitFrames.SV.DefaultFramesNewPlayer == 1 then
-        local frames = { "Health", "Stamina", "Magicka", "MountStamina", "Werewolf", "SiegeHealth" }
-        for i = 1, #frames do
-            local frame = _G["ZO_PlayerAttribute" .. frames[i]]
-            frame:UnregisterForEvent(EVENT_POWER_UPDATE)
-            frame:UnregisterForEvent(EVENT_INTERFACE_SETTING_CHANGED)
-            frame:UnregisterForEvent(EVENT_PLAYER_ACTIVATED)
-            eventManager:UnregisterForUpdate("ZO_PlayerAttribute" .. frames[i] .. "FadeUpdate")
-            frame:SetHidden(true)
-        end
+    if UnitFrames.ShouldSuppressZOPlayerAttributeBars() then
+        UnitFrames.SuppressZOPlayerAttributeBars()
     end
 end
 

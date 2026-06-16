@@ -2,10 +2,10 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101050 101051
-## Version: 7.2.4.6
-## AddOnVersion: 7246
-## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## DependsOn: LuiMedia>=7133 LuiData>=7220
+## Version: 7.2.4.7
+## AddOnVersion: 7247
+## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements, Slash Commands, and MiniMap.
+## DependsOn: LuiMedia>=7133 LuiData>=7221
 ## PCDependsOn: LibAddonMenu-2.0>=43
 ## ConsoleDependsOn: LibHarvensAddonSettings>=20108 LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
@@ -13,13 +13,14 @@
 ## OptionalDependsOn: LibDebugLogger>=268 DebugLogViewer>=697 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028
 ## OptionalDependsOn: LootLog>=408040 Taneth LibCombat LibCombat2 LibSlashCommander
 ## SavedVariables: LUIESV LUIE_UnitFrames_SV LUIE_CombatText_SV LUIE_ChatAnnouncements_SV LUIE_SpellCastBuffs_SV
-## SavedVariables: LUIE_ActionBar_SV LUIE_InfoPanel_SV LUIE_SlashCommands_SV LUIE_CombatInfo_SV
+## SavedVariables: LUIE_ActionBar_SV LUIE_InfoPanel_SV LUIE_SlashCommands_SV LUIE_CombatInfo_SV LUIE_MiniMap_SV
 
 # Addon Profiler
 ;src/AddonProfiler.lua
 
 # Language Files
 lang/_RegisterStrings.lua
+;lang/_LocalizationCoverage_Dev.lua
 lang/Core/default.lua
 lang/Shared/default.lua
 lang/ActionBar/default.lua
@@ -30,6 +31,7 @@ lang/InfoPanel/default.lua
 lang/SlashCommands/default.lua
 lang/SpellCastBuffs/default.lua
 lang/UnitFrames/default.lua
+lang/MiniMap/default.lua
 lang/Core/$(language).lua
 lang/Shared/$(language).lua
 lang/ActionBar/$(language).lua
@@ -40,16 +42,19 @@ lang/InfoPanel/$(language).lua
 lang/SlashCommands/$(language).lua
 lang/SpellCastBuffs/$(language).lua
 lang/UnitFrames/$(language).lua
+lang/MiniMap/$(language).lua
 
 bindings/Bindings.xml
 
 # Addon Base
 src/LuiExtended.lua
+src/_ZO_BuffDebuffSuppression.lua
 src/ChatOutput/Namespace.lua
 src/ChatOutput/TimestampAndFormat.lua
 src/ChatOutput/ChatOutput.lua
 src/LuiExtended_Log.lua
 src/Functions.lua
+src/StatsActiveEffects.lua
 src/DebugEnvironment.lua
 src/ProtectedHooks.lua
 src/Hooks.lua
@@ -58,6 +63,7 @@ shared/actionbutton.lua
 shared/settings_tweaks.lua
 shared/ChatOutputSettingsUI.lua
 shared/synergy.lua
+shared/HudSceneFragments.lua
 
 gamepad/HooksSkillsAdvisor.lua
 gamepad/hooks.lua
@@ -170,6 +176,27 @@ modules/CombatInfo/CombatInfo.lua
 # Modules - Info Panel
 modules/InfoPanel/InfoPanel.lua
 
+# Modules - MiniMap
+modules/MiniMap/_Namespace.lua
+modules/MiniMap/_FilterController.lua
+modules/MiniMap/_NativeWorldMapContainer.lua
+modules/MiniMap/_VisibilityController.lua
+modules/MiniMap/_ZoomContext.lua
+modules/MiniMap/_ChromeController.lua
+modules/MiniMap/_InfoPanelIntegration.lua
+modules/MiniMap/_PublicAPI.lua
+modules/MiniMap/_PinDimensions.lua
+modules/MiniMap/_HudScene.lua
+modules/MiniMap/_View.lua
+modules/MiniMap/_MapController.lua
+modules/MiniMap/_PinController.lua
+modules/MiniMap/_PinMirrorStateMachine.lua
+modules/MiniMap/_MapEventController.lua
+modules/MiniMap/_InputController.lua
+modules/MiniMap/_Runtime.lua
+modules/MiniMap/MiniMap.lua
+frontend/MiniMap.xml
+
 # Modules - Spell Cast Buffs
 modules/SpellCastBuffs/_Namespace.lua
 modules/SpellCastBuffs/_Collectibles.lua
@@ -216,6 +243,7 @@ modules/UnitFrames/CustomFrames/CompanionCustomFrameData.lua
 modules/UnitFrames/CustomFrames/BossCustomFrameData.lua
 modules/UnitFrames/CustomFrames/_PostCreate.lua
 modules/UnitFrames/_CustomFrames.lua
+modules/UnitFrames/_ZO_FrameSuppression.lua
 modules/UnitFrames/_DefaultFrames.lua
 modules/UnitFrames/_Handlers.lua
 modules/UnitFrames/_GroupElectionInfo.lua
@@ -248,10 +276,22 @@ modules/UnitFrames/_DynamicPositioning.lua
 modules/UnitFrames/_PlayerDodgePrediction.lua
 modules/UnitFrames/_CompanionAbilityTrack.lua
 modules/UnitFrames/_CompanionRapportFlourish.lua
+modules/UnitFrames/_StaticControls/Shared.lua
+modules/UnitFrames/_StaticControls/TopInfoLayout.lua
+modules/UnitFrames/_StaticControls/Player.lua
+modules/UnitFrames/_StaticControls/Target.lua
+modules/UnitFrames/_StaticControls/Group.lua
+modules/UnitFrames/_StaticControls/Raid.lua
+modules/UnitFrames/_StaticControls/Generic.lua
 modules/UnitFrames/UnitFrames.lua
 
 # SavedVariables migration (requires module Defaults tables)
 src/SavedVariablesMigration.lua
+
+# Settings - Shared
+shared/SlashCommands/SlashCommandRegistry.lua
+shared/SlashCommands/SlashCommands_LSC.lua
+shared/SlashCommands/SettingsSlashCommandLSC.lua
 
 # Settings - Console
 console/Settings_API.lua
@@ -264,6 +304,7 @@ console/settings/InfoPanel.lua
 console/settings/SlashCommands.lua
 console/settings/SpellCastBuffs.lua
 console/settings/UnitFrames.lua
+console/settings/MiniMap.lua
 
 # Dialogs - Console
 console/dialogs/BlacklistDialog.xml
@@ -275,9 +316,6 @@ pc/frontend/Changelog.xml
 pc/Changelog.lua
 
 # Settings - PC
-pc/SlashCommandRegistry.lua
-pc/SlashCommands_LSC.lua
-pc/SettingsSlashCommandLSC.lua
 pc/Settings_API.lua
 pc/lam_extension/LUIE_ComboBoxStatusbarEntry.xml
 pc/lam_extension/fontable_dropdown.lua
@@ -288,6 +326,7 @@ pc/settings/CombatInfo.lua
 pc/settings/ActionBar.lua
 pc/settings/CombatText.lua
 pc/settings/InfoPanel.lua
+pc/settings/MiniMap.lua
 pc/settings/SlashCommands.lua
 pc/settings/SpellCastBuffs.lua
 pc/settings/UnitFrames.lua

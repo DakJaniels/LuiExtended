@@ -742,6 +742,7 @@ function ChatAnnouncements.RegisterLootEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_TRADE_ITEM_REMOVED)
     -- JUSTICE
     eventManager:UnregisterForEvent(moduleName, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_JUSTICE_GOLD_PICKPOCKETED)
     eventManager:UnregisterForEvent(moduleName .. "WeaponPair", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
     -- LOOT FAILED
     eventManager:UnregisterForEvent(moduleName, EVENT_QUEST_COMPLETE_ATTEMPT_FAILED_INVENTORY_FULL)
@@ -753,6 +754,9 @@ function ChatAnnouncements.RegisterLootEvents()
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootQuestAdd or ChatAnnouncements.SV.Inventory.LootQuestRemove then
         eventManager:RegisterForEvent(moduleName, EVENT_LOOT_RECEIVED, ChatAnnouncements.OnLootReceived)
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED, ChatAnnouncements.OnInventoryItemUsed)
+    end
+    if ChatAnnouncements.SV.Inventory.Loot then
+        eventManager:RegisterForEvent(moduleName, EVENT_JUSTICE_GOLD_PICKPOCKETED, ChatAnnouncements.OnJusticeGoldPickpocketed)
     end
     -- QUEST LOOT
     if ChatAnnouncements.SV.Inventory.LootQuestAdd or ChatAnnouncements.SV.Inventory.LootQuestRemove then
@@ -4289,14 +4293,7 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemLink, quantit
 
     -- If the player pickpockets an item
     if isPickpocketLoot and lootedBySelf then
-        S.g_isPickpocketed = true
-
-        local function ResetIsPickpocketed()
-            S.g_isPickpocketed = false
-            eventManager:UnregisterForUpdate(moduleName .. "ResetPickpocket")
-        end
-        eventManager:UnregisterForUpdate(moduleName .. "ResetPickpocket")
-        eventManager:RegisterForUpdate(moduleName .. "ResetPickpocket", 150, ResetIsPickpocketed)
+        ChatAnnouncements.MarkPickpocketLootContext()
     end
 
     -- Return right now if we don't have group loot set to display
@@ -4339,6 +4336,12 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemLink, quantit
         end
         ChatAnnouncements.ItemPrinter(icon, quantity, itemType, itemId, formattedItemLink, recipient, logPrefix, gainOrLoss, false, true)
     end
+end
+
+--- @param eventId integer
+--- @param goldAmount integer
+function ChatAnnouncements.OnJusticeGoldPickpocketed(eventId, goldAmount)
+    ChatAnnouncements.MarkPickpocketLootContext()
 end
 
 --- @param deltaReputation integer
@@ -4534,6 +4537,128 @@ function ChatAnnouncements.GetFormattedCollectionStatusIcon(itemLink)
     return zo_strformat("<<1>> ", ZO_ERROR_COLOR:Colorize(zo_iconFormatInheritColor("EsoUI/Art/Buttons/decline_up.dds", 16, 16)))
 end
 
+--- @param text1 string|nil
+--- @param text2 string|nil
+--- @param text3 string|nil
+--- @return string
+function ChatAnnouncements.FormatLootItemTypeSlotLine(text1, text2, text3)
+    if not text1 or text1 == "" then
+        return ""
+    end
+
+    if text2 then
+        if text3 then
+            return zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2_ITEMSTYLE, text1, text2, text3)
+        else
+            return zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, text1, text2)
+        end
+    end
+    return zo_strformat(SI_ITEM_FORMAT_STR_TEXT1, text1)
+end
+
+--- Tooltip-style type line (see EsoUI PublicAllIngames/Tooltip/ItemTooltips.lua AddTopSection).
+--- @param itemLink string
+--- @return string
+function ChatAnnouncements.GetLootItemTypeDisplayText(itemLink)
+    if not itemLink or itemLink == "" then
+        return ""
+    end
+
+    local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+    if itemType == ITEMTYPE_NONE then
+        return ""
+    end
+
+    local specializedItemTypeText = ZO_GetSpecializedItemTypeText(itemType, specializedItemType)
+    local equipType = GetItemLinkEquipType(itemLink)
+    local text1
+    local text2
+    local text3
+
+    if itemType == ITEMTYPE_SIEGE then
+        local siegeType = GetItemLinkSiegeType(itemLink)
+        if siegeType ~= SIEGE_TYPE_NONE then
+            return GetString("SI_SIEGETYPE", siegeType)
+        end
+        return ""
+    elseif itemType == ITEMTYPE_COSTUME then
+        text1 = specializedItemTypeText
+    elseif itemType == ITEMTYPE_RECIPE then
+        if IsItemLinkRecipeKnown(itemLink) then
+            text1 = specializedItemTypeText
+        else
+            text1 = GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE)
+        end
+        text2 = GetCraftingSkillName(GetItemLinkRecipeCraftingSkillType(itemLink))
+    elseif itemType == ITEMTYPE_FURNISHING then
+        text1 = GetString("SI_ITEMTYPE", itemType)
+        local furnitureDataId = GetItemLinkFurnitureDataId(itemLink)
+        local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
+        text2 = GetFurnitureCategoryName(categoryId)
+        local furnitureSubcategoryText = GetFurnitureCategoryName(subcategoryId)
+        if furnitureSubcategoryText ~= "" then
+            text3 = furnitureSubcategoryText
+        end
+    elseif equipType ~= EQUIP_TYPE_INVALID then
+        local weaponType = GetItemLinkWeaponType(itemLink)
+        if itemType == ITEMTYPE_ARMOR and weaponType == WEAPONTYPE_NONE then
+            text1 = GetString("SI_EQUIPTYPE", equipType)
+            local armorType = GetItemLinkArmorType(itemLink)
+            if armorType ~= ARMORTYPE_NONE then
+                text2 = GetString("SI_ARMORTYPE", armorType)
+            end
+        elseif weaponType ~= WEAPONTYPE_NONE then
+            text1 = GetString("SI_WEAPONTYPE", weaponType)
+            text2 = GetString("SI_EQUIPTYPE", equipType)
+        elseif itemType == ITEMTYPE_POISON or itemType == ITEMTYPE_DISGUISE then
+            text1 = specializedItemTypeText
+        end
+    elseif itemType == ITEMTYPE_LURE and IsItemLinkConsumable(itemLink) then
+        text1 = GetString(SI_ITEM_SUB_TYPE_BAIT)
+    elseif GetItemLinkBookTitle(itemLink) then
+        if specializedItemType ~= SPECIALIZED_ITEMTYPE_NONE then
+            text1 = specializedItemTypeText
+        else
+            text1 = GetString(SI_ITEM_SUB_TYPE_BOOK)
+        end
+    elseif DoesItemLinkStartQuest(itemLink) then
+        text1 = GetString(SI_ITEM_FORMAT_STR_QUEST_STARTER_ITEM)
+    elseif DoesItemLinkFinishQuest(itemLink) then
+        text1 = GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM)
+    else
+        local craftingSkillType = GetItemLinkCraftingSkillType(itemLink)
+        if craftingSkillType ~= CRAFTING_TYPE_INVALID then
+            text1 = specializedItemTypeText
+            text2 = GetCraftingSkillName(craftingSkillType)
+        else
+            text1 = specializedItemTypeText
+        end
+    end
+
+    local displayText = ChatAnnouncements.FormatLootItemTypeSlotLine(text1, text2, text3)
+    if displayText == "" then
+        return ""
+    end
+
+    if itemType == ITEMTYPE_TREASURE then
+        local treasureTagDescriptions = {}
+        local numItemTags = GetItemLinkNumItemTags(itemLink)
+        for tagIndex = 1, numItemTags do
+            local itemTagDescription, itemTagCategory = GetItemLinkItemTagInfo(itemLink, tagIndex)
+            if itemTagDescription ~= "" and itemTagCategory == TAG_CATEGORY_MIN_VALUE then
+                treasureTagDescriptions[#treasureTagDescriptions + 1] = itemTagDescription
+            end
+        end
+        if #treasureTagDescriptions > 0 then
+            table.sort(treasureTagDescriptions)
+            local treasureTypeList = table.concat(treasureTagDescriptions, GetString(SI_LIST_COMMA_SEPARATOR))
+            displayText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, displayText, treasureTypeList)
+        end
+    end
+
+    return displayText
+end
+
 --- @param icon string
 --- @param stack integer
 --- @param itemType ItemType
@@ -4560,6 +4685,8 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
         return
     end
 
+    logPrefix = ChatAnnouncements.ResolveLootLogPrefix(logPrefix)
+
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon ~= "") and zo_strformat("<<1>> ", zo_iconFormat(icon, 16, 16)) or ""
     local color
     if gainOrLoss == 1 then
@@ -4579,6 +4706,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     local formattedTrait
     local formattedArmorType
     local formattedStyle
+    local formattedItemType
 
     if receivedBy == "" or receivedBy == nil or receivedBy == "LUIE_RECEIVE_CRAFT" or receivedBy == "LUIE_INVENTORY_UPDATE_DISGUISE" then
         -- Don't display yourself
@@ -4608,6 +4736,9 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     local unformattedStyle = zo_strformat("<<1>>", GetItemStyleName(styleType))
     formattedStyle = (ChatAnnouncements.SV.Inventory.LootShowStyle and styleType ~= 0 and styleType ~= 10 and styleType ~= GetUniversalStyleId() and itemType ~= ITEMTYPE_STYLE_MATERIAL and itemType ~= ITEMTYPE_GLYPH_ARMOR and itemType ~= ITEMTYPE_GLYPH_JEWELRY and itemType ~= ITEMTYPE_GLYPH_WEAPON and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgrade") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail")) and string_format(" |cFFFFFF(%s)|r", unformattedStyle) or ""
 
+    local itemTypeLabel = ChatAnnouncements.GetLootItemTypeDisplayText(itemLink)
+    formattedItemType = (ChatAnnouncements.SV.Inventory.LootShowItemType and itemTypeLabel ~= "" and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgrade") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageUpgradeFail")) and string_format(" |cFFFFFF(%s)|r", itemTypeLabel) or ""
+
     local formattedTotal = ""
     if ChatAnnouncements.SV.Inventory.LootTotal and receivedBy ~= "LUIE_INVENTORY_UPDATE_DISGUISE" and receivedBy ~= "LUIE_RECEIVE_CRAFT" and not groupLoot and (not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageLearnRecipe") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageLearnMotif") and not ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageLearnStyle")) then
         local total1, total2, total3 = GetItemLinkStacks(itemLink)
@@ -4618,7 +4749,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     end
 
     local formattedCollectionStatus = (showCollectionStatus and ChatAnnouncements.GetFormattedCollectionStatusIcon(itemLink)) or ""
-    local itemString = string_format("%s%s%s%s%s%s%s", formattedIcon, formattedCollectionStatus, itemLink, formattedQuantity, formattedArmorType, formattedTrait, formattedStyle)
+    local itemString = string_format("%s%s%s%s%s%s%s%s", formattedIcon, formattedCollectionStatus, itemLink, formattedQuantity, formattedArmorType, formattedTrait, formattedStyle, formattedItemType)
 
     local delayTimer = 50
     local messageType = alwaysFirst and "CONTAINER" or "LOOT"
@@ -4758,6 +4889,28 @@ function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color
     ChatAnnouncements.ResetTrackingVariables()
 end
 
+local PICKPOCKET_LOOT_CONTEXT_MS = 500
+
+function ChatAnnouncements.MarkPickpocketLootContext()
+    S.g_isPickpocketed = true
+
+    local function ResetIsPickpocketed()
+        S.g_isPickpocketed = false
+        eventManager:UnregisterForUpdate(moduleName .. "ResetPickpocket")
+    end
+    eventManager:UnregisterForUpdate(moduleName .. "ResetPickpocket")
+    eventManager:RegisterForUpdate(moduleName .. "ResetPickpocket", PICKPOCKET_LOOT_CONTEXT_MS, ResetIsPickpocketed)
+end
+
+--- @param logPrefix string
+--- @return string
+function ChatAnnouncements.ResolveLootLogPrefix(logPrefix)
+    if logPrefix and logPrefix ~= "" then
+        return logPrefix
+    end
+    return ChatAnnouncements.GetContextMessagePrefix()
+end
+
 -- Helper function to determine message prefix based on context
 --- @return string
 function ChatAnnouncements.GetContextMessagePrefix()
@@ -4767,6 +4920,8 @@ function ChatAnnouncements.GetContextMessagePrefix()
         return ChatAnnouncements.GetContextMessage("CurrencyMessagePickpocket")
     elseif S.g_isStolen and not S.g_isPickpocketed then
         return ChatAnnouncements.GetContextMessage("CurrencyMessageSteal")
+    elseif GetInteractionType() == INTERACTION_PICKPOCKET then
+        return ChatAnnouncements.GetContextMessage("CurrencyMessagePickpocket")
     end
     return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive")
 end
@@ -5147,6 +5302,10 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
         return
+    end
+
+    if GetInteractionType() == INTERACTION_PICKPOCKET then
+        ChatAnnouncements.MarkPickpocketLootContext()
     end
 
     if IsItemStolen(bagId, slotId) then

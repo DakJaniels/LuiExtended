@@ -1847,7 +1847,9 @@ local effectOverride =
     -- Dragonknight (skillLineId 351, line 43)
     [238232] = { icon = "/esoui/art/icons/ability_weapon_005.dds", dynamicTooltip = true },           -- Inexorable Descent (skill sheet / mastery passive)
     [263197] = { icon = "/esoui/art/icons/ability_weapon_005.dds", dynamicTooltip = true, tooltipMorphId = 238232 }, -- Inexorable Descent (player buff; log: with 29465 Landslide stacks)
-    [240268] = { icon = "/esoui/art/icons/ability_dragonknight_031.dds", dynamicTooltip = true },      -- Booming Voice
+    [240268] = { icon = "/esoui/art/icons/ability_dragonknight_031.dds", dynamicTooltip = true },      -- Booming Voice (Class Mastery skill sheet)
+    [263200] = { icon = "/esoui/art/icons/ability_dragonknight_031.dds", dynamicTooltip = true, tooltipMorphId = 240268 }, -- Booming Voice (Storm Voice rank 2 proc carrier, ~15s delay; table 198758357)
+    [270020] = { icon = "/esoui/art/icons/ability_dragonknight_031.dds", dynamicTooltip = true, tooltipMorphId = 240268 }, -- Booming Voice (recovery buff after delay; not Take Flight draconic fury)
     [259224] = { icon = "/esoui/art/icons/ability_dragonknight_028.dds", dynamicTooltip = true },      -- Wildfire Embers (mastery passive / skill sheet)
     [263208] = { icon = "/esoui/art/icons/ability_dragonknight_028.dds", dynamicTooltip = true, tooltipMorphId = 259224, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Wildfire Embers (target DoT; table 198758357)
     [263309] = { icon = "/esoui/art/icons/ability_dragonknight_028.dds", dynamicTooltip = true, tooltipMorphId = 259224, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Wildfire Embers (alt id; same name hash 33791935)
@@ -2139,9 +2141,9 @@ local effectOverride =
     [118928] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Dragon Leap (combat bundle)
     [32719] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds" },                                 -- Take Flight (slotted)
     [259372] = { hide = true },                                                                             -- Take Flight (travel)
-    [262683] = { hide = true },                                                                             -- Take Flight (combat bundle)
+    [262683] = { hide = true },                                                                             -- Take Flight (U49 combat bundle; player fury aura is 48752 on live — takeflight_leap.txt)
     [48753] = { hide = true },                                                                              -- CC Immunity (Take Flight)
-    [48752] = { hide = true },                                                                              -- Take Flight (combat bundle)
+    [48752] = { name = Abilities.Skill_Take_Flight, icon = "/esoui/art/icons/ability_dragonknight_009_b.dds", dynamicTooltip = true, tooltipMorphId = 32719, forcedContainer = "short" }, -- Draconic fury player buff (~15s; log: EFFECT_CHANGED unitTag player, hitValue 15000)
     [114600] = { name = Abilities.Skill_Take_Flight, tooltip = Tooltips.Generic_Knockback },                -- Stun (Take Flight)
     [262682] = { name = Abilities.Skill_Take_Flight, tooltip = Tooltips.Generic_Knockback },                -- Stun (Take Flight, U49; combat log)
     [259241] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds", hide = true },                   -- Landslide (U49, Take Flight)
@@ -3860,6 +3862,9 @@ local effectOverride =
     [62522] = { hide = true },                                                                    -- Blade Cloak (player buff id; track 247975)
 
     -- Hidden Blade / Shrouded Daggers / Flying Blade
+    [68807] = { hide = true },   -- Major Brutality combat (Hidden Blade)
+    [168270] = { hide = true },  -- Major Sorcery combat (Hidden Blade line)
+    [126647] = { hide = true },  -- Major Brutality combat (Shrouded Daggers)
     [126641] = { icon = "" },                                                                                                                          -- Hidden Blade (Hidden Blade)
     [126640] = { icon = "/esoui/art/icons/ability_dualwield_003.dds", name = Abilities.Skill_Hidden_Blade, tooltip = Tooltips.Generic_Stagger },       -- Stagger (Hidden Blade)
     [126639] = { tooltip = Tooltips.Generic_Stun },                                                                                                    -- Hidden Blade (Hidden Blade)
@@ -4263,7 +4268,7 @@ local effectOverride =
     [111788] = { hide = true },                                                                                                                               -- Major Cowardice internal (Deafening Roar; display 147643)
     [171003] = { hide = true },                                                                                                                               -- Deafening Roar target fear marker
 
-    [267744] = { icon = "/esoui/art/icons/ability_werewolf_003.dds", tooltip = Tooltips.Skill_Blood_Hunger, displayStacks = true, maxStacks = 3, stack = 1 }, -- Blood Hunger (Roar - All Morphs)
+    [267744] = { icon = "/esoui/art/icons/ability_werewolf_003.dds", tooltip = Tooltips.Skill_Blood_Hunger, displayStacks = true, maxStacks = 4, stack = 1 }, -- Blood Hunger (Roar - All Morphs)
 
     [266875] = { hide = true },                                                                                                                               -- Fury (Werewolf resource counter)
     [266744] = { hide = true },                                                                                                                               -- Fury per-target generation throttle (ON CD marker)

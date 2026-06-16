@@ -7,95 +7,8 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
-local Data = LuiData.Data
-local Effects = Data.Effects
-
 function LUIE.HookKeyboardStats()
-    -- Hook STATS Screen Buffs & Debuffs to hide buffs not needed, update icons, names, durations, and tooltips
-
-
-    -- Helper function to determine if an effect should be shown
-    ---
-    --- @param abilityId integer
-    --- @return boolean
-    local function ShouldShowEffect(abilityId)
-        local override = Effects.EffectOverride[abilityId]
-        if not override then
-            return true
-        end
-
-        if override.hideReduce then
-            return not LUIE.SpellCastBuffs.SV.HideReduce
-        end
-        return true
-    end
-
-    -- Helper function to generate tooltip text
-    --- @param abilityId integer
-    --- @param buffSlot integer
-    --- @param timer integer
-    --- @param value2 integer
-    --- @param value3 integer
-    --- @return string tooltipText
-    local function GetTooltipText(abilityId, buffSlot, timer, value2, value3)
-        local function GenTooltipText(tooltipText)
-            local override = Effects.EffectOverride[abilityId]
-
-            -- Handle veteran difficulty tooltip
-            if LUIE.ResolveVeteranDifficulty() and override and override.tooltipVeteran then
-                tooltipText = zo_strformat(override.tooltipVeteran, timer, value2, value3)
-            else
-                tooltipText = (override and override.tooltip) and
-                    zo_strformat(override.tooltip, timer, value2, value3) or
-                    GetAbilityDescription(abilityId)
-            end
-
-            -- Handle empty tooltip
-            if tooltipText == "" or tooltipText == nil then
-                local effectDesc = GetAbilityEffectDescription(buffSlot)
-                if effectDesc ~= "" then
-                    tooltipText = effectDesc
-                end
-            end
-
-            -- Handle default tooltip override
-            if Effects.TooltipUseDefault[abilityId] then
-                local effectDesc = GetAbilityEffectDescription(buffSlot)
-                if effectDesc ~= "" then
-                    tooltipText = LUIE.UpdateMundusTooltipSyntax(abilityId, effectDesc)
-                end
-            end
-
-            -- TooltipHandlers and EffectOverride.dynamicTooltip (matches SpellCastBuffs)
-            local dynTip = LUIE.DynamicTooltip(abilityId)
-            if dynTip then
-                tooltipText = dynTip
-            end
-
-            -- Clean up tooltip text
-            if tooltipText ~= "" then
-                tooltipText = string.match(tooltipText, ".*%S")
-            end
-
-            -- Use default tooltip if custom tooltips are disabled
-            if not LUIE.SpellCastBuffs.SV.TooltipCustom then
-                tooltipText = GetAbilityEffectDescription(buffSlot)
-                tooltipText = StringOnlyGSUB(tooltipText, "\n$", "")
-            end
-            return tooltipText
-        end
-        local tooltipText = GenTooltipText("")
-        return tooltipText
-    end
-
-    -- Helper function to get third line text
-    local function GetThirdLine(abilityId, timer)
-        if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].duration then
-            timer = timer + Effects.EffectOverride[abilityId].duration
-        end
-        -- Additional third line logic can be added here if needed
-        return nil
-    end
+    -- Hook STATS Screen Buffs & Debuffs — vanilla visibility; LUIE tooltips/icons on stats panel only.
 
     -- Define comparator function for sorting effects rows
     local function EffectsRowComparator(left, right)
@@ -114,146 +27,38 @@ function LUIE.HookKeyboardStats()
         end
     end
 
-    -- Process artificial effects
-    local function ProcessArtificialEffects(effectsRows, effectsRowPool)
-        for effectId in ZO_GetNextActiveArtificialEffectIdIter do
-            -- Skip ESO Plus buff (effectId == 0)
-            if effectId ~= 0 then
-                local displayName, iconFile, effectType, sortOrder, startTime, endTime = GetArtificialEffectInfo(effectId)
-                local effectsRow = effectsRowPool:AcquireObject()
-                effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName))
-                effectsRow.icon:SetTexture(iconFile)
-                effectsRow.effectType = effectType
-                local duration = startTime - endTime
-                effectsRow.time:SetHidden(duration == 0)
-                effectsRow.time.endTime = endTime
-                effectsRow.sortOrder = sortOrder
-                effectsRow.tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName)
-                effectsRow.effectId = effectId
-                effectsRow.isArtificial = true
-                effectsRow.isArtificialTooltip = true
+    local function MapStatsRowToEffectsRow(row, effectsRowPool)
+        local effectsRow = effectsRowPool:AcquireObject()
+        effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, row.displayName))
+        effectsRow.icon:SetTexture(row.displayIcon)
+        effectsRow.effectType = row.effectType or BUFF_EFFECT_TYPE_BUFF
 
-                -- Special handling for Battleground Deserter Penalty
-                if effectId == 1 then
-                    startTime = GetFrameTimeSeconds()
-                    local cooldown = GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE)
-                    endTime = startTime + cooldown
-                    duration = startTime - endTime
-                    effectsRow.time:SetHidden(duration == 0)
-                    effectsRow.time.endTime = endTime
-                    effectsRow.isArtificial = false -- Sort with normal buffs
-                end
-                table.insert(effectsRows, effectsRow)
-            end
+        if row.stackCount and row.stackCount > 1 then
+            effectsRow.stackCount:SetText(row.stackCount)
+        else
+            effectsRow.stackCount:SetText("")
         end
-        return effectsRows
-    end
 
-    -- Collect player buffs data
-    local function CollectPlayerBuffs()
-        local trackBuffs = {}
-        for i = 1, GetNumBuffs("player") do
-            local buffName, startTime, endTime, buffSlot, stackCount, iconFile, deprecatedBuffType, effectType, abilityType, statusEffectType, abilityId = GetUnitBuffInfo("player", i)
-            trackBuffs[i] =
-            {
-                buffName = buffName,
-                startTime = startTime,
-                endTime = endTime,
-                buffSlot = buffSlot,
-                stackCount = stackCount,
-                iconFile = iconFile,
-                deprecatedBuffType = deprecatedBuffType,
-                effectType = effectType,
-                abilityType = abilityType,
-                statusEffectType = statusEffectType,
-                abilityId = abilityId,
-            }
+        local duration = (row.startTime or 0) - (row.endTime or 0)
+        effectsRow.time:SetHidden(duration == 0)
+        effectsRow.time.endTime = row.endTime or 0
+        effectsRow.tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, row.displayName)
+
+        if row.isArtificial then
+            effectsRow.sortOrder = row.sortOrder
+            effectsRow.isArtificial = true
+            effectsRow.isArtificialTooltip = true
+            effectsRow.effectId = row.artificialEffectId
+        else
+            effectsRow.isArtificial = false
+            effectsRow.isArtificialTooltip = false
+            effectsRow.tooltipText = row.tooltipText or ""
+            effectsRow.thirdLine = row.thirdLine
+            effectsRow.buffSlot = row.buffSlot
+            effectsRow.effectId = row.abilityId
         end
-        return trackBuffs
-    end
 
-    -- Handle duplicate abilities
-    local function HandleDuplicateBuffs(trackBuffs)
-        for i = 1, #trackBuffs do
-            local compareId = trackBuffs[i].abilityId
-            local compareTime = trackBuffs[i].endTime
-            if Effects.EffectOverride[compareId] and Effects.EffectOverride[compareId].noDuplicate then
-                for k, v in pairs(trackBuffs) do
-                    if v.abilityId == compareId and v.endTime < compareTime then
-                        v.markForRemove = true
-                    end
-                end
-            end
-        end
-        return trackBuffs
-    end
-
-    -- Process player buffs
-    local function ProcessPlayerBuffs(effectsRows, effectsRowPool, trackBuffs)
-        for i = 1, #trackBuffs do
-            local buff = trackBuffs[i]
-            if buff.buffSlot > 0 and buff.buffName ~= "" and
-            not (Effects.EffectOverride[buff.abilityId] and Effects.EffectOverride[buff.abilityId].hide) and
-            not buff.markForRemove then
-                -- Process tooltip values
-                local timer = buff.endTime - buff.startTime
-                local value2, value3 = 0, 0
-                local effectOverride = Effects.EffectOverride[buff.abilityId]
-
-                if effectOverride then
-                    -- Handle value2
-                    if effectOverride.tooltipValue2 then
-                        value2 = effectOverride.tooltipValue2
-                    elseif effectOverride.tooltipValue2Mod then
-                        value2 = zo_floor(timer + effectOverride.tooltipValue2Mod + 0.5)
-                    elseif effectOverride.tooltipValue2Id then
-                        value2 = zo_floor((GetAbilityDuration(effectOverride.tooltipValue2Id) or 0) + 0.5) / 1000
-                    end
-                    -- Handle value3
-                    value3 = effectOverride.tooltipValue3 or 0
-                end
-
-                timer = zo_floor((timer * 10) + 0.5) / 10
-
-                -- Generate tooltip text
-                local tooltipText = GetTooltipText(buff.abilityId, buff.buffSlot, timer, value2, value3)
-
-                -- Apply effect type override if needed
-                if effectOverride and effectOverride.type then
-                    buff.effectType = effectOverride.type
-                end
-
-                -- Create effects row if conditions are met
-                if ShouldShowEffect(buff.abilityId) then
-                    local effectsRow = effectsRowPool:AcquireObject()
-                    effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, buff.buffName))
-                    effectsRow.icon:SetTexture(buff.iconFile)
-
-                    -- Always set the stack count text - set to empty string if stack count is 1 or less
-                    -- Clears stack count when objects are reused from the pool
-                    if buff.stackCount > 1 then
-                        effectsRow.stackCount:SetText(buff.stackCount)
-                    else
-                        effectsRow.stackCount:SetText("")
-                    end
-
-                    effectsRow.tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, buff.buffName)
-                    effectsRow.tooltipText = tooltipText
-                    effectsRow.thirdLine = GetThirdLine(buff.abilityId, buff.endTime - buff.startTime)
-
-                    local duration = buff.startTime - buff.endTime
-                    effectsRow.time:SetHidden(duration == 0)
-                    effectsRow.time.endTime = buff.endTime
-                    effectsRow.effectType = buff.effectType
-                    effectsRow.buffSlot = buff.buffSlot
-                    effectsRow.isArtificial = false
-                    effectsRow.effectId = buff.abilityId
-
-                    table.insert(effectsRows, effectsRow)
-                end
-            end
-        end
-        return effectsRows
+        return effectsRow
     end
 
     -- Position effects rows in the UI
@@ -276,15 +81,10 @@ function LUIE.HookKeyboardStats()
                 effectsRowPool:ReleaseAllObjects()
                 local effectsRows = {}
 
-                -- Process artificial effects
-                effectsRows = ProcessArtificialEffects(effectsRows, effectsRowPool)
+                for _, row in ipairs(LUIE.BuildStatsActiveEffectRows()) do
+                    table.insert(effectsRows, MapStatsRowToEffectsRow(row, effectsRowPool))
+                end
 
-                -- Collect and process player buffs
-                local trackBuffs = CollectPlayerBuffs()
-                trackBuffs = HandleDuplicateBuffs(trackBuffs)
-                effectsRows = ProcessPlayerBuffs(effectsRows, effectsRowPool, trackBuffs)
-
-                -- Sort and position rows
                 table.sort(effectsRows, EffectsRowComparator)
                 PositionEffectsRows(effectsRows)
             end
@@ -330,19 +130,7 @@ function LUIE.HookKeyboardStats()
                 if control.isArtificial then
                     -- ArtificialEffectId (live): 0 ESO Plus, 1 Battle Spirit, 2 LFG, 3 Battle Spirit Imperial City,
                     -- 4 Battleground Deserter, 5 Underdog Damage, 6 Underdog Healing, 7 Solo Queue XP, 8 Solo Queue AP.
-                    if control.effectId == 0 then
-                        labelAbilityId = 63601  -- ESO Plus (legacy debug label)
-                    elseif control.effectId == 1 or control.effectId == 3 then
-                        labelAbilityId = 999014 -- SpellCastBuffs fake id for Battle Spirit (+ IC)
-                    elseif control.effectId == 2 then
-                        labelAbilityId = "2 (LFG)"
-                    elseif control.effectId == 4 then
-                        labelAbilityId = "4 (BG Deserter)"
-                    elseif control.effectId >= 5 and control.effectId <= 8 then
-                        labelAbilityId = control.effectId
-                    else
-                        labelAbilityId = "Artificial"
-                    end
+                    labelAbilityId = LUIE.FormatStatsActiveEffectAbilityIdLabel(control.effectId, true)
                 end
                 GameTooltip:AddHeaderLine("Ability ID", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
                 GameTooltip:AddHeaderLine(labelAbilityId, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
@@ -351,22 +139,8 @@ function LUIE.HookKeyboardStats()
 
             -- Add Buff Type Line
             if LUIE.SpellCastBuffs.SV.TooltipBuffType then
-                local buffType = control.effectType or LUIE_BUFF_TYPE_NONE
-                local effectId = control.effectId
-                if effectId and Effects.EffectOverride[effectId] and Effects.EffectOverride[effectId].unbreakable then
-                    buffType = buffType + 2
-                end
-
-                -- Setup tooltips for player aoe trackers
-                if effectId and Effects.EffectGroundDisplay[effectId] then
-                    buffType = buffType + 4
-                end
-
-                -- Setup tooltips for ground buff/debuff effects
-                if effectId and (Effects.AddGroundDamageAura[effectId] or (Effects.EffectOverride[effectId] and Effects.EffectOverride[effectId].groundLabel)) then
-                    buffType = buffType + 6
-                end
-
+                local buffTypeLookupId = control.isArtificial and nil or control.effectId
+                local buffType = LUIE.GetStatsActiveEffectTooltipBuffType(buffTypeLookupId, control.effectType)
                 GameTooltip:AddHeaderLine("Type", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
                 GameTooltip:AddHeaderLine(LUIE.buffTypes[buffType], "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
                 detailsLine = detailsLine + 1

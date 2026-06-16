@@ -28,8 +28,8 @@ LUIE = {}
 LUIE.__index = LUIE
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.4.6"
-LUIE.addonVersion = 7246
+LUIE.version = "7.2.4.7"
+LUIE.addonVersion = 7247
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -179,6 +179,7 @@ LUIE.ModuleSavedVarNames =
     InfoPanel = "LUIE_InfoPanel_SV",
     SlashCommands = "LUIE_SlashCommands_SV",
     CombatInfo = "LUIE_CombatInfo_SV",
+    MiniMap = "LUIE_MiniMap_SV",
 }
 
 --- ZO_SavedVars namespace keys previously stored under `LUIESV` before the per-global split.
@@ -192,6 +193,7 @@ LUIE.ModuleSavedVarNamespaceKeys =
     "InfoPanel",
     "SlashCommands",
     "CombatInfo",
+    "MiniMap",
 }
 -- -----------------------------------------------------------------------------
 -- Components
@@ -200,6 +202,7 @@ LUIE.Components = {}
 -- Table to hold cached values so we don't have to ask addon manager each time we run a function.
 LUIE.OtherAddonCompatability =
 {
+    isCombatMetricsEnabled = false,
     isActionDurationReminderEnabled = false,
     isCrutchAlertsEnabled = false,
     isFancyActionBarEnabled = false,
@@ -218,7 +221,6 @@ LUIE.OtherAddonCompatability =
 --- @field ChatMethod string
 --- @field ChatBypassFormat boolean
 --- @field ChatTab table<number, boolean>
---- @field ChatSystemAll boolean
 --- @field TimeStamp boolean
 --- @field TimeStampFormat string
 --- @field TimeStampColor number[]
@@ -238,6 +240,7 @@ LUIE.Defaults =
     HideAlertFrame              = false,
     AlertFrameAlignment         = 3,
     HideXPBar                   = false,
+    SuppressZOBuffDebuffWhenHidden = false,
     WelcomeVersion              = 0,
     ShowChangeLog               = false,
 
@@ -250,6 +253,7 @@ LUIE.Defaults =
     SpellCastBuff_Enable        = true,
     ChatAnnouncements_Enable    = true,
     SlashCommands_Enable        = true,
+    MiniMap_Enabled             = false,
 
     -- Grid settings
     snapToGrid_default          = false,
@@ -272,7 +276,6 @@ LUIE.Defaults =
         ChatBypassFormat = false,
         -- Tab indices 1..N are dynamic (see LUIE.ChatOutput:GetMaxChatTabIndex); defaults keep first five enabled for legacy installs.
         ChatTab = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true },
-        ChatSystemAll = true,
         TimeStamp = false,
         TimeStampFormat = "HH:m:s",
         TimeStampColor = { 143 / 255, 143 / 255, 143 / 255 },

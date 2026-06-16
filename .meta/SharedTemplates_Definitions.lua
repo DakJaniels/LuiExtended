@@ -1,3 +1,96 @@
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended/frontend/UnitFrames\SharedTemplates.xml
+---------- LVL: 00 ----------
+---------- LVL: 01 ----------
+---------- LVL: 02 ----------
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_CombatGlowBorder : BackdropControl
+---@field public centerColor string
+---@field public edgeColor string
+---@field public tier DrawTier
+---@field public level integer
+---@field public hidden boolean
+---@field AnchorFill boolean
+---@field Edge {edgeSize: layout_measurement}
+---@field public OnInitialized fun(self: Control)
+LUIE_CombatGlowBorder = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_UF_BlackFill40_Edge60 : BackdropControl
+---@field public centerColor string
+---@field public edgeColor string
+---@field public OnInitialized fun(self: Control)
+LUIE_UF_BlackFill40_Edge60 = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_UF_BlackFill40_WhiteEdge : BackdropControl
+---@field public centerColor string
+---@field public edgeColor string
+---@field public OnInitialized fun(self: Control)
+LUIE_UF_BlackFill40_WhiteEdge = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_DodgePredictionMarker : BackdropControl
+---@field public hidden boolean
+---@field public mouseEnabled boolean
+---@field public tier DrawTier
+---@field public layer DrawLayer
+---@field public level integer
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Edge {edgeSize: layout_measurement}
+LUIE_DodgePredictionMarker = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_DecreasedArmorOverlay : Control
+---@field public tier DrawTier
+---@field public level integer
+---@field public hidden boolean
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+LUIE_DecreasedArmorOverlay = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_DecreasedArmorOverlay_Small : Control
+---@field public tier DrawTier
+---@field public level integer
+---@field public hidden boolean
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+LUIE_DecreasedArmorOverlay_Small = {}
+---------- LVL: 03 ----------
+---------- LVL: 04 ----------
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_DecreasedArmorOverlay_SmallTex : TextureControl
+---@field public layer DrawLayer
+---@field public level integer
+---@field public alpha number
+---@field public hidden boolean
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
+LUIE_DecreasedArmorOverlay_SmallTex = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_DecreasedArmorOverlay_NormalTex : TextureControl
+---@field public layer DrawLayer
+---@field public level integer
+---@field public alpha number
+---@field public hidden boolean
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
+LUIE_DecreasedArmorOverlay_NormalTex = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_DecreasedArmorOverlay_Small_SmallTex : TextureControl
+---@field public layer DrawLayer
+---@field public level integer
+---@field public alpha number
+---@field public hidden boolean
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
+LUIE_DecreasedArmorOverlay_Small_SmallTex = {}
+---------- LVL: 05 ----------
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended/frontend/UnitFrames\SharedTemplates.xml
 -- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\UnitFrames\SharedTemplates.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------

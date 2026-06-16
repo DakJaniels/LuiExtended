@@ -2,6 +2,7 @@
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
+--  LuaLS: canonical UnitFrames types/API in modules/UnitFrames/_annotations/*.meta.lua
 -- -----------------------------------------------------------------------------
 
 local GetString = GetString

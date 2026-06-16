@@ -252,32 +252,41 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
     end
 
     local powerChanged = UnitFrames.HasPowerUpdateChanged(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
-    if powerChanged then
-        UnitFrames.CommitPowerUpdateSnapshot(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    if not powerChanged then
+        return
+    end
 
-        if UnitFrames.DefaultFrames[unitTag] then
-            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.DefaultFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
-        end
+    local defaultPowerEntry = UnitFrames.DefaultFrames[unitTag] and UnitFrames.DefaultFrames[unitTag][powerType]
+    local customFrame = UnitFrames.CustomFrames[unitTag]
+    local customPowerEntry = customFrame and customFrame[powerType]
+    local avaPowerEntry = UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][powerType]
 
-        if UnitFrames.CustomFrames[unitTag] then
-            -- Special handling for reticleover health to skip critters and guards
-            if unitTag == "reticleover" and powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
-                local isCritter = (UnitFrames.savedHealth.reticleover[3] <= 9)
-                local isGuard = IsUnitInvulnerableGuard("reticleover")
-                if (isCritter or isGuard) and powerValue >= 1 then
-                    return
-                end
-            end
-            UnitFrames.UpdateCustomFramePower(unitTag, powerType, powerValue, powerMax, powerEffectiveMax, false, nil)
-        end
-
-        if UnitFrames.AvaCustFrames[unitTag] then
-            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.AvaCustFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+    local skipCustomPowerUpdate = false
+    if customFrame and unitTag == "reticleover" and powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
+        local isCritter = (UnitFrames.savedHealth.reticleover[3] <= 9)
+        local isGuard = IsUnitInvulnerableGuard("reticleover")
+        if (isCritter or isGuard) and powerValue >= 1 then
+            skipCustomPowerUpdate = true
         end
     end
 
-    if not powerChanged then
+    local hasUpdateTarget = defaultPowerEntry or avaPowerEntry or (customPowerEntry and not skipCustomPowerUpdate)
+    if not hasUpdateTarget then
         return
+    end
+
+    UnitFrames.CommitPowerUpdateSnapshot(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+
+    if defaultPowerEntry then
+        UnitFrames.UpdateAttribute(unitTag, powerType, defaultPowerEntry, powerValue, powerEffectiveMax, false, nil)
+    end
+
+    if customFrame and customPowerEntry and not skipCustomPowerUpdate then
+        UnitFrames.UpdateCustomFramePower(unitTag, powerType, powerValue, powerMax, powerEffectiveMax, false, nil)
+    end
+
+    if avaPowerEntry then
+        UnitFrames.UpdateAttribute(unitTag, powerType, avaPowerEntry, powerValue, powerEffectiveMax, false, nil)
     end
 
     -- Record state of power loss to change transparency of player frame

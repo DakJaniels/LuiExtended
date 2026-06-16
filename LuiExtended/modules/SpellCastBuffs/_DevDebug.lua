@@ -102,6 +102,9 @@ function SpellCastBuffs.AuthorCombatDebug(eventCode, result, isError, abilityNam
             if chatWindow == nil then chatWindow = cc.windows[1] end
             chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
         end
+        if SpellCastBuffs.devDebugEnabled then
+            LUIE:Log("Verbose", finalString)
+        end
     end
 end
 
@@ -146,6 +149,9 @@ function SpellCastBuffs.AuthorEffectDebug(eventCode, changeType, effectSlot, eff
             local chatWindow = cc.windows[2]
             if chatWindow == nil then chatWindow = cc.windows[1] end
             chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
+        end
+        if SpellCastBuffs.devDebugEnabled then
+            LUIE:Log("Verbose", finalString)
         end
     end
 end

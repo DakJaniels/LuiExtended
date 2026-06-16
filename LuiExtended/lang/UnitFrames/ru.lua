@@ -42,6 +42,7 @@ local strings =
     LUIE_STRING_LAM_UF_DFRAMES_HEADER = "Стандартные Фрейм юнитов",
     LUIE_STRING_LAM_UF_DFRAMES_PLAYER = "Стандартный фрейм ИГРОКА",
     LUIE_STRING_LAM_UF_DFRAMES_TARGET = "Стандартный фрейм ЦЕЛИ",
+    LUIE_STRING_LAM_UF_SUPPRESS_ZO_DESC = "Если для пункта выше выбрано «Отключить» и включён соответствующий фрейм LUIE, LUIE скрывает vanilla-элементы и снимает с них регистрацию UI-событий (включая полоски атрибутов игрока). «Ничего не менять» или Extender оставляют vanilla активным. Может конфликтовать с другими аддонами.",
     LUIE_STRING_LAM_UF_DFRAMES_GROUPSMALL = "Стандартный фрейм ГРУППЫ",
     LUIE_STRING_LAM_UF_DFRAMES_BOSS_COMPASS = "Стандартный фрейм БОССА (Компас)",
     LUIE_STRING_LAM_UF_DFRAMES_REPOSIT = "Перекомпоновать",

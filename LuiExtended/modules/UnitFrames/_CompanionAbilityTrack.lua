@@ -53,9 +53,20 @@ local UPDATE_NAME = moduleName .. "CompanionAbilityTrackTick"
 --- @field unitTag string
 --- @field abilityId integer
 
+--- @class LUIE_CompanionAuraCacheEntry
+--- @field endTimeSeconds number
+--- @field stackCount integer|nil
+
 -- -----------------------------------------------------------------------------
 -- Settings and shared helpers
 -- -----------------------------------------------------------------------------
+
+--- @param unitTag string
+--- @param abilityId integer
+--- @return string
+local function GetAuraCacheKey(unitTag, abilityId)
+    return unitTag .. "\31" .. tostring(abilityId)
+end
 
 --- @return LUIE_CompanionAbilityTrackSettings
 local function GetCompanionAbilityTrackSettings()
@@ -75,25 +86,42 @@ local function GetSlotLabelFont(iconSize)
 end
 
 --- @param unitTag string
---- @param abilityId integer
---- @return integer|nil remainingMs
---- @return integer|nil stackCount
-local function GetBuffRemainingMsAndStacks(unitTag, abilityId)
-    if not unitTag or not DoesUnitExist(unitTag) then
+--- @param abilityIds integer[]
+--- @param track LUIE_CompanionAbilityTrack|nil
+--- @return integer|nil bestRemainingMs
+--- @return integer|nil bestStacks
+local function GetBestRemainingMsAndStacksFromUnitBuffScan(unitTag, abilityIds, track)
+    if not unitTag or not DoesUnitExist(unitTag) or not abilityIds or #abilityIds == 0 then
         return nil, nil
     end
 
-    for i = 1, GetNumBuffs(unitTag) do
-        local _, timeStarted, timeEnding, _, stackCount, _, _, _, _, _, buffAbilityId = GetUnitBuffInfo(unitTag, i)
-        if buffAbilityId == abilityId then
-            local remainingS = timeEnding - GetFrameTimeSeconds()
-            if remainingS > 0 then
-                return zo_floor(remainingS * 1000 + 0.5), stackCount
+    local abilityIdLookup = {}
+    for _, abilityId in ipairs(abilityIds) do
+        abilityIdLookup[abilityId] = true
+    end
+
+    local bestRemaining
+    local bestStacks
+    for buffIndex = 1, GetNumBuffs(unitTag) do
+        local _, _, timeEnding, _, stackCount, _, _, _, _, _, buffAbilityId = GetUnitBuffInfo(unitTag, buffIndex)
+        if abilityIdLookup[buffAbilityId] then
+            if track then
+                track:SetAuraCacheEntry(unitTag, buffAbilityId, timeEnding, stackCount)
             end
-            return nil, stackCount
+            local remainingS = timeEnding - GetFrameTimeSeconds()
+            local remainingMs
+            if remainingS > 0 then
+                remainingMs = zo_floor(remainingS * 1000 + 0.5)
+            end
+            if remainingMs and (not bestRemaining or remainingMs > bestRemaining) then
+                bestRemaining = remainingMs
+                bestStacks = stackCount
+            elseif stackCount and stackCount > 0 and not bestRemaining then
+                bestStacks = stackCount
+            end
         end
     end
-    return nil, nil
+    return bestRemaining, bestStacks
 end
 
 --- @param entry CompanionAbilityTrackEntry
@@ -315,15 +343,31 @@ function LUIE_CompanionAbilitySlot:Update(track, settings, rowVisible)
     end
 
     if self.options.kind == "builtin" then
-        self:UpdateBuiltin(track, settings)
+        self:UpdateBuiltinStatic(settings)
+        self:UpdateBuiltinEffect(track, settings)
     else
-        self:UpdateHotbar(track, settings)
+        self:UpdateHotbarStatic(settings)
+        self:UpdateHotbarEffect(track, settings)
     end
 end
 
 --- @param track LUIE_CompanionAbilityTrack
 --- @param settings LUIE_CompanionAbilityTrackSettings
-function LUIE_CompanionAbilitySlot:UpdateBuiltin(track, settings)
+--- @param rowVisible boolean
+function LUIE_CompanionAbilitySlot:UpdateEffect(track, settings, rowVisible)
+    if not rowVisible or not settings or self.backdrop:IsHidden() then
+        return
+    end
+
+    if self.options.kind == "builtin" then
+        self:UpdateBuiltinEffect(track, settings)
+    else
+        self:UpdateHotbarEffect(track, settings)
+    end
+end
+
+--- @param settings LUIE_CompanionAbilityTrackSettings
+function LUIE_CompanionAbilitySlot:UpdateBuiltinStatic(settings)
     if not BUILTIN_INTERRUPT_ABILITY_ID or settings.showBuiltinInterrupt == false then
         self.backdrop:SetHidden(true)
         return
@@ -349,14 +393,28 @@ function LUIE_CompanionAbilitySlot:UpdateBuiltin(track, settings)
             self.icon:SetTexture(ZO_NO_TEXTURE_FILE)
         end
     end
-
-    local effectRemainingMs, stacks = track:ResolveEffectRemaining(slottedId, entry)
-    self:ApplyEffectVisual(settings, effectRemainingMs, stacks, entry.maxStacks)
 end
 
 --- @param track LUIE_CompanionAbilityTrack
 --- @param settings LUIE_CompanionAbilityTrackSettings
-function LUIE_CompanionAbilitySlot:UpdateHotbar(track, settings)
+--- @param allowBuffScan boolean|nil
+function LUIE_CompanionAbilitySlot:UpdateBuiltinEffect(track, settings, allowBuffScan)
+    if not BUILTIN_INTERRUPT_ABILITY_ID or settings.showBuiltinInterrupt == false then
+        return
+    end
+
+    local slottedId = BUILTIN_INTERRUPT_ABILITY_ID
+    local entry = CompanionAbilityTrackData[slottedId]
+    if not entry or not entry.builtInInterrupt or self.backdrop:IsHidden() then
+        return
+    end
+
+    local effectRemainingMs, stacks = track:ResolveEffectRemaining(slottedId, entry, allowBuffScan == true)
+    self:ApplyEffectVisual(settings, effectRemainingMs, stacks, entry.maxStacks)
+end
+
+--- @param settings LUIE_CompanionAbilityTrackSettings
+function LUIE_CompanionAbilitySlot:UpdateHotbarStatic(settings)
     local slotIndex = self.options.slotIndex
     if not slotIndex then
         self.backdrop:SetHidden(true)
@@ -371,7 +429,7 @@ function LUIE_CompanionAbilitySlot:UpdateHotbar(track, settings)
             self.icon:SetTexture("EsoUI/Art/actionbar/quickslotBG.dds")
             self.icon:SetColor(0.4, 0.4, 0.4, 0.8)
         end
-        self:ApplyEffectVisual(settings, nil, nil, nil)
+        self.slottedId = nil
         return
     end
 
@@ -379,7 +437,7 @@ function LUIE_CompanionAbilitySlot:UpdateHotbar(track, settings)
         if self.icon then
             self.icon:SetTexture(ZO_NO_TEXTURE_FILE)
         end
-        self:ApplyEffectVisual(settings, nil, nil, nil)
+        self.slottedId = nil
         return
     end
 
@@ -400,14 +458,51 @@ function LUIE_CompanionAbilitySlot:UpdateHotbar(track, settings)
             self.icon:SetTexture(GetSlotTexture(slotIndex, HOTBAR))
         end
     end
+end
 
+--- @param track LUIE_CompanionAbilityTrack
+--- @param settings LUIE_CompanionAbilityTrackSettings
+--- @param allowBuffScan boolean|nil
+function LUIE_CompanionAbilitySlot:UpdateHotbarEffect(track, settings, allowBuffScan)
+    local slotIndex = self.options.slotIndex
+    if not slotIndex or self.backdrop:IsHidden() then
+        return
+    end
+
+    if IsActionSlotLocked(slotIndex, HOTBAR) then
+        self:ApplyEffectVisual(settings, nil, nil, nil)
+        return
+    end
+
+    if GetSlotType(slotIndex, HOTBAR) == ACTION_TYPE_NOTHING or not IsSlotUsed(slotIndex, HOTBAR) then
+        self:ApplyEffectVisual(settings, nil, nil, nil)
+        return
+    end
+
+    local slottedId = self.slottedId
     local entry = slottedId and CompanionAbilityTrackData[slottedId]
-    local effectRemainingMs, stacks
+    local effectRemainingMs
+    local stacks
     if entry and slottedId then
-        effectRemainingMs, stacks = track:ResolveEffectRemaining(slottedId, entry)
+        effectRemainingMs, stacks = track:ResolveEffectRemaining(slottedId, entry, allowBuffScan == true)
     end
 
     self:ApplyEffectVisual(settings, effectRemainingMs, stacks, entry and entry.maxStacks)
+end
+
+--- @param track LUIE_CompanionAbilityTrack
+--- @return boolean
+function LUIE_CompanionAbilitySlot:NeedsEffectTick(track)
+    if self.backdrop:IsHidden() then
+        return false
+    end
+
+    local slottedId = self.slottedId
+    if not slottedId then
+        return false
+    end
+
+    return track:SlottedIdNeedsEffectTick(slottedId, CompanionAbilityTrackData[slottedId])
 end
 
 -- -----------------------------------------------------------------------------
@@ -519,35 +614,78 @@ function LUIE_CompanionAbilityRow:ApplyLayout(settings)
     end
 end
 
---- @param track LUIE_CompanionAbilityTrack
+--- @param row LUIE_CompanionAbilityRow
 --- @param settings LUIE_CompanionAbilityTrackSettings|nil
-function LUIE_CompanionAbilityRow:RefreshAll(track, settings)
+--- @return boolean rowVisible
+local function GetCompanionAbilityRowVisibility(row, settings)
     settings = settings or GetCompanionAbilityTrackSettings()
 
-    if not self:IsFeatureEnabled() then
-        self.container:SetHidden(true)
-        return
+    if not row:IsFeatureEnabled() then
+        row.container:SetHidden(true)
+        return false
     end
 
-    if not self:ShouldShow() then
-        self.container:SetHidden(true)
-        return
+    if not row:ShouldShow() then
+        row.container:SetHidden(true)
+        return false
     end
 
-    self.container:SetHidden(false)
-    local rowVisible = true
+    row.container:SetHidden(false)
+    return true
+end
+
+--- @param track LUIE_CompanionAbilityTrack
+--- @param settings LUIE_CompanionAbilityTrackSettings|nil
+function LUIE_CompanionAbilityRow:RefreshAllStatic(track, settings)
+    settings = settings or GetCompanionAbilityTrackSettings()
+    local rowVisible = GetCompanionAbilityRowVisibility(self, settings)
+    if not rowVisible then
+        return
+    end
 
     local interruptSlot = self.slots[self.interruptSlotKey]
     if interruptSlot then
-        interruptSlot:Update(track, settings, rowVisible)
+        interruptSlot:UpdateBuiltinStatic(settings)
     end
 
     for slotIndex = FIRST_SLOT, LAST_SLOT do
         local slot = self.slots[slotIndex]
         if slot then
-            slot:Update(track, settings, rowVisible)
+            slot:UpdateHotbarStatic(settings)
         end
     end
+end
+
+--- @param track LUIE_CompanionAbilityTrack
+--- @param settings LUIE_CompanionAbilityTrackSettings|nil
+--- @param allowBuffScan boolean|nil
+function LUIE_CompanionAbilityRow:RefreshAllEffects(track, settings, allowBuffScan)
+    settings = settings or GetCompanionAbilityTrackSettings()
+    if not GetCompanionAbilityRowVisibility(self, settings) then
+        return
+    end
+
+    local rowVisible = true
+    local scanBuffs = allowBuffScan == true
+
+    local interruptSlot = self.slots[self.interruptSlotKey]
+    if interruptSlot and (scanBuffs or interruptSlot:NeedsEffectTick(track)) then
+        interruptSlot:UpdateBuiltinEffect(track, settings, scanBuffs)
+    end
+
+    for slotIndex = FIRST_SLOT, LAST_SLOT do
+        local slot = self.slots[slotIndex]
+        if slot and (scanBuffs or slot:NeedsEffectTick(track)) then
+            slot:UpdateHotbarEffect(track, settings, scanBuffs)
+        end
+    end
+end
+
+--- @param track LUIE_CompanionAbilityTrack
+--- @param settings LUIE_CompanionAbilityTrackSettings|nil
+function LUIE_CompanionAbilityRow:RefreshAll(track, settings)
+    self:RefreshAllStatic(track, settings)
+    self:RefreshAllEffects(track, settings, false)
 end
 
 --- @param track LUIE_CompanionAbilityTrack
@@ -568,11 +706,40 @@ end
 
 --- @param track LUIE_CompanionAbilityTrack
 --- @param slottedId integer
+--- @param allowBuffScan boolean|nil
+function LUIE_CompanionAbilityRow:RefreshSlottedAbilityEffect(track, slottedId, allowBuffScan)
+    local settings = GetCompanionAbilityTrackSettings()
+    local rowVisible = self:ShouldShow()
+    if not self:IsFeatureEnabled() or not rowVisible then
+        return
+    end
+
+    local scanBuffs = allowBuffScan == true
+    if slottedId == BUILTIN_INTERRUPT_ABILITY_ID then
+        local interruptSlot = self.slots[self.interruptSlotKey]
+        if interruptSlot then
+            interruptSlot:UpdateBuiltinEffect(track, settings, scanBuffs)
+        end
+    end
+    for slotIndex = FIRST_SLOT, LAST_SLOT do
+        local boundId = LUIE.GetSlotTrueBoundId(slotIndex, HOTBAR)
+        if boundId == slottedId then
+            local slot = self.slots[slotIndex]
+            if slot then
+                slot:UpdateHotbarEffect(track, settings, scanBuffs)
+            end
+        end
+    end
+end
+
+--- @param track LUIE_CompanionAbilityTrack
+--- @param slottedId integer
 function LUIE_CompanionAbilityRow:RefreshSlottedAbility(track, slottedId)
     if slottedId == BUILTIN_INTERRUPT_ABILITY_ID then
         local interruptSlot = self.slots[self.interruptSlotKey]
         if interruptSlot then
-            interruptSlot:Update(track, GetCompanionAbilityTrackSettings(), self:ShouldShow())
+            interruptSlot:UpdateBuiltinStatic(GetCompanionAbilityTrackSettings())
+            interruptSlot:UpdateBuiltinEffect(track, GetCompanionAbilityTrackSettings(), false)
         end
     end
     for slotIndex = FIRST_SLOT, LAST_SLOT do
@@ -593,7 +760,8 @@ end
 --- @field slottedIds table<integer, boolean>
 --- @field groundTrackToSlotted table<integer, integer>
 --- @field combatTrackEndMs table<integer, integer>
---- @field slottedIdsWithAlternateTrack table<integer, boolean>
+--- @field slottedIdsWithReticleoverTrack table<integer, boolean>
+--- @field auraCacheByKey table<string, LUIE_CompanionAuraCacheEntry>
 --- @field eventsRegistered boolean
 --- @field updateTickRegistered boolean
 LUIE_CompanionAbilityTrack = ZO_Object:Subclass()
@@ -606,7 +774,8 @@ function LUIE_CompanionAbilityTrack:New()
     track.slottedIds = {}
     track.groundTrackToSlotted = {}
     track.combatTrackEndMs = {}
-    track.slottedIdsWithAlternateTrack = {}
+    track.slottedIdsWithReticleoverTrack = {}
+    track.auraCacheByKey = {}
     track.eventsRegistered = false
     track.updateTickRegistered = false
     return track
@@ -625,11 +794,14 @@ function LUIE_CompanionAbilityTrack:BuildLookupTables()
     ZO_ClearTable(self.slottedIds)
     ZO_ClearTable(self.trackIdToSlotted)
     ZO_ClearTable(self.groundTrackToSlotted)
-    ZO_ClearTable(self.slottedIdsWithAlternateTrack)
+    ZO_ClearTable(self.slottedIdsWithReticleoverTrack)
 
     for slottedId, entry in pairs(CompanionAbilityTrackData) do
         if entry.alternateTrackId or entry.alternateTrackIds then
-            self.slottedIdsWithAlternateTrack[slottedId] = true
+            local alternateUnitTag = entry.alternateUnitTag or "reticleover"
+            if alternateUnitTag == "reticleover" then
+                self.slottedIdsWithReticleoverTrack[slottedId] = true
+            end
         end
         self.slottedIds[slottedId] = true
         if entry.trackId then
@@ -661,14 +833,65 @@ function LUIE_CompanionAbilityTrack:BuildLookupTables()
     end
 end
 
---- @param bestRemaining integer|nil
---- @param bestStacks integer|nil
+function LUIE_CompanionAbilityTrack:ClearAuraCache()
+    ZO_ClearTable(self.auraCacheByKey)
+end
+
+--- @param unitTag string
+function LUIE_CompanionAbilityTrack:ClearAuraCacheForUnitTag(unitTag)
+    if not unitTag then
+        return
+    end
+    local prefix = unitTag .. "\31"
+    for cacheKey in pairs(self.auraCacheByKey) do
+        if zo_strsub(cacheKey, 1, #prefix) == prefix then
+            self.auraCacheByKey[cacheKey] = nil
+        end
+    end
+end
+
 --- @param unitTag string
 --- @param abilityId integer
+--- @return integer|nil remainingMs
+--- @return integer|nil stackCount
+function LUIE_CompanionAbilityTrack:GetAuraRemainingMsFromCache(unitTag, abilityId)
+    local cached = self.auraCacheByKey[GetAuraCacheKey(unitTag, abilityId)]
+    if not cached then
+        return nil, nil
+    end
+
+    local remainingSeconds = cached.endTimeSeconds - GetFrameTimeSeconds()
+    if remainingSeconds > 0 then
+        return zo_floor(remainingSeconds * 1000 + 0.5), cached.stackCount
+    end
+    return nil, cached.stackCount
+end
+
+--- @param unitTag string
+--- @param abilityId integer
+--- @param endTimeSeconds number
+--- @param stackCount integer|nil
+function LUIE_CompanionAbilityTrack:SetAuraCacheEntry(unitTag, abilityId, endTimeSeconds, stackCount)
+    self.auraCacheByKey[GetAuraCacheKey(unitTag, abilityId)] =
+    {
+        endTimeSeconds = endTimeSeconds,
+        stackCount = stackCount,
+    }
+end
+
+--- @param unitTag string
+--- @param abilityId integer
+function LUIE_CompanionAbilityTrack:ClearAuraCacheEntry(unitTag, abilityId)
+    self.auraCacheByKey[GetAuraCacheKey(unitTag, abilityId)] = nil
+end
+
+--- @param bestRemaining integer|nil
+--- @param bestStacks integer|nil
+--- @param remaining integer|nil
+--- @param stacks integer|nil
 --- @return integer|nil
 --- @return integer|nil
-local function ConsiderBuffForEffect(bestRemaining, bestStacks, unitTag, abilityId)
-    local remaining, stacks = GetBuffRemainingMsAndStacks(unitTag, abilityId)
+local function MergeBestEffectRemaining(bestRemaining, bestStacks, remaining, stacks)
     if remaining and (not bestRemaining or remaining > bestRemaining) then
         bestRemaining = remaining
         bestStacks = stacks
@@ -678,16 +901,75 @@ local function ConsiderBuffForEffect(bestRemaining, bestStacks, unitTag, ability
     return bestRemaining, bestStacks
 end
 
+--- @param bestRemaining integer|nil
+--- @param bestStacks integer|nil
+--- @param unitTag string
+--- @param abilityIds integer[]
+--- @param allowBuffScan boolean
+--- @return integer|nil
+--- @return integer|nil
+function LUIE_CompanionAbilityTrack:ConsiderUnitBuffsForEffect(bestRemaining, bestStacks, unitTag, abilityIds, allowBuffScan)
+    local missingAbilityIds
+    for _, abilityId in ipairs(abilityIds) do
+        local remaining, stacks = self:GetAuraRemainingMsFromCache(unitTag, abilityId)
+        bestRemaining, bestStacks = MergeBestEffectRemaining(bestRemaining, bestStacks, remaining, stacks)
+        if allowBuffScan and not self.auraCacheByKey[GetAuraCacheKey(unitTag, abilityId)] then
+            missingAbilityIds = missingAbilityIds or {}
+            missingAbilityIds[#missingAbilityIds + 1] = abilityId
+        end
+    end
+
+    if missingAbilityIds then
+        local scanRemaining, scanStacks = GetBestRemainingMsAndStacksFromUnitBuffScan(unitTag, missingAbilityIds, self)
+        bestRemaining, bestStacks = MergeBestEffectRemaining(bestRemaining, bestStacks, scanRemaining, scanStacks)
+    end
+
+    return bestRemaining, bestStacks
+end
+
 --- @param slottedId integer
---- @param entry CompanionAbilityTrackEntry
---- @return integer|nil effectRemainingMs
---- @return integer|nil stacks
-function LUIE_CompanionAbilityTrack:ResolveEffectRemaining(slottedId, entry)
-    local bestRemaining
-    local bestStacks
+--- @param entry CompanionAbilityTrackEntry|nil
+--- @return boolean
+function LUIE_CompanionAbilityTrack:SlottedIdNeedsEffectTick(slottedId, entry)
+    if self.combatTrackEndMs[slottedId] then
+        return true
+    end
+
+    if not entry then
+        return false
+    end
 
     for _, source in ipairs(BuildTrackBuffSourcesFromEntry(entry)) do
-        bestRemaining, bestStacks = ConsiderBuffForEffect(bestRemaining, bestStacks, source.unitTag, source.abilityId)
+        local remainingMs = self:GetAuraRemainingMsFromCache(source.unitTag, source.abilityId)
+        if remainingMs and remainingMs > 0 then
+            return true
+        end
+    end
+    return false
+end
+
+--- @param slottedId integer
+--- @param entry CompanionAbilityTrackEntry
+--- @param allowBuffScan boolean|nil
+--- @return integer|nil effectRemainingMs
+--- @return integer|nil stacks
+function LUIE_CompanionAbilityTrack:ResolveEffectRemaining(slottedId, entry, allowBuffScan)
+    local bestRemaining
+    local bestStacks
+    local scanBuffs = allowBuffScan == true
+
+    local abilityIdsByUnitTag = {}
+    for _, source in ipairs(BuildTrackBuffSourcesFromEntry(entry)) do
+        local unitAbilityIds = abilityIdsByUnitTag[source.unitTag]
+        if not unitAbilityIds then
+            unitAbilityIds = {}
+            abilityIdsByUnitTag[source.unitTag] = unitAbilityIds
+        end
+        unitAbilityIds[#unitAbilityIds + 1] = source.abilityId
+    end
+
+    for unitTag, abilityIds in pairs(abilityIdsByUnitTag) do
+        bestRemaining, bestStacks = self:ConsiderUnitBuffsForEffect(bestRemaining, bestStacks, unitTag, abilityIds, scanBuffs)
     end
 
     local trackEnd = self.combatTrackEndMs[slottedId]
@@ -715,6 +997,7 @@ function LUIE_CompanionAbilityTrack:StartCombatTrackTimer(slottedId, trackAbilit
     end
     if durationMs and durationMs > 0 then
         self.combatTrackEndMs[slottedId] = GetGameTimeMilliseconds() + durationMs
+        self:SyncUpdateTick()
     end
 end
 
@@ -787,6 +1070,32 @@ function LUIE_CompanionAbilityTrack:RefreshAll()
         return
     end
     self.row:RefreshAll(self, GetCompanionAbilityTrackSettings())
+    self:SyncUpdateTick()
+end
+
+function LUIE_CompanionAbilityTrack:RefreshAllStatic()
+    if not self.row then
+        return
+    end
+    self.row:RefreshAllStatic(self, GetCompanionAbilityTrackSettings())
+end
+
+--- @param allowBuffScan boolean|nil
+function LUIE_CompanionAbilityTrack:RefreshAllEffects(allowBuffScan)
+    if not self.row then
+        return
+    end
+    self.row:RefreshAllEffects(self, GetCompanionAbilityTrackSettings(), allowBuffScan == true)
+    self:SyncUpdateTick()
+end
+
+function LUIE_CompanionAbilityTrack:ReconcileAuraCacheForVisibleSlots()
+    self:ClearAuraCache()
+    if not self.row then
+        return
+    end
+    self.row:RefreshAllEffects(self, GetCompanionAbilityTrackSettings(), true)
+    self:SyncUpdateTick()
 end
 
 --- @param slotIndex integer
@@ -795,6 +1104,7 @@ function LUIE_CompanionAbilityTrack:RefreshSlot(slotIndex)
         return
     end
     self.row:RefreshHotbarSlot(self, slotIndex)
+    self:SyncUpdateTick()
 end
 
 --- @param slottedId integer
@@ -803,6 +1113,17 @@ function LUIE_CompanionAbilityTrack:RefreshSlottedAbility(slottedId)
         return
     end
     self.row:RefreshSlottedAbility(self, slottedId)
+    self:SyncUpdateTick()
+end
+
+--- @param slottedId integer
+--- @param allowBuffScan boolean|nil
+function LUIE_CompanionAbilityTrack:RefreshSlottedAbilityEffect(slottedId, allowBuffScan)
+    if not self.row then
+        return
+    end
+    self.row:RefreshSlottedAbilityEffect(self, slottedId, allowBuffScan == true)
+    self:SyncUpdateTick()
 end
 
 function LUIE_CompanionAbilityTrack:ApplyLayout()
@@ -811,7 +1132,8 @@ function LUIE_CompanionAbilityTrack:ApplyLayout()
     end
     local settings = GetCompanionAbilityTrackSettings()
     self.row:ApplyLayout(settings)
-    self:RefreshAll()
+    self:RefreshAllStatic()
+    self:RefreshAllEffects(false)
 end
 
 --- @return integer
@@ -824,6 +1146,41 @@ function LUIE_CompanionAbilityTrack:GetCompanionFrameExtraHeight()
     return iconSize + ROW_BELOW_GAP
 end
 
+function LUIE_CompanionAbilityTrack:NeedsUpdateTick()
+    if not self.row or not self.row:IsFeatureEnabled() or not self.row:ShouldShow() then
+        return false
+    end
+
+    if next(self.combatTrackEndMs) ~= nil then
+        return true
+    end
+
+    local frameTimeSeconds = GetFrameTimeSeconds()
+    for _, cached in pairs(self.auraCacheByKey) do
+        if cached.endTimeSeconds > frameTimeSeconds then
+            return true
+        end
+    end
+
+    return false
+end
+
+function LUIE_CompanionAbilityTrack:UnregisterUpdateTick()
+    if not self.updateTickRegistered then
+        return
+    end
+    eventManager:UnregisterForUpdate(UPDATE_NAME)
+    self.updateTickRegistered = false
+end
+
+function LUIE_CompanionAbilityTrack:SyncUpdateTick()
+    if self:NeedsUpdateTick() then
+        self:RegisterUpdateTick()
+    else
+        self:UnregisterUpdateTick()
+    end
+end
+
 function LUIE_CompanionAbilityTrack:RegisterUpdateTick()
     if self.updateTickRegistered then
         return
@@ -831,9 +1188,10 @@ function LUIE_CompanionAbilityTrack:RegisterUpdateTick()
     local track = self
     eventManager:RegisterForUpdate(UPDATE_NAME, UPDATE_INTERVAL_MS, function ()
         if not track.row or not track.row:IsFeatureEnabled() or not track.row:ShouldShow() then
+            track:UnregisterUpdateTick()
             return
         end
-        track:RefreshAll()
+        track:RefreshAllEffects(false)
     end)
     self.updateTickRegistered = true
 end
@@ -861,19 +1219,42 @@ function LUIE_CompanionAbilityTrack:OnActionSlotEffectUpdate(hotbarCategory, act
     end
 end
 
+--- @param changeType EffectResult
 --- @param unitTag string
+--- @param endTime number
+--- @param stackCount integer
 --- @param abilityId integer
-function LUIE_CompanionAbilityTrack:OnEffectChanged(unitTag, abilityId)
+function LUIE_CompanionAbilityTrack:OnEffectChanged(changeType, unitTag, endTime, stackCount, abilityId)
     local slottedId = self.trackIdToSlotted[abilityId]
     if not slottedId then
         return
     end
-    self:RefreshSlottedAbility(slottedId)
+
+    if changeType == EFFECT_RESULT_FADED then
+        self:ClearAuraCacheEntry(unitTag, abilityId)
+    else
+        self:SetAuraCacheEntry(unitTag, abilityId, endTime, stackCount)
+    end
+
+    self:RefreshSlottedAbilityEffect(slottedId)
 end
 
 function LUIE_CompanionAbilityTrack:OnReticleTargetChanged()
-    for slottedId in pairs(self.slottedIdsWithAlternateTrack) do
-        self:RefreshSlottedAbility(slottedId)
+    if not self.row or not self.row:ShouldShow() then
+        return
+    end
+
+    self:ClearAuraCacheForUnitTag("reticleover")
+
+    if BUILTIN_INTERRUPT_ABILITY_ID and self.slottedIdsWithReticleoverTrack[BUILTIN_INTERRUPT_ABILITY_ID] then
+        self:RefreshSlottedAbilityEffect(BUILTIN_INTERRUPT_ABILITY_ID, true)
+    end
+
+    for slotIndex = FIRST_SLOT, LAST_SLOT do
+        local boundId = LUIE.GetSlotTrueBoundId(slotIndex, HOTBAR)
+        if boundId and self.slottedIdsWithReticleoverTrack[boundId] then
+            self:RefreshSlottedAbilityEffect(boundId, true)
+        end
     end
 end
 
@@ -882,6 +1263,7 @@ end
 function LUIE_CompanionAbilityTrack:OnActiveCompanionStateChanged(newState, oldState)
     if newState ~= COMPANION_STATE_ACTIVE then
         ZO_ClearTable(self.combatTrackEndMs)
+        self:ClearAuraCache()
     end
     self:RefreshAll()
 end
@@ -889,11 +1271,12 @@ end
 --- @param summonResult CompanionSummonResult
 function LUIE_CompanionAbilityTrack:OnCompanionSummonResult(summonResult)
     if summonResult == COMPANION_SUMMON_RESULT_SUMMON_REQUESTED
-        or summonResult == COMPANION_SUMMON_RESULT_SUMMON_AUTO_REQUESTED
-        or summonResult == COMPANION_SUMMON_RESULT_ADDED_FOR_GROUP_PLAYER then
+    or summonResult == COMPANION_SUMMON_RESULT_SUMMON_AUTO_REQUESTED
+    or summonResult == COMPANION_SUMMON_RESULT_ADDED_FOR_GROUP_PLAYER then
         self:RefreshAll()
     else
         ZO_ClearTable(self.combatTrackEndMs)
+        self:ClearAuraCache()
         self:RefreshAll()
     end
 end
@@ -909,7 +1292,7 @@ function LUIE_CompanionAbilityTrack:OnCombatEventEffectFaded(result, abilityId)
         return
     end
     self.combatTrackEndMs[slottedFromTrack] = nil
-    self:RefreshSlottedAbility(slottedFromTrack)
+    self:RefreshSlottedAbilityEffect(slottedFromTrack)
 end
 
 --- @param result ActionResult
@@ -922,10 +1305,10 @@ function LUIE_CompanionAbilityTrack:OnCombatEventCompanion(result, hitValue, abi
     end
     if result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION then
         self:StartCombatTrackTimer(slottedFromTrack, abilityId, hitValue)
-        self:RefreshSlottedAbility(slottedFromTrack)
+        self:RefreshSlottedAbilityEffect(slottedFromTrack)
     elseif result == ACTION_RESULT_BEGIN and not self.slottedIds[abilityId] then
         self:StartCombatTrackTimer(slottedFromTrack, abilityId, hitValue)
-        self:RefreshSlottedAbility(slottedFromTrack)
+        self:RefreshSlottedAbilityEffect(slottedFromTrack)
     end
 end
 
@@ -958,7 +1341,7 @@ function LUIE_CompanionAbilityTrack:RegisterEvents()
 
     local function RegisterEffectEvents()
         local function OnEffectChangedEvent(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
-            track:OnEffectChanged(unitTag, abilityId)
+            track:OnEffectChanged(changeType, unitTag, endTime, stackCount, abilityId)
         end
         local effectUnitTags = { "companion", "reticleover", "player" }
         for index, unitTag in ipairs(effectUnitTags) do
@@ -991,10 +1374,12 @@ function LUIE_CompanionAbilityTrack:RegisterEvents()
             track:OnActiveCompanionStateChanged(newState, oldState)
         end)
         eventManager:RegisterForEvent(handler, EVENT_COMPANION_ACTIVATED, function (eventId, companionId)
-            track:RefreshAll()
+            track:RefreshAllStatic()
+            track:ReconcileAuraCacheForVisibleSlots()
         end)
         eventManager:RegisterForEvent(handler, EVENT_COMPANION_DEACTIVATED, function (eventId)
             ZO_ClearTable(track.combatTrackEndMs)
+            track:ClearAuraCache()
             track:RefreshAll()
         end)
         eventManager:RegisterForEvent(handler, EVENT_COMPANION_SUMMON_RESULT, function (eventId, summonResult, companionId)
@@ -1009,8 +1394,6 @@ function LUIE_CompanionAbilityTrack:RegisterEvents()
     RegisterEffectEvents()
     RegisterCombatEvents()
     RegisterCompanionLifecycleEvents()
-
-    self:RegisterUpdateTick()
 end
 
 function LUIE_CompanionAbilityTrack:Initialize()
@@ -1027,5 +1410,6 @@ function LUIE_CompanionAbilityTrack:Initialize()
     end
 
     self:RegisterEvents()
-    self:RefreshAll()
+    self:RefreshAllStatic()
+    self:ReconcileAuraCacheForVisibleSlots()
 end

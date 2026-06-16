@@ -95,6 +95,13 @@ local function GenerateCustomList(input)
     return options, values
 end
 
+local function RefreshProminentDebuffRemoveDropdownChoices()
+    if LUIE_Prominent_Debuffs_List and LUIE_Prominent_Debuffs_List.UpdateChoices then
+        local options, values = GenerateCustomList(SpellCastBuffs.SV.PromDebuffTable)
+        LUIE_Prominent_Debuffs_List:UpdateChoices(options, values)
+    end
+end
+
 local dialogs =
 {
     [1] =
@@ -3686,11 +3693,13 @@ function SpellCastBuffs.CreateSettings()
                 scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
-                    LUIE_Prominent_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PromDebuffTable))
+                    RefreshProminentDebuffRemoveDropdownChoices()
+                    local _, values = GenerateCustomList(Settings.PromDebuffTable)
+                    return #values > 0 and 1 or nil
                 end,
                 setFunc = function (value)
                     SpellCastBuffs.RemoveFromCustomList(Settings.PromDebuffTable, value)
-                    LUIE_Prominent_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PromDebuffTable))
+                    RefreshProminentDebuffRemoveDropdownChoices()
                 end,
                 disabled = function ()
                     return not LUIE.SV.SpellCastBuff_Enable
@@ -3916,5 +3925,9 @@ function SpellCastBuffs.CreateSettings()
     if LUIE.SV.SpellCastBuff_Enable then
         LAM:RegisterAddonPanel(LUIE.name .. "BuffsAndDebuffsOptions", panelDataBuffsDebuffs)
         LAM:RegisterOptionControls(LUIE.name .. "BuffsAndDebuffsOptions", optionsDataBuffsDebuffs)
+        RefreshProminentDebuffRemoveDropdownChoices()
+        if LUIE_Prominent_Debuffs_List and LUIE_Prominent_Debuffs_List.UpdateValue then
+            LUIE_Prominent_Debuffs_List:UpdateValue()
+        end
     end
 end

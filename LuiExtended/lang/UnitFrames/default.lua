@@ -328,6 +328,7 @@ local strings =
     LUIE_STRING_LAM_UF_DFRAMES_REPOSIT = "Reposition Default Player Frames",
     LUIE_STRING_LAM_UF_DFRAMES_REPOSIT_TP = "Change position of the default player frames to be in a compacted pyramid layout in the bottom center of the screen.",
     LUIE_STRING_LAM_UF_DFRAMES_TARGET = "Default TARGET Frame",
+    LUIE_STRING_LAM_UF_SUPPRESS_ZO_DESC = "When a dropdown above is set to Disable and the matching LUIE custom unit frame is enabled, LUIE hides the vanilla controls and unregisters their game UI event handlers (including player attribute bars when replaced). Use Do nothing or Use Extender to keep vanilla UI active. May conflict with other addons.",
     LUIE_STRING_LAM_UF_DFRAMES_VERT = "Adjust Player Frames Vertical Position",
     LUIE_STRING_LAM_UF_DFRAMES_VERT_TP = "Adjust the vertical position of the default player frames.",
     LUIE_STRING_LAM_UF_ENABLE = "Unit Frames Module",

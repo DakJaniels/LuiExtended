@@ -5,7 +5,7 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-
+local LAM = LUIE.LAM
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
@@ -88,12 +88,6 @@ local function GetAchievementCategoryInfoName(topLevelIndex)
 end
 
 function ChatAnnouncements.CreateSettings()
-    -- Load LibAddonMenu
-    local LAM = LibAddonMenu2
-    if LAM == nil then
-        return
-    end
-
     loadQuestCounterFilterDialogs()
 
     local Defaults = ChatAnnouncements.Defaults
@@ -1892,6 +1886,23 @@ function ChatAnnouncements.CreateSettings()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
                 default = Defaults.Inventory.LootShowTrait,
+            },
+            {
+                -- Show Item Type
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWITEMTYPE),
+                tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWITEMTYPE_TP),
+                getFunc = function ()
+                    return Settings.Inventory.LootShowItemType
+                end,
+                setFunc = function (value)
+                    Settings.Inventory.LootShowItemType = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Inventory.LootShowItemType,
             },
             {
                 -- Show loot total

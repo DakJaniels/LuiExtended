@@ -36,6 +36,7 @@ local strings =
     LUIE_STRING_LAM_UF_DFRAMES_HEADER = "默认单位框架",
     LUIE_STRING_LAM_UF_DFRAMES_PLAYER = "默认玩家框架",
     LUIE_STRING_LAM_UF_DFRAMES_TARGET = "默认目标框架",
+    LUIE_STRING_LAM_UF_SUPPRESS_ZO_DESC = "当上方下拉设为“禁用”且已启用匹配的 LUIE 自定义单位框架时，LUIE 会隐藏原版控件并注销其游戏 UI 事件处理（包括被替代的玩家属性条）。选择“不改动”或“扩展器”可保留原版 UI。可能与其他插件冲突。",
     LUIE_STRING_LAM_UF_DFRAMES_GROUPSMALL = "默认小队框架",
     LUIE_STRING_LAM_UF_DFRAMES_BOSS_COMPASS = "默认首领框架（指南针）",
     LUIE_STRING_LAM_UF_DFRAMES_REPOSIT = "重新定位默认玩家框架",

@@ -63,11 +63,15 @@ local strings =
     LUIE_STRING_SKILL_TAUNT_TP = "Verspottet.",
     LUIE_STRING_SKILL_TAUNT_OTHER_TP = "This enemy is taunted and will concentrate all attacks on you for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_DISGUISE_TP = "Disguised. You can be revealed by sentries or performing suspicious activity.\n\nTaking any damage other than fall damage will destroy your disguise.",
-    LUIE_STRING_SKILL_BATTLE_SPIRIT_TP = "• Erlittener Schaden und Schildstärke sind um |cFFFFFF50|r % verringert\n• Erhaltene Heilung ist um |cFFFFFF55|r % verringert\n• Lebensregeneration ist um |cFFFFFF50|r % verringert\n• Reichweite der Fähigkeit von |cFFFFFF28|r Meter oder mehr ist um |cFFFFFF8|r erhöht\n• Aktuell erhaltene Heilung ist um |cFFFFFF33|r % verringert, wenn mindestens 8 Heilen-über-Zeit-Effekte aktiv sind",
-    LUIE_STRING_SKILL_BATTLE_SPIRIT_IMPERIAL_CITY_TP = "• Erlittener Schaden und Schildstärke sind um |cFFFFFF50|r % verringert\n• Erhaltene Heilung ist um |cFFFFFF55|r % verringert\n• Lebensregeneration ist um |cFFFFFF50|r % verringert.\n• Aktuell erhaltene Heilung ist um |cFFFFFF33|r % verringert, wenn mindestens 8 Heilen-über-Zeit-Effekte aktiv sind.",
+    LUIE_STRING_SKILL_BATTLE_SPIRIT_TP = "• Erlittener Schaden und Schildstärke sind um |cffffff50|r % verringert\n• Erhaltene Heilung ist um |cffffff55|r % verringert\n• Lebensregeneration ist um |cffffff50|r % verringert\n• Reichweite der Fähigkeit von |cffffff28|r Meter oder mehr ist um |cffffff8|r erhöht\n• Aktuell erhaltene Heilung ist um |cffffff33|r % verringert, wenn mindestens 8 Heilen-über-Zeit-Effekte aktiv sind",
+    LUIE_STRING_SKILL_BATTLE_SPIRIT_IMPERIAL_CITY_TP = "• Erlittener Schaden und Schildstärke sind um |cffffff50|r % verringert\n• Erhaltene Heilung ist um |cffffff55|r % verringert\n• Lebensregeneration ist um |cffffff50|r % verringert\n• Aktuell erhaltene Heilung ist um |cffffff33|r % verringert, wenn mindestens 8 Heilen-über-Zeit-Effekte aktiv sind",
     LUIE_STRING_SKILL_RECALL_PENALTY_TP = "Ihr habt kürzlich zu einem Wegeschrein zurückggerufen und müsst eine zusätzliche Gebühr in Gold zahlen um es erneut zu tun.",
-    LUIE_STRING_SKILL_BATTLEGROUND_DESERTER_TP = "Ihr habt ein Schlachtfeld zu früh verlassen und könnt Euch nicht erneut anmelden oder Allianzpunkte im PvP erhalten.",
-    LUIE_STRING_SKILL_LOOKING_FOR_GROUP_TP = "• Increase Max Health by |cFFFFFF20|r%\n• Increase Weapon and Spell Damage by |cFFFFFF25|r%",
+    LUIE_STRING_SKILL_BATTLEGROUND_DESERTER_TP = "• Ihr könnt Euch nicht für Schlachtfelder anmelden.\n• Ihr erhaltet im PvP keine Allianzpunkte.",
+    LUIE_STRING_SKILL_LOOKING_FOR_GROUP_TP = "• Maximales Leben um |cFFFFFF20|r % erhöht.\n• Magie- und Waffenkraft um |cFFFFFF25|r % erhöht.",
+    LUIE_STRING_SKILL_UNDERDOG_DAMAGE_TP = "Erhöht den verursachten Schaden um |cFFFFFF<<1>>|r %.\n\nDieser Effekt wird von der Anzahl an fehlenden Spielern in Eurem Trupp beeinflusst.",
+    LUIE_STRING_SKILL_UNDERDOG_HEALING_TP = "Erhöht die gewirkte Heilung um |cFFFFFF<<1>>|r %.\n\nDieser Effekt wird von der Anzahl an fehlenden Spielern in Eurem Trupp beeinflusst.",
+    LUIE_STRING_SKILL_SOLO_QUEUE_XP_TP = "Erhöht die erhaltene Erfahrung um |cFFFFFF<<1>>|r %.",
+    LUIE_STRING_SKILL_SOLO_QUEUE_AP_TP = "Erhöht die erhaltenen Allianzpunkte um |cFFFFFF<<1>>|r %.",
 
     ----------------------------------------------------------------
     -- ITEM / CONSUMABLE TOOLTIPS ----------------------------------
@@ -93,7 +97,7 @@ local strings =
     LUIE_STRING_SKILL_REMOVE_TOOLTIP_PACK_LEADERS_BROTH = "If you are a werewolf, the rich marrow will also slightly ease your transformation.\nThese effects are scaled based on your level.",                                                    -- Must be exact match in each localization
     LUIE_STRING_SKILL_ADD_TOOLTIP_PACK_LEADERS_BROTH = "\nIf you are a werewolf, the rich marrow will also slightly ease your transformation.",
     LUIE_STRING_SKILL_REMOVE_TOOLTIP_DISASTROUSLY_BLOODY = "If you are a vampire, the tainted blood in this drink will corrupt you, increasing your Stage to 4.\nThese effects are scaled based on your level.",                                   -- Must be exact match in each localization
-    LUIE_STRING_SKILL_ESO_PLUS_TP = "Increase Experience, Gold, and Inspiration Points earned by |cFFFFFF10|r%.\nIncrease Trait Research speed by |cFFFFFF10|r%.",
+    LUIE_STRING_SKILL_ESO_PLUS_TP = "Erhöht um |cFFFFFF10|r%:\n• Erfahrung (alle Quellen)\n• Gold (alle Quellen)\n• Foliantenpunkte (nur Herausforderungen)\n• Inspiration beim Handwerk (Handwerksaktivitäten)\n• Allianzpunkte (Fertigkeitslinien und Rang)\n• Tel'Var-Steine (nur bei Monster-Kills)\n• Archiv-Wissensschätze (Endloses Archiv)\n• Analysezeiten von Eigenschaften im Handwerk",
 
     -- Collectible
     LUIE_STRING_SKILL_COLLECTIBLE_MYSTERY_MEAT = "Mystery Meat",

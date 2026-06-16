@@ -589,9 +589,12 @@ local barHighlightOverride =
     [38891] = { newId = 100474 },  -- Whirling Blades --> Chaotic Whirlwind
     [38861] = { newId = 100474 },  -- Steel Tornado --> Chaotic Whirlwind
 
-    [21157] = { newId = 61665 },   -- Hidden Blade --> Major Brutality
-    [38914] = { newId = 61665 },   -- Shrouded Daggers --> Major Brutality
-    [38910] = { newId = 126667 },  -- Flying Blade
+    -- Hidden Blade line (blade.txt): player [61665] @ 20s; combat [68807]/[126647] @ 20s; bar key = slotted id + BarHighlightSlottedMajorCap (blocks 60s Igneous 61665 on dagger slot).
+    [21157] = { duration = 20000, noRemove = true },                                    -- Hidden Blade
+    [38914] = { duration = 20000, noRemove = true },                                    -- Shrouded Daggers
+    [68807] = { newId = 21157, noRemove = true, duration = 20000, combatTrack = true }, -- Major Brutality combat (Hidden Blade)
+    [126647] = { newId = 38914, noRemove = true, duration = 20000, combatTrack = true }, -- Major Brutality combat (Shrouded Daggers)
+    [38910] = { newId = 126667 },  -- Flying Blade (target mark; CheckOnFade resyncs player 61665)
     [126659] = { newId = 126667 }, -- Flying Blade
 
     [83600] = { newId = 85156 },   -- Lacerate

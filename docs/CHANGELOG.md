@@ -1,5 +1,31 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.7
+
+### New
+
+- MiniMap (BETA): Optional HUD minimap module (**/luimm**). Zoom (default, subzone, dungeon, battleground, mounted), follow player, lock position and size, per-category pin scales, visibility rules (HUD, combat, looting, mounted, housing, draw tier), waypoint click behavior, and keybinds for zoom, recenter, visibility, combat, and fixed position. Enable under Misc Settings; requires UI reload.
+- Unit Frames: Optional suppress vanilla player attribute bars, target frame, group and raid frames, and companion frame while the matching LUIE custom frames are enabled (PC and console).
+- Misc Settings: **Unregister Hidden Buff/Debuff UI** stops vanilla buff and debuff UI from running in the background when the game buff UI is disabled.
+- Chat Announcements: Optional **Show Item Type** on loot lines (same pattern as trait and style display).
+- Action Bar: Cast bar **icon frame color** picker under cast bar settings.
+
+### Changes
+
+- MiniMap / Info Panel: Optional anchor Info Panel below the minimap with zone name above the map; legacy minimap clock mode removed.
+- MiniMap: Shared pin draw sizing for overlays and world-map container pins; improved quest pin sync and layout recovery.
+- Unit Frames: **TopInfo** row on player, target, small group, and AvA frames with level, veterancy rank, and overland difficulty icons in the caption area.
+- Action Bar / LuiData: Bar highlight tracks **Hidden Blade** and **Shrouded Daggers** major brutality and major sorcery with slotted major duration caps tied to player buffs.
+- SpellCastBuffs: Artificial effect overrides and tooltips for **Underdog** damage and healing and **Solo Queue** XP and AP bonuses.
+- Action Bar: Cast bar label normalization for additional wayshrine recall cast abilities.
+- Unit Frames: Companion **Ability Track** uses an aura cache for duration and stack feedback on companion buffs and hotbar effects.
+- Chat Output: Announcements use updated tab routing so active chat tabs receive lines reliably; deprecated system-message options removed from Chat Output settings.
+- LuiData 7.2.2.1: Dragonknight effect overrides and tooltip visibility fixes; LuiExtended dependency updated accordingly.
+
+### Fixed
+
+- SpellCastBuffs: Off Balance is no longer auto-added to **Prominent Debuffs** on first load (existing saved entries are unchanged). Prominent debuff remove list and right-click menu now match prominent routing, including the canonical Off Balance name entry.
+
 ## Version 7.2.4.6
 
 ### Changes

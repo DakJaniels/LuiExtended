@@ -15,6 +15,57 @@ local zo_strformat = zo_strformat
 
 local g_currentDuelTarget = nil -- Saved Duel Target for generating Battle Spirit icon when enabled
 
+local BATTLE_SPIRIT_ICON = "/esoui/art/icons/artificialeffect_battle-spirit.dds"
+local BATTLE_SPIRIT_FAKE_ABILITY_ID = 999014
+
+--- Player Battle Spirit when API artificial ids 1/3 are missing (not Cyro Vengeance — no Battle Spirit there).
+--- @return boolean
+function SpellCastBuffs.ShouldCreatePlayerBattleSpiritFallback()
+    if SpellCastBuffs.SV.IgnoreBattleSpiritPlayer then
+        return false
+    end
+    if not LUIE.ShouldShowPlayerBattleSpirit() then
+        return false
+    end
+    if IsInImperialCity() then
+        return false
+    end
+    if IsInCyrodiil() then
+        return true
+    end
+    if IsActiveWorldBattleground() then
+        return true
+    end
+    if LUIE.ResolvePVPZone() then
+        return true
+    end
+    return false
+end
+
+--- @param storeArtificialEffectId integer
+--- @param tooltip string
+function SpellCastBuffs.CreatePlayerBattleSpiritListEntry(storeArtificialEffectId, tooltip)
+    local context = "player1"
+    SpellCastBuffs.EffectsList[context][BATTLE_SPIRIT_FAKE_ABILITY_ID] =
+    {
+        uid = storeArtificialEffectId,
+        artificialEffectId = storeArtificialEffectId,
+        target = SpellCastBuffs.DetermineTarget(context),
+        type = BUFF_EFFECT_TYPE_BUFF,
+        id = BATTLE_SPIRIT_FAKE_ABILITY_ID,
+        name = Abilities.Skill_Battle_Spirit,
+        icon = BATTLE_SPIRIT_ICON,
+        tooltip = tooltip,
+        dur = 0,
+        starts = 1,
+        ends = nil,
+        forced = "long",
+        restart = true,
+        iconNum = 0,
+        artificial = false,
+    }
+end
+
 -- EVENT_DUEL_STARTED handler for creating Battle Spirit Icon on Target
 --- @param eventId integer|nil
 function SpellCastBuffs.DuelStart(eventId)
@@ -44,6 +95,9 @@ end
 function SpellCastBuffs.LoadBattleSpiritTarget()
     -- Return if we don't have Battle Spirit enabled for Target
     if SpellCastBuffs.SV.IgnoreBattleSpiritTarget then
+        return
+    end
+    if IsInCyrodiil() and not LUIE.ShouldShowPlayerBattleSpirit() then
         return
     end
 

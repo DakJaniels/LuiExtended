@@ -296,8 +296,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7220
-LuiData.addonVersion = "7.2.2.0"
+LuiData.version = 7221
+LuiData.addonVersion = "7.2.2.1"
 
 --- @class (partial) Data
 LuiData.Data =

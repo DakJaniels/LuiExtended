@@ -51,3 +51,5 @@ local ignoreListSupplement =
 for abilityId in pairs(ignoreListSupplement) do
     IgnoreList[abilityId] = true
 end
+
+

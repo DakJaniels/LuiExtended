@@ -101,6 +101,9 @@ function SpellCastBuffs.EventCombatDebug(eventId, result, isError, abilityName, 
 
     local finalString = (iconFormatted .. " [" .. abilityId .. "] " .. ability .. ": [S] " .. source .. " --> [T] " .. target .. " [D] " .. duration .. showachantime .. showacasttime .. " [R] " .. formattedResult)
     ChatOutput:Print(finalString, true)
+    if SpellCastBuffs.devDebugEnabled then
+        LUIE:Log("Verbose", finalString)
+    end
 end
 
 -- Debug Display for Effect Events
@@ -170,4 +173,7 @@ function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effect
         finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. GetEffectResultString(changeType) .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration .. ccDebug)
     end
     ChatOutput:Print(finalString, true)
+    if SpellCastBuffs.devDebugEnabled then
+        LUIE:Log("Verbose", finalString)
+    end
 end

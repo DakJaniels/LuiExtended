@@ -2,8 +2,8 @@
 ## Title: LuiData
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
-## AddOnVersion: 7220
-## Version: 7.2.2.0
+## AddOnVersion: 7221
+## Version: 7.2.2.1
 ## Description: Provides data for LuiExtended.
 ## DependsOn: LuiMedia>=7133
 ## IsLibrary: true
@@ -52,6 +52,7 @@ Effects/BarHighlight/BarHighlightCheckOnFade.lua
 Effects/BarHighlight/BarHighlightCruxMap.lua
 Effects/BarHighlight/BarHighlightDestroFix.lua
 Effects/BarHighlight/BarHighlightExtraId.lua
+Effects/BarHighlight/BarHighlightSlottedMajorCap.lua
 Effects/BarHighlight/BarHighlightOverride.lua
 Effects/BarHighlight/BarHighlightStack.lua
 Effects/BarHighlight/BarHighlightStackFromCast.lua
