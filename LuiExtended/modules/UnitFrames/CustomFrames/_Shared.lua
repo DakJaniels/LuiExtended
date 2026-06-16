@@ -61,15 +61,8 @@ Shared.MOVER_ANCHOR_REGISTRY_KEYS =
     "PetGroup1",
 }
 
--- Same scenes as default UNIT_FRAMES_FRAGMENT (HUD_FRAGMENT_GROUP + SIEGE_BAR_GROUP).
-Shared.CUSTOM_FRAME_HUD_SCENES =
-{
-    HUD_SCENE,
-    HUD_UI_SCENE,
-    LOOT_SCENE,
-    SIEGE_BAR_SCENE,
-    SIEGE_BAR_UI_SCENE,
-}
+-- Same table as LUIE.HudScene.GetGameplayScenes() after first build (ZOS HUD_FRAGMENT_GROUP + siege + loot).
+Shared.CUSTOM_FRAME_HUD_SCENES = nil
 
 --- Instantiate a custom unit frame top-level window from XML virtual template.
 --- @param globalName string
@@ -127,30 +120,14 @@ end
 --- @param scene ZO_Scene|nil
 --- @return boolean
 function Shared.IsCustomFrameHudScene(scene)
-    if not scene then
-        return false
-    end
-    for sceneIndex = 1, #Shared.CUSTOM_FRAME_HUD_SCENES do
-        if Shared.CUSTOM_FRAME_HUD_SCENES[sceneIndex] == scene then
-            return true
-        end
-    end
-    return false
+    return LUIE.HudScene.IsHudGameplayScene(scene)
 end
 
 --- Register one HUD fade fragment on all custom-frame gameplay scenes (ZOS UNIT_FRAMES parity).
 --- @param tlw LUIE_PositionableTopLevelWindow
 --- @return ZO_HUDFadeSceneFragment
 function Shared.RegisterCustomFrameHudFragment(tlw)
-    local fragment = ZO_HUDFadeSceneFragment:New(tlw, 0, 0)
-    for sceneIndex = 1, #Shared.CUSTOM_FRAME_HUD_SCENES do
-        local scene = Shared.CUSTOM_FRAME_HUD_SCENES[sceneIndex]
-        if scene and not scene:HasFragment(fragment) then
-            scene:AddFragment(fragment)
-        end
-    end
-    tlw.hudSceneFragment = fragment
-    return fragment
+    return LUIE.HudScene.RegisterHudFadeFragmentOnGameplayScenes(tlw)
 end
 
 function Shared.CreateRegenAnimation(parent, anchors, dims, alpha, number)
