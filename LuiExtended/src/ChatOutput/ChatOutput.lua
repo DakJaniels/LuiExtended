@@ -648,34 +648,32 @@ function LUIE_ChatOutput:PrintWhenReady(messageText, isSystem)
         return
     end
 
-    if not self:UsesPrintToAllTabsMethod() then
-        self:DeliverToSelectedChatTabs(messageText, isSystem)
-        return
-    end
-
-    -- Print to All Tabs: CHAT_ROUTER only when system messages use game/pChat System category on all tabs.
-    if isSystem and chatOutputSettings.ChatSystemAll then
-        if self:ShouldUseExternalFormatting() then
-            if self:PrintViaLibChatMessage(messageText) then
-                return
-            end
-            self:AddSystemMessage(self:ApplyExternalSystemFormat(messageText))
-        elseif self:ShouldRoutePrintThroughLibChatMessageProxy() then
-            if self:PrintViaLibChatMessage(messageText) then
-                return
-            end
-            self:AddSystemMessage(self:FormatMessage(messageText, self:ShouldApplyLuiExtendedTimestamp()))
-        else
-            local applyLuiTimestamp = self:ShouldApplyLuiExtendedTimestamp()
-            if isSystem and self:ShouldPChatFormatLibChatMessageProxy() then
-                applyLuiTimestamp = false
-            end
-            self:AddSystemMessage(self:FormatMessage(messageText, applyLuiTimestamp))
-        end
-        return
-    end
-
     self:DeliverToSelectedChatTabs(messageText, isSystem)
+end
+
+--- When ChatMethod is Print to All Tabs, enable LUIE routing and System filter on every active primary tab.
+function LUIE_ChatOutput:SyncChatTabRoutingForAllTabsMethod()
+    if not self:UsesPrintToAllTabsMethod() then
+        return
+    end
+    if not self:GetPrimaryChatContainerForSettings() then
+        return
+    end
+    if not LUIE.SV then
+        return
+    end
+    LUIE.SV.ChatOutput = LUIE.SV.ChatOutput or {}
+    local chatOutputSettings = LUIE.SV.ChatOutput
+    if not chatOutputSettings.ChatTab then
+        chatOutputSettings.ChatTab = {}
+    end
+    local maxTabIndex = self:GetMaxChatTabIndex()
+    for tabIndex = 1, maxTabIndex do
+        if self:IsChatTabIndexActiveForSettings(tabIndex) then
+            chatOutputSettings.ChatTab[tabIndex] = true
+            self:SetSystemCategoryEnabledOnTabForSettings(tabIndex, true)
+        end
+    end
 end
 
 --- System category filter on the primary chat container tab (settings UI).
@@ -771,9 +769,6 @@ function LUIE_ChatOutput:MaybeWarnNoDeliverableTab(isSystem)
     if not chatOutputSettings then
         return
     end
-    if self:UsesPrintToAllTabsMethod() and isSystem and chatOutputSettings.ChatSystemAll then
-        return
-    end
     if self:HasDeliverableTab(chatOutputSettings) then
         return
     end
@@ -784,11 +779,6 @@ end
 function LUIE_ChatOutput:PrintToChatWindows(formattedMessage, isSystem)
     local chatOutputSettings = self:GetChatOutputSavedVars()
     if not chatOutputSettings then
-        self:AddSystemMessage(formattedMessage)
-        return
-    end
-
-    if isSystem and chatOutputSettings.ChatSystemAll then
         self:AddSystemMessage(formattedMessage)
         return
     end
@@ -829,6 +819,23 @@ function LUIE_ChatOutput:Print(messageText, isSystem)
     self:PrintWhenReady(messageText, isSystem)
 end
 
+--- When per-tab delivery has no target, fall back to CHAT_ROUTER so hooked flows (e.g. group invite) are never silent.
+--- @param messageText string
+function LUIE_ChatOutput:PrintAnnouncementOrSystemFallback(messageText)
+    if not self:IsPlayerActivatedForChatDelivery() then
+        self:Print(messageText, true)
+        return
+    end
+    if self:UsesPrintToAllTabsMethod() then
+        self:SyncChatTabRoutingForAllTabsMethod()
+    end
+    if self:HasDeliverableTab() then
+        self:PrintWhenReady(messageText, true)
+    else
+        self:AddSystemMessage(self:FormatForDisplay(messageText))
+    end
+end
+
 function LUIE_ChatOutput:WrapFormatter(eventKey, shouldSuppressFn)
     if not CHAT_ROUTER or not IsChatSystemAvailableForCurrentPlatform() then
         return
@@ -862,6 +869,7 @@ function LUIE_ChatOutput:OnDeferredPlayerActivated()
     if not self:GetPrimaryChatContainerForSettings() then
         return
     end
+    self:SyncChatTabRoutingForAllTabsMethod()
     self:DisableLibChatMessageHistoryWhenPChatRestoreIsActive()
     if LUIE.chatOutputSettingsUI then
         LUIE.chatOutputSettingsUI:RefreshChatTabRoutingRows()
@@ -887,8 +895,8 @@ end
 
 function LUIE_ChatOutput:OnChatSystemPlayerActivatedDeferred()
     zo_callLater(function ()
-                     ChatOutput:FlushPendingPrints()
                      ChatOutput:OnDeferredPlayerActivated()
+                     ChatOutput:FlushPendingPrints()
                  end, 0)
 end
 

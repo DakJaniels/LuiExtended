@@ -179,6 +179,7 @@ LUIE.ModuleSavedVarNames =
     InfoPanel = "LUIE_InfoPanel_SV",
     SlashCommands = "LUIE_SlashCommands_SV",
     CombatInfo = "LUIE_CombatInfo_SV",
+    MiniMap = "LUIE_MiniMap_SV",
 }
 
 --- ZO_SavedVars namespace keys previously stored under `LUIESV` before the per-global split.
@@ -192,6 +193,7 @@ LUIE.ModuleSavedVarNamespaceKeys =
     "InfoPanel",
     "SlashCommands",
     "CombatInfo",
+    "MiniMap",
 }
 -- -----------------------------------------------------------------------------
 -- Components
@@ -219,7 +221,6 @@ LUIE.OtherAddonCompatability =
 --- @field ChatMethod string
 --- @field ChatBypassFormat boolean
 --- @field ChatTab table<number, boolean>
---- @field ChatSystemAll boolean
 --- @field TimeStamp boolean
 --- @field TimeStampFormat string
 --- @field TimeStampColor number[]
@@ -252,6 +253,7 @@ LUIE.Defaults =
     SpellCastBuff_Enable        = true,
     ChatAnnouncements_Enable    = true,
     SlashCommands_Enable        = true,
+    MiniMap_Enabled             = false,
 
     -- Grid settings
     snapToGrid_default          = false,
@@ -274,7 +276,6 @@ LUIE.Defaults =
         ChatBypassFormat = false,
         -- Tab indices 1..N are dynamic (see LUIE.ChatOutput:GetMaxChatTabIndex); defaults keep first five enabled for legacy installs.
         ChatTab = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true },
-        ChatSystemAll = true,
         TimeStamp = false,
         TimeStampFormat = "HH:m:s",
         TimeStampColor = { 143 / 255, 143 / 255, 143 / 255 },

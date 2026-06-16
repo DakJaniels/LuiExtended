@@ -816,12 +816,12 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                 else
                     link = ZO_LinkHandler_CreateLink(characterOrDisplayName, nil, CHARACTER_LINK_TYPE, characterOrDisplayName)
                 end
-                ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), link), true)
+                ChatOutput:PrintAnnouncementOrSystemFallback(zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), link))
                 if ChatAnnouncements.SV.Group.GroupAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
                 end
             else
-                ChatOutput:Print(zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)), true)
+                ChatOutput:PrintAnnouncementOrSystemFallback(zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
                 if ChatAnnouncements.SV.Group.GroupAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
                 end
@@ -832,7 +832,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
     -- Hook TryGroupInviteByName to add custom chat announcements and handle isMenu parameter
     ZO_PreHook("TryGroupInviteByName", function (characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
         if IsPlayerInGroup(characterOrDisplayName) then
-            ChatOutput:Print(GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER), true)
+            ChatOutput:PrintAnnouncementOrSystemFallback(GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER))
             if ChatAnnouncements.SV.Group.GroupAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
             end
@@ -861,7 +861,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
             return true -- Prevent original from running
         else
             if IsIgnored(characterOrDisplayName) then
-                ChatOutput:Print(GetString(LUIE_STRING_IGNORE_ERROR_GROUP), true)
+                ChatOutput:PrintAnnouncementOrSystemFallback(GetString(LUIE_STRING_IGNORE_ERROR_GROUP))
                 if ChatAnnouncements.SV.Group.GroupAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, LUIE_STRING_IGNORE_ERROR_GROUP)
                 end

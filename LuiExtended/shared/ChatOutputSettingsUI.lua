@@ -217,24 +217,6 @@ local function SetChatTabCheckboxValue(tabIndex, value, settings)
     settings.ChatTab[tabIndex] = value
 end
 
-local function GetChatSystemAllCheckboxValue(settings)
-    settings = settings or GetChatOutputSettings()
-    if not settings then
-        return false
-    end
-    return settings.ChatSystemAll == true
-end
-
-local function SetChatSystemAllCheckboxValue(value, settings)
-    settings = settings or GetChatOutputSettings()
-    if not settings then
-        return
-    end
-    settings.ChatSystemAll = value
-end
-
-local chatTabLAMRefreshRegistered = false
-
 --- LAM tab rows are created for all slots at addon load; refresh enables/disables rows by live tab count (never hide — avoids LAM gaps).
 local function RefreshChatTabLAMControlLabels()
     if ZO_IsConsoleOrGameCoreUI() then
@@ -243,6 +225,9 @@ local function RefreshChatTabLAMControlLabels()
     local chatOutput = LUIE.ChatOutput
     if not chatOutput then
         return
+    end
+    if chatOutput:UsesPrintToAllTabsMethod() then
+        chatOutput:SyncChatTabRoutingForAllTabsMethod()
     end
     local warningControl = _G["LUIE_ChatOutputNoDeliverableWarning"]
     if warningControl and warningControl.RefreshNoDeliverableWarning then
@@ -262,10 +247,10 @@ local function RefreshChatTabLAMControlLabels()
 end
 
 local function RegisterChatTabLAMRefreshCallback()
-    if chatTabLAMRefreshRegistered or ZO_IsConsoleOrGameCoreUI() then
+    if LUIE_ChatOutputSettingsUI.chatTabLAMRefreshRegistered or ZO_IsConsoleOrGameCoreUI() then
         return
     end
-    chatTabLAMRefreshRegistered = true
+    LUIE_ChatOutputSettingsUI.chatTabLAMRefreshRegistered = true
     CALLBACK_MANAGER:RegisterCallback("LAM-RefreshPanel", RefreshChatTabLAMControlLabels)
     local eventManager = GetEventManager()
     eventManager:RegisterForEvent(LUIE.name .. "ChatOutputSettingsTabs", EVENT_PLAYER_ACTIVATED, function ()
@@ -1108,6 +1093,9 @@ local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
                     return GetChatTabCheckboxValue(tabIndexCapture)
                 end,
                 function (value)
+                    if chatOutput and chatOutput:UsesPrintToAllTabsMethod() then
+                        return
+                    end
                     SetChatTabCheckboxValue(tabIndexCapture, value)
                     if value and chatOutput then
                         chatOutput:SetSystemCategoryEnabledOnTabForSettings(tabIndexCapture, true)
@@ -1129,6 +1117,9 @@ local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
                     return false
                 end,
                 function (value)
+                    if chatOutput and chatOutput:UsesPrintToAllTabsMethod() then
+                        return
+                    end
                     if chatOutput then
                         chatOutput:SetSystemCategoryEnabledOnTabForSettings(tabIndexCapture, value)
                     end
@@ -1156,6 +1147,8 @@ local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
             function control:RefreshChatTabRoutingRow()
                 local tabActive = chatOutput and chatOutput:IsChatTabIndexActiveForSettings(tabIndexCapture)
                 local rowDisabled = not tabActive
+                local allTabsMethod = chatOutput and chatOutput:UsesPrintToAllTabsMethod()
+                local luiToggleDisabled = rowDisabled or allTabsMethod
                 if tabActive then
                     self.rowLabel:SetText(GetTabRowLabel())
                     self.rowLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
@@ -1163,15 +1156,15 @@ local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
                     self.rowLabel:SetText(zo_strformat(GetString(LUIE_STRING_LAM_CA_CHATTAB_ROW_NONAME), tostring(tabIndexCapture)))
                     self.rowLabel:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
                 end
-                self.luiToggle:SetMouseEnabled(tabActive)
-                self.systemToggle:SetMouseEnabled(tabActive)
+                self.luiToggle:SetMouseEnabled(tabActive and not allTabsMethod)
+                self.systemToggle:SetMouseEnabled(tabActive and not allTabsMethod)
                 ApplyChatTabRoutingToggleVisual(
                     self.luiToggle,
                     GetChatTabCheckboxValue(tabIndexCapture),
-                    rowDisabled
+                    luiToggleDisabled
                 )
                 local systemEnabled = tabActive and chatOutput and chatOutput:IsSystemCategoryEnabledOnTabForSettings(tabIndexCapture) or false
-                ApplyChatTabRoutingToggleVisual(self.systemToggle, systemEnabled, rowDisabled)
+                ApplyChatTabRoutingToggleVisual(self.systemToggle, systemEnabled, luiToggleDisabled)
             end
 
             control:RefreshChatTabRoutingRow()
@@ -1233,20 +1226,6 @@ function LUIE_ChatOutputSettingsUI:BuildChatOutputLAMControls(SettingsAPI)
         )
     end
 
-    controls[#controls + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL),
-        GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL_TP),
-        function ()
-            return GetChatSystemAllCheckboxValue()
-        end,
-        function (value)
-            SetChatSystemAllCheckboxValue(value)
-        end,
-        "full",
-        nil,
-        Defaults.ChatSystemAll
-    )
-
     controls[#controls + 1] = SettingsAPI.CreateDropdownOption(
         GetString(LUIE_STRING_LAM_CA_CHATMETHOD),
         GetString(LUIE_STRING_LAM_CA_CHATMETHOD_TP),
@@ -1256,6 +1235,11 @@ function LUIE_ChatOutputSettingsUI:BuildChatOutputLAMControls(SettingsAPI)
         end,
         function (value)
             Settings.ChatMethod = value
+            local chatOutput = LUIE.ChatOutput
+            if chatOutput and value == CHAT_METHOD_SV_ALL_TABS then
+                chatOutput:SyncChatTabRoutingForAllTabsMethod()
+            end
+            RefreshChatTabLAMControlLabels()
         end,
         "full",
         nil,
