@@ -470,7 +470,6 @@ local CHAT_OUTPUT_MIGRATION_KEYS =
 {
     "ChatMethod",
     "ChatBypassFormat",
-    "ChatSystemAll",
     "TimeStamp",
     "TimeStampFormat",
 }
