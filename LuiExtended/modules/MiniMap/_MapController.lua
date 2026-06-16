@@ -26,8 +26,11 @@ function MiniMap.RunWithPlayerMapForMirror(mirrorCallback)
     MiniMap.playerMapMirrorDepth = MiniMap.playerMapMirrorDepth + 1
     local savedMapIndex = GetCurrentMapIndex()
     SetMapToPlayerLocation()
-    if not MiniMap.IsNativeWorldMapContainerAttached() then
+    local mapIndexAfterPlayerLocation = GetCurrentMapIndex()
+    local playerMapIndexChanged = savedMapIndex ~= mapIndexAfterPlayerLocation
+    if playerMapIndexChanged or not MiniMap.IsNativeWorldMapContainerAttached() then
         ZO_WorldMap_UpdateMap()
+        MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
     end
     mirrorCallback()
     if savedMapIndex ~= nil and savedMapIndex ~= GetCurrentMapIndex() then
@@ -37,6 +40,7 @@ function MiniMap.RunWithPlayerMapForMirror(mirrorCallback)
             SetMapToMapListIndex(savedMapIndex)
         end
         ZO_WorldMap_UpdateMap()
+        MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
     end
     MiniMap.playerMapMirrorDepth = MiniMap.playerMapMirrorDepth - 1
     local pendingMirrorCallback = MiniMap.playerMapMirrorPendingCallback
@@ -53,6 +57,262 @@ function MiniMap.RunWithPlayerMapForMirror(mirrorCallback)
         MiniMap.CompletePostPlayerMapMirrorWork()
     end
     return true
+end
+
+--- @return boolean
+function MiniMap.IsPlayerMapContextCurrentForHudRead()
+    return MiniMap.playerMapMirrorDepth > 0 or DoesCurrentMapMatchMapForPlayerLocation()
+end
+
+--- Runs hudMapReadCallback on the player map; mirrors via RunWithPlayerMapForMirror when the global map index differs.
+--- @param hudMapReadCallback function
+function MiniMap.RunHudMapReadInPlayerMapContext(hudMapReadCallback)
+    if MiniMap.IsPlayerMapContextCurrentForHudRead() then
+        hudMapReadCallback()
+    else
+        MiniMap.RunWithPlayerMapForMirror(hudMapReadCallback)
+    end
+end
+
+--- @return boolean
+function MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap()
+    local mapController = MiniMap.mapController
+    if not mapController or not mapController:IsReady() then
+        return false
+    end
+    local mapData = mapController.map
+    if not mapData then
+        return false
+    end
+    local playerMapRawName = GetMapName()
+    local lastLoadedMapRawName = mapController.lastLoadedMapRawName
+    if not lastLoadedMapRawName or lastLoadedMapRawName ~= playerMapRawName then
+        return false
+    end
+    if mapData.rawName ~= playerMapRawName then
+        return false
+    end
+    if not DoesCurrentMapMatchMapForPlayerLocation() then
+        return false
+    end
+    local horizontalTiles, verticalTiles = GetMapNumTiles()
+    if mapData.numHorizontalTiles ~= horizontalTiles or mapData.numVerticalTiles ~= verticalTiles then
+        return false
+    end
+    local logicalWidth, logicalHeight = ZO_WorldMap_GetMapDimensions()
+    if logicalWidth <= 0 or logicalHeight <= 0 then
+        return false
+    end
+    local loadedMapWidth = mapData.width
+    local loadedMapHeight = mapData.height
+    if mapData.tileWidth > 0 and mapData.numHorizontalTiles > 0 then
+        loadedMapWidth = mapData.tileWidth * mapData.numHorizontalTiles
+        loadedMapHeight = mapData.tileHeight * mapData.numVerticalTiles
+    end
+    if zo_abs(loadedMapWidth - logicalWidth) > 0.5 or zo_abs(loadedMapHeight - logicalHeight) > 0.5 then
+        return false
+    end
+    return true
+end
+
+--- Player-map context: tile grid + context base zoom (see GetContextBaseZoom).
+--- @return string
+function MiniMap.GetHudMapZoomContextSignature()
+    local horizontalTiles, verticalTiles = GetMapNumTiles()
+    return string.format("%d:%d:%.4f", horizontalTiles or 0, verticalTiles or 0, MiniMap.GetContextBaseZoom())
+end
+
+function MiniMap.RecordHudMapZoomContextSignature()
+    MiniMap.lastHudMapZoomContextSignature = MiniMap.GetHudMapZoomContextSignature()
+end
+
+--- Snap to context default zoom only when tile/context rules change (not every subzone label hop on the same map sheet).
+function MiniMap.ApplyHudContextZoomWhenMapContextChanged()
+    if MiniMap.holdZoomActive then
+        return
+    end
+    local signature = MiniMap.GetHudMapZoomContextSignature()
+    if MiniMap.lastHudMapZoomContextSignature == signature then
+        return
+    end
+    MiniMap.lastHudMapZoomContextSignature = signature
+    MiniMap.zoom = MiniMap.GetEffectiveDefaultZoom()
+    MiniMap.ClampSavedDefaultZoom()
+    local mapController = MiniMap.mapController
+    if mapController and mapController:IsReady() then
+        mapController:ClampZoomToLimits(true)
+    end
+end
+
+--- @param mapController MiniMapMapController
+--- @return boolean geometryChanged
+function MiniMap.SyncHudMapDataDimensionsFromPlayerMap(mapController)
+    local mapData = mapController and mapController.map
+    if not mapData or mapData.numTiles == 0 then
+        return false
+    end
+    local horizontalTiles, verticalTiles = GetMapNumTiles()
+    local logicalWidth, logicalHeight = ZO_WorldMap_GetMapDimensions()
+    if logicalWidth <= 0 or logicalHeight <= 0 then
+        return false
+    end
+    local targetWidth = logicalWidth
+    local targetHeight = logicalHeight
+    if mapData.tileWidth > 0 and mapData.tileHeight > 0 then
+        targetWidth = mapData.tileWidth * horizontalTiles
+        targetHeight = mapData.tileHeight * verticalTiles
+    end
+    if  mapData.numHorizontalTiles == horizontalTiles
+    and mapData.numVerticalTiles == verticalTiles
+    and zo_abs(mapData.width - targetWidth) < 0.5
+    and zo_abs(mapData.height - targetHeight) < 0.5 then
+        return false
+    end
+    mapData.numHorizontalTiles = horizontalTiles
+    mapData.numVerticalTiles = verticalTiles
+    mapData.numTiles = horizontalTiles * verticalTiles
+    MiniMap.AssignMiniMapMapDataPixelDimensions(mapData, logicalWidth, logicalHeight)
+    mapController:ClampZoomToLimits(true)
+    return true
+end
+
+--- @param mapData MiniMapMapData
+--- @param logicalWidth number
+--- @param logicalHeight number
+function MiniMap.AssignMiniMapMapDataPixelDimensions(mapData, logicalWidth, logicalHeight)
+    if logicalWidth <= 0 or logicalHeight <= 0 then
+        return
+    end
+    mapData.width = logicalWidth
+    mapData.height = logicalHeight
+    if mapData.tileWidth > 0 and mapData.tileHeight > 0 then
+        mapData.width = mapData.tileWidth * mapData.numHorizontalTiles
+        mapData.height = mapData.tileHeight * mapData.numVerticalTiles
+    elseif mapData.numHorizontalTiles > 0 and mapData.numVerticalTiles > 0 then
+        mapData.tileWidth = logicalWidth / mapData.numHorizontalTiles
+        mapData.tileHeight = logicalHeight / mapData.numVerticalTiles
+        mapData.width = mapData.tileWidth * mapData.numHorizontalTiles
+        mapData.height = mapData.tileHeight * mapData.numVerticalTiles
+    end
+end
+
+--- Player-map context (inside RunWithPlayerMapForMirror).
+--- @return MiniMapMapData mapData
+--- @return number logicalWidth
+--- @return number logicalHeight
+function MiniMap.CollectMiniMapMapDataFromPlayerMap()
+    local horizontalTiles, verticalTiles = GetMapNumTiles()
+    local logicalWidth, logicalHeight = ZO_WorldMap_GetMapDimensions()
+    --- @type MiniMapMapData
+    local mapData =
+    {
+        rawName = GetMapName(),
+        numHorizontalTiles = horizontalTiles,
+        numVerticalTiles = verticalTiles,
+        numTiles = horizontalTiles * verticalTiles,
+        tileWidth = 0,
+        tileHeight = 0,
+        width = 0,
+        height = 0,
+    }
+    return mapData, logicalWidth, logicalHeight
+end
+
+--- Map-context-safe read (SpellCastBuffs `/zonecheck` CollectZoneMapInfo: after SetMapToPlayerLocation).
+--- @return string|nil
+function MiniMap.CollectHudPlayerLocationNameForDisplay()
+    local locationName
+    MiniMap.RunHudMapReadInPlayerMapContext(function ()
+        locationName = GetPlayerLocationName()
+    end)
+    return locationName
+end
+
+--- @param zoneName string|nil
+--- @param subZoneName string|nil
+--- @return string|nil
+function MiniMap.GetHudLocationDisplayName(zoneName, subZoneName)
+    if subZoneName and subZoneName ~= "" then
+        return subZoneName
+    end
+    if zoneName and zoneName ~= "" then
+        return zoneName
+    end
+    local locationName = MiniMap.CollectHudPlayerLocationNameForDisplay()
+    if locationName and locationName ~= "" then
+        return locationName
+    end
+    return GetMapName()
+end
+
+--- HUD zone label: event args (alert order), then GetPlayerLocationName in player map context, then GetMapName.
+--- @param zoneName string|nil
+--- @param subZoneName string|nil
+function MiniMap.ApplyHudLocationLabelFromZoneNames(zoneName, subZoneName)
+    local view = MiniMap.view
+    if not view then
+        return
+    end
+    local displayName = MiniMap.GetHudLocationDisplayName(zoneName, subZoneName)
+    if displayName and displayName ~= "" then
+        view:SetZoneName(displayName)
+    end
+end
+
+--- @param locationLabel string|nil
+function MiniMap.ApplyHudLocationLabelFromZoneUpdate(locationLabel)
+    local view = MiniMap.view
+    if not view then
+        return
+    end
+    local displayName = locationLabel
+    if displayName == nil or displayName == "" then
+        displayName = MiniMap.GetHudLocationDisplayName(nil, nil)
+    end
+    if displayName and displayName ~= "" then
+        view:SetZoneName(displayName)
+    end
+end
+
+function MiniMap.ApplyHudLocationLabelFromPlayerLocation()
+    MiniMap.ApplyHudLocationLabelFromZoneNames(nil, nil)
+end
+
+--- Pin + layout recovery when zone label changes but map sheet identity is unchanged (no tile reload).
+--- @return boolean
+function MiniMap.IsMapReloadAffectingHudLayout()
+    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
+    local mapController = MiniMap.mapController
+    if not pinMirrorStateMachine or not mapController then
+        return false
+    end
+    if pinMirrorStateMachine:IsCurrentState("ZoneReset") then
+        return true
+    end
+    if pinMirrorStateMachine:IsCurrentState("MapReloading") then
+        if pinMirrorStateMachine.mapReloadInProgress or not mapController:IsReady() then
+            return true
+        end
+    end
+    return false
+end
+
+function MiniMap.ApplyHudMirrorRecoveryAfterSubzoneTransition()
+    if not MiniMap.Enabled then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        return
+    end
+    if MiniMap.playerMapMirrorDepth > 0 or MiniMap.IsPinMirrorMachineBusy() then
+        return
+    end
+    if not MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
+        return
+    end
+    MiniMap.TryAttachNativeWorldMapContainer()
+    MiniMap.RefreshNativeWorldMapContainer({ syncSubzoneMapGeometry = true, applyContextZoomIfChanged = true })
+    MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
 end
 
 --- @param mapController MiniMapMapController
@@ -86,16 +346,8 @@ end
 --- @return boolean|nil isShownInCurrentMap
 function MiniMap.GetMapPlayerPositionForMirror(unitTag)
     unitTag = unitTag or "player"
-    if MiniMap.playerMapMirrorDepth > 0 then
-        local normalizedX, normalizedY, heading, isShownInCurrentMap = GetMapPlayerPosition(unitTag)
-        return normalizedX, normalizedY, heading, isShownInCurrentMap
-    end
     local normalizedX, normalizedY, heading, isShownInCurrentMap
-    if DoesCurrentMapMatchMapForPlayerLocation() then
-        normalizedX, normalizedY, heading, isShownInCurrentMap = GetMapPlayerPosition(unitTag)
-        return normalizedX, normalizedY, heading, isShownInCurrentMap
-    end
-    MiniMap.RunWithPlayerMapForMirror(function ()
+    MiniMap.RunHudMapReadInPlayerMapContext(function ()
         normalizedX, normalizedY, heading, isShownInCurrentMap = GetMapPlayerPosition(unitTag)
     end)
     return normalizedX, normalizedY, heading, isShownInCurrentMap
@@ -104,14 +356,8 @@ end
 --- @return number|nil waypointX
 --- @return number|nil waypointY
 function MiniMap.GetMapPlayerWaypointForMirror()
-    if MiniMap.playerMapMirrorDepth > 0 then
-        return GetMapPlayerWaypoint()
-    end
-    if DoesCurrentMapMatchMapForPlayerLocation() then
-        return GetMapPlayerWaypoint()
-    end
     local waypointX, waypointY
-    MiniMap.RunWithPlayerMapForMirror(function ()
+    MiniMap.RunHudMapReadInPlayerMapContext(function ()
         waypointX, waypointY = GetMapPlayerWaypoint()
     end)
     return waypointX, waypointY
@@ -250,6 +496,125 @@ function MiniMapMapController:ClearPinControlsForOtherZones()
     end
 end
 
+--- @param view MiniMapView
+--- @param statusMessage string
+--- @param retryReason string
+--- @param reloadAttemptIndex number
+function MiniMapMapController:ScheduleWorldMapReloadRetryOrFail(view, statusMessage, retryReason, reloadAttemptIndex)
+    view.statusLabel:SetText(statusMessage)
+    if reloadAttemptIndex < MINIMAP_MAP_RELOAD_MAX_ATTEMPTS then
+        local mapController = self
+        zo_callLater(function ()
+                         mapController:ReloadWorldMap(retryReason, reloadAttemptIndex)
+                     end, 1000 * reloadAttemptIndex)
+        return
+    end
+    view.statusLabel:SetText("Loading failed")
+    MiniMap.pinMirrorStateMachine.mapReloadInProgress = false
+    MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
+end
+
+--- @param previousMapData MiniMapMapData|nil
+--- @param mapZoneIdentityChanged boolean
+--- @param horizontalTiles number
+--- @param verticalTiles number
+--- @param logicalWidth number
+--- @param logicalHeight number
+--- @return boolean
+function MiniMapMapController:CanReuseTilesForWorldMapReload(previousMapData, mapZoneIdentityChanged, horizontalTiles, verticalTiles, logicalWidth, logicalHeight)
+    return not mapZoneIdentityChanged
+        and previousMapData ~= nil
+        and previousMapData.numHorizontalTiles == horizontalTiles
+        and previousMapData.numVerticalTiles == verticalTiles
+        and previousMapData.width == logicalWidth
+        and previousMapData.height == logicalHeight
+        and previousMapData.tileWidth > 0
+        and previousMapData.tileHeight > 0
+end
+
+--- @param mapData MiniMapMapData
+--- @param previousMapData MiniMapMapData|nil
+--- @param canReuseLoadedTiles boolean
+--- @return boolean texturesLoaded
+function MiniMapMapController:LoadWorldMapReloadTextures(mapData, previousMapData, canReuseLoadedTiles)
+    if canReuseLoadedTiles and previousMapData then
+        mapData.tileWidth = previousMapData.tileWidth
+        mapData.tileHeight = previousMapData.tileHeight
+        return true
+    end
+    self:ClearTiles()
+    return MiniMap.ApplyNativeWorldMapTileTextures(self, mapData)
+end
+
+--- @param mapData MiniMapMapData
+--- @param logicalWidth number
+--- @param logicalHeight number
+--- @param mapZoneIdentityChanged boolean
+function MiniMapMapController:FinalizeWorldMapReloadFromMirror(mapData, logicalWidth, logicalHeight, mapZoneIdentityChanged)
+    MiniMap.AssignMiniMapMapDataPixelDimensions(mapData, logicalWidth, logicalHeight)
+    self.ready = true
+    MiniMap.ClampSavedDefaultZoom()
+    if mapZoneIdentityChanged then
+        MiniMap.zoom = MiniMap.GetEffectiveDefaultZoom()
+        MiniMap.RecordHudMapZoomContextSignature()
+    else
+        MiniMap.ApplyHudContextZoomWhenMapContextChanged()
+    end
+    self:ClampZoomToLimits(true)
+    self.view:HideLoading()
+    MiniMap.SetLuiMiniMapTileLayerHidden(true)
+    MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
+    MiniMap.SchedulePostReloadUILayout(self, mapData)
+    MiniMap.pinMirrorStateMachine:ScheduleNotifyMapReloadCompleteAfterMirror()
+end
+
+--- @param reloadAttemptIndex number
+function MiniMapMapController:ReloadWorldMapInPlayerMapMirror(reloadAttemptIndex)
+    local view = self.view
+    self:ClearPinControlsForOtherZones()
+
+    local mapData, logicalWidth, logicalHeight = MiniMap.CollectMiniMapMapDataFromPlayerMap()
+    local previousLoadedMapRawName = self.lastLoadedMapRawName
+    local previousMapData = self.map
+    local mapZoneIdentityChanged = previousLoadedMapRawName ~= mapData.rawName
+
+    if mapZoneIdentityChanged and previousLoadedMapRawName then
+        MiniMap.SV.panOffsetX = 0
+        MiniMap.SV.panOffsetY = 0
+    end
+    self.lastLoadedMapRawName = mapData.rawName
+    self.map = mapData
+    MiniMap.ApplyHudLocationLabelFromPlayerLocation()
+
+    if mapData.numTiles == 0 then
+        self:ScheduleWorldMapReloadRetryOrFail(
+            view,
+            string.format("Loading map info [%d]", reloadAttemptIndex),
+            string.format("Map info reload [%d]", reloadAttemptIndex),
+            reloadAttemptIndex)
+        return
+    end
+
+    local canReuseLoadedTiles = self:CanReuseTilesForWorldMapReload(
+        previousMapData,
+        mapZoneIdentityChanged,
+        mapData.numHorizontalTiles,
+        mapData.numVerticalTiles,
+        logicalWidth,
+        logicalHeight)
+
+    if not self:LoadWorldMapReloadTextures(mapData, previousMapData, canReuseLoadedTiles) then
+        self:ScheduleWorldMapReloadRetryOrFail(
+            view,
+            string.format("Loading textures [%d]", reloadAttemptIndex),
+            string.format("Texture reload [%d]", reloadAttemptIndex),
+            reloadAttemptIndex)
+        return
+    end
+
+    self:FinalizeWorldMapReloadFromMirror(mapData, logicalWidth, logicalHeight, mapZoneIdentityChanged)
+end
+
 --- @param reason string
 --- @param reloadAttemptIndex number
 --- @return boolean
@@ -260,93 +625,20 @@ function MiniMapMapController:ReloadWorldMap(reason, reloadAttemptIndex)
     local view = self.view
     local wasReady = self.ready
     self.ready = false
+    MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(true)
     MiniMap.pinMirrorStateMachine:OnMapReloadStarted()
     view:ShowLoading("Loading")
     reloadAttemptIndex = reloadAttemptIndex + 1
 
     local mapController = self
     local mirrorWorkScheduled = MiniMap.RunWithPlayerMapForMirror(function ()
-        mapController:ClearPinControlsForOtherZones()
-
-        local horizontalTiles, verticalTiles = GetMapNumTiles()
-        local logicalWidth, logicalHeight = ZO_WorldMap_GetMapDimensions()
-        --- @type MiniMapMapData
-        local mapData =
-        {
-            rawName = GetMapName(),
-            numHorizontalTiles = horizontalTiles,
-            numVerticalTiles = verticalTiles,
-            numTiles = horizontalTiles * verticalTiles,
-            tileWidth = 0,
-            tileHeight = 0,
-            width = 0,
-            height = 0,
-        }
-
-        local previousLoadedMapRawName = mapController.lastLoadedMapRawName
-        local mapZoneIdentityChanged = previousLoadedMapRawName ~= mapData.rawName
-
-        if mapZoneIdentityChanged and previousLoadedMapRawName then
-            MiniMap.SV.panOffsetX = 0
-            MiniMap.SV.panOffsetY = 0
-        end
-        mapController.lastLoadedMapRawName = mapData.rawName
-        mapController.map = mapData
-
-        view:SetZoneName(mapData.rawName)
-
-        if mapData.numTiles == 0 then
-            view.statusLabel:SetText(string.format("Loading map info [%d]", reloadAttemptIndex))
-            if reloadAttemptIndex < MINIMAP_MAP_RELOAD_MAX_ATTEMPTS then
-                zo_callLater(function ()
-                                 mapController:ReloadWorldMap(string.format("Map info reload [%d]", reloadAttemptIndex), reloadAttemptIndex)
-                             end, 1000 * reloadAttemptIndex)
-            else
-                view.statusLabel:SetText("Loading failed")
-                MiniMap.pinMirrorStateMachine.mapReloadInProgress = false
-            end
-            return
-        end
-
-        local texturesLoaded
-        mapController:ClearTiles()
-        texturesLoaded = MiniMap.ApplyNativeWorldMapTileTextures(mapController, mapData)
-
-        if not texturesLoaded then
-            view.statusLabel:SetText(string.format("Loading textures [%d]", reloadAttemptIndex))
-            if reloadAttemptIndex < MINIMAP_MAP_RELOAD_MAX_ATTEMPTS then
-                zo_callLater(function ()
-                                 mapController:ReloadWorldMap(string.format("Texture reload [%d]", reloadAttemptIndex), reloadAttemptIndex)
-                             end, 1000 * reloadAttemptIndex)
-            else
-                view.statusLabel:SetText("Loading failed")
-                MiniMap.pinMirrorStateMachine.mapReloadInProgress = false
-            end
-            return
-        end
-
-        mapData.width = logicalWidth
-        mapData.height = logicalHeight
-        if mapData.tileWidth > 0 and mapData.tileHeight > 0 then
-            mapData.width = mapData.tileWidth * mapData.numHorizontalTiles
-            mapData.height = mapData.tileHeight * mapData.numVerticalTiles
-        elseif mapData.numHorizontalTiles > 0 and mapData.numVerticalTiles > 0 then
-            mapData.tileWidth = logicalWidth / mapData.numHorizontalTiles
-            mapData.tileHeight = logicalHeight / mapData.numVerticalTiles
-        end
-        mapController.ready = true
-        MiniMap.ClampSavedDefaultZoom()
-        if mapZoneIdentityChanged then
-            MiniMap.zoom = MiniMap.GetEffectiveDefaultZoom()
-        end
-        mapController:ClampZoomToLimits(true)
-        view:HideLoading()
-        MiniMap.SetLuiMiniMapTileLayerHidden(true)
-        MiniMap.SchedulePostReloadUILayout(mapController, mapData)
-        MiniMap.pinMirrorStateMachine:ScheduleNotifyMapReloadCompleteAfterMirror()
+        mapController:ReloadWorldMapInPlayerMapMirror(reloadAttemptIndex)
     end)
     if not mirrorWorkScheduled then
         mapController.ready = wasReady
+        if wasReady then
+            MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
+        end
     end
 
     return self.ready

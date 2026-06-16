@@ -124,7 +124,6 @@ function MiniMapRuntime:OnFollowTick()
     end
 
     self:UpdateCenterPlayerPipVisibility()
-    MiniMap.UpdateConditionalVisibility()
 
     local playerNormalizedX, playerNormalizedY, playerHeading = MiniMap.GetMapPlayerPositionForMirror("player")
     local playerCameraHeading = GetPlayerCameraHeading()
@@ -164,7 +163,7 @@ function MiniMapRuntime:OnFollowTick()
     self.lastPlayerNormX = playerNormalizedX
     self.lastPlayerNormY = playerNormalizedY
 
-    MiniMap.UpdateNativeWorldMapMovingPins()
+    MiniMap.TickNativeWorldMapMovingPins()
 end
 
 function MiniMapRuntime:ApplyScrollFromPanOffsets()

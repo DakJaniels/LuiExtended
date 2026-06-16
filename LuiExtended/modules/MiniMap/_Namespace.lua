@@ -42,6 +42,7 @@ MiniMap.hudSceneFragment = nil
 MiniMap.worldMapBlocksMiniMapWork = false
 MiniMap.playerMapMirrorDepth = 0
 MiniMap.playerMapMirrorPendingCallback = nil
+MiniMap.lastHudMapZoomContextSignature = nil
 MiniMap.pendingPostReloadUILayout = nil
 
 --- Runs after map index restore when the outermost RunWithPlayerMapForMirror finishes.
@@ -191,7 +192,6 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field luiMiniMapPinColor table|nil
 --- @field luiMiniMapLastDrawWidth number|nil
 --- @field luiMiniMapLastDrawHeight number|nil
---- @field luiMiniMapPinSyncData MiniMapPinSyncData|nil
 --- @field luiMiniMapTextureAnimKey string|nil
 --- @field luiMiniMapTextureAnimTimeline AnimationTimeline|nil
 --- @field luiMiniMapCompositeSurfaceIndex number|nil

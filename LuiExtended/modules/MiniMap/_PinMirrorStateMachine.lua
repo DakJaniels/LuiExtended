@@ -117,7 +117,7 @@ function MiniMapPinMirrorStateMachine:Initialize(mapEventController, mapControll
             stateMachine.mapReloadQueuedReason = stateMachine.pendingMapReloadReason or "Event"
             stateMachine.mapReloadInProgress = false
             if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
-                d("[MiniMap SM] MapReloading bail ZO still showing")
+                LUIE:Log("Debug", "[MiniMap SM] MapReloading bail ZO still showing")
             end
             stateMachine:SetCurrentState("Idle")
             return
@@ -136,9 +136,9 @@ function MiniMapPinMirrorStateMachine:Initialize(mapEventController, mapControll
             pinMirrorGameplayTickersUpdateScheduled = true
             local gameplayTickersUpdateName = MiniMap.moduleName .. "PinMirrorGameplayTickers"
             EVENT_MANAGER:RegisterForUpdate(gameplayTickersUpdateName, 0, function ()
-                pinMirrorGameplayTickersUpdateScheduled = false
-                MiniMap.UpdateGameplayTickers()
-            end, true)
+                                                pinMirrorGameplayTickersUpdateScheduled = false
+                                                MiniMap.UpdateGameplayTickers()
+                                            end, true)
         end
         if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
             local currentState = stateMachine:GetCurrentState()
@@ -146,7 +146,7 @@ function MiniMapPinMirrorStateMachine:Initialize(mapEventController, mapControll
                 local stateName = currentState:GetName()
                 if stateName ~= pinMirrorStateMachineLastDebugStateName then
                     pinMirrorStateMachineLastDebugStateName = stateName
-                    d(string.format("[MiniMap SM] %s", stateName))
+                    LUIE:Log("Debug", string.format("[MiniMap SM] %s", stateName))
                 end
             end
         end
@@ -177,9 +177,6 @@ function MiniMapPinMirrorStateMachine:Stop()
     self.mapReloadCompletionHandled = false
     self.mapReloadCompletePendingAfterMirror = false
     pinMirrorStateMachineLastDebugStateName = nil
-    if self.pinController then
-        self.pinController:CancelPinSyncCoroutine()
-    end
     self:SetCurrentState("Disabled")
     self:Reset()
 end
@@ -207,7 +204,7 @@ function MiniMapPinMirrorStateMachine:RequestMapReload(reason)
         self.mapReloadQueuedWhileWorldMap = true
         self.mapReloadQueuedReason = reason or "Event"
         if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
-            d(string.format("[MiniMap SM] RequestMapReload queued (world map): %s", reason or "Event"))
+            LUIE:Log("Debug", string.format("[MiniMap SM] RequestMapReload queued (world map): %s", reason or "Event"))
         end
         return
     end
@@ -226,17 +223,13 @@ end
 
 --- @return boolean true when pin refresh ran without tile reload
 function MiniMapPinMirrorStateMachine:TryPinSyncOnlyOnPlayerActivated()
-    if not self.mapController or not self.mapController:IsReady() then
+    if not MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
         return false
     end
-    local lastLoadedMapRawName = self.mapController.lastLoadedMapRawName
-    if lastLoadedMapRawName and lastLoadedMapRawName == GetMapName() then
-        MiniMap.TryAttachNativeWorldMapContainer()
-        MiniMap.RefreshNativeWorldMapContainer()
-        MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
-        return true
-    end
-    return false
+    MiniMap.TryAttachNativeWorldMapContainer()
+    MiniMap.RefreshNativeWorldMapContainer()
+    MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
+    return true
 end
 
 function MiniMapPinMirrorStateMachine:OnMapReloadStarted()
@@ -272,30 +265,30 @@ function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteNextFrame()
     local stateMachine = self
     local mapReloadCompleteNotifyUpdateName = MiniMap.moduleName .. "MapReloadCompleteNotify"
     EVENT_MANAGER:RegisterForUpdate(mapReloadCompleteNotifyUpdateName, 0, function ()
-        stateMachine.mapReloadCompleteNotifyDeferredScheduled = false
-        if not MiniMap.Enabled then
-            return
-        end
-        if MiniMap.IsWorldMapBlockingMiniMapWork() then
-            stateMachine.mapReloadCompletePendingAfterMirror = true
-            MiniMap.RunWhenWorldMapUnblocked(function ()
-                if not MiniMap.Enabled then
-                    return
-                end
-                if not stateMachine:IsCurrentState("MapReloading") then
-                    stateMachine.mapReloadCompletePendingAfterMirror = false
-                    return
-                end
-                stateMachine.mapReloadCompletePendingAfterMirror = false
-                stateMachine:NotifyMapReloadComplete()
-            end)
-            return
-        end
-        if not stateMachine:IsCurrentState("MapReloading") then
-            return
-        end
-        stateMachine:NotifyMapReloadComplete()
-    end, true)
+                                        stateMachine.mapReloadCompleteNotifyDeferredScheduled = false
+                                        if not MiniMap.Enabled then
+                                            return
+                                        end
+                                        if MiniMap.IsWorldMapBlockingMiniMapWork() then
+                                            stateMachine.mapReloadCompletePendingAfterMirror = true
+                                            MiniMap.RunWhenWorldMapUnblocked(function ()
+                                                if not MiniMap.Enabled then
+                                                    return
+                                                end
+                                                if not stateMachine:IsCurrentState("MapReloading") then
+                                                    stateMachine.mapReloadCompletePendingAfterMirror = false
+                                                    return
+                                                end
+                                                stateMachine.mapReloadCompletePendingAfterMirror = false
+                                                stateMachine:NotifyMapReloadComplete()
+                                            end)
+                                            return
+                                        end
+                                        if not stateMachine:IsCurrentState("MapReloading") then
+                                            return
+                                        end
+                                        stateMachine:NotifyMapReloadComplete()
+                                    end, true)
 end
 
 function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteAfterMirror()
@@ -359,24 +352,4 @@ function MiniMapPinMirrorStateMachine:RequestPinSyncImmediate()
     MiniMap.RefreshNativeWorldMapContainer()
     MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     MiniMap.FirePinResyncCallbacks()
-end
-
-function MiniMapPinMirrorStateMachine:RequestPinSyncDebounced()
-    self:RequestPinSyncImmediate()
-end
-
-function MiniMapPinMirrorStateMachine:CancelPinSyncDebounce()
-end
-
-function MiniMapPinMirrorStateMachine:RestartPinSyncDebounce()
-end
-
-function MiniMapPinMirrorStateMachine:AbortMirrorPassAndRequeuePinSync()
-    self.pinSyncQueuedWhileMapReloading = true
-end
-
-function MiniMapPinMirrorStateMachine:NotifyMirrorComplete()
-    if self:IsCurrentState("Idle") then
-        self:FlushQueuedPinSyncAfterIdle()
-    end
 end

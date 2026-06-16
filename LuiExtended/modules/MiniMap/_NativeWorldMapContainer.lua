@@ -11,7 +11,10 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
+local MINIMAP_NATIVE_MOVING_PIN_UPDATE_MS = 100
+
 local nativeWorldMapContainerAttached = false
+local nativeWorldMapContainerHiddenForReload = false
 
 --- @class MiniMapNativeWorldMapContainerRestore
 --- @field parent Control
@@ -31,6 +34,39 @@ local function GetNativeHudMapOverlayLayoutReapplyUpdateName()
         NATIVE_HUD_MAP_OVERLAY_LAYOUT_REAPPLY_UPDATE_NAME = MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply"
     end
     return NATIVE_HUD_MAP_OVERLAY_LAYOUT_REAPPLY_UPDATE_NAME
+end
+
+--- Hides reparented ZO_WorldMapContainer while ReloadWorldMap runs so ZO_WorldMap_UpdateMap cannot flash full-zone dimensions.
+--- @param hidden boolean
+function MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(hidden)
+    nativeWorldMapContainerHiddenForReload = hidden == true
+    if not nativeWorldMapContainerAttached then
+        return
+    end
+    ZO_WorldMapContainer:SetHidden(nativeWorldMapContainerHiddenForReload)
+end
+
+--- @return boolean
+function MiniMap.IsAttachedNativeWorldMapContainerHiddenForReload()
+    return nativeWorldMapContainerHiddenForReload
+end
+
+--- After ZO_WorldMap_UpdateMap while the container is under the HUD minimap, re-apply minimap MAP_WIDTH/HEIGHT or stay hidden during reload.
+function MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
+    if not nativeWorldMapContainerAttached then
+        return
+    end
+    if nativeWorldMapContainerHiddenForReload then
+        ZO_WorldMapContainer:SetHidden(true)
+        return
+    end
+    local mapController = MiniMap.mapController
+    if mapController and mapController:IsReady() then
+        ZO_WorldMapContainer:SetHidden(false)
+        MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
+    else
+        ZO_WorldMapContainer:SetHidden(true)
+    end
 end
 
 function MiniMap.CancelNativeHudMapOverlayLayoutReapply()
@@ -75,10 +111,11 @@ function MiniMap.ReapplyNativeHudMapOverlayLayout()
     end
     MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
     MiniMap.ResetNativeHudWorldMapPanState()
-    MiniMap.RefreshWorldMapPinsForMirror()
     MiniMap.FlushWorldMapPinRefreshGroups()
     MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
     MiniMap.ResetNativeHudWorldMapPanState()
+    MiniMap.RefreshWorldMapSuggestionPinsForMirror()
+    MiniMap.RefreshWorldMapPingsForMirror()
 end
 
 function MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
@@ -91,10 +128,10 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     nativeHudMapOverlayLayoutReapplyScheduled = true
     local updateName = GetNativeHudMapOverlayLayoutReapplyUpdateName()
     EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
-        nativeHudMapOverlayLayoutReapplyScheduled = false
-        MiniMap.ReapplyNativeHudMapOverlayLayout()
-        MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
-    end, true)
+                                        nativeHudMapOverlayLayoutReapplyScheduled = false
+                                        MiniMap.ReapplyNativeHudMapOverlayLayout()
+                                        MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
+                                    end, true)
 end
 
 --- Second frame after ZOS g_mapRefresh:UpdateRefreshGroups (world map OnUpdate).
@@ -108,14 +145,32 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
     nativeHudMapOverlayLayoutReapplySecondFrameScheduled = true
     local secondFrameUpdateName = MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2"
     EVENT_MANAGER:RegisterForUpdate(secondFrameUpdateName, 0, function ()
-        nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
-        MiniMap.ReapplyNativeHudMapOverlayLayout()
-    end, true)
+                                        nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
+                                        MiniMap.ReapplyNativeHudMapOverlayLayout()
+                                    end, true)
 end
 
 --- @return boolean
 function MiniMap.IsNativeWorldMapContainerAttached()
     return nativeWorldMapContainerAttached == true
+end
+
+--- @return boolean
+function MiniMap.HasNativeMovingPinTargets()
+    if GetGroupSize() > 1 then
+        return true
+    end
+    return DoesUnitExist("companion")
+end
+
+--- Throttled HUD driver for UpdateNativeWorldMapMovingPins (scroll follow stays on MINIMAP_FOLLOW_UPDATE_MS).
+function MiniMap.TickNativeWorldMapMovingPins()
+    if not MiniMap.HasNativeMovingPinTargets() then
+        return
+    end
+    if MiniMap.ShouldRunThrottled("NativeMovingPins", MINIMAP_NATIVE_MOVING_PIN_UPDATE_MS) then
+        MiniMap.UpdateNativeWorldMapMovingPins()
+    end
 end
 
 --- Group / companion / dragon / objective pin positions (ZOS PIN_UPDATE_DELAY path while world map is closed).
@@ -137,6 +192,9 @@ function MiniMap.UpdateNativeWorldMapMovingPins()
     end
     local mapController = MiniMap.mapController
     if not mapController or not mapController:IsReady() then
+        return
+    end
+    if not MiniMap.HasNativeMovingPinTargets() then
         return
     end
     ZO_WorldMap_GetPinManager():UpdateMovingPins()
@@ -203,6 +261,9 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
     WORLD_MAP_MANAGER:UpdateBlobs()
 
     MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
+    if MiniMap.pinController then
+        MiniMap.pinController:ApplyUserScaleToNativeWorldMapPins()
+    end
 
     MiniMap.ResetNativeHudWorldMapPanState()
 
@@ -232,7 +293,7 @@ function MiniMap.SetLuiMiniMapTileLayerHidden(hidden)
     end
 end
 
-function MiniMap.RefreshNativeWorldMapContainer()
+function MiniMap.RefreshNativeWorldMapContainer(refreshOptions)
     if not MiniMap.Enabled then
         return
     end
@@ -243,7 +304,15 @@ function MiniMap.RefreshNativeWorldMapContainer()
     if not mapController or not mapController:IsReady() then
         return
     end
+    local syncSubzoneMapGeometry = refreshOptions and refreshOptions.syncSubzoneMapGeometry == true
+    local applyContextZoomIfChanged = refreshOptions and refreshOptions.applyContextZoomIfChanged == true
     MiniMap.RunWithPlayerMapForMirror(function ()
+        if syncSubzoneMapGeometry then
+            MiniMap.SyncHudMapDataDimensionsFromPlayerMap(mapController)
+        end
+        if applyContextZoomIfChanged then
+            MiniMap.ApplyHudContextZoomWhenMapContextChanged()
+        end
         WORLD_MAP_TILES_MANAGER:UpdateTextures()
         MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
         MiniMap.RefreshWorldMapPinsForMirror()
@@ -301,6 +370,9 @@ function MiniMap.RestoreWorldMapContainerToWorldMap()
 
     MiniMap.CancelNativeHudMapOverlayLayoutReapply()
     RestoreWorldMapPlayerPinVisibility()
+    if MiniMap.pinController then
+        MiniMap.pinController:ResetNativeWorldMapPinUserScale()
+    end
 
     local restore = nativeWorldMapContainerRestore
     local restoreParent = restore and restore.parent or ZO_WorldMapScroll
@@ -337,5 +409,6 @@ function MiniMap.OnNativeWorldMapContainerZoomChanged()
 end
 
 function MiniMap.ShutdownNativeWorldMapContainer()
+    nativeWorldMapContainerHiddenForReload = false
     MiniMap.RestoreWorldMapContainerToWorldMap()
 end

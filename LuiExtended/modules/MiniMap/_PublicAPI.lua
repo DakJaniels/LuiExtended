@@ -42,7 +42,32 @@ function MiniMap.FirePinResyncCallbacks()
     end
 end
 
---- @param pinType MapPinType
+--- @param pinGroup integer|nil
+--- @param settings MiniMapDefaults
+--- @return number|nil categoryScale when pinGroup matches a LAM category
+function MiniMap.GetPinCategoryScaleForFilterGroup(pinGroup, settings)
+    if not pinGroup or not settings then
+        return nil
+    end
+    if pinGroup == MAP_FILTER_QUESTS then
+        return settings.pinScaleQuest
+    end
+    if pinGroup == MAP_FILTER_GROUP_MEMBERS then
+        return settings.pinScaleGroup
+    end
+    if pinGroup == MAP_FILTER_WAYSHRINES then
+        return settings.pinScaleWayshrine
+    end
+    if pinGroup == MAP_FILTER_OBJECTIVES then
+        return settings.pinScalePoi
+    end
+    if pinGroup == MAP_FILTER_DIG_SITES then
+        return settings.pinScaleDigSite
+    end
+    return nil
+end
+
+--- @param pinType MapPinType|nil
 --- @return number
 function MiniMap.GetPinTypeScaleMultiplier(pinType)
     local settings = MiniMap.SV or MiniMap.Defaults
@@ -52,20 +77,9 @@ function MiniMap.GetPinTypeScaleMultiplier(pinType)
     end
     if pinType then
         local pinGroup = ZO_MapPin.PIN_TYPE_TO_PIN_GROUP[pinType]
-        if pinGroup == MAP_FILTER_QUESTS and settings.pinScaleQuest then
-            return baseScale * settings.pinScaleQuest
-        end
-        if pinGroup == MAP_FILTER_GROUP_MEMBERS and settings.pinScaleGroup then
-            return baseScale * settings.pinScaleGroup
-        end
-        if pinGroup == MAP_FILTER_WAYSHRINES and settings.pinScaleWayshrine then
-            return baseScale * settings.pinScaleWayshrine
-        end
-        if pinGroup == MAP_FILTER_OBJECTIVES and settings.pinScalePoi then
-            return baseScale * settings.pinScalePoi
-        end
-        if pinGroup == MAP_FILTER_DIG_SITES and settings.pinScaleDigSite then
-            return baseScale * settings.pinScaleDigSite
+        local categoryScale = MiniMap.GetPinCategoryScaleForFilterGroup(pinGroup, settings)
+        if categoryScale then
+            return baseScale * categoryScale
         end
     end
     if settings.pinScaleOther then

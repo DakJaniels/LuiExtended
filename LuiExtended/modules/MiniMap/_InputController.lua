@@ -222,9 +222,9 @@ function MiniMapInputController:OnFrameChromeHoverExit()
     self:CancelFrameChromeHide()
     local inputController = self
     self.frameChromeHideCallId = zo_callLater(function ()
-        inputController.frameChromeHideCallId = nil
-        inputController:HideFrameChromeIfPointerLeft()
-    end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
+                                                  inputController.frameChromeHideCallId = nil
+                                                  inputController:HideFrameChromeIfPointerLeft()
+                                              end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
 end
 
 function MiniMapInputController:OnFramePositionLockClicked(lockButton)

@@ -14,9 +14,6 @@ local WAYPOINT_PIN_TEXTURE = "EsoUI/Art/Compass/compass_waypoint.dds"
 local WAYPOINT_PIN_CONTROL_NAME = "_PlayerWaypoint"
 local PLAYER_MAP_PIN_CONTROL_NAME = "_PlayerMapPin"
 local PLAYER_MAP_PIN_TEXTURE = "EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds"
-local MINIMAP_PIN_MIN_SCALE = 0.6
-local MINIMAP_PIN_MAX_SCALE = 1.0
-local MINIMAP_PIN_MIN_SIZE = 18
 
 --- @class MiniMapPinController : ZO_InitializingObject
 --- @field view MiniMapView
@@ -143,17 +140,6 @@ function MiniMapPinController:RestoreAllDigSitePolygonsToWorldMap()
     end
 end
 
-function MiniMapPinController:IsPinSyncCoroutineActive()
-    return false
-end
-
-function MiniMapPinController:CancelPinSyncCoroutine()
-end
-
---- @param _trace string|nil
-function MiniMapPinController:AbortPinSyncCoroutine(_trace)
-end
-
 --- @param pinControlName string
 function MiniMapPinController:ReleaseOverlayPin(pinControlName)
     if self.overlayPinPool:GetActiveObject(pinControlName) then
@@ -179,31 +165,30 @@ end
 --- @param pinType MapPinType|nil
 --- @return number, number
 function MiniMapPinController:GetPinDimensions(pinWidth, pinHeight, pinScale, pinType)
-    if pinScale then
-        local worldMapWidth, worldMapHeight = ZO_WorldMap_GetMapDimensions()
-        local contentHeight = self.mapController:GetMapContentHeight()
-        if worldMapHeight and worldMapHeight > 0 and contentHeight > 0 then
-            local scaleToMinimap = contentHeight / worldMapHeight
-            return pinWidth * scaleToMinimap, pinHeight * scaleToMinimap
-        end
-        local zoom = MiniMap.zoom
-        return pinWidth * zoom, pinHeight * zoom
-    end
+    return MiniMap.ComputePinDrawDimensions(pinWidth, pinHeight, pinScale, pinType, self.mapController)
+end
 
-    local minSize = MINIMAP_PIN_MIN_SIZE
-    if pinType and ZO_MapPin.PIN_DATA then
-        local pinTypeData = ZO_MapPin.PIN_DATA[pinType]
-        if pinTypeData and pinTypeData.minSize then
-            minSize = pinTypeData.minSize
+function MiniMapPinController:ResetNativeWorldMapPinUserScale()
+    for _, mapPin in pairs(ZO_WorldMap_GetPinManager():GetActiveObjects()) do
+        mapPin:ResetScale(false)
+    end
+end
+
+--- LAM pin scale on reparented g_mapPinManager pins (UpdateSize already ran in layout).
+function MiniMapPinController:ApplyUserScaleToNativeWorldMapPins()
+    if not MiniMap.Enabled or not MiniMap.IsNativeWorldMapContainerAttached() then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        return
+    end
+    local pinManager = ZO_WorldMap_GetPinManager()
+    local playerWorldPin = pinManager:GetPlayerPin()
+    for _, mapPin in pairs(pinManager:GetActiveObjects()) do
+        if mapPin ~= playerWorldPin then
+            mapPin:SetScaleModifier(MiniMap.GetPinTypeScaleMultiplier(mapPin:GetPinType()))
         end
     end
-
-    local userScale = MiniMap.GetPinTypeScaleMultiplier(pinType)
-    local curvedZoom = zo_clamp(MiniMap.zoom, MINIMAP_PIN_MIN_SCALE, MINIMAP_PIN_MAX_SCALE)
-    local uiScale = GetUICustomScale()
-    local width = zo_max((pinWidth * curvedZoom * userScale) / uiScale, minSize)
-    local height = zo_max((pinHeight * curvedZoom * userScale) / uiScale, minSize)
-    return width, height
 end
 
 function MiniMapPinController:GetPlayerWaypointTexture()
@@ -283,6 +268,7 @@ end
 --- @param mapData MiniMapMapData
 function MiniMapPinController:RelayoutActivePinsForUserPinScale(mapData)
     self:RelayoutActivePinsForZoom(mapData)
+    self:ApplyUserScaleToNativeWorldMapPins()
 end
 
 --- @param mapData MiniMapMapData

@@ -38,9 +38,6 @@ function MiniMap.Initialize(enabled)
         if MiniMap.mapEventController then
             MiniMap.mapEventController:Unregister()
         end
-        if MiniMap.pinController then
-            MiniMap.pinController:CancelPinSyncCoroutine()
-        end
         if MiniMap.runtime then
             MiniMap.runtime:Stop()
         end

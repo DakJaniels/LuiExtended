@@ -185,6 +185,7 @@ modules/MiniMap/_ZoomContext.lua
 modules/MiniMap/_ChromeController.lua
 modules/MiniMap/_InfoPanelIntegration.lua
 modules/MiniMap/_PublicAPI.lua
+modules/MiniMap/_PinDimensions.lua
 modules/MiniMap/_HudScene.lua
 modules/MiniMap/_View.lua
 modules/MiniMap/_MapController.lua

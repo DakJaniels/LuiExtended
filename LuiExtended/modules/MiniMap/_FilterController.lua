@@ -65,3 +65,47 @@ function MiniMap.RefreshWorldMapPinsForMirror()
     MiniMap.RefreshWorldMapPingsForMirror()
     MiniMap.RefreshWorldMapLocationPinsForMirror()
 end
+
+--- Layout-only HUD recovery after ZOS quest pin data is already current (CMapHandlers callbacks, breadcrumbs, etc.).
+function MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
+    if not MiniMap.Enabled or not MiniMap.IsNativeWorldMapContainerAttached() then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        return
+    end
+    if MiniMap.playerMapMirrorDepth > 0 or MiniMap.IsPinMirrorMachineBusy() then
+        return
+    end
+    local mapController = MiniMap.mapController
+    if not mapController or not mapController:IsReady() then
+        return
+    end
+    MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
+    MiniMap.ResetNativeHudWorldMapPanState()
+    MiniMap.RefreshWorldMapSuggestionPinsForMirror()
+    MiniMap.RefreshWorldMapPingsForMirror()
+    MiniMap.FlushWorldMapPinRefreshGroups()
+end
+
+--- @param journalIndex luaindex|nil
+function MiniMap.OnCMapHandlersRefreshedQuestPins(journalIndex)
+    MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
+end
+
+--- Light quest mirror: refresh pin data when ZOS did not (tracker), then HUD layout. No full container / POI walk.
+--- @param journalIndex luaindex|nil
+--- @param refreshAll boolean|nil
+function MiniMap.RunQuestPinLightSyncForMirror(journalIndex, refreshAll)
+    if not MiniMap.Enabled then
+        return
+    end
+    MiniMap.RunWithPlayerMapForMirror(function ()
+        if refreshAll then
+            C_MAP_HANDLERS:RefreshAllQuestPins()
+        elseif journalIndex then
+            C_MAP_HANDLERS:RefreshSingleQuestPins(journalIndex)
+        end
+        MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
+    end)
+end

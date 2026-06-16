@@ -42,7 +42,7 @@ function MiniMap.RunWhenWorldMapUnblocked(onUnblocked)
             if frameCount >= MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES then
                 MiniMap.CancelWorldMapUnblockedWait()
                 if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
-                    d(string.format("[MiniMap SM] WorldMap unblocked wait exceeded %d frames", MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES))
+                    LUIE:Log("Debug", string.format("[MiniMap SM] WorldMap unblocked wait exceeded %d frames", MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES))
                 end
             end
             return
@@ -50,8 +50,9 @@ function MiniMap.RunWhenWorldMapUnblocked(onUnblocked)
         MiniMap.CancelWorldMapUnblockedWait()
         MiniMap.worldMapBlocksMiniMapWork = false
         if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug and frameCount > 1 then
-            d(string.format("[MiniMap SM] WorldMap unblocked after %d frame(s)", frameCount))
+            LUIE:Log("Debug", string.format("[MiniMap SM] WorldMap unblocked after %d frame(s)", frameCount))
         end
+        MiniMap.UpdateGameplayTickers()
         onUnblocked()
     end)
 end
@@ -160,7 +161,22 @@ function MiniMap.IsWorldMapBlockingMiniMapWork()
 end
 
 function MiniMap.UpdateGameplayTickers()
-    -- Follow updates run via LUIE_MiniMap OnUpdate when ShouldRunFollowUpdate() is true.
+    local topLevel = LUIE_MiniMap
+    if not topLevel or not MiniMap.Enabled then
+        if topLevel then
+            topLevel:SetHandler("OnUpdate", nil)
+        end
+        return
+    end
+    local hudSceneFragment = MiniMap.hudSceneFragment
+    local shouldRunFollowOnUpdate = hudSceneFragment
+        and hudSceneFragment:IsShowing()
+        and not MiniMap.IsWorldMapBlockingMiniMapWork()
+    if shouldRunFollowOnUpdate then
+        topLevel:SetHandler("OnUpdate", MiniMap.OnRootUpdate)
+    else
+        topLevel:SetHandler("OnUpdate", nil)
+    end
 end
 
 function MiniMap.ApplyFragmentHiddenReasons()
@@ -168,11 +184,21 @@ function MiniMap.ApplyFragmentHiddenReasons()
     if not hudSceneFragment then
         return
     end
+    MiniMap.fragmentHiddenReasonCache = MiniMap.fragmentHiddenReasonCache or {}
+    local cache = MiniMap.fragmentHiddenReasonCache
+
+    local function setHiddenReasonIfChanged(reason, hidden)
+        if cache[reason] ~= hidden then
+            cache[reason] = hidden
+            hudSceneFragment:SetHiddenForReason(reason, hidden)
+        end
+    end
+
     local sessionHidden = MiniMap.sessionMapVisible == false or MiniMap.SV.showInHud == false
-    hudSceneFragment:SetHiddenForReason("MiniMapSession", sessionHidden)
-    hudSceneFragment:SetHiddenForReason("MiniMapCombat", IsUnitInCombat("player") and MiniMap.SV.showInCombat ~= true)
-    hudSceneFragment:SetHiddenForReason("MiniMapMounted", IsMounted() and MiniMap.SV.showWhileMounted ~= true)
-    hudSceneFragment:SetHiddenForReason("MiniMapHousing", MiniMap.IsPlayerInHouse() and MiniMap.SV.showInHousing ~= true)
+    setHiddenReasonIfChanged("MiniMapSession", sessionHidden)
+    setHiddenReasonIfChanged("MiniMapCombat", IsUnitInCombat("player") and MiniMap.SV.showInCombat ~= true)
+    setHiddenReasonIfChanged("MiniMapMounted", IsMounted() and MiniMap.SV.showWhileMounted ~= true)
+    setHiddenReasonIfChanged("MiniMapHousing", MiniMap.IsPlayerInHouse() and MiniMap.SV.showInHousing ~= true)
 end
 
 function MiniMap.OnWorldMapOpening(sceneName)
@@ -181,8 +207,6 @@ function MiniMap.OnWorldMapOpening(sceneName)
     MiniMap.CancelWorldMapUnblockedWait()
     EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "WorldMapFollowRecovery")
     MiniMap.worldMapBlocksMiniMapWork = true
-    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
-    pinMirrorStateMachine:CancelPinSyncDebounce()
     local pinController = MiniMap.pinController
     if pinController then
         pinController:RestoreAllDigSitePolygonsToWorldMap()
@@ -304,6 +328,7 @@ function MiniMap.UnregisterMiniMapSceneIntegration()
 
     LUIE_MiniMap.hudSceneFragment = nil
     MiniMap.hudSceneFragment = nil
+    MiniMap.fragmentHiddenReasonCache = nil
 end
 
 function MiniMap.RegisterHudSceneFragment()
