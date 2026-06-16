@@ -9,6 +9,9 @@ local LUIE = LUIE
 local MiniMap = LUIE.MiniMap
 
 local DEFAULT_RESIZE_HANDLE_SIZE = 8
+local MINIMAP_ZOOM_LABEL_MAX_ALPHA = 0.4
+local MINIMAP_ZOOM_LABEL_HOLD_MS = 1250
+local MINIMAP_ZOOM_LABEL_FADE_OUT_MS = 200
 
 --- @class MiniMapView : ZO_InitializingObject
 --- @field root TopLevelWindow
@@ -30,6 +33,8 @@ local DEFAULT_RESIZE_HANDLE_SIZE = 8
 --- @field frameChromeAttachSide string|nil
 --- @field framePositionLock ButtonControl|nil
 --- @field frameMoveGrip Control|nil
+--- @field zoomLabelHideLaterId integer|nil
+--- @field zoomLabelFadeUpdateActive boolean|nil
 local MiniMapView = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapView = MiniMapView
 
@@ -59,6 +64,10 @@ function MiniMapView:Initialize(rootControl)
             self.framePositionLock = self.frameChrome:GetNamedChild("_PositionLock")
             self.frameMoveGrip = self.frameChrome:GetNamedChild("_MoveGrip")
         end
+    end
+    if self.zoomLabel then
+        self.zoomLabel:SetHidden(true)
+        self.zoomLabel:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
     end
 end
 
@@ -309,9 +318,72 @@ function MiniMapView:HideLoading()
     self.statusOverlay:SetMouseEnabled(false)
 end
 
+function MiniMapView:ClearZoomLabelFadeUpdate()
+    local label = self.zoomLabel
+    if label and self.zoomLabelFadeUpdateActive then
+        label:SetHandler("OnUpdate", nil)
+        self.zoomLabelFadeUpdateActive = nil
+    end
+end
+
+function MiniMapView:CancelZoomLabelTransient()
+    if self.zoomLabelHideLaterId then
+        zo_removeCallLater(self.zoomLabelHideLaterId)
+        self.zoomLabelHideLaterId = nil
+    end
+    self:ClearZoomLabelFadeUpdate()
+end
+
+function MiniMapView:StartZoomLabelFadeOut()
+    local label = self.zoomLabel
+    if not label or label:IsHidden() then
+        return
+    end
+    self:ClearZoomLabelFadeUpdate()
+
+    local startAlpha = MINIMAP_ZOOM_LABEL_MAX_ALPHA
+    local fadeStartMs = GetFrameTimeMilliseconds()
+    local view = self
+    self.zoomLabelFadeUpdateActive = true
+    label:SetHandler("OnUpdate", function (control)
+        local elapsedMs = GetFrameTimeMilliseconds() - fadeStartMs
+        local progress = zo_clamp(elapsedMs / MINIMAP_ZOOM_LABEL_FADE_OUT_MS, 0, 1)
+        control:SetAlpha(startAlpha * (1 - progress))
+        if progress >= 1 then
+            view:ClearZoomLabelFadeUpdate()
+            control:SetHidden(true)
+            control:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
+        end
+    end)
+end
+
+function MiniMapView:ShutdownZoomLabelFade()
+    self:CancelZoomLabelTransient()
+    if self.zoomLabel then
+        self.zoomLabel:SetHidden(true)
+        self.zoomLabel:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
+    end
+end
+
 --- @param zoom number
-function MiniMapView:SetZoomLabel(zoom)
+--- @param revealTransient boolean|nil
+function MiniMapView:SetZoomLabel(zoom, revealTransient)
+    if not self.zoomLabel then
+        return
+    end
     self.zoomLabel:SetText(string.format("%.0f%%", zoom * 100))
+    if not revealTransient then
+        return
+    end
+    self:CancelZoomLabelTransient()
+    local label = self.zoomLabel
+    label:SetHidden(false)
+    label:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
+    local view = self
+    self.zoomLabelHideLaterId = zo_callLater(function ()
+        view.zoomLabelHideLaterId = nil
+        view:StartZoomLabelFadeOut()
+    end, MINIMAP_ZOOM_LABEL_HOLD_MS)
 end
 
 --- @param zoneName string

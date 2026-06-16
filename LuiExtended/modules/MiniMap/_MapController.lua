@@ -455,7 +455,8 @@ function MiniMapMapController:ClampZoomToLimits(relayoutWhenReady)
 end
 
 --- @param delta number
-function MiniMapMapController:ApplyZoom(delta)
+--- @param revealZoomLabel boolean|nil When false, refresh label text only (no transient show).
+function MiniMapMapController:ApplyZoom(delta, revealZoomLabel)
     local previousContentWidth = self:GetMapContentWidth()
     local previousContentHeight = self:GetMapContentHeight()
 
@@ -470,7 +471,7 @@ function MiniMapMapController:ApplyZoom(delta)
     elseif MiniMap.zoom > MINIMAP_ZOOM_MAX then
         MiniMap.zoom = MINIMAP_ZOOM_MAX
     end
-    self.view:SetZoomLabel(MiniMap.zoom)
+    self.view:SetZoomLabel(MiniMap.zoom, revealZoomLabel ~= false)
     if self.ready then
         self:BuildMapLayout()
         local mapData = self.map

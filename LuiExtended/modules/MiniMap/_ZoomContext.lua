@@ -13,6 +13,16 @@ MiniMap.holdZoomSavedValue = nil
 
 local EDGE_NORM_THRESHOLD = 0.04
 
+local function ClampZoomAndRevealZoomLabel()
+    if not MiniMap.mapController then
+        return
+    end
+    MiniMap.mapController:ClampZoomToLimits(true)
+    if MiniMap.view then
+        MiniMap.view:SetZoomLabel(MiniMap.zoom, true)
+    end
+end
+
 --- @return boolean
 function MiniMap.IsInDungeonMap()
     if IsUnitInDungeon then
@@ -73,7 +83,7 @@ function MiniMap.ApplyContextDefaultZoom()
     end
     MiniMap.zoom = MiniMap.GetEffectiveDefaultZoom()
     MiniMap.ClampSavedDefaultZoom()
-    MiniMap.mapController:ApplyZoom(0)
+    MiniMap.mapController:ApplyZoom(0, false)
 end
 
 --- @param mapData MiniMapMapData
@@ -157,7 +167,7 @@ function MiniMap.BeginHoldZoom(zoomIn)
     local settings = MiniMap.SV or MiniMap.Defaults
     local factor = zoomIn and (settings.holdZoomInFactor or 0.35) or (settings.holdZoomOutFactor or 1.4)
     MiniMap.zoom = zo_clamp(MiniMap.zoom * factor, MiniMap.mapController:GetMinimumZoom(), 1.8)
-    MiniMap.mapController:ClampZoomToLimits(true)
+    ClampZoomAndRevealZoomLabel()
 end
 
 function MiniMap.EndHoldZoom()
@@ -168,7 +178,5 @@ function MiniMap.EndHoldZoom()
     MiniMap.zoom = MiniMap.holdZoomSavedValue
     MiniMap.holdZoomSavedValue = nil
     MiniMap.holdZoomActive = false
-    if MiniMap.mapController then
-        MiniMap.mapController:ClampZoomToLimits(true)
-    end
+    ClampZoomAndRevealZoomLabel()
 end

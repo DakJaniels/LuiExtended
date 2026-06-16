@@ -63,17 +63,6 @@
             </Texture>
           </Controls>
         </Label>
-        <Label name="$(parent)_ZoomLabel"
-               font="ZoFontChat"
-               alpha="0.4"
-               layer="2"
-               text="0%">
-          <Anchor point="TOPRIGHT"
-                  relativeTo="$(parent)"
-                  relativePoint="TOPRIGHT"
-                  offsetX="-4"
-                  offsetY="0" />
-        </Label>
         <Backdrop name="$(parent)_Background"
                   inherits="ZO_FrameBackdrop"
                   resizeToFitDescendents="true"
@@ -146,6 +135,19 @@
             </StatusBar>
           </Controls>
         </Scroll>
+        <Label name="$(parent)_ZoomLabel"
+               font="ZoFontGame"
+               alpha="0.4"
+               layer="4"
+               tier="HIGH"
+               hidden="true"
+               text="0%">
+          <Anchor point="TOPRIGHT"
+                  relativeTo="$(parent)_Scroll"
+                  relativePoint="TOPRIGHT"
+                  offsetX="-4"
+                  offsetY="4" />
+        </Label>
         <Control name="$(parent)_FrameChromeHover"
                  mouseEnabled="true"
                  layer="4"
