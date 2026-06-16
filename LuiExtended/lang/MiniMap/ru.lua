@@ -29,10 +29,12 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "Дополнительные параметры мини-карты появятся в будущих обновлениях.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Отладка конечного автомата меток",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Выводить в чат переходы ZO_StateMachine для зеркалирования меток, перезагрузки карты и быстрого перемещения.",
-    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS = "Метки квестов (как на компасе)",
-    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS_TP = "Рисует метки квестов на миникарте, если нативные метки отсутствуют, по тем же данным, что и компас.",
-    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS = "Принудительно показывать квесты",
-    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS_TP = "Показывать метки квестов на миникарте, даже если фильтр квестов на карте мира выключен.",
+    LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Привязать InfoPanel к миникарте",
+    LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "Размещает InfoPanel под картой (на месте названия зоны) и переносит название зоны над картой. Позицию задаёт миникарта. Требуется модуль InfoPanel.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Показывать название зоны",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Показывать название текущей карты. Перемещайте рамку элементом внизу слева при наведении на миникарту.",
+    LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Перетащите, чтобы переместить миникарту.",
+    LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Заблокировать или разблокировать позицию миникарты.",
 }
 
 for stringId, stringValue in pairs(strings) do

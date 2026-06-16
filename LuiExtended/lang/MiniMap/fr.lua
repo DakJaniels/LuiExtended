@@ -29,10 +29,12 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "D'autres options avancées seront ajoutées ultérieurement.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Débogage machine à états (pins)",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Journalise les transitions ZO_StateMachine pour le miroir des pins, le rechargement de carte et le voyage rapide.",
-    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS = "Marqueurs de quête (style boussole)",
-    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS_TP = "Affiche des marqueurs de quête sur la mini-carte lorsque les pins natifs manquent, à partir des mêmes données que la boussole.",
-    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS = "Forcer les pins de quête",
-    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS_TP = "Affiche les quêtes sur la mini-carte même si le filtre quête de la carte du monde est désactivé.",
+    LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Ancrer le panneau d'info à la mini-carte",
+    LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "Place le panneau d'info sous la carte (emplacement du nom de zone) et le titre de zone au-dessus de la carte. Position contrôlée par la mini-carte. Nécessite le module InfoPanel.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Afficher le nom de zone",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Affiche le nom de la carte actuelle. Déplacez le cadre avec le contrôle en bas à gauche au survol.",
+    LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Glisser pour déplacer la mini-carte.",
+    LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Verrouiller ou déverrouiller la position de la mini-carte.",
 }
 
 for stringId, stringValue in pairs(strings) do

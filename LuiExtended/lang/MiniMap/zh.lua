@@ -29,10 +29,12 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "更多小地图高级选项将在后续更新中提供。",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "图钉镜像状态机调试",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "在聊天中记录 ZO_StateMachine 的图钉镜像、地图重载与快速旅行过渡。",
-    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS = "罗盘式任务标记",
-    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS_TP = "当原生任务图钉缺失时，用与罗盘相同的数据在迷你地图上绘制任务标记。",
-    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS = "强制显示任务图钉",
-    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS_TP = "即使世界地图任务筛选关闭，也在 HUD 迷你地图上显示任务图钉。",
+    LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "将信息面板锚定到小地图",
+    LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "将信息面板放在地图下方（原区域名位置），并把区域名移到地图上方。启用后由小地图控制位置。需要信息面板模块。",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "显示区域名称",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "显示当前地图区域名。悬停小地图时使用左下角控件拖动框架。",
+    LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "拖动以移动小地图。",
+    LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "锁定或解锁小地图位置。",
 }
 
 for stringId, stringValue in pairs(strings) do

@@ -20,8 +20,6 @@ local MINIMAP_MAP_NAME_FALLBACK_MS = 45000
 --- @field onQuestTrackerAssistStateChanged function|nil
 --- @field onAntiquitiesUpdated function|nil
 --- @field onSingleAntiquityDigSitesUpdated function|nil
---- @field onCMapHandlersRefreshedSingleQuestPins function|nil
---- @field onCMapHandlersRefreshedAllQuestPins function|nil
 local MiniMapMapEventController = ZO_InitializingCallbackObject:Subclass()
 MiniMap.MiniMapMapEventController = MiniMapMapEventController
 
@@ -34,6 +32,7 @@ local CMAP_QUEST_PIN_SYNC_EVENT_IDS =
     EVENT_QUEST_COMPLETE,
     EVENT_QUEST_COMPLETE_DIALOG,
     EVENT_QUEST_OPTIONAL_STEP_ADVANCED,
+    EVENT_QUEST_POSITION_REQUEST_COMPLETE,
 }
 
 local CMAP_ZONE_STORY_EVENT_IDS =
@@ -120,61 +119,6 @@ function MiniMapMapEventController:RequestQuestPinSync()
     MiniMap.RefreshNativeWorldMapContainer()
 end
 
-function MiniMapMapEventController:RunLightQuestPinSync(questIndex)
-    if not MiniMap.Enabled or MiniMap.IsWorldMapBlockingMiniMapWork() then
-        return
-    end
-    MiniMap.RunWithPlayerMapForMirror(function ()
-        if questIndex then
-            MiniMap.RefreshWorldMapQuestPinsLight(questIndex)
-        else
-            for activeQuestIndex in pairs(WORLD_MAP_QUEST_BREADCRUMBS.activeQuests) do
-                C_MAP_HANDLERS:RefreshSingleQuestPins(activeQuestIndex)
-            end
-            MiniMap.RefreshWorldMapPingsForMirror()
-            MiniMap.RefreshWorldMapSuggestionPinsForMirror()
-            if MiniMap.IsNativeWorldMapContainerAttached() then
-                MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(MiniMap.mapController)
-            end
-        end
-    end)
-end
-
-function MiniMapMapEventController:ScheduleLightQuestPinSyncAfterPositionComplete()
-    local mapEventController = self
-    local updateName = MiniMap.moduleName .. "QuestPositionLightPinSync"
-    local doOnce = true
-    EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
-                                        mapEventController:RunLightQuestPinSync(nil)
-                                    end, doOnce)
-end
-
-function MiniMapMapEventController:OnCMapHandlersRefreshedSingleQuestPins(questIndex)
-    if not MiniMap.Enabled or MiniMap.IsWorldMapBlockingMiniMapWork() then
-        return
-    end
-    if not MiniMap.IsNativeWorldMapContainerAttached() then
-        return
-    end
-    MiniMap.RunWithPlayerMapForMirror(function ()
-        MiniMap.RefreshWorldMapQuestPinsLight(questIndex)
-    end)
-end
-
-function MiniMapMapEventController:OnCMapHandlersRefreshedAllQuestPins()
-    if not MiniMap.Enabled or MiniMap.IsWorldMapBlockingMiniMapWork() then
-        return
-    end
-    if not MiniMap.IsNativeWorldMapContainerAttached() then
-        return
-    end
-    MiniMap.RunWithPlayerMapForMirror(function ()
-        MiniMap.RefreshWorldMapPingsForMirror()
-        MiniMap.RefreshWorldMapSuggestionPinsForMirror()
-        MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(MiniMap.mapController)
-    end)
-end
-
 function MiniMapMapEventController:RequestDigSitePinSync()
     if not MiniMap.Enabled then
         return
@@ -210,10 +154,9 @@ end
 function MiniMapMapEventController:ScheduleDeferredQuestPinSyncFromTracker()
     local mapEventController = self
     local questPinSyncUpdateName = MiniMap.moduleName .. "QuestTrackerPinSync"
-    local doOnce = true
     EVENT_MANAGER:RegisterForUpdate(questPinSyncUpdateName, 0, function ()
-                                        mapEventController:RunLightQuestPinSync(nil)
-                                    end, doOnce)
+        mapEventController:RequestQuestPinSync()
+    end, true)
 end
 
 --- Same guard as ZOS `CMapHandlers` `EVENT_QUEST_CONDITION_COUNTER_CHANGED` handler.
@@ -307,9 +250,6 @@ function MiniMapMapEventController:Register()
     for _, eventId in ipairs(CMAP_QUEST_PIN_SYNC_EVENT_IDS) do
         self:RegisterGameEvent(eventId, function () mapEventController:RequestQuestPinSync() end)
     end
-    self:RegisterGameEvent(EVENT_QUEST_POSITION_REQUEST_COMPLETE, function ()
-        mapEventController:ScheduleLightQuestPinSyncAfterPositionComplete()
-    end)
     self:RegisterGameEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, function (...)
         mapEventController:OnQuestConditionCounterChanged(...)
     end)
@@ -350,14 +290,6 @@ function MiniMapMapEventController:Register()
     end
     ANTIQUITY_DATA_MANAGER:RegisterCallback("AntiquitiesUpdated", self.onAntiquitiesUpdated)
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", self.onSingleAntiquityDigSitesUpdated)
-    self.onCMapHandlersRefreshedSingleQuestPins = function (questIndex)
-        mapEventController:OnCMapHandlersRefreshedSingleQuestPins(questIndex)
-    end
-    self.onCMapHandlersRefreshedAllQuestPins = function ()
-        mapEventController:OnCMapHandlersRefreshedAllQuestPins()
-    end
-    C_MAP_HANDLERS:RegisterCallback("RefreshedSingleQuestPins", self.onCMapHandlersRefreshedSingleQuestPins)
-    C_MAP_HANDLERS:RegisterCallback("RefreshedAllQuestPins", self.onCMapHandlersRefreshedAllQuestPins)
     EVENT_MANAGER:RegisterForUpdate(MiniMap.moduleName .. "MapNameFallback", MINIMAP_MAP_NAME_FALLBACK_MS, function ()
         mapEventController:OnMapNameFallbackTick()
     end)
@@ -378,6 +310,7 @@ function MiniMapMapEventController:Unregister()
     end
     self.registeredEvents = {}
     EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "MapNameFallback")
+    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "QuestTrackerPinSync")
     if self.pinController then
         self.pinController:CancelPinSyncCoroutine()
     end
@@ -396,13 +329,5 @@ function MiniMapMapEventController:Unregister()
     if self.onSingleAntiquityDigSitesUpdated then
         ANTIQUITY_DATA_MANAGER:UnregisterCallback("SingleAntiquityDigSitesUpdated", self.onSingleAntiquityDigSitesUpdated)
         self.onSingleAntiquityDigSitesUpdated = nil
-    end
-    if self.onCMapHandlersRefreshedSingleQuestPins then
-        C_MAP_HANDLERS:UnregisterCallback("RefreshedSingleQuestPins", self.onCMapHandlersRefreshedSingleQuestPins)
-        self.onCMapHandlersRefreshedSingleQuestPins = nil
-    end
-    if self.onCMapHandlersRefreshedAllQuestPins then
-        C_MAP_HANDLERS:UnregisterCallback("RefreshedAllQuestPins", self.onCMapHandlersRefreshedAllQuestPins)
-        self.onCMapHandlersRefreshedAllQuestPins = nil
     end
 end

@@ -21,7 +21,6 @@ local LUIE = LUIE
 --- @field mapEventController MiniMapMapEventController|nil
 --- @field pinMirrorStateMachine MiniMapPinMirrorStateMachine|nil
 --- @field inputController MiniMapInputController|nil
---- @field compassParityController MiniMapCompassParityController|nil
 --- @field hudSceneFragment MiniMapHUDSceneFragment|nil
 --- @field worldMapBlocksMiniMapWork boolean
 local MiniMap = ZO_Object:Subclass()
@@ -39,7 +38,6 @@ MiniMap.runtime = nil
 MiniMap.mapEventController = nil
 MiniMap.pinMirrorStateMachine = nil
 MiniMap.inputController = nil
-MiniMap.compassParityController = nil
 MiniMap.hudSceneFragment = nil
 MiniMap.worldMapBlocksMiniMapWork = false
 MiniMap.playerMapMirrorDepth = 0
@@ -116,6 +114,14 @@ function MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(pinMirrorStateMachine)
 end
 
 MiniMap.PLAYER_PIN_BASE_SIZE = 16
+MiniMap.ZONE_LABEL_CHROME_OFFSET = 4
+MiniMap.FRAME_CHROME_HOVER_SIZE = 24
+MiniMap.FRAME_CHROME_OUTSIDE_OFFSET_X = 2
+MiniMap.FRAME_CHROME_OUTSIDE_OFFSET_Y = 0
+MiniMap.FRAME_CHROME_LEFT_EDGE_MARGIN = 8
+MiniMap.FRAME_CHROME_CONTROL_GAP = 4
+MiniMap.FRAME_CHROME_BAR_WIDTH = 44
+MiniMap.FRAME_CHROME_BAR_HEIGHT = 20
 MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 
 --- @class MiniMapDefaults
@@ -155,16 +161,14 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field pinScaleDigSite number
 --- @field pinScaleOther number
 --- @field pinTypeScales table
---- @field clockMode number
---- @field clockUse24Hour boolean
 --- @field compassMode number
 --- @field keepSquareAspect boolean
 --- @field positionGridDivisor number
 --- @field cameraWedgeScale number
 --- @field borderOpacity number
 --- @field pinMirrorStateMachineDebug boolean
---- @field showCompassParityPins boolean
---- @field forceQuestPinsOnMinimap boolean
+--- @field anchorInfoPanelToMiniMap boolean
+--- @field showZoneName boolean
 
 --- @class (partial) ZO_MapPin
 --- @field polygonBlob ZO_PinPolygonBlob|nil
@@ -243,16 +247,14 @@ MiniMap.Defaults =
     pinScaleDigSite = 1,
     pinScaleOther = 1,
     pinTypeScales = {},
-    clockMode = 0,
-    clockUse24Hour = false,
     compassMode = 0,
     keepSquareAspect = false,
     positionGridDivisor = 0,
     cameraWedgeScale = 1,
     borderOpacity = 1,
     pinMirrorStateMachineDebug = false,
-    showCompassParityPins = true,
-    forceQuestPinsOnMinimap = false,
+    anchorInfoPanelToMiniMap = false,
+    showZoneName = true,
 }
 
 --- @type MiniMapDefaults
@@ -370,6 +372,7 @@ function MiniMap.ApplyLiveSettings()
         MiniMap.inputController:ApplyFrameDragMouseEnabled()
     end
     MiniMap.ApplyChromeFromSettings()
+    MiniMap.ApplyChromeStacking()
     MiniMap.RefreshSceneFragments()
     MiniMap.UpdateConditionalVisibility()
     if MiniMap.pinController and MiniMap.mapController and MiniMap.mapController:IsReady() then

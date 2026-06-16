@@ -10,33 +10,13 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
---- @return boolean
-function MiniMap.IsQuestPinGroupShownOnHud()
-    if MiniMap.SV and MiniMap.SV.forceQuestPinsOnMinimap == true then
-        return true
-    end
-    return ZO_WorldMap_IsPinGroupShown(MAP_FILTER_QUESTS)
-end
-
 function MiniMap.RefreshWorldMapPingsForMirror()
     WORLD_MAP_MANAGER:RefreshMapPings()
 end
 
 function MiniMap.RefreshWorldMapSuggestionPinsForMirror()
-    if MiniMap.IsQuestPinGroupShownOnHud() then
+    if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_QUESTS) then
         WORLD_MAP_MANAGER:RefreshSuggestionPins()
-    end
-end
-
---- @param questIndex integer|nil
-function MiniMap.RefreshWorldMapQuestPinsLight(questIndex)
-    if questIndex then
-        C_MAP_HANDLERS:RefreshSingleQuestPins(questIndex)
-    end
-    MiniMap.RefreshWorldMapPingsForMirror()
-    MiniMap.RefreshWorldMapSuggestionPinsForMirror()
-    if MiniMap.IsNativeWorldMapContainerAttached() then
-        MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(MiniMap.mapController)
     end
 end
 

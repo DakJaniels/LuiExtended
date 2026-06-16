@@ -40,14 +40,6 @@ local miniMapPinCategoryScales =
     { key = "pinScaleOther",     name = LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER     },
 }
 
-local miniMapClockModeItems =
-{
-    { name = "Off",     data = 0 },
-    { name = "Real",    data = 1 },
-    { name = "In-game", data = 2 },
-    { name = "Both",    data = 3 },
-}
-
 local miniMapCompassModeItems =
 {
     { name = "Untouched", data = 0 },
@@ -337,23 +329,6 @@ function MiniMap.CreateConsoleSettings()
     panel:AddSetting(
         {
             type = LHAS.ST_DROPDOWN,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_CLOCK_MODE),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CLOCK_MODE_TP),
-            items = miniMapClockModeItems,
-            getFunction = function ()
-                return { data = MiniMap.SV.clockMode or 0 }
-            end,
-            setFunction = function (_combobox, _value, item)
-                MiniMap.SV.clockMode = item.data
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.clockMode or 0,
-            disable = disable,
-        })
-
-    panel:AddSetting(
-        {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE_TP),
             items = miniMapCompassModeItems,
@@ -371,33 +346,36 @@ function MiniMap.CreateConsoleSettings()
     panel:AddSetting(
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS_TP),
-            getFunction = function () return MiniMap.SV.showCompassParityPins ~= false end,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP),
+            getFunction = function () return MiniMap.SV.showZoneName ~= false end,
             setFunction = function (value)
-                MiniMap.SV.showCompassParityPins = value
-                if not value and MiniMap.compassParityController then
-                    MiniMap.compassParityController:ReleaseAllCompassParityOverlays()
-                end
+                MiniMap.SV.showZoneName = value
+                MiniMap.ApplyLiveSettings()
             end,
-            default = Defaults.showCompassParityPins,
+            default = Defaults.showZoneName,
             disable = disable,
         })
+
+    local infoPanelModuleDisabled = function ()
+        return disable() or not LUIE.SV.InfoPanel_Enabled
+    end
 
     panel:AddSetting(
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS_TP),
-            getFunction = function () return MiniMap.SV.forceQuestPinsOnMinimap == true end,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP),
+            getFunction = function () return MiniMap.SV.anchorInfoPanelToMiniMap == true end,
             setFunction = function (value)
-                MiniMap.SV.forceQuestPinsOnMinimap = value
-                if MiniMap.mapEventController then
-                    MiniMap.mapEventController:RequestQuestPinSync()
+                MiniMap.SV.anchorInfoPanelToMiniMap = value
+                MiniMap.ApplyLiveSettings()
+                if not value and LUIE.InfoPanel and LUIE.InfoPanel.Enabled then
+                    LUIE.InfoPanel.ApplyPanelPosition()
                 end
             end,
-            default = Defaults.forceQuestPinsOnMinimap,
-            disable = disable,
+            default = Defaults.anchorInfoPanelToMiniMap,
+            disable = infoPanelModuleDisabled,
         })
 
     panel:AddSetting(

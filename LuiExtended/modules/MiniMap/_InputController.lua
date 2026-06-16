@@ -9,6 +9,7 @@ local LUIE = LUIE
 local MiniMap = LUIE.MiniMap
 
 local MINIMAP_WAYPOINT_DRAG_THRESHOLD = 8
+local MINIMAP_FRAME_CHROME_HIDE_DELAY_MS = 200
 
 --- @class MiniMapInputController : ZO_InitializingObject
 --- @field view MiniMapView
@@ -21,6 +22,7 @@ local MINIMAP_WAYPOINT_DRAG_THRESHOLD = 8
 --- @field panScrollStartX number
 --- @field panScrollStartY number
 --- @field pendingWaypointClick boolean
+--- @field frameChromeHideCallId integer|nil
 local MiniMapInputController = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapInputController = MiniMapInputController
 
@@ -34,6 +36,7 @@ function MiniMapInputController:Initialize(view, mapController, runtime)
     self.panDragActive = false
     self.panDragMoved = false
     self.pendingWaypointClick = false
+    self.frameChromeHideCallId = nil
 end
 
 --- @param shift boolean
@@ -81,7 +84,7 @@ function MiniMapInputController:TrySetWaypointFromClick(mouseX, mouseY, shift)
             return
         end
 
-        PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedY, MAP_TYPE_LOCATION_CENTERED)
+        PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedY)
     end)
 end
 
@@ -160,9 +163,95 @@ end
 function MiniMapInputController:ApplyFrameDragMouseEnabled()
     local background = self.view.background
     local zone = self.view.zone
-    local positionLocked = MiniMap.SV.lockPosition == true
-    background:SetMouseEnabled(not positionLocked)
-    zone:SetMouseEnabled(not positionLocked)
+    background:SetMouseEnabled(false)
+    if zone then
+        zone:SetMouseEnabled(false)
+    end
+end
+
+function MiniMapInputController:IsMouseOverFrameChromeHoverRegion()
+    local frameChromeHover = self.view.frameChromeHover
+    if frameChromeHover and MouseIsOver(frameChromeHover) then
+        return true
+    end
+    local frameChrome = self.view.frameChrome
+    if frameChrome and not frameChrome:IsHidden() and MouseIsOver(frameChrome) then
+        return true
+    end
+    return false
+end
+
+function MiniMapInputController:ShowFrameChrome()
+    local frameChrome = self.view.frameChrome
+    if frameChrome then
+        frameChrome:SetHidden(false)
+    end
+end
+
+function MiniMapInputController:HideFrameChromeIfPointerLeft()
+    if self:IsMouseOverFrameChromeHoverRegion() then
+        return
+    end
+    local frameChrome = self.view.frameChrome
+    if frameChrome then
+        frameChrome:SetHidden(true)
+    end
+end
+
+function MiniMapInputController:CancelFrameChromeHide()
+    if self.frameChromeHideCallId then
+        zo_removeCallLater(self.frameChromeHideCallId)
+        self.frameChromeHideCallId = nil
+    end
+end
+
+function MiniMapInputController:RefreshFrameChromeVisibility()
+    if self:IsMouseOverFrameChromeHoverRegion() then
+        self:ShowFrameChrome()
+    else
+        self:HideFrameChromeIfPointerLeft()
+    end
+end
+
+function MiniMapInputController:OnFrameChromeHoverEnter()
+    self:CancelFrameChromeHide()
+    self:ShowFrameChrome()
+end
+
+function MiniMapInputController:OnFrameChromeHoverExit()
+    self:CancelFrameChromeHide()
+    local inputController = self
+    self.frameChromeHideCallId = zo_callLater(function ()
+        inputController.frameChromeHideCallId = nil
+        inputController:HideFrameChromeIfPointerLeft()
+    end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
+end
+
+function MiniMapInputController:OnFramePositionLockClicked(lockButton)
+    if not MiniMap.SV then
+        return
+    end
+    MiniMap.SV.lockPosition = not MiniMap.SV.lockPosition
+    MiniMap.ApplyLiveSettings()
+end
+
+--- @param button integer
+function MiniMapInputController:OnFrameMoveGripMouseDown(button)
+    if button ~= MOUSE_BUTTON_INDEX_LEFT then
+        return
+    end
+    if not MiniMap.SV or MiniMap.SV.lockPosition then
+        return
+    end
+    self.view.root:StartMoving()
+end
+
+--- @param button integer
+function MiniMapInputController:OnFrameMoveGripMouseUp(button)
+    if button ~= MOUSE_BUTTON_INDEX_LEFT then
+        return
+    end
+    self.view.root:StopMovingOrResizing()
 end
 
 --- @param button integer
@@ -222,17 +311,6 @@ function MiniMapInputController:OnMapMouseUp(button, shift)
     self:StopPanDrag(mouseX, mouseY, shift)
 end
 
---- @param button integer
-function MiniMapInputController:OnFrameDragMouseDown(button)
-    if button ~= MOUSE_BUTTON_INDEX_LEFT then
-        return
-    end
-    if MiniMap.SV.lockPosition then
-        return
-    end
-    self.view.root:StartMoving()
-end
-
 --- @param horizontal number
 --- @param vertical number
 function MiniMapInputController:OnScrollOffsetChanged(horizontal, vertical)
@@ -276,9 +354,60 @@ function MiniMap.OnMapUpdate(control, time)
     end
 end
 
-function MiniMap.OnFrameDragMouseDown(control, button, ctrl, alt, shift, command)
+function MiniMap.OnFrameChromeHotspotMouseEnter(control)
     if MiniMap.inputController then
-        MiniMap.inputController:OnFrameDragMouseDown(button)
+        MiniMap.inputController:OnFrameChromeHoverEnter()
+    end
+end
+
+function MiniMap.OnFrameChromeHotspotMouseExit(control)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnFrameChromeHoverExit()
+    end
+end
+
+function MiniMap.OnFrameChromeMouseEnter(control)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnFrameChromeHoverEnter()
+    end
+end
+
+function MiniMap.OnFrameChromeMouseExit(control)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnFrameChromeHoverExit()
+    end
+end
+
+function MiniMap.OnFramePositionLockInitialized(lockButton)
+    local initialState = TOGGLE_BUTTON_OPEN
+    if MiniMap.SV and MiniMap.SV.lockPosition then
+        initialState = TOGGLE_BUTTON_CLOSED
+    end
+    ZO_ToggleButton_Initialize(lockButton, TOGGLE_BUTTON_TYPE_PADLOCK, initialState)
+    ZO_MouseTooltipBehavior_OnInitialized(lockButton)
+    lockButton:SetTooltipString(GetString(LUIE_STRING_MINIMAP_FRAME_LOCK_TP))
+end
+
+function MiniMap.OnFramePositionLockClicked(control, button, ctrl, alt, shift, command)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnFramePositionLockClicked(control)
+    end
+end
+
+function MiniMap.OnFrameMoveGripInitialized(moveGrip)
+    ZO_MouseTooltipBehavior_OnInitialized(moveGrip)
+    moveGrip:SetTooltipString(GetString(LUIE_STRING_MINIMAP_FRAME_MOVE_TP))
+end
+
+function MiniMap.OnFrameMoveGripMouseDown(control, button, ctrl, alt, shift, command)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnFrameMoveGripMouseDown(button)
+    end
+end
+
+function MiniMap.OnFrameMoveGripMouseUp(control, button, upInside, ctrl, alt, shift, command)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnFrameMoveGripMouseUp(button)
     end
 end
 

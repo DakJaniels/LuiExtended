@@ -179,11 +179,11 @@ modules/InfoPanel/InfoPanel.lua
 # Modules - MiniMap
 modules/MiniMap/_Namespace.lua
 modules/MiniMap/_FilterController.lua
-modules/MiniMap/_CompassParityController.lua
 modules/MiniMap/_NativeWorldMapContainer.lua
 modules/MiniMap/_VisibilityController.lua
 modules/MiniMap/_ZoomContext.lua
 modules/MiniMap/_ChromeController.lua
+modules/MiniMap/_InfoPanelIntegration.lua
 modules/MiniMap/_PublicAPI.lua
 modules/MiniMap/_HudScene.lua
 modules/MiniMap/_View.lua

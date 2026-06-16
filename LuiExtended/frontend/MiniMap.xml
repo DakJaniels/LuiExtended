@@ -46,9 +46,6 @@
                   relativeTo="$(parent)"
                   relativePoint="BOTTOM"
                   offsetY="4" />
-          <OnMouseDown>
-            LUIE.MiniMap.OnFrameDragMouseDown(self, button, ctrl, alt, shift, command)
-          </OnMouseDown>
           <Controls>
             <Texture name="$(parent)_Divider"
                      textureFile="EsoUI/Art/Miscellaneous/horizontalDivider.dds">
@@ -88,9 +85,6 @@
                   relativePoint="TOPLEFT"
                   offsetX="-3"
                   offsetY="-3" />
-          <OnMouseDown>
-            LUIE.MiniMap.OnFrameDragMouseDown(self, button, ctrl, alt, shift, command)
-          </OnMouseDown>
         </Backdrop>
         <Scroll name="$(parent)_Scroll"
                 mouseEnabled="true">
@@ -152,17 +146,71 @@
             </StatusBar>
           </Controls>
         </Scroll>
-        <Label name="$(parent)_ClockLabel"
-               font="ZoFontGameSmall"
-               layer="2"
-               hidden="true"
-               text="">
-          <Anchor point="TOPLEFT"
-                  relativeTo="$(parent)_Scroll"
-                  relativePoint="TOPLEFT"
-                  offsetX="4"
-                  offsetY="4" />
-        </Label>
+        <Control name="$(parent)_FrameChromeHover"
+                 mouseEnabled="true"
+                 layer="4"
+                 tier="HIGH">
+          <Dimensions x="24"
+                      y="24" />
+          <OnMouseEnter>
+            LUIE.MiniMap.OnFrameChromeHotspotMouseEnter(self)
+          </OnMouseEnter>
+          <OnMouseExit>
+            LUIE.MiniMap.OnFrameChromeHotspotMouseExit(self)
+          </OnMouseExit>
+          <Controls>
+            <Control name="$(parent)_FrameChrome"
+                     hidden="true"
+                     mouseEnabled="true">
+              <Dimensions x="44"
+                          y="20" />
+              <OnMouseEnter>
+                LUIE.MiniMap.OnFrameChromeMouseEnter(self)
+              </OnMouseEnter>
+              <OnMouseExit>
+                LUIE.MiniMap.OnFrameChromeMouseExit(self)
+              </OnMouseExit>
+              <Controls>
+                <Button name="$(parent)_PositionLock"
+                        inherits="ZO_ButtonBehaviorClickSound"
+                        mouseOverBlendMode="ADD"
+                        mouseEnabled="true">
+                  <Dimensions x="20"
+                              y="20" />
+                  <OnInitialized>
+                    LUIE.MiniMap.OnFramePositionLockInitialized(self)
+                  </OnInitialized>
+                  <OnClicked>
+                    LUIE.MiniMap.OnFramePositionLockClicked(self, button, ctrl, alt, shift, command)
+                  </OnClicked>
+                </Button>
+                <Control name="$(parent)_MoveGrip"
+                           inherits="ZO_MouseTooltipBehavior"
+                           mouseEnabled="true">
+                  <Dimensions x="20"
+                              y="20" />
+                  <OnInitialized>
+                    LUIE.MiniMap.OnFrameMoveGripInitialized(self)
+                  </OnInitialized>
+                  <OnMouseDown>
+                    LUIE.MiniMap.OnFrameMoveGripMouseDown(self, button, ctrl, alt, shift, command)
+                  </OnMouseDown>
+                  <OnMouseUp>
+                    LUIE.MiniMap.OnFrameMoveGripMouseUp(self, button, upInside, ctrl, alt, shift, command)
+                  </OnMouseUp>
+                  <Controls>
+                    <Texture name="$(parent)Icon"
+                             resizeToFitFile="true"
+                             textureFile="EsoUI/Art/Minimap/minimap_button_over.dds"
+                             alpha="0.85">
+                      <Anchor point="CENTER" />
+                    </Texture>
+                  </Controls>
+                </Control>
+              </Controls>
+            </Control>
+          </Controls>
+        </Control>
         <Texture name="$(parent)_Player"
                  resizeToFitFile="true"
                  layer="2"
@@ -181,8 +229,10 @@
                   relativePoint="CENTER" />
         </Texture>
         <Button name="$(parent)_ZoomIn"
+                inherits="ZO_ButtonBehaviorClickSound"
                 hidden="true"
                 mouseEnabled="true"
+                mouseOverBlendMode="ADD"
                 layer="4"
                 tier="HIGH">
           <Dimensions x="24"
@@ -194,14 +244,17 @@
                   offsetY="-4" />
           <Textures normal="EsoUI/Art/Minimap/minimap_zoomplus_up.dds"
                     pressed="EsoUI/Art/Minimap/minimap_zoomplus_down.dds"
-                    disabled="EsoUI/Art/Minimap/minimap_zoomplus_disabled.dds" />
+                    disabled="EsoUI/Art/Minimap/minimap_zoomplus_disabled.dds"
+                    mouseOver="EsoUI/Art/Minimap/minimap_zoom_mouseover.dds" />
           <OnClicked>
             LUIE.MiniMap.OnZoomInClicked(self, button, ctrl, alt, shift, command)
           </OnClicked>
         </Button>
         <Button name="$(parent)_ZoomOut"
+                inherits="ZO_ButtonBehaviorClickSound"
                 hidden="true"
                 mouseEnabled="true"
+                mouseOverBlendMode="ADD"
                 layer="4"
                 tier="HIGH">
           <Dimensions x="24"
@@ -213,7 +266,8 @@
                   offsetY="0" />
           <Textures normal="EsoUI/Art/Minimap/minimap_zoomminus_up.dds"
                     pressed="EsoUI/Art/Minimap/minimap_zoomminus_down.dds"
-                    disabled="EsoUI/Art/Minimap/minimap_zoomminus_disabled.dds" />
+                    disabled="EsoUI/Art/Minimap/minimap_zoomminus_disabled.dds"
+                    mouseOver="EsoUI/Art/Minimap/minimap_zoom_mouseover.dds" />
           <OnClicked>
             LUIE.MiniMap.OnZoomOutClicked(self, button, ctrl, alt, shift, command)
           </OnClicked>

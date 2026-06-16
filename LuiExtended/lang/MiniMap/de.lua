@@ -29,10 +29,12 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "Weitere erweiterte MiniMap-Optionen folgen in künftigen Updates.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Pin-Mirror-Zustandsautomat (Debug)",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "ZO_StateMachine-Übergänge für Pin-Spiegel, Karten-Neuladen und Schnellreise im Chat protokollieren.",
-    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS = "Quest-Marker im Kompass-Stil",
-    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS_TP = "Fehlende Quest-Pins auf der Minimap mit Breadcrumb-Daten und Kompass-Symbolen nachzeichnen.",
-    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS = "Quest-Pins auf Minimap erzwingen",
-    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS_TP = "Quest-Pins anzeigen, auch wenn der Weltkarten-Quest-Filter aus ist.",
+    LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "InfoPanel an Minimap verankern",
+    LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "InfoPanel unter der Karte (Zonenname-Position) platzieren und den Zonentitel über die Karte legen. Position wird von der Minimap gesteuert. Erfordert das InfoPanel-Modul.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Zonennamen anzeigen",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Aktuellen Zonennamen an der Minimap anzeigen. Zum Verschieben beim Darüberfahren die Steuerung unten links nutzen.",
+    LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Ziehen, um die Minimap zu verschieben.",
+    LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Minimap-Position sperren oder entsperren.",
 }
 
 for stringId, stringValue in pairs(strings) do

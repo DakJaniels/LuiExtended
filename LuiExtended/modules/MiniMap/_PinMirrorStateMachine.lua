@@ -136,10 +136,9 @@ function MiniMapPinMirrorStateMachine:Initialize(mapEventController, mapControll
             pinMirrorGameplayTickersUpdateScheduled = true
             local gameplayTickersUpdateName = MiniMap.moduleName .. "PinMirrorGameplayTickers"
             EVENT_MANAGER:RegisterForUpdate(gameplayTickersUpdateName, 0, function ()
-                EVENT_MANAGER:UnregisterForUpdate(gameplayTickersUpdateName)
                 pinMirrorGameplayTickersUpdateScheduled = false
                 MiniMap.UpdateGameplayTickers()
-            end)
+            end, true)
         end
         if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
             local currentState = stateMachine:GetCurrentState()
@@ -273,7 +272,6 @@ function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteNextFrame()
     local stateMachine = self
     local mapReloadCompleteNotifyUpdateName = MiniMap.moduleName .. "MapReloadCompleteNotify"
     EVENT_MANAGER:RegisterForUpdate(mapReloadCompleteNotifyUpdateName, 0, function ()
-        EVENT_MANAGER:UnregisterForUpdate(mapReloadCompleteNotifyUpdateName)
         stateMachine.mapReloadCompleteNotifyDeferredScheduled = false
         if not MiniMap.Enabled then
             return
@@ -297,7 +295,7 @@ function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteNextFrame()
             return
         end
         stateMachine:NotifyMapReloadComplete()
-    end)
+    end, true)
 end
 
 function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteAfterMirror()

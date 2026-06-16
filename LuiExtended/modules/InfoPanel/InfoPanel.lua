@@ -937,6 +937,9 @@ local function PerformInfoPanelLayout()
     ApplyInfoPanelDividerAnchors()
     InfoPanel.SetScale()
     InfoPanel.ApplyTransparency()
+    if LUIE.MiniMap and LUIE.MiniMap.IsInfoPanelAnchorActive and LUIE.MiniMap.IsInfoPanelAnchorActive() then
+        LUIE.MiniMap.ApplyInfoPanelAnchor()
+    end
 end
 
 local function InfoPanelRefreshGroupIsActive()
@@ -1272,6 +1275,10 @@ function InfoPanel.ApplyPanelPosition()
     if not InfoPanel.Enabled or not uiPanel then
         return
     end
+    if LUIE.MiniMap and LUIE.MiniMap.IsInfoPanelAnchorActive and LUIE.MiniMap.IsInfoPanelAnchorActive() then
+        LUIE.MiniMap.ApplyInfoPanelAnchor()
+        return
+    end
     if InfoPanel.SV.position ~= nil and #InfoPanel.SV.position == 2 then
         uiPanel:ClearAnchors()
         uiPanel:SetAnchor(CENTER, GuiRoot, TOPLEFT, InfoPanel.SV.position[1], InfoPanel.SV.position[2])
@@ -1283,6 +1290,10 @@ function InfoPanel.ResetPosition()
     if not InfoPanel.Enabled then
         return
     end
+    if LUIE.MiniMap and LUIE.MiniMap.IsInfoPanelAnchorActive and LUIE.MiniMap.IsInfoPanelAnchorActive() then
+        LUIE.MiniMap.ApplyInfoPanelAnchor()
+        return
+    end
     -- Clear anchors and let XML default anchor take over
     uiPanel:ClearAnchors()
     uiPanel:SetAnchor(TOPRIGHT, GuiRoot, TOPRIGHT, -24, 20)
@@ -1291,6 +1302,10 @@ end
 -- Handler for OnMoveStop event (called from XML)
 --- @param control Control
 function InfoPanel.OnPanelMoveStop(control)
+    if LUIE.MiniMap and LUIE.MiniMap.IsInfoPanelAnchorActive and LUIE.MiniMap.IsInfoPanelAnchorActive() then
+        LUIE.MiniMap.ApplyInfoPanelAnchor()
+        return
+    end
     if InfoPanel.SV then
         InfoPanel.SV.position = { control:GetCenter() }
     end
@@ -1299,6 +1314,13 @@ end
 -- Unlock panel for moving. Called from Settings Menu.
 function InfoPanel.SetMovingState(state)
     if not InfoPanel.Enabled then
+        return
+    end
+    if LUIE.MiniMap and LUIE.MiniMap.IsInfoPanelAnchorActive and LUIE.MiniMap.IsInfoPanelAnchorActive() then
+        InfoPanel.panelUnlocked = false
+        uiPanel:SetMouseEnabled(false)
+        uiPanel:SetMovable(false)
+        uiPanel:SetHidden(false)
         return
     end
     InfoPanel.panelUnlocked = state

@@ -41,14 +41,9 @@ function MiniMap.Initialize(enabled)
         if MiniMap.pinController then
             MiniMap.pinController:CancelPinSyncCoroutine()
         end
-        if MiniMap.compassParityController then
-            MiniMap.compassParityController:ReleaseAllCompassParityOverlays()
-            MiniMap.compassParityController = nil
-        end
         if MiniMap.runtime then
             MiniMap.runtime:Stop()
         end
-        MiniMap.StopClockTicker()
         MiniMap.ShutdownNativeWorldMapContainer()
         MiniMap.UnregisterMiniMapSceneIntegration()
         LUIE_MiniMap:SetHidden(true)
@@ -67,7 +62,6 @@ function MiniMap.Initialize(enabled)
     MiniMap.zoom = MiniMap.SV.defaultZoom
     MiniMap.mapController:ClampZoomToLimits(false)
     MiniMap.pinController = MiniMap.MiniMapPinController:New(MiniMap.view, MiniMap.mapController)
-    MiniMap.compassParityController = MiniMap.MiniMapCompassParityController:New(MiniMap.pinController, MiniMap.mapController)
     MiniMap.runtime = MiniMap.MiniMapRuntime:New(MiniMap.view, MiniMap.mapController, MiniMap.pinController)
     local followPlayer = MiniMap.SV.followPlayer == true and MiniMap.SV.enableFixedMapPosition ~= true
     MiniMap.runtime.mapFollowsPlayer = followPlayer

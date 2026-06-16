@@ -59,12 +59,12 @@ function MiniMap.ToggleShowMap()
     end
     MiniMap.sessionMapVisible = not MiniMap.sessionMapVisible
     MiniMap.UpdateConditionalVisibility()
-    if CENTER_SCREEN_ANNOUNCE then
-        local message = MiniMap.sessionMapVisible
-            and GetString(LUIE_STRING_MINIMAP_TOGGLE_SHOW_ON)
-            or GetString(LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF)
-        CENTER_SCREEN_ANNOUNCE:AddMessage(message, CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
-    end
+    local message = MiniMap.sessionMapVisible and GetString(LUIE_STRING_MINIMAP_TOGGLE_SHOW_ON) or GetString(LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF)
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
+    messageParams:SetText(message)
+    messageParams:SetSound(SOUNDS.NONE)
+    messageParams:SetLifespanMS(5000)
+    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
 end
 
 function MiniMap.ToggleShowInCombatSetting()

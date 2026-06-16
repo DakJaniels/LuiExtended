@@ -91,11 +91,10 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     nativeHudMapOverlayLayoutReapplyScheduled = true
     local updateName = GetNativeHudMapOverlayLayoutReapplyUpdateName()
     EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
-        EVENT_MANAGER:UnregisterForUpdate(updateName)
         nativeHudMapOverlayLayoutReapplyScheduled = false
         MiniMap.ReapplyNativeHudMapOverlayLayout()
         MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
-    end)
+    end, true)
 end
 
 --- Second frame after ZOS g_mapRefresh:UpdateRefreshGroups (world map OnUpdate).
@@ -109,10 +108,9 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
     nativeHudMapOverlayLayoutReapplySecondFrameScheduled = true
     local secondFrameUpdateName = MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2"
     EVENT_MANAGER:RegisterForUpdate(secondFrameUpdateName, 0, function ()
-        EVENT_MANAGER:UnregisterForUpdate(secondFrameUpdateName)
         nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
         MiniMap.ReapplyNativeHudMapOverlayLayout()
-    end)
+    end, true)
 end
 
 --- @return boolean

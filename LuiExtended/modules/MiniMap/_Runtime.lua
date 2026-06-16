@@ -165,11 +165,6 @@ function MiniMapRuntime:OnFollowTick()
     self.lastPlayerNormY = playerNormalizedY
 
     MiniMap.UpdateNativeWorldMapMovingPins()
-
-    local compassParityController = MiniMap.compassParityController
-    if compassParityController then
-        compassParityController:SyncQuestBreadcrumbOverlays(mapData)
-    end
 end
 
 function MiniMapRuntime:ApplyScrollFromPanOffsets()
