@@ -42,6 +42,10 @@ MiniMap.hudSceneFragment = nil
 MiniMap.worldMapBlocksMiniMapWork = false
 MiniMap.playerMapMirrorDepth = 0
 MiniMap.playerMapMirrorPendingCallback = nil
+MiniMap.playerMapMirrorZosTilesUpdated = false
+MiniMap.playerMapMirrorZosTilesMapRawName = nil
+MiniMap.playerMapMirrorZosTilesHorizontal = nil
+MiniMap.playerMapMirrorZosTilesVertical = nil
 MiniMap.lastHudMapZoomContextSignature = nil
 MiniMap.pendingPostReloadUILayout = nil
 

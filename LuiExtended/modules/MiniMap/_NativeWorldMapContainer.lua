@@ -283,16 +283,6 @@ function MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapControll
     MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentHeight)
 end
 
-function MiniMap.SetLuiMiniMapTileLayerHidden(hidden)
-    local mapController = MiniMap.mapController
-    if not mapController or not mapController.tilesManager then
-        return
-    end
-    for _, tileControl in pairs(mapController.tilesManager:GetActiveObjects()) do
-        tileControl:SetHidden(hidden == true)
-    end
-end
-
 function MiniMap.RefreshNativeWorldMapContainer(refreshOptions)
     if not MiniMap.Enabled then
         return
@@ -307,17 +297,22 @@ function MiniMap.RefreshNativeWorldMapContainer(refreshOptions)
     local syncSubzoneMapGeometry = refreshOptions and refreshOptions.syncSubzoneMapGeometry == true
     local applyContextZoomIfChanged = refreshOptions and refreshOptions.applyContextZoomIfChanged == true
     MiniMap.RunWithPlayerMapForMirror(function ()
+        local geometryChanged = false
         if syncSubzoneMapGeometry then
-            MiniMap.SyncHudMapDataDimensionsFromPlayerMap(mapController)
+            geometryChanged = MiniMap.SyncHudMapDataDimensionsFromPlayerMap(mapController)
         end
         if applyContextZoomIfChanged then
             MiniMap.ApplyHudContextZoomWhenMapContextChanged()
         end
-        WORLD_MAP_TILES_MANAGER:UpdateTextures()
+        local mapData = mapController.map
+        if mapData and mapData.numTiles > 0 then
+            local invokeUpdateTextures = geometryChanged
+                or MiniMap.ShouldInvokeNativeWorldMapUpdateTexturesForMapData(mapData)
+            MiniMap.BindNativeWorldMapTilesForHud(mapData, invokeUpdateTextures)
+        end
         MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
         MiniMap.RefreshWorldMapPinsForMirror()
         if MiniMap.IsNativeWorldMapContainerAttached() then
-            MiniMap.SetLuiMiniMapTileLayerHidden(true)
             MiniMap.FlushWorldMapPinRefreshGroups()
             MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
             MiniMap.ResetNativeHudWorldMapPanState()
@@ -358,7 +353,6 @@ function MiniMap.TryAttachNativeWorldMapContainer()
 
     nativeWorldMapContainerAttached = true
     ApplyNativeWorldMapHudDrawOrder(view)
-    MiniMap.SetLuiMiniMapTileLayerHidden(true)
     MiniMap.RefreshNativeWorldMapContainer()
     MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
 end
@@ -394,7 +388,6 @@ function MiniMap.RestoreWorldMapContainerToWorldMap()
 
     nativeWorldMapContainerAttached = false
     nativeWorldMapContainerRestore = nil
-    MiniMap.SetLuiMiniMapTileLayerHidden(false)
 
     if MiniMap.pinController then
         MiniMap.pinController:RestoreAllDigSitePolygonsToWorldMap()

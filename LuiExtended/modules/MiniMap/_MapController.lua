@@ -24,12 +24,16 @@ function MiniMap.RunWithPlayerMapForMirror(mirrorCallback)
         return true
     end
     MiniMap.playerMapMirrorDepth = MiniMap.playerMapMirrorDepth + 1
+    if MiniMap.playerMapMirrorDepth == 1 then
+        MiniMap.ClearPlayerMapMirrorZosTilesUpdatedState()
+    end
     local savedMapIndex = GetCurrentMapIndex()
     SetMapToPlayerLocation()
     local mapIndexAfterPlayerLocation = GetCurrentMapIndex()
     local playerMapIndexChanged = savedMapIndex ~= mapIndexAfterPlayerLocation
     if playerMapIndexChanged or not MiniMap.IsNativeWorldMapContainerAttached() then
         ZO_WorldMap_UpdateMap()
+        MiniMap.MarkPlayerMapMirrorZosTilesUpdated()
         MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
     end
     mirrorCallback()
@@ -40,9 +44,13 @@ function MiniMap.RunWithPlayerMapForMirror(mirrorCallback)
             SetMapToMapListIndex(savedMapIndex)
         end
         ZO_WorldMap_UpdateMap()
+        MiniMap.MarkPlayerMapMirrorZosTilesUpdated()
         MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
     end
     MiniMap.playerMapMirrorDepth = MiniMap.playerMapMirrorDepth - 1
+    if MiniMap.playerMapMirrorDepth == 0 then
+        MiniMap.ClearPlayerMapMirrorZosTilesUpdatedState()
+    end
     local pendingMirrorCallback = MiniMap.playerMapMirrorPendingCallback
     if MiniMap.playerMapMirrorDepth == 0 and pendingMirrorCallback then
         MiniMap.playerMapMirrorPendingCallback = nil
@@ -315,12 +323,58 @@ function MiniMap.ApplyHudMirrorRecoveryAfterSubzoneTransition()
     MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
 end
 
---- @param mapController MiniMapMapController
+function MiniMap.ClearPlayerMapMirrorZosTilesUpdatedState()
+    MiniMap.playerMapMirrorZosTilesUpdated = false
+    MiniMap.playerMapMirrorZosTilesMapRawName = nil
+    MiniMap.playerMapMirrorZosTilesHorizontal = nil
+    MiniMap.playerMapMirrorZosTilesVertical = nil
+end
+
+function MiniMap.MarkPlayerMapMirrorZosTilesUpdated()
+    MiniMap.playerMapMirrorZosTilesUpdated = true
+    MiniMap.playerMapMirrorZosTilesMapRawName = GetMapName()
+    MiniMap.playerMapMirrorZosTilesHorizontal, MiniMap.playerMapMirrorZosTilesVertical = GetMapNumTiles()
+end
+
 --- @param mapData MiniMapMapData
+--- @return boolean
+function MiniMap.ShouldInvokeNativeWorldMapUpdateTexturesForMapData(mapData)
+    if not MiniMap.playerMapMirrorZosTilesUpdated then
+        return true
+    end
+    if MiniMap.playerMapMirrorZosTilesMapRawName ~= mapData.rawName then
+        return true
+    end
+    if mapData.numHorizontalTiles ~= MiniMap.playerMapMirrorZosTilesHorizontal
+        or mapData.numVerticalTiles ~= MiniMap.playerMapMirrorZosTilesVertical then
+        return true
+    end
+    return false
+end
+
+--- @param mapData MiniMapMapData
+--- @param invokeUpdateTextures boolean
+function MiniMap.BindNativeWorldMapTilesForHud(mapData, invokeUpdateTextures)
+    if invokeUpdateTextures then
+        WORLD_MAP_TILES_MANAGER:UpdateTextures()
+        return
+    end
+    WORLD_MAP_TILES_MANAGER:UpdateMapData()
+    if WORLD_MAP_TILES_MANAGER.totalTiles ~= mapData.numTiles
+        or not WORLD_MAP_TILES_MANAGER:GetActiveObject(1) then
+        WORLD_MAP_TILES_MANAGER:UpdateTextures()
+    end
+end
+
+--- @class MiniMapNativeWorldMapTilesReadyOptions
+--- @field invokeUpdateTextures boolean|nil
+
+--- @param mapData MiniMapMapData
+--- @param readyOptions MiniMapNativeWorldMapTilesReadyOptions|nil
 --- @return boolean texturesLoaded
-function MiniMap.ApplyNativeWorldMapTileTextures(mapController, mapData)
-    WORLD_MAP_TILES_MANAGER:UpdateTextures()
-    mapController.tilesManager:UpdateMapData()
+function MiniMap.WaitForNativeWorldMapTilesReady(mapData, readyOptions)
+    local invokeUpdateTextures = readyOptions and readyOptions.invokeUpdateTextures == true
+    MiniMap.BindNativeWorldMapTilesForHud(mapData, invokeUpdateTextures)
 
     for tileIndex = 1, mapData.numTiles do
         local nativeTile = WORLD_MAP_TILES_MANAGER:GetActiveObject(tileIndex)
@@ -334,6 +388,10 @@ function MiniMap.ApplyNativeWorldMapTileTextures(mapController, mapData)
         else
             return false
         end
+    end
+    if mapData.tileWidth <= 0 or mapData.tileHeight <= 0 then
+        local logicalWidth, logicalHeight = ZO_WorldMap_GetMapDimensions()
+        MiniMap.AssignMiniMapMapDataPixelDimensions(mapData, logicalWidth, logicalHeight)
     end
     return mapData.tileWidth > 0 and mapData.tileHeight > 0
 end
@@ -376,7 +434,6 @@ end
 --- @class MiniMapMapController : ZO_InitializingObject
 --- @field view MiniMapView
 --- @field map MiniMapMapData|nil
---- @field tilesManager ZO_WorldMapTiles_Manager
 --- @field ready boolean
 --- @field lastLoadedMapRawName string|nil
 local MiniMapMapController = ZO_InitializingObject:Subclass()
@@ -387,7 +444,6 @@ function MiniMapMapController:Initialize(view)
     self.view = view
     self.map = nil
     self.ready = false
-    self.tilesManager = ZO_WorldMapTiles_Manager:New(view.map)
     self.lastLoadedMapRawName = nil
 end
 
@@ -485,12 +541,6 @@ function MiniMapMapController:ApplyZoom(delta, revealZoomLabel)
     end
 end
 
-function MiniMapMapController:ClearTiles()
-    if self.tilesManager then
-        self.tilesManager:ReleaseAllObjects()
-    end
-end
-
 function MiniMapMapController:ClearPinControlsForOtherZones()
     if MiniMap.pinController then
         MiniMap.pinController:ReleaseAllPinPools()
@@ -543,8 +593,8 @@ function MiniMapMapController:LoadWorldMapReloadTextures(mapData, previousMapDat
         mapData.tileHeight = previousMapData.tileHeight
         return true
     end
-    self:ClearTiles()
-    return MiniMap.ApplyNativeWorldMapTileTextures(self, mapData)
+    local invokeUpdateTextures = MiniMap.ShouldInvokeNativeWorldMapUpdateTexturesForMapData(mapData)
+    return MiniMap.WaitForNativeWorldMapTilesReady(mapData, { invokeUpdateTextures = invokeUpdateTextures })
 end
 
 --- @param mapData MiniMapMapData
@@ -563,7 +613,6 @@ function MiniMapMapController:FinalizeWorldMapReloadFromMirror(mapData, logicalW
     end
     self:ClampZoomToLimits(true)
     self.view:HideLoading()
-    MiniMap.SetLuiMiniMapTileLayerHidden(true)
     MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
     MiniMap.SchedulePostReloadUILayout(self, mapData)
     MiniMap.pinMirrorStateMachine:ScheduleNotifyMapReloadCompleteAfterMirror()
@@ -651,9 +700,6 @@ function MiniMapMapController:BuildMapLayout()
         return
     end
 
-    local zoom = MiniMap.zoom
-    local tileWidth = zoom * mapData.tileWidth
-    local tileHeight = zoom * mapData.tileHeight
     local mapWidth = self:GetMapContentWidth()
     local mapHeight = self:GetMapContentHeight()
 
@@ -661,12 +707,6 @@ function MiniMapMapController:BuildMapLayout()
     mapControl:SetDimensions(mapWidth, mapHeight)
     self.view.pins:SetDimensions(mapWidth, mapHeight)
 
-    for tileIndex = 1, mapData.numTiles do
-        local tile = self.tilesManager:GetActiveObject(tileIndex)
-        if tile then
-            tile:SetHidden(true)
-        end
-    end
     MiniMap.OnNativeWorldMapContainerZoomChanged()
 end
 
