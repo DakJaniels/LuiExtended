@@ -96,6 +96,35 @@
       <Action name="LUIE_COMMAND_OUTFIT_10">
         <Down>LUIE.SlashCommands.SlashOutfit(10)</Down>
       </Action>
+      <Action name="LUIE_MINIMAP_ZOOMIN">
+        <Down>LUIE.MiniMap.Zoom(1)</Down>
+      </Action>
+      <Action name="LUIE_MINIMAP_ZOOMOUT">
+        <Down>LUIE.MiniMap.Zoom(-1)</Down>
+      </Action>
+      <Action name="LUIE_MINIMAP_ZOOMRESET">
+        <Down>LUIE.MiniMap.Zoom(0)</Down>
+      </Action>
+      <Action name="LUIE_MINIMAP_RECENTER">
+        <Down>LUIE.MiniMap.RecenterFollow()</Down>
+      </Action>
+      <Action name="LUIE_MINIMAP_TOGGLE_SHOW">
+        <Down>LUIE.MiniMap.ToggleShowMap()</Down>
+      </Action>
+      <Action name="LUIE_MINIMAP_TOGGLE_COMBAT">
+        <Down>LUIE.MiniMap.ToggleShowInCombatSetting()</Down>
+      </Action>
+      <Action name="LUIE_MINIMAP_TOGGLE_FIXED">
+        <Down>LUIE.MiniMap.ToggleFixedMapPosition()</Down>
+      </Action>
+      <Action name="LUIE_MINIMAP_HOLD_ZOOMIN">
+        <Down>LUIE.MiniMap.BeginHoldZoom(true)</Down>
+        <Up>LUIE.MiniMap.EndHoldZoom()</Up>
+      </Action>
+      <Action name="LUIE_MINIMAP_HOLD_ZOOMOUT">
+        <Down>LUIE.MiniMap.BeginHoldZoom(false)</Down>
+        <Up>LUIE.MiniMap.EndHoldZoom()</Up>
+      </Action>
     </Category>
   </Layer>
 </Bindings>

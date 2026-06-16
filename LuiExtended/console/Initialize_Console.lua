@@ -84,6 +84,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
     LUIE.UnitFrames.Initialize(LUIE.SV.UnitFrames_Enabled)
     LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
+    LUIE.MiniMap.Initialize(LUIE.SV.MiniMap_Enabled)
     LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
     -- -----------------------------------------------------------------------------
     LUIE.ApplyZOBuffDebuffSuppression()
@@ -101,6 +102,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.InfoPanel.CreateConsoleSettings()
     LUIE.UnitFrames.CreateConsoleSettings()
     LUIE.SpellCastBuffs.CreateConsoleSettings()
+    LUIE.MiniMap.CreateConsoleSettings()
     LUIE.SlashCommands.CreateConsoleSettings()
     -- -----------------------------------------------------------------------------
     -- Register global event listeners

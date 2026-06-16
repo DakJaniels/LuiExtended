@@ -1,0 +1,91 @@
+-- -----------------------------------------------------------------------------
+--  LuiExtended                                                               --
+--  Distributed under The MIT License (MIT) (see LICENSE file)                --
+-- -----------------------------------------------------------------------------
+
+-- MiniMap localization (default)
+local strings =
+{
+    LUIE_STRING_LAM_MINIMAP = "MiniMap (BETA)",
+    LUIE_STRING_LAM_MINIMAP_DESCRIPTION = "Enable and configure the MiniMap module.",
+    LUIE_STRING_LAM_MINIMAP_ENABLE = "Enable MiniMap",
+    LUIE_STRING_LAM_MINIMAP_ENABLE_TP = "Toggle the MiniMap module on or off. Requires UI reload.",
+    LUIE_STRING_LAM_MINIMAP_ZOOM = "Default Zoom (%)",
+    LUIE_STRING_LAM_MINIMAP_ZOOM_TP = "Default zoom when resetting or reloading. Cannot go below the level that fits the whole zone in the frame (varies with map size and minimap dimensions).",
+    LUIE_STRING_LAM_MINIMAP_PINSCALE = "Default Pin Scale (%)",
+    LUIE_STRING_LAM_MINIMAP_PINSCALE_TP = "Scale map icons (POI, group, world events, etc.). Does not change quest area circles on the map.",
+    LUIE_STRING_LAM_MINIMAP_PLAYERPINSCALE = "Player Pip Size (%)",
+    LUIE_STRING_LAM_MINIMAP_PLAYERPINSCALE_TP = "Size of the center player pip (follow on) and map player pin (follow off). Based on the world map 16px pip.",
+    LUIE_STRING_LAM_MINIMAP_RESETPOSITION_TP = "Reset the MiniMap position to its default location.",
+    LUIE_STRING_LAM_MINIMAP_FOLLOW_PLAYER = "Follow Player",
+    LUIE_STRING_LAM_MINIMAP_FOLLOW_PLAYER_TP = "Default: keep the map centered on your position. Dragging the map pans without changing this setting until you recenter or toggle follow here.",
+    LUIE_STRING_LAM_MINIMAP_LOCK_POSITION = "Lock Position",
+    LUIE_STRING_LAM_MINIMAP_LOCK_POSITION_TP = "Prevent dragging the MiniMap frame.",
+    LUIE_STRING_LAM_MINIMAP_LOCK_SIZE = "Lock Size",
+    LUIE_STRING_LAM_MINIMAP_LOCK_SIZE_TP = "Prevent resizing the MiniMap frame.",
+    LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT = "Waypoint Requires Shift",
+    LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT_TP = "When enabled, Shift+click sets a player waypoint. When disabled, a plain click on the map sets a waypoint if you did not drag.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS = "Show Zoom Buttons",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP = "Show on-map zoom plus and minus buttons.",
+    LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER = "Advanced Options",
+    LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "Performance and integration options for the MiniMap module.",
+    LUIE_STRING_LAM_MINIMAP_VISIBILITY_HEADER = "Visibility",
+    LUIE_STRING_LAM_MINIMAP_SHOW_HUD = "Show in HUD",
+    LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP = "Allow the MiniMap on gameplay HUD scenes when other visibility rules pass.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT = "Show in Combat",
+    LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP = "Show the MiniMap while in combat.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_LOOT = "Show While Looting",
+    LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP = "Register the MiniMap on the loot scene when enabled.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED = "Show While Mounted",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP = "Show the MiniMap while mounted.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING = "Show in Housing",
+    LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP = "Show the MiniMap in player housing.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP = "Draw On Top",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP = "Raise MiniMap draw layer above most HUD controls.",
+    LUIE_STRING_LAM_MINIMAP_ZOOM_CONTEXT_HEADER = "Context Zoom",
+    LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM = "Sub-Zone Zoom (%)",
+    LUIE_STRING_LAM_MINIMAP_SUBZONE_ZOOM_TP = "Default zoom on multi-tile overworld maps.",
+    LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM = "Dungeon Zoom (%)",
+    LUIE_STRING_LAM_MINIMAP_DUNGEON_ZOOM_TP = "Default zoom in dungeons.",
+    LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM = "Battleground Zoom (%)",
+    LUIE_STRING_LAM_MINIMAP_BATTLEGROUND_ZOOM_TP = "Default zoom in battlegrounds.",
+    LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM = "Mounted Zoom Scale (%)",
+    LUIE_STRING_LAM_MINIMAP_MOUNTED_ZOOM_TP = "Multiplier applied to context zoom while mounted.",
+    LUIE_STRING_LAM_MINIMAP_AUTO_ZOOM_EDGE = "Auto Zoom Out at Map Edge",
+    LUIE_STRING_LAM_MINIMAP_AUTO_ZOOM_EDGE_TP = "When following the player, zoom out if you reach the edge of the current map tile.",
+    LUIE_STRING_LAM_MINIMAP_PIN_CATEGORY_HEADER = "Pin Category Scale",
+    LUIE_STRING_LAM_MINIMAP_PINSCALE_QUEST = "Quest Pins (%)",
+    LUIE_STRING_LAM_MINIMAP_PINSCALE_GROUP = "Group Pins (%)",
+    LUIE_STRING_LAM_MINIMAP_PINSCALE_POI = "Objective / POI Pins (%)",
+    LUIE_STRING_LAM_MINIMAP_PINSCALE_WAYSHRINE = "Wayshrine Pins (%)",
+    LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER = "Other Pins (%)",
+    LUIE_STRING_LAM_MINIMAP_CHROME_HEADER = "Appearance",
+    LUIE_STRING_LAM_MINIMAP_CLOCK_MODE = "Clock",
+    LUIE_STRING_LAM_MINIMAP_CLOCK_MODE_TP = "Optional clock overlay on the MiniMap.",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_MODE = "Compass",
+    LUIE_STRING_LAM_MINIMAP_COMPASS_MODE_TP = "Optionally hide or force-show the compass while MiniMap is active.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS = "Compass-Style Quest Markers",
+    LUIE_STRING_LAM_MINIMAP_SHOW_COMPASS_PARITY_PINS_TP = "When native quest pins are missing on the minimap, draw quest markers from the same breadcrumb data the compass uses (compass art).",
+    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS = "Force Quest Pins on MiniMap",
+    LUIE_STRING_LAM_MINIMAP_FORCE_QUEST_PINS_TP = "Show quest pins on the HUD minimap even when the world map quest filter is off. Also enables compass-style fallback overlays for eligible objectives.",
+    LUIE_STRING_LAM_MINIMAP_KEEP_SQUARE = "Keep Square Aspect",
+    LUIE_STRING_LAM_MINIMAP_POSITION_GRID = "Position Grid Snap",
+    LUIE_STRING_LAM_MINIMAP_POSITION_GRID_TP = "Snap frame size and position to an N×N pixel grid (0 = off).",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE = "Camera Wedge Scale (%)",
+    LUIE_STRING_LAM_MINIMAP_BATCHED_PIN_SYNC = "Spread Pin Sync Updates",
+    LUIE_STRING_LAM_MINIMAP_BATCHED_PIN_SYNC_TP = "Mirrors world-map pins over multiple frames by scanning ZO_WorldMapContainer inside a named coroutine (batch size below). Reduces sync spikes without LibAsync.",
+    LUIE_STRING_LAM_MINIMAP_PIN_SYNC_BATCH_SIZE = "Pin Sync Batch Size",
+    LUIE_STRING_LAM_MINIMAP_PIN_SYNC_BATCH_SIZE_TP = "Mirrored pins applied before each coroutine yield when spread pin sync is enabled.",
+    LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Pin Mirror State Machine Debug",
+    LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Log ZO_StateMachine transitions for pin mirror, map reload, and fast travel (chat). Uses the same debug channel as ZOS Crown Crates UI state machines.",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_ON = "MiniMap shown",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF = "MiniMap hidden",
+}
+
+for stringId, stringValue in pairs(strings) do
+    ZO_CreateStringId(stringId, stringValue)
+    SafeAddVersion(stringId, 1)
+end
+SafeAddVersion("LUIE_STRING_LAM_MINIMAP_PINSCALE_TP", 2)
+SafeAddVersion("LUIE_STRING_LAM_MINIMAP_BATCHED_PIN_SYNC_TP", 2)
+SafeAddVersion("LUIE_STRING_LAM_MINIMAP_PIN_SYNC_BATCH_SIZE_TP", 2)

@@ -1,0 +1,381 @@
+-- -----------------------------------------------------------------------------
+--  LuiExtended                                                               --
+--  Distributed under The MIT License (MIT) (see LICENSE file)                --
+-- -----------------------------------------------------------------------------
+
+--- @class (partial) LuiExtended
+local LUIE = LUIE
+
+--- @class (partial) LUIE.MiniMap : ZO_Object
+--- @field SV MiniMapDefaults
+--- @field Defaults MiniMapDefaults
+--- @field Enabled boolean
+--- @field moduleName string
+--- @field zoom number
+--- @field fastTravel boolean
+--- @field resize boolean
+--- @field view MiniMapView|nil
+--- @field mapController MiniMapMapController|nil
+--- @field pinController MiniMapPinController|nil
+--- @field runtime MiniMapRuntime|nil
+--- @field mapEventController MiniMapMapEventController|nil
+--- @field pinMirrorStateMachine MiniMapPinMirrorStateMachine|nil
+--- @field inputController MiniMapInputController|nil
+--- @field compassParityController MiniMapCompassParityController|nil
+--- @field hudSceneFragment MiniMapHUDSceneFragment|nil
+--- @field worldMapBlocksMiniMapWork boolean
+local MiniMap = ZO_Object:Subclass()
+LUIE.MiniMap = MiniMap
+
+MiniMap.moduleName = LUIE.name .. "MiniMap"
+MiniMap.Enabled = false
+MiniMap.zoom = 0.5
+MiniMap.fastTravel = false
+MiniMap.resize = false
+MiniMap.view = nil
+MiniMap.mapController = nil
+MiniMap.pinController = nil
+MiniMap.runtime = nil
+MiniMap.mapEventController = nil
+MiniMap.pinMirrorStateMachine = nil
+MiniMap.inputController = nil
+MiniMap.compassParityController = nil
+MiniMap.hudSceneFragment = nil
+MiniMap.worldMapBlocksMiniMapWork = false
+MiniMap.playerMapMirrorDepth = 0
+MiniMap.playerMapMirrorPendingCallback = nil
+MiniMap.pendingPostReloadUILayout = nil
+
+--- Runs after map index restore when the outermost RunWithPlayerMapForMirror finishes.
+function MiniMap.CompletePostPlayerMapMirrorWork()
+    local pendingLayout = MiniMap.pendingPostReloadUILayout
+    if pendingLayout then
+        MiniMap.pendingPostReloadUILayout = nil
+        local mapController = pendingLayout.mapController
+        local mapData = pendingLayout.mapData
+        if mapData and mapController then
+            if MiniMap.ApplyFixedMapScroll(mapData) then
+                -- fixed map position for this zone
+            elseif MiniMap.GetMapFollowsPlayer() and MiniMap.runtime then
+                MiniMap.runtime:ClearFollowScrollCache()
+                MiniMap.runtime:ApplyScrollCenterOnPlayer(
+                    mapController:GetMapContentWidth(),
+                    mapController:GetMapContentHeight()
+                )
+            end
+        end
+    end
+    MiniMap.ScheduleFollowRecoveryAfterWorldMap()
+    MiniMap.TryAttachNativeWorldMapContainer()
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.ReapplyNativeHudMapOverlayLayout()
+        MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
+    end
+    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
+    if pinMirrorStateMachine.mapReloadCompletePendingAfterMirror then
+        pinMirrorStateMachine.mapReloadCompletePendingAfterMirror = false
+        if pinMirrorStateMachine:IsCurrentState("MapReloading") then
+            pinMirrorStateMachine:NotifyMapReloadComplete()
+        end
+    end
+end
+
+--- @param mapController MiniMapMapController
+--- @param mapData MiniMapMapData
+function MiniMap.SchedulePostReloadUILayout(mapController, mapData)
+    MiniMap.pendingPostReloadUILayout =
+    {
+        mapController = mapController,
+        mapData = mapData,
+    }
+end
+
+--- @return boolean
+function MiniMap.IsPinMirrorMachineBusy()
+    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
+    if not pinMirrorStateMachine or not pinMirrorStateMachine:HasCurrentState() then
+        return false
+    end
+    return pinMirrorStateMachine:IsCurrentState("MapReloading")
+        or pinMirrorStateMachine:IsCurrentState("ZoneReset")
+end
+
+--- Prefer tile reload over pin-only sync when map raw name changed while world map was blocking work.
+--- @param pinMirrorStateMachine MiniMapPinMirrorStateMachine
+function MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(pinMirrorStateMachine)
+    local mapController = pinMirrorStateMachine.mapController
+    local lastLoadedMapRawName = mapController and mapController.lastLoadedMapRawName
+    if lastLoadedMapRawName and lastLoadedMapRawName ~= GetMapName() then
+        pinMirrorStateMachine.mapReloadQueuedWhileWorldMap = true
+        if not pinMirrorStateMachine.mapReloadQueuedReason then
+            pinMirrorStateMachine.mapReloadQueuedReason = "MapIdentityWhileWorldMap"
+        end
+    else
+        pinMirrorStateMachine.pinSyncQueuedWhileWorldMap = true
+    end
+end
+
+MiniMap.PLAYER_PIN_BASE_SIZE = 16
+MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
+
+--- @class MiniMapDefaults
+--- @field offsetX number
+--- @field offsetY number
+--- @field width number
+--- @field height number
+--- @field defaultZoom number
+--- @field defaultPinScale number
+--- @field playerPinScale number
+--- @field followPlayer boolean
+--- @field panOffsetX number
+--- @field panOffsetY number
+--- @field lockPosition boolean
+--- @field lockSize boolean
+--- @field waypointClickRequiresShift boolean
+--- @field showZoomButtons boolean
+--- @field showInHud boolean
+--- @field showInCombat boolean
+--- @field showWhileLooting boolean
+--- @field showWhileMounted boolean
+--- @field showInHousing boolean
+--- @field showOnTop boolean
+--- @field subZoneZoom number
+--- @field dungeonZoom number
+--- @field battlegroundZoom number
+--- @field mountedZoomScale number
+--- @field autoZoomOutAtEdge boolean
+--- @field enableFixedMapPosition boolean
+--- @field fixedMaps table
+--- @field holdZoomInFactor number
+--- @field holdZoomOutFactor number
+--- @field pinScaleQuest number
+--- @field pinScaleGroup number
+--- @field pinScalePoi number
+--- @field pinScaleWayshrine number
+--- @field pinScaleDigSite number
+--- @field pinScaleOther number
+--- @field pinTypeScales table
+--- @field clockMode number
+--- @field clockUse24Hour boolean
+--- @field compassMode number
+--- @field keepSquareAspect boolean
+--- @field positionGridDivisor number
+--- @field cameraWedgeScale number
+--- @field borderOpacity number
+--- @field pinMirrorStateMachineDebug boolean
+--- @field showCompassParityPins boolean
+--- @field forceQuestPinsOnMinimap boolean
+
+--- @class (partial) ZO_MapPin
+--- @field polygonBlob ZO_PinPolygonBlob|nil
+--- @field polygonBlobKey any
+--- @field luiMiniMapPolygonOnMiniMap boolean|nil
+--- @field luiMiniMapDigSiteZoneName string|nil
+--- @field validLocation boolean|nil
+
+--- World-map pin host control carrying `m_Pin` (ZO map pin instance).
+--- @class ZO_WorldMapPinHostControl : Control
+--- @field m_Pin ZO_MapPin|nil
+
+--- Minimap mirrored pin control (texture root or composite); `zoneName` when synced from world map.
+--- @class MiniMapPinControl : Control, TextureControl, TextureCompositeControl
+--- @field zoneName string|nil
+--- @field luiMiniMapPinIsComposite boolean|nil
+--- @field luiMiniMapPinBackground TextureControl|nil
+--- @field luiMiniMapPinGlow TextureControl|nil
+--- @field luiMiniMapPinTexture string|nil
+--- @field luiMiniMapPinColor table|nil
+--- @field luiMiniMapLastDrawWidth number|nil
+--- @field luiMiniMapLastDrawHeight number|nil
+--- @field luiMiniMapPinSyncData MiniMapPinSyncData|nil
+--- @field luiMiniMapTextureAnimKey string|nil
+--- @field luiMiniMapTextureAnimTimeline AnimationTimeline|nil
+--- @field luiMiniMapCompositeSurfaceIndex number|nil
+--- @field luiMiniMapNormalizedX number|nil
+--- @field luiMiniMapNormalizedY number|nil
+--- @field luiMiniMapPinWidth number|nil
+--- @field luiMiniMapPinHeight number|nil
+--- @field luiMiniMapPinScale number|nil
+--- @field luiMiniMapPinType MapPinType|nil
+--- @field SetTexture fun(self: MiniMapPinControl, texture: string)
+--- @field SetColor fun(self: MiniMapPinControl, r: number, g: number, b: number, a?: number)
+--- @field SetTextureCoords fun(self: MiniMapPinControl, left: number, right: number, top: number, bottom: number)
+--- @field SetTextureRotation fun(self: MiniMapPinControl, radians: number, centerX?: number, centerY?: number)
+--- @field ClearAllSurfaces fun(self: MiniMapPinControl)
+--- @field AddSurface fun(self: MiniMapPinControl, left: number, right: number, top: number, bottom: number):surfaceIndex: luaindex
+
+--- @type MiniMapDefaults
+MiniMap.Defaults =
+{
+    offsetX = -50,
+    offsetY = -50,
+    width = 260,
+    height = 260,
+    defaultZoom = 0.5,
+    defaultPinScale = 1,
+    playerPinScale = 1,
+    followPlayer = true,
+    panOffsetX = 0,
+    panOffsetY = 0,
+    lockPosition = false,
+    lockSize = false,
+    waypointClickRequiresShift = true,
+    showZoomButtons = false,
+    showInHud = true,
+    showInCombat = false,
+    showWhileLooting = true,
+    showWhileMounted = true,
+    showInHousing = true,
+    showOnTop = false,
+    subZoneZoom = 0.5,
+    dungeonZoom = 0.5,
+    battlegroundZoom = 0.5,
+    mountedZoomScale = 1.15,
+    autoZoomOutAtEdge = true,
+    enableFixedMapPosition = false,
+    fixedMaps = {},
+    holdZoomInFactor = 0.35,
+    holdZoomOutFactor = 1.4,
+    pinScaleQuest = 1,
+    pinScaleGroup = 1,
+    pinScalePoi = 1,
+    pinScaleWayshrine = 1,
+    pinScaleDigSite = 1,
+    pinScaleOther = 1,
+    pinTypeScales = {},
+    clockMode = 0,
+    clockUse24Hour = false,
+    compassMode = 0,
+    keepSquareAspect = false,
+    positionGridDivisor = 0,
+    cameraWedgeScale = 1,
+    borderOpacity = 1,
+    pinMirrorStateMachineDebug = false,
+    showCompassParityPins = true,
+    forceQuestPinsOnMinimap = false,
+}
+
+--- @type MiniMapDefaults
+MiniMap.SV = ...
+
+--- @param mapName string
+--- @return string
+function MiniMap.StripMapNameFormatting(mapName)
+    return (string.gsub(mapName, "%^(.+)", ""))
+end
+
+--- @param key string
+--- @param bufferMs number
+--- @return boolean
+function MiniMap.ShouldRunThrottled(key, bufferMs)
+    MiniMap.throttle = MiniMap.throttle or {}
+    local entry = MiniMap.throttle[key]
+    local now = GetFrameTimeMilliseconds()
+    if not entry then
+        MiniMap.throttle[key] = { last = now, buffer = bufferMs }
+        return true
+    end
+    if (now - entry.last) >= bufferMs then
+        entry.last = now
+        return true
+    end
+    return false
+end
+
+--- @param delta number
+function MiniMap.Zoom(delta)
+    if not MiniMap.Enabled or not MiniMap.mapController then
+        return
+    end
+    MiniMap.mapController:ApplyZoom(delta)
+end
+
+function MiniMap.RecenterFollow()
+    if not MiniMap.Enabled or not MiniMap.SV then
+        return
+    end
+    MiniMap.SV.followPlayer = true
+    if MiniMap.runtime then
+        MiniMap.runtime:SetMapFollowsPlayer(true)
+        MiniMap.runtime:ClearFollowScrollCache()
+        if MiniMap.mapController and MiniMap.mapController:IsReady() then
+            MiniMap.runtime:ApplyScrollCenterOnPlayer(
+                MiniMap.mapController:GetMapContentWidth(),
+                MiniMap.mapController:GetMapContentHeight()
+            )
+        end
+    end
+end
+
+--- @return boolean
+function MiniMap.GetMapFollowsPlayer()
+    if MiniMap.SV and MiniMap.SV.enableFixedMapPosition == true then
+        return false
+    end
+    if MiniMap.runtime then
+        return MiniMap.runtime.mapFollowsPlayer
+    end
+    if MiniMap.SV then
+        return MiniMap.SV.followPlayer
+    end
+    return MiniMap.Defaults.followPlayer
+end
+
+--- @return number
+function MiniMap.GetPlayerPinDrawSize()
+    local scale = MiniMap.SV and MiniMap.SV.playerPinScale or MiniMap.Defaults.playerPinScale
+    return zo_round(MiniMap.PLAYER_PIN_BASE_SIZE * scale)
+end
+
+function MiniMap.ClampSavedDefaultZoom()
+    if not MiniMap.SV then
+        return
+    end
+    local zoomMinimum = 0.35
+    if MiniMap.mapController then
+        zoomMinimum = MiniMap.mapController:GetMinimumZoom()
+    end
+    if MiniMap.SV.defaultZoom < zoomMinimum then
+        MiniMap.SV.defaultZoom = zoomMinimum
+    elseif MiniMap.SV.defaultZoom > 1.8 then
+        MiniMap.SV.defaultZoom = 1.8
+    end
+end
+
+function MiniMap.ApplyInteractionLocks()
+    if not MiniMap.view then
+        return
+    end
+    MiniMap.view:ApplyInteractionLocks(MiniMap.SV)
+end
+
+function MiniMap.ApplyChromeVisibility()
+    if not MiniMap.view then
+        return
+    end
+    MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
+end
+
+function MiniMap.ApplyLiveSettings()
+    if not MiniMap.Enabled or not MiniMap.view or not MiniMap.SV then
+        return
+    end
+    MiniMap.view:ApplyInteractionLocks(MiniMap.SV)
+    MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
+    MiniMap.view:ApplyPlayerIconDimensions()
+    if MiniMap.runtime then
+        MiniMap.runtime:UpdateCenterPlayerPipVisibility()
+    end
+    if MiniMap.inputController then
+        MiniMap.inputController:ApplyFrameDragMouseEnabled()
+    end
+    MiniMap.ApplyChromeFromSettings()
+    MiniMap.RefreshSceneFragments()
+    MiniMap.UpdateConditionalVisibility()
+    if MiniMap.pinController and MiniMap.mapController and MiniMap.mapController:IsReady() then
+        local mapData = MiniMap.mapController:GetMapData()
+        if mapData then
+            MiniMap.pinController:RelayoutActivePinsForUserPinScale(mapData)
+        end
+    end
+end

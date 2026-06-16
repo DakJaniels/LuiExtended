@@ -988,6 +988,23 @@ function LUIE.CreateSettings()
         "half"
     )
 
+    -- MiniMap Module
+    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_MINIMAP_ENABLE),
+        GetString(LUIE_STRING_LAM_MINIMAP_ENABLE_TP),
+        function () return Settings.MiniMap_Enabled end,
+        function (value) Settings.MiniMap_Enabled = value end,
+        "half",
+        nil,
+        Defaults.MiniMap_Enabled,
+        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+    )
+
+    optionsData[#optionsData + 1] = SettingsAPI.CreateDescriptionOption(
+        GetString(LUIE_STRING_LAM_MINIMAP_DESCRIPTION),
+        "half"
+    )
+
     -- Unit Frames Module
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_UF_ENABLE),

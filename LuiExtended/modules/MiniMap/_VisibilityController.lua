@@ -1,0 +1,103 @@
+-- -----------------------------------------------------------------------------
+--  LuiExtended                                                               --
+--  Distributed under The MIT License (MIT) (see LICENSE file)                --
+-- -----------------------------------------------------------------------------
+
+--- @class (partial) LuiExtended
+local LUIE = LUIE
+--- @class (partial) LUIE.MiniMap
+local MiniMap = LUIE.MiniMap
+
+MiniMap.sessionMapVisible = true
+
+--- @return boolean
+function MiniMap.IsPlayerInHouse()
+    if GetCurrentZoneHouseId then
+        return GetCurrentZoneHouseId() ~= 0
+    end
+    return false
+end
+
+--- @return boolean
+function MiniMap.GetContextAllowsMiniMap()
+    if not MiniMap.Enabled or not MiniMap.SV then
+        return false
+    end
+    if MiniMap.sessionMapVisible == false then
+        return false
+    end
+    if MiniMap.SV.showInHud == false then
+        return false
+    end
+    if IsUnitInCombat("player") and MiniMap.SV.showInCombat ~= true then
+        return false
+    end
+    if IsMounted() and MiniMap.SV.showWhileMounted ~= true then
+        return false
+    end
+    if MiniMap.IsPlayerInHouse() and MiniMap.SV.showInHousing ~= true then
+        return false
+    end
+    return true
+end
+
+function MiniMap.UpdateConditionalVisibility()
+    if not MiniMap.Enabled or not MiniMap.view then
+        return
+    end
+    local scene = SCENE_MANAGER:GetCurrentScene()
+    if not MiniMap.IsMiniMapHudScene(scene) then
+        return
+    end
+    MiniMap.ApplyFragmentHiddenReasons()
+    MiniMap.ApplyCompassMode()
+end
+
+function MiniMap.ToggleShowMap()
+    if not MiniMap.Enabled then
+        return
+    end
+    MiniMap.sessionMapVisible = not MiniMap.sessionMapVisible
+    MiniMap.UpdateConditionalVisibility()
+    if CENTER_SCREEN_ANNOUNCE then
+        local message = MiniMap.sessionMapVisible
+            and GetString(LUIE_STRING_MINIMAP_TOGGLE_SHOW_ON)
+            or GetString(LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF)
+        CENTER_SCREEN_ANNOUNCE:AddMessage(message, CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
+    end
+end
+
+function MiniMap.ToggleShowInCombatSetting()
+    if not MiniMap.SV then
+        return
+    end
+    MiniMap.SV.showInCombat = not MiniMap.SV.showInCombat
+    MiniMap.UpdateConditionalVisibility()
+end
+
+function MiniMap.ApplyDrawLayerPreference()
+    if not MiniMap.view then
+        return
+    end
+    local root = MiniMap.view.root
+    if MiniMap.SV and MiniMap.SV.showOnTop == true then
+        root:SetDrawLayer(DL_OVERLAY)
+        root:SetDrawTier(DT_HIGH)
+    else
+        root:SetDrawLayer(DL_CONTROLS)
+        root:SetDrawTier(DT_MEDIUM)
+    end
+end
+
+function MiniMap.RegisterVisibilityEvents()
+    local anchor = LUIE_MiniMap
+    anchor:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, function ()
+        MiniMap.UpdateConditionalVisibility()
+    end)
+    anchor:RegisterForEvent(EVENT_MOUNTED_STATE_CHANGED, function ()
+        MiniMap.UpdateConditionalVisibility()
+    end)
+    anchor:RegisterForEvent(EVENT_HOUSING_PLAYER_INFO_CHANGED, function ()
+        MiniMap.UpdateConditionalVisibility()
+    end)
+end
