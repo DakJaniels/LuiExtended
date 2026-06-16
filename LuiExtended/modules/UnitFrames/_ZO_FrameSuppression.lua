@@ -25,9 +25,6 @@ local PLAYER_ATTRIBUTE_BAR_SUFFIXES =
 }
 
 function UnitFrames.ShouldSuppressZOPlayerAttributeBars()
-    if not UnitFrames.SV.SuppressZOPlayerAttributeBarsWhenReplaced then
-        return false
-    end
     if UnitFrames.SV.DefaultFramesNewPlayer ~= 1 then
         return false
     end
@@ -35,9 +32,6 @@ function UnitFrames.ShouldSuppressZOPlayerAttributeBars()
 end
 
 function UnitFrames.ShouldSuppressZOTarget()
-    if not UnitFrames.SV.SuppressZOTargetFrameWhenReplaced then
-        return false
-    end
     if UnitFrames.SV.DefaultFramesNewTarget ~= 1 then
         return false
     end
@@ -45,9 +39,6 @@ function UnitFrames.ShouldSuppressZOTarget()
 end
 
 function UnitFrames.ShouldSuppressZOGroup()
-    if not UnitFrames.SV.SuppressZOGroupFramesWhenReplaced then
-        return false
-    end
     if UnitFrames.SV.DefaultFramesNewGroup ~= 1 then
         return false
     end
@@ -57,9 +48,6 @@ function UnitFrames.ShouldSuppressZOGroup()
 end
 
 function UnitFrames.ShouldSuppressZOCompanion()
-    if not UnitFrames.SV.SuppressZOCompanionFrameWhenReplaced then
-        return false
-    end
     if not UnitFrames.SV.CustomFramesCompanion then
         return false
     end
