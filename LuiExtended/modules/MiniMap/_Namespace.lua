@@ -131,6 +131,12 @@ MiniMap.FRAME_CHROME_BAR_WIDTH = 44
 MiniMap.FRAME_CHROME_BAR_HEIGHT = 20
 MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 
+--- @class MiniMapInfoPanelRestoreAnchor
+--- @field point integer
+--- @field relativePoint integer
+--- @field offsetX number
+--- @field offsetY number
+
 --- @class MiniMapDefaults
 --- @field offsetX number
 --- @field offsetY number
@@ -173,6 +179,7 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field borderOpacity number
 --- @field pinMirrorStateMachineDebug boolean
 --- @field anchorInfoPanelToMiniMap boolean
+--- @field infoPanelRestoreAnchor MiniMapInfoPanelRestoreAnchor|nil
 --- @field showZoneName boolean
 
 --- @class (partial) ZO_MapPin

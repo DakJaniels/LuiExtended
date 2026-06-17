@@ -375,10 +375,13 @@ function MiniMap.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP),
             getFunction = function () return MiniMap.SV.anchorInfoPanelToMiniMap == true end,
             setFunction = function (value)
+                if value then
+                    MiniMap.CaptureInfoPanelAnchorSnapshot()
+                end
                 MiniMap.SV.anchorInfoPanelToMiniMap = value
                 MiniMap.ApplyLiveSettings()
-                if not value and LUIE.InfoPanel and LUIE.InfoPanel.Enabled then
-                    LUIE.InfoPanel.ApplyPanelPosition()
+                if not value then
+                    MiniMap.RestoreInfoPanelAnchor()
                 end
             end,
             default = Defaults.anchorInfoPanelToMiniMap,
