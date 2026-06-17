@@ -42,6 +42,15 @@ function MiniMap.FirePinResyncCallbacks()
     end
 end
 
+local PIN_FILTER_GROUP_TO_SCALE_SETTING_KEY =
+{
+    [MAP_FILTER_QUESTS] = "pinScaleQuest",
+    [MAP_FILTER_GROUP_MEMBERS] = "pinScaleGroup",
+    [MAP_FILTER_WAYSHRINES] = "pinScaleWayshrine",
+    [MAP_FILTER_OBJECTIVES] = "pinScalePoi",
+    [MAP_FILTER_DIG_SITES] = "pinScaleDigSite",
+}
+
 --- @param pinGroup integer|nil
 --- @param settings MiniMapDefaults
 --- @return number|nil categoryScale when pinGroup matches a LAM category
@@ -49,22 +58,8 @@ function MiniMap.GetPinCategoryScaleForFilterGroup(pinGroup, settings)
     if not pinGroup or not settings then
         return nil
     end
-    if pinGroup == MAP_FILTER_QUESTS then
-        return settings.pinScaleQuest
-    end
-    if pinGroup == MAP_FILTER_GROUP_MEMBERS then
-        return settings.pinScaleGroup
-    end
-    if pinGroup == MAP_FILTER_WAYSHRINES then
-        return settings.pinScaleWayshrine
-    end
-    if pinGroup == MAP_FILTER_OBJECTIVES then
-        return settings.pinScalePoi
-    end
-    if pinGroup == MAP_FILTER_DIG_SITES then
-        return settings.pinScaleDigSite
-    end
-    return nil
+    local scaleSettingKey = PIN_FILTER_GROUP_TO_SCALE_SETTING_KEY[pinGroup]
+    return scaleSettingKey and settings[scaleSettingKey]
 end
 
 --- @param pinType MapPinType|nil
