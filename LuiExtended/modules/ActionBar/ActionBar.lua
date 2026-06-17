@@ -971,6 +971,7 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForUpdate(moduleName .. "OnUpdate")
     eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
     eventManager:UnregisterForEvent(moduleName .. "CombatState")
+    eventManager:UnregisterForEvent(moduleName .. "ShowActionBarSetting")
 
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
@@ -979,6 +980,12 @@ function ActionBar.RegisterEvents()
 
     eventManager:RegisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE, function ()
         ActionBar.ApplyDisplayAlpha()
+    end)
+
+    eventManager:RegisterForEvent(moduleName .. "ShowActionBarSetting", EVENT_INTERFACE_SETTING_CHANGED, function (_, settingType, settingId)
+        if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_SHOW_ACTION_BAR then
+            ActionBar.ApplyDisplayAlpha()
+        end
     end)
 
     eventManager:UnregisterForEvent(moduleName, EVENT_COMBAT_EVENT)
@@ -1186,6 +1193,13 @@ function ActionBar.RemoveFromCustomList(list, input)
 end
 
 -- -----------------------------------------------------------------------------
+--- True when base game Ability Bar is set to Automatic (contextual HUD fade owns ZO_ActionBar1 alpha).
+--- @return boolean
+function ActionBar.IsAutomaticAbilityBarSetting()
+    return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR)) == ACTION_BAR_SETTING_CHOICE_AUTOMATIC
+end
+
+-- -----------------------------------------------------------------------------
 --- Set action bar and cast bar opacity from in-combat / out-of-combat saved values (0–100).
 function ActionBar.ApplyDisplayAlpha()
     if not ActionBar.Enabled then
@@ -1199,8 +1213,21 @@ function ActionBar.ApplyDisplayAlpha()
     g_actionBarDisplayAlpha = alpha
 
     local actionBar = GetActionBarControl()
-    if actionBar and actionBar.SetAlpha then
-        actionBar:SetAlpha(alpha)
+    local backbarContainer = Backbar.GetContainer()
+    if ActionBar.IsAutomaticAbilityBarSetting() then
+        if actionBar and actionBar.SetAlpha then
+            actionBar:SetAlpha(1)
+        end
+        if backbarContainer and backbarContainer.SetAlpha then
+            backbarContainer:SetAlpha(alpha)
+        end
+    else
+        if actionBar and actionBar.SetAlpha then
+            actionBar:SetAlpha(alpha)
+        end
+        if backbarContainer and backbarContainer.SetAlpha then
+            backbarContainer:SetAlpha(1)
+        end
     end
 
     CastBar.ApplyDisplayAlpha(alpha)
@@ -1261,10 +1288,20 @@ end
 --- @param currentTimeMS integer
 function ActionBar.OnUpdate(currentTimeMS)
     if g_actionBarDisplayAlpha then
-        local actionBar = GetActionBarControl()
-        if actionBar and actionBar.GetAlpha and actionBar.SetAlpha then
-            if zo_abs(actionBar:GetAlpha() - g_actionBarDisplayAlpha) > 0.001 then
-                actionBar:SetAlpha(g_actionBarDisplayAlpha)
+        local alpha = g_actionBarDisplayAlpha
+        if ActionBar.IsAutomaticAbilityBarSetting() then
+            local backbarContainer = Backbar.GetContainer()
+            if backbarContainer and backbarContainer.GetAlpha and backbarContainer.SetAlpha then
+                if zo_abs(backbarContainer:GetAlpha() - alpha) > 0.001 then
+                    backbarContainer:SetAlpha(alpha)
+                end
+            end
+        else
+            local actionBar = GetActionBarControl()
+            if actionBar and actionBar.GetAlpha and actionBar.SetAlpha then
+                if zo_abs(actionBar:GetAlpha() - alpha) > 0.001 then
+                    actionBar:SetAlpha(alpha)
+                end
             end
         end
     end

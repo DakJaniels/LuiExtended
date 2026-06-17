@@ -74,6 +74,7 @@ local LUIE = LUIE
 --- @field StopCastBar fun()
 --- @field OnUpdateCastbar fun(currentTimeMS: number)
 --- @field ApplyDisplayAlpha fun()
+--- @field IsAutomaticAbilityBarSetting fun(): boolean
 --- @field ApplyFont fun()
 --- @field CastBar LUIE.ActionBar.CastBar
 --- @field Backbar LUIE.ActionBar.Backbar
