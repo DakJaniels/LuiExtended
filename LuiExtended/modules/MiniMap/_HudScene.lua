@@ -10,6 +10,8 @@ local MiniMap = LUIE.MiniMap
 
 local HudScene = LUIE.HudScene
 
+local eventManager = GetEventManager()
+
 local WORLD_MAP_SCENE_NAME_KEYBOARD = "worldMap"
 local WORLD_MAP_SCENE_NAME_GAMEPAD = "gamepad_worldMap"
 
@@ -23,7 +25,7 @@ local function GetWorldMapUnblockedUpdateName()
 end
 
 function MiniMap.CancelWorldMapUnblockedWait()
-    EVENT_MANAGER:UnregisterForUpdate(GetWorldMapUnblockedUpdateName())
+    eventManager:UnregisterForUpdate(GetWorldMapUnblockedUpdateName())
 end
 
 --- Runs callback once ZO_WorldMap_IsWorldMapShowing is false (manual block cleared at success).
@@ -32,7 +34,7 @@ function MiniMap.RunWhenWorldMapUnblocked(onUnblocked)
     local updateName = GetWorldMapUnblockedUpdateName()
     MiniMap.CancelWorldMapUnblockedWait()
     local frameCount = 0
-    EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
+    eventManager:RegisterForUpdate(updateName, 0, function ()
         frameCount = frameCount + 1
         if not MiniMap.Enabled then
             MiniMap.CancelWorldMapUnblockedWait()
@@ -91,24 +93,24 @@ function MiniMap.ScheduleFollowRecoveryAfterWorldMap()
         return
     end
     local recoveryUpdateName = MiniMap.moduleName .. "WorldMapFollowRecovery"
-    EVENT_MANAGER:UnregisterForUpdate(recoveryUpdateName)
+    eventManager:UnregisterForUpdate(recoveryUpdateName)
     local frameCount = 0
-    EVENT_MANAGER:RegisterForUpdate(recoveryUpdateName, 0, function ()
+    eventManager:RegisterForUpdate(recoveryUpdateName, 0, function ()
         frameCount = frameCount + 1
         if not MiniMap.Enabled or not miniMapWorldMapWasOpen then
-            EVENT_MANAGER:UnregisterForUpdate(recoveryUpdateName)
+            eventManager:UnregisterForUpdate(recoveryUpdateName)
             return
         end
         if MiniMap.IsWorldMapBlockingMiniMapWork() then
-            EVENT_MANAGER:UnregisterForUpdate(recoveryUpdateName)
+            eventManager:UnregisterForUpdate(recoveryUpdateName)
             return
         end
         if MiniMap.ApplyFollowRecoveryAfterWorldMap() then
-            EVENT_MANAGER:UnregisterForUpdate(recoveryUpdateName)
+            eventManager:UnregisterForUpdate(recoveryUpdateName)
             return
         end
         if frameCount >= MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES then
-            EVENT_MANAGER:UnregisterForUpdate(recoveryUpdateName)
+            eventManager:UnregisterForUpdate(recoveryUpdateName)
         end
     end)
 end
@@ -194,6 +196,14 @@ function MiniMap.ApplyFragmentHiddenReasons()
         end
     end
 
+    if MiniMap.consoleLayoutPreviewActive == true then
+        setHiddenReasonIfChanged("MiniMapSession", false)
+        setHiddenReasonIfChanged("MiniMapCombat", false)
+        setHiddenReasonIfChanged("MiniMapMounted", false)
+        setHiddenReasonIfChanged("MiniMapHousing", false)
+        return
+    end
+
     local sessionHidden = MiniMap.sessionMapVisible == false or MiniMap.SV.allowOnGameplayHud == false
     setHiddenReasonIfChanged("MiniMapSession", sessionHidden)
     setHiddenReasonIfChanged("MiniMapCombat", IsUnitInCombat("player") and MiniMap.SV.allowDuringCombat ~= true)
@@ -205,7 +215,7 @@ function MiniMap.OnWorldMapOpening(sceneName)
     miniMapWorldMapWasOpen = true
     MiniMap.RestoreWorldMapContainerToWorldMap()
     MiniMap.CancelWorldMapUnblockedWait()
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "WorldMapFollowRecovery")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "WorldMapFollowRecovery")
     MiniMap.worldMapBlocksMiniMapWork = true
     local pinController = MiniMap.pinController
     if pinController then
@@ -313,9 +323,10 @@ end
 function MiniMap.UnregisterMiniMapSceneIntegration()
     miniMapWorldMapSceneGateRegistered = false
     miniMapWorldMapWasOpen = false
+    MiniMap.SetConsoleLayoutPreviewActive(false)
     MiniMap.ShutdownNativeWorldMapContainer()
     MiniMap.CancelWorldMapUnblockedWait()
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "WorldMapFollowRecovery")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "WorldMapFollowRecovery")
     MiniMap.worldMapBlocksMiniMapWork = false
     MiniMap.UpdateGameplayTickers()
 

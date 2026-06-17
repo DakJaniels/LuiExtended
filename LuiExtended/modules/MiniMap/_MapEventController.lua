@@ -8,6 +8,8 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
+local eventManager = GetEventManager()
+
 local MINIMAP_MAP_NAME_FALLBACK_MS = 45000
 
 --- @class MiniMapMapEventController : ZO_InitializingCallbackObject
@@ -206,8 +208,8 @@ end
 function MiniMapMapEventController:ScheduleQuestPinLightSync()
     local mapEventController = self
     local updateName = MiniMap.moduleName .. "QuestPinLightSync"
-    EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
-                                        EVENT_MANAGER:UnregisterForUpdate(updateName)
+    eventManager:RegisterForUpdate(updateName, 0, function ()
+                                        eventManager:UnregisterForUpdate(updateName)
                                         local journalIndex = questPinLightSyncPendingJournalIndex
                                         local refreshAll = questPinLightSyncPendingRefreshAll
                                         local layoutOnly = questPinLightSyncPendingLayoutOnly
@@ -257,7 +259,7 @@ end
 function MiniMapMapEventController:ScheduleDeferredQuestPinSyncLight(journalIndex)
     local mapEventController = self
     local questPinSyncUpdateName = MiniMap.moduleName .. "QuestTrackerPinSync"
-    EVENT_MANAGER:RegisterForUpdate(questPinSyncUpdateName, 0, function ()
+    eventManager:RegisterForUpdate(questPinSyncUpdateName, 0, function ()
                                         mapEventController:RequestQuestPinSyncLight(journalIndex, false)
                                     end, true)
 end
@@ -265,8 +267,8 @@ end
 function MiniMapMapEventController:ScheduleSubzoneHudRecovery()
     local mapEventController = self
     local updateName = MiniMap.moduleName .. "SubzoneHudRecovery"
-    EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
-                                        EVENT_MANAGER:UnregisterForUpdate(updateName)
+    eventManager:RegisterForUpdate(updateName, 0, function ()
+                                        eventManager:UnregisterForUpdate(updateName)
                                         if MiniMap.IsMapReloadAffectingHudLayout() then
                                             mapEventController:ScheduleSubzoneHudRecovery()
                                             return
@@ -432,7 +434,7 @@ function MiniMapMapEventController:Register()
     end
     ANTIQUITY_DATA_MANAGER:RegisterCallback("AntiquitiesUpdated", self.onAntiquitiesUpdated)
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", self.onSingleAntiquityDigSitesUpdated)
-    EVENT_MANAGER:RegisterForUpdate(MiniMap.moduleName .. "MapNameFallback", MINIMAP_MAP_NAME_FALLBACK_MS, function ()
+    eventManager:RegisterForUpdate(MiniMap.moduleName .. "MapNameFallback", MINIMAP_MAP_NAME_FALLBACK_MS, function ()
         mapEventController:OnMapNameFallbackTick()
     end)
     self.pinMirrorStateMachine:Start()
@@ -451,10 +453,10 @@ function MiniMapMapEventController:Unregister()
         self.eventAnchor:UnregisterForEvent(eventId)
     end
     self.registeredEvents = {}
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "MapNameFallback")
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "QuestTrackerPinSync")
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "QuestPinLightSync")
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "SubzoneHudRecovery")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "MapNameFallback")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "QuestTrackerPinSync")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "QuestPinLightSync")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "SubzoneHudRecovery")
     if self.onQuestTrackerTrackingStateChanged then
         FOCUSED_QUEST_TRACKER:UnregisterCallback("QuestTrackerTrackingStateChanged", self.onQuestTrackerTrackingStateChanged)
         self.onQuestTrackerTrackingStateChanged = nil

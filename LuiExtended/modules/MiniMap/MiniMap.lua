@@ -3,16 +3,6 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_ZOOMIN", "Zoom in")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_ZOOMOUT", "Zoom out")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_ZOOMRESET", "Zoom reset")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_RECENTER", "Recenter MiniMap")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_SHOW", "Toggle MiniMap visibility")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_COMBAT", "Toggle MiniMap in combat")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED", "Toggle zone scroll lock")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMIN", "Hold zoom in MiniMap")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMOUT", "Hold zoom out MiniMap")
-
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
@@ -40,6 +30,7 @@ function MiniMap.Initialize(enabled)
         MiniMap.playerMapMirrorPendingCallback = nil
         MiniMap.pendingPostReloadUILayout = nil
         MiniMap.pinResyncCallbacks = nil
+        MiniMap.SetConsoleLayoutPreviewActive(false)
         if MiniMap.mapEventController then
             MiniMap.mapEventController:Unregister()
         end
@@ -107,6 +98,6 @@ function MiniMap.ResetPosition()
     MiniMap.SV.offsetX = MiniMap.Defaults.offsetX
     MiniMap.SV.offsetY = MiniMap.Defaults.offsetY
     if MiniMap.view then
-        MiniMap.view:ApplySavedLayout(MiniMap.SV)
+        MiniMap.ApplyFrameLayoutFromSavedSettings(true)
     end
 end

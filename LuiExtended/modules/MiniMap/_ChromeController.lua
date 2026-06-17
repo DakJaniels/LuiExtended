@@ -80,7 +80,7 @@ function MiniMap.ApplySquareAspect(widthDriven)
 end
 
 --- @param settings MiniMapDefaults
-function MiniMap.ApplyPositionGridSnap(settings)
+function MiniMap.SnapFrameLayoutToPositionGrid(settings)
     if not MiniMap.view or not settings.positionGridDivisor or settings.positionGridDivisor <= 1 then
         return
     end
@@ -94,7 +94,54 @@ function MiniMap.ApplyPositionGridSnap(settings)
     settings.height = zo_max(height, 100)
     settings.offsetX = offsetX
     settings.offsetY = offsetY
+end
+
+--- @param settings MiniMapDefaults
+function MiniMap.ApplyPositionGridSnap(settings)
+    if not settings then
+        return
+    end
+    MiniMap.SnapFrameLayoutToPositionGrid(settings)
+    MiniMap.ApplyFrameLayoutFromSavedSettings(true)
+end
+
+function MiniMap.ApplyZoneNameFont()
+    if not MiniMap.view or not MiniMap.view.zone or not MiniMap.SV then
+        return
+    end
+    local settings = MiniMap.SV
+    local defaults = MiniMap.Defaults
+    local faceKey = settings.zoneNameFontFace or defaults.zoneNameFontFace
+    local fontName = LUIE.Fonts[faceKey]
+    if not fontName or fontName == "" then
+        fontName = LUIE.Fonts[defaults.zoneNameFontFace] or defaults.zoneNameFontFace
+    end
+    local fontSize = (settings.zoneNameFontSize and settings.zoneNameFontSize > 0) and settings.zoneNameFontSize or defaults.zoneNameFontSize
+    local fontStyle = settings.zoneNameFontStyle or defaults.zoneNameFontStyle
+    MiniMap.view.zone:SetFont(LUIE.CreateFontString(fontName, fontSize, fontStyle))
+end
+
+--- @param skipPositionGridSnap boolean|nil
+function MiniMap.ApplyFrameLayoutFromSavedSettings(skipPositionGridSnap)
+    if not MiniMap.view or not MiniMap.SV then
+        return
+    end
+    local settings = MiniMap.SV
+    if skipPositionGridSnap ~= true and settings.positionGridDivisor and settings.positionGridDivisor > 1 then
+        MiniMap.SnapFrameLayoutToPositionGrid(settings)
+    end
+    settings.width = zo_max(settings.width or MiniMap.Defaults.width, 100)
+    settings.height = zo_max(settings.height or MiniMap.Defaults.height, 100)
     MiniMap.view:ApplySavedLayout(settings)
+    MiniMap.view:ApplyRootClientLayout(settings)
+    if settings.keepSquareAspect == true then
+        MiniMap.ApplySquareAspect(nil)
+    end
+    MiniMap.ApplyChromeStacking()
+    local mapController = MiniMap.mapController
+    if mapController and mapController:IsReady() then
+        mapController:ClampZoomToLimits()
+    end
 end
 
 function MiniMap.ApplyChromeFromSettings()

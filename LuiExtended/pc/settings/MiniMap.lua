@@ -10,6 +10,7 @@ local MiniMap = LUIE.MiniMap
 
 local zo_strformat = zo_strformat
 local LAM = LUIE.LAM
+local SettingsAPI = LUIE.SettingsAPI
 
 local miniMapHudVisibilityOptions =
 {
@@ -371,6 +372,65 @@ function MiniMap.CreateSettings()
         default = Defaults.showZoneName,
         disabled = disabled,
     }
+
+    local zoneNameFontDisabled = function ()
+        return disabled() or MiniMap.SV.showZoneName == false
+    end
+
+    local zoneNameFontSubmenuControls = {}
+
+    zoneNameFontSubmenuControls[#zoneNameFontSubmenuControls + 1] = SettingsAPI.CreateFontDropdown(
+        GetString(LUIE_STRING_LAM_FONT),
+        GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_TP),
+        function () return MiniMap.SV.zoneNameFontFace end,
+        function (var)
+            MiniMap.SV.zoneNameFontFace = var
+            MiniMap.ApplyZoneNameFont()
+        end,
+        "full",
+        zoneNameFontDisabled,
+        Defaults.zoneNameFontFace,
+        nil,
+        "name-up",
+        function () return MiniMap.SV.zoneNameFontSize end,
+        function () return MiniMap.SV.zoneNameFontStyle end
+    )
+
+    zoneNameFontSubmenuControls[#zoneNameFontSubmenuControls + 1] = SettingsAPI.CreateSliderOption(
+        GetString(LUIE_STRING_LAM_FONT_SIZE),
+        GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_SIZE_TP),
+        10,
+        30,
+        1,
+        function () return MiniMap.SV.zoneNameFontSize end,
+        function (value)
+            MiniMap.SV.zoneNameFontSize = value
+            MiniMap.ApplyZoneNameFont()
+        end,
+        "full",
+        zoneNameFontDisabled,
+        Defaults.zoneNameFontSize
+    )
+
+    zoneNameFontSubmenuControls[#zoneNameFontSubmenuControls + 1] = SettingsAPI.CreateFontStyleDropdown(
+        GetString(LUIE_STRING_LAM_FONT_STYLE),
+        GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_STYLE_TP),
+        function () return MiniMap.SV.zoneNameFontStyle end,
+        function (var)
+            MiniMap.SV.zoneNameFontStyle = var
+            MiniMap.ApplyZoneNameFont()
+        end,
+        function () return MiniMap.SV.zoneNameFontFace end,
+        function () return MiniMap.SV.zoneNameFontSize end,
+        "full",
+        zoneNameFontDisabled,
+        Defaults.zoneNameFontStyle
+    )
+
+    optionsDataMiniMap[#optionsDataMiniMap + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_HEADER),
+        zoneNameFontSubmenuControls
+    )
 
     local infoPanelModuleDisabled = function ()
         return disabled() or not LUIE.SV.InfoPanel_Enabled

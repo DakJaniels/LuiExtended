@@ -6,6 +6,15 @@
 -- MiniMap localization (default)
 local strings =
 {
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMIN = "Zoom in",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMOUT = "Zoom out",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMRESET = "Zoom reset",
+    SI_BINDING_NAME_LUIE_MINIMAP_RECENTER = "Recenter MiniMap",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_SHOW = "Toggle MiniMap visibility",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_COMBAT = "Toggle MiniMap in combat",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED = "Toggle zone scroll lock",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMIN = "Hold zoom in MiniMap",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMOUT = "Hold zoom out MiniMap",
     LUIE_STRING_LAM_MINIMAP = "MiniMap (BETA)",
     LUIE_STRING_LAM_MINIMAP_DESCRIPTION = "Enable and configure the MiniMap module.",
     LUIE_STRING_LAM_MINIMAP_ENABLE = "Enable MiniMap",
@@ -68,7 +77,21 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Anchor InfoPanel to MiniMap",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "Place the InfoPanel below the map (where the zone name usually sits) and move the zone title above the map. InfoPanel position is controlled by the MiniMap while enabled. Requires the InfoPanel module.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Show Zone Name",
-    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Show the current map zone title near the minimap. Drag the frame using the move control at the bottom-left when hovering the map.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Show the current map zone title near the minimap. On PC, drag the frame using the move control when hovering the map. Otherwise use the Frame Layout section sliders.",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_SECTION_GENERAL = "Zoom & Map",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_LAYOUT_HEADER = "Frame Layout",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW = "Show Map Now",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW_TP = "Show the MiniMap on screen while this menu is open so you can preview position and size with the sliders below. Press again to hide. Hides automatically when you leave settings.",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_X_TP = "Horizontal offset from the bottom-right of the screen (negative moves left).",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_Y_TP = "Vertical offset from the bottom-right of the screen (negative moves up).",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH = "Frame Width",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH_TP = "MiniMap frame width in pixels. When Keep Square Aspect is enabled, width and height stay matched.",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT = "Frame Height",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT_TP = "MiniMap frame height in pixels. Disabled while Keep Square Aspect is enabled (use Frame Width).",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_HEADER = "Zone Name Font",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_TP = "Font face for the zone title label.",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_SIZE_TP = "Font size for the zone title label.",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_STYLE_TP = "Font style for the zone title label.",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Drag to move the minimap.",
     LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Lock or unlock minimap position.",
     LUIE_STRING_LAM_MINIMAP_KEEP_SQUARE = "Keep Square Aspect",
@@ -85,10 +108,4 @@ local strings =
     LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF = "MiniMap hidden",
 }
 
-for stringId, stringValue in pairs(strings) do
-    ZO_CreateStringId(stringId, stringValue)
-    SafeAddVersion(stringId, 1)
-end
-SafeAddVersion("LUIE_STRING_LAM_MINIMAP_PINSCALE_TP", 2)
-SafeAddVersion("LUIE_STRING_LAM_MINIMAP_BATCHED_PIN_SYNC_TP", 2)
-SafeAddVersion("LUIE_STRING_LAM_MINIMAP_PIN_SYNC_BATCH_SIZE_TP", 2)
+LUIE_RegisterStrings(strings, false)

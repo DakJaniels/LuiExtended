@@ -4,6 +4,15 @@
 
 local strings =
 {
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMIN = "Приблизить",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMOUT = "Отдалить",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMRESET = "Сбросить масштаб",
+    SI_BINDING_NAME_LUIE_MINIMAP_RECENTER = "Центрировать миникарту",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_SHOW = "Показать/скрыть миникарту",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_COMBAT = "Миникарта в бою",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED = "Блокировка прокрутки зоны",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMIN = "Удерживать приближение",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMOUT = "Удерживать отдаление",
     LUIE_STRING_LAM_MINIMAP = "MiniMap (BETA)",
     LUIE_STRING_LAM_MINIMAP_DESCRIPTION = "Включить и настроить модуль мини-карты.",
     LUIE_STRING_LAM_MINIMAP_ENABLE = "Включить мини-карту",
@@ -24,7 +33,7 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT = "Метка с Shift",
     LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT_TP = "Если включено: Shift+ЛКМ ставит метку, Shift+ПКМ снимает. Иначе: клик без перетаскивания ставит метку.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS = "Кнопки масштаба",
-    LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP = "Показывать кнопки «+» и «−» на карте.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP = "Показывать на карте кнопки увеличения и уменьшения масштаба.",
     LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER = "Дополнительные параметры",
     LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "Дополнительные параметры мини-карты появятся в будущих обновлениях.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Отладка конечного автомата меток",
@@ -32,16 +41,28 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Привязать InfoPanel к миникарте",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "Размещает InfoPanel под картой (на месте названия зоны) и переносит название зоны над картой. Позицию задаёт миникарта. Требуется модуль InfoPanel.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Показывать название зоны",
-    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Показывать название текущей карты. Перемещайте рамку элементом внизу слева при наведении на миникарту.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Показывать название текущей карты. На ПК: перемещайте рамку элементом при наведении. Иначе: ползунки в разделе «Расположение рамки».",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_SECTION_GENERAL = "Масштаб и карта",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_LAYOUT_HEADER = "Расположение рамки",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW = "Показать карту",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW_TP = "Показывает миникарту поверх этого меню, чтобы видеть положение и размер при настройке ползунков ниже. Нажмите снова, чтобы скрыть. Скрывается при выходе из настроек.",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_X_TP = "Горизонтальное смещение от правого нижнего угла экрана (отрицательное = влево).",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_Y_TP = "Вертикальное смещение от правого нижнего угла экрана (отрицательное = вверх).",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH = "Ширина рамки",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH_TP = "Ширина рамки миникарты в пикселях. При «Квадратном соотношении» ширина и высота совпадают.",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT = "Высота рамки",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT_TP = "Высота рамки в пикселях. Недоступно при квадратном соотношении (используйте ширину).",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_HEADER = "Шрифт названия зоны",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_TP = "Шрифт подписи названия зоны.",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_SIZE_TP = "Размер шрифта названия зоны.",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_STYLE_TP = "Стиль шрифта названия зоны.",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Перетащите, чтобы переместить миникарту.",
     LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Заблокировать или разблокировать позицию миникарты.",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_ON = "Миникарта показана",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF = "Миникарта скрыта",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Как в игре",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Скрыть компас на HUD",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Показывать компас на HUD",
 }
 
-for stringId, stringValue in pairs(strings) do
-    ZO_CreateStringId(stringId, stringValue)
-    SafeAddVersion(stringId, 1)
-end
-SafeAddVersion("LUIE_STRING_LAM_MINIMAP_PINSCALE_TP", 2)
+LUIE_RegisterStrings(strings, true)

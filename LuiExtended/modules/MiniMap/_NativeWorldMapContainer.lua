@@ -11,6 +11,8 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
+local eventManager = GetEventManager()
+
 local MINIMAP_NATIVE_MOVING_PIN_UPDATE_MS = 100
 
 local nativeWorldMapContainerAttached = false
@@ -72,8 +74,8 @@ end
 function MiniMap.CancelNativeHudMapOverlayLayoutReapply()
     nativeHudMapOverlayLayoutReapplyScheduled = false
     nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
-    EVENT_MANAGER:UnregisterForUpdate(GetNativeHudMapOverlayLayoutReapplyUpdateName())
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2")
+    eventManager:UnregisterForUpdate(GetNativeHudMapOverlayLayoutReapplyUpdateName())
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2")
 end
 
 --- Runs ZOS g_mapRefresh:UpdateRefreshGroups via the world map OnUpdate handler (keep / link / location dirty groups).
@@ -127,7 +129,7 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     end
     nativeHudMapOverlayLayoutReapplyScheduled = true
     local updateName = GetNativeHudMapOverlayLayoutReapplyUpdateName()
-    EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
+    eventManager:RegisterForUpdate(updateName, 0, function ()
                                         nativeHudMapOverlayLayoutReapplyScheduled = false
                                         MiniMap.ReapplyNativeHudMapOverlayLayout()
                                         MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
@@ -144,7 +146,7 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
     end
     nativeHudMapOverlayLayoutReapplySecondFrameScheduled = true
     local secondFrameUpdateName = MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2"
-    EVENT_MANAGER:RegisterForUpdate(secondFrameUpdateName, 0, function ()
+    eventManager:RegisterForUpdate(secondFrameUpdateName, 0, function ()
                                         nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
                                         MiniMap.ReapplyNativeHudMapOverlayLayout()
                                     end, true)

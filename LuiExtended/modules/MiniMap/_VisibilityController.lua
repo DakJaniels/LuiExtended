@@ -9,6 +9,9 @@ local LUIE = LUIE
 local MiniMap = LUIE.MiniMap
 
 MiniMap.sessionMapVisible = true
+MiniMap.consoleLayoutPreviewActive = false
+
+local LIB_HARVENS_ADDON_SETTINGS_SCENE_NAME = "LibHarvensAddonSettingsScene"
 
 --- @return boolean
 function MiniMap.IsPlayerInHouse()
@@ -75,6 +78,68 @@ function MiniMap.ToggleShowInCombatSetting()
     MiniMap.UpdateConditionalVisibility()
 end
 
+--- Console: show MiniMap while LibHarvens addon settings are open (layout sliders).
+--- @param active boolean
+function MiniMap.SetConsoleLayoutPreviewActive(active)
+    local wantActive = active == true
+    if MiniMap.consoleLayoutPreviewActive == wantActive then
+        return
+    end
+    MiniMap.consoleLayoutPreviewActive = wantActive
+
+    local hudSceneFragment = MiniMap.hudSceneFragment
+    local settingsScene = SCENE_MANAGER:GetScene(LIB_HARVENS_ADDON_SETTINGS_SCENE_NAME)
+    if wantActive then
+        MiniMap.sessionMapVisible = true
+        if hudSceneFragment and settingsScene and not settingsScene:HasFragment(hudSceneFragment) then
+            settingsScene:AddFragment(hudSceneFragment)
+        end
+    elseif hudSceneFragment and settingsScene and settingsScene:HasFragment(hudSceneFragment) then
+        settingsScene:RemoveFragment(hudSceneFragment)
+    end
+
+    MiniMap.ApplyFragmentHiddenReasons()
+    MiniMap.UpdateGameplayTickers()
+end
+
+function MiniMap.ShowMapNowForConsoleLayout()
+    if not MiniMap.Enabled or not ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
+    MiniMap.SetConsoleLayoutPreviewActive(true)
+    MiniMap.ApplyFrameLayoutFromSavedSettings()
+    if MiniMap.mapController and MiniMap.mapController:IsReady() then
+        MiniMap.RefreshNativeWorldMapContainer()
+    end
+end
+
+function MiniMap.ToggleConsoleLayoutPreview()
+    if not MiniMap.Enabled or not ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
+    if MiniMap.consoleLayoutPreviewActive then
+        MiniMap.SetConsoleLayoutPreviewActive(false)
+    else
+        MiniMap.ShowMapNowForConsoleLayout()
+    end
+end
+
+function MiniMap.RegisterConsoleLayoutPreviewSettingsSceneHook()
+    if MiniMap.consoleLayoutPreviewSettingsSceneHooked or not ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
+    local settingsScene = SCENE_MANAGER:GetScene(LIB_HARVENS_ADDON_SETTINGS_SCENE_NAME)
+    if not settingsScene then
+        return
+    end
+    MiniMap.consoleLayoutPreviewSettingsSceneHooked = true
+    settingsScene:RegisterCallback("StateChange", function (_, newState)
+        if newState == SCENE_HIDDEN then
+            MiniMap.SetConsoleLayoutPreviewActive(false)
+        end
+    end)
+end
+
 function MiniMap.ApplyDrawLayerPreference()
     if not MiniMap.view then
         return
@@ -100,4 +165,5 @@ function MiniMap.RegisterVisibilityEvents()
     anchor:RegisterForEvent(EVENT_HOUSING_PLAYER_INFO_CHANGED, function ()
         MiniMap.UpdateConditionalVisibility()
     end)
+    MiniMap.RegisterConsoleLayoutPreviewSettingsSceneHook()
 end

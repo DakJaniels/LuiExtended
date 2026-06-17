@@ -8,6 +8,8 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
+local eventManager = GetEventManager()
+
 local pinMirrorGameplayTickersUpdateScheduled = false
 local pinMirrorStateMachineLastDebugStateName = nil
 
@@ -135,7 +137,7 @@ function MiniMapPinMirrorStateMachine:Initialize(mapEventController, mapControll
         if not pinMirrorGameplayTickersUpdateScheduled then
             pinMirrorGameplayTickersUpdateScheduled = true
             local gameplayTickersUpdateName = MiniMap.moduleName .. "PinMirrorGameplayTickers"
-            EVENT_MANAGER:RegisterForUpdate(gameplayTickersUpdateName, 0, function ()
+            eventManager:RegisterForUpdate(gameplayTickersUpdateName, 0, function ()
                                                 pinMirrorGameplayTickersUpdateScheduled = false
                                                 MiniMap.UpdateGameplayTickers()
                                             end, true)
@@ -165,8 +167,8 @@ end
 
 function MiniMapPinMirrorStateMachine:Stop()
     pinMirrorGameplayTickersUpdateScheduled = false
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "PinMirrorGameplayTickers")
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "MapReloadCompleteNotify")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "PinMirrorGameplayTickers")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "MapReloadCompleteNotify")
     MiniMap.CancelWorldMapUnblockedWait()
     self.mapReloadCompleteNotifyDeferredScheduled = false
     self.pinSyncQueuedWhileMapReloading = false
@@ -264,7 +266,7 @@ function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteNextFrame()
     self.mapReloadCompleteNotifyDeferredScheduled = true
     local stateMachine = self
     local mapReloadCompleteNotifyUpdateName = MiniMap.moduleName .. "MapReloadCompleteNotify"
-    EVENT_MANAGER:RegisterForUpdate(mapReloadCompleteNotifyUpdateName, 0, function ()
+    eventManager:RegisterForUpdate(mapReloadCompleteNotifyUpdateName, 0, function ()
                                         stateMachine.mapReloadCompleteNotifyDeferredScheduled = false
                                         if not MiniMap.Enabled then
                                             return

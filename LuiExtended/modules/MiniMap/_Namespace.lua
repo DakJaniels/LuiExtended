@@ -208,6 +208,9 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field anchorInfoPanelToMiniMap boolean
 --- @field infoPanelRestoreAnchor MiniMapInfoPanelRestoreAnchor|nil
 --- @field showZoneName boolean
+--- @field zoneNameFontFace string
+--- @field zoneNameFontSize number
+--- @field zoneNameFontStyle number
 
 --- @class (partial) ZO_MapPin
 --- @field polygonBlob ZO_PinPolygonBlob|nil
@@ -291,6 +294,9 @@ MiniMap.Defaults =
     pinMirrorStateMachineDebug = false,
     anchorInfoPanelToMiniMap = false,
     showZoneName = true,
+    zoneNameFontFace = "LUIE Default Font",
+    zoneNameFontSize = 18,
+    zoneNameFontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
 }
 
 --- @type MiniMapDefaults
@@ -400,6 +406,7 @@ function MiniMap.ApplyLiveSettings()
     end
     MiniMap.view:ApplyInteractionLocks(MiniMap.SV)
     MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
+    MiniMap.ApplyZoneNameFont()
     MiniMap.view:ApplyPlayerIconDimensions()
     if MiniMap.runtime then
         MiniMap.runtime:UpdateCenterPlayerPipVisibility()

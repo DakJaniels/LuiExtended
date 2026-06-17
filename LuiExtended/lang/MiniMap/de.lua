@@ -4,6 +4,15 @@
 
 local strings =
 {
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMIN = "Hineinzoomen",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMOUT = "Herauszoomen",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMRESET = "Zoom zurücksetzen",
+    SI_BINDING_NAME_LUIE_MINIMAP_RECENTER = "Minimap neu zentrieren",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_SHOW = "Minimap-Sichtbarkeit umschalten",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_COMBAT = "Minimap im Kampf umschalten",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED = "Zonen-Scroll-Sperre umschalten",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMIN = "Hineinzoomen gedrückt halten",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMOUT = "Herauszoomen gedrückt halten",
     LUIE_STRING_LAM_MINIMAP = "MiniMap (BETA)",
     LUIE_STRING_LAM_MINIMAP_DESCRIPTION = "MiniMap-Modul aktivieren und konfigurieren.",
     LUIE_STRING_LAM_MINIMAP_ENABLE = "MiniMap aktivieren",
@@ -32,16 +41,28 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "InfoPanel an Minimap verankern",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "InfoPanel unter der Karte (Zonenname-Position) platzieren und den Zonentitel über die Karte legen. Position wird von der Minimap gesteuert. Erfordert das InfoPanel-Modul.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Zonennamen anzeigen",
-    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Aktuellen Zonennamen an der Minimap anzeigen. Zum Verschieben beim Darüberfahren die Steuerung unten links nutzen.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Aktuellen Zonennamen an der Minimap anzeigen. Am PC: Verschieben über die Steuerung beim Darüberfahren. Sonst: Schieberegler im Bereich „Rahmenlayout“.",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_SECTION_GENERAL = "Zoom & Karte",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_LAYOUT_HEADER = "Rahmenlayout",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW = "Karte jetzt anzeigen",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW_TP = "Zeigt die Minimap über diesem Menü an, damit Sie Position und Größe mit den Schiebereglern unten prüfen können. Erneut drücken zum Ausblenden. Wird beim Verlassen der Einstellungen ausgeblendet.",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_X_TP = "Horizontaler Versatz von der unteren rechten Bildschirmecke (negativ = nach links).",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_Y_TP = "Vertikaler Versatz von der unteren rechten Bildschirmecke (negativ = nach oben).",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH = "Rahmenbreite",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH_TP = "Minimap-Rahmenbreite in Pixeln. Bei „Quadratisches Seitenverhältnis“ bleiben Breite und Höhe gleich.",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT = "Rahmenhöhe",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT_TP = "Minimap-Rahmenhöhe in Pixeln. Deaktiviert bei aktivem quadratischen Seitenverhältnis (Rahmenbreite nutzen).",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_HEADER = "Schrift Zonenname",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_TP = "Schriftart für die Zonentitel-Beschriftung.",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_SIZE_TP = "Schriftgröße für die Zonentitel-Beschriftung.",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_STYLE_TP = "Schriftstil für die Zonentitel-Beschriftung.",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Ziehen, um die Minimap zu verschieben.",
-    LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Lock or unlock minimap position.",
+    LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Minimap-Position sperren oder entsperren.",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_ON = "Minimap angezeigt",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF = "Minimap ausgeblendet",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Spielstandard",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Kompass am HUD ausblenden",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Kompass am HUD anzeigen",
 }
 
-for stringId, stringValue in pairs(strings) do
-    ZO_CreateStringId(stringId, stringValue)
-    SafeAddVersion(stringId, 1)
-end
-SafeAddVersion("LUIE_STRING_LAM_MINIMAP_PINSCALE_TP", 2)
+LUIE_RegisterStrings(strings, true)

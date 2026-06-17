@@ -4,6 +4,15 @@
 
 local strings =
 {
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMIN = "放大",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMOUT = "缩小",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMRESET = "重置缩放",
+    SI_BINDING_NAME_LUIE_MINIMAP_RECENTER = "小地图重新居中",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_SHOW = "切换小地图显示",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_COMBAT = "战斗中切换小地图",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED = "切换区域滚动锁定",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMIN = "按住放大",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMOUT = "按住缩小",
     LUIE_STRING_LAM_MINIMAP = "MiniMap (BETA)",
     LUIE_STRING_LAM_MINIMAP_DESCRIPTION = "启用并配置小地图模块。",
     LUIE_STRING_LAM_MINIMAP_ENABLE = "启用小地图",
@@ -32,16 +41,28 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "将信息面板锚定到小地图",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "将信息面板放在地图下方（原区域名位置），并把区域名移到地图上方。启用后由小地图控制位置。需要信息面板模块。",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "显示区域名称",
-    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "显示当前地图区域名。悬停小地图时使用左下角控件拖动框架。",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "显示当前地图区域名。PC：悬停时使用移动控件拖动框架。否则请使用「框架布局」分区中的滑块。",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_SECTION_GENERAL = "缩放与地图",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_LAYOUT_HEADER = "框架布局",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW = "立即显示地图",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW_TP = "在此菜单打开时在屏幕上显示小地图，便于用下方滑块预览位置与大小。再次按下可隐藏。离开设置菜单时自动隐藏。",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_X_TP = "相对屏幕右下角的水平偏移（负值向左）。",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_Y_TP = "相对屏幕右下角的垂直偏移（负值向上）。",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH = "框架宽度",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH_TP = "小地图框架宽度（像素）。启用「保持正方形比例」时宽高一致。",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT = "框架高度",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT_TP = "框架高度（像素）。启用正方形比例时禁用（请调整框架宽度）。",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_HEADER = "区域名字体",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_TP = "区域标题标签的字体。",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_SIZE_TP = "区域标题的字号。",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_STYLE_TP = "区域标题的字体样式。",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "拖动以移动小地图。",
     LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "锁定或解锁小地图位置。",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_ON = "小地图已显示",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF = "小地图已隐藏",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "使用游戏默认",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "在 HUD 上隐藏罗盘",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "在 HUD 上显示罗盘",
 }
 
-for stringId, stringValue in pairs(strings) do
-    ZO_CreateStringId(stringId, stringValue)
-    SafeAddVersion(stringId, 1)
-end
-SafeAddVersion("LUIE_STRING_LAM_MINIMAP_PINSCALE_TP", 2)
+LUIE_RegisterStrings(strings, true)

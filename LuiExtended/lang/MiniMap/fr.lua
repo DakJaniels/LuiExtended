@@ -4,6 +4,15 @@
 
 local strings =
 {
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMIN = "Zoom avant",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMOUT = "Zoom arrière",
+    SI_BINDING_NAME_LUIE_MINIMAP_ZOOMRESET = "Réinitialiser le zoom",
+    SI_BINDING_NAME_LUIE_MINIMAP_RECENTER = "Recentrer la mini-carte",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_SHOW = "Afficher/masquer la mini-carte",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_COMBAT = "Mini-carte en combat",
+    SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED = "Verrouillage du défilement de zone",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMIN = "Maintenir zoom avant",
+    SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMOUT = "Maintenir zoom arrière",
     LUIE_STRING_LAM_MINIMAP = "MiniMap (BETA)",
     LUIE_STRING_LAM_MINIMAP_DESCRIPTION = "Activer et configurer le module Mini-carte.",
     LUIE_STRING_LAM_MINIMAP_ENABLE = "Activer la mini-carte",
@@ -24,7 +33,7 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT = "Point de passage avec Maj",
     LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT_TP = "Si activé : Maj+clic gauche place un point de passage, Maj+clic droit le supprime. Sinon : un clic sans glisser en place un.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS = "Afficher les boutons zoom",
-    LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP = "Affiche les boutons zoom + et − sur la carte.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP = "Affiche les boutons de zoom plus et moins sur la carte.",
     LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER = "Options avancées",
     LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "D'autres options avancées seront ajoutées ultérieurement.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Débogage machine à états (pins)",
@@ -32,16 +41,28 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Ancrer le panneau d'info à la mini-carte",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "Place le panneau d'info sous la carte (emplacement du nom de zone) et le titre de zone au-dessus de la carte. Position contrôlée par la mini-carte. Nécessite le module InfoPanel.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Afficher le nom de zone",
-    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Affiche le nom de la carte actuelle. Déplacez le cadre avec le contrôle en bas à gauche au survol.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME_TP = "Affiche le nom de la carte actuelle. Sur PC : déplacez le cadre avec le contrôle au survol. Sinon : curseurs de la section « Disposition du cadre ».",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_SECTION_GENERAL = "Zoom et carte",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_LAYOUT_HEADER = "Disposition du cadre",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW = "Afficher la carte",
+    LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW_TP = "Affiche la mini-carte par-dessus ce menu pour prévisualiser la position et la taille avec les curseurs ci-dessous. Appuyez à nouveau pour masquer. Se masque en quittant les réglages.",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_X_TP = "Décalage horizontal depuis le coin inférieur droit (négatif = vers la gauche).",
+    LUIE_STRING_LAM_MINIMAP_CONSOLE_POS_Y_TP = "Décalage vertical depuis le coin inférieur droit (négatif = vers le haut).",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH = "Largeur du cadre",
+    LUIE_STRING_LAM_MINIMAP_FRAME_WIDTH_TP = "Largeur du cadre en pixels. Avec « Conserver le ratio carré », largeur et hauteur restent identiques.",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT = "Hauteur du cadre",
+    LUIE_STRING_LAM_MINIMAP_FRAME_HEIGHT_TP = "Hauteur du cadre en pixels. Désactivé si le ratio carré est activé (utilisez la largeur).",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_HEADER = "Police du nom de zone",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_TP = "Police du libellé du titre de zone.",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_SIZE_TP = "Taille de police du titre de zone.",
+    LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_STYLE_TP = "Style de police du titre de zone.",
     LUIE_STRING_MINIMAP_FRAME_MOVE_TP = "Glisser pour déplacer la mini-carte.",
     LUIE_STRING_MINIMAP_FRAME_LOCK_TP = "Verrouiller ou déverrouiller la position de la mini-carte.",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_ON = "Mini-carte affichée",
+    LUIE_STRING_MINIMAP_TOGGLE_SHOW_OFF = "Mini-carte masquée",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Paramètre du jeu",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Masquer la boussole sur le HUD",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Afficher la boussole sur le HUD",
 }
 
-for stringId, stringValue in pairs(strings) do
-    ZO_CreateStringId(stringId, stringValue)
-    SafeAddVersion(stringId, 1)
-end
-SafeAddVersion("LUIE_STRING_LAM_MINIMAP_PINSCALE_TP", 2)
+LUIE_RegisterStrings(strings, true)
