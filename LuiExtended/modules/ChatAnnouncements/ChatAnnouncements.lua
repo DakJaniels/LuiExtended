@@ -121,14 +121,14 @@ S.g_disguiseState = nil   -- Holds current disguise state
 
 -- Indexing
 S.g_bankBag = nil
-S.g_currentBankBagId = nil    -- actual bag id of current bank tab (BAG_BANK, BAG_FURNITURE_VAULT, house bank, etc.)
-S.g_bankStacks = {}           -- Bank Inventory Index
-S.g_banksubStacks = {}        -- Subscriber Bank Inventory Index
-S.g_houseBags = {}            -- House Storage Index
-S.g_furnitureVaultStacks = {} -- Furnishing Vault (BAG_FURNITURE_VAULT) index
-S.g_equippedStacks = {}       -- Equipped Items Index
-S.g_inventoryStacks = {}      -- Inventory Index
-S.g_JusticeStacks = {}        -- Justice Items Index (only filled as a comparison table when items are confiscated)
+S.g_currentBankBagId = nil         -- actual bag id of current bank tab (BAG_BANK, BAG_FURNITURE_VAULT, house bank, etc.)
+S.g_bankStacks = {}                -- Bank Inventory Index
+S.g_banksubStacks = {}             -- Subscriber Bank Inventory Index
+S.g_houseBags = {}                 -- House Storage Index
+S.g_furnitureVaultStacks = {}      -- Furnishing Vault (BAG_FURNITURE_VAULT) index
+S.g_equippedStacks = {}            -- Equipped Items Index
+S.g_inventoryStacks = {}           -- Inventory Index
+S.g_JusticeStacks = {}             -- Justice Items Index (only filled as a comparison table when items are confiscated)
 S.g_guildBankCarry = nil           -- Saves item data when an item is removed/deposited into the guild bank.
 S.g_selectedGuildBankId = nil      -- Active guild bank tab (EVENT_GUILD_BANK_SELECTED / open bank)
 S.g_guildBankAnnounceGuildId = nil -- Guild id for deferred guild-bank item announce (cleared after print)

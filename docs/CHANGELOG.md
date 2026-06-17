@@ -1,5 +1,26 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.8
+
+### New
+
+- MiniMap: **Show during Death Recap** visibility toggle under Visibility.
+- MiniMap: **Player Pip Color** and **Camera Wedge Color** pickers under Appearance.
+- MiniMap: **Zone Name Font** face, size, and style submenu when **Show Zone Name** is enabled (PC).
+- MiniMap: **Pin Updates** sliders for **Moving pins (ms)** and **Pin hover (ms)** under Advanced.
+- MiniMap (console): **Frame Layout** with **Show Map Now**, bottom-right position offsets, and **Frame Width** / **Frame Height** (height follows width when **Keep Square Aspect** is on); settings reorganized into sections.
+
+### Changes
+
+- MiniMap: When **Show Zoom Buttons** is enabled, zoom plus/minus fade in on map hover.
+- MiniMap: **Keep Square Aspect** resize keeps a square while respecting whether you dragged width or height.
+- MiniMap: Pin mouseover and sticky-pin selection on the HUD minimap; mouseover lists update before map clicks and on the **Pin hover (ms)** refresh setting.
+- MiniMap: Improved map ping handling, objective/POI pin sync, and LUIE waypoint overlay refresh after native pin updates.
+- MiniMap: With **Waypoint Requires Shift**, Shift+click can clear the player waypoint on the minimap.
+- MiniMap / Info Panel: **Anchor InfoPanel to MiniMap** saves and restores the Info Panel anchor when you turn anchoring off.
+- MiniMap (PC): LibAddonMenu settings grouped into submenus (Zoom & Map, Visibility, Context Zoom, Appearance, Advanced).
+- MiniMap: Keybind display names for minimap actions in Settings → Controls; MiniMap strings refreshed (de, fr, ru, zh).
+
 ## Version 7.2.4.7
 
 ### New

@@ -23,6 +23,7 @@ local MINIMAP_FRAME_CHROME_HIDE_DELAY_MS = 200
 --- @field panScrollStartY number
 --- @field pendingWaypointClick boolean
 --- @field frameChromeHideCallId integer|nil
+--- @field zoomChromeExitCallId integer|nil
 local MiniMapInputController = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapInputController = MiniMapInputController
 
@@ -37,6 +38,7 @@ function MiniMapInputController:Initialize(view, mapController, runtime)
     self.panDragMoved = false
     self.pendingWaypointClick = false
     self.frameChromeHideCallId = nil
+    self.zoomChromeExitCallId = nil
 end
 
 --- @param shift boolean
@@ -88,6 +90,117 @@ function MiniMapInputController:TrySetWaypointFromClick(mouseX, mouseY, shift)
     end)
 end
 
+--- Clears the player waypoint when the waypoint modifier is active (Shift+right when shift is required).
+--- @param shift boolean
+function MiniMapInputController:TryRemovePlayerWaypointFromClick(shift)
+    if MiniMap.fastTravel then
+        return
+    end
+    if not self:WaypointModifierActive(shift) then
+        return
+    end
+    MiniMap.RunWithPlayerMapForMirror(function ()
+        ZO_WorldMap_RemovePlayerWaypoint()
+    end)
+    MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
+end
+
+--- @param mouseX number
+--- @param mouseY number
+function MiniMapInputController:TrySetGroupPingFromClick(mouseX, mouseY)
+    if MiniMap.fastTravel or not self.mapController:IsReady() then
+        return
+    end
+    local mapData = self.mapController:GetMapData()
+    if not mapData then
+        return
+    end
+    MiniMap.RunWithPlayerMapForMirror(function ()
+        local scroll = self.view.scroll
+        local scrollLeft = scroll:GetLeft()
+        local scrollTop = scroll:GetTop()
+        local localX = mouseX - scrollLeft + scroll:GetHorizontalScroll()
+        local localY = mouseY - scrollTop + scroll:GetVerticalScroll()
+        local mapWidth = self.mapController:GetMapContentWidth()
+        local mapHeight = self.mapController:GetMapContentHeight()
+        if mapWidth <= 0 or mapHeight <= 0 then
+            return
+        end
+        local normalizedX = localX / mapWidth
+        local normalizedY = localY / mapHeight
+        if normalizedX < 0 or normalizedX > 1 or normalizedY < 0 or normalizedY > 1 then
+            return
+        end
+        PingMap(MAP_PIN_TYPE_PING, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedY)
+    end)
+end
+
+--- ZOS map pins call ZO_WorldMap_MouseDown; shift+click is rally on the full map, not waypoint.
+--- @param button integer
+--- @param ctrl boolean
+--- @param alt boolean
+--- @param shift boolean
+--- @return boolean true when the HUD minimap consumed the press (do not call stock ZO_WorldMap_MouseDown)
+function MiniMapInputController:TryHandleHudMinimapWorldMapMouseDown(button, ctrl, alt, shift)
+    if button ~= MOUSE_BUTTON_INDEX_LEFT then
+        return false
+    end
+    if shift and not alt and not ctrl then
+        local mouseX, mouseY = GetUIMousePosition()
+        self:TrySetWaypointFromClick(mouseX, mouseY, true)
+        return true
+    end
+    if not shift and not alt and ctrl then
+        local mouseX, mouseY = GetUIMousePosition()
+        self:TrySetGroupPingFromClick(mouseX, mouseY)
+        return true
+    end
+    return false
+end
+
+--- @param mouseButton integer
+--- @param upInside boolean
+--- @return boolean true suppresses stock ZO_WorldMap_MouseUp
+function MiniMapInputController:TryHandleHudMinimapWorldMapMouseUp(mouseButton, upInside)
+    if not MiniMap.ShouldHudMinimapOverrideWorldMapInput() then
+        return false
+    end
+    if mouseButton == MOUSE_BUTTON_INDEX_RIGHT then
+        local shift = IsShiftKeyDown()
+        local alt = IsAltKeyDown()
+        local ctrl = IsControlKeyDown()
+        if shift and not alt and not ctrl and self:WaypointModifierActive(true) then
+            self:TryRemovePlayerWaypointFromClick(true)
+        end
+        return true
+    end
+    return false
+end
+
+--- Handles left/right mouse up on LUIE scroll/map (waypoint set/clear, pan end).
+--- @param button integer
+--- @param shift boolean
+function MiniMapInputController:TryHandleMapPointerButtonUp(button, shift)
+    if button == MOUSE_BUTTON_INDEX_RIGHT then
+        if self:WaypointModifierActive(shift) then
+            self:TryRemovePlayerWaypointFromClick(shift)
+        end
+        return
+    end
+    if button ~= MOUSE_BUTTON_INDEX_LEFT then
+        return
+    end
+    local mouseX, mouseY = GetUIMousePosition()
+    if self.pendingWaypointClick then
+        self.pendingWaypointClick = false
+        self:TrySetWaypointFromClick(mouseX, mouseY, shift)
+        return
+    end
+    if self.panDragActive then
+        self:StopPanDrag(mouseX, mouseY, shift)
+    end
+end
+
 function MiniMapInputController:StartPanDrag(mouseX, mouseY)
     self.panDragActive = true
     self.panDragMoved = false
@@ -96,15 +209,12 @@ function MiniMapInputController:StartPanDrag(mouseX, mouseY)
     local scroll = self.view.scroll
     self.panScrollStartX = scroll:GetHorizontalScroll()
     self.panScrollStartY = scroll:GetVerticalScroll()
-    if MiniMap.runtime and MiniMap.SV and MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true then
-        MiniMap.runtime:SetMapFollowsPlayer(false)
+    if MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true then
+        self.runtime:SetMapFollowsPlayer(false)
     end
 end
 
 function MiniMapInputController:CompletePanDragSession()
-    if not MiniMap.SV then
-        return
-    end
     local scroll = self.view.scroll
     if MiniMap.SV.zoneScrollLockEnabled == true then
         MiniMap.SV.panOffsetX = scroll:GetHorizontalScroll()
@@ -112,17 +222,14 @@ function MiniMapInputController:CompletePanDragSession()
         return
     end
     if MiniMap.SV.followPlayer == true then
-        local runtime = self.runtime
         local mapController = self.mapController
-        if runtime then
-            runtime:SetMapFollowsPlayer(true)
-            if mapController and mapController:IsReady() then
-                runtime:ClearFollowScrollCache()
-                runtime:ApplyScrollCenterOnPlayer(
-                    mapController:GetMapContentWidth(),
-                    mapController:GetMapContentHeight()
-                )
-            end
+        self.runtime:SetMapFollowsPlayer(true)
+        if mapController:IsReady() then
+            self.runtime:ClearFollowScrollCache()
+            self.runtime:ApplyScrollCenterOnPlayer(
+                mapController:GetMapContentWidth(),
+                mapController:GetMapContentHeight()
+            )
         end
         return
     end
@@ -169,13 +276,25 @@ function MiniMapInputController:ApplyFrameDragMouseEnabled()
     end
 end
 
+function MiniMapInputController:IsFrameChromePinnedOpen()
+    return MiniMap.SV.lockPosition ~= true
+end
+
 function MiniMapInputController:IsMouseOverFrameChromeHoverRegion()
     local frameChromeHover = self.view.frameChromeHover
     if frameChromeHover and MouseIsOver(frameChromeHover) then
         return true
     end
     local frameChrome = self.view.frameChrome
-    if frameChrome and not frameChrome:IsHidden() and MouseIsOver(frameChrome) then
+    if frameChrome and MouseIsOver(frameChrome) then
+        return true
+    end
+    local lockButton = self.view.framePositionLock
+    if lockButton and MouseIsOver(lockButton) then
+        return true
+    end
+    local moveGrip = self.view.frameMoveGrip
+    if moveGrip and not moveGrip:IsHidden() and MouseIsOver(moveGrip) then
         return true
     end
     return false
@@ -189,6 +308,9 @@ function MiniMapInputController:ShowFrameChrome()
 end
 
 function MiniMapInputController:HideFrameChromeIfPointerLeft()
+    if self:IsFrameChromePinnedOpen() then
+        return
+    end
     if self:IsMouseOverFrameChromeHoverRegion() then
         return
     end
@@ -206,7 +328,7 @@ function MiniMapInputController:CancelFrameChromeHide()
 end
 
 function MiniMapInputController:RefreshFrameChromeVisibility()
-    if self:IsMouseOverFrameChromeHoverRegion() then
+    if self:IsFrameChromePinnedOpen() or self:IsMouseOverFrameChromeHoverRegion() then
         self:ShowFrameChrome()
     else
         self:HideFrameChromeIfPointerLeft()
@@ -220,17 +342,79 @@ end
 
 function MiniMapInputController:OnFrameChromeHoverExit()
     self:CancelFrameChromeHide()
+    if self:IsFrameChromePinnedOpen() then
+        return
+    end
     local inputController = self
     self.frameChromeHideCallId = zo_callLater(function ()
                                                   inputController.frameChromeHideCallId = nil
+                                                  if inputController:IsFrameChromePinnedOpen() then
+                                                      return
+                                                  end
                                                   inputController:HideFrameChromeIfPointerLeft()
                                               end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
 end
 
-function MiniMapInputController:OnFramePositionLockClicked(lockButton)
-    if not MiniMap.SV then
+function MiniMapInputController:IsZoomButtonsFeatureEnabled()
+    return self.view:IsZoomButtonsEnabled()
+end
+
+function MiniMapInputController:IsMouseOverZoomChromeRegion()
+    local view = self.view
+    if not view then
+        return false
+    end
+    local zoomChromeHover = view.zoomChromeHover
+    if zoomChromeHover and not zoomChromeHover:IsHidden() and MouseIsOver(zoomChromeHover) then
+        return true
+    end
+    local zoomIn = view.zoomIn
+    if zoomIn and not zoomIn:IsHidden() and MouseIsOver(zoomIn) then
+        return true
+    end
+    local zoomOut = view.zoomOut
+    if zoomOut and not zoomOut:IsHidden() and MouseIsOver(zoomOut) then
+        return true
+    end
+    return false
+end
+
+function MiniMapInputController:CancelZoomChromeExitDebounce()
+    if self.zoomChromeExitCallId then
+        zo_removeCallLater(self.zoomChromeExitCallId)
+        self.zoomChromeExitCallId = nil
+    end
+end
+
+function MiniMapInputController:OnZoomChromeHoverEnter()
+    if not self:IsZoomButtonsFeatureEnabled() then
         return
     end
+    self:CancelZoomChromeExitDebounce()
+    if self.view then
+        self.view:RevealZoomButtonsTransient()
+    end
+end
+
+function MiniMapInputController:OnZoomChromeHoverExit()
+    if not self:IsZoomButtonsFeatureEnabled() then
+        return
+    end
+    self:CancelZoomChromeExitDebounce()
+    local inputController = self
+    self.zoomChromeExitCallId = zo_callLater(function ()
+                                                 inputController.zoomChromeExitCallId = nil
+                                                 if inputController:IsMouseOverZoomChromeRegion() then
+                                                     return
+                                                 end
+                                                 if inputController.view then
+                                                     inputController.view:ScheduleZoomButtonsFadeAfterIdle()
+                                                 end
+                                             end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
+end
+
+function MiniMapInputController:OnFramePositionLockClicked(lockButton)
+    self:CancelFrameChromeHide()
     MiniMap.SV.lockPosition = not MiniMap.SV.lockPosition
     MiniMap.ApplyLiveSettings()
 end
@@ -240,7 +424,7 @@ function MiniMapInputController:OnFrameMoveGripMouseDown(button)
     if button ~= MOUSE_BUTTON_INDEX_LEFT then
         return
     end
-    if not MiniMap.SV or MiniMap.SV.lockPosition then
+    if MiniMap.SV.lockPosition then
         return
     end
     self.view.root:StartMoving()
@@ -257,6 +441,7 @@ end
 --- @param button integer
 --- @param shift boolean
 function MiniMapInputController:OnScrollMouseDown(button, shift)
+    MiniMap.FlushHudMinimapPinMouseOverForClick()
     if button ~= MOUSE_BUTTON_INDEX_LEFT then
         return
     end
@@ -268,23 +453,13 @@ end
 --- @param button integer
 --- @param shift boolean
 function MiniMapInputController:OnScrollMouseUp(button, shift)
-    if button ~= MOUSE_BUTTON_INDEX_LEFT then
-        return
-    end
-    local mouseX, mouseY = GetUIMousePosition()
-    if self.pendingWaypointClick then
-        self.pendingWaypointClick = false
-        self:TrySetWaypointFromClick(mouseX, mouseY, shift)
-        return
-    end
-    if self.panDragActive then
-        self:StopPanDrag(mouseX, mouseY, shift)
-    end
+    self:TryHandleMapPointerButtonUp(button, shift)
 end
 
 --- @param button integer
 --- @param shift boolean
 function MiniMapInputController:OnMapMouseDown(button, shift)
+    MiniMap.FlushHudMinimapPinMouseOverForClick()
     if button ~= MOUSE_BUTTON_INDEX_LEFT then
         return
     end
@@ -299,24 +474,12 @@ end
 --- @param button integer
 --- @param shift boolean
 function MiniMapInputController:OnMapMouseUp(button, shift)
-    if button ~= MOUSE_BUTTON_INDEX_LEFT then
-        return
-    end
-    local mouseX, mouseY = GetUIMousePosition()
-    if self.pendingWaypointClick then
-        self.pendingWaypointClick = false
-        self:TrySetWaypointFromClick(mouseX, mouseY, shift)
-        return
-    end
-    self:StopPanDrag(mouseX, mouseY, shift)
+    self:TryHandleMapPointerButtonUp(button, shift)
 end
 
 --- @param horizontal number
 --- @param vertical number
 function MiniMapInputController:OnScrollOffsetChanged(horizontal, vertical)
-    if not MiniMap.SV then
-        return
-    end
     MiniMap.SV.panOffsetX = horizontal
     MiniMap.SV.panOffsetY = vertical
 end
@@ -378,6 +541,18 @@ function MiniMap.OnFrameChromeMouseExit(control)
     end
 end
 
+function MiniMap.OnZoomChromeHoverMouseEnter(control)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnZoomChromeHoverEnter()
+    end
+end
+
+function MiniMap.OnZoomChromeHoverMouseExit(control)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnZoomChromeHoverExit()
+    end
+end
+
 function MiniMap.OnFramePositionLockInitialized(lockButton)
     local initialState = TOGGLE_BUTTON_OPEN
     if MiniMap.SV and MiniMap.SV.lockPosition then
@@ -427,4 +602,69 @@ function MiniMap.OnZoomOutClicked(control, button, ctrl, alt, shift, command)
     if MiniMap.Enabled then
         MiniMap.Zoom(-1)
     end
+end
+
+local hudMinimapWorldMapMouseDownPreHookActive --- @type function|nil
+local hudMinimapWorldMapMouseUpPreHookActive   --- @type function|nil
+
+local function NoOpHudMinimapWorldMapMouseDownPreHook()
+    return false
+end
+
+local function NoOpHudMinimapWorldMapMouseUpPreHook()
+    return false
+end
+
+--- @param button integer
+--- @param ctrl boolean
+--- @param alt boolean
+--- @param shift boolean
+--- @return boolean true suppresses stock ZO_WorldMap_MouseDown
+function MiniMap.HudMinimapWorldMapMouseDownPreHook(button, ctrl, alt, shift)
+    if not MiniMap.ShouldHudMinimapOverrideWorldMapInput() then
+        return false
+    end
+    local inputController = MiniMap.inputController
+    if inputController and inputController:TryHandleHudMinimapWorldMapMouseDown(button, ctrl, alt, shift) then
+        return true
+    end
+    return false
+end
+
+--- @param mapControl Control|nil
+--- @param mouseButton integer
+--- @param upInside boolean
+--- @return boolean true suppresses stock ZO_WorldMap_MouseUp
+function MiniMap.HudMinimapWorldMapMouseUpPreHook(mapControl, mouseButton, upInside)
+    if not MiniMap.ShouldHudMinimapOverrideWorldMapInput() then
+        return false
+    end
+    local inputController = MiniMap.inputController
+    if inputController and inputController:TryHandleHudMinimapWorldMapMouseUp(mouseButton, upInside) then
+        return true
+    end
+    return false
+end
+
+--- ZO_PreHook cannot be removed without /reloadui; use tail-call delegator to disable (see ZO_Hook.lua).
+function MiniMap.InstallHudMinimapWorldMapInputPreHooks()
+    if hudMinimapWorldMapMouseDownPreHookActive == nil then
+        hudMinimapWorldMapMouseDownPreHookActive = MiniMap.HudMinimapWorldMapMouseDownPreHook
+        ZO_PreHook("ZO_WorldMap_MouseDown", function (button, ctrl, alt, shift)
+            return hudMinimapWorldMapMouseDownPreHookActive(button, ctrl, alt, shift)
+        end)
+        hudMinimapWorldMapMouseUpPreHookActive = MiniMap.HudMinimapWorldMapMouseUpPreHook
+        ZO_PreHook("ZO_WorldMap_MouseUp", function (mapControl, mouseButton, upInside)
+            return hudMinimapWorldMapMouseUpPreHookActive(mapControl, mouseButton, upInside)
+        end)
+    else
+        hudMinimapWorldMapMouseDownPreHookActive = MiniMap.HudMinimapWorldMapMouseDownPreHook
+        hudMinimapWorldMapMouseUpPreHookActive = MiniMap.HudMinimapWorldMapMouseUpPreHook
+    end
+end
+
+--- ZO_PreHook cannot be removed without /reloadui; use tail-call delegator to disable (see ZO_Hook.lua).
+function MiniMap.DisableHudMinimapWorldMapInputPreHooks()
+    hudMinimapWorldMapMouseDownPreHookActive = NoOpHudMinimapWorldMapMouseDownPreHook
+    hudMinimapWorldMapMouseUpPreHookActive = NoOpHudMinimapWorldMapMouseUpPreHook
 end

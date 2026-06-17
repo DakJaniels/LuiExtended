@@ -2,8 +2,8 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101050 101051
-## Version: 7.2.4.7
-## AddOnVersion: 7247
+## Version: 7.2.4.8
+## AddOnVersion: 7248
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements, Slash Commands, and MiniMap.
 ## DependsOn: LuiMedia>=7133 LuiData>=7221
 ## PCDependsOn: LibAddonMenu-2.0>=43
@@ -193,6 +193,7 @@ modules/MiniMap/_PinController.lua
 modules/MiniMap/_PinMirrorStateMachine.lua
 modules/MiniMap/_MapEventController.lua
 modules/MiniMap/_InputController.lua
+modules/MiniMap/_HudMapPinInteraction.lua
 modules/MiniMap/_Runtime.lua
 modules/MiniMap/MiniMap.lua
 frontend/MiniMap.xml

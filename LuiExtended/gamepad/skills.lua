@@ -154,7 +154,7 @@ LUIE.HookGamePadStats = function ()
         -- Active Effects--
         self.numActiveEffects = 0
 
-    local function GetActiveEffectNarration(entryData, entryControl)
+        local function GetActiveEffectNarration(entryData, entryControl)
             local narrations = {}
 
             -- Generate the standard parametric list entry narration

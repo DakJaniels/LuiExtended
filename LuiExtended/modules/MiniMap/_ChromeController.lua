@@ -23,15 +23,12 @@ local COMPASS_CONTROLS =
 
 local function SetCompassControlsHidden(compassControlsHidden)
     for controlIndex = 1, #COMPASS_CONTROLS do
-        local compassControl = _G[COMPASS_CONTROLS[controlIndex]]
-        if compassControl then
-            compassControl:SetHidden(compassControlsHidden)
-        end
+        _G[COMPASS_CONTROLS[controlIndex]]:SetHidden(compassControlsHidden)
     end
 end
 
 function MiniMap.ApplyCompassMode()
-    local settings = MiniMap.SV or MiniMap.Defaults
+    local settings = MiniMap.SV
     local mode = settings.compassOverride or MINIMAP_COMPASS_OVERRIDE_DEFAULT
     if mode == MINIMAP_COMPASS_OVERRIDE_DEFAULT then
         if MiniMap.compassChromeOverrideActive then
@@ -47,15 +44,32 @@ function MiniMap.ApplyCompassMode()
     SetCompassControlsHidden(compassControlsHidden)
 end
 
-function MiniMap.ApplySquareAspect()
-    if not MiniMap.view or not MiniMap.SV then
+--- @param rootWidth number
+--- @param rootHeight number
+--- @param widthDriven boolean|nil When nil (e.g. settings toggle), use max(width, height).
+--- @return number
+function MiniMap.GetSquareRootSizeFromDimensions(rootWidth, rootHeight, widthDriven)
+    local size
+    if widthDriven == nil then
+        size = zo_max(rootWidth, rootHeight)
+    elseif widthDriven then
+        size = rootWidth
+    else
+        size = rootHeight
+    end
+    return zo_max(size, 100)
+end
+
+--- @param widthDriven boolean|nil Driven resize axis from OnRootResizeStart; nil uses max for one-shot normalize.
+function MiniMap.ApplySquareAspect(widthDriven)
+    if not MiniMap.view then
         return
     end
     if MiniMap.SV.keepSquareAspect ~= true then
         return
     end
     local root = MiniMap.view.root
-    local size = zo_max(root:GetWidth(), root:GetHeight())
+    local size = MiniMap.GetSquareRootSizeFromDimensions(root:GetWidth(), root:GetHeight(), widthDriven)
     root:SetDimensions(size, size)
     MiniMap.SV.width = size
     MiniMap.SV.height = size
@@ -63,7 +77,7 @@ function MiniMap.ApplySquareAspect()
 end
 
 --- @param settings MiniMapDefaults
-function MiniMap.ApplyPositionGridSnap(settings)
+function MiniMap.SnapFrameLayoutToPositionGrid(settings)
     if not MiniMap.view or not settings.positionGridDivisor or settings.positionGridDivisor <= 1 then
         return
     end
@@ -77,17 +91,62 @@ function MiniMap.ApplyPositionGridSnap(settings)
     settings.height = zo_max(height, 100)
     settings.offsetX = offsetX
     settings.offsetY = offsetY
+end
+
+--- @param settings MiniMapDefaults
+function MiniMap.ApplyPositionGridSnap(settings)
+    if not settings then
+        return
+    end
+    MiniMap.SnapFrameLayoutToPositionGrid(settings)
+    MiniMap.ApplyFrameLayoutFromSavedSettings(true)
+end
+
+function MiniMap.ApplyZoneNameFont()
+    if not MiniMap.view then
+        return
+    end
+    local settings = MiniMap.SV
+    local defaults = MiniMap.Defaults
+    local faceKey = settings.zoneNameFontFace or defaults.zoneNameFontFace
+    local fontName = LUIE.Fonts[faceKey]
+    if not fontName or fontName == "" then
+        fontName = LUIE.Fonts[defaults.zoneNameFontFace] or defaults.zoneNameFontFace
+    end
+    local fontSize = (settings.zoneNameFontSize and settings.zoneNameFontSize > 0) and settings.zoneNameFontSize or defaults.zoneNameFontSize
+    local fontStyle = settings.zoneNameFontStyle or defaults.zoneNameFontStyle
+    MiniMap.view.zone:SetFont(LUIE.CreateFontString(fontName, fontSize, fontStyle))
+end
+
+--- @param skipPositionGridSnap boolean|nil
+function MiniMap.ApplyFrameLayoutFromSavedSettings(skipPositionGridSnap)
+    if not MiniMap.view then
+        return
+    end
+    local settings = MiniMap.SV
+    if skipPositionGridSnap ~= true and settings.positionGridDivisor and settings.positionGridDivisor > 1 then
+        MiniMap.SnapFrameLayoutToPositionGrid(settings)
+    end
+    settings.width = zo_max(settings.width or MiniMap.Defaults.width, 100)
+    settings.height = zo_max(settings.height or MiniMap.Defaults.height, 100)
     MiniMap.view:ApplySavedLayout(settings)
+    MiniMap.view:ApplyRootClientLayout(settings)
+    if settings.keepSquareAspect == true then
+        MiniMap.ApplySquareAspect(nil)
+    end
+    MiniMap.ApplyChromeStacking()
+    local mapController = MiniMap.mapController
+    if mapController and mapController:IsReady() then
+        mapController:ClampZoomToLimits()
+    end
 end
 
 function MiniMap.ApplyChromeFromSettings()
-    if not MiniMap.view or not MiniMap.SV then
+    if not MiniMap.view then
         return
     end
     MiniMap.ApplyDrawLayerPreference()
-    if MiniMap.view.background and MiniMap.SV.borderOpacity then
-        MiniMap.view.background:SetAlpha(MiniMap.SV.borderOpacity)
-    end
+    MiniMap.view.background:SetAlpha(MiniMap.SV.borderOpacity)
     MiniMap.view:ApplyPlayerIconDimensions()
     MiniMap.ApplyCompassMode()
 end

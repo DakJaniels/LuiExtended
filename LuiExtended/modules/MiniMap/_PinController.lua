@@ -219,7 +219,11 @@ function MiniMapPinController:ApplyOverlayPinAppearance(pin, pinTexture, drawWid
     local surface = self:GetOverlayPinTextureSurface(pin)
     if surface then
         surface:SetTexture(pinTexture)
-        surface:SetColor(pinColor.r, pinColor.g, pinColor.b, 1)
+        local pinAlpha = pinColor.a
+        if pinAlpha == nil then
+            pinAlpha = 1
+        end
+        surface:SetColor(pinColor.r, pinColor.g, pinColor.b, pinAlpha)
     end
     pin.luiMiniMapPinTexture = pinTexture
 end
@@ -257,7 +261,9 @@ function MiniMapPinController:RelayoutOverlayPin(pin, pinsParent, mapData)
     local drawWidth, drawHeight = self:GetPinDimensions(pinWidth, pinHeight, pinScale, pinType)
     local pinTexture = pin.luiMiniMapPinTexture
     if pinTexture and pinTexture ~= "" then
-        self:ApplyOverlayPinAppearance(pin, pinTexture, drawWidth, drawHeight, { r = 1, g = 1, b = 1 })
+        local playerRed, playerGreen, playerBlue, playerAlpha = MiniMap.GetPlayerPipColor()
+        self:ApplyOverlayPinAppearance(pin, pinTexture, drawWidth, drawHeight,
+                                       { r = playerRed, g = playerGreen, b = playerBlue, a = playerAlpha })
     else
         pin:SetDimensions(drawWidth, drawHeight)
     end
@@ -335,7 +341,9 @@ function MiniMapPinController:SyncPlayerMapPin(mapData)
     local pinX, pinY = self:GetMapPinOffsets(mapData, normalizedX, normalizedY)
     local drawSize = MiniMap.GetPlayerPinDrawSize()
 
-    self:ApplyOverlayPinAppearance(pin, PLAYER_MAP_PIN_TEXTURE, drawSize, drawSize, { r = 1, g = 1, b = 1 })
+    local playerRed, playerGreen, playerBlue, playerAlpha = MiniMap.GetPlayerPipColor()
+    self:ApplyOverlayPinAppearance(pin, PLAYER_MAP_PIN_TEXTURE, drawSize, drawSize,
+                                   { r = playerRed, g = playerGreen, b = playerBlue, a = playerAlpha })
     local playerPinSurface = self:GetOverlayPinTextureSurface(pin)
     if playerPinSurface then
         playerPinSurface:SetTextureRotation(playerHeading)

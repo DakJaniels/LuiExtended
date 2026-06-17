@@ -49,6 +49,28 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.4.8
+    "|cFFA500LuiExtended Version 7.2.4.8|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFShow during Death Recap|r visibility toggle under Visibility.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFPlayer Pip Color|r and |cFFFFFFCamera Wedge Color|r pickers under Appearance.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFZone Name Font|r face, size, and style submenu when |cFFFFFFShow Zone Name|r is enabled (PC).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFPin Updates|r sliders for |cFFFFFFMoving pins (ms)|r and |cFFFFFFPin hover (ms)|r under Advanced.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap (console): |cFFFFFFFrame Layout|r with |cFFFFFFShow Map Now|r, bottom-right position offsets, and |cFFFFFFFrame Width|r / |cFFFFFFFrame Height|r (height follows width when |cFFFFFFKeep Square Aspect|r is on); settings reorganized into sections.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: When |cFFFFFFShow Zoom Buttons|r is enabled, zoom plus/minus fade in on map hover.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFKeep Square Aspect|r resize keeps a square while respecting whether you dragged width or height.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Pin mouseover and sticky-pin selection on the HUD minimap; mouseover lists update before map clicks and on the |cFFFFFFPin hover (ms)|r refresh setting.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Improved map ping handling, objective/POI pin sync, and LUIE waypoint overlay refresh after native pin updates.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: With |cFFFFFFWaypoint Requires Shift|r, Shift+click can clear the player waypoint on the minimap.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap / Info Panel: |cFFFFFFAnchor InfoPanel to MiniMap|r saves and restores the Info Panel anchor when you turn anchoring off.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap (PC): LibAddonMenu settings grouped into submenus (Zoom & Map, Visibility, Context Zoom, Appearance, Advanced).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Keybind display names for minimap actions in Settings → Controls; MiniMap strings refreshed (de, fr, ru, zh).",
+    "",
     -- Version Header 7.2.4.7
     "|cFFA500LuiExtended Version 7.2.4.7|r",
     "",

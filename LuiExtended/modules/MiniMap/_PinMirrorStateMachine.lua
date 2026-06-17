@@ -8,6 +8,8 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
+local eventManager = GetEventManager()
+
 local pinMirrorGameplayTickersUpdateScheduled = false
 local pinMirrorStateMachineLastDebugStateName = nil
 
@@ -135,10 +137,10 @@ function MiniMapPinMirrorStateMachine:Initialize(mapEventController, mapControll
         if not pinMirrorGameplayTickersUpdateScheduled then
             pinMirrorGameplayTickersUpdateScheduled = true
             local gameplayTickersUpdateName = MiniMap.moduleName .. "PinMirrorGameplayTickers"
-            EVENT_MANAGER:RegisterForUpdate(gameplayTickersUpdateName, 0, function ()
-                                                pinMirrorGameplayTickersUpdateScheduled = false
-                                                MiniMap.UpdateGameplayTickers()
-                                            end, true)
+            eventManager:RegisterForUpdate(gameplayTickersUpdateName, 0, function ()
+                                               pinMirrorGameplayTickersUpdateScheduled = false
+                                               MiniMap.UpdateGameplayTickers()
+                                           end, true)
         end
         if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
             local currentState = stateMachine:GetCurrentState()
@@ -165,8 +167,8 @@ end
 
 function MiniMapPinMirrorStateMachine:Stop()
     pinMirrorGameplayTickersUpdateScheduled = false
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "PinMirrorGameplayTickers")
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "MapReloadCompleteNotify")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "PinMirrorGameplayTickers")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "MapReloadCompleteNotify")
     MiniMap.CancelWorldMapUnblockedWait()
     self.mapReloadCompleteNotifyDeferredScheduled = false
     self.pinSyncQueuedWhileMapReloading = false
@@ -264,31 +266,31 @@ function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteNextFrame()
     self.mapReloadCompleteNotifyDeferredScheduled = true
     local stateMachine = self
     local mapReloadCompleteNotifyUpdateName = MiniMap.moduleName .. "MapReloadCompleteNotify"
-    EVENT_MANAGER:RegisterForUpdate(mapReloadCompleteNotifyUpdateName, 0, function ()
-                                        stateMachine.mapReloadCompleteNotifyDeferredScheduled = false
-                                        if not MiniMap.Enabled then
-                                            return
-                                        end
-                                        if MiniMap.IsWorldMapBlockingMiniMapWork() then
-                                            stateMachine.mapReloadCompletePendingAfterMirror = true
-                                            MiniMap.RunWhenWorldMapUnblocked(function ()
-                                                if not MiniMap.Enabled then
-                                                    return
-                                                end
-                                                if not stateMachine:IsCurrentState("MapReloading") then
-                                                    stateMachine.mapReloadCompletePendingAfterMirror = false
-                                                    return
-                                                end
-                                                stateMachine.mapReloadCompletePendingAfterMirror = false
-                                                stateMachine:NotifyMapReloadComplete()
-                                            end)
-                                            return
-                                        end
-                                        if not stateMachine:IsCurrentState("MapReloading") then
-                                            return
-                                        end
-                                        stateMachine:NotifyMapReloadComplete()
-                                    end, true)
+    eventManager:RegisterForUpdate(mapReloadCompleteNotifyUpdateName, 0, function ()
+                                       stateMachine.mapReloadCompleteNotifyDeferredScheduled = false
+                                       if not MiniMap.Enabled then
+                                           return
+                                       end
+                                       if MiniMap.IsWorldMapBlockingMiniMapWork() then
+                                           stateMachine.mapReloadCompletePendingAfterMirror = true
+                                           MiniMap.RunWhenWorldMapUnblocked(function ()
+                                               if not MiniMap.Enabled then
+                                                   return
+                                               end
+                                               if not stateMachine:IsCurrentState("MapReloading") then
+                                                   stateMachine.mapReloadCompletePendingAfterMirror = false
+                                                   return
+                                               end
+                                               stateMachine.mapReloadCompletePendingAfterMirror = false
+                                               stateMachine:NotifyMapReloadComplete()
+                                           end)
+                                           return
+                                       end
+                                       if not stateMachine:IsCurrentState("MapReloading") then
+                                           return
+                                       end
+                                       stateMachine:NotifyMapReloadComplete()
+                                   end, true)
 end
 
 function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteAfterMirror()
@@ -310,6 +312,9 @@ function MiniMapPinMirrorStateMachine:FlushQueuedPinSyncAfterIdle()
         MiniMap.RefreshNativeWorldMapContainer()
         MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
         MiniMap.FirePinResyncCallbacks()
+        if MiniMap.IsNativeWorldMapContainerAttached() then
+            MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+        end
     end
 end
 
@@ -352,4 +357,7 @@ function MiniMapPinMirrorStateMachine:RequestPinSyncImmediate()
     MiniMap.RefreshNativeWorldMapContainer()
     MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     MiniMap.FirePinResyncCallbacks()
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+    end
 end

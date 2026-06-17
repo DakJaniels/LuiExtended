@@ -18,7 +18,7 @@ MiniMap.MINIMAP_PIN_MIN_SIZE = 18
 --- @return number
 local function GetMinPinDrawSize(pinType)
     local minSize = MiniMap.MINIMAP_PIN_MIN_SIZE
-    if pinType and ZO_MapPin.PIN_DATA then
+    if pinType then
         local pinTypeData = ZO_MapPin.PIN_DATA[pinType]
         if pinTypeData and pinTypeData.minSize then
             minSize = pinTypeData.minSize

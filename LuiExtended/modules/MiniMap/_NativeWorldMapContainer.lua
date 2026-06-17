@@ -11,7 +11,7 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
-local MINIMAP_NATIVE_MOVING_PIN_UPDATE_MS = 100
+local eventManager = GetEventManager()
 
 local nativeWorldMapContainerAttached = false
 local nativeWorldMapContainerHiddenForReload = false
@@ -72,13 +72,13 @@ end
 function MiniMap.CancelNativeHudMapOverlayLayoutReapply()
     nativeHudMapOverlayLayoutReapplyScheduled = false
     nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
-    EVENT_MANAGER:UnregisterForUpdate(GetNativeHudMapOverlayLayoutReapplyUpdateName())
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2")
+    eventManager:UnregisterForUpdate(GetNativeHudMapOverlayLayoutReapplyUpdateName())
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2")
 end
 
 --- Runs ZOS g_mapRefresh:UpdateRefreshGroups via the world map OnUpdate handler (keep / link / location dirty groups).
 function MiniMap.FlushWorldMapPinRefreshGroups()
-    if not WORLD_MAP_MANAGER or not WORLD_MAP_MANAGER.control then
+    if not WORLD_MAP_MANAGER then
         return
     end
     local worldMapControl = WORLD_MAP_MANAGER.control
@@ -91,9 +91,6 @@ end
 --- Stops ZO_MapPanAndZoom from re-anchoring ZO_WorldMapContainer to CENTER while it is parented under the HUD minimap.
 function MiniMap.ResetNativeHudWorldMapPanState()
     local panAndZoom = ZO_WorldMap_GetPanAndZoom()
-    if not panAndZoom then
-        return
-    end
     panAndZoom:ClearLockPoint()
     panAndZoom:ClearTargetOffset()
     panAndZoom:ClearTargetNormalizedZoom()
@@ -127,11 +124,11 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     end
     nativeHudMapOverlayLayoutReapplyScheduled = true
     local updateName = GetNativeHudMapOverlayLayoutReapplyUpdateName()
-    EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
-                                        nativeHudMapOverlayLayoutReapplyScheduled = false
-                                        MiniMap.ReapplyNativeHudMapOverlayLayout()
-                                        MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
-                                    end, true)
+    eventManager:RegisterForUpdate(updateName, 0, function ()
+                                       nativeHudMapOverlayLayoutReapplyScheduled = false
+                                       MiniMap.ReapplyNativeHudMapOverlayLayout()
+                                       MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
+                                   end, true)
 end
 
 --- Second frame after ZOS g_mapRefresh:UpdateRefreshGroups (world map OnUpdate).
@@ -144,10 +141,10 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
     end
     nativeHudMapOverlayLayoutReapplySecondFrameScheduled = true
     local secondFrameUpdateName = MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2"
-    EVENT_MANAGER:RegisterForUpdate(secondFrameUpdateName, 0, function ()
-                                        nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
-                                        MiniMap.ReapplyNativeHudMapOverlayLayout()
-                                    end, true)
+    eventManager:RegisterForUpdate(secondFrameUpdateName, 0, function ()
+                                       nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
+                                       MiniMap.ReapplyNativeHudMapOverlayLayout()
+                                   end, true)
 end
 
 --- @return boolean
@@ -168,7 +165,7 @@ function MiniMap.TickNativeWorldMapMovingPins()
     if not MiniMap.HasNativeMovingPinTargets() then
         return
     end
-    if MiniMap.ShouldRunThrottled("NativeMovingPins", MINIMAP_NATIVE_MOVING_PIN_UPDATE_MS) then
+    if MiniMap.ShouldRunThrottled("NativeMovingPins", MiniMap.GetMovingPinRefreshMs()) then
         MiniMap.UpdateNativeWorldMapMovingPins()
     end
 end
@@ -198,6 +195,29 @@ function MiniMap.UpdateNativeWorldMapMovingPins()
         return
     end
     ZO_WorldMap_GetPinManager():UpdateMovingPins()
+    MiniMap.ApplyNativeWorldMapPlayerPinColors()
+end
+
+--- Tints the ZOS HUD player map pin (ZO_WorldMapPins_Manager:GetPlayerPin), not a fixed pool index.
+function MiniMap.ApplyNativeWorldMapPlayerPinColors()
+    if not nativeWorldMapContainerAttached then
+        return
+    end
+    local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+    if not playerMapPin or playerMapPin:GetPinType() ~= MAP_PIN_TYPE_PLAYER then
+        return
+    end
+    local backgroundControl = playerMapPin.backgroundControl
+    if not backgroundControl then
+        return
+    end
+    local red, green, blue, alpha
+    if MiniMap.GetMapFollowsPlayer() then
+        red, green, blue, alpha = MiniMap.GetCameraWedgeColor()
+    else
+        red, green, blue, alpha = MiniMap.GetPlayerPipColor()
+    end
+    backgroundControl:SetColor(red, green, blue, alpha)
 end
 
 local function ApplyNativeWorldMapHudDrawOrder(view)
@@ -217,11 +237,7 @@ function MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
     if nativeWorldMapContainerRestore.playerWorldPinWasHidden == nil then
         nativeWorldMapContainerRestore.playerWorldPinWasHidden = playerWorldPinControl:IsHidden()
     end
-    if MiniMap.GetMapFollowsPlayer() then
-        playerWorldPinControl:SetHidden(true)
-    else
-        playerWorldPinControl:SetHidden(false)
-    end
+    MiniMap.ApplyNativeWorldMapPlayerPinColors()
 end
 
 local function RestoreWorldMapPlayerPinVisibility()
@@ -261,6 +277,7 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
     WORLD_MAP_MANAGER:UpdateBlobs()
 
     MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
+    MiniMap.ApplyNativeWorldMapPlayerPinColors()
     if MiniMap.pinController then
         MiniMap.pinController:ApplyUserScaleToNativeWorldMapPins()
     end

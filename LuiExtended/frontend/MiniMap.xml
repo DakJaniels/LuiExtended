@@ -187,8 +187,8 @@
                   </OnClicked>
                 </Button>
                 <Control name="$(parent)_MoveGrip"
-                           inherits="ZO_MouseTooltipBehavior"
-                           mouseEnabled="true">
+                         inherits="ZO_MouseTooltipBehavior"
+                         mouseEnabled="true">
                   <Dimensions x="20"
                               y="20" />
                   <OnInitialized>
@@ -230,6 +230,24 @@
                   relativeTo="$(parent)_Player"
                   relativePoint="CENTER" />
         </Texture>
+        <Control name="$(parent)_ZoomChromeHover"
+                 mouseEnabled="true"
+                 layer="2"
+                 tier="HIGH">
+          <Dimensions x="32"
+                      y="56" />
+          <Anchor point="BOTTOMRIGHT"
+                  relativeTo="$(parent)_Scroll"
+                  relativePoint="BOTTOMRIGHT"
+                  offsetX="-54"
+                  offsetY="0" />
+          <OnMouseEnter>
+            LUIE.MiniMap.OnZoomChromeHoverMouseEnter(self)
+          </OnMouseEnter>
+          <OnMouseExit>
+            LUIE.MiniMap.OnZoomChromeHoverMouseExit(self)
+          </OnMouseExit>
+        </Control>
         <Button name="$(parent)_ZoomIn"
                 inherits="ZO_ButtonBehaviorClickSound"
                 hidden="true"
@@ -251,6 +269,12 @@
           <OnClicked>
             LUIE.MiniMap.OnZoomInClicked(self, button, ctrl, alt, shift, command)
           </OnClicked>
+          <OnMouseEnter>
+            LUIE.MiniMap.OnZoomChromeHoverMouseEnter(self)
+          </OnMouseEnter>
+          <OnMouseExit>
+            LUIE.MiniMap.OnZoomChromeHoverMouseExit(self)
+          </OnMouseExit>
         </Button>
         <Button name="$(parent)_ZoomOut"
                 inherits="ZO_ButtonBehaviorClickSound"
@@ -273,6 +297,12 @@
           <OnClicked>
             LUIE.MiniMap.OnZoomOutClicked(self, button, ctrl, alt, shift, command)
           </OnClicked>
+          <OnMouseEnter>
+            LUIE.MiniMap.OnZoomChromeHoverMouseEnter(self)
+          </OnMouseEnter>
+          <OnMouseExit>
+            LUIE.MiniMap.OnZoomChromeHoverMouseExit(self)
+          </OnMouseExit>
         </Button>
       </Controls>
     </TopLevelControl>

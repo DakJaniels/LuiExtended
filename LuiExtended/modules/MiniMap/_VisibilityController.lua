@@ -9,18 +9,40 @@ local LUIE = LUIE
 local MiniMap = LUIE.MiniMap
 
 MiniMap.sessionMapVisible = true
+MiniMap.consoleLayoutPreviewActive = false
+
+local LIB_HARVENS_ADDON_SETTINGS_SCENE_NAME = "LibHarvensAddonSettingsScene"
 
 --- @return boolean
 function MiniMap.IsPlayerInHouse()
-    if GetCurrentZoneHouseId then
-        return GetCurrentZoneHouseId() ~= 0
+    return GetCurrentZoneHouseId() ~= 0
+end
+
+--- @return boolean
+function MiniMap.IsDeathRecapVisible()
+    return not DEATH_RECAP_FRAGMENT:IsHidden()
+end
+
+function MiniMap.RegisterDeathRecapVisibilityHook()
+    if MiniMap.deathRecapVisibilityHookRegistered then
+        return
     end
-    return false
+    MiniMap.deathRecapVisibilityHookRegistered = true
+
+    DEATH_RECAP_FRAGMENT:RegisterCallback("StateChange", function ()
+        MiniMap.ApplyFragmentHiddenReasons()
+        MiniMap.UpdateGameplayTickers()
+    end)
+
+    DEATH_RECAP:RegisterCallback("OnDeathRecapAvailableChanged", function ()
+        MiniMap.ApplyFragmentHiddenReasons()
+        MiniMap.UpdateGameplayTickers()
+    end)
 end
 
 --- @return boolean
 function MiniMap.GetContextAllowsMiniMap()
-    if not MiniMap.Enabled or not MiniMap.SV then
+    if not MiniMap.Enabled then
         return false
     end
     if MiniMap.sessionMapVisible == false then
@@ -68,11 +90,70 @@ function MiniMap.ToggleShowMap()
 end
 
 function MiniMap.ToggleShowInCombatSetting()
-    if not MiniMap.SV then
-        return
-    end
     MiniMap.SV.allowDuringCombat = not MiniMap.SV.allowDuringCombat
     MiniMap.UpdateConditionalVisibility()
+end
+
+--- Console: show MiniMap while LibHarvens addon settings are open (layout sliders).
+--- @param active boolean
+function MiniMap.SetConsoleLayoutPreviewActive(active)
+    local wantActive = active == true
+    if MiniMap.consoleLayoutPreviewActive == wantActive then
+        return
+    end
+    MiniMap.consoleLayoutPreviewActive = wantActive
+
+    local hudSceneFragment = MiniMap.hudSceneFragment
+    local settingsScene = SCENE_MANAGER:GetScene(LIB_HARVENS_ADDON_SETTINGS_SCENE_NAME)
+    if wantActive then
+        MiniMap.sessionMapVisible = true
+        if hudSceneFragment and settingsScene and not settingsScene:HasFragment(hudSceneFragment) then
+            settingsScene:AddFragment(hudSceneFragment)
+        end
+    elseif hudSceneFragment and settingsScene and settingsScene:HasFragment(hudSceneFragment) then
+        settingsScene:RemoveFragment(hudSceneFragment)
+    end
+
+    MiniMap.ApplyFragmentHiddenReasons()
+    MiniMap.UpdateGameplayTickers()
+end
+
+function MiniMap.ShowMapNowForConsoleLayout()
+    if not MiniMap.Enabled or not ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
+    MiniMap.SetConsoleLayoutPreviewActive(true)
+    MiniMap.ApplyFrameLayoutFromSavedSettings()
+    if MiniMap.mapController and MiniMap.mapController:IsReady() then
+        MiniMap.RefreshNativeWorldMapContainer()
+    end
+end
+
+function MiniMap.ToggleConsoleLayoutPreview()
+    if not MiniMap.Enabled or not ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
+    if MiniMap.consoleLayoutPreviewActive then
+        MiniMap.SetConsoleLayoutPreviewActive(false)
+    else
+        MiniMap.ShowMapNowForConsoleLayout()
+    end
+end
+
+function MiniMap.RegisterConsoleLayoutPreviewSettingsSceneHook()
+    if MiniMap.consoleLayoutPreviewSettingsSceneHooked or not ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
+    local settingsScene = SCENE_MANAGER:GetScene(LIB_HARVENS_ADDON_SETTINGS_SCENE_NAME)
+    if not settingsScene then
+        return
+    end
+    MiniMap.consoleLayoutPreviewSettingsSceneHooked = true
+    settingsScene:RegisterCallback("StateChange", function (_, newState)
+        if newState == SCENE_HIDDEN then
+            MiniMap.SetConsoleLayoutPreviewActive(false)
+        end
+    end)
 end
 
 function MiniMap.ApplyDrawLayerPreference()
@@ -100,4 +181,14 @@ function MiniMap.RegisterVisibilityEvents()
     anchor:RegisterForEvent(EVENT_HOUSING_PLAYER_INFO_CHANGED, function ()
         MiniMap.UpdateConditionalVisibility()
     end)
+    anchor:RegisterForEvent(EVENT_PLAYER_DEAD, function ()
+        MiniMap.ApplyFragmentHiddenReasons()
+        MiniMap.UpdateGameplayTickers()
+    end)
+    anchor:RegisterForEvent(EVENT_PLAYER_ALIVE, function ()
+        MiniMap.ApplyFragmentHiddenReasons()
+        MiniMap.UpdateGameplayTickers()
+    end)
+    MiniMap.RegisterDeathRecapVisibilityHook()
+    MiniMap.RegisterConsoleLayoutPreviewSettingsSceneHook()
 end

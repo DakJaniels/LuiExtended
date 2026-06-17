@@ -3,16 +3,6 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_ZOOMIN", "Zoom in")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_ZOOMOUT", "Zoom out")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_ZOOMRESET", "Zoom reset")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_RECENTER", "Recenter MiniMap")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_SHOW", "Toggle MiniMap visibility")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_COMBAT", "Toggle MiniMap in combat")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_TOGGLE_FIXED", "Toggle zone scroll lock")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMIN", "Hold zoom in MiniMap")
-ZO_CreateStringId("SI_BINDING_NAME_LUIE_MINIMAP_HOLD_ZOOMOUT", "Hold zoom out MiniMap")
-
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
@@ -30,6 +20,7 @@ function MiniMap.Initialize(enabled)
     if not enabled then
         if MiniMap.view then
             MiniMap.view:ShutdownZoomLabelFade()
+            MiniMap.view:ShutdownZoomButtonsFade()
         end
         if MiniMap.pinMirrorStateMachine then
             MiniMap.pinMirrorStateMachine:Stop()
@@ -38,6 +29,8 @@ function MiniMap.Initialize(enabled)
         MiniMap.playerMapMirrorDepth = 0
         MiniMap.playerMapMirrorPendingCallback = nil
         MiniMap.pendingPostReloadUILayout = nil
+        MiniMap.pinResyncCallbacks = nil
+        MiniMap.SetConsoleLayoutPreviewActive(false)
         if MiniMap.mapEventController then
             MiniMap.mapEventController:Unregister()
         end
@@ -45,6 +38,8 @@ function MiniMap.Initialize(enabled)
             MiniMap.runtime:Stop()
         end
         MiniMap.ShutdownNativeWorldMapContainer()
+        MiniMap.DisableHudMinimapWorldMapInputPreHooks()
+        MiniMap.DisableHudMinimapPinInteractionPreHooks()
         MiniMap.UnregisterMiniMapSceneIntegration()
         LUIE_MiniMap:SetHidden(true)
         MiniMap.Enabled = false
@@ -62,6 +57,10 @@ function MiniMap.Initialize(enabled)
     MiniMap.zoom = MiniMap.SV.resetZoomLevel
     MiniMap.mapController:ClampZoomToLimits(false)
     MiniMap.pinController = MiniMap.MiniMapPinController:New(MiniMap.view, MiniMap.mapController)
+    MiniMap.pinResyncCallbacks = nil
+    MiniMap.RegisterPinResyncCallback(function ()
+        MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
+    end)
     MiniMap.runtime = MiniMap.MiniMapRuntime:New(MiniMap.view, MiniMap.mapController, MiniMap.pinController)
     local followPlayer = MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true
     MiniMap.runtime.mapFollowsPlayer = followPlayer
@@ -73,6 +72,8 @@ function MiniMap.Initialize(enabled)
     )
     MiniMap.pinMirrorStateMachine.mapEventController = MiniMap.mapEventController
     MiniMap.inputController = MiniMap.MiniMapInputController:New(MiniMap.view, MiniMap.mapController, MiniMap.runtime)
+    MiniMap.InstallHudMinimapWorldMapInputPreHooks()
+    MiniMap.InstallHudMinimapPinInteractionPreHooks()
 
     MiniMap.view:ApplySavedLayout(MiniMap.SV)
     MiniMap.view:SetupPlayerIcons()
@@ -97,6 +98,6 @@ function MiniMap.ResetPosition()
     MiniMap.SV.offsetX = MiniMap.Defaults.offsetX
     MiniMap.SV.offsetY = MiniMap.Defaults.offsetY
     if MiniMap.view then
-        MiniMap.view:ApplySavedLayout(MiniMap.SV)
+        MiniMap.ApplyFrameLayoutFromSavedSettings(true)
     end
 end

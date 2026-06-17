@@ -152,7 +152,7 @@ function MiniMapRuntime:OnFollowTick()
             MiniMap.TryAutoZoomOutAtMapEdge(mapData)
         end
     else
-        local panDragActive = MiniMap.inputController and MiniMap.inputController.panDragActive
+        local panDragActive = MiniMap.inputController.panDragActive
         if not panDragActive then
             scroll:SetHorizontalScroll(MiniMap.SV.panOffsetX or 0)
             scroll:SetVerticalScroll(MiniMap.SV.panOffsetY or 0)
@@ -164,6 +164,9 @@ function MiniMapRuntime:OnFollowTick()
     self.lastPlayerNormY = playerNormalizedY
 
     MiniMap.TickNativeWorldMapMovingPins()
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.ApplyNativeWorldMapPlayerPinColors()
+    end
 end
 
 function MiniMapRuntime:ApplyScrollFromPanOffsets()
@@ -192,6 +195,7 @@ function MiniMap.OnRootUpdate(control, time)
     if not MiniMap.ShouldRunFollowUpdate() then
         return
     end
+    MiniMap.UpdateHudMinimapPinMouseOverFromPointer()
     local runtime = MiniMap.runtime
     local now = GetFrameTimeMilliseconds()
     if runtime.lastFollowUpdateMs and (now - runtime.lastFollowUpdateMs) < MINIMAP_FOLLOW_UPDATE_MS then

@@ -8,6 +8,8 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
+local eventManager = GetEventManager()
+
 local MINIMAP_MAP_NAME_FALLBACK_MS = 45000
 
 --- @class MiniMapMapEventController : ZO_InitializingCallbackObject
@@ -63,11 +65,7 @@ local CMAP_KEEP_EVENT_IDS =
 
 local PIN_DIRTY_EVENT_IDS =
 {
-    EVENT_MAP_PING,
     EVENT_OBJECTIVES_UPDATED,
-    EVENT_POIS_INITIALIZED,
-    EVENT_POI_UPDATED,
-    EVENT_POI_DISCOVERED,
     EVENT_GROUP_UPDATE,
     EVENT_GROUP_MEMBER_JOINED,
     EVENT_GROUP_MEMBER_LEFT,
@@ -102,6 +100,87 @@ function MiniMapMapEventController:SchedulePinSync()
     self.pinMirrorStateMachine:RequestPinSyncImmediate()
 end
 
+--- Skyshards, delves, and other map objective pins on the reparented world map container.
+function MiniMapMapEventController:RequestMapObjectivePinSync()
+    if not MiniMap.Enabled or not self.mapController or not self.pinMirrorStateMachine then
+        return
+    end
+    if MiniMap.fastTravel or self.pinMirrorStateMachine:IsCurrentState("FastTravelBlocked") then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(self.pinMirrorStateMachine)
+        return
+    end
+    if self.pinMirrorStateMachine:IsCurrentState("MapReloading") or self.pinMirrorStateMachine:IsCurrentState("ZoneReset") then
+        self.pinMirrorStateMachine.pinSyncQueuedWhileMapReloading = true
+        return
+    end
+    if not self.mapController:IsReady() then
+        self.pinMirrorStateMachine.pinSyncQueuedWhileMapReloading = true
+        return
+    end
+    MiniMap.TryAttachNativeWorldMapContainer()
+    local mirrorRan = MiniMap.RunWithPlayerMapForMirror(function ()
+        ZO_WorldMap_RefreshAllPOIs()
+        MiniMap.RefreshWorldMapLocationPinsForMirror()
+    end)
+    if not mirrorRan then
+        return
+    end
+    MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+    MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
+end
+
+--- Mirrors ZOS WorldMap EVENT_MAP_PING handler in player-map context for the HUD mirror.
+--- @param _eventCode integer
+--- @param pingEventType integer
+--- @param pingType MapPinType
+--- @param pingTag string
+--- @param x number
+--- @param y number
+--- @param _isPingOwner boolean
+function MiniMapMapEventController:OnMapPing(_eventCode, pingEventType, pingType, pingTag, x, y, _isPingOwner)
+    if not MiniMap.Enabled or not self.mapController or not self.pinMirrorStateMachine then
+        return
+    end
+    if MiniMap.fastTravel or self.pinMirrorStateMachine:IsCurrentState("FastTravelBlocked") then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(self.pinMirrorStateMachine)
+        return
+    end
+    if self.pinMirrorStateMachine:IsCurrentState("MapReloading") or self.pinMirrorStateMachine:IsCurrentState("ZoneReset") then
+        self.pinMirrorStateMachine.pinSyncQueuedWhileMapReloading = true
+        return
+    end
+    if not self.mapController:IsReady() then
+        self.pinMirrorStateMachine.pinSyncQueuedWhileMapReloading = true
+        return
+    end
+    MiniMap.TryAttachNativeWorldMapContainer()
+    local pinAdded = false
+    local mirrorRan = MiniMap.RunWithPlayerMapForMirror(function ()
+        local pinManager = ZO_WorldMap_GetPinManager()
+        if pingEventType == PING_EVENT_ADDED then
+            pinManager:RemovePins("pings", pingType, pingTag)
+            pinManager:CreatePin(pingType, pingTag, x, y)
+            pinAdded = true
+        elseif pingEventType == PING_EVENT_REMOVED then
+            pinManager:RemovePins("pings", pingType, pingTag)
+        end
+    end)
+    if not mirrorRan then
+        return
+    end
+    MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+    if pinAdded and self.pinController then
+        self.pinController:ApplyUserScaleToNativeWorldMapPins()
+    end
+    MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
+end
+
 --- Full native container refresh for quest flows ZOS CMapHandlers does not own.
 function MiniMapMapEventController:RequestQuestPinSyncFull()
     if not MiniMap.Enabled then
@@ -129,20 +208,20 @@ end
 function MiniMapMapEventController:ScheduleQuestPinLightSync()
     local mapEventController = self
     local updateName = MiniMap.moduleName .. "QuestPinLightSync"
-    EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
-                                        EVENT_MANAGER:UnregisterForUpdate(updateName)
-                                        local journalIndex = questPinLightSyncPendingJournalIndex
-                                        local refreshAll = questPinLightSyncPendingRefreshAll
-                                        local layoutOnly = questPinLightSyncPendingLayoutOnly
-                                        questPinLightSyncPendingJournalIndex = nil
-                                        questPinLightSyncPendingRefreshAll = false
-                                        questPinLightSyncPendingLayoutOnly = false
-                                        if layoutOnly and not journalIndex and not refreshAll then
-                                            MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
-                                            return
-                                        end
-                                        MiniMap.RunQuestPinLightSyncForMirror(journalIndex, refreshAll)
-                                    end, true)
+    eventManager:RegisterForUpdate(updateName, 0, function ()
+                                       eventManager:UnregisterForUpdate(updateName)
+                                       local journalIndex = questPinLightSyncPendingJournalIndex
+                                       local refreshAll = questPinLightSyncPendingRefreshAll
+                                       local layoutOnly = questPinLightSyncPendingLayoutOnly
+                                       questPinLightSyncPendingJournalIndex = nil
+                                       questPinLightSyncPendingRefreshAll = false
+                                       questPinLightSyncPendingLayoutOnly = false
+                                       if layoutOnly and not journalIndex and not refreshAll then
+                                           MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
+                                           return
+                                       end
+                                       MiniMap.RunQuestPinLightSyncForMirror(journalIndex, refreshAll)
+                                   end, true)
 end
 
 function MiniMapMapEventController:RequestDigSitePinSync()
@@ -180,27 +259,27 @@ end
 function MiniMapMapEventController:ScheduleDeferredQuestPinSyncLight(journalIndex)
     local mapEventController = self
     local questPinSyncUpdateName = MiniMap.moduleName .. "QuestTrackerPinSync"
-    EVENT_MANAGER:RegisterForUpdate(questPinSyncUpdateName, 0, function ()
-                                        mapEventController:RequestQuestPinSyncLight(journalIndex, false)
-                                    end, true)
+    eventManager:RegisterForUpdate(questPinSyncUpdateName, 0, function ()
+                                       mapEventController:RequestQuestPinSyncLight(journalIndex, false)
+                                   end, true)
 end
 
 function MiniMapMapEventController:ScheduleSubzoneHudRecovery()
     local mapEventController = self
     local updateName = MiniMap.moduleName .. "SubzoneHudRecovery"
-    EVENT_MANAGER:RegisterForUpdate(updateName, 0, function ()
-                                        EVENT_MANAGER:UnregisterForUpdate(updateName)
-                                        if MiniMap.IsMapReloadAffectingHudLayout() then
-                                            mapEventController:ScheduleSubzoneHudRecovery()
-                                            return
-                                        end
-                                        if MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
-                                            MiniMap.ApplyHudMirrorRecoveryAfterSubzoneTransition()
-                                            MiniMap.ApplyHudLocationLabelFromPlayerLocation()
-                                        else
-                                            mapEventController:RequestMapReload("EVENT_ZONE_CHANGED")
-                                        end
-                                    end, true)
+    eventManager:RegisterForUpdate(updateName, 0, function ()
+                                       eventManager:UnregisterForUpdate(updateName)
+                                       if MiniMap.IsMapReloadAffectingHudLayout() then
+                                           mapEventController:ScheduleSubzoneHudRecovery()
+                                           return
+                                       end
+                                       if MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
+                                           MiniMap.ApplyHudMirrorRecoveryAfterSubzoneTransition()
+                                           MiniMap.ApplyHudLocationLabelFromPlayerLocation()
+                                       else
+                                           mapEventController:RequestMapReload("EVENT_ZONE_CHANGED")
+                                       end
+                                   end, true)
 end
 
 function MiniMapMapEventController:OnCurrentSubzoneListChanged()
@@ -293,6 +372,18 @@ function MiniMapMapEventController:Register()
     for _, eventId in ipairs(PIN_DIRTY_EVENT_IDS) do
         self:RegisterGameEvent(eventId, function () mapEventController:SchedulePinSync() end)
     end
+    self:RegisterGameEvent(EVENT_MAP_PING, function (eventCode, pingEventType, pingType, pingTag, x, y, isPingOwner)
+        mapEventController:OnMapPing(eventCode, pingEventType, pingType, pingTag, x, y, isPingOwner)
+    end)
+    self:RegisterGameEvent(EVENT_POI_UPDATED, function ()
+        mapEventController:RequestMapObjectivePinSync()
+    end)
+    self:RegisterGameEvent(EVENT_POI_DISCOVERED, function ()
+        mapEventController:RequestMapObjectivePinSync()
+    end)
+    self:RegisterGameEvent(EVENT_POIS_INITIALIZED, function ()
+        mapEventController:RequestMapObjectivePinSync()
+    end)
     for _, eventId in ipairs(CMAP_QUEST_PIN_SYNC_FULL_EVENT_IDS) do
         self:RegisterGameEvent(eventId, function () mapEventController:RequestQuestPinSyncFull() end)
     end
@@ -343,7 +434,7 @@ function MiniMapMapEventController:Register()
     end
     ANTIQUITY_DATA_MANAGER:RegisterCallback("AntiquitiesUpdated", self.onAntiquitiesUpdated)
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", self.onSingleAntiquityDigSitesUpdated)
-    EVENT_MANAGER:RegisterForUpdate(MiniMap.moduleName .. "MapNameFallback", MINIMAP_MAP_NAME_FALLBACK_MS, function ()
+    eventManager:RegisterForUpdate(MiniMap.moduleName .. "MapNameFallback", MINIMAP_MAP_NAME_FALLBACK_MS, function ()
         mapEventController:OnMapNameFallbackTick()
     end)
     self.pinMirrorStateMachine:Start()
@@ -362,10 +453,10 @@ function MiniMapMapEventController:Unregister()
         self.eventAnchor:UnregisterForEvent(eventId)
     end
     self.registeredEvents = {}
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "MapNameFallback")
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "QuestTrackerPinSync")
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "QuestPinLightSync")
-    EVENT_MANAGER:UnregisterForUpdate(MiniMap.moduleName .. "SubzoneHudRecovery")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "MapNameFallback")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "QuestTrackerPinSync")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "QuestPinLightSync")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "SubzoneHudRecovery")
     if self.onQuestTrackerTrackingStateChanged then
         FOCUSED_QUEST_TRACKER:UnregisterCallback("QuestTrackerTrackingStateChanged", self.onQuestTrackerTrackingStateChanged)
         self.onQuestTrackerTrackingStateChanged = nil

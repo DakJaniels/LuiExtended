@@ -346,7 +346,7 @@ function MiniMap.ShouldInvokeNativeWorldMapUpdateTexturesForMapData(mapData)
         return true
     end
     if mapData.numHorizontalTiles ~= MiniMap.playerMapMirrorZosTilesHorizontal
-        or mapData.numVerticalTiles ~= MiniMap.playerMapMirrorZosTilesVertical then
+    or mapData.numVerticalTiles ~= MiniMap.playerMapMirrorZosTilesVertical then
         return true
     end
     return false
@@ -361,7 +361,7 @@ function MiniMap.BindNativeWorldMapTilesForHud(mapData, invokeUpdateTextures)
     end
     WORLD_MAP_TILES_MANAGER:UpdateMapData()
     if WORLD_MAP_TILES_MANAGER.totalTiles ~= mapData.numTiles
-        or not WORLD_MAP_TILES_MANAGER:GetActiveObject(1) then
+    or not WORLD_MAP_TILES_MANAGER:GetActiveObject(1) then
         WORLD_MAP_TILES_MANAGER:UpdateTextures()
     end
 end

@@ -28,35 +28,25 @@ end
 
 --- @return boolean
 function MiniMap.IsInDungeonMap()
-    if IsUnitInDungeon then
-        return IsUnitInDungeon("player")
-    end
-    return false
+    return IsUnitInDungeon("player")
 end
 
 --- @return boolean
 function MiniMap.IsInBattlegroundMap()
-    if IsActiveWorldBattleground then
-        return IsActiveWorldBattleground()
-    end
-    return false
+    return IsActiveWorldBattleground()
 end
 
 --- @return number
 function MiniMap.GetContextBaseZoom()
-    local settings = MiniMap.SV or MiniMap.Defaults
+    local settings = MiniMap.SV
     if MiniMap.IsInBattlegroundMap() then
         return settings.battlegroundMapZoom or settings.resetZoomLevel
     end
-    if GetMapContentType then
-        local mapContentType = GetMapContentType()
-        if mapContentType == MAP_CONTENT_BATTLEGROUND then
-            return settings.battlegroundMapZoom or settings.resetZoomLevel
-        end
-        if mapContentType == MAP_CONTENT_DUNGEON or MiniMap.IsInDungeonMap() then
-            return settings.dungeonMapZoom or settings.resetZoomLevel
-        end
-    elseif MiniMap.IsInDungeonMap() then
+    local mapContentType = GetMapContentType()
+    if mapContentType == MAP_CONTENT_BATTLEGROUND then
+        return settings.battlegroundMapZoom or settings.resetZoomLevel
+    end
+    if mapContentType == MAP_CONTENT_DUNGEON or MiniMap.IsInDungeonMap() then
         return settings.dungeonMapZoom or settings.resetZoomLevel
     end
     local horizontalTiles = select(1, GetMapNumTiles())
@@ -68,7 +58,7 @@ end
 
 --- @return number
 function MiniMap.GetMountedZoomMultiplier()
-    local settings = MiniMap.SV or MiniMap.Defaults
+    local settings = MiniMap.SV
     if IsMounted() and settings.mountedZoomMultiplier then
         return settings.mountedZoomMultiplier
     end
@@ -92,7 +82,7 @@ end
 --- @param mapData MiniMapMapData
 function MiniMap.TryAutoZoomOutAtMapEdge(mapData)
     local settings = MiniMap.SV
-    if not settings or settings.autoZoomOutAtEdge ~= true or not MiniMap.mapController then
+    if settings.autoZoomOutAtEdge ~= true or not MiniMap.mapController then
         return
     end
     if not MiniMap.GetMapFollowsPlayer() then
@@ -110,9 +100,6 @@ function MiniMap.TryAutoZoomOutAtMapEdge(mapData)
 end
 
 function MiniMap.ToggleFixedMapPosition()
-    if not MiniMap.SV then
-        return
-    end
     MiniMap.SV.zoneScrollLockEnabled = not MiniMap.SV.zoneScrollLockEnabled
     if not MiniMap.SV.zoneScrollLockByMapName then
         MiniMap.SV.zoneScrollLockByMapName = {}
@@ -138,7 +125,7 @@ end
 --- @param mapData MiniMapMapData
 --- @return boolean
 function MiniMap.ApplyFixedMapScroll(mapData)
-    if not MiniMap.SV or MiniMap.SV.zoneScrollLockEnabled ~= true or not MiniMap.SV.zoneScrollLockByMapName then
+    if MiniMap.SV.zoneScrollLockEnabled ~= true or not MiniMap.SV.zoneScrollLockByMapName then
         return false
     end
     local fixedEntry = MiniMap.SV.zoneScrollLockByMapName[mapData.rawName]

@@ -158,7 +158,7 @@ function CastBar.BuildWayshrineRecallCastAbilityLookup()
     for collectibleIndex = 1, collectibleTotal do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE, collectibleIndex)
         if collectibleId and collectibleId > 0 then
-            if GetCollectiblePlayerFxOverrideType(collectibleId) == PLAYER_FX_OVERRIDE_TYPE_ABILITY
+            if  GetCollectiblePlayerFxOverrideType(collectibleId) == PLAYER_FX_OVERRIDE_TYPE_ABILITY
             and GetCollectiblePlayerFxOverrideAbilityType(collectibleId) == PLAYER_FX_OVERRIDE_ABILITY_TYPE_WAYSHRINE then
                 local referenceAbilityId = GetCollectibleReferenceId(collectibleId)
                 if referenceAbilityId and referenceAbilityId > 0 then
@@ -175,7 +175,7 @@ local function castBarHasActiveWayshrineRecallPlayerFxOverride()
     for collectibleIndex = 1, collectibleTotal do
         local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE, collectibleIndex)
         if collectibleId and collectibleId > 0 then
-            if GetCollectiblePlayerFxOverrideType(collectibleId) == PLAYER_FX_OVERRIDE_TYPE_ABILITY
+            if  GetCollectiblePlayerFxOverrideType(collectibleId) == PLAYER_FX_OVERRIDE_TYPE_ABILITY
             and GetCollectiblePlayerFxOverrideAbilityType(collectibleId) == PLAYER_FX_OVERRIDE_ABILITY_TYPE_WAYSHRINE
             and IsCollectibleActive(collectibleId, GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                 return true
