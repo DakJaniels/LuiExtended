@@ -209,6 +209,8 @@ function MiniMap.ApplyFragmentHiddenReasons()
     setHiddenReasonIfChanged("MiniMapCombat", IsUnitInCombat("player") and MiniMap.SV.allowDuringCombat ~= true)
     setHiddenReasonIfChanged("MiniMapMounted", IsMounted() and MiniMap.SV.allowWhileMounted ~= true)
     setHiddenReasonIfChanged("MiniMapHousing", MiniMap.IsPlayerInHouse() and MiniMap.SV.allowInPlayerHousing ~= true)
+    local deathRecapHidden = MiniMap.IsDeathRecapVisible() and MiniMap.SV.allowOnDeathRecap == false
+    setHiddenReasonIfChanged("MiniMapDeathRecap", deathRecapHidden)
 end
 
 function MiniMap.OnWorldMapOpening(sceneName)

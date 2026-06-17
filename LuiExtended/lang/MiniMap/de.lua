@@ -42,6 +42,8 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Gruppe und Begleiter. Niedriger = flüssiger, höher = weniger CPU.",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS = "Pin-Mausover (ms)",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Pins unter der Maus. Vor allem Tastatur und Maus.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Bei Death Recap anzeigen",
+    LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP = "Anzeigen, solange das Death-Recap-Fenster offen ist. Aus = Karte auf diesem Bildschirm ausblenden.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Pin-Mirror-Zustandsautomat (Debug)",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Pin-Spiegel, Karten-Neuladen und Schnellreise im Chat protokollieren.",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "InfoPanel an Minimap verankern",
@@ -69,6 +71,12 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Spielstandard",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Kompass am HUD ausblenden",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Kompass am HUD anzeigen",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE = "Kamera-Kegel-Skalierung (%)",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_TP = "Größe des Kamera-Richtungskegels. Nur bei Spieler folgen.",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR = "Spieler-Pip-Farbe",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Farbe Ihres Spielerpfeils auf der Karte.",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Kamera-Kegel-Farbe",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Farbe des Kamera-Richtungskegels. Nur bei Spieler folgen.",
 }
 
 LUIE_RegisterStrings(strings, true)

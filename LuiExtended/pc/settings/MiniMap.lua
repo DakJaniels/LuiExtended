@@ -24,6 +24,7 @@ local miniMapHudVisibilityOptions =
     { key = "allowOnGameplayHud",     name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP     },
     { key = "allowDuringCombat",      name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP  },
     { key = "allowOnLootScene",       name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,    tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP    },
+    { key = "allowOnDeathRecap",      name = LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP, tp = LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP },
     { key = "allowWhileMounted",      name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED, tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP },
     { key = "allowInPlayerHousing",   name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING, tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP },
     { key = "preferElevatedDrawTier", name = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP  },
@@ -510,6 +511,10 @@ function MiniMap.CreateSettings()
         return disabled() or not LUIE.SV.InfoPanel_Enabled
     end
 
+    local cameraWedgeSettingsDisabled = function ()
+        return disabled() or not MiniMap.SV.followPlayer
+    end
+
     local appearanceControls =
     {
         {
@@ -552,6 +557,50 @@ function MiniMap.CreateSettings()
             controls = zoneNameFontSubmenuControls,
         },
         {
+            type = "colorpicker",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP),
+            getFunc = function ()
+                local color = MiniMap.SV.playerPipColor or Defaults.playerPipColor
+                return color.r, color.g, color.b, color.a
+            end,
+            setFunc = function (red, green, blue, alpha)
+                MiniMap.SV.playerPipColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.ApplyLiveSettings()
+            end,
+            width = "half",
+            disabled = disabled,
+            default =
+            {
+                r = Defaults.playerPipColor.r,
+                g = Defaults.playerPipColor.g,
+                b = Defaults.playerPipColor.b,
+                a = Defaults.playerPipColor.a,
+            },
+        },
+        {
+            type = "colorpicker",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP),
+            getFunc = function ()
+                local color = MiniMap.SV.cameraWedgeColor or Defaults.cameraWedgeColor
+                return color.r, color.g, color.b, color.a
+            end,
+            setFunc = function (red, green, blue, alpha)
+                MiniMap.SV.cameraWedgeColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.ApplyLiveSettings()
+            end,
+            width = "half",
+            disabled = cameraWedgeSettingsDisabled,
+            default =
+            {
+                r = Defaults.cameraWedgeColor.r,
+                g = Defaults.cameraWedgeColor.g,
+                b = Defaults.cameraWedgeColor.b,
+                a = Defaults.cameraWedgeColor.a,
+            },
+        },
+        {
             type = "checkbox",
             name = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP),
@@ -573,6 +622,7 @@ function MiniMap.CreateSettings()
         {
             type = "slider",
             name = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_TP),
             min = 50,
             max = 150,
             step = 5,
@@ -583,7 +633,7 @@ function MiniMap.CreateSettings()
             end,
             width = "full",
             default = 100,
-            disabled = disabled,
+            disabled = cameraWedgeSettingsDisabled,
         },
     }
 

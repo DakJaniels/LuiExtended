@@ -42,6 +42,8 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Группа и спутник. Меньше = плавнее, больше = меньше нагрузка.",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS = "Наведение на метки (мс)",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Метки под курсором. В основном клавиатура и мышь.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Показывать в Death Recap",
+    LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP = "Показывать, пока открыто окно Death Recap. Выкл. — скрыть карту на этом экране.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Отладка конечного автомата меток",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Зеркало меток, перезагрузка карты и быстрый переход в чат.",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Привязать InfoPanel к миникарте",
@@ -69,6 +71,12 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Как в игре",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Скрыть компас на HUD",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Показывать компас на HUD",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE = "Масштаб клина камеры (%)",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_TP = "Размер клина направления камеры. Только при следовании за игроком.",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR = "Цвет метки игрока",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Цвет стрелки игрока на карте.",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Цвет клина камеры",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Цвет клина направления камеры. Только при следовании за игроком.",
 }
 
 LUIE_RegisterStrings(strings, true)

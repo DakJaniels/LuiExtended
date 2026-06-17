@@ -42,6 +42,8 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Groupe et compagnon. Plus bas = plus fluide, plus haut = moins de CPU.",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS = "Survol des pins (ms)",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Pins sous la souris. Surtout clavier et souris.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Afficher pendant le récap de mort",
+    LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP = "Afficher tant que la fenêtre Death Recap est ouverte. Désactivé = masquer la carte sur cet écran.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Débogage machine à états (pins)",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Journalise miroir des pins, rechargement de carte et voyage rapide dans le chat.",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Ancrer le panneau d'info à la mini-carte",
@@ -69,6 +71,12 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT = "Paramètre du jeu",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE = "Masquer la boussole sur le HUD",
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Afficher la boussole sur le HUD",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE = "Échelle du cône caméra (%)",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_TP = "Taille du cône de direction de la caméra. Uniquement si Suivre le joueur est activé.",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR = "Couleur du pip joueur",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Couleur de la flèche du joueur sur la carte.",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Couleur du cône caméra",
+    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Couleur du cône de direction de la caméra. Uniquement si Suivre le joueur est activé.",
 }
 
 LUIE_RegisterStrings(strings, true)

@@ -282,13 +282,25 @@ function MiniMapInputController:ApplyFrameDragMouseEnabled()
     end
 end
 
+function MiniMapInputController:IsFrameChromePinnedOpen()
+    return MiniMap.SV and MiniMap.SV.lockPosition ~= true
+end
+
 function MiniMapInputController:IsMouseOverFrameChromeHoverRegion()
     local frameChromeHover = self.view.frameChromeHover
     if frameChromeHover and MouseIsOver(frameChromeHover) then
         return true
     end
     local frameChrome = self.view.frameChrome
-    if frameChrome and not frameChrome:IsHidden() and MouseIsOver(frameChrome) then
+    if frameChrome and MouseIsOver(frameChrome) then
+        return true
+    end
+    local lockButton = self.view.framePositionLock
+    if lockButton and MouseIsOver(lockButton) then
+        return true
+    end
+    local moveGrip = self.view.frameMoveGrip
+    if moveGrip and not moveGrip:IsHidden() and MouseIsOver(moveGrip) then
         return true
     end
     return false
@@ -302,6 +314,9 @@ function MiniMapInputController:ShowFrameChrome()
 end
 
 function MiniMapInputController:HideFrameChromeIfPointerLeft()
+    if self:IsFrameChromePinnedOpen() then
+        return
+    end
     if self:IsMouseOverFrameChromeHoverRegion() then
         return
     end
@@ -319,7 +334,7 @@ function MiniMapInputController:CancelFrameChromeHide()
 end
 
 function MiniMapInputController:RefreshFrameChromeVisibility()
-    if self:IsMouseOverFrameChromeHoverRegion() then
+    if self:IsFrameChromePinnedOpen() or self:IsMouseOverFrameChromeHoverRegion() then
         self:ShowFrameChrome()
     else
         self:HideFrameChromeIfPointerLeft()
@@ -333,9 +348,15 @@ end
 
 function MiniMapInputController:OnFrameChromeHoverExit()
     self:CancelFrameChromeHide()
+    if self:IsFrameChromePinnedOpen() then
+        return
+    end
     local inputController = self
     self.frameChromeHideCallId = zo_callLater(function ()
                                                   inputController.frameChromeHideCallId = nil
+                                                  if inputController:IsFrameChromePinnedOpen() then
+                                                      return
+                                                  end
                                                   inputController:HideFrameChromeIfPointerLeft()
                                               end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
 end
@@ -405,6 +426,7 @@ function MiniMapInputController:OnFramePositionLockClicked(lockButton)
     if not MiniMap.SV then
         return
     end
+    self:CancelFrameChromeHide()
     MiniMap.SV.lockPosition = not MiniMap.SV.lockPosition
     MiniMap.ApplyLiveSettings()
 end

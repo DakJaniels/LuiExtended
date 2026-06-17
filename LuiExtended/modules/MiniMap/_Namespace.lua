@@ -182,6 +182,7 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field allowOnGameplayHud boolean
 --- @field allowDuringCombat boolean
 --- @field allowOnLootScene boolean
+--- @field allowOnDeathRecap boolean
 --- @field allowWhileMounted boolean
 --- @field allowInPlayerHousing boolean
 --- @field preferElevatedDrawTier boolean
@@ -203,6 +204,8 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field keepSquareAspect boolean
 --- @field positionGridDivisor number
 --- @field cameraWedgeScale number
+--- @field playerPipColor { r: number, g: number, b: number, a: number }
+--- @field cameraWedgeColor { r: number, g: number, b: number, a: number }
 --- @field borderOpacity number
 --- @field pinMirrorStateMachineDebug boolean
 --- @field anchorInfoPanelToMiniMap boolean
@@ -271,6 +274,7 @@ MiniMap.Defaults =
     allowOnGameplayHud = true,
     allowDuringCombat = true,
     allowOnLootScene = true,
+    allowOnDeathRecap = true,
     allowWhileMounted = true,
     allowInPlayerHousing = true,
     preferElevatedDrawTier = false,
@@ -292,6 +296,8 @@ MiniMap.Defaults =
     keepSquareAspect = false,
     positionGridDivisor = 0,
     cameraWedgeScale = 1,
+    playerPipColor = { r = 1, g = 1, b = 1, a = 1 },
+    cameraWedgeColor = { r = 1, g = 1, b = 1, a = 1 },
     borderOpacity = 1,
     pinMirrorStateMachineDebug = false,
     anchorInfoPanelToMiniMap = false,
@@ -429,6 +435,63 @@ function MiniMap.ApplyChromeVisibility()
     MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
 end
 
+--- @param savedColor { r: number, g: number, b: number, a: number }|nil
+--- @param defaultColor { r: number, g: number, b: number, a: number }
+--- @return number r, number g, number b, number a
+local function GetMiniMapSavedColorComponents(savedColor, defaultColor)
+    if not savedColor then
+        return defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a
+    end
+    local red = savedColor.r
+    if red == nil then
+        red = defaultColor.r
+    end
+    local green = savedColor.g
+    if green == nil then
+        green = defaultColor.g
+    end
+    local blue = savedColor.b
+    if blue == nil then
+        blue = defaultColor.b
+    end
+    local alpha = savedColor.a
+    if alpha == nil then
+        alpha = defaultColor.a
+    end
+    return red, green, blue, alpha
+end
+
+--- @return number r, number g, number b, number a
+function MiniMap.GetPlayerPipColor()
+    local defaults = MiniMap.Defaults
+    local settings = MiniMap.SV
+    local defaultColor = defaults.playerPipColor
+    local savedColor = settings and settings.playerPipColor
+    return GetMiniMapSavedColorComponents(savedColor, defaultColor)
+end
+
+--- @return number r, number g, number b, number a
+function MiniMap.GetCameraWedgeColor()
+    local defaults = MiniMap.Defaults
+    local settings = MiniMap.SV
+    local defaultColor = defaults.cameraWedgeColor
+    local savedColor = settings and settings.cameraWedgeColor
+    return GetMiniMapSavedColorComponents(savedColor, defaultColor)
+end
+
+function MiniMap.ApplyPlayerPipColors()
+    if not MiniMap.view then
+        return
+    end
+    local playerRed, playerGreen, playerBlue, playerAlpha = MiniMap.GetPlayerPipColor()
+    local wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha = MiniMap.GetCameraWedgeColor()
+    MiniMap.view.player:SetColor(playerRed, playerGreen, playerBlue, playerAlpha)
+    MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.ApplyNativeWorldMapPlayerPinColors()
+    end
+end
+
 function MiniMap.ApplyLiveSettings()
     if not MiniMap.Enabled or not MiniMap.view or not MiniMap.SV then
         return
@@ -437,6 +500,7 @@ function MiniMap.ApplyLiveSettings()
     MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
     MiniMap.ApplyZoneNameFont()
     MiniMap.view:ApplyPlayerIconDimensions()
+    MiniMap.ApplyPlayerPipColors()
     if MiniMap.runtime then
         MiniMap.runtime:UpdateCenterPlayerPipVisibility()
     end

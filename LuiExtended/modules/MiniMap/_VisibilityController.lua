@@ -15,10 +15,29 @@ local LIB_HARVENS_ADDON_SETTINGS_SCENE_NAME = "LibHarvensAddonSettingsScene"
 
 --- @return boolean
 function MiniMap.IsPlayerInHouse()
-    if GetCurrentZoneHouseId then
-        return GetCurrentZoneHouseId() ~= 0
+    return GetCurrentZoneHouseId() ~= 0
+end
+
+--- @return boolean
+function MiniMap.IsDeathRecapVisible()
+    return not DEATH_RECAP_FRAGMENT:IsHidden()
+end
+
+function MiniMap.RegisterDeathRecapVisibilityHook()
+    if MiniMap.deathRecapVisibilityHookRegistered then
+        return
     end
-    return false
+    MiniMap.deathRecapVisibilityHookRegistered = true
+
+    DEATH_RECAP_FRAGMENT:RegisterCallback("StateChange", function ()
+        MiniMap.ApplyFragmentHiddenReasons()
+        MiniMap.UpdateGameplayTickers()
+    end)
+
+    DEATH_RECAP:RegisterCallback("OnDeathRecapAvailableChanged", function ()
+        MiniMap.ApplyFragmentHiddenReasons()
+        MiniMap.UpdateGameplayTickers()
+    end)
 end
 
 --- @return boolean
@@ -165,5 +184,14 @@ function MiniMap.RegisterVisibilityEvents()
     anchor:RegisterForEvent(EVENT_HOUSING_PLAYER_INFO_CHANGED, function ()
         MiniMap.UpdateConditionalVisibility()
     end)
+    anchor:RegisterForEvent(EVENT_PLAYER_DEAD, function ()
+        MiniMap.ApplyFragmentHiddenReasons()
+        MiniMap.UpdateGameplayTickers()
+    end)
+    anchor:RegisterForEvent(EVENT_PLAYER_ALIVE, function ()
+        MiniMap.ApplyFragmentHiddenReasons()
+        MiniMap.UpdateGameplayTickers()
+    end)
+    MiniMap.RegisterDeathRecapVisibilityHook()
     MiniMap.RegisterConsoleLayoutPreviewSettingsSceneHook()
 end

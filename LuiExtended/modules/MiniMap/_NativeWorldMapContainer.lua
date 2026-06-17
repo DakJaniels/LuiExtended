@@ -198,6 +198,29 @@ function MiniMap.UpdateNativeWorldMapMovingPins()
         return
     end
     ZO_WorldMap_GetPinManager():UpdateMovingPins()
+    MiniMap.ApplyNativeWorldMapPlayerPinColors()
+end
+
+--- Tints the ZOS HUD player map pin (ZO_WorldMapPins_Manager:GetPlayerPin), not a fixed pool index.
+function MiniMap.ApplyNativeWorldMapPlayerPinColors()
+    if not nativeWorldMapContainerAttached then
+        return
+    end
+    local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+    if not playerMapPin or playerMapPin:GetPinType() ~= MAP_PIN_TYPE_PLAYER then
+        return
+    end
+    local backgroundControl = playerMapPin.backgroundControl
+    if not backgroundControl then
+        return
+    end
+    local red, green, blue, alpha
+    if MiniMap.GetMapFollowsPlayer() then
+        red, green, blue, alpha = MiniMap.GetCameraWedgeColor()
+    else
+        red, green, blue, alpha = MiniMap.GetPlayerPipColor()
+    end
+    backgroundControl:SetColor(red, green, blue, alpha)
 end
 
 local function ApplyNativeWorldMapHudDrawOrder(view)
@@ -217,11 +240,7 @@ function MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
     if nativeWorldMapContainerRestore.playerWorldPinWasHidden == nil then
         nativeWorldMapContainerRestore.playerWorldPinWasHidden = playerWorldPinControl:IsHidden()
     end
-    if MiniMap.GetMapFollowsPlayer() then
-        playerWorldPinControl:SetHidden(true)
-    else
-        playerWorldPinControl:SetHidden(false)
-    end
+    MiniMap.ApplyNativeWorldMapPlayerPinColors()
 end
 
 local function RestoreWorldMapPlayerPinVisibility()
@@ -261,6 +280,7 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
     WORLD_MAP_MANAGER:UpdateBlobs()
 
     MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
+    MiniMap.ApplyNativeWorldMapPlayerPinColors()
     if MiniMap.pinController then
         MiniMap.pinController:ApplyUserScaleToNativeWorldMapPins()
     end

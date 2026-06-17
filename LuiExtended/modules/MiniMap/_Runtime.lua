@@ -164,6 +164,9 @@ function MiniMapRuntime:OnFollowTick()
     self.lastPlayerNormY = playerNormalizedY
 
     MiniMap.TickNativeWorldMapMovingPins()
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.ApplyNativeWorldMapPlayerPinColors()
+    end
 end
 
 function MiniMapRuntime:ApplyScrollFromPanOffsets()

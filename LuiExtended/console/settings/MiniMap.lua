@@ -18,6 +18,7 @@ local miniMapHudVisibilityOptions =
     { key = "allowOnGameplayHud",     name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP     },
     { key = "allowDuringCombat",      name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP  },
     { key = "allowOnLootScene",       name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,    tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP    },
+    { key = "allowOnDeathRecap",      name = LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP, tp = LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP },
     { key = "allowWhileMounted",      name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED, tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP },
     { key = "allowInPlayerHousing",   name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING, tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP },
     { key = "preferElevatedDrawTier", name = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP  },
@@ -99,6 +100,10 @@ function MiniMap.CreateConsoleSettings()
 
     local infoPanelModuleDisabled = function ()
         return disable() or not LUIE.SV.InfoPanel_Enabled
+    end
+
+    local cameraWedgeSettingsDisabled = function ()
+        return disable() or not MiniMap.SV.followPlayer
     end
 
     local fontItems = SettingsAPI:GetFontsList()
@@ -524,6 +529,36 @@ function MiniMap.CreateConsoleSettings()
             disable = zoneNameFontDisabled,
         },
         {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP),
+            getFunction = function ()
+                local color = MiniMap.SV.playerPipColor or Defaults.playerPipColor
+                return color.r, color.g, color.b, color.a
+            end,
+            setFunction = function (red, green, blue, alpha)
+                MiniMap.SV.playerPipColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.ApplyLiveSettings()
+            end,
+            default = Defaults.playerPipColor,
+            disable = disable,
+        },
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP),
+            getFunction = function ()
+                local color = MiniMap.SV.cameraWedgeColor or Defaults.cameraWedgeColor
+                return color.r, color.g, color.b, color.a
+            end,
+            setFunction = function (red, green, blue, alpha)
+                MiniMap.SV.cameraWedgeColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.ApplyLiveSettings()
+            end,
+            default = Defaults.cameraWedgeColor,
+            disable = cameraWedgeSettingsDisabled,
+        },
+        {
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP),
@@ -544,6 +579,7 @@ function MiniMap.CreateConsoleSettings()
         {
             type = LHAS.ST_SLIDER,
             label = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_TP),
             min = 50,
             max = 150,
             step = 5,
@@ -554,7 +590,7 @@ function MiniMap.CreateConsoleSettings()
                 MiniMap.ApplyLiveSettings()
             end,
             default = (Defaults.cameraWedgeScale or 1) * 100,
-            disable = disable,
+            disable = cameraWedgeSettingsDisabled,
         },
     }
 
