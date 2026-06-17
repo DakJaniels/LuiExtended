@@ -209,19 +209,19 @@ function MiniMapMapEventController:ScheduleQuestPinLightSync()
     local mapEventController = self
     local updateName = MiniMap.moduleName .. "QuestPinLightSync"
     eventManager:RegisterForUpdate(updateName, 0, function ()
-                                        eventManager:UnregisterForUpdate(updateName)
-                                        local journalIndex = questPinLightSyncPendingJournalIndex
-                                        local refreshAll = questPinLightSyncPendingRefreshAll
-                                        local layoutOnly = questPinLightSyncPendingLayoutOnly
-                                        questPinLightSyncPendingJournalIndex = nil
-                                        questPinLightSyncPendingRefreshAll = false
-                                        questPinLightSyncPendingLayoutOnly = false
-                                        if layoutOnly and not journalIndex and not refreshAll then
-                                            MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
-                                            return
-                                        end
-                                        MiniMap.RunQuestPinLightSyncForMirror(journalIndex, refreshAll)
-                                    end, true)
+                                       eventManager:UnregisterForUpdate(updateName)
+                                       local journalIndex = questPinLightSyncPendingJournalIndex
+                                       local refreshAll = questPinLightSyncPendingRefreshAll
+                                       local layoutOnly = questPinLightSyncPendingLayoutOnly
+                                       questPinLightSyncPendingJournalIndex = nil
+                                       questPinLightSyncPendingRefreshAll = false
+                                       questPinLightSyncPendingLayoutOnly = false
+                                       if layoutOnly and not journalIndex and not refreshAll then
+                                           MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
+                                           return
+                                       end
+                                       MiniMap.RunQuestPinLightSyncForMirror(journalIndex, refreshAll)
+                                   end, true)
 end
 
 function MiniMapMapEventController:RequestDigSitePinSync()
@@ -260,26 +260,26 @@ function MiniMapMapEventController:ScheduleDeferredQuestPinSyncLight(journalInde
     local mapEventController = self
     local questPinSyncUpdateName = MiniMap.moduleName .. "QuestTrackerPinSync"
     eventManager:RegisterForUpdate(questPinSyncUpdateName, 0, function ()
-                                        mapEventController:RequestQuestPinSyncLight(journalIndex, false)
-                                    end, true)
+                                       mapEventController:RequestQuestPinSyncLight(journalIndex, false)
+                                   end, true)
 end
 
 function MiniMapMapEventController:ScheduleSubzoneHudRecovery()
     local mapEventController = self
     local updateName = MiniMap.moduleName .. "SubzoneHudRecovery"
     eventManager:RegisterForUpdate(updateName, 0, function ()
-                                        eventManager:UnregisterForUpdate(updateName)
-                                        if MiniMap.IsMapReloadAffectingHudLayout() then
-                                            mapEventController:ScheduleSubzoneHudRecovery()
-                                            return
-                                        end
-                                        if MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
-                                            MiniMap.ApplyHudMirrorRecoveryAfterSubzoneTransition()
-                                            MiniMap.ApplyHudLocationLabelFromPlayerLocation()
-                                        else
-                                            mapEventController:RequestMapReload("EVENT_ZONE_CHANGED")
-                                        end
-                                    end, true)
+                                       eventManager:UnregisterForUpdate(updateName)
+                                       if MiniMap.IsMapReloadAffectingHudLayout() then
+                                           mapEventController:ScheduleSubzoneHudRecovery()
+                                           return
+                                       end
+                                       if MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
+                                           MiniMap.ApplyHudMirrorRecoveryAfterSubzoneTransition()
+                                           MiniMap.ApplyHudLocationLabelFromPlayerLocation()
+                                       else
+                                           mapEventController:RequestMapReload("EVENT_ZONE_CHANGED")
+                                       end
+                                   end, true)
 end
 
 function MiniMapMapEventController:OnCurrentSubzoneListChanged()

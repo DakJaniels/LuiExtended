@@ -209,15 +209,12 @@ function MiniMapInputController:StartPanDrag(mouseX, mouseY)
     local scroll = self.view.scroll
     self.panScrollStartX = scroll:GetHorizontalScroll()
     self.panScrollStartY = scroll:GetVerticalScroll()
-    if MiniMap.runtime and MiniMap.SV and MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true then
-        MiniMap.runtime:SetMapFollowsPlayer(false)
+    if MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true then
+        self.runtime:SetMapFollowsPlayer(false)
     end
 end
 
 function MiniMapInputController:CompletePanDragSession()
-    if not MiniMap.SV then
-        return
-    end
     local scroll = self.view.scroll
     if MiniMap.SV.zoneScrollLockEnabled == true then
         MiniMap.SV.panOffsetX = scroll:GetHorizontalScroll()
@@ -225,17 +222,14 @@ function MiniMapInputController:CompletePanDragSession()
         return
     end
     if MiniMap.SV.followPlayer == true then
-        local runtime = self.runtime
         local mapController = self.mapController
-        if runtime then
-            runtime:SetMapFollowsPlayer(true)
-            if mapController and mapController:IsReady() then
-                runtime:ClearFollowScrollCache()
-                runtime:ApplyScrollCenterOnPlayer(
-                    mapController:GetMapContentWidth(),
-                    mapController:GetMapContentHeight()
-                )
-            end
+        self.runtime:SetMapFollowsPlayer(true)
+        if mapController:IsReady() then
+            self.runtime:ClearFollowScrollCache()
+            self.runtime:ApplyScrollCenterOnPlayer(
+                mapController:GetMapContentWidth(),
+                mapController:GetMapContentHeight()
+            )
         end
         return
     end
@@ -283,7 +277,7 @@ function MiniMapInputController:ApplyFrameDragMouseEnabled()
 end
 
 function MiniMapInputController:IsFrameChromePinnedOpen()
-    return MiniMap.SV and MiniMap.SV.lockPosition ~= true
+    return MiniMap.SV.lockPosition ~= true
 end
 
 function MiniMapInputController:IsMouseOverFrameChromeHoverRegion()
@@ -362,9 +356,6 @@ function MiniMapInputController:OnFrameChromeHoverExit()
 end
 
 function MiniMapInputController:IsZoomButtonsFeatureEnabled()
-    if not MiniMap.SV or not self.view then
-        return false
-    end
     return self.view:IsZoomButtonsEnabled()
 end
 
@@ -423,9 +414,6 @@ function MiniMapInputController:OnZoomChromeHoverExit()
 end
 
 function MiniMapInputController:OnFramePositionLockClicked(lockButton)
-    if not MiniMap.SV then
-        return
-    end
     self:CancelFrameChromeHide()
     MiniMap.SV.lockPosition = not MiniMap.SV.lockPosition
     MiniMap.ApplyLiveSettings()
@@ -436,7 +424,7 @@ function MiniMapInputController:OnFrameMoveGripMouseDown(button)
     if button ~= MOUSE_BUTTON_INDEX_LEFT then
         return
     end
-    if not MiniMap.SV or MiniMap.SV.lockPosition then
+    if MiniMap.SV.lockPosition then
         return
     end
     self.view.root:StartMoving()
@@ -492,9 +480,6 @@ end
 --- @param horizontal number
 --- @param vertical number
 function MiniMapInputController:OnScrollOffsetChanged(horizontal, vertical)
-    if not MiniMap.SV then
-        return
-    end
     MiniMap.SV.panOffsetX = horizontal
     MiniMap.SV.panOffsetY = vertical
 end

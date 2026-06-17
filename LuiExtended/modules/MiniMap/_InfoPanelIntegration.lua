@@ -15,7 +15,7 @@ local INFO_PANEL_DEFAULT_OFFSET_Y = 20
 
 --- @return boolean
 function MiniMap.IsInfoPanelAnchorActive()
-    if not MiniMap.Enabled or not MiniMap.SV or MiniMap.SV.anchorInfoPanelToMiniMap ~= true then
+    if not MiniMap.Enabled or MiniMap.SV.anchorInfoPanelToMiniMap ~= true then
         return false
     end
     local infoPanel = LUIE.InfoPanel
@@ -23,9 +23,6 @@ function MiniMap.IsInfoPanelAnchorActive()
 end
 
 function MiniMap.CaptureInfoPanelAnchorSnapshot()
-    if not MiniMap.SV then
-        return
-    end
     local infoPanel = LUIE.InfoPanel
     if not infoPanel or infoPanel.Enabled ~= true or LUIE_InfoPanel == nil then
         return

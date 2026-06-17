@@ -24,11 +24,6 @@ function MiniMap.ShouldHudMinimapOverrideWorldMapInput()
 end
 
 --- @return boolean
-function MiniMap.ShouldHudMinimapPinInteraction()
-    return MiniMap.ShouldHudMinimapOverrideWorldMapInput()
-end
-
---- @return boolean
 function MiniMap.IsPointerOverHudMinimapMap()
     local view = MiniMap.view
     local hudSceneFragment = MiniMap.hudSceneFragment
@@ -97,7 +92,7 @@ end
 --- @param pinManager ZO_WorldMapPins_Manager
 --- @return boolean true suppresses stock UpdateMouseOverPins
 function MiniMap.HudMinimapUpdateMouseOverPinsPreHook(pinManager)
-    if not MiniMap.ShouldHudMinimapPinInteraction() or not MiniMap.IsPointerOverHudMinimapMap() then
+    if not MiniMap.ShouldHudMinimapOverrideWorldMapInput() or not MiniMap.IsPointerOverHudMinimapMap() then
         return false
     end
     local cursorPositionX
@@ -131,7 +126,7 @@ end
 
 --- Refreshes pin mouseover lists immediately before a click on LUIE scroll/map.
 function MiniMap.FlushHudMinimapPinMouseOverForClick()
-    if not MiniMap.ShouldHudMinimapPinInteraction() or not MiniMap.IsPointerOverHudMinimapMap() then
+    if not MiniMap.ShouldHudMinimapOverrideWorldMapInput() or not MiniMap.IsPointerOverHudMinimapMap() then
         return
     end
     ZO_WorldMap_GetPinManager():UpdateMouseOverPins()
@@ -139,7 +134,7 @@ end
 
 --- Throttled UpdateMouseOverPins while the pointer is over the HUD minimap (no world-map tooltips).
 function MiniMap.UpdateHudMinimapPinMouseOverFromPointer()
-    if not MiniMap.ShouldHudMinimapPinInteraction() or not MiniMap.IsPointerOverHudMinimapMap() then
+    if not MiniMap.ShouldHudMinimapOverrideWorldMapInput() or not MiniMap.IsPointerOverHudMinimapMap() then
         return
     end
     if MiniMap.ShouldRunThrottled("HudMinimapPinMouseOver", MiniMap.GetPinMouseOverRefreshMs()) then

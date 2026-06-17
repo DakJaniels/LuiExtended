@@ -23,15 +23,12 @@ local COMPASS_CONTROLS =
 
 local function SetCompassControlsHidden(compassControlsHidden)
     for controlIndex = 1, #COMPASS_CONTROLS do
-        local compassControl = _G[COMPASS_CONTROLS[controlIndex]]
-        if compassControl then
-            compassControl:SetHidden(compassControlsHidden)
-        end
+        _G[COMPASS_CONTROLS[controlIndex]]:SetHidden(compassControlsHidden)
     end
 end
 
 function MiniMap.ApplyCompassMode()
-    local settings = MiniMap.SV or MiniMap.Defaults
+    local settings = MiniMap.SV
     local mode = settings.compassOverride or MINIMAP_COMPASS_OVERRIDE_DEFAULT
     if mode == MINIMAP_COMPASS_OVERRIDE_DEFAULT then
         if MiniMap.compassChromeOverrideActive then
@@ -65,7 +62,7 @@ end
 
 --- @param widthDriven boolean|nil Driven resize axis from OnRootResizeStart; nil uses max for one-shot normalize.
 function MiniMap.ApplySquareAspect(widthDriven)
-    if not MiniMap.view or not MiniMap.SV then
+    if not MiniMap.view then
         return
     end
     if MiniMap.SV.keepSquareAspect ~= true then
@@ -106,7 +103,7 @@ function MiniMap.ApplyPositionGridSnap(settings)
 end
 
 function MiniMap.ApplyZoneNameFont()
-    if not MiniMap.view or not MiniMap.view.zone or not MiniMap.SV then
+    if not MiniMap.view then
         return
     end
     local settings = MiniMap.SV
@@ -123,7 +120,7 @@ end
 
 --- @param skipPositionGridSnap boolean|nil
 function MiniMap.ApplyFrameLayoutFromSavedSettings(skipPositionGridSnap)
-    if not MiniMap.view or not MiniMap.SV then
+    if not MiniMap.view then
         return
     end
     local settings = MiniMap.SV
@@ -145,13 +142,11 @@ function MiniMap.ApplyFrameLayoutFromSavedSettings(skipPositionGridSnap)
 end
 
 function MiniMap.ApplyChromeFromSettings()
-    if not MiniMap.view or not MiniMap.SV then
+    if not MiniMap.view then
         return
     end
     MiniMap.ApplyDrawLayerPreference()
-    if MiniMap.view.background and MiniMap.SV.borderOpacity then
-        MiniMap.view.background:SetAlpha(MiniMap.SV.borderOpacity)
-    end
+    MiniMap.view.background:SetAlpha(MiniMap.SV.borderOpacity)
     MiniMap.view:ApplyPlayerIconDimensions()
     MiniMap.ApplyCompassMode()
 end

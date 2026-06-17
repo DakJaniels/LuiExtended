@@ -323,23 +323,13 @@ MiniMap.MINIMAP_PIN_REFRESH_MS_MAX = 500
 
 --- @return number
 function MiniMap.GetMovingPinRefreshMs()
-    local defaults = MiniMap.Defaults
-    local settings = MiniMap.SV
-    local refreshMs = defaults.movingPinRefreshMs
-    if settings and settings.movingPinRefreshMs then
-        refreshMs = settings.movingPinRefreshMs
-    end
+    local refreshMs = MiniMap.SV.movingPinRefreshMs
     return zo_clamp(refreshMs, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
 end
 
 --- @return number
 function MiniMap.GetPinMouseOverRefreshMs()
-    local defaults = MiniMap.Defaults
-    local settings = MiniMap.SV
-    local refreshMs = defaults.pinMouseOverRefreshMs
-    if settings and settings.pinMouseOverRefreshMs then
-        refreshMs = settings.pinMouseOverRefreshMs
-    end
+    local refreshMs = MiniMap.SV.pinMouseOverRefreshMs
     return zo_clamp(refreshMs, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
 end
 
@@ -370,46 +360,38 @@ function MiniMap.Zoom(delta)
 end
 
 function MiniMap.RecenterFollow()
-    if not MiniMap.Enabled or not MiniMap.SV then
+    if not MiniMap.Enabled then
         return
     end
     MiniMap.SV.followPlayer = true
-    if MiniMap.runtime then
-        MiniMap.runtime:SetMapFollowsPlayer(true)
-        MiniMap.runtime:ClearFollowScrollCache()
-        if MiniMap.mapController and MiniMap.mapController:IsReady() then
-            MiniMap.runtime:ApplyScrollCenterOnPlayer(
-                MiniMap.mapController:GetMapContentWidth(),
-                MiniMap.mapController:GetMapContentHeight()
-            )
-        end
+    MiniMap.runtime:SetMapFollowsPlayer(true)
+    MiniMap.runtime:ClearFollowScrollCache()
+    if MiniMap.mapController and MiniMap.mapController:IsReady() then
+        MiniMap.runtime:ApplyScrollCenterOnPlayer(
+            MiniMap.mapController:GetMapContentWidth(),
+            MiniMap.mapController:GetMapContentHeight()
+        )
     end
 end
 
 --- @return boolean
 function MiniMap.GetMapFollowsPlayer()
-    if MiniMap.SV and MiniMap.SV.zoneScrollLockEnabled == true then
+    if MiniMap.SV.zoneScrollLockEnabled == true then
         return false
     end
     if MiniMap.runtime then
         return MiniMap.runtime.mapFollowsPlayer
     end
-    if MiniMap.SV then
-        return MiniMap.SV.followPlayer
-    end
-    return MiniMap.Defaults.followPlayer
+    return MiniMap.SV.followPlayer
 end
 
 --- @return number
 function MiniMap.GetPlayerPinDrawSize()
-    local scale = MiniMap.SV and MiniMap.SV.playerPinScale or MiniMap.Defaults.playerPinScale
+    local scale = MiniMap.SV.playerPinScale
     return zo_round(MiniMap.PLAYER_PIN_BASE_SIZE * scale)
 end
 
 function MiniMap.ClampSavedDefaultZoom()
-    if not MiniMap.SV then
-        return
-    end
     local zoomMinimum = 0.35
     if MiniMap.mapController then
         zoomMinimum = MiniMap.mapController:GetMinimumZoom()
@@ -466,7 +448,7 @@ function MiniMap.GetPlayerPipColor()
     local defaults = MiniMap.Defaults
     local settings = MiniMap.SV
     local defaultColor = defaults.playerPipColor
-    local savedColor = settings and settings.playerPipColor
+    local savedColor = settings.playerPipColor
     return GetMiniMapSavedColorComponents(savedColor, defaultColor)
 end
 
@@ -475,7 +457,7 @@ function MiniMap.GetCameraWedgeColor()
     local defaults = MiniMap.Defaults
     local settings = MiniMap.SV
     local defaultColor = defaults.cameraWedgeColor
-    local savedColor = settings and settings.cameraWedgeColor
+    local savedColor = settings.cameraWedgeColor
     return GetMiniMapSavedColorComponents(savedColor, defaultColor)
 end
 
@@ -493,7 +475,7 @@ function MiniMap.ApplyPlayerPipColors()
 end
 
 function MiniMap.ApplyLiveSettings()
-    if not MiniMap.Enabled or not MiniMap.view or not MiniMap.SV then
+    if not MiniMap.Enabled or not MiniMap.view then
         return
     end
     MiniMap.view:ApplyInteractionLocks(MiniMap.SV)
@@ -501,12 +483,8 @@ function MiniMap.ApplyLiveSettings()
     MiniMap.ApplyZoneNameFont()
     MiniMap.view:ApplyPlayerIconDimensions()
     MiniMap.ApplyPlayerPipColors()
-    if MiniMap.runtime then
-        MiniMap.runtime:UpdateCenterPlayerPipVisibility()
-    end
-    if MiniMap.inputController then
-        MiniMap.inputController:ApplyFrameDragMouseEnabled()
-    end
+    MiniMap.runtime:UpdateCenterPlayerPipVisibility()
+    MiniMap.inputController:ApplyFrameDragMouseEnabled()
     MiniMap.ApplyChromeFromSettings()
     MiniMap.ApplyChromeStacking()
     MiniMap.RefreshSceneFragments()

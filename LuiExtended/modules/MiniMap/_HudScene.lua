@@ -346,15 +346,6 @@ function MiniMap.UnregisterMiniMapSceneIntegration()
     MiniMap.fragmentHiddenReasonCache = nil
 end
 
-function MiniMap.RegisterHudSceneFragment()
-    MiniMap.RegisterMiniMapSceneIntegration()
-    return MiniMap.hudSceneFragment
-end
-
-function MiniMap.UnregisterHudSceneFragment()
-    MiniMap.UnregisterMiniMapSceneIntegration()
-end
-
 function MiniMap.RefreshSceneFragments()
     MiniMap.SyncLootSceneFragmentAttachment()
 end

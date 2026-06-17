@@ -78,7 +78,7 @@ end
 
 --- Runs ZOS g_mapRefresh:UpdateRefreshGroups via the world map OnUpdate handler (keep / link / location dirty groups).
 function MiniMap.FlushWorldMapPinRefreshGroups()
-    if not WORLD_MAP_MANAGER or not WORLD_MAP_MANAGER.control then
+    if not WORLD_MAP_MANAGER then
         return
     end
     local worldMapControl = WORLD_MAP_MANAGER.control
@@ -91,9 +91,6 @@ end
 --- Stops ZO_MapPanAndZoom from re-anchoring ZO_WorldMapContainer to CENTER while it is parented under the HUD minimap.
 function MiniMap.ResetNativeHudWorldMapPanState()
     local panAndZoom = ZO_WorldMap_GetPanAndZoom()
-    if not panAndZoom then
-        return
-    end
     panAndZoom:ClearLockPoint()
     panAndZoom:ClearTargetOffset()
     panAndZoom:ClearTargetNormalizedZoom()
@@ -128,10 +125,10 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     nativeHudMapOverlayLayoutReapplyScheduled = true
     local updateName = GetNativeHudMapOverlayLayoutReapplyUpdateName()
     eventManager:RegisterForUpdate(updateName, 0, function ()
-                                        nativeHudMapOverlayLayoutReapplyScheduled = false
-                                        MiniMap.ReapplyNativeHudMapOverlayLayout()
-                                        MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
-                                    end, true)
+                                       nativeHudMapOverlayLayoutReapplyScheduled = false
+                                       MiniMap.ReapplyNativeHudMapOverlayLayout()
+                                       MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
+                                   end, true)
 end
 
 --- Second frame after ZOS g_mapRefresh:UpdateRefreshGroups (world map OnUpdate).
@@ -145,9 +142,9 @@ function MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
     nativeHudMapOverlayLayoutReapplySecondFrameScheduled = true
     local secondFrameUpdateName = MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2"
     eventManager:RegisterForUpdate(secondFrameUpdateName, 0, function ()
-                                        nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
-                                        MiniMap.ReapplyNativeHudMapOverlayLayout()
-                                    end, true)
+                                       nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
+                                       MiniMap.ReapplyNativeHudMapOverlayLayout()
+                                   end, true)
 end
 
 --- @return boolean

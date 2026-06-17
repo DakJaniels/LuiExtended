@@ -50,7 +50,7 @@ function MiniMapView:Initialize(rootControl)
     self.background = rootControl:GetNamedChild("_Background")
     self.scroll = rootControl:GetNamedChild("_Scroll")
     self.zone = rootControl:GetNamedChild("_Zone")
-    self.zoneDivider = self.zone and self.zone:GetNamedChild("_Divider")
+    self.zoneDivider = self.zone:GetNamedChild("_Divider")
     self.zoomLabel = rootControl:GetNamedChild("_ZoomLabel")
     self.player = rootControl:GetNamedChild("_Player")
     self.playerCam = rootControl:GetNamedChild("_PlayerCam")
@@ -62,20 +62,11 @@ function MiniMapView:Initialize(rootControl)
     self.statusOverlay = self.scroll:GetNamedChild("_StatusOverlay")
     self.statusLabel = self.statusOverlay:GetNamedChild("_Label")
     self.frameChromeHover = rootControl:GetNamedChild("_FrameChromeHover")
-    self.frameChrome = nil
-    self.framePositionLock = nil
-    self.frameMoveGrip = nil
-    if self.frameChromeHover then
-        self.frameChrome = self.frameChromeHover:GetNamedChild("_FrameChrome")
-        if self.frameChrome then
-            self.framePositionLock = self.frameChrome:GetNamedChild("_PositionLock")
-            self.frameMoveGrip = self.frameChrome:GetNamedChild("_MoveGrip")
-        end
-    end
-    if self.zoomLabel then
-        self.zoomLabel:SetHidden(true)
-        self.zoomLabel:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
-    end
+    self.frameChrome = self.frameChromeHover:GetNamedChild("_FrameChrome")
+    self.framePositionLock = self.frameChrome:GetNamedChild("_PositionLock")
+    self.frameMoveGrip = self.frameChrome:GetNamedChild("_MoveGrip")
+    self.zoomLabel:SetHidden(true)
+    self.zoomLabel:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
 end
 
 --- @param settings MiniMapDefaults
@@ -237,20 +228,15 @@ end
 
 --- @param rootControl Control
 --- @param childSuffix string
---- @param globalControl Control|nil
---- @return Control|nil
-function MiniMapView:GetChromeControl(rootControl, childSuffix, globalControl)
-    local child = rootControl:GetNamedChild(childSuffix)
-    if child then
-        return child
-    end
-    return globalControl
+--- @return Control
+function MiniMapView:GetChromeControl(rootControl, childSuffix)
+    return rootControl:GetNamedChild(childSuffix)
 end
 
 function MiniMapView:ResolveChromeControls()
     local root = self.root
-    self.zoomIn = self:GetChromeControl(root, "_ZoomIn", LUIE_MiniMap_ZoomIn)
-    self.zoomOut = self:GetChromeControl(root, "_ZoomOut", LUIE_MiniMap_ZoomOut)
+    self.zoomIn = self:GetChromeControl(root, "_ZoomIn")
+    self.zoomOut = self:GetChromeControl(root, "_ZoomOut")
 end
 
 --- @param settings MiniMapDefaults|nil
@@ -270,9 +256,6 @@ end
 
 --- @return boolean
 function MiniMapView:IsZoomButtonsEnabled()
-    if not MiniMap.SV then
-        return MiniMap.Defaults.showZoomButtons == true
-    end
     return self:GetSettingsBoolean(MiniMap.SV, "showZoomButtons", MiniMap.Defaults.showZoomButtons)
 end
 
@@ -309,22 +292,15 @@ end
 --- @param settings MiniMapDefaults
 function MiniMapView:ApplyZoneChrome(settings)
     local showZoneName = self:GetSettingsBoolean(settings, "showZoneName", MiniMap.Defaults.showZoneName)
-    if self.zone then
-        self.zone:SetHidden(not showZoneName)
-        self.zone:SetMouseEnabled(false)
-    end
-    if self.zoneDivider then
-        self.zoneDivider:SetHidden(not showZoneName)
-    end
+    self.zone:SetHidden(not showZoneName)
+    self.zone:SetMouseEnabled(false)
+    self.zoneDivider:SetHidden(not showZoneName)
 end
 
 --- @param settings MiniMapDefaults
 function MiniMapView:ApplyFrameChromeFromSettings(settings)
     local lockButton = self.framePositionLock
     local moveGrip = self.frameMoveGrip
-    if not lockButton then
-        return
-    end
     local positionLocked = settings.lockPosition == true
     local padlockState = positionLocked and TOGGLE_BUTTON_CLOSED or TOGGLE_BUTTON_OPEN
     ZO_ToggleButton_SetState(lockButton, padlockState)
@@ -530,18 +506,13 @@ function MiniMapView:SetupPlayerIcons()
     self.playerCam:SetBlendMode(TEX_BLEND_MODE_ALPHA)
     self:ApplyPlayerIconDimensions()
     MiniMap.ApplyPlayerPipColors()
-    if MiniMap.SV then
-        self:ApplyFrameChromeFromSettings(MiniMap.SV)
-        self:ApplyFrameChromePlacement()
-    end
+    self:ApplyFrameChromeFromSettings(MiniMap.SV)
+    self:ApplyFrameChromePlacement()
 end
 
 -- Handlers called from MiniMap.xml
 
 function MiniMap.OnRootMoveStop(control)
-    if not MiniMap.SV then
-        return
-    end
     MiniMap.SV.offsetX = control:GetRight() - GuiRoot:GetRight()
     MiniMap.SV.offsetY = control:GetBottom() - GuiRoot:GetBottom()
     if MiniMap.SV.positionGridDivisor and MiniMap.SV.positionGridDivisor > 1 then
@@ -551,7 +522,7 @@ function MiniMap.OnRootMoveStop(control)
 end
 
 function MiniMap.OnRootResizeStart(control)
-    if not MiniMap.SV or MiniMap.SV.lockSize then
+    if MiniMap.SV.lockSize then
         return
     end
     MiniMap.resize = true
@@ -567,7 +538,7 @@ function MiniMap.OnRootResizeStart(control)
 end
 
 function MiniMap.OnRootResizeStop(control)
-    if MiniMap.SV and MiniMap.SV.keepSquareAspect == true then
+    if MiniMap.SV.keepSquareAspect == true then
         MiniMap.ApplySquareAspect(MiniMap.resizeIsWidthDriven)
     end
     MiniMap.resize = false
@@ -584,7 +555,7 @@ function MiniMap.OnRootRectChanged(control, newLeft, newTop, newRight, newBottom
     if not MiniMap.resize or not MiniMap.view or not MiniMap.runtime then
         return
     end
-    if MiniMap.SV and MiniMap.SV.keepSquareAspect == true then
+    if MiniMap.SV.keepSquareAspect == true then
         MiniMap.ApplySquareAspect(MiniMap.resizeIsWidthDriven)
     else
         MiniMap.view:OnResizePersist()

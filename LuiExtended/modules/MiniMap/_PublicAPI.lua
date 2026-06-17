@@ -13,7 +13,7 @@ MiniMap.MAP_MODE_LUIE_MINIMAP = 42
 
 --- @return boolean
 function MiniMap.IsModuleEnabled()
-    return MiniMap.Enabled == true and LUIE.SV and LUIE.SV.MiniMap_Enabled == true
+    return MiniMap.Enabled == true and LUIE.SV.MiniMap_Enabled == true
 end
 
 --- @return number
@@ -70,7 +70,7 @@ end
 --- @param pinType MapPinType|nil
 --- @return number
 function MiniMap.GetPinTypeScaleMultiplier(pinType)
-    local settings = MiniMap.SV or MiniMap.Defaults
+    local settings = MiniMap.SV
     local baseScale = settings.defaultPinScale or 1
     if pinType and settings.pinTypeScales and settings.pinTypeScales[pinType] then
         return baseScale * settings.pinTypeScales[pinType]

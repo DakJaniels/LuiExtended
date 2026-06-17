@@ -42,7 +42,7 @@ end
 
 --- @return boolean
 function MiniMap.GetContextAllowsMiniMap()
-    if not MiniMap.Enabled or not MiniMap.SV then
+    if not MiniMap.Enabled then
         return false
     end
     if MiniMap.sessionMapVisible == false then
@@ -90,9 +90,6 @@ function MiniMap.ToggleShowMap()
 end
 
 function MiniMap.ToggleShowInCombatSetting()
-    if not MiniMap.SV then
-        return
-    end
     MiniMap.SV.allowDuringCombat = not MiniMap.SV.allowDuringCombat
     MiniMap.UpdateConditionalVisibility()
 end

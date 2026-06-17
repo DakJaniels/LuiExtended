@@ -152,7 +152,7 @@ function MiniMapRuntime:OnFollowTick()
             MiniMap.TryAutoZoomOutAtMapEdge(mapData)
         end
     else
-        local panDragActive = MiniMap.inputController and MiniMap.inputController.panDragActive
+        local panDragActive = MiniMap.inputController.panDragActive
         if not panDragActive then
             scroll:SetHorizontalScroll(MiniMap.SV.panOffsetX or 0)
             scroll:SetVerticalScroll(MiniMap.SV.panOffsetY or 0)
