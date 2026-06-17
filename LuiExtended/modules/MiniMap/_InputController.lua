@@ -23,6 +23,7 @@ local MINIMAP_FRAME_CHROME_HIDE_DELAY_MS = 200
 --- @field panScrollStartY number
 --- @field pendingWaypointClick boolean
 --- @field frameChromeHideCallId integer|nil
+--- @field zoomChromeExitCallId integer|nil
 local MiniMapInputController = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapInputController = MiniMapInputController
 
@@ -37,6 +38,7 @@ function MiniMapInputController:Initialize(view, mapController, runtime)
     self.panDragMoved = false
     self.pendingWaypointClick = false
     self.frameChromeHideCallId = nil
+    self.zoomChromeExitCallId = nil
 end
 
 --- @param shift boolean
@@ -227,6 +229,67 @@ function MiniMapInputController:OnFrameChromeHoverExit()
                                               end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
 end
 
+function MiniMapInputController:IsZoomButtonsFeatureEnabled()
+    if not MiniMap.SV or not self.view then
+        return false
+    end
+    return self.view:IsZoomButtonsEnabled()
+end
+
+function MiniMapInputController:IsMouseOverZoomChromeRegion()
+    local view = self.view
+    if not view then
+        return false
+    end
+    local zoomChromeHover = view.zoomChromeHover
+    if zoomChromeHover and not zoomChromeHover:IsHidden() and MouseIsOver(zoomChromeHover) then
+        return true
+    end
+    local zoomIn = view.zoomIn
+    if zoomIn and not zoomIn:IsHidden() and MouseIsOver(zoomIn) then
+        return true
+    end
+    local zoomOut = view.zoomOut
+    if zoomOut and not zoomOut:IsHidden() and MouseIsOver(zoomOut) then
+        return true
+    end
+    return false
+end
+
+function MiniMapInputController:CancelZoomChromeExitDebounce()
+    if self.zoomChromeExitCallId then
+        zo_removeCallLater(self.zoomChromeExitCallId)
+        self.zoomChromeExitCallId = nil
+    end
+end
+
+function MiniMapInputController:OnZoomChromeHoverEnter()
+    if not self:IsZoomButtonsFeatureEnabled() then
+        return
+    end
+    self:CancelZoomChromeExitDebounce()
+    if self.view then
+        self.view:RevealZoomButtonsTransient()
+    end
+end
+
+function MiniMapInputController:OnZoomChromeHoverExit()
+    if not self:IsZoomButtonsFeatureEnabled() then
+        return
+    end
+    self:CancelZoomChromeExitDebounce()
+    local inputController = self
+    self.zoomChromeExitCallId = zo_callLater(function ()
+                                                 inputController.zoomChromeExitCallId = nil
+                                                 if inputController:IsMouseOverZoomChromeRegion() then
+                                                     return
+                                                 end
+                                                 if inputController.view then
+                                                     inputController.view:ScheduleZoomButtonsFadeAfterIdle()
+                                                 end
+                                             end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
+end
+
 function MiniMapInputController:OnFramePositionLockClicked(lockButton)
     if not MiniMap.SV then
         return
@@ -375,6 +438,18 @@ end
 function MiniMap.OnFrameChromeMouseExit(control)
     if MiniMap.inputController then
         MiniMap.inputController:OnFrameChromeHoverExit()
+    end
+end
+
+function MiniMap.OnZoomChromeHoverMouseEnter(control)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnZoomChromeHoverEnter()
+    end
+end
+
+function MiniMap.OnZoomChromeHoverMouseExit(control)
+    if MiniMap.inputController then
+        MiniMap.inputController:OnZoomChromeHoverExit()
     end
 end
 

@@ -30,6 +30,7 @@ function MiniMap.Initialize(enabled)
     if not enabled then
         if MiniMap.view then
             MiniMap.view:ShutdownZoomLabelFade()
+            MiniMap.view:ShutdownZoomButtonsFade()
         end
         if MiniMap.pinMirrorStateMachine then
             MiniMap.pinMirrorStateMachine:Stop()
