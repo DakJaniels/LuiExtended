@@ -40,8 +40,13 @@ end
 
 function MiniMapRuntime:UpdateCenterPlayerPipVisibility()
     local followPlayer = MiniMap.GetMapFollowsPlayer()
+    local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
     self.view.player:SetHidden(not followPlayer)
-    self.view.playerCam:SetHidden(not followPlayer)
+    if followPlayer and nativeHudMapAttached then
+        self.view.playerCam:SetHidden(true)
+    else
+        self.view.playerCam:SetHidden(not followPlayer)
+    end
 end
 
 --- @param followsPlayer boolean
@@ -50,6 +55,8 @@ function MiniMapRuntime:SetMapFollowsPlayer(followsPlayer)
     self:UpdateCenterPlayerPipVisibility()
     if MiniMap.IsNativeWorldMapContainerAttached() then
         MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
+        MiniMap.ApplyNativeHudPlayerPinScale()
+        MiniMap.ApplyNativeWorldMapPlayerPinColors()
     end
 end
 
@@ -114,6 +121,9 @@ function MiniMapRuntime:OnFollowTick()
     if MiniMap.IsWorldMapBlockingMiniMapWork() then
         return
     end
+    if MiniMap.playerMapMirrorDepth > 0 then
+        return
+    end
     if MiniMap.IsPinMirrorMachineBusy() then
         return
     end
@@ -130,8 +140,10 @@ function MiniMapRuntime:OnFollowTick()
     local scroll = self.view.scroll
     local mapContentWidth = self.mapController:GetMapContentWidth()
     local mapContentHeight = self.mapController:GetMapContentHeight()
+    local followPlayer = MiniMap.GetMapFollowsPlayer()
+    local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
 
-    if MiniMap.GetMapFollowsPlayer() then
+    if followPlayer then
         local horizontalScroll = (playerNormalizedX * mapContentWidth) - (scroll:GetWidth() / 2)
         local verticalScroll = (playerNormalizedY * mapContentHeight) - (scroll:GetHeight() / 2)
         if playerNormalizedX ~= self.lastPlayerNormX
@@ -145,7 +157,9 @@ function MiniMapRuntime:OnFollowTick()
             self.lastPlayerHeading = playerHeading
         end
         if playerCameraHeading ~= self.lastCameraHeading then
-            self.view.playerCam:SetTextureRotation(playerCameraHeading)
+            if not nativeHudMapAttached then
+                self.view.playerCam:SetTextureRotation(playerCameraHeading)
+            end
             self.lastCameraHeading = playerCameraHeading
         end
         if MiniMap.ShouldRunThrottled("AutoZoomEdge", 600) then
@@ -163,10 +177,7 @@ function MiniMapRuntime:OnFollowTick()
     self.lastPlayerNormX = playerNormalizedX
     self.lastPlayerNormY = playerNormalizedY
 
-    MiniMap.TickNativeWorldMapMovingPins()
-    if MiniMap.IsNativeWorldMapContainerAttached() then
-        MiniMap.ApplyNativeWorldMapPlayerPinColors()
-    end
+    MiniMap.TickHudMovingAndPlayerPins(followPlayer)
 end
 
 function MiniMapRuntime:ApplyScrollFromPanOffsets()
@@ -198,7 +209,11 @@ function MiniMap.OnRootUpdate(control, time)
     MiniMap.UpdateHudMinimapPinMouseOverFromPointer()
     local runtime = MiniMap.runtime
     local now = GetFrameTimeMilliseconds()
-    if runtime.lastFollowUpdateMs and (now - runtime.lastFollowUpdateMs) < MINIMAP_FOLLOW_UPDATE_MS then
+    local followRefreshMs = MINIMAP_FOLLOW_UPDATE_MS
+    if MiniMap.GetMapFollowsPlayer() then
+        followRefreshMs = MiniMap.GetMovingPinRefreshMs()
+    end
+    if runtime.lastFollowUpdateMs and (now - runtime.lastFollowUpdateMs) < followRefreshMs then
         return
     end
     runtime.lastFollowUpdateMs = now

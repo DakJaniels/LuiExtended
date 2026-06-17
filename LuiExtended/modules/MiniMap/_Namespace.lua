@@ -468,8 +468,12 @@ function MiniMap.ApplyPlayerPipColors()
     local playerRed, playerGreen, playerBlue, playerAlpha = MiniMap.GetPlayerPipColor()
     local wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha = MiniMap.GetCameraWedgeColor()
     MiniMap.view.player:SetColor(playerRed, playerGreen, playerBlue, playerAlpha)
-    MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
-    if MiniMap.IsNativeWorldMapContainerAttached() then
+    local followPlayer = MiniMap.GetMapFollowsPlayer()
+    local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
+    if not (nativeHudMapAttached and followPlayer) then
+        MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
+    end
+    if nativeHudMapAttached then
         MiniMap.ApplyNativeWorldMapPlayerPinColors()
     end
 end
@@ -482,6 +486,9 @@ function MiniMap.ApplyLiveSettings()
     MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
     MiniMap.ApplyZoneNameFont()
     MiniMap.view:ApplyPlayerIconDimensions()
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.ApplyNativeHudPlayerPinScale()
+    end
     MiniMap.ApplyPlayerPipColors()
     MiniMap.runtime:UpdateCenterPlayerPipVisibility()
     MiniMap.inputController:ApplyFrameDragMouseEnabled()
