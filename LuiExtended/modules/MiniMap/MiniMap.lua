@@ -39,6 +39,7 @@ function MiniMap.Initialize(enabled)
         MiniMap.playerMapMirrorDepth = 0
         MiniMap.playerMapMirrorPendingCallback = nil
         MiniMap.pendingPostReloadUILayout = nil
+        MiniMap.pinResyncCallbacks = nil
         if MiniMap.mapEventController then
             MiniMap.mapEventController:Unregister()
         end
@@ -46,6 +47,8 @@ function MiniMap.Initialize(enabled)
             MiniMap.runtime:Stop()
         end
         MiniMap.ShutdownNativeWorldMapContainer()
+        MiniMap.DisableHudMinimapWorldMapInputPreHooks()
+        MiniMap.DisableHudMinimapPinInteractionPreHooks()
         MiniMap.UnregisterMiniMapSceneIntegration()
         LUIE_MiniMap:SetHidden(true)
         MiniMap.Enabled = false
@@ -63,6 +66,10 @@ function MiniMap.Initialize(enabled)
     MiniMap.zoom = MiniMap.SV.resetZoomLevel
     MiniMap.mapController:ClampZoomToLimits(false)
     MiniMap.pinController = MiniMap.MiniMapPinController:New(MiniMap.view, MiniMap.mapController)
+    MiniMap.pinResyncCallbacks = nil
+    MiniMap.RegisterPinResyncCallback(function ()
+        MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
+    end)
     MiniMap.runtime = MiniMap.MiniMapRuntime:New(MiniMap.view, MiniMap.mapController, MiniMap.pinController)
     local followPlayer = MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true
     MiniMap.runtime.mapFollowsPlayer = followPlayer
@@ -74,6 +81,8 @@ function MiniMap.Initialize(enabled)
     )
     MiniMap.pinMirrorStateMachine.mapEventController = MiniMap.mapEventController
     MiniMap.inputController = MiniMap.MiniMapInputController:New(MiniMap.view, MiniMap.mapController, MiniMap.runtime)
+    MiniMap.InstallHudMinimapWorldMapInputPreHooks()
+    MiniMap.InstallHudMinimapPinInteractionPreHooks()
 
     MiniMap.view:ApplySavedLayout(MiniMap.SV)
     MiniMap.view:SetupPlayerIcons()

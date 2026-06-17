@@ -232,6 +232,8 @@ function MiniMap.FlushWorldMapQueuedWork()
         MiniMap.TryAttachNativeWorldMapContainer()
         MiniMap.RefreshNativeWorldMapContainer()
         MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
+        MiniMap.FirePinResyncCallbacks()
+        MiniMap.ApplyHudNativePinLayoutAfterRefresh()
     end
 end
 

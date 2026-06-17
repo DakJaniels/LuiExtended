@@ -63,11 +63,7 @@ local CMAP_KEEP_EVENT_IDS =
 
 local PIN_DIRTY_EVENT_IDS =
 {
-    EVENT_MAP_PING,
     EVENT_OBJECTIVES_UPDATED,
-    EVENT_POIS_INITIALIZED,
-    EVENT_POI_UPDATED,
-    EVENT_POI_DISCOVERED,
     EVENT_GROUP_UPDATE,
     EVENT_GROUP_MEMBER_JOINED,
     EVENT_GROUP_MEMBER_LEFT,
@@ -100,6 +96,87 @@ function MiniMapMapEventController:SchedulePinSync()
         return
     end
     self.pinMirrorStateMachine:RequestPinSyncImmediate()
+end
+
+--- Skyshards, delves, and other map objective pins on the reparented world map container.
+function MiniMapMapEventController:RequestMapObjectivePinSync()
+    if not MiniMap.Enabled or not self.mapController or not self.pinMirrorStateMachine then
+        return
+    end
+    if MiniMap.fastTravel or self.pinMirrorStateMachine:IsCurrentState("FastTravelBlocked") then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(self.pinMirrorStateMachine)
+        return
+    end
+    if self.pinMirrorStateMachine:IsCurrentState("MapReloading") or self.pinMirrorStateMachine:IsCurrentState("ZoneReset") then
+        self.pinMirrorStateMachine.pinSyncQueuedWhileMapReloading = true
+        return
+    end
+    if not self.mapController:IsReady() then
+        self.pinMirrorStateMachine.pinSyncQueuedWhileMapReloading = true
+        return
+    end
+    MiniMap.TryAttachNativeWorldMapContainer()
+    local mirrorRan = MiniMap.RunWithPlayerMapForMirror(function ()
+        ZO_WorldMap_RefreshAllPOIs()
+        MiniMap.RefreshWorldMapLocationPinsForMirror()
+    end)
+    if not mirrorRan then
+        return
+    end
+    MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+    MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
+end
+
+--- Mirrors ZOS WorldMap EVENT_MAP_PING handler in player-map context for the HUD mirror.
+--- @param _eventCode integer
+--- @param pingEventType integer
+--- @param pingType MapPinType
+--- @param pingTag string
+--- @param x number
+--- @param y number
+--- @param _isPingOwner boolean
+function MiniMapMapEventController:OnMapPing(_eventCode, pingEventType, pingType, pingTag, x, y, _isPingOwner)
+    if not MiniMap.Enabled or not self.mapController or not self.pinMirrorStateMachine then
+        return
+    end
+    if MiniMap.fastTravel or self.pinMirrorStateMachine:IsCurrentState("FastTravelBlocked") then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(self.pinMirrorStateMachine)
+        return
+    end
+    if self.pinMirrorStateMachine:IsCurrentState("MapReloading") or self.pinMirrorStateMachine:IsCurrentState("ZoneReset") then
+        self.pinMirrorStateMachine.pinSyncQueuedWhileMapReloading = true
+        return
+    end
+    if not self.mapController:IsReady() then
+        self.pinMirrorStateMachine.pinSyncQueuedWhileMapReloading = true
+        return
+    end
+    MiniMap.TryAttachNativeWorldMapContainer()
+    local pinAdded = false
+    local mirrorRan = MiniMap.RunWithPlayerMapForMirror(function ()
+        local pinManager = ZO_WorldMap_GetPinManager()
+        if pingEventType == PING_EVENT_ADDED then
+            pinManager:RemovePins("pings", pingType, pingTag)
+            pinManager:CreatePin(pingType, pingTag, x, y)
+            pinAdded = true
+        elseif pingEventType == PING_EVENT_REMOVED then
+            pinManager:RemovePins("pings", pingType, pingTag)
+        end
+    end)
+    if not mirrorRan then
+        return
+    end
+    MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+    if pinAdded and self.pinController then
+        self.pinController:ApplyUserScaleToNativeWorldMapPins()
+    end
+    MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
 end
 
 --- Full native container refresh for quest flows ZOS CMapHandlers does not own.
@@ -293,6 +370,18 @@ function MiniMapMapEventController:Register()
     for _, eventId in ipairs(PIN_DIRTY_EVENT_IDS) do
         self:RegisterGameEvent(eventId, function () mapEventController:SchedulePinSync() end)
     end
+    self:RegisterGameEvent(EVENT_MAP_PING, function (eventCode, pingEventType, pingType, pingTag, x, y, isPingOwner)
+        mapEventController:OnMapPing(eventCode, pingEventType, pingType, pingTag, x, y, isPingOwner)
+    end)
+    self:RegisterGameEvent(EVENT_POI_UPDATED, function ()
+        mapEventController:RequestMapObjectivePinSync()
+    end)
+    self:RegisterGameEvent(EVENT_POI_DISCOVERED, function ()
+        mapEventController:RequestMapObjectivePinSync()
+    end)
+    self:RegisterGameEvent(EVENT_POIS_INITIALIZED, function ()
+        mapEventController:RequestMapObjectivePinSync()
+    end)
     for _, eventId in ipairs(CMAP_QUEST_PIN_SYNC_FULL_EVENT_IDS) do
         self:RegisterGameEvent(eventId, function () mapEventController:RequestQuestPinSyncFull() end)
     end

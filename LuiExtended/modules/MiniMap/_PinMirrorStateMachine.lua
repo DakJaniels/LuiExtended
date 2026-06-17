@@ -310,6 +310,9 @@ function MiniMapPinMirrorStateMachine:FlushQueuedPinSyncAfterIdle()
         MiniMap.RefreshNativeWorldMapContainer()
         MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
         MiniMap.FirePinResyncCallbacks()
+        if MiniMap.IsNativeWorldMapContainerAttached() then
+            MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+        end
     end
 end
 
@@ -352,4 +355,7 @@ function MiniMapPinMirrorStateMachine:RequestPinSyncImmediate()
     MiniMap.RefreshNativeWorldMapContainer()
     MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     MiniMap.FirePinResyncCallbacks()
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+    end
 end

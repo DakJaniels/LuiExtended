@@ -464,9 +464,9 @@ function MiniMapView:ScheduleZoomButtonsFadeAfterIdle()
     self:CancelZoomButtonsTransient()
     local view = self
     self.zoomButtonsHideLaterId = zo_callLater(function ()
-                                                 view.zoomButtonsHideLaterId = nil
-                                                 view:StartZoomButtonsFadeOut()
-                                             end, MINIMAP_ZOOM_CHROME_HOLD_MS)
+                                                   view.zoomButtonsHideLaterId = nil
+                                                   view:StartZoomButtonsFadeOut()
+                                               end, MINIMAP_ZOOM_CHROME_HOLD_MS)
 end
 
 function MiniMapView:ShutdownZoomButtonsFade()

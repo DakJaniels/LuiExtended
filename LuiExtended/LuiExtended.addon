@@ -193,6 +193,7 @@ modules/MiniMap/_PinController.lua
 modules/MiniMap/_PinMirrorStateMachine.lua
 modules/MiniMap/_MapEventController.lua
 modules/MiniMap/_InputController.lua
+modules/MiniMap/_HudMapPinInteraction.lua
 modules/MiniMap/_Runtime.lua
 modules/MiniMap/MiniMap.lua
 frontend/MiniMap.xml

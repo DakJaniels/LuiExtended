@@ -120,6 +120,33 @@ function MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(pinMirrorStateMachine)
     end
 end
 
+--- LUIE waypoint / player overlays on view.pins after native g_mapPinManager refresh.
+function MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
+    if not MiniMap.Enabled then
+        return
+    end
+    local mapController = MiniMap.mapController
+    local pinController = MiniMap.pinController
+    if not mapController or not mapController:IsReady() or not pinController then
+        return
+    end
+    local mapData = mapController:GetMapData()
+    if not mapData then
+        return
+    end
+    pinController:SyncPlayerWaypoint(mapData)
+    pinController:SyncPlayerMapPin(mapData)
+end
+
+--- Flush ZOS g_mapRefresh groups and re-apply HUD minimap layout on reparented ZO_WorldMapContainer.
+function MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+    if not MiniMap.Enabled or not MiniMap.IsNativeWorldMapContainerAttached() then
+        return
+    end
+    MiniMap.FlushWorldMapPinRefreshGroups()
+    MiniMap.ReapplyNativeHudMapOverlayLayout()
+end
+
 MiniMap.PLAYER_PIN_BASE_SIZE = 16
 MiniMap.ZONE_LABEL_CHROME_OFFSET = 4
 MiniMap.FRAME_CHROME_HOVER_SIZE = 24
