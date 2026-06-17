@@ -126,6 +126,15 @@ modules/ChatAnnouncements/hooks/Hooks_Vengeance.lua
 modules/ChatAnnouncements/hooks/Hooks_CsaCallbacks.lua
 modules/ChatAnnouncements/ChatAnnouncementsHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsSocialRouter.lua
+modules/ChatAnnouncements/_ItemFormatting.lua
+modules/ChatAnnouncements/_ItemPrinter.lua
+modules/ChatAnnouncements/_ItemDelay.lua
+modules/ChatAnnouncements/_InventoryDiff.lua
+modules/ChatAnnouncements/_InventoryUpdateGuildBank.lua
+modules/ChatAnnouncements/_InventoryUpdate.lua
+modules/ChatAnnouncements/_InventoryUpdateCraft.lua
+modules/ChatAnnouncements/_InventoryUpdateBank.lua
+modules/ChatAnnouncements/_InventoryUpdateFence.lua
 modules/ChatAnnouncements/ChatAnnouncements.lua
 
 # Modules - Combat Text
