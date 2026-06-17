@@ -55,10 +55,8 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
         S.g_isStolen = true
         local function ResetIsStolen()
             S.g_isStolen = false
-            eventManager:UnregisterForUpdate(moduleName .. "ResetStolen")
         end
-        eventManager:UnregisterForUpdate(moduleName .. "ResetStolen")
-        eventManager:RegisterForUpdate(moduleName .. "ResetStolen", 150, ResetIsStolen)
+        eventManager:RegisterForUpdate(moduleName .. "ResetStolen", 150, ResetIsStolen, true)
     end
 
     local receivedBy = ""
@@ -163,7 +161,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
             -- Flag stack split as true - this will occur when a stack of items is split into multiple stacks.
             if not isNewItem then
                 S.g_stackSplit = true
-                eventManager:RegisterForUpdate(moduleName .. "StackTracker", 50, ChatAnnouncements.ResetStackSplit)
+                eventManager:RegisterForUpdate(moduleName .. "StackTracker", 50, ChatAnnouncements.ResetStackSplit, true)
             end
             icon, stack = GetItemInfo(bagId, slotId)
             itemType = GetItemType(bagId, slotId)
@@ -219,7 +217,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                 -- Flag stack split as true - this will occur when two items are stacked together (dragged over each other)
                 if not isNewItem then
                     S.g_stackSplit = true
-                    eventManager:RegisterForUpdate(moduleName .. "StackTracker", 50, ChatAnnouncements.ResetStackSplit)
+                    eventManager:RegisterForUpdate(moduleName .. "StackTracker", 50, ChatAnnouncements.ResetStackSplit, true)
                 end
 
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
@@ -271,8 +269,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     zo_callLater(function ()
                                      if S.g_stackSplit == false then
                                          ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
-                                         eventManager:UnregisterForUpdate(moduleName .. "Printer")
-                                         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                                         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                                      end
                                  end, 25)
                 elseif S.g_weAreInAGuildStore and ChatAnnouncements.SV.Inventory.LootShowList then
@@ -384,8 +381,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                         zo_callLater(function ()
                                          if S.g_stackSplit == false then
                                              ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
-                                             eventManager:UnregisterForUpdate(moduleName .. "Printer")
-                                             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                                             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                                          end
                                      end, 25)
                     end

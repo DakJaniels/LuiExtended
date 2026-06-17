@@ -313,6 +313,7 @@
 --- @field PrintMailDelayedLootLines fun(sortByMailId: boolean)
 --- @field QueueTimedActivityChatMessage fun(message: string, encodedIdKey: string|nil)
 --- @field RecordTimedActivityProgressAnnounce fun(index: luaindex, currentProgress: integer, timedActivityEncodedId: id64|nil)
+--- @field RegisterForUpdateOnce fun(updateName: string, minIntervalMs: integer, callback: function)
 --- @field ResolveGuildStoreSaleMailSender fun(authoritativeSender: string): string
 --- @field ResolveMailSender fun(mailId: id64): string, boolean, integer, integer
 --- @field ShouldSkipMailReceivedDeletedNotifications fun(): boolean

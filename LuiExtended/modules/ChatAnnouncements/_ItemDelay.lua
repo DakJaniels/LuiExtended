@@ -177,10 +177,8 @@ function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemL
             alwaysFirst = alwaysFirst,
             delay = delay,
         }
-        eventManager:UnregisterForUpdate(moduleName .. "SendDelayedItems")
         if not S.g_mailBatchTakeAll then
-            eventManager:UnregisterForUpdate(moduleName .. "SendDelayedMailItems")
-            eventManager:RegisterForUpdate(moduleName .. "SendDelayedMailItems", 25, ChatAnnouncements.SendDelayedMailItems)
+            eventManager:RegisterForUpdate(moduleName .. "SendDelayedMailItems", 25, ChatAnnouncements.SendDelayedMailItems, true)
         end
         return
     end
@@ -209,8 +207,7 @@ function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemL
     }
 
     -- Pass along all values to SendDelayedItems()
-    eventManager:UnregisterForUpdate(moduleName .. "SendDelayedItems")
-    eventManager:RegisterForUpdate(moduleName .. "SendDelayedItems", 25, ChatAnnouncements.SendDelayedItems)
+    eventManager:RegisterForUpdate(moduleName .. "SendDelayedItems", 25, ChatAnnouncements.SendDelayedItems, true)
 end
 
 function ChatAnnouncements.SendDelayedItems()
@@ -253,8 +250,7 @@ function ChatAnnouncements.ItemCounterDelayOut(icon, stack, itemType, itemId, it
     } -- Save relevant parameters
 
     -- Pass along all values to SendDelayedItems()
-    eventManager:UnregisterForUpdate(moduleName .. "SendDelayedItemsOut")
-    eventManager:RegisterForUpdate(moduleName .. "SendDelayedItemsOut", 25, ChatAnnouncements.SendDelayedItemsOut)
+    eventManager:RegisterForUpdate(moduleName .. "SendDelayedItemsOut", 25, ChatAnnouncements.SendDelayedItemsOut, true)
 end
 
 function ChatAnnouncements.SendDelayedItemsOut()

@@ -110,7 +110,7 @@ local function queueCraftAggregatedItem(isGain, itemString, color, messageType, 
             S.g_itemStringLoss, messageType, formattedRecipient, color, logPrefix, "", groupLoot, guildAnnounceGuildId)
     end
 
-    eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages)
+    eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages, true)
 end
 
 --- @param logPrefix string
@@ -169,9 +169,8 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         if delay then
             delayTimer = FAST_PRINTER_DELAY_MS
-            eventManager:UnregisterForUpdate(moduleName .. "Printer")
         end
-        eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages, true)
     end
 end
 
@@ -211,10 +210,8 @@ function ChatAnnouncements.MarkPickpocketLootContext()
 
     local function ResetIsPickpocketed()
         S.g_isPickpocketed = false
-        eventManager:UnregisterForUpdate(moduleName .. "ResetPickpocket")
     end
-    eventManager:UnregisterForUpdate(moduleName .. "ResetPickpocket")
-    eventManager:RegisterForUpdate(moduleName .. "ResetPickpocket", PICKPOCKET_LOOT_CONTEXT_MS, ResetIsPickpocketed)
+    eventManager:RegisterForUpdate(moduleName .. "ResetPickpocket", PICKPOCKET_LOOT_CONTEXT_MS, ResetIsPickpocketed, true)
 end
 
 --- @param logPrefix string

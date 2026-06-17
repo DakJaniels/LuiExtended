@@ -40,7 +40,7 @@ function ChatAnnouncements.Hooks.RegisterVengeance(ctx)
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "EXPERIENCE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then

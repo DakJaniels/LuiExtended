@@ -42,7 +42,7 @@ end
 local function QueueGuildMailReceivedNotification(message)
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-    guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
 end
 
 local function FormatGuildMailRankEntry(guildId, rankIndex, guildColor, forAlert)
@@ -102,7 +102,7 @@ end
 local function QueueGuildManageNotification(message)
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-    guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
 end
 
 local function EmitGuildManageSuccess(social, messageCA, messageAlert, sound)
@@ -222,7 +222,7 @@ function ChatAnnouncements.GuildHeraldrySaved()
             local finalMessage = zo_strformat(GetString(LUIE_STRING_CA_GUILD_HERALDRY_UPDATE), guildNameAlliance)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Social.GuildManageAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_HERALDRY_UPDATE), guildNameAllianceAlert))
@@ -244,7 +244,7 @@ function ChatAnnouncements.GuildRanksSaved(eventId, guildId)
         local finalMessage = zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANKS_UPDATE), guildNameAlliance)
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "NOTIFICATION", isSystem = true }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
     if ChatAnnouncements.SV.Social.GuildManageAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANKS_UPDATE), guildNameAllianceAlert))
@@ -299,7 +299,7 @@ function ChatAnnouncements.GuildTextChanged(eventId, guildId)
             local finalMessage = zo_strformat(GetString(messageString), guildNameAlliance)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            guildEventManager:RegisterForUpdate(guildModuleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Social.GuildManageAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(messageString), guildNameAllianceAlert))

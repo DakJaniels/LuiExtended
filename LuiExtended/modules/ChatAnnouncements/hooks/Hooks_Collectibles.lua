@@ -48,7 +48,7 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                         local finalString = zo_strformat("<<1>><<2>>", string1, string2)
                         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "COLLECTIBLE" }
                         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                     end
 
                     -- Set message params even if CSA is disabled, we just send a dummy event so the callback handler works correctly.
@@ -107,7 +107,7 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                             local finalString = zo_strformat("<<1>><<2>><<3>>", string1, formattedIcon, string2)
                             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "COLLECTIBLE" }
                             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                         end
 
                         -- Set message params even if CSA is disabled, we just send a dummy event so the callback handler works correctly.

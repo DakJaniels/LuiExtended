@@ -262,6 +262,15 @@ S.g_weAreInADig = false -- When in a digsite.
 I.GetCarriedCurrencyAmount = function (currencyType)
     return GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER)
 end
+
+--- One-shot delayed update (see zo_callLater / EVENT_MANAGER RegisterForUpdate doOnce).
+--- @param updateName string
+--- @param minIntervalMs integer
+--- @param callback function
+function I.RegisterForUpdateOnce(updateName, minIntervalMs, callback)
+    eventManager:RegisterForUpdate(updateName, minIntervalMs, callback, true)
+end
+
 ------------------------------------------------
 -- ITEM BLACKLIST ------------------------------
 ------------------------------------------------
@@ -1453,7 +1462,7 @@ function ChatAnnouncements.PointRespecDisplay(respecType)
     if ChatAnnouncements.SV.DisplayAnnouncements.Respec.CA then
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE", isSystem = true }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
 
     if ChatAnnouncements.SV.DisplayAnnouncements.Respec.CSA then
@@ -1507,10 +1516,8 @@ function I.BeginContainerLootOrderingWindow()
     local function ResetContainerRecentlyOpened()
         ChatAnnouncements.FlushDeferredContainerLootCurrency()
         S.g_containerRecentlyOpened = false
-        eventManager:UnregisterForUpdate(moduleName .. "ResetContainer")
     end
-    eventManager:UnregisterForUpdate(moduleName .. "ResetContainer")
-    eventManager:RegisterForUpdate(moduleName .. "ResetContainer", 200, ResetContainerRecentlyOpened)
+    eventManager:RegisterForUpdate(moduleName .. "ResetContainer", 200, ResetContainerRecentlyOpened, true)
 end
 
 --- @param eventId integer
@@ -1629,8 +1636,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         elseif currencyType == CURT_ALLIANCE_POINTS then
             if not currencySettings.CurrencyAPShowChange then return nil end
             if currencySettings.CurrencyAPThrottle > 0 and (changeReason == CURRENCY_CHANGE_REASON_KILL or changeReason == CURRENCY_CHANGE_REASON_KEEP_REPAIR or changeReason == CURRENCY_CHANGE_REASON_PVP_RESURRECT) then
-                eventManager:UnregisterForUpdate(moduleName .. "BufferedAP")
-                eventManager:RegisterForUpdate(moduleName .. "BufferedAP", currencySettings.CurrencyAPThrottle, ChatAnnouncements.CurrencyAPThrottlePrinter)
+                eventManager:RegisterForUpdate(moduleName .. "BufferedAP", currencySettings.CurrencyAPThrottle, ChatAnnouncements.CurrencyAPThrottlePrinter, true)
                 S.g_currencyAPThrottleValue = S.g_currencyAPThrottleValue + amountDelta
                 S.g_currencyAPThrottleTotal = I.GetCarriedCurrencyAmount(2)
                 return "skip"
@@ -1652,8 +1658,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         elseif currencyType == CURT_TELVAR_STONES then
             if not currencySettings.CurrencyTVChange then return nil end
             if currencySettings.CurrencyTVThrottle > 0 and (changeReason == CURRENCY_CHANGE_REASON_LOOT or changeReason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER) and not S.g_containerRecentlyOpened then
-                eventManager:UnregisterForUpdate(moduleName .. "BufferedTV")
-                eventManager:RegisterForUpdate(moduleName .. "BufferedTV", currencySettings.CurrencyTVThrottle, ChatAnnouncements.CurrencyTVThrottlePrinter)
+                eventManager:RegisterForUpdate(moduleName .. "BufferedTV", currencySettings.CurrencyTVThrottle, ChatAnnouncements.CurrencyTVThrottlePrinter, true)
                 S.g_currencyTVThrottleValue = S.g_currencyTVThrottleValue + amountDelta
                 S.g_currencyTVThrottleTotal = I.GetCarriedCurrencyAmount(3)
                 return "skip"
@@ -1973,10 +1978,17 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
     local item
     local name
 
-    messageP1 = ("|r|c" .. currencyTypeColor .. currencyIcon .. " " .. changeType .. currencyName .. "|r|c" .. changeColor)
+    local function BuildCurrencyAmountSegment(icon, numericPart, namePart)
+        if icon ~= "" then
+            return icon .. " " .. numericPart .. namePart
+        end
+        return numericPart .. namePart
+    end
+
+    messageP1 = ("|r|c" .. currencyTypeColor .. BuildCurrencyAmountSegment(currencyIcon, changeType, currencyName) .. "|r|c" .. changeColor)
 
     if (currencyTotal and type ~= "LUIE_CURRENCY_HERALDRY") or (type == "LUIE_CURRENCY_VENDOR" and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency) then
-        messageP2 = ("|r|c" .. currencyTypeColor .. currencyIcon .. " " .. formattedValue .. "|r|c" .. changeColor)
+        messageP2 = ("|r|c" .. currencyTypeColor .. BuildCurrencyAmountSegment(currencyIcon, formattedValue, "") .. "|r|c" .. changeColor)
     else
         messageP2 = "|r"
     end
@@ -2061,7 +2073,7 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         local resolveType = (type == "LUIE_CURRENCY_POSTAGE" and "CURRENCY POSTAGE") or (baseCurrencyType == CURT_CROWNS and "EXPERIENCE") or "CURRENCY"
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = resolveType }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
 end
 
@@ -2097,7 +2109,6 @@ function ChatAnnouncements.CurrencyAPThrottlePrinter()
         local type = "LUIE_CURRENCY_THROTTLE"
         ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
-    eventManager:UnregisterForUpdate(moduleName .. "BufferedAP")
     S.g_currencyAPThrottleValue = 0
     S.g_currencyAPThrottleTotal = 0
 end
@@ -2116,7 +2127,6 @@ function ChatAnnouncements.CurrencyTVThrottlePrinter()
         local type = "LUIE_CURRENCY_THROTTLE"
         ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
-    eventManager:UnregisterForUpdate(moduleName .. "BufferedTV")
     S.g_currencyTVThrottleValue = 0
     S.g_currencyTVThrottleTotal = 0
 end
@@ -2136,7 +2146,7 @@ function ChatAnnouncements.MiscAlertLockSuccess(eventId)
         local message = GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS)
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
     if ChatAnnouncements.SV.Notify.NotificationLockpickAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS))
@@ -2158,7 +2168,7 @@ function ChatAnnouncements.StorageBag(eventId, previousCapacity, currentCapacity
             local formattedString = ColorizeColors.StorageBagColorize:Colorize(zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.Notify.StorageBagAlert then
@@ -2179,7 +2189,7 @@ function ChatAnnouncements.StorageBank(eventId, previousCapacity, currentCapacit
             local formattedString = ColorizeColors.StorageBagColorize:Colorize(zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.Notify.StorageBagAlert then
@@ -2232,7 +2242,7 @@ function ChatAnnouncements.OnBuybackItem(eventId, itemName, quantity, money, ite
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "CURRENCY" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
     S.g_savedPurchase = {}
 end
@@ -2374,7 +2384,7 @@ function ChatAnnouncements.OnBuyItem(eventId, itemName, entryType, quantity, mon
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "CURRENCY" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
 
     S.g_savedPurchase = {}
@@ -2427,7 +2437,7 @@ function ChatAnnouncements.OnSellItem(eventId, itemName, quantity, money)
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "CURRENCY" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
     S.g_savedPurchase = {}
 end
@@ -2486,7 +2496,7 @@ function ChatAnnouncements.TradingHouseResponseReceived(eventId, TradingHouseRes
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = type }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageListing")
         ChatAnnouncements.CurrencyPrinter(nil, S.g_savedPurchase.formattedValue, changeColor, S.g_savedPurchase.changeType, S.g_savedPurchase.currencyTypeColor, S.g_savedPurchase.currencyIcon, S.g_savedPurchase.currencyName, S.g_savedPurchase.currencyTotal, messageChange, S.g_savedPurchase.messageTotal, type)
     end
@@ -2544,7 +2554,7 @@ function ChatAnnouncements.MailRemoved(eventId)
             local message = GetString(LUIE_STRING_CA_MAIL_DELETED_MSG)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_MAIL_DELETED_MSG))
@@ -2912,15 +2922,12 @@ function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
         I.EnqueueMailLootEntry(mailId, mailTarget)
     end
 
-    eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
     eventManager:RegisterForUpdate(moduleName .. "ClearMailTakingFlag", 200, function ()
         S.g_mailIsTakingMail = false
-        eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
         if not S.g_mailBatchTakeAll then
-            eventManager:UnregisterForUpdate(moduleName .. "SendDelayedMailItems")
             ChatAnnouncements.SendDelayedMailItems()
         end
-    end)
+    end, true)
 
     if not I.ShouldSkipMailReceivedDeletedNotifications() and (ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert) then
         local mailString
@@ -2933,7 +2940,7 @@ function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
             if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = mailString, type = "NOTIFICATION", isSystem = true }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
             end
             if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, mailString)
@@ -2954,11 +2961,9 @@ function ChatAnnouncements.OnMailTakeAttachedMoney(eventId, mailId)
     if not S.g_mailBatchTakeAll then
         I.EnqueueMailLootEntry(mailId, mailTarget)
     end
-    eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
     eventManager:RegisterForUpdate(moduleName .. "ClearMailTakingFlag", 200, function ()
         S.g_mailIsTakingMail = false
-        eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
-    end)
+    end, true)
 end
 
 --- @param eventId integer
@@ -2971,8 +2976,7 @@ function ChatAnnouncements.OnMailTakeAllResponse(eventId, result, category, head
         ChatAnnouncements.ResetMailSession(true)
     end
     ChatAnnouncements.FlushMailDelayedLootLines()
-    eventManager:UnregisterForUpdate(moduleName .. "FlushMailLoot")
-    eventManager:RegisterForUpdate(moduleName .. "FlushMailLoot", 75, FinishMailTakeAllBatch)
+    eventManager:RegisterForUpdate(moduleName .. "FlushMailLoot", 75, FinishMailTakeAllBatch, true)
 end
 
 --- @param eventId integer
@@ -3065,7 +3069,7 @@ function ChatAnnouncements.OnMailSuccess(eventId)
             if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = mailString, type = "NOTIFICATION", isSystem = true }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
             end
             if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, mailString)
@@ -3253,7 +3257,7 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
             local finalString = stringpart1 .. stringpart2 .. stringpart3 .. stringpart4
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "ACHIEVEMENT" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.Achievement.AchievementUpdateAlert then
@@ -3329,7 +3333,7 @@ function I.QueueTimedActivityChatMessage(message, encodedIdKey)
         timedActivityAnnounceKey = encodedIdKey,
     }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
 end
 
 --- @param index luaindex
@@ -3509,7 +3513,7 @@ function ChatAnnouncements.OnTamrielTomesEndOfSeasonRecapAvailable()
     if ChatAnnouncements.SV.Notify.TimedActivityCA then
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
     if ChatAnnouncements.SV.Notify.TimedActivityAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
@@ -3540,7 +3544,7 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventId, c
                 rewardQuantity = rewardQuantity
             }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.Notify.PromotionalEventsActivityAlert then
@@ -3584,7 +3588,7 @@ function ChatAnnouncements.OnCraftedAbilityLockStateChanged(eventId, craftedAbil
                 isUnlocked = isUnlocked
             }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.Notify.CraftedAbilityAlert then
@@ -3625,7 +3629,7 @@ function ChatAnnouncements.OnCraftedAbilityScriptLockStateChanged(eventId, craft
                 isUnlocked = isUnlocked
             }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.Notify.CraftedAbilityScriptAlert then
@@ -3650,7 +3654,7 @@ function ChatAnnouncements.OnFurnitureItemsTransferredToVault(eventId, numEligib
     end
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = msg, type = "MESSAGE" }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
 end
 
 function ChatAnnouncements.IndexInventory()
@@ -3955,11 +3959,9 @@ end
 function ChatAnnouncements.OnPackSiege()
     local function ResetPackSiege()
         S.g_packSiege = false
-        eventManager:UnregisterForUpdate(moduleName .. "ResetPackSiege")
     end
     S.g_packSiege = true
-    eventManager:UnregisterForUpdate(moduleName .. "ResetPackSiege")
-    eventManager:RegisterForUpdate(moduleName .. "ResetPackSiege", 4000, ResetPackSiege)
+    eventManager:RegisterForUpdate(moduleName .. "ResetPackSiege", 4000, ResetPackSiege, true)
 end
 
 -- Helper function for Craft Bag
@@ -4103,10 +4105,9 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
                         finalMessage = string_format("|c%s%s|r%s", color, formattedMessageP2, totalString)
 
-                        eventManager:UnregisterForUpdate(moduleName .. "Printer")
                         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "QUEST LOOT REMOVE", itemId = itemId }
                         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                        eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages)
+                        eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages, true)
                     end
                 end
 
@@ -4194,10 +4195,9 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
                         finalMessage = string_format("|c%s%s|r%s", color, formattedMessageP2, totalString)
 
-                        eventManager:UnregisterForUpdate(moduleName .. "Printer")
                         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "QUEST LOOT ADD", itemId = itemId }
                         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                        eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages)
+                        eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages, true)
                     end
                 end
 
@@ -4218,8 +4218,6 @@ function ChatAnnouncements.ResolveQuestItemChange()
             end
         end
     end
-
-    eventManager:UnregisterForUpdate(moduleName .. "QuestItemUpdater")
 end
 
 --- @param itemId integer
@@ -4239,7 +4237,7 @@ function I.DisplayQuestItem(itemId, stackCount, icon, reset)
         -- d(itemId .. " - Increment by: " .. stackCount)
         questItemIndex[itemId].counter = questItemIndex[itemId].counter + stackCount
     end
-    eventManager:RegisterForUpdate(moduleName .. "QuestItemUpdater", 25, ChatAnnouncements.ResolveQuestItemChange)
+    eventManager:RegisterForUpdate(moduleName .. "QuestItemUpdater", 25, ChatAnnouncements.ResolveQuestItemChange, true)
 end
 
 --- @param eventId integer
@@ -4260,10 +4258,8 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemLink, quantit
 
         local function ResetIsLooted()
             S.g_isLooted = false
-            eventManager:UnregisterForUpdate(moduleName .. "ResetLooted")
         end
-        eventManager:UnregisterForUpdate(moduleName .. "ResetLooted")
-        eventManager:RegisterForUpdate(moduleName .. "ResetLooted", 150, ResetIsLooted)
+        eventManager:RegisterForUpdate(moduleName .. "ResetLooted", 150, ResetIsLooted, true)
     end
 
     -- If the player pickpockets an item
@@ -4378,7 +4374,7 @@ function ChatAnnouncements.QueueAdventureZoneFactionReputationGain(deltaReputati
         groupLoot = false,
     }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
 end
 
 --- @param eventId integer
@@ -4409,14 +4405,12 @@ function ChatAnnouncements.OnInventoryItemUsed(eventId, itemSoundCategory)
 
     local function ResetCombinedRecipe()
         S.g_combinedRecipe = false
-        eventManager:UnregisterForUpdate(moduleName .. "ResetCombinedRecipe")
     end
 
     -- Trophy items used for recipe combination seem to have no itemSoundCategory.
     if itemSoundCategory == 0 then
         S.g_combinedRecipe = true
-        eventManager:UnregisterForUpdate(moduleName .. "ResetCombinedRecipe")
-        eventManager:RegisterForUpdate(moduleName .. "ResetCombinedRecipe", 150, ResetCombinedRecipe)
+        eventManager:RegisterForUpdate(moduleName .. "ResetCombinedRecipe", 150, ResetCombinedRecipe, true)
     end
 end
 
@@ -4528,7 +4522,7 @@ function ChatAnnouncements.JusticeDisplayConfiscate()
         if ChatAnnouncements.SV.Notify.NotificationConfiscateCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = ConfiscateMessage, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         else
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, ConfiscateMessage)
         end
@@ -4623,7 +4617,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
             local message = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_MAJOR_TEXT, SOUNDS.GROUP_ELECTION_REQUESTED)
@@ -4645,7 +4639,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
             local message = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_MAJOR_TEXT, SOUNDS.GROUP_ELECTION_REQUESTED)
@@ -4671,7 +4665,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
         if ChatAnnouncements.SV.Notify.DisguiseCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.DisguiseAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
@@ -4690,7 +4684,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
         if ChatAnnouncements.SV.Notify.DisguiseCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.DisguiseAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
@@ -4739,7 +4733,7 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
                 if ChatAnnouncements.SV.Notify.DisguiseCA then
                     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                 end
                 if ChatAnnouncements.SV.Notify.DisguiseAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
@@ -4759,7 +4753,7 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
                 if ChatAnnouncements.SV.Notify.DisguiseCA then
                     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                 end
                 if ChatAnnouncements.SV.Notify.DisguiseAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
@@ -5113,7 +5107,6 @@ function ChatAnnouncements.PrintQueuedMessages()
 
     ZO_ClearTable(ChatAnnouncements.QueuedMessages)
     ChatAnnouncements.QueuedMessagesCounter = 1
-    eventManager:UnregisterForUpdate(moduleName .. "Printer")
 end
 
 local mementoTable =
