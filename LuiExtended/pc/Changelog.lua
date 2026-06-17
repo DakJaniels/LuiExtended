@@ -49,6 +49,24 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.4.9
+    "|cFFA500LuiExtended Version 7.2.4.9|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: |cFFFFFFShow Global Cooldown|r now updates cooldown visuals on the LUIE backbar row as well as the active bar.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Backbar base-game activation (proc) glow syncs slot use-failure state and only listens to inactive-hotbar slot/effect events.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Inventory loot and bag updates refactored into dedicated handlers (bag, bank, craft, fence, guild bank, item delay/formatting).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Removed |cFFFFFFCamera Wedge|r scale setting from PC and console settings.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Native HUD player pip scaling and visibility when following the minimap vs when attached to the world map.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Clarified |cFFFFFFMoving pins (ms)|r / moving pin refresh descriptions (de, fr, ru, zh).",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Fixed flickering when the base game |cFFFFFFAbility Bar|r is set to |cFFFFFFAutomatic|r (LUIE no longer overrides ZOS HUD fade alpha on |cFFFFFFZO_ActionBar1|r).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Backbar proc glow no longer uses invalid offset slot ids when cooldown updates refresh activation highlights.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Fixed inventory-related event registration across split inventory modules.",
+    "",
     -- Version Header 7.2.4.8
     "|cFFA500LuiExtended Version 7.2.4.8|r",
     "",

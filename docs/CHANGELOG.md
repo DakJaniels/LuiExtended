@@ -1,5 +1,22 @@
 # LuiExtended Changelog
 
+## Version 7.2.4.9
+
+### Changes
+
+- Action Bar: **Show Global Cooldown** now updates cooldown visuals on the LUIE backbar row as well as the active bar.
+- Action Bar: Backbar base-game activation (proc) glow syncs slot use-failure state and only listens to inactive-hotbar slot/effect events.
+- Chat Announcements: Inventory loot and bag updates refactored into dedicated handlers (bag, bank, craft, fence, guild bank, item delay/formatting).
+- MiniMap: Removed **Camera Wedge** scale setting from PC and console settings.
+- MiniMap: Native HUD player pip scaling and visibility when following the minimap vs when attached to the world map.
+- MiniMap: Clarified **Moving pins (ms)** / moving pin refresh descriptions (de, fr, ru, zh).
+
+### Fixed
+
+- Action Bar: Fixed flickering when the base game **Ability Bar** is set to **Automatic** (LUIE no longer overrides ZOS HUD fade alpha on the main action bar control).
+- Action Bar: Backbar proc glow no longer uses invalid offset slot ids when cooldown updates refresh activation highlights.
+- Chat Announcements: Fixed inventory-related event registration across split inventory modules.
+
 ## Version 7.2.4.8
 
 ### New
