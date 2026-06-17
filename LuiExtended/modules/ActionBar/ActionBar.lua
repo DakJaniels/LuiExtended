@@ -602,17 +602,66 @@ function ActionBar.OnActiveWeaponPairChanged(activeWeaponPair, locked)
 end
 
 -- -----------------------------------------------------------------------------
+--- Resolve physical slot, hotbar, and cooldown for ActionButton (LUIE backbar uses offset slot ids).
+--- @param button ActionButton
+--- @return integer physicalSlot
+--- @return HotBarCategory hotbarCategory
+--- @return integer remain
+--- @return integer duration
+--- @return boolean global
+--- @return integer? globalSlotType
+local function GetActionButtonCooldownInfo(button)
+    local luiSlotNum = button:GetSlot()
+    local physicalSlot = luiSlotNum
+    local hotbarCategory
+    local isLuiBackbarSlot = luiSlotNum >= BAR_INDEX_START + BACKBAR_INDEX_OFFSET
+
+    if button.slot.slotNum == 1 then
+        hotbarCategory = HOTBAR_CATEGORY_QUICKSLOT_WHEEL
+    elseif isLuiBackbarSlot then
+        physicalSlot = luiSlotNum - BACKBAR_INDEX_OFFSET
+        hotbarCategory = button:GetHotbarCategory()
+    else
+        hotbarCategory = g_hotbarCategory
+    end
+
+    local remain, duration, global, globalSlotType = GetSlotCooldownInfo(physicalSlot, hotbarCategory)
+
+    if ActionBar.SV.GlobalShowGCD and isLuiBackbarSlot then
+        local remainActive, durationActive, globalActive, globalSlotTypeActive = GetSlotCooldownInfo(physicalSlot, g_hotbarCategory)
+        if durationActive > 0 and globalActive and (duration == 0 or global) then
+            remain, duration, global, globalSlotType = remainActive, durationActive, globalActive, globalSlotTypeActive
+        end
+    end
+
+    return physicalSlot, hotbarCategory, remain, duration, global, globalSlotType
+end
+
+-- -----------------------------------------------------------------------------
 -- Hook to update GCD support
 --- Hooks ActionButton UpdateUsable/UpdateCooldown for global GCD display.
 function ActionBar.HookGCD()
     ---
     --- @param self ActionButton
     --- @diagnostic disable-next-line: duplicate-set-field
+    function ActionButton:RefreshCooldown()
+        local physicalSlot, hotbarCategory, remain, duration = GetActionButtonCooldownInfo(self)
+        local percentComplete = duration > 0 and (1 - remain / duration) or 1
+
+        if IsInGamepadPreferredMode() then
+            self:SetCooldownPercentComplete(percentComplete)
+            self:UpdateUsable()
+        end
+
+        self.icon.percentComplete = percentComplete
+    end
+
+    ---
+    --- @param self ActionButton
+    --- @diagnostic disable-next-line: duplicate-set-field
     function ActionButton:UpdateUsable()
-        local slotnum = self:GetSlot()
-        local hotbarCategory = self.slot.slotNum == 1 and HOTBAR_CATEGORY_QUICKSLOT_WHEEL or g_hotbarCategory
+        local slotnum, hotbarCategory, _, duration = GetActionButtonCooldownInfo(self)
         local isGamepad = IsInGamepadPreferredMode()
-        local _, duration, _, _ = GetSlotCooldownInfo(slotnum, hotbarCategory)
         local isShowingCooldown = self.showingCooldown
         local isKeyboardUltimateSlot = not isGamepad and self.slot.slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
         local usable = false
@@ -640,9 +689,7 @@ function ActionBar.HookGCD()
     --- @param options table
     --- @diagnostic disable-next-line: duplicate-set-field
     function ActionButton:UpdateCooldown(options)
-        local slotnum = self:GetSlot()
-        local hotbarCategory = self.slot.slotNum == 1 and HOTBAR_CATEGORY_QUICKSLOT_WHEEL or g_hotbarCategory
-        local remain, duration, global, globalSlotType = GetSlotCooldownInfo(slotnum, hotbarCategory)
+        local slotnum, hotbarCategory, remain, duration, global, globalSlotType = GetActionButtonCooldownInfo(self)
         local isInCooldown = duration > 0
         local slotType = GetSlotType(slotnum, hotbarCategory)
         local showGlobalCooldownForCollectible = global and slotType == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
@@ -731,6 +778,8 @@ function ActionBar.HookGCD()
         self.isGlobalCooldown = global
         self:UpdateUsable()
     end
+
+    Backbar.OnActionUpdateCooldowns()
 end
 
 -- -----------------------------------------------------------------------------

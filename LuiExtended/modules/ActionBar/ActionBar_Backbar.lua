@@ -598,7 +598,22 @@ function Backbar.RegisterPlatformStyle()
     ZO_PlatformStyle:New(Backbar.BackbarSetupTemplate, KEYBOARD_CONSTANTS, GAMEPAD_CONSTANTS)
 end
 
+function Backbar.OnActionUpdateCooldowns()
+    if not ActionBar.SV.BarShowBack or not ActionBar.SV.GlobalShowGCD then
+        return
+    end
+    for _, button in pairs(g_backbarButtons) do
+        if button and button.UpdateCooldown then
+            button:UpdateCooldown()
+        end
+    end
+end
+
 function Backbar.RegisterEvents()
+    eventManager:UnregisterForEvent(moduleName .. "BackbarCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS)
+
+    eventManager:RegisterForEvent(moduleName .. "BackbarCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS, Backbar.OnActionUpdateCooldowns)
+
     eventManager:RegisterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (_, bagId, slotIndex)
         if ActionBar.SV.BarShowBack and bagId == BAG_WORN and (slotIndex == EQUIP_SLOT_RING1 or slotIndex == EQUIP_SLOT_RING2) then
             Backbar.BackbarToggleSettings()
@@ -629,11 +644,13 @@ function Backbar.RegisterEvents()
     eventManager:RegisterForEvent(moduleName .. "BackbarActiveHotbar", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function ()
         Backbar._updateButtonActionIds()
         Backbar.RefreshAllActivationHighlights()
+        Backbar.OnActionUpdateCooldowns()
     end)
 
     eventManager:RegisterForEvent(moduleName .. "BackbarAllHotbars", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function ()
         Backbar._updateButtonActionIds()
         Backbar.RefreshAllActivationHighlights()
+        Backbar.OnActionUpdateCooldowns()
     end)
 end
 

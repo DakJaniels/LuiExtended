@@ -184,6 +184,7 @@ ActionBar.CastBar =
 --- @field UpdateActivationHighlight fun(luiSlotNum: number)
 --- @field RefreshAllActivationHighlights fun()
 --- @field OnPhysicalSlotVisualSync fun(physicalSlotIndex: number)
+--- @field OnActionUpdateCooldowns fun()
 --- @field SyncDefaultBackRowTimers fun()
 ActionBar.Backbar =
 {
