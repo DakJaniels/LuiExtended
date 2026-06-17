@@ -203,7 +203,6 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field compassOverride number
 --- @field keepSquareAspect boolean
 --- @field positionGridDivisor number
---- @field cameraWedgeScale number
 --- @field playerPipColor { r: number, g: number, b: number, a: number }
 --- @field cameraWedgeColor { r: number, g: number, b: number, a: number }
 --- @field borderOpacity number
@@ -295,7 +294,6 @@ MiniMap.Defaults =
     compassOverride = 0,
     keepSquareAspect = false,
     positionGridDivisor = 0,
-    cameraWedgeScale = 1,
     playerPipColor = { r = 1, g = 1, b = 1, a = 1 },
     cameraWedgeColor = { r = 1, g = 1, b = 1, a = 1 },
     borderOpacity = 1,
@@ -468,8 +466,12 @@ function MiniMap.ApplyPlayerPipColors()
     local playerRed, playerGreen, playerBlue, playerAlpha = MiniMap.GetPlayerPipColor()
     local wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha = MiniMap.GetCameraWedgeColor()
     MiniMap.view.player:SetColor(playerRed, playerGreen, playerBlue, playerAlpha)
-    MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
-    if MiniMap.IsNativeWorldMapContainerAttached() then
+    local followPlayer = MiniMap.GetMapFollowsPlayer()
+    local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
+    if not (nativeHudMapAttached and followPlayer) then
+        MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
+    end
+    if nativeHudMapAttached then
         MiniMap.ApplyNativeWorldMapPlayerPinColors()
     end
 end
@@ -482,6 +484,9 @@ function MiniMap.ApplyLiveSettings()
     MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
     MiniMap.ApplyZoneNameFont()
     MiniMap.view:ApplyPlayerIconDimensions()
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.ApplyNativeHudPlayerPinScale()
+    end
     MiniMap.ApplyPlayerPipColors()
     MiniMap.runtime:UpdateCenterPlayerPipVisibility()
     MiniMap.inputController:ApplyFrameDragMouseEnabled()

@@ -313,6 +313,7 @@
 --- @field PrintMailDelayedLootLines fun(sortByMailId: boolean)
 --- @field QueueTimedActivityChatMessage fun(message: string, encodedIdKey: string|nil)
 --- @field RecordTimedActivityProgressAnnounce fun(index: luaindex, currentProgress: integer, timedActivityEncodedId: id64|nil)
+--- @field RegisterForUpdateOnce fun(updateName: string, minIntervalMs: integer, callback: function)
 --- @field ResolveGuildStoreSaleMailSender fun(authoritativeSender: string): string
 --- @field ResolveMailSender fun(mailId: id64): string, boolean, integer, integer
 --- @field ShouldSkipMailReceivedDeletedNotifications fun(): boolean
@@ -478,6 +479,9 @@
 --- @field ItemCounterDelay fun(icon: string, stack: integer, itemType: ItemType, itemId: integer, itemLink: string, receivedBy: string, logPrefix: string, gainOrLoss: integer, filter: boolean, groupLoot: boolean, alwaysFirst: boolean, delay: boolean, lootMailId: id64|nil, showCollectionStatus: boolean)
 --- @field ItemCounterDelayOut fun(icon: string, stack: integer, itemType: ItemType, itemId: integer, itemLink: string, receivedBy: string, logPrefix: string, gainOrLoss: integer, filter: boolean, groupLoot: boolean, alwaysFirst: boolean, delay: boolean)
 --- @field ItemFilter fun(itemType: ItemType, itemId: integer, itemLink: string, groupLoot: boolean): boolean
+--- @field GetLootGainOrLossColorHex fun(gainOrLoss: integer|nil): string
+--- @field FormatLootRecipient fun(receivedBy: string|nil): string
+--- @field BuildLootItemDisplayString fun(icon: string, stack: integer, itemType: ItemType, itemLink: string, receivedBy: string, logPrefix: string, gainOrLoss: integer, groupLoot: boolean, showCollectionStatus: boolean|nil): string, string, string, string
 --- @field ItemPrinter fun(icon: string, stack: integer, itemType: ItemType, itemId: integer, itemLink: string, receivedBy: string, logPrefix: string, gainOrLoss: integer, filter: boolean, groupLoot: boolean, alwaysFirst: boolean, delay: boolean, showCollectionStatus: boolean)
 --- @field JusticeDisplayConfiscate fun()
 --- @field JusticeRemovePrint fun()

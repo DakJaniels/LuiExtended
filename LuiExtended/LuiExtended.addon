@@ -2,8 +2,8 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101050 101051
-## Version: 7.2.4.8
-## AddOnVersion: 7248
+## Version: 7.2.4.9
+## AddOnVersion: 7249
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements, Slash Commands, and MiniMap.
 ## DependsOn: LuiMedia>=7133 LuiData>=7221
 ## PCDependsOn: LibAddonMenu-2.0>=43
@@ -126,6 +126,15 @@ modules/ChatAnnouncements/hooks/Hooks_Vengeance.lua
 modules/ChatAnnouncements/hooks/Hooks_CsaCallbacks.lua
 modules/ChatAnnouncements/ChatAnnouncementsHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsSocialRouter.lua
+modules/ChatAnnouncements/_ItemFormatting.lua
+modules/ChatAnnouncements/_ItemPrinter.lua
+modules/ChatAnnouncements/_ItemDelay.lua
+modules/ChatAnnouncements/_InventoryDiff.lua
+modules/ChatAnnouncements/_InventoryUpdateGuildBank.lua
+modules/ChatAnnouncements/_InventoryUpdate.lua
+modules/ChatAnnouncements/_InventoryUpdateCraft.lua
+modules/ChatAnnouncements/_InventoryUpdateBank.lua
+modules/ChatAnnouncements/_InventoryUpdateFence.lua
 modules/ChatAnnouncements/ChatAnnouncements.lua
 
 # Modules - Combat Text

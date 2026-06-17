@@ -15,12 +15,13 @@ $RECYCLE.BIN/
 *~
 
 .vscode/*
+tools/*
+
 .emmyrc.json
 .luarc.json
 .luacheckrc
-tools/*
-
-LuiDevTool
-
 .remarkignore
+
 LuiExtended2/*
+LuiMiniMap/*
+LuiDevTool/*

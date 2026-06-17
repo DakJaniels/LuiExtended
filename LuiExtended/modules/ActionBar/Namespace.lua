@@ -74,6 +74,8 @@ local LUIE = LUIE
 --- @field StopCastBar fun()
 --- @field OnUpdateCastbar fun(currentTimeMS: number)
 --- @field ApplyDisplayAlpha fun()
+--- @field IsAutomaticAbilityBarSetting fun(): boolean
+--- @field UpdateActivationHighlightForButton fun(button: ActionButton?)
 --- @field ApplyFont fun()
 --- @field CastBar LUIE.ActionBar.CastBar
 --- @field Backbar LUIE.ActionBar.Backbar
@@ -181,8 +183,10 @@ ActionBar.CastBar =
 --- @field OnSetHotbarEffect fun(changeType: number): boolean
 --- @field GetInactiveHotbarCategory fun(): HotBarCategory
 --- @field UpdateActivationHighlight fun(luiSlotNum: number)
+--- @field SyncButtonUseFailure fun(button: ActionButton, physicalSlot: integer, hotbarCategory: HotBarCategory)
 --- @field RefreshAllActivationHighlights fun()
 --- @field OnPhysicalSlotVisualSync fun(physicalSlotIndex: number)
+--- @field OnActionUpdateCooldowns fun()
 --- @field SyncDefaultBackRowTimers fun()
 ActionBar.Backbar =
 {

@@ -602,17 +602,81 @@ function ActionBar.OnActiveWeaponPairChanged(activeWeaponPair, locked)
 end
 
 -- -----------------------------------------------------------------------------
+--- Resolve physical slot, hotbar, and cooldown for ActionButton (LUIE backbar uses offset slot ids).
+--- @param button ActionButton
+--- @return integer physicalSlot
+--- @return HotBarCategory hotbarCategory
+--- @return integer remain
+--- @return integer duration
+--- @return boolean global
+--- @return integer? globalSlotType
+local function GetActionButtonCooldownInfo(button)
+    local luiSlotNum = button:GetSlot()
+    local physicalSlot = luiSlotNum
+    local hotbarCategory
+    local isLuiBackbarSlot = luiSlotNum >= BAR_INDEX_START + BACKBAR_INDEX_OFFSET
+
+    if button.slot.slotNum == 1 then
+        hotbarCategory = HOTBAR_CATEGORY_QUICKSLOT_WHEEL
+    elseif isLuiBackbarSlot then
+        physicalSlot = luiSlotNum - BACKBAR_INDEX_OFFSET
+        hotbarCategory = button:GetHotbarCategory()
+    else
+        hotbarCategory = g_hotbarCategory
+    end
+
+    local remain, duration, global, globalSlotType = GetSlotCooldownInfo(physicalSlot, hotbarCategory)
+
+    if ActionBar.SV.GlobalShowGCD and isLuiBackbarSlot then
+        local remainActive, durationActive, globalActive, globalSlotTypeActive = GetSlotCooldownInfo(physicalSlot, g_hotbarCategory)
+        if durationActive > 0 and globalActive and (duration == 0 or global) then
+            remain, duration, global, globalSlotType = remainActive, durationActive, globalActive, globalSlotTypeActive
+        end
+    end
+
+    return physicalSlot, hotbarCategory, remain, duration, global, globalSlotType
+end
+
+-- -----------------------------------------------------------------------------
+--- Routes activation highlight to Backbar (offset slot ids) or vanilla ActionButton.
+--- @param button ActionButton?
+function ActionBar.UpdateActivationHighlightForButton(button)
+    if not button then
+        return
+    end
+    local luiSlot = button:GetSlot()
+    if luiSlot >= BAR_INDEX_START + BACKBAR_INDEX_OFFSET then
+        Backbar.UpdateActivationHighlight(luiSlot)
+    else
+        button:UpdateActivationHighlight()
+    end
+end
+
+-- -----------------------------------------------------------------------------
 -- Hook to update GCD support
 --- Hooks ActionButton UpdateUsable/UpdateCooldown for global GCD display.
 function ActionBar.HookGCD()
     ---
     --- @param self ActionButton
     --- @diagnostic disable-next-line: duplicate-set-field
+    function ActionButton:RefreshCooldown()
+        local physicalSlot, hotbarCategory, remain, duration = GetActionButtonCooldownInfo(self)
+        local percentComplete = duration > 0 and (1 - remain / duration) or 1
+
+        if IsInGamepadPreferredMode() then
+            self:SetCooldownPercentComplete(percentComplete)
+            self:UpdateUsable()
+        end
+
+        self.icon.percentComplete = percentComplete
+    end
+
+    ---
+    --- @param self ActionButton
+    --- @diagnostic disable-next-line: duplicate-set-field
     function ActionButton:UpdateUsable()
-        local slotnum = self:GetSlot()
-        local hotbarCategory = self.slot.slotNum == 1 and HOTBAR_CATEGORY_QUICKSLOT_WHEEL or g_hotbarCategory
+        local slotnum, hotbarCategory, _, duration = GetActionButtonCooldownInfo(self)
         local isGamepad = IsInGamepadPreferredMode()
-        local _, duration, _, _ = GetSlotCooldownInfo(slotnum, hotbarCategory)
         local isShowingCooldown = self.showingCooldown
         local isKeyboardUltimateSlot = not isGamepad and self.slot.slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
         local usable = false
@@ -640,9 +704,7 @@ function ActionBar.HookGCD()
     --- @param options table
     --- @diagnostic disable-next-line: duplicate-set-field
     function ActionButton:UpdateCooldown(options)
-        local slotnum = self:GetSlot()
-        local hotbarCategory = self.slot.slotNum == 1 and HOTBAR_CATEGORY_QUICKSLOT_WHEEL or g_hotbarCategory
-        local remain, duration, global, globalSlotType = GetSlotCooldownInfo(slotnum, hotbarCategory)
+        local slotnum, hotbarCategory, remain, duration, global, globalSlotType = GetActionButtonCooldownInfo(self)
         local isInCooldown = duration > 0
         local slotType = GetSlotType(slotnum, hotbarCategory)
         local showGlobalCooldownForCollectible = global and slotType == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
@@ -707,7 +769,7 @@ function ActionBar.HookGCD()
 
         if showCooldown ~= self.showingCooldown then
             self:SetShowCooldown(showCooldown)
-            self:UpdateActivationHighlight()
+            ActionBar.UpdateActivationHighlightForButton(self)
 
             if IsInGamepadPreferredMode() then
                 self:SetCooldownPercentComplete(self.icon.percentComplete)
@@ -731,6 +793,8 @@ function ActionBar.HookGCD()
         self.isGlobalCooldown = global
         self:UpdateUsable()
     end
+
+    Backbar.OnActionUpdateCooldowns()
 end
 
 -- -----------------------------------------------------------------------------
@@ -971,6 +1035,7 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForUpdate(moduleName .. "OnUpdate")
     eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
     eventManager:UnregisterForEvent(moduleName .. "CombatState")
+    eventManager:UnregisterForEvent(moduleName .. "ShowActionBarSetting")
 
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
@@ -979,6 +1044,12 @@ function ActionBar.RegisterEvents()
 
     eventManager:RegisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE, function ()
         ActionBar.ApplyDisplayAlpha()
+    end)
+
+    eventManager:RegisterForEvent(moduleName .. "ShowActionBarSetting", EVENT_INTERFACE_SETTING_CHANGED, function (_, settingType, settingId)
+        if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_SHOW_ACTION_BAR then
+            ActionBar.ApplyDisplayAlpha()
+        end
     end)
 
     eventManager:UnregisterForEvent(moduleName, EVENT_COMBAT_EVENT)
@@ -1186,6 +1257,13 @@ function ActionBar.RemoveFromCustomList(list, input)
 end
 
 -- -----------------------------------------------------------------------------
+--- True when base game Ability Bar is set to Automatic (contextual HUD fade owns ZO_ActionBar1 alpha).
+--- @return boolean
+function ActionBar.IsAutomaticAbilityBarSetting()
+    return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR)) == ACTION_BAR_SETTING_CHOICE_AUTOMATIC
+end
+
+-- -----------------------------------------------------------------------------
 --- Set action bar and cast bar opacity from in-combat / out-of-combat saved values (0–100).
 function ActionBar.ApplyDisplayAlpha()
     if not ActionBar.Enabled then
@@ -1199,8 +1277,21 @@ function ActionBar.ApplyDisplayAlpha()
     g_actionBarDisplayAlpha = alpha
 
     local actionBar = GetActionBarControl()
-    if actionBar and actionBar.SetAlpha then
-        actionBar:SetAlpha(alpha)
+    local backbarContainer = Backbar.GetContainer()
+    if ActionBar.IsAutomaticAbilityBarSetting() then
+        if actionBar and actionBar.SetAlpha then
+            actionBar:SetAlpha(1)
+        end
+        if backbarContainer and backbarContainer.SetAlpha then
+            backbarContainer:SetAlpha(alpha)
+        end
+    else
+        if actionBar and actionBar.SetAlpha then
+            actionBar:SetAlpha(alpha)
+        end
+        if backbarContainer and backbarContainer.SetAlpha then
+            backbarContainer:SetAlpha(1)
+        end
     end
 
     CastBar.ApplyDisplayAlpha(alpha)
@@ -1261,10 +1352,20 @@ end
 --- @param currentTimeMS integer
 function ActionBar.OnUpdate(currentTimeMS)
     if g_actionBarDisplayAlpha then
-        local actionBar = GetActionBarControl()
-        if actionBar and actionBar.GetAlpha and actionBar.SetAlpha then
-            if zo_abs(actionBar:GetAlpha() - g_actionBarDisplayAlpha) > 0.001 then
-                actionBar:SetAlpha(g_actionBarDisplayAlpha)
+        local alpha = g_actionBarDisplayAlpha
+        if ActionBar.IsAutomaticAbilityBarSetting() then
+            local backbarContainer = Backbar.GetContainer()
+            if backbarContainer and backbarContainer.GetAlpha and backbarContainer.SetAlpha then
+                if zo_abs(backbarContainer:GetAlpha() - alpha) > 0.001 then
+                    backbarContainer:SetAlpha(alpha)
+                end
+            end
+        else
+            local actionBar = GetActionBarControl()
+            if actionBar and actionBar.GetAlpha and actionBar.SetAlpha then
+                if zo_abs(actionBar:GetAlpha() - alpha) > 0.001 then
+                    actionBar:SetAlpha(alpha)
+                end
             end
         end
     end

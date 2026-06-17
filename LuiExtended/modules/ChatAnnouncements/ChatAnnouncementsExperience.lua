@@ -63,9 +63,7 @@ function ChatAnnouncements.OnExperienceGain(eventId, reason, level, previousExpe
         -- If throttle is enabled, save value and end function here
         if ChatAnnouncements.SV.XP.ExperienceThrottle > 0 and reason == PROGRESS_REASON_KILL then
             g_xpCombatBufferValue = g_xpCombatBufferValue + change
-            -- We unregister the event, then re-register it, this keeps the buffer at a constant X throttle after XP is gained.
-            eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
-            eventManager:RegisterForUpdate(moduleName .. "BufferedXP", ChatAnnouncements.SV.XP.ExperienceThrottle, ChatAnnouncements.PrintBufferedXP)
+            eventManager:RegisterForUpdate(moduleName .. "BufferedXP", ChatAnnouncements.SV.XP.ExperienceThrottle, ChatAnnouncements.PrintBufferedXP, true)
             return
         end
 
@@ -97,7 +95,7 @@ function ChatAnnouncements.PrintExperienceGain(change)
 
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "EXPERIENCE" }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
 end
 
 -- Print Buffered Experience Gain
@@ -106,7 +104,6 @@ function ChatAnnouncements.PrintBufferedXP()
         local change = g_xpCombatBufferValue
         ChatAnnouncements.PrintExperienceGain(change)
     end
-    eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
     g_xpCombatBufferValue = 0
 end
 
@@ -154,8 +151,7 @@ function ChatAnnouncements.SkillXPUpdate(eventId, skillType, skillIndex, reason,
             if ChatAnnouncements.SV.Skills.SkillGuildThrottle > 0 and change <= 5 then
                 g_guildSkillThrottle = g_guildSkillThrottle + change
                 g_guildSkillThrottleLine = formattedName
-                eventManager:UnregisterForUpdate(moduleName .. "BufferedRep")
-                eventManager:RegisterForUpdate(moduleName .. "BufferedRep", ChatAnnouncements.SV.Skills.SkillGuildThrottle, ChatAnnouncements.PrintBufferedGuildRep)
+                eventManager:RegisterForUpdate(moduleName .. "BufferedRep", ChatAnnouncements.SV.Skills.SkillGuildThrottle, ChatAnnouncements.PrintBufferedGuildRep, true)
                 return
             end
 
@@ -225,7 +221,7 @@ function ChatAnnouncements.PrintGuildRep(change, lineName, lineId, priority)
     -- We set this to skill gain, so as to avoid creating an entire additional chat message category (we want it to show after XP but before any other skill gains or level up so we place it on top of the level up priority).
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = priority }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
 end
 
 -- Print Buffered Guild Rep Gain
@@ -235,7 +231,6 @@ function ChatAnnouncements.PrintBufferedGuildRep()
         local lineName = g_guildSkillThrottleLine
         ChatAnnouncements.PrintGuildRep(g_guildSkillThrottle, lineName, lineId, "EXPERIENCE LEVEL")
     end
-    eventManager:UnregisterForUpdate(moduleName .. "BufferedRep")
     g_guildSkillThrottle = 0
     g_guildSkillThrottleLine = ""
 end

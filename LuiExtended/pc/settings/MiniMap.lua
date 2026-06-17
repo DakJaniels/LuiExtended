@@ -619,22 +619,6 @@ function MiniMap.CreateSettings()
             default = Defaults.anchorInfoPanelToMiniMap,
             disabled = infoPanelModuleDisabled,
         },
-        {
-            type = "slider",
-            name = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_TP),
-            min = 50,
-            max = 150,
-            step = 5,
-            getFunc = function () return (MiniMap.SV.cameraWedgeScale or 1) * 100 end,
-            setFunc = function (value)
-                MiniMap.SV.cameraWedgeScale = value / 100
-                MiniMap.ApplyLiveSettings()
-            end,
-            width = "full",
-            default = 100,
-            disabled = cameraWedgeSettingsDisabled,
-        },
     }
 
     optionsDataMiniMap[#optionsDataMiniMap + 1] =

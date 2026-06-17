@@ -160,57 +160,57 @@ function MiniMap.HasNativeMovingPinTargets()
     return DoesUnitExist("companion")
 end
 
---- Throttled HUD driver for UpdateNativeWorldMapMovingPins (scroll follow stays on MINIMAP_FOLLOW_UPDATE_MS).
-function MiniMap.TickNativeWorldMapMovingPins()
-    if not MiniMap.HasNativeMovingPinTargets() then
+--- Native HUD player pin + group/companion moving pins. Called from OnFollowTick after its guards.
+--- @param followPlayer boolean|nil
+function MiniMap.TickHudMovingAndPlayerPins(followPlayer)
+    if followPlayer == nil then
+        followPlayer = MiniMap.GetMapFollowsPlayer()
+    end
+    if not nativeWorldMapContainerAttached then
         return
     end
-    if MiniMap.ShouldRunThrottled("NativeMovingPins", MiniMap.GetMovingPinRefreshMs()) then
-        MiniMap.UpdateNativeWorldMapMovingPins()
+    local pinManager = ZO_WorldMap_GetPinManager()
+    local hasGroupOrCompanionPins = MiniMap.HasNativeMovingPinTargets()
+    if followPlayer then
+        if hasGroupOrCompanionPins then
+            pinManager:UpdateMovingPins()
+        else
+            MiniMap.UpdateNativeHudPlayerMapPin()
+        end
+    else
+        pinManager:UpdateMovingPins()
+    end
+    MiniMap.ApplyNativeHudPlayerPinScale()
+    MiniMap.ApplyNativeWorldMapPlayerPinColors()
+end
+
+--- ZOS UpdateMovingPins player block only (MapPin_Manager.lua) for solo follow pip sync.
+function MiniMap.UpdateNativeHudPlayerMapPin()
+    local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+    local xLoc, yLoc, _, isShownInCurrentMap, isSymbolicLocation = GetMapPlayerPosition("player")
+    playerMapPin:SetOriginalPosition(xLoc, yLoc)
+    playerMapPin:SetIsSymbolicPosition(isSymbolicLocation)
+    playerMapPin:SetLocation(xLoc, yLoc)
+    if isShownInCurrentMap then
+        playerMapPin:SetHidden(false)
+        local rotation = isSymbolicLocation and 0 or GetPlayerCameraHeading()
+        playerMapPin:SetRotation(rotation)
+    else
+        playerMapPin:SetHidden(true)
     end
 end
 
---- Group / companion / dragon / objective pin positions (ZOS PIN_UPDATE_DELAY path while world map is closed).
-function MiniMap.UpdateNativeWorldMapMovingPins()
-    if not MiniMap.Enabled then
-        return
-    end
-    if not MiniMap.IsNativeWorldMapContainerAttached() then
-        return
-    end
-    if MiniMap.IsWorldMapBlockingMiniMapWork() then
-        return
-    end
-    if MiniMap.playerMapMirrorDepth > 0 then
-        return
-    end
-    if MiniMap.IsPinMirrorMachineBusy() then
-        return
-    end
-    local mapController = MiniMap.mapController
-    if not mapController or not mapController:IsReady() then
-        return
-    end
-    if not MiniMap.HasNativeMovingPinTargets() then
-        return
-    end
-    ZO_WorldMap_GetPinManager():UpdateMovingPins()
-    MiniMap.ApplyNativeWorldMapPlayerPinColors()
+--- Native HUD player pin uses the same pip art as the overlay; size comes from Player Pip scale only.
+function MiniMap.ApplyNativeHudPlayerPinScale()
+    local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+    local drawSize = MiniMap.GetPlayerPinDrawSize()
+    playerMapPin:SetScaleModifier(drawSize / MiniMap.PLAYER_PIN_BASE_SIZE)
 end
 
 --- Tints the ZOS HUD player map pin (ZO_WorldMapPins_Manager:GetPlayerPin), not a fixed pool index.
 function MiniMap.ApplyNativeWorldMapPlayerPinColors()
-    if not nativeWorldMapContainerAttached then
-        return
-    end
     local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
-    if not playerMapPin or playerMapPin:GetPinType() ~= MAP_PIN_TYPE_PLAYER then
-        return
-    end
     local backgroundControl = playerMapPin.backgroundControl
-    if not backgroundControl then
-        return
-    end
     local red, green, blue, alpha
     if MiniMap.GetMapFollowsPlayer() then
         red, green, blue, alpha = MiniMap.GetCameraWedgeColor()
@@ -278,6 +278,7 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
 
     MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
     MiniMap.ApplyNativeWorldMapPlayerPinColors()
+    MiniMap.ApplyNativeHudPlayerPinScale()
     if MiniMap.pinController then
         MiniMap.pinController:ApplyUserScaleToNativeWorldMapPins()
     end

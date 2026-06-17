@@ -487,11 +487,7 @@ end
 
 function MiniMapView:ApplyPlayerIconDimensions()
     local drawSize = MiniMap.GetPlayerPinDrawSize()
-    local wedgeRatio = MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO
-    if MiniMap.SV and MiniMap.SV.cameraWedgeScale then
-        wedgeRatio = wedgeRatio * MiniMap.SV.cameraWedgeScale
-    end
-    local cameraSize = zo_round(drawSize * wedgeRatio)
+    local cameraSize = zo_round(drawSize * MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO)
     self.player:SetResizeToFitFile(false)
     self.player:SetDimensions(drawSize, drawSize)
     self.playerCam:SetDimensions(cameraSize, cameraSize)

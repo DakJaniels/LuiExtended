@@ -576,22 +576,6 @@ function MiniMap.CreateConsoleSettings()
             default = Defaults.anchorInfoPanelToMiniMap,
             disable = infoPanelModuleDisabled,
         },
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_TP),
-            min = 50,
-            max = 150,
-            step = 5,
-            format = "%.0f",
-            getFunction = function () return (MiniMap.SV.cameraWedgeScale or 1) * 100 end,
-            setFunction = function (value)
-                MiniMap.SV.cameraWedgeScale = value / 100
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = (Defaults.cameraWedgeScale or 1) * 100,
-            disable = cameraWedgeSettingsDisabled,
-        },
     }
 
     local pinRefreshSectionRows =
