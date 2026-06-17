@@ -638,6 +638,21 @@ local function GetActionButtonCooldownInfo(button)
 end
 
 -- -----------------------------------------------------------------------------
+--- Routes activation highlight to Backbar (offset slot ids) or vanilla ActionButton.
+--- @param button ActionButton?
+function ActionBar.UpdateActivationHighlightForButton(button)
+    if not button then
+        return
+    end
+    local luiSlot = button:GetSlot()
+    if luiSlot >= BAR_INDEX_START + BACKBAR_INDEX_OFFSET then
+        Backbar.UpdateActivationHighlight(luiSlot)
+    else
+        button:UpdateActivationHighlight()
+    end
+end
+
+-- -----------------------------------------------------------------------------
 -- Hook to update GCD support
 --- Hooks ActionButton UpdateUsable/UpdateCooldown for global GCD display.
 function ActionBar.HookGCD()
@@ -754,7 +769,7 @@ function ActionBar.HookGCD()
 
         if showCooldown ~= self.showingCooldown then
             self:SetShowCooldown(showCooldown)
-            self:UpdateActivationHighlight()
+            ActionBar.UpdateActivationHighlightForButton(self)
 
             if IsInGamepadPreferredMode() then
                 self:SetCooldownPercentComplete(self.icon.percentComplete)

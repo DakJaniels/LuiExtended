@@ -120,6 +120,32 @@ function Backbar._updateButtonActionIds()
     end
 end
 
+--- Sync useFailure for backbar buttons using physical slot + inactive hotbar (mirrors ActionButton:UpdateUseFailure).
+--- @param button ActionButton
+--- @param physicalSlot integer
+--- @param hotbarCategory HotBarCategory
+function Backbar.SyncButtonUseFailure(button, physicalSlot, hotbarCategory)
+    local slotType = GetSlotType(physicalSlot, hotbarCategory)
+
+    button.itemQtyFailure = false
+    local soulGemFailure = false
+    if slotType == ACTION_TYPE_ITEM then
+        button.itemQtyFailure = (GetSlotItemCount(physicalSlot, hotbarCategory) == 0)
+    elseif slotType == ACTION_TYPE_ABILITY or slotType == ACTION_TYPE_CRAFTED_ABILITY then
+        local isSoulGemAbility = IsSlotSoulTrap(physicalSlot)
+        if isSoulGemAbility and not DoesInventoryContainEmptySoulGem() then
+            soulGemFailure = true
+        end
+    end
+
+    local costFailure = ActionSlotHasCostFailure(physicalSlot, hotbarCategory)
+    local nonCostFailure = slotType ~= ACTION_TYPE_NOTHING and button.itemQtyFailure or soulGemFailure
+        or ActionSlotHasNonCostStateFailure(physicalSlot, hotbarCategory)
+
+    button.costFailureOnly = costFailure and not nonCostFailure
+    button.useFailure = costFailure or nonCostFailure
+end
+
 --- Mirrors ZOS ActionButton:UpdateActivationHighlight for LUIE backbar slot indices (physical + BACKBAR_INDEX_OFFSET).
 --- @param luiSlotNum integer
 function Backbar.UpdateActivationHighlight(luiSlotNum)
@@ -133,6 +159,8 @@ function Backbar.UpdateActivationHighlight(luiSlotNum)
 
     local physicalSlot = luiSlotNum - BACKBAR_INDEX_OFFSET
     local hotbarCategory = Backbar.GetInactiveHotbarCategory()
+    Backbar.SyncButtonUseFailure(button, physicalSlot, hotbarCategory)
+
     local slotType = GetSlotType(physicalSlot, hotbarCategory)
     local slotIsEmpty = slotType == ACTION_TYPE_NOTHING
     local showHighlight = not slotIsEmpty
@@ -140,34 +168,31 @@ function Backbar.UpdateActivationHighlight(luiSlotNum)
         and not button.useFailure
         and not button.showingCooldown
     local activationHighlight = button.activationHighlight
-    local anim = activationHighlight.animation
-
-    if not showHighlight then
-        activationHighlight:SetHidden(true)
-        if anim then
-            anim:GetTimeline():Stop()
-        end
-        return
-    end
-
     local isShowingHighlight = activationHighlight:IsControlHidden() == false
-    if not isShowingHighlight then
-        activationHighlight:SetHidden(false)
-    end
 
-    local _, _, activationAnimationTexture = GetSlotTexture(physicalSlot, hotbarCategory)
-    activationHighlight:SetTexture(activationAnimationTexture)
+    if showHighlight ~= isShowingHighlight then
+        activationHighlight:SetHidden(not showHighlight)
 
-    if not anim then
-        anim = CreateSimpleAnimation(ANIMATION_TEXTURE, activationHighlight)
-        anim:SetImageData(64, 1)
-        anim:SetFramerate(30)
-        anim:GetTimeline():SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
-        activationHighlight.animation = anim
-    end
+        if showHighlight then
+            local _, _, activationAnimationTexture = GetSlotTexture(physicalSlot, hotbarCategory)
+            activationHighlight:SetTexture(activationAnimationTexture)
 
-    if not anim:GetTimeline():IsPlaying() then
-        anim:GetTimeline():PlayFromStart()
+            local anim = activationHighlight.animation
+            if not anim then
+                anim = CreateSimpleAnimation(ANIMATION_TEXTURE, activationHighlight)
+                anim:SetImageData(64, 1)
+                anim:SetFramerate(30)
+                anim:GetTimeline():SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
+                activationHighlight.animation = anim
+            end
+
+            anim:GetTimeline():PlayFromStart()
+        else
+            local anim = activationHighlight.animation
+            if anim then
+                anim:GetTimeline():Stop()
+            end
+        end
     end
 end
 
@@ -611,6 +636,9 @@ end
 
 function Backbar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "BackbarCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS)
+    eventManager:UnregisterForEvent(moduleName .. "BackbarSlotState", EVENT_HOTBAR_SLOT_STATE_UPDATED)
+    eventManager:UnregisterForEvent(moduleName .. "BackbarSlotEffect", EVENT_ACTION_SLOT_EFFECT_UPDATE)
+    eventManager:UnregisterForEvent(moduleName .. "BackbarEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED)
 
     eventManager:RegisterForEvent(moduleName .. "BackbarCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS, Backbar.OnActionUpdateCooldowns)
 
@@ -627,18 +655,31 @@ function Backbar.RegisterEvents()
     end)
     eventManager:RegisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE, Backbar.BackbarToggleSettings)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarSlotState", EVENT_HOTBAR_SLOT_STATE_UPDATED, function (_, actionSlotIndex, _hotbarCategory)
+    eventManager:RegisterForEvent(moduleName .. "BackbarSlotState", EVENT_HOTBAR_SLOT_STATE_UPDATED, function (_, actionSlotIndex, hotbarCategory)
         if not ActionBar.SV.BarShowBack then
+            return
+        end
+        if hotbarCategory ~= Backbar.GetInactiveHotbarCategory() then
             return
         end
         Backbar.OnPhysicalSlotVisualSync(actionSlotIndex)
     end)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarSlotEffect", EVENT_ACTION_SLOT_EFFECT_UPDATE, function (_, _hotbarCategory, actionSlotIndex)
+    eventManager:RegisterForEvent(moduleName .. "BackbarSlotEffect", EVENT_ACTION_SLOT_EFFECT_UPDATE, function (_, hotbarCategory, actionSlotIndex)
         if not ActionBar.SV.BarShowBack then
             return
         end
+        if hotbarCategory ~= Backbar.GetInactiveHotbarCategory() then
+            return
+        end
         Backbar.OnPhysicalSlotVisualSync(actionSlotIndex)
+    end)
+
+    eventManager:RegisterForEvent(moduleName .. "BackbarEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED, function ()
+        if not ActionBar.SV.BarShowBack then
+            return
+        end
+        Backbar.RefreshAllActivationHighlights()
     end)
 
     eventManager:RegisterForEvent(moduleName .. "BackbarActiveHotbar", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function ()
