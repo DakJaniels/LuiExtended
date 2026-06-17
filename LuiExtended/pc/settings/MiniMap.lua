@@ -13,11 +13,11 @@ local LAM = LUIE.LAM
 
 local miniMapHudVisibilityOptions =
 {
-    { key = "allowOnGameplayHud",   name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP     },
-    { key = "allowDuringCombat",    name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP  },
-    { key = "allowOnLootScene",     name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,    tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP    },
-    { key = "allowWhileMounted",    name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED, tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP },
-    { key = "allowInPlayerHousing", name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING, tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP },
+    { key = "allowOnGameplayHud",     name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP     },
+    { key = "allowDuringCombat",      name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP  },
+    { key = "allowOnLootScene",       name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,    tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP    },
+    { key = "allowWhileMounted",      name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED, tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP },
+    { key = "allowInPlayerHousing",   name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING, tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP },
     { key = "preferElevatedDrawTier", name = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP,  tp = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP  },
 }
 
@@ -340,7 +340,8 @@ function MiniMap.CreateSettings()
         type = "dropdown",
         name = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE),
         tooltip = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE_TP),
-        choices = {
+        choices =
+        {
             GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT),
             GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE),
             GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW),
@@ -446,20 +447,21 @@ function MiniMap.CreateSettings()
         disabled = disabled,
     }
 
-    optionsDataMiniMap[#optionsDataMiniMap + 1] =
-    {
-        type = "header",
-        name = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER),
-        width = "full",
-    }
-
-    optionsDataMiniMap[#optionsDataMiniMap + 1] =
-    {
-        type = "description",
-        text = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC),
-    }
-
     if LUIE.IsDevDebugEnabled() then
+        optionsDataMiniMap[#optionsDataMiniMap + 1] =
+        {
+            type = "header",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER),
+            width = "full",
+        }
+
+        optionsDataMiniMap[#optionsDataMiniMap + 1] =
+        {
+            type = "description",
+            text = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC),
+        }
+
+
         optionsDataMiniMap[#optionsDataMiniMap + 1] =
         {
             type = "checkbox",

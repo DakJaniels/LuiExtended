@@ -187,8 +187,8 @@
                   </OnClicked>
                 </Button>
                 <Control name="$(parent)_MoveGrip"
-                           inherits="ZO_MouseTooltipBehavior"
-                           mouseEnabled="true">
+                         inherits="ZO_MouseTooltipBehavior"
+                         mouseEnabled="true">
                   <Dimensions x="20"
                               y="20" />
                   <OnInitialized>

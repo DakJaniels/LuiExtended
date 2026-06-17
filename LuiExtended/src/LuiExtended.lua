@@ -28,8 +28,8 @@ LUIE = {}
 LUIE.__index = LUIE
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.4.7"
-LUIE.addonVersion = 7247
+LUIE.version = "7.2.4.8"
+LUIE.addonVersion = 7248
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -234,43 +234,43 @@ LUIE.OtherAddonCompatability =
 --- @field ChatOutput LUIE_ChatOutputDefaults LUIE-wide chat print routing (tabs, timestamps, LCM/pChat)
 LUIE.Defaults =
 {
-    CustomIcons                 = true,
-    CharacterSpecificSV         = false,
-    StartupInfo                 = false,
-    HideAlertFrame              = false,
-    AlertFrameAlignment         = 3,
-    HideXPBar                   = false,
+    CustomIcons                    = true,
+    CharacterSpecificSV            = false,
+    StartupInfo                    = false,
+    HideAlertFrame                 = false,
+    AlertFrameAlignment            = 3,
+    HideXPBar                      = false,
     SuppressZOBuffDebuffWhenHidden = false,
-    WelcomeVersion              = 0,
-    ShowChangeLog               = false,
+    WelcomeVersion                 = 0,
+    ShowChangeLog                  = false,
 
     -- Modules
-    UnitFrames_Enabled          = true,
-    InfoPanel_Enabled           = true,
-    ActionBar_Enabled           = true,
-    CombatInfo_Enabled          = true,
-    CombatText_Enabled          = true,
-    SpellCastBuff_Enable        = true,
-    ChatAnnouncements_Enable    = true,
-    SlashCommands_Enable        = true,
-    MiniMap_Enabled             = false,
+    UnitFrames_Enabled             = true,
+    InfoPanel_Enabled              = true,
+    ActionBar_Enabled              = true,
+    CombatInfo_Enabled             = true,
+    CombatText_Enabled             = true,
+    SpellCastBuff_Enable           = true,
+    ChatAnnouncements_Enable       = true,
+    SlashCommands_Enable           = true,
+    MiniMap_Enabled                = false,
 
     -- Grid settings
-    snapToGrid_default          = false,
-    snapToGridSize_default      = 15,
-    snapToGrid_unitFrames       = false,
-    snapToGridSize_unitFrames   = 15,
-    snapToGrid_buffs            = false,
-    snapToGridSize_buffs        = 15,
+    snapToGrid_default             = false,
+    snapToGridSize_default         = 15,
+    snapToGrid_unitFrames          = false,
+    snapToGridSize_unitFrames      = 15,
+    snapToGrid_buffs               = false,
+    snapToGridSize_buffs           = 15,
     -- snapToGrid_combatText     = false,
     -- snapToGridSize_combatText = 15,
 
     -- Debug environment (/luie debug): LUIE-core addon allowlist isolation
-    DebugEnvironmentActive      = false,
-    DebugEnvironmentRestore     = nil,
-    DebugEnvironmentPendingChat = nil,
+    DebugEnvironmentActive         = false,
+    DebugEnvironmentRestore        = nil,
+    DebugEnvironmentPendingChat    = nil,
 
-    ChatOutput                  =
+    ChatOutput                     =
     {
         ChatMethod = "Print to All Tabs",
         ChatBypassFormat = false,
@@ -287,7 +287,7 @@ LUIE.Defaults =
         },
     },
 
-    Migrations                  = {}
+    Migrations                     = {}
 }
 
 -- -----------------------------------------------------------------------------
@@ -387,8 +387,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {

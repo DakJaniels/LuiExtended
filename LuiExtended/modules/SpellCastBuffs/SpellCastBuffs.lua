@@ -2295,71 +2295,71 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
             if not LUIE.IsDisplayableArtificialEffectType(effectType) then
                 -- continue (e.g. transient NOT_AN_EFFECT placeholder for artificial id 1)
             else
-            local duration = 0
+                local duration = 0
 
-            -- ArtificialEffectId (live): 0 ESO Plus, 1 Battle Spirit, 2 LFG, 3 Battle Spirit Imperial City,
-            -- 4 Battleground Deserter, 5 Underdog Damage, 6 Underdog Healing, 7 Solo Queue XP, 8 Solo Queue AP.
-            if effectId == 4 then
-                duration = 300000
-                timeEndingS = timeStartedS + (GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE) * 1000)
-                effectType = BUFF_EFFECT_TYPE_BUFF
-            elseif effectId == 0 or effectId == 1 or effectId == 2 or effectId == 3 then
-                -- No timer for these (Underdog / Solo Queue ids 5–8 keep API start/end from GetArtificialEffectInfo).
-                duration = 0
-                timeEndingS = nil
-            end
+                -- ArtificialEffectId (live): 0 ESO Plus, 1 Battle Spirit, 2 LFG, 3 Battle Spirit Imperial City,
+                -- 4 Battleground Deserter, 5 Underdog Damage, 6 Underdog Healing, 7 Solo Queue XP, 8 Solo Queue AP.
+                if effectId == 4 then
+                    duration = 300000
+                    timeEndingS = timeStartedS + (GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE) * 1000)
+                    effectType = BUFF_EFFECT_TYPE_BUFF
+                elseif effectId == 0 or effectId == 1 or effectId == 2 or effectId == 3 then
+                    -- No timer for these (Underdog / Solo Queue ids 5–8 keep API start/end from GetArtificialEffectInfo).
+                    duration = 0
+                    timeEndingS = nil
+                end
 
-            local tooltip = nil
-            local artificial = true
-            if effectId == 0 then
-                tooltip = Tooltips.Innate_ESO_Plus
-            elseif effectId == 1 then
-                tooltip = Tooltips.Innate_Battle_Spirit
-                effectId = 999014
-                artificial = false
-                hasValidPlayerBattleSpiritArtificial = true
-            elseif effectId == 2 then
-                tooltip = Tooltips.Innate_Looking_for_Group
-            elseif effectId == 3 then
-                tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
-                effectId = 999014
-                artificial = false
-                hasValidPlayerBattleSpiritArtificial = true
-            elseif effectId == 4 then
-                tooltip = Tooltips.Innate_Battleground_Deserter
-            elseif effectId == 5 then
-                tooltip = Tooltips.Innate_Underdog_Damage
-            elseif effectId == 6 then
-                tooltip = Tooltips.Innate_Underdog_Healing
-            elseif effectId == 7 then
-                tooltip = Tooltips.Innate_Solo_Queue_XP
-            elseif effectId == 8 then
-                tooltip = Tooltips.Innate_Solo_Queue_AP
-            end
+                local tooltip = nil
+                local artificial = true
+                if effectId == 0 then
+                    tooltip = Tooltips.Innate_ESO_Plus
+                elseif effectId == 1 then
+                    tooltip = Tooltips.Innate_Battle_Spirit
+                    effectId = 999014
+                    artificial = false
+                    hasValidPlayerBattleSpiritArtificial = true
+                elseif effectId == 2 then
+                    tooltip = Tooltips.Innate_Looking_for_Group
+                elseif effectId == 3 then
+                    tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
+                    effectId = 999014
+                    artificial = false
+                    hasValidPlayerBattleSpiritArtificial = true
+                elseif effectId == 4 then
+                    tooltip = Tooltips.Innate_Battleground_Deserter
+                elseif effectId == 5 then
+                    tooltip = Tooltips.Innate_Underdog_Damage
+                elseif effectId == 6 then
+                    tooltip = Tooltips.Innate_Underdog_Healing
+                elseif effectId == 7 then
+                    tooltip = Tooltips.Innate_Solo_Queue_XP
+                elseif effectId == 8 then
+                    tooltip = Tooltips.Innate_Solo_Queue_AP
+                end
 
-            -- Route artificial effects (Battle Spirit, ESO Plus, BG Deserter, etc.) always to player context
-            -- so they land in player_long when "Show Battle Spirit on Player" / LongTermEffects are enabled.
-            -- If we used DetermineContextSimple, 999014 in PromBuffTable would promote to promb_player and
-            -- the effect would show in prominent buffs instead of the long-term player container.
-            local context = "player1"
-            SpellCastBuffs.EffectsList[context][effectId] =
-            {
-                uid = storeArtificialEffectId,
-                artificialEffectId = storeArtificialEffectId,
-                target = SpellCastBuffs.DetermineTarget(context),
-                type = effectType,
-                id = effectId,
-                name = displayName,
-                icon = iconFile,
-                tooltip = tooltip,
-                dur = duration,
-                starts = timeStartedS,
-                ends = timeEndingS,
-                forced = "long",
-                restart = true,
-                iconNum = 0,
-                artificial = artificial,
-            }
+                -- Route artificial effects (Battle Spirit, ESO Plus, BG Deserter, etc.) always to player context
+                -- so they land in player_long when "Show Battle Spirit on Player" / LongTermEffects are enabled.
+                -- If we used DetermineContextSimple, 999014 in PromBuffTable would promote to promb_player and
+                -- the effect would show in prominent buffs instead of the long-term player container.
+                local context = "player1"
+                SpellCastBuffs.EffectsList[context][effectId] =
+                {
+                    uid = storeArtificialEffectId,
+                    artificialEffectId = storeArtificialEffectId,
+                    target = SpellCastBuffs.DetermineTarget(context),
+                    type = effectType,
+                    id = effectId,
+                    name = displayName,
+                    icon = iconFile,
+                    tooltip = tooltip,
+                    dur = duration,
+                    starts = timeStartedS,
+                    ends = timeEndingS,
+                    forced = "long",
+                    restart = true,
+                    iconNum = 0,
+                    artificial = artificial,
+                }
             end
         end
     end

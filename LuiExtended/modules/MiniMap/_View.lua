@@ -381,9 +381,9 @@ function MiniMapView:SetZoomLabel(zoom, revealTransient)
     label:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
     local view = self
     self.zoomLabelHideLaterId = zo_callLater(function ()
-        view.zoomLabelHideLaterId = nil
-        view:StartZoomLabelFadeOut()
-    end, MINIMAP_ZOOM_LABEL_HOLD_MS)
+                                                 view.zoomLabelHideLaterId = nil
+                                                 view:StartZoomLabelFadeOut()
+                                             end, MINIMAP_ZOOM_LABEL_HOLD_MS)
 end
 
 --- @param zoneName string
