@@ -558,29 +558,66 @@ function MiniMap.CreateConsoleSettings()
         },
     }
 
-    local advancedSectionRows =
+    local pinRefreshSectionRows =
     {
         {
             type = LHAS.ST_LABEL,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC),
+            label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_DESC),
+        },
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP),
+            min = MiniMap.MINIMAP_PIN_REFRESH_MS_MIN,
+            max = MiniMap.MINIMAP_PIN_REFRESH_MS_MAX,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return MiniMap.GetMovingPinRefreshMs() end,
+            setFunction = function (value)
+                MiniMap.SV.movingPinRefreshMs = zo_clamp(value, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
+            end,
+            default = Defaults.movingPinRefreshMs,
+            disable = disable,
+        },
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP),
+            min = MiniMap.MINIMAP_PIN_REFRESH_MS_MIN,
+            max = MiniMap.MINIMAP_PIN_REFRESH_MS_MAX,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return MiniMap.GetPinMouseOverRefreshMs() end,
+            setFunction = function (value)
+                MiniMap.SV.pinMouseOverRefreshMs = zo_clamp(value, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
+            end,
+            default = Defaults.pinMouseOverRefreshMs,
+            disable = disable,
         },
     }
 
+    local devAdvancedSectionRows = nil
     if LUIE.IsDevDebugEnabled() then
-        advancedSectionRows[#advancedSectionRows + 1] =
+        devAdvancedSectionRows =
         {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP),
-            getFunction = function () return MiniMap.SV.pinMirrorStateMachineDebug end,
-            setFunction = function (value)
-                MiniMap.SV.pinMirrorStateMachineDebug = value
-                if MiniMap.pinMirrorStateMachine then
-                    MiniMap.pinMirrorStateMachine:ApplyDebugLoggingFromSavedVars()
-                end
-            end,
-            default = Defaults.pinMirrorStateMachineDebug,
-            disable = disable,
+            {
+                type = LHAS.ST_LABEL,
+                label = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC),
+            },
+            {
+                type = LHAS.ST_CHECKBOX,
+                label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG),
+                tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP),
+                getFunction = function () return MiniMap.SV.pinMirrorStateMachineDebug end,
+                setFunction = function (value)
+                    MiniMap.SV.pinMirrorStateMachineDebug = value
+                    if MiniMap.pinMirrorStateMachine then
+                        MiniMap.pinMirrorStateMachine:ApplyDebugLoggingFromSavedVars()
+                    end
+                end,
+                default = Defaults.pinMirrorStateMachineDebug,
+                disable = disable,
+            },
         }
     end
 
@@ -608,7 +645,10 @@ function MiniMap.CreateConsoleSettings()
     appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_ZOOM_CONTEXT_HEADER), zoomContextSectionRows)
     appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_PIN_CATEGORY_HEADER), pinCategorySectionRows)
     appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_CHROME_HEADER), chromeSectionRows)
-    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER), advancedSectionRows)
+    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER), pinRefreshSectionRows)
+    if devAdvancedSectionRows then
+        appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER), devAdvancedSectionRows)
+    end
 
     panel:AddSettings(settingsData)
 end

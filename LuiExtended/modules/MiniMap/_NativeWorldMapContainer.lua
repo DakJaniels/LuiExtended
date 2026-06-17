@@ -13,8 +13,6 @@ local MiniMap = LUIE.MiniMap
 
 local eventManager = GetEventManager()
 
-local MINIMAP_NATIVE_MOVING_PIN_UPDATE_MS = 100
-
 local nativeWorldMapContainerAttached = false
 local nativeWorldMapContainerHiddenForReload = false
 
@@ -170,7 +168,7 @@ function MiniMap.TickNativeWorldMapMovingPins()
     if not MiniMap.HasNativeMovingPinTargets() then
         return
     end
-    if MiniMap.ShouldRunThrottled("NativeMovingPins", MINIMAP_NATIVE_MOVING_PIN_UPDATE_MS) then
+    if MiniMap.ShouldRunThrottled("NativeMovingPins", MiniMap.GetMovingPinRefreshMs()) then
         MiniMap.UpdateNativeWorldMapMovingPins()
     end
 end

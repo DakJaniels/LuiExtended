@@ -10,8 +10,6 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
-local MINIMAP_HUD_PIN_MOUSEOVER_UPDATE_MS = 200
-
 local hudMinimapBuildMouseOverPinListsPreHookActive --- @type function|nil
 
 local function NoOpHudMinimapBuildMouseOverPinListsPreHook()
@@ -144,7 +142,7 @@ function MiniMap.UpdateHudMinimapPinMouseOverFromPointer()
     if not MiniMap.ShouldHudMinimapPinInteraction() or not MiniMap.IsPointerOverHudMinimapMap() then
         return
     end
-    if MiniMap.ShouldRunThrottled("HudMinimapPinMouseOver", MINIMAP_HUD_PIN_MOUSEOVER_UPDATE_MS) then
+    if MiniMap.ShouldRunThrottled("HudMinimapPinMouseOver", MiniMap.GetPinMouseOverRefreshMs()) then
         ZO_WorldMap_GetPinManager():UpdateMouseOverPins()
     end
 end

@@ -211,6 +211,8 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field zoneNameFontFace string
 --- @field zoneNameFontSize number
 --- @field zoneNameFontStyle number
+--- @field movingPinRefreshMs number
+--- @field pinMouseOverRefreshMs number
 
 --- @class (partial) ZO_MapPin
 --- @field polygonBlob ZO_PinPolygonBlob|nil
@@ -297,6 +299,8 @@ MiniMap.Defaults =
     zoneNameFontFace = "LUIE Default Font",
     zoneNameFontSize = 18,
     zoneNameFontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+    movingPinRefreshMs = 100,
+    pinMouseOverRefreshMs = 200,
 }
 
 --- @type MiniMapDefaults
@@ -306,6 +310,31 @@ MiniMap.SV = ...
 --- @return string
 function MiniMap.StripMapNameFormatting(mapName)
     return (string.gsub(mapName, "%^(.+)", ""))
+end
+
+MiniMap.MINIMAP_PIN_REFRESH_MS_MIN = 16
+MiniMap.MINIMAP_PIN_REFRESH_MS_MAX = 500
+
+--- @return number
+function MiniMap.GetMovingPinRefreshMs()
+    local defaults = MiniMap.Defaults
+    local settings = MiniMap.SV
+    local refreshMs = defaults.movingPinRefreshMs
+    if settings and settings.movingPinRefreshMs then
+        refreshMs = settings.movingPinRefreshMs
+    end
+    return zo_clamp(refreshMs, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
+end
+
+--- @return number
+function MiniMap.GetPinMouseOverRefreshMs()
+    local defaults = MiniMap.Defaults
+    local settings = MiniMap.SV
+    local refreshMs = defaults.pinMouseOverRefreshMs
+    if settings and settings.pinMouseOverRefreshMs then
+        refreshMs = settings.pinMouseOverRefreshMs
+    end
+    return zo_clamp(refreshMs, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
 end
 
 --- @param key string
