@@ -14,6 +14,7 @@ local LUIE = LUIE
 --- @field zoom number
 --- @field fastTravel boolean
 --- @field resize boolean
+--- @field resizeIsWidthDriven boolean|nil
 --- @field view MiniMapView|nil
 --- @field mapController MiniMapMapController|nil
 --- @field pinController MiniMapPinController|nil
@@ -31,6 +32,7 @@ MiniMap.Enabled = false
 MiniMap.zoom = 0.5
 MiniMap.fastTravel = false
 MiniMap.resize = false
+MiniMap.resizeIsWidthDriven = nil
 MiniMap.view = nil
 MiniMap.mapController = nil
 MiniMap.pinController = nil

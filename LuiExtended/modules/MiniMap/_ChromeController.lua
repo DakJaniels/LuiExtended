@@ -47,7 +47,24 @@ function MiniMap.ApplyCompassMode()
     SetCompassControlsHidden(compassControlsHidden)
 end
 
-function MiniMap.ApplySquareAspect()
+--- @param rootWidth number
+--- @param rootHeight number
+--- @param widthDriven boolean|nil When nil (e.g. settings toggle), use max(width, height).
+--- @return number
+function MiniMap.GetSquareRootSizeFromDimensions(rootWidth, rootHeight, widthDriven)
+    local size
+    if widthDriven == nil then
+        size = zo_max(rootWidth, rootHeight)
+    elseif widthDriven then
+        size = rootWidth
+    else
+        size = rootHeight
+    end
+    return zo_max(size, 100)
+end
+
+--- @param widthDriven boolean|nil Driven resize axis from OnRootResizeStart; nil uses max for one-shot normalize.
+function MiniMap.ApplySquareAspect(widthDriven)
     if not MiniMap.view or not MiniMap.SV then
         return
     end
@@ -55,7 +72,7 @@ function MiniMap.ApplySquareAspect()
         return
     end
     local root = MiniMap.view.root
-    local size = zo_max(root:GetWidth(), root:GetHeight())
+    local size = MiniMap.GetSquareRootSizeFromDimensions(root:GetWidth(), root:GetHeight(), widthDriven)
     root:SetDimensions(size, size)
     MiniMap.SV.width = size
     MiniMap.SV.height = size

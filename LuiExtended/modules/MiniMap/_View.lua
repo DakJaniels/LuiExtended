@@ -447,13 +447,23 @@ function MiniMap.OnRootResizeStart(control)
         return
     end
     MiniMap.resize = true
+    if MiniMap.SV.keepSquareAspect == true then
+        local mouseX, mouseY = GetUIMousePosition()
+        local left, top, right, bottom = control:GetScreenRect()
+        local minXToSide = zo_min(zo_abs(mouseX - left), zo_abs(mouseX - right))
+        local minYToSide = zo_min(zo_abs(mouseY - top), zo_abs(mouseY - bottom))
+        MiniMap.resizeIsWidthDriven = (minXToSide < minYToSide)
+    else
+        MiniMap.resizeIsWidthDriven = nil
+    end
 end
 
 function MiniMap.OnRootResizeStop(control)
-    MiniMap.resize = false
     if MiniMap.SV and MiniMap.SV.keepSquareAspect == true then
-        MiniMap.ApplySquareAspect()
+        MiniMap.ApplySquareAspect(MiniMap.resizeIsWidthDriven)
     end
+    MiniMap.resize = false
+    MiniMap.resizeIsWidthDriven = nil
 end
 
 function MiniMap.OnRootMouseWheel(control, delta, ctrl, alt, shift, command)
@@ -466,7 +476,11 @@ function MiniMap.OnRootRectChanged(control, newLeft, newTop, newRight, newBottom
     if not MiniMap.resize or not MiniMap.view or not MiniMap.runtime then
         return
     end
-    MiniMap.view:OnResizePersist()
+    if MiniMap.SV and MiniMap.SV.keepSquareAspect == true then
+        MiniMap.ApplySquareAspect(MiniMap.resizeIsWidthDriven)
+    else
+        MiniMap.view:OnResizePersist()
+    end
     MiniMap.ApplyChromeStacking()
     local mapController = MiniMap.mapController
     if mapController and mapController:IsReady() then
