@@ -39,7 +39,7 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER = "Pin-Aktualisierung",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_DESC = "Wie oft Pins auf der Karte aktualisiert werden.",
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS = "Bewegliche Pins (ms)",
-    LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Gruppe und Begleiter sowie HUD-Spieler-Pip-Sync (native + Overlay-Pfeile) bei „Spieler folgen“. Niedriger = flüssiger, höher = weniger CPU.",
+    LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Gruppe und Begleiter sowie HUD-Spieler-Pip (Position/Richtung, native Karte und Overlay-Pip ohne „Spieler folgen“). Niedriger = flüssiger, höher = weniger CPU.",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS = "Pin-Mausover (ms)",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Pins unter der Maus. Vor allem Tastatur und Maus.",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Bei Death Recap anzeigen",

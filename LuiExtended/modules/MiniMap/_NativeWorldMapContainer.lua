@@ -169,15 +169,8 @@ function MiniMap.TickHudMovingAndPlayerPins(followPlayer)
     if not nativeWorldMapContainerAttached then
         return
     end
-    local hasGroupOrCompanionPins = MiniMap.HasNativeMovingPinTargets()
-    if not followPlayer and not hasGroupOrCompanionPins then
-        return
-    end
-    if not followPlayer and not MiniMap.ShouldRunThrottled("HudMovingAndPlayerPins", MiniMap.GetMovingPinRefreshMs()) then
-        return
-    end
-
     local pinManager = ZO_WorldMap_GetPinManager()
+    local hasGroupOrCompanionPins = MiniMap.HasNativeMovingPinTargets()
     if followPlayer then
         if hasGroupOrCompanionPins then
             pinManager:UpdateMovingPins()

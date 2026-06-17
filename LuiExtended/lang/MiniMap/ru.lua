@@ -39,7 +39,7 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER = "Обновление меток",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_DESC = "Как часто обновляются метки на карте.",
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS = "Движущиеся метки (мс)",
-    LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Группа и спутник, а также синхронизация пипов игрока на HUD (нативная + оверлей) при «Следовать за игроком». Меньше = плавнее, больше = меньше нагрузка.",
+    LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Группа и спутник, а также пип игрока на HUD (позиция/направление, нативная карта и оверлей без «Следовать за игроком»). Меньше = плавнее, больше = меньше нагрузка.",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS = "Наведение на метки (мс)",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Метки под курсором. В основном клавиатура и мышь.",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Показывать в Death Recap",

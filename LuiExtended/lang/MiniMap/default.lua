@@ -41,7 +41,7 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER = "Pin Updates",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_DESC = "How often pins refresh on the map.",
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS = "Moving pins (ms)",
-    LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Group and companion pin positions, and HUD player pip sync (native + overlay arrows) when Follow Player is on. Lower = smoother, higher = less CPU.",
+    LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP = "Group and companion pin positions, and HUD player pip position/heading (native map and overlay pip). Applies with or without Follow Player. Lower = smoother, higher = less CPU.",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS = "Pin hover (ms)",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Updates pins under the mouse. Mostly for keyboard and mouse.",
     LUIE_STRING_LAM_MINIMAP_VISIBILITY_HEADER = "Visibility",

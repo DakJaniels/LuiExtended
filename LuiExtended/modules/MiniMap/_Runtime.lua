@@ -8,8 +8,6 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
-local MINIMAP_FOLLOW_UPDATE_MS = 40
-
 --- @class MiniMapRuntime : ZO_InitializingObject
 --- @field view MiniMapView
 --- @field mapController MiniMapMapController
@@ -209,10 +207,7 @@ function MiniMap.OnRootUpdate(control, time)
     MiniMap.UpdateHudMinimapPinMouseOverFromPointer()
     local runtime = MiniMap.runtime
     local now = GetFrameTimeMilliseconds()
-    local followRefreshMs = MINIMAP_FOLLOW_UPDATE_MS
-    if MiniMap.GetMapFollowsPlayer() then
-        followRefreshMs = MiniMap.GetMovingPinRefreshMs()
-    end
+    local followRefreshMs = MiniMap.GetMovingPinRefreshMs()
     if runtime.lastFollowUpdateMs and (now - runtime.lastFollowUpdateMs) < followRefreshMs then
         return
     end
