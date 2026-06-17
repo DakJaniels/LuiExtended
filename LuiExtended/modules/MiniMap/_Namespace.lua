@@ -203,7 +203,6 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field compassOverride number
 --- @field keepSquareAspect boolean
 --- @field positionGridDivisor number
---- @field cameraWedgeScale number
 --- @field playerPipColor { r: number, g: number, b: number, a: number }
 --- @field cameraWedgeColor { r: number, g: number, b: number, a: number }
 --- @field borderOpacity number
@@ -295,7 +294,6 @@ MiniMap.Defaults =
     compassOverride = 0,
     keepSquareAspect = false,
     positionGridDivisor = 0,
-    cameraWedgeScale = 1,
     playerPipColor = { r = 1, g = 1, b = 1, a = 1 },
     cameraWedgeColor = { r = 1, g = 1, b = 1, a = 1 },
     borderOpacity = 1,

@@ -105,8 +105,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_KEEP_SQUARE = "Keep Square Aspect",
     LUIE_STRING_LAM_MINIMAP_POSITION_GRID = "Position Grid Snap",
     LUIE_STRING_LAM_MINIMAP_POSITION_GRID_TP = "Snap size and position to a pixel grid. 0 = off.",
-    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE = "Camera Wedge Scale (%)",
-    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_TP = "Sizes the overlay camera wedge texture when Follow Player is on and the native world map is not used. When the native map is attached, both arrows use Player Pip scale; use Camera Wedge Color for the camera arrow.",
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR = "Player Pip Color",
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Color of your player arrow on the map.",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Camera Wedge Color",
