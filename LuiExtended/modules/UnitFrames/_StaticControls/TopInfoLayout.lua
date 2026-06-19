@@ -46,6 +46,9 @@ end
 --- @param self LUIE_CustomFrameObject
 function FrameObject.UpdateTopInfoOverlandIcon(self)
     local overlandIcon = self.overlandDifficultyIcon
+    if overlandIcon == nil then
+        return
+    end
     local difficulty = FrameObject.ResolveTopInfoOverlandDifficulty(self)
     if difficulty == nil then
         overlandIcon:SetHidden(true)
@@ -123,6 +126,9 @@ function FrameObject.UpdateTopInfoLevelRow(self)
         return
     end
     local unitTag = ResolveTopInfoUnitTag(self)
+    if unitTag == nil and self.unitTag and DoesUnitExist(self.unitTag) then
+        unitTag = self.unitTag
+    end
     local showLevel = self.isPlayer
     local shouldShowVeterancyInfo = FrameObject.ShouldShowVeterancyRankOnFrame(self)
 

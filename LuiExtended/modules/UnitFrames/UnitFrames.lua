@@ -1777,7 +1777,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
     end
 
     -- Finally if user does not want to have default target frame we have to hide it here all the time
-    if not UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.SV.DefaultFramesNewTarget == 1 then
+    if not UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.SV.DefaultFramesNewTarget) then
         ZO_TargetUnitFramereticleover:SetHidden(true)
     end
 end
@@ -1864,6 +1864,7 @@ function UnitFrames.TitleUpdate(eventCode, unitTag)
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
     UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames[unitTag])
     UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
+    UnitFrames.RefreshDefaultTargetLevelDisplayIfNeeded(unitTag)
 end
 
 -- Re-run UpdateStaticControls on player, target, and group after overland/veterancy season changes or related LAM toggles.
@@ -1899,6 +1900,8 @@ function UnitFrames.OnLevelUpdate(eventCode, unitTag, level)
     if unitTag == "player" and UnitFrames.CustomFrames["player"] and (UnitFrames.CustomFrames["player"].Experience or UnitFrames.CustomFrames["player"].ChampionXP) then
         UnitFrames.CustomFramesSetupAlternative()
     end
+
+    UnitFrames.RefreshDefaultTargetLevelDisplayIfNeeded(unitTag)
 end
 
 -- Runs on the EVENT_PLAYER_COMBAT_STATE listener.
