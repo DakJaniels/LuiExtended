@@ -5,7 +5,6 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local UI = LUIE.UI
 
 -- Unit Frames namespace
 --- @class (partial) UnitFrames
@@ -26,13 +25,44 @@ local defaultPos = {}
 
 
 -- Following settings will be used in options menu to define DefaultFrames behaviour
--- TODO: localization
-local g_DefaultFramesOptions =
-{
-    [1] = "Disable",                             -- false
-    [2] = "Do nothing (keep default)",           -- nil
-    [3] = "Use Extender (display text overlay)", -- true
-}
+UnitFrames.DEFAULT_FRAMES_MODE_DISABLE = 1
+UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER = 2
+UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT = 3
+UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER = 4
+
+--- @param mode integer|nil
+--- @return boolean
+function UnitFrames.IsDefaultFramesModeHideVanilla(mode)
+    return mode == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or mode == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER
+end
+
+--- @param mode integer|nil
+--- @return boolean
+function UnitFrames.IsDefaultFramesModeUnregisterVanilla(mode)
+    return mode == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER
+end
+
+--- @param mode integer|nil
+--- @return boolean
+function UnitFrames.IsDefaultFramesModeExtender(mode)
+    return mode == UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER
+end
+
+local function GetDefaultFramesModeLabel(modeIndex)
+    if modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE then
+        return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE)
+    end
+    if modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER then
+        return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE_UNREGISTER)
+    end
+    if modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT then
+        return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_KEEP_DEFAULT)
+    end
+    if modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER then
+        return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_EXTENDER)
+    end
+    return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE)
+end
 
 -- A function to extract the anchor information
 --- @param frame Control
@@ -98,9 +128,9 @@ end
 
 function UnitFrames.GetDefaultFramesOptions(frame)
     local retval = {}
-    for k, v in pairs(g_DefaultFramesOptions) do
-        if not (frame == "Boss" and k == 3) then
-            table.insert(retval, v)
+    for modeIndex = UnitFrames.DEFAULT_FRAMES_MODE_DISABLE, UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER do
+        if not (frame == "Boss" and modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER) then
+            table.insert(retval, GetDefaultFramesModeLabel(modeIndex))
         end
     end
     return retval
@@ -108,23 +138,28 @@ end
 
 function UnitFrames.SetDefaultFramesSetting(frame, value)
     local key = "DefaultFramesNew" .. tostring(frame)
-    if value == g_DefaultFramesOptions[3] then
-        if not ZO_IsConsoleOrGameCoreUI() then
-            SetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS, 0, SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
+    for modeIndex = UnitFrames.DEFAULT_FRAMES_MODE_DISABLE, UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER do
+        if GetDefaultFramesModeLabel(modeIndex) == value then
+            if modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER and frame ~= "Boss" then
+                if not ZO_IsConsoleOrGameCoreUI() then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS, 0, SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
+                end
+            end
+            UnitFrames.SV[key] = modeIndex
+            UnitFrames.ApplyZOUnitFrameSuppression()
+            return
         end
-        UnitFrames.SV[key] = 3
-    elseif value == g_DefaultFramesOptions[2] then
-        UnitFrames.SV[key] = 2
-    else
-        UnitFrames.SV[key] = 1
     end
 end
 
 function UnitFrames.GetDefaultFramesSetting(frame, default)
     local key = "DefaultFramesNew" .. tostring(frame)
     local from = default and UnitFrames.Defaults or UnitFrames.SV
-    local value = from[key]
-    return g_DefaultFramesOptions[value]
+    local mode = from[key]
+    if mode == nil or mode < UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or mode > UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER then
+        mode = UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
+    end
+    return GetDefaultFramesModeLabel(mode)
 end
 
 -- Used to create default frames extender controls for player and target.
@@ -133,7 +168,7 @@ function UnitFrames.CreateDefaultFrames()
     -- Create text overlay for default unit frames for player and reticleover.
     local default_controls = {}
 
-    if UnitFrames.SV.DefaultFramesNewPlayer == 3 then
+    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.SV.DefaultFramesNewPlayer) then
         default_controls.player =
         {
             [COMBAT_MECHANIC_FLAGS_HEALTH] = ZO_PlayerAttributeHealth,
@@ -141,7 +176,7 @@ function UnitFrames.CreateDefaultFrames()
             [COMBAT_MECHANIC_FLAGS_STAMINA] = ZO_PlayerAttributeStamina,
         }
     end
-    if UnitFrames.SV.DefaultFramesNewTarget == 3 then
+    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.SV.DefaultFramesNewTarget) then
         default_controls.reticleover = { [COMBAT_MECHANIC_FLAGS_HEALTH] = ZO_TargetUnitFramereticleover }
         -- UnitFrames.DefaultFrames.reticleover should be always present to hold target classIcon and friendIcon
     else
@@ -187,7 +222,7 @@ function UnitFrames.CreateDefaultFrames()
     table.insert(UnitFrames.targetUnitFrame.fadeComponents, UnitFrames.DefaultFrames.reticleover.friendIcon)
 
     -- When default Group frame in use, then create dummy boolean field, so this setting remain constant between /reloadui calls
-    if UnitFrames.SV.DefaultFramesNewGroup == 3 then
+    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.SV.DefaultFramesNewGroup) then
         UnitFrames.DefaultFrames.SmallGroup = true
     end
 
@@ -276,6 +311,24 @@ function UnitFrames.DefaultFramesCreateUnitGroupControls(unitTag)
             end
         end
     end
+end
+
+--- Refresh ZOS default target level/CP when vanilla reticleover frame is still shown.
+--- @param unitTag string
+function UnitFrames.RefreshDefaultTargetLevelDisplayIfNeeded(unitTag)
+    if unitTag ~= "reticleover" then
+        return
+    end
+    if not DoesUnitExist("reticleover") then
+        return
+    end
+    if UnitFrames.ShouldSuppressZOTarget() then
+        return
+    end
+    if not IsUnitPlayer("reticleover") then
+        return
+    end
+    UnitFrames.UpdateDefaultLevelTarget()
 end
 
 function UnitFrames.UpdateDefaultLevelTarget()

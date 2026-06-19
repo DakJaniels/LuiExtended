@@ -57,7 +57,7 @@ function UnitFrames.ResetCompassBarMenu()
     if not COMPASS_FRAME then
         return
     end
-    local useCompassBossBar = UnitFrames.SV.DefaultFramesNewBoss == 2
+    local useCompassBossBar = UnitFrames.SV.DefaultFramesNewBoss == UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT
     COMPASS_FRAME:SetBossBarHiddenForReason(LUIE_COMPASS_BOSS_BAR_HIDDEN_REASON, not useCompassBossBar)
     if useCompassBossBar then
         for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do

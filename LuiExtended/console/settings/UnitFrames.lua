@@ -281,12 +281,6 @@ function UnitFrames.CreateConsoleSettings()
         }
         settings[#settings + 1] =
         {
-            type = LHAS.ST_LABEL,
-            label = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_DESC),
-            canSelect = false,
-        }
-        settings[#settings + 1] =
-        {
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_UF_DFRAMES_REPOSIT),
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_REPOSIT_TP),

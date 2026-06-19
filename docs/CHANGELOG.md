@@ -1,5 +1,16 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.0
+
+### Changes
+
+- Unit Frames: Default Unit Frames dropdowns add **Disable + Unregister ZOS Events** as a fourth choice alongside Disable, Do nothing, and Use Extender (per-slot hide vs unregister; applies without UI reload when changed in settings).
+
+### Fixed
+
+- Unit Frames: Fixed UI error when updating default group Extender frames on title or rank events (TopInfo overland icon on frames without TopInfo controls).
+- Unit Frames: Target champion point and level display on the default target frame refresh on title, rank, and level events when vanilla target UI is visible.
+
 ## Version 7.2.4.9
 
 ### Changes

@@ -49,6 +49,18 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.0
+    "|cFFA500LuiExtended Version 7.2.5.0|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default Unit Frames dropdowns add |cFFFFFFDisable + Unregister ZOS Events|r as a fourth choice alongside Disable, Do nothing, and Use Extender (per-slot hide vs unregister; applies without UI reload when changed in settings).",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Fixed UI error when updating default group Extender frames on title or rank events (TopInfo overland icon on frames without TopInfo controls).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Target champion point and level display on the default target frame refresh on title, rank, and level events when vanilla target UI is visible.",
+    "",
     -- Version Header 7.2.4.9
     "|cFFA500LuiExtended Version 7.2.4.9|r",
     "",

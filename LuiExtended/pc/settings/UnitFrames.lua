@@ -336,10 +336,6 @@ function UnitFrames.CreateSettings()
                 default = UnitFrames.GetDefaultFramesSetting("Boss", true),
             },
             {
-                type = "description",
-                text = GetString(LUIE_STRING_LAM_UF_SUPPRESS_ZO_DESC),
-            },
-            {
                 -- Reposition default player bars
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_DFRAMES_REPOSIT),

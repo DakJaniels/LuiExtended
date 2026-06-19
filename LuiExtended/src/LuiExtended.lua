@@ -19,7 +19,6 @@
 --- @field SVVer number SavedVariables version
 --- @field Defaults LUIE_Defaults_SV Default settings
 --- @field SV LUIE_Defaults_SV Current saved variables
---- @field UI LUIE.UI
 --- @field GridOverlay LUIE.GridOverlay
 --- @field chatOutputSettingsUI LUIE_ChatOutputSettingsUI|nil
 --- @field ChatOutput LUIE_ChatOutput
@@ -28,8 +27,8 @@ LUIE = {}
 LUIE.__index = LUIE
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.4.9"
-LUIE.addonVersion = 7249
+LUIE.version = "7.2.5.0"
+LUIE.addonVersion = 7250
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
