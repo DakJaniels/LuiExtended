@@ -1,5 +1,13 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.2
+
+### Fixed
+
+- Unit Frames: Removed ZO unit frame suppression (runtime hide/release/unregister of vanilla player, target, group, and companion UI). Default hide behavior is again init-time and matches pre-7.2.5 patterns.
+- Unit Frames: Default Unit Frames dropdowns are back to three choices (Disable, Do nothing, Use Extender). Removed **Disable + Unregister ZOS Events** and related strings.
+- Unit Frames: Existing saves from 7.2.5.0/7.2.5.1 four-option values are mapped at load to the three-option behavior without rewriting saved variables.
+
 ## Version 7.2.5.1
 
 ### Fixed
