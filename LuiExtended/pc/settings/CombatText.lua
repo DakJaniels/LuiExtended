@@ -97,6 +97,10 @@ function CombatText.CreateSettings()
     local Defaults = CombatText.Defaults
     local Settings = CombatText.SV
 
+    if not LUIE.SV.CombatText_Enabled then
+        return
+    end
+
     -- Load Dialog Buttons
     loadDialogButtons()
 
@@ -3594,8 +3598,6 @@ function CombatText.CreateSettings()
     }
 
     -- Register the settings panel
-    if LUIE.SV.CombatText_Enabled then
-        LAM:RegisterAddonPanel(LUIE.name .. "CombatTextOptions", panelDataCombatText)
-        LAM:RegisterOptionControls(LUIE.name .. "CombatTextOptions", optionsDataCombatText)
-    end
+    LAM:RegisterAddonPanel(LUIE.name .. "CombatTextOptions", panelDataCombatText)
+    LAM:RegisterOptionControls(LUIE.name .. "CombatTextOptions", optionsDataCombatText)
 end

@@ -138,6 +138,10 @@ function UnitFrames.CreateSettings()
     local Defaults = UnitFrames.Defaults
     local Settings = UnitFrames.SV
 
+    if not LUIE.SV.UnitFrames_Enabled then
+        return
+    end
+
     -- Load Dialog Buttons
     loadDialogButtons()
 
@@ -5634,8 +5638,6 @@ function UnitFrames.CreateSettings()
     }
 
     -- Register the settings panel
-    if LUIE.SV.UnitFrames_Enabled then
-        LAM:RegisterAddonPanel(LUIE.name .. "UnitFramesOptions", panelDataUnitFrames)
-        LAM:RegisterOptionControls(LUIE.name .. "UnitFramesOptions", optionsDataUnitFrames)
-    end
+    LAM:RegisterAddonPanel(LUIE.name .. "UnitFramesOptions", panelDataUnitFrames)
+    LAM:RegisterOptionControls(LUIE.name .. "UnitFramesOptions", optionsDataUnitFrames)
 end

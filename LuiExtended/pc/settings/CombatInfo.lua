@@ -56,6 +56,10 @@ function CombatInfo.CreateSettings()
     local Defaults = CombatInfo.Defaults
     local Settings = CombatInfo.SV
 
+    if not LUIE.SV.CombatInfo_Enabled then
+        return
+    end
+
     local panelDataCombatInfo =
     {
         type = "panel",
@@ -3287,8 +3291,6 @@ function CombatInfo.CreateSettings()
     }
 
     -- Register the settings panel
-    if LUIE.SV.CombatInfo_Enabled then
-        LAM:RegisterAddonPanel(LUIE.name .. "CombatInfoOptions", panelDataCombatInfo)
-        LAM:RegisterOptionControls(LUIE.name .. "CombatInfoOptions", optionsDataCombatInfo)
-    end
+    LAM:RegisterAddonPanel(LUIE.name .. "CombatInfoOptions", panelDataCombatInfo)
+    LAM:RegisterOptionControls(LUIE.name .. "CombatInfoOptions", optionsDataCombatInfo)
 end

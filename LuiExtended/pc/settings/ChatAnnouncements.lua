@@ -93,6 +93,10 @@ function ChatAnnouncements.CreateSettings()
     local Defaults = ChatAnnouncements.Defaults
     local Settings = ChatAnnouncements.SV
 
+    if not LUIE.SV.ChatAnnouncements_Enable then
+        return
+    end
+
     local panelDataChatAnnouncements =
     {
         type = "panel",
@@ -10131,8 +10135,6 @@ function ChatAnnouncements.CreateSettings()
     }
 
     -- Register the settings panel
-    if LUIE.SV.ChatAnnouncements_Enable then
-        LAM:RegisterAddonPanel(LUIE.name .. "ChatAnnouncementOptions", panelDataChatAnnouncements)
-        LAM:RegisterOptionControls(LUIE.name .. "ChatAnnouncementOptions", optionsDataChatAnnouncements)
-    end
+    LAM:RegisterAddonPanel(LUIE.name .. "ChatAnnouncementOptions", panelDataChatAnnouncements)
+    LAM:RegisterOptionControls(LUIE.name .. "ChatAnnouncementOptions", optionsDataChatAnnouncements)
 end

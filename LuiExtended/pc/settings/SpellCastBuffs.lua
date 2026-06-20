@@ -170,6 +170,10 @@ function SpellCastBuffs.CreateSettings()
     local Defaults = SpellCastBuffs.Defaults
     local Settings = SpellCastBuffs.SV
 
+    if not LUIE.SV.SpellCastBuff_Enable then
+        return
+    end
+
     -- Load Dialog Buttons
     loadDialogButtons()
 
@@ -3926,12 +3930,10 @@ function SpellCastBuffs.CreateSettings()
     }
 
     -- Register the settings panel
-    if LUIE.SV.SpellCastBuff_Enable then
-        LAM:RegisterAddonPanel(LUIE.name .. "BuffsAndDebuffsOptions", panelDataBuffsDebuffs)
-        LAM:RegisterOptionControls(LUIE.name .. "BuffsAndDebuffsOptions", optionsDataBuffsDebuffs)
-        RefreshProminentDebuffRemoveDropdownChoices()
-        if LUIE_Prominent_Debuffs_List and LUIE_Prominent_Debuffs_List.UpdateValue then
-            LUIE_Prominent_Debuffs_List:UpdateValue()
-        end
+    LAM:RegisterAddonPanel(LUIE.name .. "BuffsAndDebuffsOptions", panelDataBuffsDebuffs)
+    LAM:RegisterOptionControls(LUIE.name .. "BuffsAndDebuffsOptions", optionsDataBuffsDebuffs)
+    RefreshProminentDebuffRemoveDropdownChoices()
+    if LUIE_Prominent_Debuffs_List and LUIE_Prominent_Debuffs_List.UpdateValue then
+        LUIE_Prominent_Debuffs_List:UpdateValue()
     end
 end
