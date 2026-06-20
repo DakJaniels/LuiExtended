@@ -49,6 +49,15 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.1
+    "|cFFA500LuiExtended Version 7.2.5.1|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Restored pre-7.2.5 behavior for existing Default Unit Frames saved values (read-time legacy decode until you re-select a dropdown to store the new four-option scheme).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Fixed compass boss health bars and Extender / Do nothing modes misbehaving after the 7.2.5.0 Default Frames dropdown change.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Re-show default player attribute bars when Default PLAYER Frame no longer uses a hide-vanilla mode; clear group/raid disable state when group suppression is released.",
+    "",
     -- Version Header 7.2.5.0
     "|cFFA500LuiExtended Version 7.2.5.0|r",
     "",

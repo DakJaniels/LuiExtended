@@ -64,6 +64,57 @@ local function GetDefaultFramesModeLabel(modeIndex)
     return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE)
 end
 
+--- @param frameKey "Player"|"Target"|"Group"|"Boss"
+--- @return string
+local function GetDefaultFramesFourModeFlagKey(frameKey)
+    return "DefaultFramesNewFourMode" .. tostring(frameKey)
+end
+
+--- @param frameKey "Player"|"Target"|"Group"|"Boss"
+--- @return boolean
+function UnitFrames.UsesDefaultFramesFourModeScheme(frameKey)
+    return UnitFrames.SV[GetDefaultFramesFourModeFlagKey(frameKey)] == true
+end
+
+--- Read-time legacy decode for pre-7.2.5 DefaultFramesNew* integers (does not rewrite SV).
+--- @param frameKey "Player"|"Target"|"Group"|"Boss"
+--- @return integer effective mode 1-4
+function UnitFrames.GetEffectiveDefaultFramesMode(frameKey)
+    local storedKey = "DefaultFramesNew" .. tostring(frameKey)
+    local rawMode = UnitFrames.SV[storedKey]
+    if rawMode == nil then
+        rawMode = UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
+    end
+
+    if UnitFrames.UsesDefaultFramesFourModeScheme(frameKey) then
+        if rawMode < UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or rawMode > UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER then
+            return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
+        end
+        return rawMode
+    end
+
+    if frameKey == "Boss" then
+        if rawMode == 1 then
+            return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
+        end
+        if rawMode == 2 or rawMode == 3 then
+            return UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT
+        end
+        return rawMode
+    end
+
+    if rawMode == 1 then
+        return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER
+    end
+    if rawMode == 2 then
+        return UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT
+    end
+    if rawMode == 3 then
+        return UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER
+    end
+    return rawMode
+end
+
 -- A function to extract the anchor information
 --- @param frame Control
 --- @return {point:AnchorPosition,relativeTo:object,relativePoint:AnchorPosition,offsetX:number,offsetY:number }|nil
@@ -146,20 +197,25 @@ function UnitFrames.SetDefaultFramesSetting(frame, value)
                 end
             end
             UnitFrames.SV[key] = modeIndex
+            UnitFrames.SV[GetDefaultFramesFourModeFlagKey(frame)] = true
             UnitFrames.ApplyZOUnitFrameSuppression()
+            UnitFrames.ResetCompassBarMenu()
             return
         end
     end
 end
 
 function UnitFrames.GetDefaultFramesSetting(frame, default)
-    local key = "DefaultFramesNew" .. tostring(frame)
     local from = default and UnitFrames.Defaults or UnitFrames.SV
-    local mode = from[key]
-    if mode == nil or mode < UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or mode > UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER then
-        mode = UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
+    if default then
+        local mode = from["DefaultFramesNew" .. tostring(frame)]
+        if mode == nil or mode < UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or mode > UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER then
+            mode = UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
+        end
+        return GetDefaultFramesModeLabel(mode)
     end
-    return GetDefaultFramesModeLabel(mode)
+    local effectiveMode = UnitFrames.GetEffectiveDefaultFramesMode(frame)
+    return GetDefaultFramesModeLabel(effectiveMode)
 end
 
 -- Used to create default frames extender controls for player and target.
@@ -168,7 +224,7 @@ function UnitFrames.CreateDefaultFrames()
     -- Create text overlay for default unit frames for player and reticleover.
     local default_controls = {}
 
-    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.SV.DefaultFramesNewPlayer) then
+    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.GetEffectiveDefaultFramesMode("Player")) then
         default_controls.player =
         {
             [COMBAT_MECHANIC_FLAGS_HEALTH] = ZO_PlayerAttributeHealth,
@@ -176,7 +232,7 @@ function UnitFrames.CreateDefaultFrames()
             [COMBAT_MECHANIC_FLAGS_STAMINA] = ZO_PlayerAttributeStamina,
         }
     end
-    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.SV.DefaultFramesNewTarget) then
+    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.GetEffectiveDefaultFramesMode("Target")) then
         default_controls.reticleover = { [COMBAT_MECHANIC_FLAGS_HEALTH] = ZO_TargetUnitFramereticleover }
         -- UnitFrames.DefaultFrames.reticleover should be always present to hold target classIcon and friendIcon
     else
@@ -222,7 +278,7 @@ function UnitFrames.CreateDefaultFrames()
     table.insert(UnitFrames.targetUnitFrame.fadeComponents, UnitFrames.DefaultFrames.reticleover.friendIcon)
 
     -- When default Group frame in use, then create dummy boolean field, so this setting remain constant between /reloadui calls
-    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.SV.DefaultFramesNewGroup) then
+    if UnitFrames.IsDefaultFramesModeExtender(UnitFrames.GetEffectiveDefaultFramesMode("Group")) then
         UnitFrames.DefaultFrames.SmallGroup = true
     end
 

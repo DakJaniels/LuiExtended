@@ -28,28 +28,28 @@ function UnitFrames.ShouldSuppressZOPlayerAttributeBars()
     if UnitFrames.CustomFrames["player"] == nil then
         return false
     end
-    return UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.SV.DefaultFramesNewPlayer)
+    return UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Player"))
 end
 
 function UnitFrames.ShouldUnregisterZOPlayerAttributeBars()
     if not UnitFrames.ShouldSuppressZOPlayerAttributeBars() then
         return false
     end
-    return UnitFrames.IsDefaultFramesModeUnregisterVanilla(UnitFrames.SV.DefaultFramesNewPlayer)
+    return UnitFrames.IsDefaultFramesModeUnregisterVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Player"))
 end
 
 function UnitFrames.ShouldSuppressZOTarget()
     if UnitFrames.CustomFrames["reticleover"] == nil then
         return false
     end
-    return UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.SV.DefaultFramesNewTarget)
+    return UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Target"))
 end
 
 function UnitFrames.ShouldUnregisterZOTargetUnitFrameEvents()
     if not UnitFrames.ShouldSuppressZOTarget() then
         return false
     end
-    return UnitFrames.IsDefaultFramesModeUnregisterVanilla(UnitFrames.SV.DefaultFramesNewTarget)
+    return UnitFrames.IsDefaultFramesModeUnregisterVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Target"))
 end
 
 function UnitFrames.ShouldSuppressZOGroup()
@@ -58,14 +58,14 @@ function UnitFrames.ShouldSuppressZOGroup()
     if not hasSmallGroup and not hasRaidGroup then
         return false
     end
-    return UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.SV.DefaultFramesNewGroup)
+    return UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Group"))
 end
 
 function UnitFrames.ShouldUnregisterZOGroupUnitFrameEvents()
     if not UnitFrames.ShouldSuppressZOGroup() then
         return false
     end
-    return UnitFrames.IsDefaultFramesModeUnregisterVanilla(UnitFrames.SV.DefaultFramesNewGroup)
+    return UnitFrames.IsDefaultFramesModeUnregisterVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Group"))
 end
 
 function UnitFrames.ShouldSuppressZOCompanion()
@@ -114,6 +114,20 @@ function UnitFrames.ShouldUnregisterZOUnitFramesControlEvents()
     return UnitFrames.ShouldSuppressZOTarget()
         and UnitFrames.ShouldSuppressZOGroup()
         and UnitFrames.ShouldSuppressZOCompanion()
+end
+
+local function ShowZOPlayerAttributeBars()
+    for suffixIndex = 1, #PLAYER_ATTRIBUTE_BAR_SUFFIXES do
+        local suffix = PLAYER_ATTRIBUTE_BAR_SUFFIXES[suffixIndex]
+        local controlName = "ZO_PlayerAttribute" .. suffix
+        local frame = _G[controlName]
+        if frame then
+            frame:SetHidden(false)
+        end
+    end
+    if ZO_PlayerAttribute then
+        ZO_PlayerAttribute:SetHidden(false)
+    end
 end
 
 local function HideZOPlayerAttributeBars()
@@ -204,6 +218,14 @@ local function ReleaseVanillaGroupAndRaidFrameSuppression()
     local hiddenReason = UnitFrames.ZO_FRAME_SUPPRESSION_HIDDEN_REASON
     if UNIT_FRAMES then
         UNIT_FRAMES:SetGroupAndRaidFramesHiddenForReason(hiddenReason, false)
+        if UNIT_FRAMES.groupFrames and UNIT_FRAMES.raidFrames then
+            for _, unitFrame in pairs(UNIT_FRAMES.groupFrames) do
+                unitFrame:SetHiddenForReason("disabled", false)
+            end
+            for _, unitFrame in pairs(UNIT_FRAMES.raidFrames) do
+                unitFrame:SetHiddenForReason("disabled", false)
+            end
+        end
     end
 end
 
@@ -245,6 +267,8 @@ function UnitFrames.ApplyZOUnitFrameSuppression()
         else
             HideZOPlayerAttributeBars()
         end
+    else
+        ShowZOPlayerAttributeBars()
     end
 
     if UnitFrames.ShouldSuppressZOTarget() then
