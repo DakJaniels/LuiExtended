@@ -1,5 +1,13 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.1
+
+### Fixed
+
+- Unit Frames: Restored pre-7.2.5 behavior for existing Default Unit Frames saved values (read-time legacy decode until you re-select a dropdown to store the new four-option scheme).
+- Unit Frames: Fixed compass boss health bars and Extender / Do nothing modes misbehaving after the 7.2.5.0 Default Frames dropdown change.
+- Unit Frames: Re-show default player attribute bars when Default PLAYER Frame no longer uses a hide-vanilla mode; clear group/raid disable state when group suppression is released.
+
 ## Version 7.2.5.0
 
 ### Changes

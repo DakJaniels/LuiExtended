@@ -1777,7 +1777,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
     end
 
     -- Finally if user does not want to have default target frame we have to hide it here all the time
-    if not UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.SV.DefaultFramesNewTarget) then
+    if not UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Target")) then
         ZO_TargetUnitFramereticleover:SetHidden(true)
     end
 end
