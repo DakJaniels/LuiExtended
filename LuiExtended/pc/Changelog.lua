@@ -49,6 +49,15 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.2
+    "|cFFA500LuiExtended Version 7.2.5.2|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Removed ZO unit frame suppression (runtime hide/release/unregister of vanilla player, target, group, and companion UI). Default hide behavior is again init-time and matches pre-7.2.5 patterns.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default Unit Frames dropdowns are back to three choices (Disable, Do nothing, Use Extender). Removed |cFFFFFFDisable + Unregister ZOS Events|r and related strings.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Existing saves from 7.2.5.0/7.2.5.1 four-option values are mapped at load to the three-option behavior without rewriting saved variables.",
+    "",
     -- Version Header 7.2.5.1
     "|cFFA500LuiExtended Version 7.2.5.1|r",
     "",

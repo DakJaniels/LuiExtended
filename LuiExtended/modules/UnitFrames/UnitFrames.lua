@@ -274,6 +274,7 @@ function UnitFrames.Initialize(enabled)
 
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()
+    UnitFrames.ApplyHideDefaultPlayerAttributeBarsIfNeeded()
     UnitFrames.PlayerDodgePrediction.Initialize()
 
     -- Initialize LibGroupBroadcast integrations if available
@@ -312,8 +313,6 @@ function UnitFrames.Initialize(enabled)
     -- Initialize visualizer coordinators for all tracked units
     -- Each coordinator registers its own attribute visual events with unit tag filtering
     UnitFrames.InitializeDefaultVisualizers()
-
-    UnitFrames.ApplyZOUnitFrameSuppression()
 
     -- Set event handlers
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, UnitFrames.OnPlayerActivated)
@@ -1343,6 +1342,8 @@ end
 function UnitFrames.OnPlayerActivated(eventId, initial)
     TryShowPendingCrutchAlertsVersionWarning()
 
+    UnitFrames.ApplyHideDefaultPlayerAttributeBarsIfNeeded()
+
     -- Reload values for player frames (this triggers visualizer OnUnitChanged which initializes all power types)
     UnitFrames.ReloadValues("player")
 
@@ -1777,7 +1778,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
     end
 
     -- Finally if user does not want to have default target frame we have to hide it here all the time
-    if not UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Target")) then
+    if not UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.ShouldHideVanillaTargetFrameForCustomTarget() then
         ZO_TargetUnitFramereticleover:SetHidden(true)
     end
 end
@@ -2622,7 +2623,17 @@ function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
 end
 
 local function CustomFramesHideDefaultGroupFrames(groupSize)
-    UnitFrames.HideVanillaGroupAndRaidFramesForCustomFrames(groupSize)
+    local shouldHide = false
+    if UnitFrames.SV.CustomFramesGroup and groupSize <= 4 then
+        shouldHide = true
+    elseif UnitFrames.SV.CustomFramesRaid then
+        if groupSize > 4 or (not UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["RaidGroup1"]) then
+            shouldHide = true
+        end
+    end
+    if shouldHide and ZO_UnitFramesGroups then
+        ZO_UnitFramesGroups:SetHidden(true)
+    end
 end
 
 -- Returns true for raid frames, false for small group frames, nil if neither available.

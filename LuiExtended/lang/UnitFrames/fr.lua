@@ -43,7 +43,6 @@ local strings =
     LUIE_STRING_LAM_UF_DFRAMES_PLAYER = "Cadre PLAYER par défaut",
     LUIE_STRING_LAM_UF_DFRAMES_TARGET = "Cadre CIBLE par défaut",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE = "Désactiver",
-    LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE_UNREGISTER = "Désactiver + désinscrire les événements ZOS",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_KEEP_DEFAULT = "Ne rien faire (garder par défaut)",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_EXTENDER = "Extender (superposition de texte)",
     LUIE_STRING_LAM_UF_DFRAMES_GROUPSMALL = "Cadre GROUPE par défaut",
