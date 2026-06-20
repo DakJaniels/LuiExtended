@@ -43,7 +43,6 @@ local strings =
     LUIE_STRING_LAM_UF_DFRAMES_PLAYER = "Стандартный фрейм ИГРОКА",
     LUIE_STRING_LAM_UF_DFRAMES_TARGET = "Стандартный фрейм ЦЕЛИ",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE = "Отключить",
-    LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE_UNREGISTER = "Отключить + снять регистрацию событий ZOS",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_KEEP_DEFAULT = "Ничего не менять (оставить стандарт)",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_EXTENDER = "Extender (текстовая надстройка)",
     LUIE_STRING_LAM_UF_DFRAMES_GROUPSMALL = "Стандартный фрейм ГРУППЫ",

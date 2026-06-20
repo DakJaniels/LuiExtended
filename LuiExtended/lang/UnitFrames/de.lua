@@ -297,7 +297,6 @@ local strings =
     LUIE_STRING_LAM_UF_DFRAMES_REPOSIT_TP = "Ändert die Position der Standard-Spielerfenster zu einem kompakten Pyramiden-Layout in der unteren Bildschirmmitte.",
     LUIE_STRING_LAM_UF_DFRAMES_TARGET = "Standard-ZIEL-Fenster",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE = "Deaktivieren",
-    LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE_UNREGISTER = "Deaktivieren + ZOS-Ereignisse abmelden",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_KEEP_DEFAULT = "Nichts tun (Standard beibehalten)",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_EXTENDER = "Extender (Text-Overlay)",
     LUIE_STRING_LAM_UF_DFRAMES_VERT = "Vertikale Position der Spielerfenster anpassen",

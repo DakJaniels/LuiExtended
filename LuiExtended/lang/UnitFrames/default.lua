@@ -329,7 +329,6 @@ local strings =
     LUIE_STRING_LAM_UF_DFRAMES_REPOSIT_TP = "Change position of the default player frames to be in a compacted pyramid layout in the bottom center of the screen.",
     LUIE_STRING_LAM_UF_DFRAMES_TARGET = "Default TARGET Frame",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE = "Disable",
-    LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE_UNREGISTER = "Disable + Unregister ZOS Events",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_KEEP_DEFAULT = "Do nothing (keep default)",
     LUIE_STRING_LAM_UF_DFRAMES_MODE_EXTENDER = "Use Extender (display text overlay)",
     LUIE_STRING_LAM_UF_DFRAMES_VERT = "Adjust Player Frames Vertical Position",

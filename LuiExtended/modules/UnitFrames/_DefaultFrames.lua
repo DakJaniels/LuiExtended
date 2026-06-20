@@ -20,26 +20,31 @@ local UnitFrames = LUIE.UnitFrames
 
 local pairs = pairs
 
+local eventManager = GetEventManager()
+
 local defaultPos = {}
 
+local PLAYER_ATTRIBUTE_BAR_SUFFIXES =
+{
+    "Health",
+    "Stamina",
+    "Magicka",
+    "MountStamina",
+    "Werewolf",
+    "SiegeHealth",
+}
 
 
--- Following settings will be used in options menu to define DefaultFrames behaviour
+
+-- Following settings will be used in options menu to define DefaultFrames behaviour (stored 1-3).
 UnitFrames.DEFAULT_FRAMES_MODE_DISABLE = 1
-UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER = 2
-UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT = 3
-UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER = 4
+UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT = 2
+UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER = 3
 
 --- @param mode integer|nil
 --- @return boolean
 function UnitFrames.IsDefaultFramesModeHideVanilla(mode)
-    return mode == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or mode == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER
-end
-
---- @param mode integer|nil
---- @return boolean
-function UnitFrames.IsDefaultFramesModeUnregisterVanilla(mode)
-    return mode == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER
+    return mode == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
 end
 
 --- @param mode integer|nil
@@ -52,9 +57,6 @@ local function GetDefaultFramesModeLabel(modeIndex)
     if modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE then
         return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE)
     end
-    if modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER then
-        return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE_UNREGISTER)
-    end
     if modeIndex == UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT then
         return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_KEEP_DEFAULT)
     end
@@ -64,55 +66,83 @@ local function GetDefaultFramesModeLabel(modeIndex)
     return GetString(LUIE_STRING_LAM_UF_DFRAMES_MODE_DISABLE)
 end
 
+--- Maps saved DefaultFramesNew* to behavior modes 1-3 (does not rewrite SV).
 --- @param frameKey "Player"|"Target"|"Group"|"Boss"
---- @return string
-local function GetDefaultFramesFourModeFlagKey(frameKey)
-    return "DefaultFramesNewFourMode" .. tostring(frameKey)
-end
-
---- @param frameKey "Player"|"Target"|"Group"|"Boss"
---- @return boolean
-function UnitFrames.UsesDefaultFramesFourModeScheme(frameKey)
-    return UnitFrames.SV[GetDefaultFramesFourModeFlagKey(frameKey)] == true
-end
-
---- Read-time legacy decode for pre-7.2.5 DefaultFramesNew* integers (does not rewrite SV).
---- @param frameKey "Player"|"Target"|"Group"|"Boss"
---- @return integer effective mode 1-4
+--- @return integer mode 1-3
 function UnitFrames.GetEffectiveDefaultFramesMode(frameKey)
     local storedKey = "DefaultFramesNew" .. tostring(frameKey)
     local rawMode = UnitFrames.SV[storedKey]
     if rawMode == nil then
-        rawMode = UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
+        return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
     end
 
-    if UnitFrames.UsesDefaultFramesFourModeScheme(frameKey) then
-        if rawMode < UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or rawMode > UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER then
+    local fourModeFlagKey = "DefaultFramesNewFourMode" .. tostring(frameKey)
+    if UnitFrames.SV[fourModeFlagKey] == true then
+        if rawMode == 1 or rawMode == 2 then
             return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
         end
-        return rawMode
+        if rawMode == 3 then
+            return UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT
+        end
+        if rawMode >= 4 then
+            return UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER
+        end
+        return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
     end
 
     if frameKey == "Boss" then
         if rawMode == 1 then
             return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
         end
-        if rawMode == 2 or rawMode == 3 then
-            return UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT
-        end
-        return rawMode
-    end
-
-    if rawMode == 1 then
-        return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE_UNREGISTER
-    end
-    if rawMode == 2 then
         return UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT
     end
-    if rawMode == 3 then
+
+    if rawMode == 1 or rawMode == 2 or rawMode == 3 then
+        return rawMode
+    end
+    if rawMode >= 4 then
         return UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER
     end
-    return rawMode
+    return UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
+end
+
+--- @return boolean
+function UnitFrames.ShouldHideVanillaPlayerAttributeBarsForCustomPlayer()
+    if not UnitFrames.SV.CustomFramesPlayer then
+        return false
+    end
+    return UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Player"))
+end
+
+--- @return boolean
+function UnitFrames.ShouldHideVanillaTargetFrameForCustomTarget()
+    if not UnitFrames.SV.CustomFramesTarget then
+        return false
+    end
+    return UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Target"))
+end
+
+--- Hide default player attribute bars when Default PLAYER is Disable and LUIE custom player is enabled.
+function UnitFrames.ApplyHideDefaultPlayerAttributeBarsIfNeeded()
+    if not UnitFrames.ShouldHideVanillaPlayerAttributeBarsForCustomPlayer() then
+        return
+    end
+    for suffixIndex = 1, #PLAYER_ATTRIBUTE_BAR_SUFFIXES do
+        local suffix = PLAYER_ATTRIBUTE_BAR_SUFFIXES[suffixIndex]
+        local controlName = "ZO_PlayerAttribute" .. suffix
+        local frame = _G[controlName]
+        if frame then
+            frame:UnregisterForEvent(EVENT_POWER_UPDATE)
+            frame:UnregisterForEvent(EVENT_INTERFACE_SETTING_CHANGED)
+            frame:UnregisterForEvent(EVENT_PLAYER_ACTIVATED)
+            eventManager:UnregisterForUpdate(controlName .. "FadeUpdate")
+            frame:SetHidden(true)
+        end
+    end
+    if ZO_PlayerAttribute then
+        eventManager:UnregisterForAllEvents("ZO_PlayerAttribute")
+        ZO_PlayerAttribute:SetHidden(true)
+    end
 end
 
 -- A function to extract the anchor information
@@ -197,25 +227,24 @@ function UnitFrames.SetDefaultFramesSetting(frame, value)
                 end
             end
             UnitFrames.SV[key] = modeIndex
-            UnitFrames.SV[GetDefaultFramesFourModeFlagKey(frame)] = true
-            UnitFrames.ApplyZOUnitFrameSuppression()
             UnitFrames.ResetCompassBarMenu()
+            UnitFrames.ApplyHideDefaultPlayerAttributeBarsIfNeeded()
             return
         end
     end
 end
 
 function UnitFrames.GetDefaultFramesSetting(frame, default)
-    local from = default and UnitFrames.Defaults or UnitFrames.SV
     if default then
-        local mode = from["DefaultFramesNew" .. tostring(frame)]
-        if mode == nil or mode < UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or mode > UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER then
+        local mode = UnitFrames.Defaults["DefaultFramesNew" .. tostring(frame)]
+        if frame == "Boss" and (mode == nil or mode == 3) then
+            mode = UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT
+        elseif mode == nil or mode < UnitFrames.DEFAULT_FRAMES_MODE_DISABLE or mode > UnitFrames.DEFAULT_FRAMES_MODE_EXTENDER then
             mode = UnitFrames.DEFAULT_FRAMES_MODE_DISABLE
         end
         return GetDefaultFramesModeLabel(mode)
     end
-    local effectiveMode = UnitFrames.GetEffectiveDefaultFramesMode(frame)
-    return GetDefaultFramesModeLabel(effectiveMode)
+    return GetDefaultFramesModeLabel(UnitFrames.GetEffectiveDefaultFramesMode(frame))
 end
 
 -- Used to create default frames extender controls for player and target.
@@ -284,10 +313,6 @@ function UnitFrames.CreateDefaultFrames()
 
     -- Apply fonts
     UnitFrames.DefaultFramesApplyFont()
-
-    if UnitFrames.ShouldSuppressZOPlayerAttributeBars() then
-        UnitFrames.SuppressZOPlayerAttributeBars()
-    end
 end
 
 -- Sets out-of-combat transparency values for default user-frames
@@ -378,7 +403,7 @@ function UnitFrames.RefreshDefaultTargetLevelDisplayIfNeeded(unitTag)
     if not DoesUnitExist("reticleover") then
         return
     end
-    if UnitFrames.ShouldSuppressZOTarget() then
+    if UnitFrames.ShouldHideVanillaTargetFrameForCustomTarget() then
         return
     end
     if not IsUnitPlayer("reticleover") then
