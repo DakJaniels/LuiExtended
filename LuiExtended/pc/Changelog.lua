@@ -49,6 +49,15 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.3
+    "|cFFA500LuiExtended Version 7.2.5.3|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: With |cFFFFFFLock position to unit frames|r, player/target out-of-combat and in-combat opacity from Unit Frames applies to buff and debuff icons; SpellCastBuffs container alpha no longer overrides those regions.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: |cFFFFFFShow Border Cooldown|r radial sweep only on timed buffs; permanent effects no longer show a cooldown layer over the icon (inset frame unchanged).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: When locked to unit frames, icon art, borders, inset panel, and radial cooldown tint fade together at OOC/INC opacity (per-icon alpha; avoids crushed or popped chrome).",
+    "",
     -- Version Header 7.2.5.2
     "|cFFA500LuiExtended Version 7.2.5.2|r",
     "",
@@ -57,6 +66,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Removed ZO unit frame suppression (runtime hide/release/unregister of vanilla player, target, group, and companion UI). Default hide behavior is again init-time and matches pre-7.2.5 patterns.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default Unit Frames dropdowns are back to three choices (Disable, Do nothing, Use Extender). Removed |cFFFFFFDisable + Unregister ZOS Events|r and related strings.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Existing saves from 7.2.5.0/7.2.5.1 four-option values are mapped at load to the three-option behavior without rewriting saved variables.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default PLAYER |cFFFFFFDisable|r now hides vanilla player attribute bars after custom frames are built, on player activated, and when the dropdown changes (fixes bars still visible when custom player frames are enabled).",
     "",
     -- Version Header 7.2.5.1
     "|cFFA500LuiExtended Version 7.2.5.1|r",

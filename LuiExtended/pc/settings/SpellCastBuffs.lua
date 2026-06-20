@@ -298,6 +298,10 @@ function SpellCastBuffs.CreateSettings()
         end,
         setFunc = function (value)
             Settings.lockPositionToUnitFrames = value
+            if LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesApplyInCombat then
+                LUIE.UnitFrames.CustomFramesApplyInCombat(true)
+            end
+            SpellCastBuffs.ApplyDisplayAlpha()
         end,
         width = "full",
         warning = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK_WARNING),

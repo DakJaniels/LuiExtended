@@ -4152,10 +4152,32 @@ end
 
 local function CustomFramesApplyAlphaAndBuffs(frame, idle, oocAlpha, incAlpha, hideBuffsOoc)
     if not frame or not frame.tlw then return end
-    frame.control:SetAlpha(idle and oocAlpha or incAlpha)
+    local alpha = idle and oocAlpha or incAlpha
+    local spellCastBuffs = LUIE.SpellCastBuffs
+    local deferBuffRegionAlphaToScb = spellCastBuffs
+        and spellCastBuffs.SV
+        and spellCastBuffs.SV.lockPositionToUnitFrames
+        and (frame == UnitFrames.CustomFrames.player or frame == UnitFrames.CustomFrames.reticleover)
+
+    if deferBuffRegionAlphaToScb and spellCastBuffs.SetLockedContainerAlphaForUnit then
+        local unitKind = (frame == UnitFrames.CustomFrames.player) and "player" or "target"
+        spellCastBuffs.SetLockedContainerAlphaForUnit(unitKind, alpha)
+    end
+
+    frame.control:SetAlpha(alpha)
     if hideBuffsOoc and frame.buffs and frame.debuffs then
         frame.buffs:SetHidden(idle)
         frame.debuffs:SetHidden(idle)
+    else
+        local buffRegionAlpha = deferBuffRegionAlphaToScb and 1 or alpha
+        if frame.buffs then
+            frame.buffs:SetHidden(false)
+            frame.buffs:SetAlpha(buffRegionAlpha)
+        end
+        if frame.debuffs then
+            frame.debuffs:SetHidden(false)
+            frame.debuffs:SetAlpha(buffRegionAlpha)
+        end
     end
 end
 
@@ -4172,6 +4194,21 @@ local function CustomFramesComputeOocIdle(useMissingPowerAsCombat)
         return idle == true
     end
     return UnitFrames.statFull.combat == true
+end
+
+--- OOC/INC alpha (0–1) for SpellCastBuffs containers locked to player/target UF buff regions.
+--- @param containerKey string
+--- @return number|nil nil when not a locked player/target buff container
+function UnitFrames.GetSpellCastBuffsLockedContainerAlpha(containerKey)
+    if containerKey == "player1" or containerKey == "player2" then
+        local idle = CustomFramesComputeOocIdle(UnitFrames.SV.PlayerOocAlphaPower)
+        return idle and (0.01 * UnitFrames.SV.PlayerOocAlpha) or (0.01 * UnitFrames.SV.PlayerIncAlpha)
+    end
+    if containerKey == "target1" or containerKey == "target2" then
+        local idle = CustomFramesComputeOocIdle(UnitFrames.SV.TargetOocAlphaPower)
+        return idle and (0.01 * UnitFrames.SV.TargetOocAlpha) or (0.01 * UnitFrames.SV.TargetIncAlpha)
+    end
+    return nil
 end
 
 -- This function reduces opacity of custom frames when player is out of combat and has full attributes
