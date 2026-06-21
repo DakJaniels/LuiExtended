@@ -578,6 +578,11 @@ function FrameObject.LayoutTopInfoAvaTarget(self)
     local nameUsedWidth = GetTopInfoNameRowUsedWidth(self.name, nameMaxWidth)
     local levelStart = rowStartX + nameUsedWidth + TOPINFO_NAME_LEVEL_GAP
     LayoutTopInfoLevelCluster(self, rowOffsetY, levelStart, showLevelRow, rightReserved)
+
+    if self.avaRankIcon and not self.avaRankIcon:IsHidden() then
+        self.avaRankIcon:ClearAnchors()
+        self.avaRankIcon:SetAnchor(TOPRIGHT, self.topInfo, TOPRIGHT, -1, rowOffsetY)
+    end
 end
 
 --- @param self LUIE_CustomFrameObject
