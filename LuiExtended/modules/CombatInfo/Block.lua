@@ -27,6 +27,8 @@ local moduleName = Block.name
 
 local BASE_BLOCK_COST = 1730
 local BLOCK_INDICATOR_SIZE = 64
+--- Vertical nudge for block count text on shield art (negative = up).
+local BLOCK_INDICATOR_COUNT_OFFSET_Y = -2
 local BLOCK_INDICATOR_INACTIVE_ALPHA = 0.3
 local DEBOUNCE_DELAY_MS = 500
 local BLOODLORD_EMBRACE_DEBUFF_ABILITY_ID = 139903
@@ -233,12 +235,20 @@ function Block.OnBlockUpdate()
     if bothRegen or not sv.showRemainingBlocks then
         Block.remainingBlocksLabel:SetText("")
         Block.remainingBlocksLabel:Clean()
+        if Block.remainingBlocksShadowLabel then
+            Block.remainingBlocksShadowLabel:SetText("")
+            Block.remainingBlocksShadowLabel:Clean()
+        end
         return
     end
     local powerType = staminaRegen > 0 and COMBAT_MECHANIC_FLAGS_MAGICKA or COMBAT_MECHANIC_FLAGS_STAMINA
     local current, max, effectiveMax = GetUnitPower("player", powerType)
     local numBlocks = (current > 0 and cachedBlockCost > 0) and zo_floor(current / cachedBlockCost) or 0
-    Block.remainingBlocksLabel:SetText(tostring(numBlocks))
+    local blockCountText = tostring(numBlocks)
+    Block.remainingBlocksLabel:SetText(blockCountText)
+    if Block.remainingBlocksShadowLabel then
+        Block.remainingBlocksShadowLabel:SetText(blockCountText)
+    end
 end
 
 -- ---------------------------------------------------------------------------
@@ -437,19 +447,29 @@ local function CreateBlockIndicatorWindow()
     Block.blockIndicatorTexture = texture
     Block.ApplyBlockShieldTexture()
 
-    local label = windowManager:CreateControlFromVirtual(moduleName .. "BlockIndicatorCount", texture, "ZO_MapBlobName")
+    local label = windowManager:CreateControl(moduleName .. "BlockIndicatorCount", texture, CT_LABEL)
     label:ClearAnchors()
-    label:SetAnchor(TOPLEFT, texture, TOPLEFT, 1, -2)
-    label:SetDimensions(BLOCK_INDICATOR_SIZE, BLOCK_INDICATOR_SIZE)
+    label:SetAnchor(TOPLEFT, texture, TOPLEFT, 0, BLOCK_INDICATOR_COUNT_OFFSET_Y)
+    label:SetAnchor(BOTTOMRIGHT, texture, BOTTOMRIGHT, 0, BLOCK_INDICATOR_COUNT_OFFSET_Y)
+    label:SetPixelRoundingEnabled(false)
     label:SetColor(1, 1, 1, 1)
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    label:SetDrawLayer(DL_BACKGROUND)
+    label:SetDrawLevel(4)
+
+    local shadowLabel = label:CreateControl("$(parent)Shadow", CT_LABEL)
+    shadowLabel:ClearAnchors()
+    shadowLabel:SetAnchor(CENTER, label, CENTER, 1, 1)
+    shadowLabel:SetDimensions(BLOCK_INDICATOR_SIZE, BLOCK_INDICATOR_SIZE)
+    shadowLabel:SetColor(0, 0, 0, 1)
+    shadowLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+    shadowLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    shadowLabel:SetDrawLayer(DL_BACKGROUND)
+    shadowLabel:SetDrawLevel(3)
 
     local blockIndicatorFont = GetBlockIndicatorFont()
     label:SetFont(blockIndicatorFont)
-
-    local shadowLabel = label:GetNamedChild("Shadow")
-    shadowLabel:SetColor(0, 0, 0, 1)
     shadowLabel:SetFont(blockIndicatorFont)
 
     blockIndicatorFragment = ZO_HUDFadeSceneFragment:New(win, 0, 0)
