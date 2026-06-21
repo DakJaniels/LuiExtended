@@ -33,21 +33,30 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         local finalName
         local finalAlertName
 
-        local nameCheck1 = ZO_GetPrimaryPlayerName(displayName, characterName)
-        local nameCheck2 = ZO_GetSecondaryPlayerName(displayName, characterName)
-
-        if nameCheck1 == "" then
-            finalName = displayName
-            finalAlertName = displayName
-        elseif nameCheck2 == "" then
-            finalName = characterName
-            finalAlertName = characterName
-        elseif nameCheck1 ~= "" and nameCheck2 ~= "" then
-            finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
-            finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+        if response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED_CANT_JOIN then
+            -- characterName is the inviter, not the invitee (ZOS AlertHandlers EVENT_GROUP_INVITE_RESPONSE)
+            finalName = ChatAnnouncements.ResolveNameLink(characterName, "")
+            finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, "")
+            if characterName ~= "" then
+                finalAlertName = ZO_FormatUserFacingCharacterName(characterName)
+            end
         else
-            finalName = ""
-            finalAlertName = ""
+            local nameCheck1 = ZO_GetPrimaryPlayerName(displayName, characterName)
+            local nameCheck2 = ZO_GetSecondaryPlayerName(displayName, characterName)
+
+            if nameCheck1 == "" then
+                finalName = displayName
+                finalAlertName = displayName
+            elseif nameCheck2 == "" then
+                finalName = characterName
+                finalAlertName = characterName
+            elseif nameCheck1 ~= "" and nameCheck2 ~= "" then
+                finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+                finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+            else
+                finalName = ""
+                finalAlertName = ""
+            end
         end
 
         if response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER then
