@@ -24,8 +24,7 @@ local GetAbilityName = GetAbilityName
 local IsBlockActive = IsBlockActive
 local IsPlayerStunned = IsPlayerStunned
 
--- Matches SpellCastBuffs.xml ZO_DefaultCooldown alpha="0.5"
-local BUFF_ICON_COOLDOWN_ALPHA = 0.5
+-- Matches SpellCastBuffs.xml ZO_DefaultCooldown alpha="0.5" (cooldown base alpha lives in SpellCastBuffs.ApplyBuffIconDisplayAlpha)
 local BUFF_ICON_FADEOUT_MS = 2000
 
 --- Maps API status effect type to LUIE_CC_TYPE for ColorCC when EffectOverride.cc is absent.
@@ -295,7 +294,6 @@ local function EaseOutQuad(t, b, c, d)
     return -c * t * (t - 2) + b
 end
 
---- Parent SetAlpha does not reliably fade CooldownControl; scale cd control + fill with the expire fade.
 --- @param buff SpellCastBuffs_BuffIcon_Control
 --- @param container string
 --- @param remain number|nil
@@ -305,14 +303,7 @@ local function ApplyBuffIconExpireFade(buff, container, remain)
         fadeAlpha = EaseOutQuad(remain, 0, 1, BUFF_ICON_FADEOUT_MS)
     end
 
-    buff:SetAlpha(fadeAlpha)
-
-    if buff.cd and container ~= "player_long" and not buff.cd:IsHidden() then
-        buff.cd:SetAlpha(BUFF_ICON_COOLDOWN_ALPHA * fadeAlpha)
-        if buff.cdFillA then
-            buff.cd:SetFillColor(buff.cdFillR, buff.cdFillG, buff.cdFillB, buff.cdFillA * fadeAlpha)
-        end
-    end
+    SpellCastBuffs.ApplyBuffIconDisplayAlpha(buff, container, fadeAlpha)
 end
 
 --- @param currentTimeMs number
@@ -440,6 +431,7 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
 
             buff.icon:SetTexture(effect.icon)
             buff:SetAlpha(1)
+            SpellCastBuffs.ResetBuffIconChromeAlphas(buff)
 
             local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
             if not remain or effect.fakeDuration then
@@ -514,14 +506,18 @@ local function updateIconsLight(currentTimeMs, sortedList, container)
             end
         end
 
-        if effect.restart and buff.cd ~= nil and container ~= "player_long" then
-            if effect.id == 999016 then
-                effect.dur = 600000
-            end
-            if remain == nil or effect.dur == nil or effect.dur == 0 or effect.fakeDuration then
-                buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-            else
-                buff.cd:StartCooldown(remain, effect.dur, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
+        local showRadialCooldown = SpellCastBuffs.ShouldShowBuffIconRadialCooldown(container, effect)
+        if buff.cd and container ~= "player_long" then
+            if showRadialCooldown then
+                if effect.restart then
+                    if effect.id == 999016 then
+                        effect.dur = 600000
+                    end
+                    buff.cd:StartCooldown(remain, effect.dur, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
+                    effect.restart = false
+                end
+            elseif effect.restart or not buff.cd:IsHidden() then
+                SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container, effect)
                 effect.restart = false
             end
         end

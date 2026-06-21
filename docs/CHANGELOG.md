@@ -1,5 +1,20 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.3
+
+### Changes
+
+- Combat Info: Block indicator remaining-block count uses a shadow label and vertical offset on the shield art for clearer readability.
+- MiniMap: Pin mirror and waypoint sync run deferred work when the world map unblocks; map reload failures no longer leave gameplay pin tickers stuck.
+
+### Fixed
+
+- Chat Announcements: Group invite response when you are already in a group now names the inviter correctly (matches ZOS alert handler argument order).
+- Unit Frames: Custom AvA player target frame shows only for a hostile living player on reticleover when AvA target frames are enabled; TopInfo layout refreshes with frame visibility.
+- SpellCastBuffs: With **Lock position to unit frames**, player/target out-of-combat and in-combat opacity from Unit Frames applies to buff and debuff icons; SpellCastBuffs container alpha no longer overrides those regions.
+- SpellCastBuffs: **Show Border Cooldown** radial sweep only on timed buffs; permanent effects no longer show a cooldown layer over the icon (inset frame unchanged).
+- SpellCastBuffs: When locked to unit frames, icon art, borders, inset panel, and radial cooldown tint fade together at OOC/INC opacity (per-icon alpha; avoids crushed or popped chrome).
+
 ## Version 7.2.5.2
 
 ### Fixed
@@ -7,6 +22,7 @@
 - Unit Frames: Removed ZO unit frame suppression (runtime hide/release/unregister of vanilla player, target, group, and companion UI). Default hide behavior is again init-time and matches pre-7.2.5 patterns.
 - Unit Frames: Default Unit Frames dropdowns are back to three choices (Disable, Do nothing, Use Extender). Removed **Disable + Unregister ZOS Events** and related strings.
 - Unit Frames: Existing saves from 7.2.5.0/7.2.5.1 four-option values are mapped at load to the three-option behavior without rewriting saved variables.
+- Unit Frames: Default PLAYER **Disable** now hides vanilla player attribute bars after custom frames are built, on player activated, and when the dropdown changes (fixes bars still visible when custom player frames are enabled).
 
 ## Version 7.2.5.1
 

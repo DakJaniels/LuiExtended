@@ -88,8 +88,8 @@ function MiniMap.TryAutoZoomOutAtMapEdge(mapData)
     if not MiniMap.GetMapFollowsPlayer() then
         return
     end
-    local normalizedX, normalizedY = MiniMap.GetMapPlayerPositionForMirror("player")
-    if not normalizedX or normalizedX <= 0 then
+    local normalizedX, normalizedY, _, isShownInCurrentMap = MiniMap.GetMapPlayerPositionForMirror("player")
+    if not MiniMap.IsMapPlayerPositionShownOnHudMap(normalizedX, normalizedY, isShownInCurrentMap) then
         return
     end
     if  normalizedX > EDGE_NORM_THRESHOLD and normalizedX < (1 - EDGE_NORM_THRESHOLD)

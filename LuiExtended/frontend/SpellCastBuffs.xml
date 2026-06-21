@@ -50,6 +50,7 @@
         </Texture>
         <Cooldown name="$(parent)_Cooldown"
                   inherits="ZO_DefaultCooldown"
+                  layer="BACKGROUND"
                   level="1"
                   alpha="0.5"
                   hidden="true">

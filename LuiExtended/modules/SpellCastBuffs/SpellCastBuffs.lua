@@ -685,15 +685,24 @@ function SpellCastBuffs.Initialize(enabled)
     end)
 
     SpellCastBuffs.ApplyDisplayAlpha()
+    if SpellCastBuffs.SV.lockPositionToUnitFrames and LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesApplyInCombat then
+        LUIE.UnitFrames.CustomFramesApplyInCombat(true)
+    end
     -- HUD fade fragments can force alpha to 1 after init; /reloadui does not fire PLAYER_ACTIVATED
     zo_callLater(function ()
                      if SpellCastBuffs.Enabled then
                          SpellCastBuffs.ApplyDisplayAlpha()
+                         if SpellCastBuffs.SV.lockPositionToUnitFrames and LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesApplyInCombat then
+                             LUIE.UnitFrames.CustomFramesApplyInCombat(true)
+                         end
                      end
                  end, 0)
     zo_callLater(function ()
                      if SpellCastBuffs.Enabled then
                          SpellCastBuffs.ApplyDisplayAlpha()
+                         if SpellCastBuffs.SV.lockPositionToUnitFrames and LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesApplyInCombat then
+                             LUIE.UnitFrames.CustomFramesApplyInCombat(true)
+                         end
                      end
                  end, 300)
 
@@ -1368,6 +1377,46 @@ function SpellCastBuffs.GetBuffIconArtInset(container)
     return 1
 end
 
+--- Radial wedge only for finite-duration effects (ZO_BuffDebuff: not permanent, duration > 0).
+--- @param container string|nil
+--- @param effect table|nil
+--- @return boolean
+function SpellCastBuffs.ShouldShowBuffIconRadialCooldown(container, effect)
+    if container == "player_long" then
+        return false
+    end
+    if not SpellCastBuffs.SV.RemainingCooldown then
+        return false
+    end
+    if not effect then
+        return false
+    end
+    if effect.fakeDuration then
+        return false
+    end
+    if effect.ends == nil or effect.dur == nil or effect.dur == 0 then
+        return false
+    end
+    return true
+end
+
+--- ZO_BuffDebuffIcon: Cooldown level 1, Icon level 2 — radial wedge under art.
+--- @param buff SpellCastBuffs_BuffIcon_Control
+function SpellCastBuffs.ApplyBuffIconDrawOrder(buff)
+    if buff.cd then
+        buff.cd:SetDrawLayer(DL_BACKGROUND)
+        buff.cd:SetDrawLevel(1)
+    end
+    if buff.iconbg then
+        buff.iconbg:SetDrawLayer(DL_BACKGROUND)
+        buff.iconbg:SetDrawLevel(2)
+    end
+    if buff.icon then
+        buff.icon:SetDrawLayer(DL_CONTROLS)
+        buff.icon:SetDrawLevel(2)
+    end
+end
+
 --- @param buff SpellCastBuffs_BuffIcon_Control
 --- @param container string|nil
 function SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
@@ -1398,29 +1447,34 @@ end
 
 --- @param buff SpellCastBuffs_BuffIcon_Control
 --- @param container string
-function SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
+--- @param effectContext table|nil
+function SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container, effectContext)
     if container == "player_long" then
         if buff.iconbg then
             buff.iconbg:SetHidden(true)
         end
         if buff.cd then
+            buff.cd:ResetCooldown()
             buff.cd:SetHidden(true)
         end
         return
     end
 
-    local showRadial = SpellCastBuffs.SV.RemainingCooldown
+    local showRadial = SpellCastBuffs.ShouldShowBuffIconRadialCooldown(container, effectContext)
     local showIconBg = SpellCastBuffs.ShouldShowBuffIconInsetBg(container)
 
     if buff.cd then
-        buff.cd:SetHidden(not showRadial)
+        if showRadial then
+            buff.cd:SetHidden(false)
+        else
+            buff.cd:ResetCooldown()
+            buff.cd:SetHidden(true)
+        end
     end
     if buff.iconbg then
         buff.iconbg:SetHidden(not showIconBg)
         if showIconBg then
             buff.iconbg:SetTexture(SpellCastBuffs.GetGenericIconInsetTexture())
-            buff.iconbg:SetDrawLayer(DL_BACKGROUND)
-            buff.iconbg:SetDrawLevel(2)
         end
     end
 end
@@ -1441,7 +1495,8 @@ function SpellCastBuffs.ApplyBuffIconChrome(buff, container, effectContext)
         buff.drop:SetHidden(not effectContext.backdrop)
     end
     SpellCastBuffs.ApplyBuffIconInsetAnchors(buff, container)
-    SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container)
+    SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container, effectContext)
+    SpellCastBuffs.ApplyBuffIconDrawOrder(buff)
     buff.lastChromeLayoutVersion = SpellCastBuffs.displayLayoutVersion
 end
 
@@ -2651,6 +2706,143 @@ end
 -- churn was real. We cleared between uses with ZO_ClearTable.
 local g_displayAlphaSeen = {}
 
+--- When true, Unit Frames PlayerOocAlpha / TargetOocAlpha drive container fade (not SpellCastBuffs oocAlpha).
+--- @param containerKey string
+--- @return boolean
+function SpellCastBuffs.ShouldUnitFramesOwnContainerAlpha(containerKey)
+    if not SpellCastBuffs.SV.lockPositionToUnitFrames then
+        return false
+    end
+    return containerKey == "player1"
+        or containerKey == "player2"
+        or containerKey == "target1"
+        or containerKey == "target2"
+end
+
+--- When SCB icons are locked to UF, buff/debuff region alpha is driven per icon (container stays at 1).
+--- @type table<string, number>
+SpellCastBuffs.lockedContainerAlphaByUnit =
+{
+    player = 1,
+    target = 1,
+}
+
+--- @param unitKind "player"|"target"
+--- @param alpha number
+function SpellCastBuffs.SetLockedContainerAlphaForUnit(unitKind, alpha)
+    SpellCastBuffs.lockedContainerAlphaByUnit[unitKind] = alpha
+end
+
+--- CooldownControl does not inherit parent alpha; multiply by buff container fade (UF OOC or SCB display alpha).
+--- @param containerKey string
+--- @return number
+function SpellCastBuffs.GetBuffContainerAlphaMultiplier(containerKey)
+    if SpellCastBuffs.ShouldUnitFramesOwnContainerAlpha(containerKey) then
+        local unitFrames = LUIE.UnitFrames
+        if unitFrames and unitFrames.GetSpellCastBuffsLockedContainerAlpha then
+            local liveAlpha = unitFrames.GetSpellCastBuffsLockedContainerAlpha(containerKey)
+            if liveAlpha then
+                return liveAlpha
+            end
+        end
+        if containerKey == "player1" or containerKey == "player2" then
+            return SpellCastBuffs.lockedContainerAlphaByUnit.player or 1
+        end
+        if containerKey == "target1" or containerKey == "target2" then
+            return SpellCastBuffs.lockedContainerAlphaByUnit.target or 1
+        end
+        return 1
+    end
+    local buffContainer = SpellCastBuffs.BuffContainers[containerKey]
+    if buffContainer and buffContainer.GetAlpha then
+        return buffContainer:GetAlpha()
+    end
+    return 1
+end
+
+--- Expire fade × container OOC/INC alpha (UF-owned or SpellCastBuffs display alpha on container).
+--- @param containerKey string
+--- @param fadeAlpha number
+--- @return number
+function SpellCastBuffs.GetBuffIconChainAlpha(containerKey, fadeAlpha)
+    return fadeAlpha * SpellCastBuffs.GetBuffContainerAlphaMultiplier(containerKey)
+end
+
+local BUFF_ICON_COOLDOWN_BASE_ALPHA = 0.5
+
+--- Reset explicit chrome alphas after pool release or slot rebind (avoid stale OOC overrides).
+--- @param buff SpellCastBuffs_BuffIcon_Control
+function SpellCastBuffs.ResetBuffIconChromeAlphas(buff)
+    if buff.iconbg then
+        buff.iconbg:SetAlpha(1)
+    end
+    if buff.back then
+        buff.back:SetAlpha(1)
+    end
+    if buff.frame then
+        buff.frame:SetAlpha(1)
+    end
+    if buff.drop then
+        buff.drop:SetAlpha(1)
+    end
+    if buff.icon then
+        buff.icon:SetAlpha(1)
+    end
+    if buff.cd then
+        buff.cd:SetAlpha(BUFF_ICON_COOLDOWN_BASE_ALPHA)
+    end
+end
+
+--- CooldownControl and overlay chrome do not inherit buff-root alpha; set leaf alphas with UF buff region at 1.
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param container string
+--- @param fadeAlpha number
+function SpellCastBuffs.ApplyBuffIconDisplayAlpha(buff, container, fadeAlpha)
+    local unitFramesOwnAlpha = SpellCastBuffs.ShouldUnitFramesOwnContainerAlpha(container)
+    local chainAlpha = SpellCastBuffs.GetBuffIconChainAlpha(container, fadeAlpha)
+    local useFullAlpha = chainAlpha >= 0.999
+
+    local function applyVisibleLeafAlpha(control)
+        if not control then
+            return
+        end
+        if control:IsHidden() then
+            if useFullAlpha then
+                control:SetAlpha(1)
+            end
+            return
+        end
+        if unitFramesOwnAlpha then
+            control:SetAlpha(chainAlpha)
+        elseif useFullAlpha then
+            control:SetAlpha(1)
+        end
+    end
+
+    if unitFramesOwnAlpha then
+        buff:SetAlpha(1)
+        applyVisibleLeafAlpha(buff.icon)
+        applyVisibleLeafAlpha(buff.iconbg)
+        applyVisibleLeafAlpha(buff.back)
+        applyVisibleLeafAlpha(buff.frame)
+        applyVisibleLeafAlpha(buff.drop)
+    else
+        buff:SetAlpha(fadeAlpha)
+    end
+
+    if buff.cd and container ~= "player_long" then
+        if not buff.cd:IsHidden() then
+            local cooldownAlpha = BUFF_ICON_COOLDOWN_BASE_ALPHA * chainAlpha
+            buff.cd:SetAlpha(cooldownAlpha)
+            if buff.cdFillA then
+                buff.cd:SetFillColor(buff.cdFillR, buff.cdFillG, buff.cdFillB, buff.cdFillA * chainAlpha)
+            end
+        elseif useFullAlpha then
+            buff.cd:SetAlpha(BUFF_ICON_COOLDOWN_BASE_ALPHA)
+        end
+    end
+end
+
 --- Set buff container opacity from in-combat / out-of-combat saved values (0–100).
 function SpellCastBuffs.ApplyDisplayAlpha()
     if not SpellCastBuffs.Enabled then
@@ -2664,10 +2856,12 @@ function SpellCastBuffs.ApplyDisplayAlpha()
     g_scbDisplayAlpha = alpha
 
     ZO_ClearTable(g_displayAlphaSeen)
-    for _, control in pairs(SpellCastBuffs.BuffContainers) do
+    for containerKey, control in pairs(SpellCastBuffs.BuffContainers) do
         if control and control.SetAlpha and not g_displayAlphaSeen[control] then
             g_displayAlphaSeen[control] = true
-            control:SetAlpha(alpha)
+            if not SpellCastBuffs.ShouldUnitFramesOwnContainerAlpha(containerKey) then
+                control:SetAlpha(alpha)
+            end
         end
     end
 end
@@ -2680,10 +2874,11 @@ function SpellCastBuffs.EnforceDisplayAlpha()
 
     local alpha = g_scbDisplayAlpha
     ZO_ClearTable(g_displayAlphaSeen)
-    for _, control in pairs(SpellCastBuffs.BuffContainers) do
+    for containerKey, control in pairs(SpellCastBuffs.BuffContainers) do
         if control and control.SetAlpha and control.GetAlpha and not g_displayAlphaSeen[control] then
             g_displayAlphaSeen[control] = true
-            if zo_abs(control:GetAlpha() - alpha) > 0.001 then
+            if not SpellCastBuffs.ShouldUnitFramesOwnContainerAlpha(containerKey)
+            and zo_abs(control:GetAlpha() - alpha) > 0.001 then
                 control:SetAlpha(alpha)
             end
         end

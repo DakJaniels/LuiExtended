@@ -250,7 +250,7 @@ end
 function MiniMapPinController:RelayoutOverlayPin(pin, pinsParent, mapData)
     local normalizedX = pin.luiMiniMapNormalizedX
     local normalizedY = pin.luiMiniMapNormalizedY
-    if not normalizedX or not normalizedY or normalizedX <= 0 then
+    if not normalizedX or not normalizedY then
         return
     end
     local pinWidth = pin.luiMiniMapPinWidth or 32
@@ -290,7 +290,7 @@ end
 --- @param mapData MiniMapMapData
 function MiniMapPinController:SyncPlayerWaypoint(mapData)
     local waypointX, waypointY = MiniMap.GetMapPlayerWaypointForMirror()
-    if not waypointX or waypointX <= 0 or not waypointY or waypointY <= 0 then
+    if not MiniMap.IsMapNormalizedWaypointPlaced(waypointX, waypointY) then
         self:ReleaseOverlayPin(WAYPOINT_PIN_CONTROL_NAME)
         return
     end
@@ -328,7 +328,7 @@ function MiniMapPinController:SyncPlayerMapPin(mapData)
     end
 
     local normalizedX, normalizedY, playerHeading, isShownInCurrentMap = MiniMap.GetMapPlayerPositionForMirror("player")
-    if not isShownInCurrentMap or not normalizedX or normalizedX <= 0 then
+    if not MiniMap.IsMapPlayerPositionShownOnHudMap(normalizedX, normalizedY, isShownInCurrentMap) then
         self:ReleaseOverlayPin(PLAYER_MAP_PIN_CONTROL_NAME)
         return
     end

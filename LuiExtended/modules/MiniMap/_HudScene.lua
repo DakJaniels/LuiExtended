@@ -44,8 +44,11 @@ function MiniMap.RunWhenWorldMapUnblocked(onUnblocked)
             if frameCount >= MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES then
                 MiniMap.CancelWorldMapUnblockedWait()
                 if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
-                    LUIE:Log("Debug", string.format("[MiniMap SM] WorldMap unblocked wait exceeded %d frames", MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES))
+                    LUIE:Log("Debug", string.format("[MiniMap SM] WorldMap unblocked wait exceeded %d frames; running deferred work", MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES))
                 end
+                MiniMap.worldMapBlocksMiniMapWork = false
+                MiniMap.UpdateGameplayTickers()
+                onUnblocked()
             end
             return
         end
@@ -246,6 +249,13 @@ function MiniMap.FlushWorldMapQueuedWork()
         MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
         MiniMap.FirePinResyncCallbacks()
         MiniMap.ApplyHudNativePinLayoutAfterRefresh()
+    end
+    local mapEventController = MiniMap.mapEventController
+    if mapEventController and mapEventController.companionPinSyncQueuedWhileWorldMap then
+        mapEventController.companionPinSyncQueuedWhileWorldMap = false
+        MiniMap.RunWithPlayerMapForMirror(function ()
+            WORLD_MAP_MANAGER:RefreshCompanionPins()
+        end)
     end
 end
 

@@ -170,6 +170,10 @@ function SpellCastBuffs.CreateSettings()
     local Defaults = SpellCastBuffs.Defaults
     local Settings = SpellCastBuffs.SV
 
+    if not LUIE.SV.SpellCastBuff_Enable then
+        return
+    end
+
     -- Load Dialog Buttons
     loadDialogButtons()
 
@@ -298,6 +302,10 @@ function SpellCastBuffs.CreateSettings()
         end,
         setFunc = function (value)
             Settings.lockPositionToUnitFrames = value
+            if LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesApplyInCombat then
+                LUIE.UnitFrames.CustomFramesApplyInCombat(true)
+            end
+            SpellCastBuffs.ApplyDisplayAlpha()
         end,
         width = "full",
         warning = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK_WARNING),
@@ -3922,12 +3930,10 @@ function SpellCastBuffs.CreateSettings()
     }
 
     -- Register the settings panel
-    if LUIE.SV.SpellCastBuff_Enable then
-        LAM:RegisterAddonPanel(LUIE.name .. "BuffsAndDebuffsOptions", panelDataBuffsDebuffs)
-        LAM:RegisterOptionControls(LUIE.name .. "BuffsAndDebuffsOptions", optionsDataBuffsDebuffs)
-        RefreshProminentDebuffRemoveDropdownChoices()
-        if LUIE_Prominent_Debuffs_List and LUIE_Prominent_Debuffs_List.UpdateValue then
-            LUIE_Prominent_Debuffs_List:UpdateValue()
-        end
+    LAM:RegisterAddonPanel(LUIE.name .. "BuffsAndDebuffsOptions", panelDataBuffsDebuffs)
+    LAM:RegisterOptionControls(LUIE.name .. "BuffsAndDebuffsOptions", optionsDataBuffsDebuffs)
+    RefreshProminentDebuffRemoveDropdownChoices()
+    if LUIE_Prominent_Debuffs_List and LUIE_Prominent_Debuffs_List.UpdateValue then
+        LUIE_Prominent_Debuffs_List:UpdateValue()
     end
 end

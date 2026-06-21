@@ -1591,6 +1591,30 @@ function UnitFrames.OnTargetChange(eventId, unitTag)
     UnitFrames.OnReticleTargetChanged(eventId)
 end
 
+--- @param reactionType integer|nil
+--- @return boolean
+function UnitFrames.ShouldShowAvaPlayerTargetForReticleover(reactionType)
+    if not UnitFrames.SV.AvaCustFramesTarget then
+        return false
+    end
+    if not UnitFrames.CustomFrames["AvaPlayerTarget"] then
+        return false
+    end
+    if not DoesUnitExist("reticleover") then
+        return false
+    end
+    if not IsUnitPlayer("reticleover") then
+        return false
+    end
+    if reactionType ~= UNIT_REACTION_HOSTILE then
+        return false
+    end
+    if IsUnitDead("reticleover") then
+        return false
+    end
+    return true
+end
+
 -- Clears the custom target frame and reticleover buffs (used when no target and not lingering, or when linger timeout fires).
 function UnitFrames.ClearTargetFrame()
     UnitFrames.targetFrameLingered = false
@@ -1704,31 +1728,37 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
                 end)
             end
 
-            -- Finally show custom target frame
-            UnitFrames.CustomFrames["reticleover"].control:SetHidden(false)
-            if UnitFrames.SV.QuickHideDead then
-                local isMonster
-                if UnitFrames.SV.QuickHideDeadUseUnitMonster and IsUnitMonster then
-                    isMonster = IsUnitMonster("reticleover")
-                else
-                    isMonster = IsGameCameraInteractableUnitMonster()
+            local showAvaPlayerTarget = UnitFrames.ShouldShowAvaPlayerTargetForReticleover(reactionType)
+            if not showAvaPlayerTarget then
+                UnitFrames.CustomFrames["reticleover"].control:SetHidden(false)
+                if UnitFrames.SV.QuickHideDead then
+                    local isMonster
+                    if UnitFrames.SV.QuickHideDeadUseUnitMonster and IsUnitMonster then
+                        isMonster = IsUnitMonster("reticleover")
+                    else
+                        isMonster = IsGameCameraInteractableUnitMonster()
+                    end
+                    local isNPC = reactionType == UNIT_REACTION_NEUTRAL
+                        or reactionType == UNIT_REACTION_FRIENDLY
+                        or reactionType == UNIT_REACTION_NPC_ALLY
+                        or (reactionType == UNIT_REACTION_HOSTILE and isMonster)
+                    local shouldHide = IsUnitDead("reticleover") and isNPC
+                    UnitFrames.CustomFrames["reticleover"].control:SetHidden(shouldHide)
                 end
-                local isNPC = reactionType == UNIT_REACTION_NEUTRAL
-                    or reactionType == UNIT_REACTION_FRIENDLY
-                    or reactionType == UNIT_REACTION_NPC_ALLY
-                    or (reactionType == UNIT_REACTION_HOSTILE and isMonster)
-                local shouldHide = IsUnitDead("reticleover") and isNPC
-                -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE:Log("Debug","reactionType:%d isMonster:%s isNPC:%s", reactionType, tostring(isMonster), tostring(isNPC))
-                -- end
-                UnitFrames.CustomFrames["reticleover"].control:SetHidden(shouldHide)
+            else
+                UnitFrames.CustomFrames["reticleover"].control:SetHidden(true)
             end
             UnitFrames.targetFrameLingered = true
         end
 
-        -- Unhide second target frame only for player enemies
-        if UnitFrames.CustomFrames["AvaPlayerTarget"] then
-            UnitFrames.CustomFrames["AvaPlayerTarget"].control:SetHidden(not (UnitFrames.CustomFrames["AvaPlayerTarget"].isPlayer and (reactionType == UNIT_REACTION_HOSTILE) and not IsUnitDead("reticleover")))
+        local avaPlayerTargetFrame = UnitFrames.CustomFrames["AvaPlayerTarget"]
+        if avaPlayerTargetFrame then
+            local showAvaPlayerTarget = UnitFrames.ShouldShowAvaPlayerTargetForReticleover(reactionType)
+            if showAvaPlayerTarget then
+                avaPlayerTargetFrame.name:SetColor(color[1], color[2], color[3], 1)
+                avaPlayerTargetFrame.className:SetColor(color[1], color[2], color[3], 1)
+            end
+            avaPlayerTargetFrame.control:SetHidden(not showAvaPlayerTarget)
         end
 
         -- Update position of default target class icon
@@ -3463,9 +3493,7 @@ end
 
 -- Only AvA rank label/icon on custom reticleover. Do not call full UpdateStaticControls from layout:
 -- it reanchors buffs/debuffs and clashes with the anchors set in CustomFramesApplyLayoutReticleoverFrame.
-local function CustomFramesLayoutRefreshReticleoverAvaRankOnly(unitTag)
-    unitTag = unitTag or "reticleover"
-    local target = UnitFrames.CustomFrames.reticleover
+local function CustomFramesLayoutApplyAvaRankStaticToFrame(target, unitTag)
     if not target or not target.avaRank or not target.avaRankIcon then
         return
     end
@@ -3489,6 +3517,18 @@ local function CustomFramesLayoutRefreshReticleoverAvaRankOnly(unitTag)
     else
         target.avaRank:SetHidden(true)
         target.avaRankIcon:SetHidden(true)
+    end
+end
+
+local function CustomFramesLayoutRefreshReticleoverAvaRankOnly(unitTag)
+    unitTag = unitTag or "reticleover"
+    CustomFramesLayoutApplyAvaRankStaticToFrame(UnitFrames.CustomFrames.reticleover, unitTag)
+    if UnitFrames.SV.AvaCustFramesTarget and UnitFrames.CustomFrames.AvaPlayerTarget then
+        CustomFramesLayoutApplyAvaRankStaticToFrame(UnitFrames.CustomFrames.AvaPlayerTarget, unitTag)
+        local avaPlayerTargetFrame = UnitFrames.CustomFrames.AvaPlayerTarget
+        if avaPlayerTargetFrame.frameCategory == "avaTarget" then
+            LUIE_CustomFrameObject.LayoutTopInfoAvaTarget(avaPlayerTargetFrame)
+        end
     end
 end
 
@@ -3543,7 +3583,8 @@ function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
 
     UnitFrames.CustomFramesTryUnhideTlw("reticleover", unhide)
     if unhide then
-        target.control:SetHidden(false)
+        local reactionType = DoesUnitExist("reticleover") and GetUnitReaction("reticleover") or nil
+        target.control:SetHidden(UnitFrames.ShouldShowAvaPlayerTargetForReticleover(reactionType))
     end
 end
 
@@ -3574,9 +3615,12 @@ function UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
     thb.labelOne:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
     thb.labelTwo:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
 
+    CustomFramesLayoutRefreshReticleoverAvaRankOnly(target.unitTag or "reticleover")
+
     UnitFrames.CustomFramesTryUnhideTlw("AvaPlayerTarget", unhide)
     if unhide then
-        target.control:SetHidden(false)
+        local reactionType = DoesUnitExist("reticleover") and GetUnitReaction("reticleover") or nil
+        target.control:SetHidden(not UnitFrames.ShouldShowAvaPlayerTargetForReticleover(reactionType))
     end
 end
 
@@ -4152,10 +4196,32 @@ end
 
 local function CustomFramesApplyAlphaAndBuffs(frame, idle, oocAlpha, incAlpha, hideBuffsOoc)
     if not frame or not frame.tlw then return end
-    frame.control:SetAlpha(idle and oocAlpha or incAlpha)
+    local alpha = idle and oocAlpha or incAlpha
+    local spellCastBuffs = LUIE.SpellCastBuffs
+    local deferBuffRegionAlphaToScb = spellCastBuffs
+        and spellCastBuffs.SV
+        and spellCastBuffs.SV.lockPositionToUnitFrames
+        and (frame == UnitFrames.CustomFrames.player or frame == UnitFrames.CustomFrames.reticleover)
+
+    if deferBuffRegionAlphaToScb and spellCastBuffs.SetLockedContainerAlphaForUnit then
+        local unitKind = (frame == UnitFrames.CustomFrames.player) and "player" or "target"
+        spellCastBuffs.SetLockedContainerAlphaForUnit(unitKind, alpha)
+    end
+
+    frame.control:SetAlpha(alpha)
     if hideBuffsOoc and frame.buffs and frame.debuffs then
         frame.buffs:SetHidden(idle)
         frame.debuffs:SetHidden(idle)
+    else
+        local buffRegionAlpha = deferBuffRegionAlphaToScb and 1 or alpha
+        if frame.buffs then
+            frame.buffs:SetHidden(false)
+            frame.buffs:SetAlpha(buffRegionAlpha)
+        end
+        if frame.debuffs then
+            frame.debuffs:SetHidden(false)
+            frame.debuffs:SetAlpha(buffRegionAlpha)
+        end
     end
 end
 
@@ -4172,6 +4238,21 @@ local function CustomFramesComputeOocIdle(useMissingPowerAsCombat)
         return idle == true
     end
     return UnitFrames.statFull.combat == true
+end
+
+--- OOC/INC alpha (0–1) for SpellCastBuffs containers locked to player/target UF buff regions.
+--- @param containerKey string
+--- @return number|nil nil when not a locked player/target buff container
+function UnitFrames.GetSpellCastBuffsLockedContainerAlpha(containerKey)
+    if containerKey == "player1" or containerKey == "player2" then
+        local idle = CustomFramesComputeOocIdle(UnitFrames.SV.PlayerOocAlphaPower)
+        return idle and (0.01 * UnitFrames.SV.PlayerOocAlpha) or (0.01 * UnitFrames.SV.PlayerIncAlpha)
+    end
+    if containerKey == "target1" or containerKey == "target2" then
+        local idle = CustomFramesComputeOocIdle(UnitFrames.SV.TargetOocAlphaPower)
+        return idle and (0.01 * UnitFrames.SV.TargetOocAlpha) or (0.01 * UnitFrames.SV.TargetIncAlpha)
+    end
+    return nil
 end
 
 -- This function reduces opacity of custom frames when player is out of combat and has full attributes

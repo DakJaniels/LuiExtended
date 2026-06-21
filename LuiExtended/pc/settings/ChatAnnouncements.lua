@@ -88,10 +88,12 @@ local function GetAchievementCategoryInfoName(topLevelIndex)
 end
 
 function ChatAnnouncements.CreateSettings()
-    loadQuestCounterFilterDialogs()
-
     local Defaults = ChatAnnouncements.Defaults
     local Settings = ChatAnnouncements.SV
+
+    if not LUIE.SV.ChatAnnouncements_Enable then
+        return
+    end
 
     local panelDataChatAnnouncements =
     {
@@ -108,6 +110,8 @@ function ChatAnnouncements.CreateSettings()
         registerForRefresh = true,
         registerForDefaults = true,
     }
+
+    loadQuestCounterFilterDialogs()
 
     local optionsDataChatAnnouncements = {}
 
@@ -10131,8 +10135,6 @@ function ChatAnnouncements.CreateSettings()
     }
 
     -- Register the settings panel
-    if LUIE.SV.ChatAnnouncements_Enable then
-        LAM:RegisterAddonPanel(LUIE.name .. "ChatAnnouncementOptions", panelDataChatAnnouncements)
-        LAM:RegisterOptionControls(LUIE.name .. "ChatAnnouncementOptions", optionsDataChatAnnouncements)
-    end
+    LAM:RegisterAddonPanel(LUIE.name .. "ChatAnnouncementOptions", panelDataChatAnnouncements)
+    LAM:RegisterOptionControls(LUIE.name .. "ChatAnnouncementOptions", optionsDataChatAnnouncements)
 end

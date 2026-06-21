@@ -17,8 +17,6 @@ local Effects = Data.Effects
 local Tooltips = Data.Tooltips
 local Abilities = Data.Abilities
 
-local UI = LUIE.UI
-
 --- @class GroupFoodDrinkBuffManager
 local GroupFoodDrinkBuffManager = {}
 UnitFrames.GroupFoodDrinkBuff = GroupFoodDrinkBuffManager

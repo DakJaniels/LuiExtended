@@ -94,6 +94,10 @@ function ActionBar.CreateSettings()
     local Defaults = ActionBar.Defaults
     local Settings = ActionBar.SV
 
+    if not LUIE.SV.ActionBar_Enabled then
+        return
+    end
+
     -- Load Dialog Buttons
     loadDialogButtons()
 
@@ -1181,8 +1185,6 @@ function ActionBar.CreateSettings()
     }
 
     -- Register the settings panel
-    if LUIE.SV.ActionBar_Enabled then
-        LAM:RegisterAddonPanel(LUIE.name .. "ActionBarOptions", panelDataActionBar)
-        LAM:RegisterOptionControls(LUIE.name .. "ActionBarOptions", optionsDataActionBar)
-    end
+    LAM:RegisterAddonPanel(LUIE.name .. "ActionBarOptions", panelDataActionBar)
+    LAM:RegisterOptionControls(LUIE.name .. "ActionBarOptions", optionsDataActionBar)
 end

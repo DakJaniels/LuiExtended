@@ -69,8 +69,8 @@ end
 --- @param mapContentHeight number
 function MiniMapRuntime:ApplyScrollCenterOnPlayer(mapContentWidth, mapContentHeight)
     local scroll = self.view.scroll
-    local playerNormalizedX, playerNormalizedY = MiniMap.GetMapPlayerPositionForMirror("player")
-    if not playerNormalizedX or playerNormalizedX <= 0 then
+    local playerNormalizedX, playerNormalizedY, _, isShownInCurrentMap = MiniMap.GetMapPlayerPositionForMirror("player")
+    if not MiniMap.IsMapPlayerPositionShownOnHudMap(playerNormalizedX, playerNormalizedY, isShownInCurrentMap) then
         return
     end
     local horizontalScroll = (playerNormalizedX * mapContentWidth) - (scroll:GetWidth() / 2)

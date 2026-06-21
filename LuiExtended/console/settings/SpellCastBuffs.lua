@@ -317,6 +317,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             setFunction = function (v)
                 Settings.lockPositionToUnitFrames = v
+                if LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesApplyInCombat then
+                    LUIE.UnitFrames.CustomFramesApplyInCombat(true)
+                end
+                SpellCastBuffs.ApplyDisplayAlpha()
             end,
             default = Defaults.lockPositionToUnitFrames,
         }

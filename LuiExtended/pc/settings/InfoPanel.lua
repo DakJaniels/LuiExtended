@@ -21,6 +21,11 @@ function InfoPanel.CreateSettings()
     local Defaults = InfoPanel.Defaults
     local Settings = InfoPanel.SV
 
+
+    if not LUIE.SV.InfoPanel_Enabled then
+        return
+    end
+
     local panelDataInfoPanel =
     {
         type = "panel",
@@ -384,8 +389,6 @@ function InfoPanel.CreateSettings()
     )
 
     -- Register the settings panel
-    if LUIE.SV.InfoPanel_Enabled then
-        LAM:RegisterAddonPanel(LUIE.name .. "InfoPanelOptions", panelDataInfoPanel)
-        LAM:RegisterOptionControls(LUIE.name .. "InfoPanelOptions", optionsDataInfoPanel)
-    end
+    LAM:RegisterAddonPanel(LUIE.name .. "InfoPanelOptions", panelDataInfoPanel)
+    LAM:RegisterOptionControls(LUIE.name .. "InfoPanelOptions", optionsDataInfoPanel)
 end

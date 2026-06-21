@@ -92,10 +92,11 @@ local function ResetBuffIconControl(buff)
     buff:SetExcludeFromFlexbox(true)
     buff:ClearAnchors()
     buff:SetAlpha(1)
+    SpellCastBuffs.ResetBuffIconChromeAlphas(buff)
     buff:SetParent(GuiRoot)
     if buff.cd then
-        buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-        buff.cd:SetAlpha(0.5)
+        buff.cd:ResetCooldown()
+        buff.cd:SetHidden(true)
     end
     buff.label:SetText("")
     buff.stack:SetHidden(true)
@@ -150,18 +151,10 @@ local function SetupBuffIconControlReferences(buff)
 
     buff.frame:SetPixelRoundingEnabled(true)
 
-    -- ZO_BuffDebuffIcon: Cooldown level 1, Icon level 2 — radial wedge stays in frame ring under art.
     if buff.cd then
-        buff.cd:SetDrawLayer(DL_BACKGROUND)
-        buff.cd:SetDrawLevel(1)
         buff.cd:SetLeadingEdgeTexture("")
     end
-    if buff.iconbg then
-        buff.iconbg:SetDrawLayer(DL_BACKGROUND)
-        buff.iconbg:SetDrawLevel(2)
-    end
-    buff.icon:SetDrawLayer(DL_CONTROLS)
-    buff.icon:SetDrawLevel(2)
+    SpellCastBuffs.ApplyBuffIconDrawOrder(buff)
 
     ApplyBuffIconTextureReleasePolicy(buff.icon)
     ApplyBuffIconTextureReleasePolicy(buff.back)

@@ -99,6 +99,11 @@ function SlashCommands.CreateSettings()
     local Defaults = SlashCommands.Defaults
     local Settings = SlashCommands.SV
 
+
+    if not LUIE.SV.SlashCommands_Enable then
+        return
+    end
+
     local panelDataSlashCommands =
     {
         type = "panel",
@@ -751,8 +756,6 @@ function SlashCommands.CreateSettings()
     )
 
     -- Register the settings panel
-    if LUIE.SV.SlashCommands_Enable then
-        LAM:RegisterAddonPanel(LUIE.name .. "SlashCommandsOptions", panelDataSlashCommands)
-        LAM:RegisterOptionControls(LUIE.name .. "SlashCommandsOptions", optionsDataSlashCommands)
-    end
+    LAM:RegisterAddonPanel(LUIE.name .. "SlashCommandsOptions", panelDataSlashCommands)
+    LAM:RegisterOptionControls(LUIE.name .. "SlashCommandsOptions", optionsDataSlashCommands)
 end
