@@ -88,8 +88,6 @@ local function GetAchievementCategoryInfoName(topLevelIndex)
 end
 
 function ChatAnnouncements.CreateSettings()
-    loadQuestCounterFilterDialogs()
-
     local Defaults = ChatAnnouncements.Defaults
     local Settings = ChatAnnouncements.SV
 
@@ -112,6 +110,8 @@ function ChatAnnouncements.CreateSettings()
         registerForRefresh = true,
         registerForDefaults = true,
     }
+
+    loadQuestCounterFilterDialogs()
 
     local optionsDataChatAnnouncements = {}
 
