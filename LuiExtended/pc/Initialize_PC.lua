@@ -78,82 +78,84 @@ end
 --- @param eventId integer
 --- @param addonName string
 local function OnAddOnLoaded(eventId, addonName)
-    if addonName == LUIE.name then
-        eventManager:UnregisterForEvent(addonName, eventId)
-        -- -----------------------------------------------------------------------------
-        -- Load saved variables
-        LoadSavedVars()
-        -- -----------------------------------------------------------------------------
-        LUIE.UpdateGuildData(nil, nil, nil, nil)
-        -- -----------------------------------------------------------------------------
-        -- Initialize Hooks
-        LUIE:InitializeHooks()
-        --
-        LUIE.OtherAddonCompatability.isCombatMetricsEnabled = LUIE.IsItEnabled("CombatMetrics")
-        LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
-        LUIE.OtherAddonCompatability.isCrutchAlertsEnabled = LUIE.IsItEnabled("CrutchAlerts")
-        LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
-        LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
-        LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
-        LUIE.OtherAddonCompatability.isLibCombatEnabled = LUIE.IsItEnabled("LibCombat")
-        LUIE.OtherAddonCompatability.isLibSlashCommanderEnabled = LUIE.IsItEnabled("LibSlashCommander")
-        -- -----------------------------------------------------------------------------
-        -- Toggle Alert Frame Visibility if needed
-        LUIE.SetupAlertFrameVisibility()
-        LUIE.PlayerNameRaw = GetRawUnitName("player")
-        LUIE.PlayerNameFormatted = zo_strformat("<<C:1>>", GetUnitName("player"))
-        LUIE.PlayerDisplayName = zo_strformat("<<C:1>>", GetUnitDisplayName("player"))
-        LUIE.PlayerFaction = GetUnitAlliance("player")
-        -- -----------------------------------------------------------------------------
-        -- LUIE-wide chat output (LCM / tabs / timestamps); independent of CA module
-        LUIE.ChatOutput:InitializePrintRouting()
-        -- -----------------------------------------------------------------------------
-        -- Initialize this addon modules according to user preferences
-        LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)
-        LUIE.ActionBar.Initialize(LUIE.SV.ActionBar_Enabled)
-        LUIE.CombatInfo.Initialize(LUIE.SV.CombatInfo_Enabled)
-        LUIE.CombatText.Initialize(LUIE.SV.CombatText_Enabled)
-        LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
-        LUIE.UnitFrames.Initialize(LUIE.SV.UnitFrames_Enabled)
-        LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
-        LUIE.MiniMap.Initialize(LUIE.SV.MiniMap_Enabled)
-        LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
-        -- -----------------------------------------------------------------------------
-        LUIE.ApplyZOBuffDebuffSuppression()
-        LUIE.RegisterZOBuffDebuffSuppressionSettingListener()
-        -- -----------------------------------------------------------------------------
-        -- Load Timestamp Color
-        LUIE.ChatOutput:UpdateTimeStampColor()
-        -- -----------------------------------------------------------------------------
-        -- Create settings menus for our addon
-        LUIE.CreateSettings()
-        LUIE.ChatAnnouncements.CreateSettings()
-        LUIE.ActionBar.CreateSettings()
-        LUIE.CombatInfo.CreateSettings()
-        LUIE.CombatText.CreateSettings()
-        LUIE.InfoPanel.CreateSettings()
-        LUIE.UnitFrames.CreateSettings()
-        LUIE.SpellCastBuffs.CreateSettings()
-        LUIE.MiniMap.CreateSettings()
-        LUIE.SlashCommands.CreateSettings()
-        LUIE.SlashCommands.MigrateSettings()
-        -- -----------------------------------------------------------------------------
-        -- Display changelog screen
-        if LUIE.SV.ShowChangeLog == true then
-            LUIE.ChangelogScreen()
-        end
-        if LUIE.SlashCommandRegistry then
-            LUIE.SlashCommandRegistry.ApplyPostInitSlashCommandIntegration()
-        else
-            SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
-        end
-        -- -----------------------------------------------------------------------------
-        -- Register global event listeners
-        RegisterEvents()
-        LUIE.ScheduleDebugEnvironmentReloadChat()
-        -- Dev locale audit: enable lang/_LocalizationCoverage_Dev.lua in LuiExtended.addon, then:
-        -- if LUIE_ScheduleLocalizationCoverageReport then LUIE_ScheduleLocalizationCoverageReport() end
+    if addonName ~= LUIE.name then
+        return
     end
+    -- -----------------------------------------------------------------------------
+    -- Load saved variables
+    LoadSavedVars()
+    -- -----------------------------------------------------------------------------
+    LUIE.UpdateGuildData(nil, nil, nil, nil)
+    -- -----------------------------------------------------------------------------
+    -- Initialize Hooks
+    LUIE:InitializeHooks()
+    --
+    LUIE.OtherAddonCompatability.isCombatMetricsEnabled = LUIE.IsItEnabled("CombatMetrics")
+    LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
+    LUIE.OtherAddonCompatability.isCrutchAlertsEnabled = LUIE.IsItEnabled("CrutchAlerts")
+    LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
+    LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
+    LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
+    LUIE.OtherAddonCompatability.isLibCombatEnabled = LUIE.IsItEnabled("LibCombat")
+    LUIE.OtherAddonCompatability.isLibSlashCommanderEnabled = LUIE.IsItEnabled("LibSlashCommander")
+    -- -----------------------------------------------------------------------------
+    -- Toggle Alert Frame Visibility if needed
+    LUIE.SetupAlertFrameVisibility()
+    LUIE.PlayerNameRaw = GetRawUnitName("player")
+    LUIE.PlayerNameFormatted = zo_strformat("<<C:1>>", GetUnitName("player"))
+    LUIE.PlayerDisplayName = zo_strformat("<<C:1>>", GetUnitDisplayName("player"))
+    LUIE.PlayerFaction = GetUnitAlliance("player")
+    -- -----------------------------------------------------------------------------
+    -- LUIE-wide chat output (LCM / tabs / timestamps); independent of CA module
+    LUIE.ChatOutput:InitializePrintRouting()
+    -- -----------------------------------------------------------------------------
+    -- Initialize this addon modules according to user preferences
+    LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)
+    LUIE.ActionBar.Initialize(LUIE.SV.ActionBar_Enabled)
+    LUIE.CombatInfo.Initialize(LUIE.SV.CombatInfo_Enabled)
+    LUIE.CombatText.Initialize(LUIE.SV.CombatText_Enabled)
+    LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
+    LUIE.UnitFrames.Initialize(LUIE.SV.UnitFrames_Enabled)
+    LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
+    LUIE.MiniMap.Initialize(LUIE.SV.MiniMap_Enabled)
+    LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
+    -- -----------------------------------------------------------------------------
+    LUIE.ApplyZOBuffDebuffSuppression()
+    LUIE.RegisterZOBuffDebuffSuppressionSettingListener()
+    -- -----------------------------------------------------------------------------
+    -- Load Timestamp Color
+    LUIE.ChatOutput:UpdateTimeStampColor()
+    -- -----------------------------------------------------------------------------
+    -- Create settings menus for our addon
+    LUIE.CreateSettings()
+    LUIE.ChatAnnouncements.CreateSettings()
+    LUIE.ActionBar.CreateSettings()
+    LUIE.CombatInfo.CreateSettings()
+    LUIE.CombatText.CreateSettings()
+    LUIE.InfoPanel.CreateSettings()
+    LUIE.UnitFrames.CreateSettings()
+    LUIE.SpellCastBuffs.CreateSettings()
+    LUIE.MiniMap.CreateSettings()
+    LUIE.SlashCommands.CreateSettings()
+    LUIE.SlashCommands.MigrateSettings()
+    -- -----------------------------------------------------------------------------
+    -- Display changelog screen
+    if LUIE.SV.ShowChangeLog == true then
+        LUIE.ChangelogScreen()
+    end
+    if LUIE.SlashCommandRegistry then
+        LUIE.SlashCommandRegistry.ApplyPostInitSlashCommandIntegration()
+    else
+        SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+    end
+    -- -----------------------------------------------------------------------------
+    -- Register global event listeners
+    RegisterEvents()
+    LUIE.ScheduleDebugEnvironmentReloadChat()
+    -- Dev locale audit: enable lang/_LocalizationCoverage_Dev.lua in LuiExtended.addon, then:
+    -- if LUIE_ScheduleLocalizationCoverageReport then LUIE_ScheduleLocalizationCoverageReport() end
+    --
+    eventManager:UnregisterForEvent(addonName, eventId)
 end
 
 eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
