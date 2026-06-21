@@ -719,6 +719,8 @@ function Backbar.OnPlayerActivatedScan()
         g_backbarContainer:SetHidden(true)
     elseif Backbar.OakensoulEquipped() then
         g_backbarContainer:SetHidden(true)
+    elseif IsPlayerInWerewolfForm() then
+        g_backbarContainer:SetHidden(true)
     else
         for i = 1, GetNumBuffs("player") do
             local _, _, _, _, _, _, _, _, abilityType = GetUnitBuffInfo("player", i)
