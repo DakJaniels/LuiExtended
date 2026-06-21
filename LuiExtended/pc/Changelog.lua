@@ -52,8 +52,15 @@ local changelogMessages =
     -- Version Header 7.2.5.3
     "|cFFA500LuiExtended Version 7.2.5.3|r",
     "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info: Block indicator remaining-block count uses a shadow label and vertical offset on the shield art for clearer readability.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Pin mirror and waypoint sync run deferred work when the world map unblocks; map reload failures no longer leave gameplay pin tickers stuck.",
+    "",
     -- Fix
     "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Group invite response when you are already in a group now names the inviter correctly (matches ZOS alert handler argument order).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom AvA player target frame shows only for a hostile living player on reticleover when AvA target frames are enabled; TopInfo layout refreshes with frame visibility.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: With |cFFFFFFLock position to unit frames|r, player/target out-of-combat and in-combat opacity from Unit Frames applies to buff and debuff icons; SpellCastBuffs container alpha no longer overrides those regions.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: |cFFFFFFShow Border Cooldown|r radial sweep only on timed buffs; permanent effects no longer show a cooldown layer over the icon (inset frame unchanged).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: When locked to unit frames, icon art, borders, inset panel, and radial cooldown tint fade together at OOC/INC opacity (per-icon alpha; avoids crushed or popped chrome).",
