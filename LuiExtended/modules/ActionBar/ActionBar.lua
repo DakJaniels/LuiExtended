@@ -1312,7 +1312,9 @@ function ActionBar.OnPlayerActivated()
         ActionBar.BarSlotUpdate(i, true, false)
     end
     ActionBar.OnPowerUpdatePlayer("player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE))
-
+    if ShouldShowCompanionUltimateButton() then
+        ActionBar.OnPowerUpdateCompanion("companion", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE))
+    end
     Backbar.HideAllAbilityActionButtonDropCallouts()
     Backbar.OnPlayerActivatedScan()
 
