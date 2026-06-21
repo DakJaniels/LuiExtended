@@ -86,6 +86,7 @@ function MiniMapMapEventController:Initialize(mapController, pinController, pinM
     self.pinMirrorStateMachine = pinMirrorStateMachine
     self.eventAnchor = LUIE_MiniMap
     self.registeredEvents = {}
+    self.companionPinSyncQueuedWhileWorldMap = false
 end
 
 --- @param reason string
@@ -236,6 +237,10 @@ function MiniMapMapEventController:RequestCompanionPinSync()
         return
     end
     if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        self.companionPinSyncQueuedWhileWorldMap = true
+        if self.pinMirrorStateMachine then
+            MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(self.pinMirrorStateMachine)
+        end
         return
     end
     MiniMap.RunWithPlayerMapForMirror(function ()

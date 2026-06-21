@@ -259,6 +259,20 @@ function MiniMapPinMirrorStateMachine:NotifyMapReloadComplete()
     end
 end
 
+--- Terminal reload failure after max retries: return to Idle without native refresh (map not ready).
+function MiniMapPinMirrorStateMachine:NotifyMapReloadFailed()
+    if not self:IsCurrentState("MapReloading") then
+        return
+    end
+    if self.mapReloadCompletionHandled then
+        return
+    end
+    self.mapReloadCompletionHandled = true
+    self.mapReloadInProgress = false
+    self:FireCallbacks(MINIMAP_MIRROR_TRIGGER_COMMANDS.MAP_RELOAD_COMPLETE)
+    MiniMap.UpdateGameplayTickers()
+end
+
 function MiniMapPinMirrorStateMachine:ScheduleNotifyMapReloadCompleteNextFrame()
     if self.mapReloadCompleteNotifyDeferredScheduled then
         return

@@ -421,6 +421,23 @@ function MiniMap.GetMapPlayerWaypointForMirror()
     return waypointX, waypointY
 end
 
+--- Matches ZOS WorldMap ping/waypoint refresh: unset when either axis is 0 (EsoUI/Ingame/Map/WorldMap.lua).
+--- @param normalizedX number|nil
+--- @param normalizedY number|nil
+--- @return boolean
+function MiniMap.IsMapNormalizedWaypointPlaced(normalizedX, normalizedY)
+    return normalizedX ~= nil and normalizedY ~= nil and normalizedX ~= 0 and normalizedY ~= 0
+end
+
+--- Player pip / follow scroll: use isShownInCurrentMap like ZO_WorldMapPins_Manager:UpdateMovingPins.
+--- @param normalizedX number|nil
+--- @param normalizedY number|nil
+--- @param isShownInCurrentMap boolean|nil
+--- @return boolean
+function MiniMap.IsMapPlayerPositionShownOnHudMap(normalizedX, normalizedY, isShownInCurrentMap)
+    return isShownInCurrentMap == true and normalizedX ~= nil and normalizedY ~= nil
+end
+
 --- @class MiniMapMapData
 --- @field rawName string
 --- @field numHorizontalTiles number
@@ -561,8 +578,12 @@ function MiniMapMapController:ScheduleWorldMapReloadRetryOrFail(view, statusMess
         return
     end
     view.statusLabel:SetText("Loading failed")
-    MiniMap.pinMirrorStateMachine.mapReloadInProgress = false
+    view:HideLoading()
     MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
+    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
+    if pinMirrorStateMachine then
+        pinMirrorStateMachine:NotifyMapReloadFailed()
+    end
 end
 
 --- @param previousMapData MiniMapMapData|nil
