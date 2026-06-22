@@ -91,8 +91,7 @@ local function queueCraftAggregatedItem(isGain, itemString, color, messageType, 
             ChatAnnouncements.QueuedMessagesCounter = S.g_itemCounterGain
         end
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        ChatAnnouncements.QueuedMessages[S.g_itemCounterGain] = buildQueuedItemMessage(
-            S.g_itemStringGain, messageType, formattedRecipient, color, logPrefix, "", groupLoot, guildAnnounceGuildId)
+        ChatAnnouncements.QueuedMessages[S.g_itemCounterGain] = buildQueuedItemMessage(S.g_itemStringGain, messageType, formattedRecipient, color, logPrefix, "", groupLoot, guildAnnounceGuildId)
     else
         S.g_itemStringLoss = aggregatedString
         S.g_itemCounterLossTracker = S.g_itemCounterLossTracker + 1
@@ -106,8 +105,7 @@ local function queueCraftAggregatedItem(isGain, itemString, color, messageType, 
             ChatAnnouncements.QueuedMessagesCounter = S.g_itemCounterLoss
         end
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        ChatAnnouncements.QueuedMessages[S.g_itemCounterLoss] = buildQueuedItemMessage(
-            S.g_itemStringLoss, messageType, formattedRecipient, color, logPrefix, "", groupLoot, guildAnnounceGuildId)
+        ChatAnnouncements.QueuedMessages[S.g_itemCounterLoss] = buildQueuedItemMessage(S.g_itemStringLoss, messageType, formattedRecipient, color, logPrefix, "", groupLoot, guildAnnounceGuildId)
     end
 
     eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages, true)
@@ -116,8 +114,7 @@ end
 --- @param logPrefix string
 --- @return integer|nil guildAnnounceGuildId
 local function getGuildAnnounceGuildIdForLogPrefix(logPrefix)
-    if ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageDepositGuild")
-    or ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageWithdrawGuild") then
+    if ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageDepositGuild") or ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageWithdrawGuild") then
         return S.g_guildBankAnnounceGuildId or ChatAnnouncements.GetActiveGuildBankId()
     end
     return nil
@@ -149,8 +146,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
 
     logPrefix = ChatAnnouncements.ResolveLootLogPrefix(logPrefix)
 
-    local itemString, formattedTotal, formattedRecipient, color = ChatAnnouncements.BuildLootItemDisplayString(
-        icon, stack, itemType, itemLink, receivedBy, logPrefix, gainOrLoss, groupLoot, showCollectionStatus)
+    local itemString, formattedTotal, formattedRecipient, color = ChatAnnouncements.BuildLootItemDisplayString(icon, stack, itemType, itemLink, receivedBy, logPrefix, gainOrLoss, groupLoot, showCollectionStatus)
 
     local delayTimer = DEFAULT_PRINTER_DELAY_MS
     local messageType = alwaysFirst and "CONTAINER" or "LOOT"
@@ -164,8 +160,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
         ChatAnnouncements.ResolveItemMessage(itemString, formattedRecipient, color, logPrefix, formattedTotal, groupLoot, guildAnnounceGuildId)
         ChatAnnouncements.FlushDeferredContainerLootCurrency()
     else
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = buildQueuedItemMessage(
-            itemString, messageType, formattedRecipient, color, logPrefix, formattedTotal, groupLoot, guildAnnounceGuildId)
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = buildQueuedItemMessage(itemString, messageType, formattedRecipient, color, logPrefix, formattedTotal, groupLoot, guildAnnounceGuildId)
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         if delay then
             delayTimer = FAST_PRINTER_DELAY_MS
@@ -176,7 +171,7 @@ end
 
 --- @param message string
 --- @param formattedRecipient string
---- @param color string
+--- @param color string|table|ZO_ColorDef
 --- @param logPrefix string
 --- @param totalString string
 --- @param groupLoot boolean
@@ -184,7 +179,17 @@ end
 function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color, logPrefix, totalString, groupLoot, guildAnnounceGuildId)
     message = message or ""
     formattedRecipient = formattedRecipient or ""
-    color = color and (type(color) == "table" and color:IsColorDef() and color or ZO_ColorDef:New(color)) or ZO_ColorDef:New("FFFFFF")
+    -- normalize color to a ZO_ColorDef
+    if type(color) == "table" and ZO_ColorDef:IsInstanceOf(color) then
+        -- already a ZO_ColorDef; keep as-is
+    elseif type(color) == "string" then
+        color = ZO_ColorDef:New(color)
+    elseif type(color) == "table" then
+        -- plain table color {r=..., g=..., b=...}
+        color = ZO_ColorDef:New(color)
+    else
+        color = ZO_ColorDef:New("FFFFFF")
+    end
     logPrefix = logPrefix or ""
     totalString = totalString or ""
 
