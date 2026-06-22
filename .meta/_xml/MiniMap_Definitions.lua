@@ -1,132 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended/frontend/MiniMap.xml
----------- LVL: 00 ----------
----------- LVL: 01 ----------
----------- LVL: 02 ----------
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap : TopLevelWindow
----@field public mouseEnabled boolean
----@field public movable boolean
----@field public resizeHandleSize number
----@field public clampedToScreen boolean
----@field public hidden boolean
----@field Dimensions {x: layout_measurement, y: layout_measurement}
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
-LUIE_MiniMap = {}
----------- LVL: 03 ----------
----------- LVL: 04 ----------
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Zone : LabelControl
----@field public font string
----@field public layer DrawLayer
----@field public text string
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetY: layout_measurement}
-LUIE_MiniMap_Zone = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_ZoomLabel : LabelControl
----@field public font string
----@field public alpha number
----@field public layer DrawLayer
----@field public text string
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
-LUIE_MiniMap_ZoomLabel = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Background : BackdropControl
----@field public resizeToFitDescendents boolean
----@field Dimensions {x: layout_measurement, y: layout_measurement}
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
-LUIE_MiniMap_Background = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Scroll : ScrollControl
----@field public mouseEnabled boolean
----@field Dimensions {x: layout_measurement, y: layout_measurement}
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
-LUIE_MiniMap_Scroll = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_ZoomIn : ButtonControl
----@field public hidden boolean
----@field public layer DrawLayer
----@field Dimensions {x: layout_measurement, y: layout_measurement}
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
----@field Textures {normal: string, pressed: string, disabled: string}
-LUIE_MiniMap_ZoomIn = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_ZoomOut : ButtonControl
----@field public hidden boolean
----@field public layer DrawLayer
----@field Dimensions {x: layout_measurement, y: layout_measurement}
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
----@field Textures {normal: string, pressed: string, disabled: string}
-LUIE_MiniMap_ZoomOut = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Player : TextureControl
----@field public resizeToFitFile boolean
----@field public layer DrawLayer
----@field public textureFile string
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
-LUIE_MiniMap_Player = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_PlayerCam : TextureControl
----@field public resizeToFitFile boolean
----@field public layer DrawLayer
----@field public textureFile string
----@field public alpha number
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
-LUIE_MiniMap_PlayerCam = {}
----------- LVL: 05 ----------
----------- LVL: 06 ----------
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Zone_Divider : TextureControl
----@field public textureFile string
----@field Dimensions {y: layout_measurement}
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
----@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
-LUIE_MiniMap_Zone_Divider = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Scroll_Map : Control
----@field public mouseEnabled boolean
----@field public hidden boolean
----@field public layer DrawLayer
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
-LUIE_MiniMap_Scroll_Map = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Scroll_StatusOverlay : StatusBarControl
----@field public layer DrawLayer
----@field public color string
----@field public alpha number
----@field public hidden boolean
----@field AnchorFill boolean
-LUIE_MiniMap_Scroll_StatusOverlay = {}
----------- LVL: 07 ----------
----------- LVL: 08 ----------
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Scroll_Map_Pins : Control
----@field public layer DrawLayer
----@field AnchorFill boolean
-LUIE_MiniMap_Scroll_Map_Pins = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_Scroll_StatusOverlay_Label : LabelControl
----@field public font string
----@field public layer DrawLayer
----@field public text string
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetY: layout_measurement}
-LUIE_MiniMap_Scroll_StatusOverlay_Label = {}
----------- LVL: 09 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended/frontend/MiniMap.xml
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\MiniMap.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\MiniMap.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -144,6 +16,12 @@ LUIE_MiniMap_Scroll_StatusOverlay_Label = {}
 ---@field public space Space
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field public OnMoveStop fun(self: Control)
+---@field public OnResizeStart fun(self: Control)
+---@field public OnResizeStop fun(self: Control)
+---@field public OnMouseWheel fun(self: Control, delta: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+---@field public OnUpdate fun(self: Control, time: number)
+---@field public OnRectChanged fun(self: Control, newLeft: number, newTop: number, newRight: number, newBottom: number, oldLeft: number, oldTop: number, oldRight: number, oldBottom: number)
 LUIE_MiniMap = {}
 ---------- LVL: 03 ----------
 ---------- LVL: 04 ----------
@@ -155,15 +33,6 @@ LUIE_MiniMap = {}
 ---@field public text string
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetY: layout_measurement}
 LUIE_MiniMap_Zone = {}
--- ---------------------------------------------------------------------------------------------------------------------
---
----@class LUIE_MiniMap_ZoomLabel : LabelControl
----@field public font string
----@field public alpha number
----@field public layer DrawLayer
----@field public text string
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
-LUIE_MiniMap_ZoomLabel = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_MiniMap_Background : BackdropControl
@@ -178,7 +47,31 @@ LUIE_MiniMap_Background = {}
 ---@field public mouseEnabled boolean
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
+---@field public OnMouseDown fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+---@field public OnScrollOffsetChanged fun(self: ScrollControl, horizontal: number, vertical: number)
 LUIE_MiniMap_Scroll = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_MiniMap_ZoomLabel : LabelControl
+---@field public font string
+---@field public alpha number
+---@field public layer DrawLayer
+---@field public tier DrawTier
+---@field public hidden boolean
+---@field public text string
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_MiniMap_ZoomLabel = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_MiniMap_FrameChromeHover : Control
+---@field public mouseEnabled boolean
+---@field public layer DrawLayer
+---@field public tier DrawTier
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field public OnMouseEnter fun(self: Control)
+---@field public OnMouseExit fun(self: Control)
+LUIE_MiniMap_FrameChromeHover = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_MiniMap_Player : TextureControl
@@ -198,25 +91,44 @@ LUIE_MiniMap_Player = {}
 LUIE_MiniMap_PlayerCam = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_MiniMap_ZoomIn : ButtonControl
----@field public hidden boolean
+---@class LUIE_MiniMap_ZoomChromeHover : Control
 ---@field public mouseEnabled boolean
 ---@field public layer DrawLayer
 ---@field public tier DrawTier
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
----@field Textures {normal: string, pressed: string, disabled: string}
+---@field public OnMouseEnter fun(self: Control)
+---@field public OnMouseExit fun(self: Control)
+LUIE_MiniMap_ZoomChromeHover = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_MiniMap_ZoomIn : ButtonControl
+---@field public hidden boolean
+---@field public mouseEnabled boolean
+---@field public mouseOverBlendMode TextureBlendMode
+---@field public layer DrawLayer
+---@field public tier DrawTier
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Textures {normal: string, pressed: string, disabled: string, mouseOver: string}
+---@field public OnClicked fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+---@field public OnMouseEnter fun(self: Control)
+---@field public OnMouseExit fun(self: Control)
 LUIE_MiniMap_ZoomIn = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_MiniMap_ZoomOut : ButtonControl
 ---@field public hidden boolean
 ---@field public mouseEnabled boolean
+---@field public mouseOverBlendMode TextureBlendMode
 ---@field public layer DrawLayer
 ---@field public tier DrawTier
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
----@field Textures {normal: string, pressed: string, disabled: string}
+---@field Textures {normal: string, pressed: string, disabled: string, mouseOver: string}
+---@field public OnClicked fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+---@field public OnMouseEnter fun(self: Control)
+---@field public OnMouseExit fun(self: Control)
 LUIE_MiniMap_ZoomOut = {}
 ---------- LVL: 05 ----------
 ---------- LVL: 06 ----------
@@ -235,6 +147,9 @@ LUIE_MiniMap_Zone_Divider = {}
 ---@field public hidden boolean
 ---@field public layer DrawLayer
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
+---@field public OnMouseDown fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+---@field public OnUpdate fun(self: Control, time: number)
 LUIE_MiniMap_Scroll_Map = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -245,6 +160,15 @@ LUIE_MiniMap_Scroll_Map = {}
 ---@field public hidden boolean
 ---@field AnchorFill boolean
 LUIE_MiniMap_Scroll_StatusOverlay = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_MiniMap_FrameChromeHover_FrameChrome : Control
+---@field public hidden boolean
+---@field public mouseEnabled boolean
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field public OnMouseEnter fun(self: Control)
+---@field public OnMouseExit fun(self: Control)
+LUIE_MiniMap_FrameChromeHover_FrameChrome = {}
 ---------- LVL: 07 ----------
 ---------- LVL: 08 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -261,5 +185,33 @@ LUIE_MiniMap_Scroll_Map_Pins = {}
 ---@field public text string
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetY: layout_measurement}
 LUIE_MiniMap_Scroll_StatusOverlay_Label = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_MiniMap_FrameChromeHover_FrameChrome_PositionLock : ButtonControl
+---@field public mouseOverBlendMode TextureBlendMode
+---@field public mouseEnabled boolean
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field public OnInitialized fun(self: Control)
+---@field public OnClicked fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+LUIE_MiniMap_FrameChromeHover_FrameChrome_PositionLock = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_MiniMap_FrameChromeHover_FrameChrome_MoveGrip : Control
+---@field public mouseEnabled boolean
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field public OnInitialized fun(self: Control)
+---@field public OnMouseDown fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+LUIE_MiniMap_FrameChromeHover_FrameChrome_MoveGrip = {}
 ---------- LVL: 09 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\frontend\MiniMap.xml
+---------- LVL: 10 ----------
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_MiniMap_FrameChromeHover_FrameChrome_MoveGripIcon : TextureControl
+---@field public resizeToFitFile boolean
+---@field public textureFile string
+---@field public alpha number
+---@field Anchor {point: AnchorPosition}
+LUIE_MiniMap_FrameChromeHover_FrameChrome_MoveGripIcon = {}
+---------- LVL: 11 ----------
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\MiniMap.xml
