@@ -147,7 +147,7 @@ function Shared.CreateRegenAnimation(parent, anchors, dims, alpha, number)
         return nil
     end
 
-    if #dims ~= 2 then
+    if dims == nil or #dims ~= 2 then
         dims = { parent:GetDimensions() }
     end
 
