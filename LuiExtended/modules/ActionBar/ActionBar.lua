@@ -62,6 +62,9 @@ local Backbar = ActionBar.Backbar
 local g_ultimateCost = 0     -- Cost of ultimate Ability in Slot
 local g_ultimateCurrent = 0  -- Current ultimate value
 local g_ultimateSlot = ActionBar.ULTIMATE_SLOT_INDEX
+local function GetPlayerUltimatePowerType()
+    return IsPlayerInWerewolfForm() and COMBAT_MECHANIC_FLAGS_WEREWOLF or COMBAT_MECHANIC_FLAGS_ULTIMATE
+end
 local g_uiProcAnimation = {} -- Animation for bar slots
 --- @type table<number, any>
 local g_uiCustomToggle = {}  -- Toggle slots for bar Slots (value: control or true placeholder)
@@ -1311,7 +1314,10 @@ function ActionBar.OnPlayerActivated()
         -- Update Bar Slots on initial load (don't want to do it normally when we do a slot update)
         ActionBar.BarSlotUpdate(i, true, false)
     end
-    ActionBar.OnPowerUpdatePlayer("player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE))
+    local playerPowerType = GetPlayerUltimatePowerType()
+    local currentPower, max = GetUnitPower("player", playerPowerType)
+    local maxPower = (playerPowerType == COMBAT_MECHANIC_FLAGS_WEREWOLF) and 1000 or max
+    ActionBar.OnPowerUpdatePlayer("player", nil, playerPowerType, currentPower, maxPower, maxPower)
     if ShouldShowCompanionUltimateButton() then
         ActionBar.OnPowerUpdateCompanion("companion", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE))
     end
@@ -3339,12 +3345,11 @@ end
 --- -----------------------------------------------------------------------------
 --- Refreshes ultimate slot label (cost, percentage) from current power and slot ability.
 function ActionBar.UpdateUltimateLabel()
-    -- Get the currently slotted ultimate cost
-    local ultimateHotbarCategory = g_hotbarCategory
-    g_ultimateCost = GetSlotAbilityCost(g_ultimateSlot, COMBAT_MECHANIC_FLAGS_ULTIMATE, ultimateHotbarCategory) or 0
+    local powerType = GetPlayerUltimatePowerType()
+    local currentPower, max = GetUnitPower("player", powerType)
+    local maxPower = (powerType == COMBAT_MECHANIC_FLAGS_WEREWOLF) and 1000 or max
 
-    -- Update ultimate label
-    ActionBar.OnPowerUpdatePlayer("player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, g_ultimateCurrent, 0, 0)
+    ActionBar.OnPowerUpdatePlayer("player", nil, powerType, currentPower, maxPower, maxPower)
 end
 
 --- -----------------------------------------------------------------------------
@@ -3583,28 +3588,29 @@ function ActionBar.OnPowerUpdatePlayer(unitTag, powerIndex, powerType, powerValu
     if unitTag ~= "player" then
         return
     end
-    if powerType ~= COMBAT_MECHANIC_FLAGS_ULTIMATE then
+    if powerType ~= GetPlayerUltimatePowerType() then
         return
     end
 
-    -- flag if ultimate is full - we"ll need it for ultimate generation texture
     uiUltimate.NotFull = (powerValue < powerMax)
-    -- Calculate the percentage to activation old one and current
-    local ultimatePercent = (g_ultimateCost > 0) and zo_floor((powerValue / g_ultimateCost) * 100) or 0
-    -- Set max percentage label to 100%.
+
+    local displayMax = g_ultimateCost
+    if powerType == COMBAT_MECHANIC_FLAGS_WEREWOLF then
+        displayMax = (powerMax > 0) and powerMax or 1000
+    end
+
+    local ultimatePercent = (displayMax > 0) and zo_floor((powerValue / displayMax) * 100) or 0
     if ultimatePercent > 100 then
         ultimatePercent = 100
     end
-    -- Update the tooltip only when the slot is used and percentage is enabled
+
     if IsSlotUsed(g_ultimateSlot, g_hotbarCategory) then
         if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-            -- Set % value
             if ActionBar.SV.UltimatePctEnabled then
                 uiUltimate.LabelPct:SetText(ultimatePercent .. "%")
             end
-            -- Set label value
             if ActionBar.SV.UltimateLabelEnabled then
-                uiUltimate.LabelVal:SetText(powerValue .. "/" .. g_ultimateCost)
+                uiUltimate.LabelVal:SetText(powerValue .. "/" .. displayMax)
             end
             -- Pct label: show always when less then 100% and possibly if UltimateHideFull is false
             if ultimatePercent < 100 then
@@ -3649,7 +3655,7 @@ function ActionBar.OnPowerUpdatePlayer(unitTag, powerIndex, powerType, powerValu
         uiUltimate.LabelPct:SetHidden(true)
         uiUltimate.LabelVal:SetHidden(true)
     end
-    -- Update stored value
+
     g_ultimateCurrent = powerValue
 end
 
