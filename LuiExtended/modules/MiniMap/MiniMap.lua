@@ -7,6 +7,7 @@
 local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
+local eventManager = GetEventManager()
 
 --- @param enabled boolean
 function MiniMap.Initialize(enabled)
@@ -84,7 +85,11 @@ function MiniMap.Initialize(enabled)
     MiniMap.ApplyChromeFromSettings()
     MiniMap.ApplyFragmentHiddenReasons()
     MiniMap.UpdateConditionalVisibility()
-
+    eventManager:RegisterForEvent("LUIE_MiniMap_GamePad_Sync", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
+        local mapController = MiniMap.mapController
+        local mapData = mapController.map
+        MiniMap.pinController:SyncLuiOverlays(mapData)
+    end)
     zo_callLater(function ()
                      MiniMap.mapEventController:RequestMapReload("Initialize")
                      if not MiniMap.GetMapFollowsPlayer() then
