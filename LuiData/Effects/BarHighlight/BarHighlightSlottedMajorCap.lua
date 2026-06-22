@@ -16,8 +16,6 @@ local Effects = Data.Effects
 -- Longer refreshes (e.g. Igneous 76518 / 61665 @ 60s) are ignored for shorter-cap slots (Hidden Blade @ 20s).
 -- Values from LuiDevTool combat log (blade.txt): 68807/126647 combat + 61665 @ 20000; Flying 61665 @ 40000.
 --------------------------------------------------------------------------------------------------------------------------------
-
---- @type table<integer, table<integer, integer>>
 local barHighlightSlottedMajorCap =
 {
     [61665] =
