@@ -27,8 +27,5 @@ function LUIE_ChatOutput:Initialize()
     self.timestampColorHex = ZO_OFF_WHITE:ToHex()
 end
 
---- @class (partial) LuiExtended
---- @field ChatOutput LUIE_ChatOutput
---- @field ChatOutputClass LUIE_ChatOutput
 LUIE.ChatOutputClass = LUIE_ChatOutput
 LUIE.ChatOutput = LUIE_ChatOutput:New()

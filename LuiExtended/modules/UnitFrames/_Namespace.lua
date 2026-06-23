@@ -517,7 +517,6 @@ UnitFrames.SV = {}
 --- @field degen1 UnitFrames.RegenStripControl|nil
 --- @field degen2 UnitFrames.RegenStripControl|nil
 --- @field stat table|nil
---- @field label table|nil
 --- @field format string|nil
 
 --- @class UnitFrames.CustomFrameResourceRow : UnitFrames.CustomFramePowerEntry

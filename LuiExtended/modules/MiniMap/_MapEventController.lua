@@ -135,8 +135,8 @@ end
 
 --- Mirrors ZOS WorldMap EVENT_MAP_PING handler in player-map context for the HUD mirror.
 --- @param _eventCode integer
---- @param pingEventType integer
---- @param pingType MapPinType
+--- @param pingEventType MapPingEventType
+--- @param pingType MapDisplayPinType
 --- @param pingTag string
 --- @param x number
 --- @param y number

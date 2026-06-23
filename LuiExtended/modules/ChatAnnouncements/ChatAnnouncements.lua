@@ -412,7 +412,7 @@ end
 --- @param _ integer
 --- @param campaignId integer
 --- @param isGroup boolean
---- @param state CampaignQueueRequestState
+--- @param state CampaignQueueRequestStateType
 function ChatAnnouncements.OnCampaignQueueStateChanged(_, campaignId, isGroup, state)
     local campaignName = GetCampaignName(campaignId)
     local stateLabel = CampaignQueueStateLabel(campaignId, isGroup, state)

@@ -503,7 +503,7 @@
 --- @field OnBuybackItem fun(eventId: integer, itemName: string, quantity: integer, money: integer, itemSound: integer)
 --- @field OnCampaignQueueJoined fun(_: integer, campaignId: integer)
 --- @field OnCampaignQueueLeft fun(_: integer, campaignId: integer)
---- @field OnCampaignQueueStateChanged fun(_: integer, campaignId: integer, isGroup: boolean, state: CampaignQueueRequestState)
+--- @field OnCampaignQueueStateChanged fun(_: integer, campaignId: integer, isGroup: boolean, state: CampaignQueueRequestStateType)
 --- @field OnChatterBegin fun()
 --- @field OnChatterEnd fun()
 --- @field OnCraftedAbilityLockStateChanged fun(eventId: integer, craftedAbilityDefId: integer, isUnlocked: boolean, isFromInit: boolean)

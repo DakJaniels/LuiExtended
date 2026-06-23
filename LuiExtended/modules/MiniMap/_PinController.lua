@@ -162,7 +162,7 @@ end
 --- @param pinWidth number
 --- @param pinHeight number
 --- @param pinScale boolean
---- @param pinType MapPinType|nil
+--- @param pinType MapDisplayPinType|nil
 --- @return number, number
 function MiniMapPinController:GetPinDimensions(pinWidth, pinHeight, pinScale, pinType)
     return MiniMap.ComputePinDrawDimensions(pinWidth, pinHeight, pinScale, pinType, self.mapController)
@@ -234,7 +234,7 @@ end
 --- @param pinWidth number
 --- @param pinHeight number
 --- @param pinScale boolean
---- @param pinType MapPinType|nil
+--- @param pinType MapDisplayPinType|nil
 function MiniMapPinController:SetOverlayPinLayoutMetadata(pin, normalizedX, normalizedY, pinWidth, pinHeight, pinScale, pinType)
     pin.luiMiniMapNormalizedX = normalizedX
     pin.luiMiniMapNormalizedY = normalizedY
