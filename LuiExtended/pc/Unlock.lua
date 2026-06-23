@@ -250,28 +250,26 @@ function Unlock.RegisterUnlockPositionHooks()
     if Unlock.unlockPositionHooksInstalled then
         return
     end
-    if COMPASS_FRAME then
-        ZO_PostHook(COMPASS_FRAME, "ApplyStyle", function ()
-            Unlock.ApplySavedUnlockFramePosition("ZO_CompassFrame")
-        end)
-    end
-    if PLAYER_PROGRESS_BAR then
-        ZO_PostHook(PLAYER_PROGRESS_BAR, "RefreshTemplate", function ()
-            Unlock.ApplySavedUnlockFramePosition("ZO_PlayerProgress")
-        end)
-    end
-    if ZO_HUDTracker_Base then
-        ZO_PostHook(ZO_HUDTracker_Base, "RefreshAnchors", function (tracker)
-            if tracker.container then
-                Unlock.ApplySavedUnlockFramePosition(tracker.container:GetName())
-            end
-        end)
-    end
-    if ACTIVE_COMBAT_TIP_SYSTEM then
-        ZO_PostHook(ACTIVE_COMBAT_TIP_SYSTEM, "ApplyStyle", function ()
-            Unlock.ApplyActiveCombatTipsAnchors()
-        end)
-    end
+
+    ZO_PostHook(ZO_HUDTracker_Base, "RefreshAnchors", function (tracker)
+        if tracker.container then
+            Unlock.ApplySavedUnlockFramePosition(tracker.container:GetName())
+        end
+    end)
+
+    ZO_PostHook(COMPASS_FRAME, "ApplyStyle", function ()
+        Unlock.ApplySavedUnlockFramePosition("ZO_CompassFrame")
+    end)
+
+
+    ZO_PostHook(PLAYER_PROGRESS_BAR, "RefreshTemplate", function ()
+        Unlock.ApplySavedUnlockFramePosition("ZO_PlayerProgress")
+    end)
+
+    ZO_PostHook(ACTIVE_COMBAT_TIP_SYSTEM, "ApplyStyle", function ()
+        Unlock.ApplyActiveCombatTipsAnchors()
+    end)
+    ZO_ReticleContainer:SetDrawLayer(DL_TEXT)
     Unlock.unlockPositionHooksInstalled = true
 end
 
