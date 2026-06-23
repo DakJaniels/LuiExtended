@@ -40,7 +40,7 @@ function MiniMap.Initialize(enabled)
         end
         MiniMap.ShutdownNativeWorldMapContainer()
         MiniMap.DisableHudMinimapWorldMapInputPreHooks()
-        MiniMap.DisableHudMinimapPinInteractionPreHooks()
+        -- MiniMap.DisableHudMinimapPinInteractionPreHooks()
         MiniMap.UnregisterMiniMapSceneIntegration()
         LUIE_MiniMap:SetHidden(true)
         MiniMap.Enabled = false
@@ -74,7 +74,7 @@ function MiniMap.Initialize(enabled)
     MiniMap.pinMirrorStateMachine.mapEventController = MiniMap.mapEventController
     MiniMap.inputController = MiniMap.MiniMapInputController:New(MiniMap.view, MiniMap.mapController, MiniMap.runtime)
     MiniMap.InstallHudMinimapWorldMapInputPreHooks()
-    MiniMap.InstallHudMinimapPinInteractionPreHooks()
+    -- MiniMap.InstallHudMinimapPinInteractionPreHooks()
 
     MiniMap.view:ApplySavedLayout(MiniMap.SV)
     MiniMap.view:SetupPlayerIcons()
