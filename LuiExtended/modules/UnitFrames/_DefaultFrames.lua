@@ -416,6 +416,8 @@ function UnitFrames.UpdateDefaultLevelTarget()
     local targetLevel = ZO_TargetUnitFramereticleoverLevel
     local targetChamp = ZO_TargetUnitFramereticleoverChampionIcon
     local targetName = ZO_TargetUnitFramereticleoverName
+    local targetVeteranRankIcon = ZO_TargetUnitFramereticleoverVeterancyRankIcon
+    local allianceRankIcon = ZO_TargetUnitFramereticleoverRankIcon
     local unitLevel
     local isChampion = IsUnitChampion("reticleover")
     if isChampion then
@@ -437,5 +439,9 @@ function UnitFrames.UpdateDefaultLevelTarget()
         targetChamp:SetHidden(false)
     else
         targetChamp:SetHidden(true)
+    end
+    if targetVeteranRankIcon then
+        targetVeteranRankIcon:ClearAnchors()
+        targetVeteranRankIcon:SetAnchor(CENTER, allianceRankIcon, RIGHT, 8, -2)
     end
 end

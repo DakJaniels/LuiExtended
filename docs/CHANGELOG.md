@@ -1,5 +1,12 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.5
+
+### Fixed
+
+- Unit Frames: Default Unit Frames -> Default TARGET Frame ; Use Extender option ; Now shows Veterancy Rank Icon to the right of the Alliance Rank Icon.
+- General stability and performance improvements...
+
 ## Version 7.2.5.4
 
 ### New

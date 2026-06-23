@@ -599,21 +599,21 @@ function MiniMap.CreateConsoleSettings()
             default = Defaults.movingPinRefreshMs,
             disable = disable,
         },
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP),
-            min = MiniMap.MINIMAP_PIN_REFRESH_MS_MIN,
-            max = MiniMap.MINIMAP_PIN_REFRESH_MS_MAX,
-            step = 1,
-            format = "%.0f",
-            getFunction = function () return MiniMap.GetPinMouseOverRefreshMs() end,
-            setFunction = function (value)
-                MiniMap.SV.pinMouseOverRefreshMs = zo_clamp(value, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
-            end,
-            default = Defaults.pinMouseOverRefreshMs,
-            disable = disable,
-        },
+        -- {
+        --     type = LHAS.ST_SLIDER,
+        --     label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS),
+        --     tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP),
+        --     min = MiniMap.MINIMAP_PIN_REFRESH_MS_MIN,
+        --     max = MiniMap.MINIMAP_PIN_REFRESH_MS_MAX,
+        --     step = 1,
+        --     format = "%.0f",
+        --     getFunction = function () return MiniMap.GetPinMouseOverRefreshMs() end,
+        --     setFunction = function (value)
+        --         MiniMap.SV.pinMouseOverRefreshMs = zo_clamp(value, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
+        --     end,
+        --     default = Defaults.pinMouseOverRefreshMs,
+        --     disable = disable,
+        -- },
     }
 
     local devAdvancedSectionRows = nil

@@ -53,8 +53,8 @@ local Unlock =
         [ZO_ActionBar1] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTION_BAR) },
         [ZO_Subtitles] = { GetString(LUIE_STRING_DEFAULT_FRAME_SUBTITLES), 256, 80 },
         [ZO_ObjectiveCaptureMeter] = { GetString(LUIE_STRING_DEFAULT_FRAME_OBJECTIVE_METER), 128, 128 },
-        [ZO_PlayerToPlayerAreaPromptContainer] = { GetString(LUIE_STRING_DEFAULT_FRAME_PLAYER_INTERACTION), nil, 30 },
-        [ZO_SynergyTopLevelContainer] = { GetString(LUIE_STRING_DEFAULT_FRAME_SYNERGY) },
+        [ZO_PlayerToPlayerAreaPromptContainer] = { GetString(LUIE_STRING_DEFAULT_FRAME_PLAYER_INTERACTION), 256, 80 },
+        [ZO_SynergyTopLevelContainer] = { GetString(LUIE_STRING_DEFAULT_FRAME_SYNERGY), 256, 80 },
         [ZO_CompassFrame] = { GetString(LUIE_STRING_DEFAULT_FRAME_COMPASS) },                                        -- Needs custom template applied
         [ZO_PlayerProgress] = { GetString(LUIE_STRING_DEFAULT_FRAME_PLAYER_PROGRESS) },                              -- Needs custom template applied
         [ZO_EndDunHUDTrackerContainer] = { GetString(LUIE_STRING_DEFAULT_FRAME_ENDLESS_DUNGEON_TRACKER), 230, 100 }, -- Needs custom template applied
@@ -202,9 +202,6 @@ function Unlock.RegisterDynamicEventsQuestAnchorHook()
 end
 
 function Unlock.ApplyActiveCombatTipsAnchors()
-    if not ZO_ActiveCombatTipsTip then
-        return
-    end
     local frameName = "LUIE_ActiveCombatTipsAnchor"
     if LUIE.SV["ZO_ActiveCombatTipsTip"] and not LUIE.SV[frameName] then
         LUIE.SV[frameName] = LUIE.SV["ZO_ActiveCombatTipsTip"]
@@ -219,7 +216,7 @@ function Unlock.ApplyActiveCombatTipsAnchors()
         anchor:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -250, ANCHOR_CONSTRAINS_XY)
         Unlock.activeCombatTipsAnchor = anchor
         if not Unlock.defaultPanels[anchor] then
-            Unlock.defaultPanels[anchor] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTIVE_COMBAT_TIPS), 250, 20 }
+            Unlock.defaultPanels[anchor] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTIVE_COMBAT_TIPS), 256, 80 }
         end
     end
     local anchor = Unlock.activeCombatTipsAnchor
@@ -240,9 +237,7 @@ function Unlock.ApplyActiveCombatTipsAnchors()
     ZO_ActiveCombatTipsTip:ClearAnchors()
     ZO_ActiveCombatTipsTip:SetAnchor(CENTER, anchor, CENTER, 0, 0, ANCHOR_CONSTRAINS_XY)
 
-    if ZO_ActiveCombatTips then
-        ZO_ActiveCombatTips:SetDrawTier(DT_HIGH)
-    end
+    ZO_ActiveCombatTips:SetDrawTier(DT_HIGH)
     ZO_ActiveCombatTipsTip:SetDrawTier(DT_HIGH)
     ZO_ActiveCombatTipsTip:SetDrawLayer(DL_OVERLAY)
     if ZO_ActiveCombatTipsTipTipText then
@@ -255,28 +250,26 @@ function Unlock.RegisterUnlockPositionHooks()
     if Unlock.unlockPositionHooksInstalled then
         return
     end
-    if COMPASS_FRAME then
-        ZO_PostHook(COMPASS_FRAME, "ApplyStyle", function ()
-            Unlock.ApplySavedUnlockFramePosition("ZO_CompassFrame")
-        end)
-    end
-    if PLAYER_PROGRESS_BAR then
-        ZO_PostHook(PLAYER_PROGRESS_BAR, "RefreshTemplate", function ()
-            Unlock.ApplySavedUnlockFramePosition("ZO_PlayerProgress")
-        end)
-    end
-    if ZO_HUDTracker_Base then
-        ZO_PostHook(ZO_HUDTracker_Base, "RefreshAnchors", function (tracker)
-            if tracker.container then
-                Unlock.ApplySavedUnlockFramePosition(tracker.container:GetName())
-            end
-        end)
-    end
-    if ACTIVE_COMBAT_TIP_SYSTEM then
-        ZO_PostHook(ACTIVE_COMBAT_TIP_SYSTEM, "ApplyStyle", function ()
-            Unlock.ApplyActiveCombatTipsAnchors()
-        end)
-    end
+
+    ZO_PostHook(ZO_HUDTracker_Base, "RefreshAnchors", function (tracker)
+        if tracker.container then
+            Unlock.ApplySavedUnlockFramePosition(tracker.container:GetName())
+        end
+    end)
+
+    ZO_PostHook(COMPASS_FRAME, "ApplyStyle", function ()
+        Unlock.ApplySavedUnlockFramePosition("ZO_CompassFrame")
+    end)
+
+
+    ZO_PostHook(PLAYER_PROGRESS_BAR, "RefreshTemplate", function ()
+        Unlock.ApplySavedUnlockFramePosition("ZO_PlayerProgress")
+    end)
+
+    ZO_PostHook(ACTIVE_COMBAT_TIP_SYSTEM, "ApplyStyle", function ()
+        Unlock.ApplyActiveCombatTipsAnchors()
+    end)
+    ZO_ReticleContainer:SetDrawLayer(DL_TEXT)
     Unlock.unlockPositionHooksInstalled = true
 end
 

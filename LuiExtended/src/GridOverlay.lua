@@ -11,9 +11,9 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 
 local DEFAULT_GRID_SIZE = 15
-local OVERLAY_CONTROL_NAME = "LUIEGridOverlayShared"
-local LINE_TEMPLATE_V = "LUIE_GridOverlay_Line_V"
-local LINE_TEMPLATE_H = "LUIE_GridOverlay_Line_H"
+local OVERLAY_CONTROL_NAME = "LUIE_Grid_Overlay"
+local LINE_TEMPLATE_V = "LUIE_Grid_Overlay_Line_V"
+local LINE_TEMPLATE_H = "LUIE_Grid_Overlay_Line_H"
 
 local GRID_COLOR =
 {
@@ -234,7 +234,7 @@ local function GetSharedOverlay(manager)
         control:SetAnchorFill(GuiRoot)
         control:SetDrawLayer(DL_BACKGROUND)
         control:SetDrawTier(DT_LOW)
-        control:SetDrawLevel(1)
+        control:SetDrawLevel(0)
         control:SetAlpha(1)
         control:SetMouseEnabled(false)
         control:SetMovable(false)
