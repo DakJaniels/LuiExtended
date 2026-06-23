@@ -10,7 +10,7 @@
     <Backdrop name="LUIE_CombatGlowBorder"
               centerColor="000000"
               edgeColor="FF0000"
-              tier="MEDIUM"
+              tier="LOW"
               level="3"
               hidden="true"
               virtual="true">
@@ -50,7 +50,7 @@
               virtual="true"
               hidden="true"
               mouseEnabled="false"
-              tier="MEDIUM"
+              tier="LOW"
               layer="OVERLAY"
               level="6">
       <Dimensions x="2"
@@ -59,7 +59,7 @@
     </Backdrop>
     <!-- Decreased Armor Overlay Container (Full version with both textures) -->
     <Control name="LUIE_DecreasedArmorOverlay"
-             tier="MEDIUM"
+             tier="LOW"
              level="0"
              hidden="true"
              virtual="true">
@@ -95,7 +95,7 @@
     </Control>
     <!-- Small variant (only smallTex) -->
     <Control name="LUIE_DecreasedArmorOverlay_Small"
-             tier="MEDIUM"
+             tier="LOW"
              level="0"
              hidden="true"
              virtual="true">

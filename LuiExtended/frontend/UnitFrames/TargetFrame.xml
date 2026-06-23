@@ -14,7 +14,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="MEDIUM">
+                     tier="LOW">
       <Dimensions x="300"
                   y="120" />
       <Controls>
@@ -22,14 +22,14 @@
                  hidden="true"
                  mouseEnabled="false"
                  layer="OVERLAY"
-                 tier="MEDIUM"
+                 tier="LOW"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
                       inherits="LUIE_UF_BlackFill40_WhiteEdge"
                       layer="OVERLAY"
-                      tier="MEDIUM"
+                      tier="LOW"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
@@ -261,7 +261,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="MEDIUM"
+                         tier="LOW"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
