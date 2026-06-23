@@ -860,7 +860,7 @@ local function GetUpdatedAbilityDuration(abilityId)
 end
 
 --- @param tableKeyAbilityId integer BarHighlightOverride row key (slotted or combat source id)
---- @param overrideRow BarHighlightOverrideData
+--- @param overrideRow BarHighlightOverrideOptions
 local function ApplyBarHighlightDurationOverride(tableKeyAbilityId, overrideRow)
     if not overrideRow.duration then
         return
