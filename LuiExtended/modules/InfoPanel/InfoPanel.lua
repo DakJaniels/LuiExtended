@@ -182,13 +182,7 @@ local function ForEachMeter(fn)
     end
 end
 
-local InfoPanelMeterBase = ZO_Object:Subclass()
-
-function InfoPanelMeterBase:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
+local InfoPanelMeterBase = ZO_InitializingObject:Subclass()
 
 function InfoPanelMeterBase:Initialize(infoPanel, id, intervalMs)
     self.infoPanel = infoPanel
@@ -1230,15 +1224,22 @@ function InfoPanel.Initialize(enabled)
     InfoPanel.RearrangePanel()
 
     -- Set event handlers
-    eventManager:RegisterForEvent(moduleName, EVENT_LOOT_RECEIVED, InfoPanel.OnBagUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, InfoPanel.OnBagUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_DESTROYED, InfoPanel.OnBagUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_FULL_UPDATE, InfoPanel.OnBagUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG, InfoPanel.OnBagUpdate)
+    -- * EVENT_LOOT_RECEIVED (*string* _receivedBy_, *string* _itemName_, *integer* _quantity_, *[ItemUISoundCategory|#ItemUISoundCategory]* _soundCategory_, *[LootItemType|#LootItemType]* _lootType_, *bool* _self_, *bool* _isPickpocketLoot_, *string* _questItemIcon_, *integer* _itemId_, *bool* _isStolen_)
+    eventManager:RegisterForEvent(moduleName, EVENT_LOOT_RECEIVED, function () InfoPanel.OnBagUpdate() end)
+    -- * EVENT_INVENTORY_SINGLE_SLOT_UPDATE (*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *bool* _isNewItem_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_, *integer* _inventoryUpdateReason_, *integer* _stackCountChange_, *string:nilable* _triggeredByCharacterName_, *string:nilable* _triggeredByDisplayName_, *bool* _isLastUpdateForMessage_, *[BonusDropSource|#BonusDropSource]* _bonusDropSource_)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function () InfoPanel.OnBagUpdate() end)
+    -- * EVENT_INVENTORY_ITEM_DESTROYED (*[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_DESTROYED, function () InfoPanel.OnBagUpdate() end)
+    -- * EVENT_INVENTORY_FULL_UPDATE
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_FULL_UPDATE, function () InfoPanel.OnBagUpdate() end)
+    -- * EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG, function () InfoPanel.OnBagUpdate() end)
+    -- * EVENT_INVENTORY_BAG_CAPACITY_CHANGED (*integer* _previousCapacity_, *integer* _currentCapacity_, *integer* _previousUpgrade_, *integer* _currentUpgrade_)
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_BAG_CAPACITY_CHANGED, InfoPanel.OnBagCapacityChanged)
+    -- * EVENT_CARRIED_CURRENCY_UPDATE (*[CurrencyType|#CurrencyType]* _currency_, *integer* _newValue_, *integer* _oldValue_, *[CurrencyChangeReason|#CurrencyChangeReason]* _reason_, *integer* _reasonSupplementaryInfo_)
     eventManager:RegisterForEvent(moduleName, EVENT_CARRIED_CURRENCY_UPDATE, InfoPanel.OnCurrencyUpdate)
+    -- * EVENT_RIDING_SKILL_IMPROVEMENT (*[RidingTrainType|#RidingTrainType]* _ridingSkillType_, *integer* _previous_, *integer* _current_, *[RidingTrainSource|#RidingTrainSource]* _source_)
     eventManager:RegisterForEvent(moduleName, EVENT_RIDING_SKILL_IMPROVEMENT, InfoPanel.UpdateMountFeedTimer)
-
     InfoPanel.RegisterAllMeterUpdates()
 
     -- Combat state: always register so enabling HideInCombat in settings later works. Handler checks HideInCombat.

@@ -7,6 +7,7 @@
 local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
+local eventManager = GetEventManager()
 
 --- @param enabled boolean
 function MiniMap.Initialize(enabled)
@@ -39,7 +40,7 @@ function MiniMap.Initialize(enabled)
         end
         MiniMap.ShutdownNativeWorldMapContainer()
         MiniMap.DisableHudMinimapWorldMapInputPreHooks()
-        MiniMap.DisableHudMinimapPinInteractionPreHooks()
+        -- MiniMap.DisableHudMinimapPinInteractionPreHooks()
         MiniMap.UnregisterMiniMapSceneIntegration()
         LUIE_MiniMap:SetHidden(true)
         MiniMap.Enabled = false
@@ -73,7 +74,7 @@ function MiniMap.Initialize(enabled)
     MiniMap.pinMirrorStateMachine.mapEventController = MiniMap.mapEventController
     MiniMap.inputController = MiniMap.MiniMapInputController:New(MiniMap.view, MiniMap.mapController, MiniMap.runtime)
     MiniMap.InstallHudMinimapWorldMapInputPreHooks()
-    MiniMap.InstallHudMinimapPinInteractionPreHooks()
+    -- MiniMap.InstallHudMinimapPinInteractionPreHooks()
 
     MiniMap.view:ApplySavedLayout(MiniMap.SV)
     MiniMap.view:SetupPlayerIcons()
@@ -84,7 +85,11 @@ function MiniMap.Initialize(enabled)
     MiniMap.ApplyChromeFromSettings()
     MiniMap.ApplyFragmentHiddenReasons()
     MiniMap.UpdateConditionalVisibility()
-
+    eventManager:RegisterForEvent("LUIE_MiniMap_GamePad_Sync", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
+        local mapController = MiniMap.mapController
+        local mapData = mapController.map
+        MiniMap.pinController:SyncLuiOverlays(mapData)
+    end)
     zo_callLater(function ()
                      MiniMap.mapEventController:RequestMapReload("Initialize")
                      if not MiniMap.GetMapFollowsPlayer() then

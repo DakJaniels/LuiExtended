@@ -31,107 +31,6 @@ local LUIE = LUIE
 --- @alias AB_CustomList table<integer|string, boolean>
 
 --- @class (partial) LUIE.ActionBar
---- @field Enabled boolean
---- @field Defaults ActionBarDefaults
---- @field CastBarUnlocked boolean
---- @field ModuleName string
---- @field BAR_INDEX_START integer
---- @field BAR_INDEX_END integer
---- @field BACKBAR_INDEX_END integer
---- @field BACKBAR_INDEX_OFFSET integer
---- @field OAKENSOUL_RING_ITEM_ID integer
---- @field CooldownMethod table<integer, integer>
---- @field DROP_CALLOUT_VALIDITY_BY_ACTION_TYPE table<integer, function>
---- @field ULTIMATE_SLOT_INDEX integer
---- @field uiQuickSlot table
---- @field uiUltimate table
---- @field uiCompanionUltimate table
---- @field GAMEPAD_CONSTANTS LUIE_ACTIONBAR_GAMEPAD_CONSTANTS
---- @field KEYBOARD_CONSTANTS LUIE_ACTIONBAR_KEYBOARD_CONSTANTS
---- @field AttachPlatformWeaponSwap fun(actionBar: table)
---- @field isStackCounter table<integer, true>
---- @field isStackBaseAbility table<integer, true>
---- @field PROC_SOUND_THRESHOLDS table<integer, integer[]>
---- @field ACTION_BUTTON_BGS table<string, string>
---- @field ACTION_BUTTON_BORDERS table<string, string>
---- @field FORCE_SUPPRESS_COOLDOWN_SOUND boolean
---- @field BOUNCE_DURATION_MS integer
---- @field RegisterBarCombatEvent fun(eventManager: table, eventNamesList: string[], eventName: string, ...)
---- @field Initialize fun(enabled: boolean)
---- @field SetupBackBarIcons fun(button: ActionButton, flip: boolean)
---- @field OnActiveWeaponPairChanged fun(activeWeaponPair: ActiveWeaponPair, locked: boolean)
---- @field HookGCD fun()
---- @field UpdateBarHighlightTables fun()
---- @field RegisterEvents fun()
---- @field ClearCustomList fun(list: AB_CustomList)
---- @field AddToCustomList fun(list: AB_CustomList, input: any)
---- @field RemoveFromCustomList fun(list: AB_CustomList, input: any)
---- @field OnPlayerActivated fun()
---- @field OnUpdate fun(currentTimeMS: number)
---- @field OnGameCameraUIModeChanged fun()
---- @field OnSiegeEnd fun()
---- @field OnAbilityUsed fun(actionSlotIndex: number)
---- @field StopCastBar fun()
---- @field OnUpdateCastbar fun(currentTimeMS: number)
---- @field ApplyDisplayAlpha fun()
---- @field IsAutomaticAbilityBarSetting fun(): boolean
---- @field UpdateActivationHighlightForButton fun(button: ActionButton?)
---- @field ApplyFont fun()
---- @field CastBar LUIE.ActionBar.CastBar
---- @field Backbar LUIE.ActionBar.Backbar
---- @field GetHotbarCategory fun(): integer
---- @field SetHotbarCategory fun(category: integer)
---- @field GetHeldWeaponPair fun(): ActiveWeaponPair
---- @field GetCustomToggleControl fun(slotNum: number): table?
---- @field ApplyProcSound fun(previewMenuContext: table?)
---- @field ResetUltimateLabel fun()
---- @field ResetBarLabel fun()
---- @field ResetPotionTimerLabel fun()
---- @field OnTargetChange fun(unitTag: string)
---- @field OnReticleHiddenUpdate fun(hidden: boolean)
---- @field OnReticleTargetChanged fun()
---- @field BarHighlightSwap fun(abilityId: number)
---- @field OnEffectChanged fun(changeType: number, effectSlot: number, effectName: string, unitTag: string, beginTime: number, endTime: number, stackCount: number, iconName: string, deprecatedBuffType: number, effectType: number, abilityType: number, statusEffectType: number, unitName: string, unitId: number, abilityId: number, sourceType: number, passThrough: table?, savedId: number?)
---- @field HideSlot fun(slotNum: number, abilityId: number)
---- @field ShowSlot fun(slotNum: number, abilityId: number, currentTimeMS: number?, desaturate: boolean?)
---- @field BackbarHideSlot fun(slotNum: number)
---- @field BackbarShowSlot fun(slotNum: number)
---- @field ToggleBackbarSaturation fun(slotNum: number, desaturate: boolean)
---- @field BackbarSetupTemplate fun()
---- @field BackbarToggleSettings fun()
---- @field CreateCastBar fun()
---- @field ResizeCastBar fun()
---- @field UpdateCastBar fun()
---- @field ResetCastBarPosition fun()
---- @field GetCastBarOffsetX fun(): number
---- @field GetCastBarOffsetY fun(): number
---- @field SetCastBarPosition fun()
---- @field SetMovingState fun(state: boolean)
---- @field GenerateCastbarPreview fun(state: boolean)
---- @field ClientInteractResult fun(eventCode: number, result: number, interactTargetName: string)
---- @field SoulGemResurrectionStart fun(durationMs: number)
---- @field SoulGemResurrectionEnd fun()
---- @field OnCombatEventBreakCast fun(result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number, overflow: number)
---- @field OnCombatEvent fun(result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number, overflow: number)
---- @field OnCombatEventSpecialFilters fun(eventCode: number, result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number)
---- @field OnCombatEventBar fun(result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number, overflow: number)
---- @field OnSlotUpdated fun(actionSlotIndex: number)
---- @field BarSlotUpdate fun(slotNum: number, wasFullUpdate: boolean, onlyProc: boolean)
---- @field UpdateUltimateLabel fun()
---- @field UpdateCompanionUltimateLabel fun(optionalCurrentPower: number?)
---- @field ResetCompanionUltimateLabel fun()
---- @field RefreshCompanionQuickslotAnchors fun()
---- @field SyncMainRowUltimateAnchor fun()
---- @field CreateCompanionUltimateLabels fun()
---- @field OnPowerUpdateCompanion fun(unitTag: string, powerIndex: luaindex?, powerType: CombatMechanicFlags, powerValue: integer, powerMax: integer, powerEffectiveMax: integer)
---- @field InventoryItemUsed fun()
---- @field OnActiveHotbarUpdate fun(didActiveHotbarChange: boolean, shouldUpdateAbilityAssignments: boolean, activeHotbarCategory: number)
---- @field OnSlotsFullUpdate fun()
---- @field PlayProcAnimations fun(slotNum: number)
---- @field OnDeath fun(unitTag: string, isDead: boolean)
---- @field ShowCustomToggle fun(slotNum: number)
---- @field OnPowerUpdatePlayer fun(unitTag: string, powerIndex: number?, powerType: number, powerValue: number, powerMax: number, powerEffectiveMax: number)
---- @field OnInventorySlotUpdate fun(bagId: Bag, slotIndex: number, isNewItem: boolean, itemSoundCategory: ItemUISoundCategory, inventoryUpdateReason: number, stackCountChange: number, triggeredByCharacterName: string?, triggeredByDisplayName: string?, isLastUpdateForMessage: boolean, bonusDropSource: BonusDropSource)
 local ActionBar = {}
 ActionBar.__index = ActionBar
 --- @class (partial) LUIE.ActionBar
@@ -140,136 +39,19 @@ LUIE.ActionBar = ActionBar
 ActionBar.ModuleName = LUIE.name .. "ActionBar"
 
 --- @class (partial) LUIE.ActionBar.CastBar
---- @field name string
---- @field g_castCombatEventNames string[]
---- @field RegisterEvents fun()
---- @field UnregisterEvents fun()
---- @field Initialize fun()
---- @field ApplyDisplayAlpha fun(alpha: number)
---- @field ApplyFont fun(fontString: string)
---- @field TickInterruptChecks fun()
---- @field StopForAbilitySlot fun(actionSlotIndex: number)
---- @field OnActionSlotAbilityUsed fun(actionSlotIndex: number)
---- @field OnEffectChanged fun(changeType: number, effectSlot: integer, effectName: string, unitTag: string, beginTime: number, endTime: number, stackCount: integer, iconName: string, deprecatedBuffType: integer, effectType: integer, abilityType: integer, statusEffectType: integer, unitName: string, unitId: integer, abilityId: integer, sourceType: integer, passThrough: boolean, savedId: integer)
---- @field HandleCombatEvent fun(result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number, overflow: number)
---- @field OnEffectCastBreak fun(abilityId: number, changeType: number): boolean
---- @field OnLibCombatSkillTimings fun(eventCode: integer, timems: number, reducedSlot: integer, abilityId: integer, skillStatus: integer, skillDelay: number, skillDuration: number)
---- @field usesLibCombatSkillTimings boolean
---- @field RegisterLibCombatEvents fun()
---- @field UnregisterLibCombatEvents fun()
---- @field ShouldShowOnCastBar fun(abilityId: integer, castAbilityName: string|nil): boolean
---- @field HideWeaveLines fun()
---- @field GetWeaveLineWidth fun(): string
---- @field UpdateWeaveLineDimensions fun()
---- @field ResetWeaveBackdropEdge fun()
---- @field Private table
---- @field ComputeCastDurationMs fun(abilityId: integer, result: number, hitValue: integer, channeled: boolean, castTime: integer): integer
---- @field ShowCast fun(abilityId: integer, startTimeMs: number, durationMs: integer, channeled: boolean, castAbilityIcon: string|nil, castAbilityName: string|nil, startedFromLibCombat: boolean|nil)
 ActionBar.CastBar =
 {
     name = LUIE.name .. "ActionBar" .. "CastBar",
 }
 
 --- @class (partial) LUIE.ActionBar.Backbar
---- @field CreateUI fun()
---- @field RegisterPlatformStyle fun()
---- @field RegisterEvents fun()
---- @field GetButton fun(slotNum: number): ActionButton?
---- @field GetButtons fun(): table
---- @field UpdateButtonActionIds fun()
---- @field HideAllAbilityActionButtonDropCallouts fun()
---- @field ShowAppropriateAbilityActionButtonDropCallouts fun(actionType: integer, actionValue: integer)
---- @field OnPlayerActivatedScan fun()
---- @field OnSetHotbarEffect fun(changeType: number): boolean
---- @field GetInactiveHotbarCategory fun(): HotBarCategory
---- @field UpdateActivationHighlight fun(luiSlotNum: number)
---- @field SyncButtonUseFailure fun(button: ActionButton, physicalSlot: integer, hotbarCategory: HotBarCategory)
---- @field RefreshAllActivationHighlights fun()
---- @field OnPhysicalSlotVisualSync fun(physicalSlotIndex: number)
---- @field OnActionUpdateCooldowns fun()
---- @field SyncDefaultBackRowTimers fun()
 ActionBar.Backbar =
 {
     name = LUIE.name .. "ActionBar" .. "Backbar",
 }
 
---- Default settings for ActionBar module (saved vars shape).
---- @class ActionBarDefaults
---- @field blacklist AB_CustomList
---- @field GlobalShowGCD boolean
---- @field GlobalPotion boolean
---- @field GlobalFlash boolean
---- @field GlobalDesat boolean
---- @field GlobalLabelColor boolean
---- @field GlobalMethod integer
---- @field UltimateLabelEnabled boolean
---- @field UltimatePctEnabled boolean
---- @field UltimateHideFull boolean
---- @field UltimateGeneration boolean
---- @field UltimateLabelPosition integer
---- @field UltimateFontFace string
---- @field UltimateFontStyle FontStyle
---- @field UltimateFontSize integer
---- @field ShowTriggered boolean
---- @field ProcEnableSound boolean
---- @field ProcSoundName string
---- @field ShowToggled boolean
---- @field ShowToggledUltimate boolean
---- @field BarShowLabel boolean
---- @field BarLabelPosition integer
---- @field BarFontFace string
---- @field BarFontStyle FontStyle
---- @field BarFontSize integer
---- @field BarMillis boolean
---- @field BarMillisAboveTen boolean
---- @field BarMillisThreshold integer
---- @field BarShowBack boolean
---- @field BarDarkUnused boolean
---- @field BarDesaturateUnused boolean
---- @field BarHideUnused boolean
---- @field PotionTimerShow boolean
---- @field PotionTimerLabelPosition integer
---- @field PotionTimerFontFace string
---- @field PotionTimerFontStyle FontStyle
---- @field PotionTimerFontSize integer
---- @field PotionTimerColor boolean
---- @field PotionTimerMillis boolean
---- @field CastBarEnable boolean
---- @field CastBarSizeW number
---- @field CastBarSizeH number
---- @field CastBarIconSize number
---- @field CastBarTexture string
---- @field CastBarLabel boolean
---- @field CastBarTimer boolean
---- @field CastBarFontFace string
---- @field CastBarFontStyle FontStyle
---- @field CastBarFontSize integer
---- @field CastBarGradientC1 AB_Color
---- @field CastBarGradientC2 AB_Color
---- @field CastBarIconFrameColor AB_Color
---- @field CastBarHeavy boolean
---- @field CastBarTimerFormat integer
---- @field CastBarWeaveHelper boolean
---- @field CastBarWeaveThresholdMs integer
---- @field CastbarOffsetX number | nil
---- @field CastbarOffsetY number | nil
---- @field CastBarCustomPosition table | nil
---- @field CompanionUltimateLabelEnabled boolean
---- @field CompanionUltimatePctEnabled boolean
---- @field CompanionUltimateHideFull boolean
---- @field CompanionUltimateLabelPosition integer
---- @field CompanionUltimateFontFace string
---- @field CompanionUltimateFontStyle FontStyle
---- @field CompanionUltimateFontSize integer
---- @field CompanionUltimateColorDefault AB_Color
---- @field CompanionUltimateColor100 AB_Color
---- @field CompanionUltimateColor80 AB_Color
---- @field CompanionUltimateColor50 AB_Color
---- @field oocAlpha number
---- @field incAlpha number
-
 ActionBar.Enabled = false
---- @type ActionBarDefaults
+
 ActionBar.Defaults =
 {
     blacklist = {},
@@ -346,18 +128,15 @@ ActionBar.Defaults =
     incAlpha = 100,
 }
 
---- @type ActionBarDefaults
 ActionBar.SV = ...
 ActionBar.CastBarUnlocked = false
 
--- Slot / backbar indices (match ZOS action bar layout used throughout this module)
 ActionBar.BAR_INDEX_START = 3
 ActionBar.BAR_INDEX_END = 8
 ActionBar.BACKBAR_INDEX_END = 7
 ActionBar.BACKBAR_INDEX_OFFSET = 50
 ActionBar.OAKENSOUL_RING_ITEM_ID = 187658
 
---- Drop callout validity (mirrors ZOS ZO_ABILITY_DROP_CALLOUT_VALIDITY_FUNCTION_BY_ACTION_TYPE)
 ActionBar.DROP_CALLOUT_VALIDITY_BY_ACTION_TYPE =
 {
     [ACTION_TYPE_ABILITY] = IsValidAbilityForSlot,
@@ -400,51 +179,13 @@ ActionBar.uiUltimate =
 
 ActionBar.uiCompanionUltimate =
 {
-    LabelVal = nil,
-    LabelPct = nil,
+    LabelVal = nil, --- @type LabelControl
+    LabelPct = nil, --- @type LabelControl
     FadeTime = 0,
     NotFull = false,
 }
 
 --- @class LUIE_ACTIONBAR_GAMEPAD_CONSTANTS
---- @field abilitySlotOffsetX number
---- @field ultimateSlotOffsetX number
---- @field quickslotOffsetXFromCompanionUltimate number
---- @field quickslotOffsetXFromFirstSlot number
---- @field backbarHeightMultiplier number
---- @field backbarOffsetMultiplier number
---- @field backbarRowGap number
---- @field backRowSlotOffsetY number
---- @field backRowUltimateSlotOffsetY number
---- @field keybindBGWidth number
---- @field keybindBGWidthWithoutCompanion number
---- @field keybindBGHeight number
---- @field keybindBGAnchorOffsetX number
---- @field keybindBGAnchorOffsetXWithoutCompanion number
---- @field weaponSwapControl table?
---- @field weaponSwapOffsetX number
---- @field weaponSwapOffsetY number
-
---- @class LUIE_ACTIONBAR_KEYBOARD_CONSTANTS
---- @field abilitySlotOffsetX number
---- @field ultimateSlotOffsetX number
---- @field quickslotOffsetXFromCompanionUltimate number
---- @field quickslotOffsetXFromFirstSlot number
---- @field backbarHeightMultiplier number
---- @field backbarOffsetMultiplier number
---- @field backbarRowGap number
---- @field backRowSlotOffsetY number
---- @field backRowUltimateSlotOffsetY number
---- @field keybindBGWidth number
---- @field keybindBGWidthWithoutCompanion number
---- @field keybindBGHeight number
---- @field keybindBGAnchorOffsetX number
---- @field keybindBGAnchorOffsetXWithoutCompanion number
---- @field weaponSwapControl table?
---- @field weaponSwapOffsetX number
---- @field weaponSwapOffsetY number
-
---- @type LUIE_ACTIONBAR_GAMEPAD_CONSTANTS
 ActionBar.GAMEPAD_CONSTANTS =
 {
     abilitySlotOffsetX = 10,
@@ -465,7 +206,7 @@ ActionBar.GAMEPAD_CONSTANTS =
     weaponSwapOffsetY = 4,
 }
 
---- @type LUIE_ACTIONBAR_KEYBOARD_CONSTANTS
+--- @class LUIE_ACTIONBAR_KEYBOARD_CONSTANTS
 ActionBar.KEYBOARD_CONSTANTS =
 {
     abilitySlotOffsetX = 2,
@@ -486,7 +227,6 @@ ActionBar.KEYBOARD_CONSTANTS =
     weaponSwapOffsetY = -4,
 }
 
---- ZO_ActionBar1 must exist; call once from ActionBar.lua after resolving the action bar control.
 function ActionBar.AttachPlatformWeaponSwap(actionBar)
     local weaponSwap = actionBar:GetNamedChild("WeaponSwap")
     ActionBar.GAMEPAD_CONSTANTS.weaponSwapControl = weaponSwap

@@ -54,8 +54,8 @@ UnitFrames.Visualizers = {}
 UnitFrames.AvaCustFrames = {}
 
 --- Regen/degen strip control created by CreateRegenAnimation (texture + looping translate timeline).
---- @class UnitFrames.RegenStripControl : Control
---- @field animation AnimationObject
+--- @class UnitFrames.RegenStripControl : TextureControl
+--- @field animation AnimationObjectTranslate
 --- @field timeline AnimationTimeline
 
 --- Default frame power entry (label + color, optional threshold for target).
@@ -517,7 +517,6 @@ UnitFrames.SV = {}
 --- @field degen1 UnitFrames.RegenStripControl|nil
 --- @field degen2 UnitFrames.RegenStripControl|nil
 --- @field stat table|nil
---- @field label table|nil
 --- @field format string|nil
 
 --- @class UnitFrames.CustomFrameResourceRow : UnitFrames.CustomFramePowerEntry

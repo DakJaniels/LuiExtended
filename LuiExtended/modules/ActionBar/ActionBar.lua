@@ -1,4 +1,3 @@
---- @diagnostic disable: duplicate-doc-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended — ActionBar implementation (namespace: Namespace.lua)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
@@ -9,7 +8,8 @@ local LUIE = LUIE
 
 --- @class (partial) LUIE.ActionBar
 local ActionBar = LUIE.ActionBar
-
+local CastBar = ActionBar.CastBar
+local Backbar = ActionBar.Backbar
 local LuiData = LuiData
 local Data = LuiData.Data
 local Effects = Data.Effects
@@ -57,11 +57,13 @@ local ACTION_BUTTON_BORDERS = ActionBar.ACTION_BUTTON_BORDERS
 local BOUNCE_DURATION_MS = ActionBar.BOUNCE_DURATION_MS
 
 local isFancyActionBarEnabled = OtherAddonCompatability.isFancyActionBarPlusEnabled or LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
-local CastBar = ActionBar.CastBar
-local Backbar = ActionBar.Backbar
-local g_ultimateCost = 0     -- Cost of ultimate Ability in Slot
-local g_ultimateCurrent = 0  -- Current ultimate value
+
+local g_ultimateCost = 0    -- Cost of ultimate Ability in Slot
+local g_ultimateCurrent = 0 -- Current ultimate value
 local g_ultimateSlot = ActionBar.ULTIMATE_SLOT_INDEX
+local function GetPlayerUltimatePowerType()
+    return IsPlayerInWerewolfForm() and COMBAT_MECHANIC_FLAGS_WEREWOLF or COMBAT_MECHANIC_FLAGS_ULTIMATE
+end
 local g_uiProcAnimation = {} -- Animation for bar slots
 --- @type table<number, any>
 local g_uiCustomToggle = {}  -- Toggle slots for bar Slots (value: control or true placeholder)
@@ -267,7 +269,7 @@ end
 
 --- Refreshes backbar layout, companion anchors, and overlay fonts when input mode changes.
 local function OnGamepadPreferredModeChanged()
-    ActionBar.BackbarSetupTemplate()
+    Backbar.BackbarSetupTemplate()
     RefreshCompanionQuickslotAnchors()
     ActionBar.ApplyFont()
     ActionBar.ResetUltimateLabel()
@@ -290,7 +292,7 @@ local function OnSwapAnimationHalfDone(animation, button, isBackBarSlot)
             ActionBar.BarSlotUpdate(i + BACKBAR_INDEX_OFFSET, false, false)
             -- Don't try to setup back bar ultimate
             if i < 8 then
-                ActionBar.SetupBackBarIcons(targetButton, true)
+                Backbar.SetupBackBarIcons(targetButton, true)
             end
             if i == 8 then
                 ActionBar.UpdateUltimateLabel()
@@ -857,7 +859,7 @@ local function GetUpdatedAbilityDuration(abilityId)
 end
 
 --- @param tableKeyAbilityId integer BarHighlightOverride row key (slotted or combat source id)
---- @param overrideRow BarHighlightOverrideData
+--- @param overrideRow BarHighlightOverrideOptions
 local function ApplyBarHighlightDurationOverride(tableKeyAbilityId, overrideRow)
     if not overrideRow.duration then
         return
@@ -1034,8 +1036,8 @@ end
 function ActionBar.RegisterEvents()
     eventManager:UnregisterForUpdate(moduleName .. "OnUpdate")
     eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
-    eventManager:UnregisterForEvent(moduleName .. "CombatState")
-    eventManager:UnregisterForEvent(moduleName .. "ShowActionBarSetting")
+    eventManager:UnregisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE)
+    eventManager:UnregisterForEvent(moduleName .. "ShowActionBarSetting", EVENT_INTERFACE_SETTING_CHANGED)
 
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
@@ -1053,6 +1055,8 @@ function ActionBar.RegisterEvents()
     end)
 
     eventManager:UnregisterForEvent(moduleName, EVENT_COMBAT_EVENT)
+    eventManager:UnregisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT)
+    eventManager:UnregisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT)
     eventManager:UnregisterForEvent(moduleName, EVENT_POWER_UPDATE)
     eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED)
     eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED)
@@ -1306,13 +1310,14 @@ function ActionBar.OnPlayerActivated()
     ActionBar.CreateCompanionUltimateLabels()
     RefreshCompanionQuickslotAnchors()
     ActionBar.OnSlotsFullUpdate()
-    ActionBar.BackbarSetupTemplate()
+    Backbar.BackbarSetupTemplate()
     for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
         -- Update Bar Slots on initial load (don't want to do it normally when we do a slot update)
         ActionBar.BarSlotUpdate(i, true, false)
     end
-    ActionBar.OnPowerUpdatePlayer("player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE))
-
+    if ShouldShowCompanionUltimateButton() then
+        ActionBar.OnPowerUpdateCompanion("companion", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE))
+    end
     Backbar.HideAllAbilityActionButtonDropCallouts()
     Backbar.OnPlayerActivatedScan()
 
@@ -2741,8 +2746,8 @@ function ActionBar.HideSlot(slotNum, abilityId)
     end
     if slotNum > BACKBAR_INDEX_OFFSET then
         if slotNum ~= BAR_INDEX_END + BACKBAR_INDEX_OFFSET then
-            ActionBar.BackbarHideSlot(slotNum)
-            ActionBar.ToggleBackbarSaturation(slotNum, ActionBar.SV.BarDarkUnused)
+            Backbar.BackbarHideSlot(slotNum)
+            Backbar.ToggleBackbarSaturation(slotNum, ActionBar.SV.BarDarkUnused)
         end
     end
     if slotNum == g_ultimateSlot and ActionBar.SV.UltimatePctEnabled and IsSlotUsed(g_ultimateSlot, g_hotbarCategory) then
@@ -2760,8 +2765,8 @@ function ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, desaturate)
     ActionBar.ShowCustomToggle(slotNum)
     if slotNum > BACKBAR_INDEX_OFFSET then
         if slotNum ~= BAR_INDEX_END + BACKBAR_INDEX_OFFSET then
-            ActionBar.BackbarShowSlot(slotNum)
-            ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
+            Backbar.BackbarShowSlot(slotNum)
+            Backbar.ToggleBackbarSaturation(slotNum, desaturate)
         end
     end
     if slotNum == 8 and ActionBar.SV.UltimatePctEnabled then
@@ -3323,7 +3328,7 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
                     if customToggleControl then
                         desaturate = false
                         if customToggleControl:IsHidden() then
-                            ActionBar.BackbarHideSlot(showSlotNum)
+                            Backbar.BackbarHideSlot(showSlotNum)
                             desaturate = true
                         end
                     end
@@ -3337,12 +3342,24 @@ end
 --- -----------------------------------------------------------------------------
 --- Refreshes ultimate slot label (cost, percentage) from current power and slot ability.
 function ActionBar.UpdateUltimateLabel()
-    -- Get the currently slotted ultimate cost
-    local ultimateHotbarCategory = g_hotbarCategory
-    g_ultimateCost = GetSlotAbilityCost(g_ultimateSlot, COMBAT_MECHANIC_FLAGS_ULTIMATE, ultimateHotbarCategory) or 0
+    local powerType = GetPlayerUltimatePowerType()
+    local currentPower, maxPower, effectiveMax = GetUnitPower("player", powerType)
 
-    -- Update ultimate label
-    ActionBar.OnPowerUpdatePlayer("player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, g_ultimateCurrent, 0, 0)
+    -- Werewolf override stays
+    if powerType == COMBAT_MECHANIC_FLAGS_WEREWOLF then
+        maxPower = (maxPower > 0) and maxPower or 1000
+        effectiveMax = maxPower
+    end
+
+    -- Call handler with correct argument order
+    ActionBar.OnPowerUpdatePlayer(
+        "player",
+        nil, -- powerIndex (unused)
+        powerType,
+        currentPower,
+        maxPower,
+        effectiveMax
+    )
 end
 
 --- -----------------------------------------------------------------------------
@@ -3395,7 +3412,7 @@ function ActionBar.OnSlotsFullUpdate()
 
     for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
         local button = Backbar.GetButton(i)
-        ActionBar.SetupBackBarIcons(button, nil)
+        Backbar.SetupBackBarIcons(button, nil)
         ActionBar.BarSlotUpdate(i, true, false)
     end
 end
@@ -3581,73 +3598,76 @@ function ActionBar.OnPowerUpdatePlayer(unitTag, powerIndex, powerType, powerValu
     if unitTag ~= "player" then
         return
     end
-    if powerType ~= COMBAT_MECHANIC_FLAGS_ULTIMATE then
+    if powerType ~= GetPlayerUltimatePowerType() then
         return
     end
 
-    -- flag if ultimate is full - we"ll need it for ultimate generation texture
     uiUltimate.NotFull = (powerValue < powerMax)
-    -- Calculate the percentage to activation old one and current
-    local ultimatePercent = (g_ultimateCost > 0) and zo_floor((powerValue / g_ultimateCost) * 100) or 0
-    -- Set max percentage label to 100%.
+
+    local displayMax
+
+    if powerType == COMBAT_MECHANIC_FLAGS_WEREWOLF then
+        displayMax = (powerMax > 0) and powerMax or 1000
+    else
+        local slot = g_ultimateSlot
+        local hotbar = g_hotbarCategory
+        displayMax = GetSlotAbilityCost(slot, COMBAT_MECHANIC_FLAGS_ULTIMATE, hotbar)
+    end
+
+
+    local ultimatePercent = (displayMax > 0) and zo_floor((powerValue / displayMax) * 100) or 0
     if ultimatePercent > 100 then
         ultimatePercent = 100
     end
-    -- Update the tooltip only when the slot is used and percentage is enabled
+
     if IsSlotUsed(g_ultimateSlot, g_hotbarCategory) then
         if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-            -- Set % value
             if ActionBar.SV.UltimatePctEnabled then
                 uiUltimate.LabelPct:SetText(ultimatePercent .. "%")
             end
-            -- Set label value
             if ActionBar.SV.UltimateLabelEnabled then
-                uiUltimate.LabelVal:SetText(powerValue .. "/" .. g_ultimateCost)
+                uiUltimate.LabelVal:SetText(powerValue .. "/" .. displayMax )
             end
-            -- Pct label: show always when less then 100% and possibly if UltimateHideFull is false
+
             if ultimatePercent < 100 then
-                -- Check Ultimate Percent Setting & if slot is used then check if the slot is currently showing a toggle
                 local setHiddenPct = not ActionBar.SV.UltimatePctEnabled
                 local ultimateSlotToggle = GetCustomToggleControl(8)
                 if ActionBar.SV.ShowToggledUltimate and ultimateSlotToggle and not ultimateSlotToggle:IsHidden() then
                     setHiddenPct = true
                 end
                 uiUltimate.LabelPct:SetHidden(setHiddenPct)
-                -- Update Label Color
+
                 if ActionBar.SV.UltimateLabelEnabled then
                     for i = #uiUltimate.pctColours, 1, -1 do
                         if ultimatePercent < uiUltimate.pctColours[i].pct then
                             local color = uiUltimate.pctColours[i].colour
-                            local r, g, b, a = color[1], color[2], color[3], color[4]
-                            uiUltimate.LabelVal:SetColor(r, g, b, a)
+                            uiUltimate.LabelVal:SetColor(color[1], color[2], color[3], color[4])
                             break
                         end
                     end
                 end
             else
-                -- Check Ultimate Percent Setting & if slot is used then check if the slot is currently showing a toggle
                 local setHiddenPct = not ActionBar.SV.UltimatePctEnabled
                 local ultimateSlotToggle = GetCustomToggleControl(8)
-                if (ActionBar.SV.ShowToggledUltimate and ultimateSlotToggle and not ultimateSlotToggle:IsHidden()) or ActionBar.SV.UltimateHideFull then
+                if (ActionBar.SV.ShowToggledUltimate and ultimateSlotToggle and not ultimateSlotToggle:IsHidden())
+                or ActionBar.SV.UltimateHideFull then
                     setHiddenPct = true
                 end
                 uiUltimate.LabelPct:SetHidden(setHiddenPct)
-                -- Update Label Color
+
                 if ActionBar.SV.UltimateLabelEnabled then
                     local color = uiUltimate.colour
-                    local r, g, b, a = color[1], color[2], color[3], color[4]
-                    uiUltimate.LabelVal:SetColor(r, g, b, a)
+                    uiUltimate.LabelVal:SetColor(color[1], color[2], color[3], color[4])
                 end
             end
-            -- Set label hidden or showing
-            local setHiddenLabel = not ActionBar.SV.UltimateLabelEnabled
-            uiUltimate.LabelVal:SetHidden(setHiddenLabel)
+
+            uiUltimate.LabelVal:SetHidden(not ActionBar.SV.UltimateLabelEnabled)
         end
     else
         uiUltimate.LabelPct:SetHidden(true)
         uiUltimate.LabelVal:SetHidden(true)
     end
-    -- Update stored value
+
     g_ultimateCurrent = powerValue
 end
 

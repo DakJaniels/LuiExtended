@@ -147,12 +147,12 @@ function Shared.CreateRegenAnimation(parent, anchors, dims, alpha, number)
         return nil
     end
 
-    if #dims ~= 2 then
+    if dims == nil or #dims ~= 2 then
         dims = { parent:GetDimensions() }
     end
 
     local updateDims = { dims[2] * 1.9, dims[2] * 0.85 }
-    local control = parent:CreateControl("$(parent)_RegenAnim_" .. number, CT_TEXTURE)
+    local control = parent:CreateControl("$(parent)_RegenAnim_" .. number, CT_TEXTURE) ---@type UnitFrames.RegenStripControl
     if anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         control:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -169,7 +169,7 @@ function Shared.CreateRegenAnimation(parent, anchors, dims, alpha, number)
         local isValid, _, _, _, _, offsetY = control:GetAnchor(i)
         if isValid then
             control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_RegenAnimationTemplate", control)
-            control.animation = control.timeline:GetAnimation(1)
+            control.animation = control.timeline:GetAnimation(1) ---@type AnimationObjectTranslate
             control.animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
             return control
         end

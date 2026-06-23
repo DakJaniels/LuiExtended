@@ -62,7 +62,7 @@ function MiniMap.GetPinCategoryScaleForFilterGroup(pinGroup, settings)
     return scaleSettingKey and settings[scaleSettingKey]
 end
 
---- @param pinType MapPinType|nil
+--- @param pinType MapDisplayPinType|nil
 --- @return number
 function MiniMap.GetPinTypeScaleMultiplier(pinType)
     local settings = MiniMap.SV

@@ -5,10 +5,9 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
---- @type CAInternal
 local Internal = ChatAnnouncements.Internal
 local ColorizeColors = ChatAnnouncements.Colors
 

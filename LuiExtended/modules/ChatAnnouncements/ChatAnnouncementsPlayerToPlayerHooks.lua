@@ -14,8 +14,7 @@ local ChatOutput = LUIE.ChatOutput
 local GetString = GetString
 local zo_strformat = zo_strformat
 
-
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 -- HOOK PLAYER_TO_PLAYER Group Notifications to edit Ignore alert

@@ -6,13 +6,12 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
---- @type CAState
 local S = ChatAnnouncements.State
 
---- @type CAInternal
+
 local I = ChatAnnouncements.Internal
 
 local B = ChatAnnouncements.Brackets

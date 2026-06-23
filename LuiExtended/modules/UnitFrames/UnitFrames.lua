@@ -3965,7 +3965,7 @@ local function GetRaidIntegrationWidth()
 end
 
 --- @param unhide boolean When true, unhides the raid TLW after layout.
---- @param layoutAllRaidSlots boolean When true, lay out all 12 raid slots using SavedVariables (RaidLayout, spacers, bar sizes) even if the group has fewer members (UnitFrames slash debug preview). Uses unitTag `player` for role / leader / online checks so RaidIconOptions behave consistently.
+--- @param layoutAllRaidSlots boolean? When true, lay out all 12 raid slots using SavedVariables (RaidLayout, spacers, bar sizes) even if the group has fewer members (UnitFrames slash debug preview). Uses unitTag `player` for role / leader / online checks so RaidIconOptions behave consistently.
 function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
     if not UnitFrames.CustomFrames["RaidGroup1"] or not UnitFrames.CustomFrames["RaidGroup1"].tlw then
         return

@@ -245,7 +245,7 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field luiMiniMapPinWidth number|nil
 --- @field luiMiniMapPinHeight number|nil
 --- @field luiMiniMapPinScale number|nil
---- @field luiMiniMapPinType MapPinType|nil
+--- @field luiMiniMapPinType MapDisplayPinType|nil
 --- @field SetTexture fun(self: MiniMapPinControl, texture: string)
 --- @field SetColor fun(self: MiniMapPinControl, r: number, g: number, b: number, a?: number)
 --- @field SetTextureCoords fun(self: MiniMapPinControl, left: number, right: number, top: number, bottom: number)

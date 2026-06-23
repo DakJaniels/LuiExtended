@@ -3,7 +3,6 @@
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) UnitFrames
---- @field SV table
 local UnitFrames = LUIE.UnitFrames
 
 UnitFrames.FORMAT_DEFAULT = "Current + Shield - Trauma (Percentage%)"

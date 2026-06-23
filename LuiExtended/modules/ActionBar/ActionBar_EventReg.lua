@@ -9,10 +9,10 @@ local ActionBar = LUIE.ActionBar
 
 --- Register one filtered EVENT_COMBAT_EVENT handler for bar highlights; tracks name for unregister.
 --- Remaining arguments after eventName are passed to AddFilterForEvent (filter type/value pairs).
---- @param eventManager table
+--- @param eventManager EventManager 
 --- @param eventNamesList string[]
 --- @param eventName string
---- @param ... FilterTypeAndValue varargs passed to AddFilterForEvent
+--- @param ... RegisterForEventFilterVararg varargs passed to AddFilterForEvent
 function ActionBar.RegisterBarCombatEvent(eventManager, eventNamesList, eventName, ...)
     eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, combatAbilityId, overflow)
         ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, combatAbilityId, overflow)

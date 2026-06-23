@@ -204,7 +204,7 @@ function MiniMap.OnRootUpdate(control, time)
     if not MiniMap.ShouldRunFollowUpdate() then
         return
     end
-    MiniMap.UpdateHudMinimapPinMouseOverFromPointer()
+    -- MiniMap.UpdateHudMinimapPinMouseOverFromPointer()
     local runtime = MiniMap.runtime
     local now = GetFrameTimeMilliseconds()
     local followRefreshMs = MiniMap.GetMovingPinRefreshMs()

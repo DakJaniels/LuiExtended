@@ -150,6 +150,9 @@ function FrameObject.IsOverlandDifficultyEnabledOnFrame(self)
     return IsOverlandDifficultyEnabledForCategory(frameCategory)
 end
 
+---
+---@param difficulty OverlandDifficultyType
+---@return string iconPath
 function FrameObject.GetOverlandChallengeDifficultyIconPath(difficulty)
     if difficulty ~= nil then
         local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty]
@@ -224,7 +227,7 @@ end
 
 --- @param unitTag string
 --- @param nameText string
---- @param frameCategory UnitFrames.StaticControlDisplayCategory|string|nil
+--- @param frameCategory "group"|"player"|"raid"|"target"|nil
 --- @return string
 function UnitFrames.ApplyOverlandDifficultyNameIcon(unitTag, nameText, frameCategory)
     if nameText == nil or nameText == "" or unitTag == nil then

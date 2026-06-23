@@ -49,6 +49,22 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.4
+    "|cFFA500LuiExtended Version 7.2.5.4|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Ultimate now shows cost instead of out of 500.\n While in werewolf form, the ultimate count reflects your current fury count out of 1000.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Changed the base draw tier of unitframes so promts will now be able to draw on top.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Disabled tooltips for future me to look into fixing :)",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t General stability and performance improvements...",
+    "",
     -- Version Header 7.2.5.3
     "|cFFA500LuiExtended Version 7.2.5.3|r",
     "",

@@ -7,10 +7,10 @@
 local LUIE = LUIE
 
 -- ChatAnnouncements namespace (see ChatAnnouncementsTypes.lua for full partial class fields)
---- @class (partial) ChatAnnouncements
---- @type ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = {}
-
+--- @class (partial) LUIE.ChatAnnouncements
+--- @field Defaults CADefaults
 LUIE.ChatAnnouncements = ChatAnnouncements
 
 --- @class QueuedMessage
@@ -31,22 +31,16 @@ ChatAnnouncements.QueuedMessages = {} --- @type table<integer,QueuedMessage>
 ChatAnnouncements.QueuedMessagesCounter = 1
 
 -- Setup Color Table
-local caColors = {}
---- @cast caColors CAColors
-ChatAnnouncements.Colors = caColors
+ChatAnnouncements.Colors = {}
 
 -- Runtime flags, indexes, and session state (see ChatAnnouncements.lua init).
-local caState = {}
---- @cast caState CAState
-ChatAnnouncements.State = caState
+ChatAnnouncements.State = {}
 
 -- File-scope helpers (Lua 5.1 local limit); defined in ChatAnnouncements.lua / ChatAnnouncementsCSA.lua.
-local caInternal = {}
---- @cast caInternal CAInternal
-ChatAnnouncements.Internal = caInternal
+ChatAnnouncements.Internal = {}
 
 -- Bracket / link-style options for formatted CA strings (read-only).
---- @type CABrackets
+
 ChatAnnouncements.Brackets =
 {
     bracket1 =
@@ -96,613 +90,9 @@ ChatAnnouncements.Brackets =
     },
 }
 
-------------------------------------------------
--- DEFAULT VARIABLE SETUP ----------------------
-------------------------------------------------
-
---- RGBA color tuple (0-1). Some entries use 3 components (RGB).
---- @alias CA_Color number[]
-
---- Chat tab index to enabled state (1-5).
---- @alias CA_ChatTab table<integer, boolean>
-
---- Display announcement sub-section (CA / CSA / Alert toggles).
---- @class CADisplayAnnouncementSection
---- @field CA boolean
---- @field CSA boolean
---- @field Alert boolean
-
---- Display announcement section with optional Description (e.g. ZoneIC).
---- @class CADisplayAnnouncementSectionWithDesc
---- @field CA boolean
---- @field CSA boolean
---- @field Alert boolean
---- @field Description? boolean
-
---- Achievement default settings.
---- @class CAAchievementDefaults
---- @field AchievementCategoryIgnore table<integer, boolean> Inverted list of achievements to be tracked
---- @field AchievementProgressMsg string
---- @field AchievementCompleteMsg string
---- @field AchievementColorProgress boolean
---- @field AchievementColor1 CA_Color
---- @field AchievementColor2 CA_Color
---- @field AchievementCompPercentage boolean
---- @field AchievementUpdateCA boolean
---- @field AchievementUpdateAlert boolean
---- @field AchievementCompleteCA boolean
---- @field AchievementCompleteCSA boolean
---- @field AchievementCompleteAlwaysCSA boolean
---- @field AchievementCompleteAlert boolean
---- @field AchievementIcon boolean
---- @field AchievementCategory boolean
---- @field AchievementSubcategory boolean
---- @field AchievementDetails boolean
---- @field AchievementBracketOptions integer
---- @field AchievementCatBracketOptions integer
---- @field AchievementStep integer
-
---- Group default settings.
---- @class CAGroupDefaults
---- @field GroupCA boolean
---- @field GroupAlert boolean
---- @field GroupLFGCA boolean
---- @field GroupLFGAlert boolean
---- @field GroupLFGQueueCA boolean
---- @field GroupLFGQueueAlert boolean
---- @field GroupLFGCompleteCA boolean
---- @field GroupLFGCompleteCSA boolean
---- @field GroupLFGCompleteAlert boolean
---- @field GroupVoteCA boolean
---- @field GroupVoteAlert boolean
---- @field GroupRaidCA boolean
---- @field GroupRaidCSA boolean
---- @field GroupRaidAlert boolean
---- @field GroupRaidScoreCA boolean
---- @field GroupRaidScoreCSA boolean
---- @field GroupRaidScoreAlert boolean
---- @field GroupRaidBestScoreCA boolean
---- @field GroupRaidBestScoreCSA boolean
---- @field GroupRaidBestScoreAlert boolean
---- @field GroupRaidReviveCA boolean
---- @field GroupRaidReviveCSA boolean
---- @field GroupRaidReviveAlert boolean
-
---- Social default settings (Guild, Friend, Duel, Pledge of Mara).
---- @class CASocialDefaults
---- @field GuildCA boolean
---- @field GuildAlert boolean
---- @field GuildRankCA boolean
---- @field GuildRankAlert boolean
---- @field GuildManageCA boolean
---- @field GuildManageAlert boolean
---- @field GuildIcon boolean
---- @field GuildAllianceColor boolean
---- @field GuildColor CA_Color
---- @field GuildRankDisplayOptions integer
---- @field FriendIgnoreCA boolean
---- @field FriendIgnoreAlert boolean
---- @field FriendStatusCA boolean
---- @field FriendStatusAlert boolean
---- @field FriendStatusNameFormat integer
---- @field DuelCA boolean
---- @field DuelAlert boolean
---- @field DuelBoundaryCA boolean
---- @field DuelBoundaryCSA boolean
---- @field DuelBoundaryAlert boolean
---- @field DuelWonCA boolean
---- @field DuelWonCSA boolean
---- @field DuelWonAlert boolean
---- @field DuelStartCA boolean
---- @field DuelStartCSA boolean
---- @field DuelStartAlert boolean
---- @field DuelStartOptions integer
---- @field PledgeOfMaraCA boolean
---- @field PledgeOfMaraCSA boolean
---- @field PledgeOfMaraAlert boolean
---- @field PledgeOfMaraAlertOnlyFail boolean
-
---- Notify default settings (notifications, disguise, storage, etc.).
---- @class CANotifyDefaults
---- @field NotificationConfiscateCA boolean
---- @field NotificationConfiscateAlert boolean
---- @field NotificationLockpickCA boolean
---- @field NotificationLockpickAlert boolean
---- @field NotificationMailSendCA boolean
---- @field NotificationMailSendAlert boolean
---- @field NotificationMailErrorCA boolean
---- @field NotificationMailErrorAlert boolean
---- @field NotificationTradeCA boolean
---- @field NotificationTradeAlert boolean
---- @field SlashHomeCA boolean
---- @field SlashHomeAlert boolean
---- @field SlashCampaignCA boolean
---- @field SlashCampaignAlert boolean
---- @field CampaignQueueCA boolean
---- @field CampaignQueueAlert boolean
---- @field OutfitEquipCA boolean
---- @field OutfitEquipAlert boolean
---- @field ChallengeDifficultyCA boolean
---- @field ChallengeDifficultyAlert boolean
---- @field SocialErrorCA boolean
---- @field SocialErrorAlert boolean
---- @field DisguiseCA boolean
---- @field DisguiseCSA boolean
---- @field DisguiseAlert boolean
---- @field DisguiseWarnCA boolean
---- @field DisguiseWarnCSA boolean
---- @field DisguiseWarnAlert boolean
---- @field DisguiseAlertColor CA_Color
---- @field StorageRidingColor CA_Color
---- @field StorageRidingBookColor CA_Color
---- @field StorageRidingCA boolean
---- @field StorageRidingCSA boolean
---- @field StorageRidingAlert boolean
---- @field StorageBagColor CA_Color
---- @field StorageBagCA boolean
---- @field StorageBagCSA boolean
---- @field StorageBagAlert boolean
---- @field TimedActivityCA boolean
---- @field TimedActivityAlert boolean
---- @field TimedActivityProgressCA boolean
---- @field TimedActivityProgressAlert boolean
---- @field TimedActivityProgressScope string
---- @field TimedActivityProgressFrequency string
---- @field PromotionalEventsActivityCA boolean
---- @field PromotionalEventsActivityAlert boolean
---- @field CraftedAbilityCA boolean
---- @field CraftedAbilityAlert boolean
---- @field CraftedAbilityScriptCA boolean
---- @field CraftedAbilityScriptAlert boolean
-
---- Collectibles default settings.
---- @class CACollectiblesDefaults
---- @field CollectibleCA boolean
---- @field CollectibleCSA boolean
---- @field CollectibleAlert boolean
---- @field CollectibleBracket integer
---- @field CollectiblePrefix string
---- @field CollectibleIcon boolean
---- @field CollectibleColor1 CA_Color
---- @field CollectibleColor2 CA_Color
---- @field CollectibleCategory boolean
---- @field CollectibleSubcategory boolean
---- @field CollectibleUseCA boolean
---- @field CollectibleUseAlert boolean
---- @field CollectibleUsePetNickname boolean
---- @field CollectibleUseIcon boolean
---- @field CollectibleUseColor CA_Color
---- @field CollectibleUseCategory3 boolean
---- @field CollectibleUseCategory7 boolean
---- @field CollectibleUseCategory10 boolean
---- @field CollectibleUseCategory12 boolean
-
---- Lorebooks default settings.
---- @class CALorebooksDefaults
---- @field LorebookCA boolean
---- @field LorebookCSA boolean
---- @field LorebookCSALoreOnly boolean
---- @field LorebookAlert boolean
---- @field LorebookCollectionCA boolean
---- @field LorebookCollectionCSA boolean
---- @field LorebookCollectionAlert boolean
---- @field LorebookCollectionPrefix string
---- @field LorebookPrefix1 string
---- @field LorebookPrefix2 string
---- @field LorebookBracket integer
---- @field LorebookColor1 CA_Color
---- @field LorebookColor2 CA_Color
---- @field LorebookIcon boolean
---- @field LorebookShowHidden boolean
---- @field LorebookCategory boolean
-
---- Antiquities default settings.
---- @class CAAntiquitiesDefaults
---- @field AntiquityCA boolean
---- @field AntiquityCSA boolean
---- @field AntiquityAlert boolean
---- @field AntiquityBracket integer
---- @field AntiquityPrefix string
---- @field AntiquityPrefixBracket integer
---- @field AntiquitySuffix string
---- @field AntiquityColor CA_Color
---- @field AntiquityIcon boolean
-
---- Quests default settings.
---- @class CAQuestsDefaults
---- @field QuestShareCA boolean
---- @field QuestShareAlert boolean
---- @field QuestColorLocName CA_Color
---- @field QuestColorLocDescription CA_Color
---- @field QuestColorName CA_Color
---- @field QuestColorDescription CA_Color
---- @field QuestLocLong boolean
---- @field QuestIcon boolean
---- @field QuestLong boolean
---- @field QuestLocDiscoveryCA boolean
---- @field QuestLocDiscoveryCSA boolean
---- @field QuestLocDiscoveryAlert boolean
---- @field QuestLocObjectiveCA boolean
---- @field QuestLocObjectiveCSA boolean
---- @field QuestLocObjectiveAlert boolean
---- @field QuestLocCompleteCA boolean
---- @field QuestLocCompleteCSA boolean
---- @field QuestLocCompleteAlert boolean
---- @field QuestAcceptCA boolean
---- @field QuestAcceptCSA boolean
---- @field QuestAcceptAlert boolean
---- @field QuestCompleteCA boolean
---- @field QuestCompleteCSA boolean
---- @field QuestCompleteAlert boolean
---- @field QuestAbandonCA boolean
---- @field QuestAbandonCSA boolean
---- @field QuestAbandonAlert boolean
---- @field QuestFailCA boolean
---- @field QuestFailCSA boolean
---- @field QuestFailAlert boolean
---- @field QuestObjCompleteCA boolean
---- @field QuestObjCompleteCSA boolean
---- @field QuestObjCompleteAlert boolean
---- @field QuestObjUpdateCA boolean
---- @field QuestObjUpdateCSA boolean
---- @field QuestObjUpdateAlert boolean
---- @field QuestCounterFilterEnable boolean
---- @field QuestCounterFilterKeys table<string, boolean>
-
---- Experience (XP) default settings.
---- @class CAXPDefaults
---- @field ExperienceEnlightenedCA boolean
---- @field ExperienceEnlightenedCSA boolean
---- @field ExperienceEnlightenedAlert boolean
---- @field ExperienceLevelUpCA boolean
---- @field ExperienceLevelUpCSA boolean
---- @field ExperienceLevelUpAlert boolean
---- @field ExperienceLevelUpCSAExpand boolean
---- @field ExperienceLevelUpIcon boolean
---- @field ExperienceLevelColorByLevel boolean
---- @field ExperienceLevelUpColor CA_Color
---- @field Experience boolean
---- @field ExperienceIcon boolean
---- @field ExperienceMessage string
---- @field ExperienceName string
---- @field ExperienceHideCombat boolean
---- @field ExperienceFilter integer
---- @field ExperienceThrottle integer
---- @field ExperienceColorMessage CA_Color
---- @field ExperienceColorName CA_Color
-
---- Skills default settings.
---- @class CASkillsDefaults
---- @field SkillPointCA boolean
---- @field SkillPointCSA boolean
---- @field SkillPointAlert boolean
---- @field SkillPointSkyshard string
---- @field SkillPointBracket integer
---- @field SkillPointsPartial boolean
---- @field SkillPointColor1 CA_Color
---- @field SkillPointColor2 CA_Color
---- @field SkillLineUnlockCA boolean
---- @field SkillLineUnlockCSA boolean
---- @field SkillLineUnlockAlert boolean
---- @field SkillLineCA boolean
---- @field SkillLineCSA boolean
---- @field SkillLineAlert boolean
---- @field SkillAbilityCA boolean
---- @field SkillAbilityCSA boolean
---- @field SkillAbilityAlert boolean
---- @field SkillLineIcon boolean
---- @field SkillLineColor CA_Color
---- @field SkillGuildFighters boolean
---- @field SkillGuildMages boolean
---- @field SkillGuildUndaunted boolean
---- @field SkillGuildThieves boolean
---- @field SkillGuildDarkBrotherhood boolean
---- @field SkillGuildPsijicOrder boolean
---- @field SkillGuildIcon boolean
---- @field SkillGuildMsg string
---- @field SkillGuildRepName string
---- @field SkillGuildColor CA_Color
---- @field SkillGuildColorFG CA_Color
---- @field SkillGuildColorMG CA_Color
---- @field SkillGuildColorUD CA_Color
---- @field SkillGuildColorTG CA_Color
---- @field SkillGuildColorDB CA_Color
---- @field SkillGuildColorPO CA_Color
---- @field SkillGuildThrottle integer
---- @field SkillGuildThreshold integer
---- @field SkillGuildAlert boolean
-
---- Currency default settings.
---- @class CACurrencyDefaults
---- @field CurrencyAPColor CA_Color
---- @field CurrencyAPFilter integer
---- @field CurrencyAPName string
---- @field CurrencyIcon boolean
---- @field CurrencyAPShowChange boolean
---- @field CurrencyAPShowTotal boolean
---- @field CurrencyAPThrottle integer
---- @field CurrencyColor CA_Color
---- @field CurrencyColorDown CA_Color
---- @field CurrencyColorUp CA_Color
---- @field CurrencyContextColor boolean
---- @field CurrencyContextMergedColor boolean
---- @field CurrencyGoldChange boolean
---- @field CurrencyGoldColor CA_Color
---- @field CurrencyGoldFilter integer
---- @field CurrencyGoldHideAH boolean
---- @field CurrencyGoldHideListingAH boolean
---- @field CurrencyGoldName string
---- @field CurrencyGoldShowTotal boolean
---- @field CurrencyGoldThrottle boolean
---- @field CurrencyTVChange boolean
---- @field CurrencyTVColor CA_Color
---- @field CurrencyTVFilter integer
---- @field CurrencyTVName string
---- @field CurrencyTVShowTotal boolean
---- @field CurrencyTVThrottle integer
---- @field CurrencyWVChange boolean
---- @field CurrencyWVColor CA_Color
---- @field CurrencyWVName string
---- @field CurrencyWVShowTotal boolean
---- @field CurrencyTransmuteChange boolean
---- @field CurrencyTransmuteColor CA_Color
---- @field CurrencyTransmuteName string
---- @field CurrencyTransmuteShowTotal boolean
---- @field CurrencyCrownsChange boolean
---- @field CurrencyCrownsColor CA_Color
---- @field CurrencyCrownsName string
---- @field CurrencyCrownsShowTotal boolean
---- @field CurrencyCrownGemsChange boolean
---- @field CurrencyCrownGemsColor CA_Color
---- @field CurrencyCrownGemsName string
---- @field CurrencyCrownGemsShowTotal boolean
---- @field CurrencySealsChange boolean
---- @field CurrencySealsColor CA_Color
---- @field CurrencySealsName string
---- @field CurrencySealsShowTotal boolean
---- @field CurrencyTradeBarsChange boolean
---- @field CurrencyTradeBarsColor CA_Color
---- @field CurrencyTradeBarsName string
---- @field CurrencyTradeBarsShowTotal boolean
---- @field CurrencyTomePointsChange boolean
---- @field CurrencyTomePointsColor CA_Color
---- @field CurrencyTomePointsName string
---- @field CurrencyTomePointsShowTotal boolean
---- @field CurrencyTomePointCachesChange boolean
---- @field CurrencyTomePointCachesColor CA_Color
---- @field CurrencyTomePointCachesName string
---- @field CurrencyTomePointCachesShowTotal boolean
---- @field CurrencyTomeTokensChange boolean
---- @field CurrencyTomeTokensColor CA_Color
---- @field CurrencyTomeTokensName string
---- @field CurrencyTomeTokensShowTotal boolean
---- @field CurrencyTomeChallengeRerollsChange boolean
---- @field CurrencyTomeChallengeRerollsColor CA_Color
---- @field CurrencyTomeChallengeRerollsName string
---- @field CurrencyTomeChallengeRerollsShowTotal boolean
---- @field CurrencyOutfitTokenChange boolean
---- @field CurrencyOutfitTokenColor CA_Color
---- @field CurrencyOutfitTokenName string
---- @field CurrencyOutfitTokenShowTotal boolean
---- @field CurrencyUndauntedChange boolean
---- @field CurrencyUndauntedColor CA_Color
---- @field CurrencyUndauntedName string
---- @field CurrencyUndauntedShowTotal boolean
---- @field CurrencyEndlessChange boolean
---- @field CurrencyEndlessColor CA_Color
---- @field CurrencyEndlessName string
---- @field CurrencyEndlessShowTotal boolean
---- @field CurrencyMessageTotalAP string
---- @field CurrencyMessageTotalGold string
---- @field CurrencyMessageTotalTV string
---- @field CurrencyMessageTotalWV string
---- @field CurrencyMessageTotalTransmute string
---- @field CurrencyMessageTotalCrowns string
---- @field CurrencyMessageTotalCrownGems string
---- @field CurrencyMessageTotalSeals string
---- @field CurrencyMessageTotalTradeBars string
---- @field CurrencyMessageTotalTomePoints string
---- @field CurrencyMessageTotalTomePointCaches string
---- @field CurrencyMessageTotalTomeTokens string
---- @field CurrencyMessageTotalTomeChallengeRerolls string
---- @field CurrencyMessageTotalOutfitToken string
---- @field CurrencyMessageTotalUndaunted string
---- @field CurrencyMessageTotalEndless string
-
---- Inventory/Loot default settings.
---- @class CAInventoryDefaults
---- @field Loot boolean
---- @field LootLogOverride boolean
---- @field LootBank boolean
---- @field LootBlacklist boolean
---- @field LootTotal boolean
---- @field LootTotalString string
---- @field LootCraft boolean
---- @field LootGroup boolean
---- @field LootIcons boolean
---- @field LootShowCollectionStatus boolean
---- @field LootMail boolean
---- @field LootNotTrash boolean
---- @field LootOnlyNotable boolean
---- @field LootShowArmorType boolean
---- @field LootShowStyle boolean
---- @field LootShowTrait boolean
---- @field LootShowItemType boolean
---- @field LootConfiscate boolean
---- @field LootTrade boolean
---- @field LootVendor boolean
---- @field LootVendorCurrency boolean
---- @field LootVendorTotalCurrency boolean
---- @field LootVendorTotalItems boolean
---- @field LootShowCraftUse boolean
---- @field LootShowDestroy boolean
---- @field LootShowRemove boolean
---- @field LootShowTurnIn boolean
---- @field LootShowList boolean
---- @field LootShowUsePotion boolean
---- @field LootShowUseFood boolean
---- @field LootShowUseDrink boolean
---- @field LootShowUseRepairKit boolean
---- @field LootShowUseSoulGem boolean
---- @field LootShowUseSiege boolean
---- @field LootShowUseFish boolean
---- @field LootShowUseMisc boolean
---- @field LootShowContainer boolean
---- @field LootShowDisguise boolean
---- @field LootShowLockpick boolean
---- @field LootShowRecipe boolean
---- @field LootShowMotif boolean
---- @field LootShowStylePage boolean
---- @field LootRecipeHideAlert boolean
---- @field LootQuestAdd boolean
---- @field LootQuestRemove boolean
---- @field AttunableStationCA boolean
---- @field AttunableStationCSA boolean
---- @field AttunableStationAlert boolean
-
---- Context message strings (loot/currency action labels).
---- @class CAContextMessagesDefaults
---- @field CurrencyMessageConfiscate string
---- @field CurrencyMessageDeposit string
---- @field CurrencyMessageDepositStorage string
---- @field CurrencyMessageDepositFurnitureVault string
---- @field CurrencyMessageDepositGuild string
---- @field CurrencyMessageEarn string
---- @field CurrencyMessageLoot string
---- @field CurrencyMessageContainer string
---- @field CurrencyMessageSteal string
---- @field CurrencyMessageLost string
---- @field CurrencyMessagePickpocket string
---- @field CurrencyMessageReceive string
---- @field CurrencyMessageSpend string
---- @field CurrencyMessagePay string
---- @field CurrencyMessageUseKit string
---- @field CurrencyMessagePotion string
---- @field CurrencyMessageFood string
---- @field CurrencyMessageDrink string
---- @field CurrencyMessageDeploy string
---- @field CurrencyMessageStow string
---- @field CurrencyMessageFillet string
---- @field CurrencyMessageLearnRecipe string
---- @field CurrencyMessageLearnMotif string
---- @field CurrencyMessageLearnStyle string
---- @field CurrencyMessageExcavate string
---- @field CurrencyMessageTradeIn string
---- @field CurrencyMessageTradeInNoName string
---- @field CurrencyMessageTradeOut string
---- @field CurrencyMessageTradeOutNoName string
---- @field CurrencyMessageMailIn string
---- @field CurrencyMessageMailInNoName string
---- @field CurrencyMessageMailOut string
---- @field CurrencyMessageMailOutNoName string
---- @field CurrencyMessageMailCOD string
---- @field CurrencyMessagePostage string
---- @field CurrencyMessageWithdraw string
---- @field CurrencyMessageWithdrawStorage string
---- @field CurrencyMessageWithdrawFurnitureVault string
---- @field CurrencyMessageWithdrawGuild string
---- @field CurrencyMessageStable string
---- @field CurrencyMessageStorage string
---- @field CurrencyMessageWayshrine string
---- @field CurrencyMessageUnstuck string
---- @field CurrencyMessageChampion string
---- @field CurrencyMessageAttributes string
---- @field CurrencyMessageSkills string
---- @field CurrencyMessageMorphs string
---- @field CurrencyMessageSkillLine string
---- @field CurrencyMessageBounty string
---- @field CurrencyMessageTrader string
---- @field CurrencyMessageRepair string
---- @field CurrencyMessageListing string
---- @field CurrencyMessageListingValue string
---- @field CurrencyMessageList string
---- @field CurrencyMessageCampaign string
---- @field CurrencyMessageFence string
---- @field CurrencyMessageFenceNoV string
---- @field CurrencyMessageSellNoV string
---- @field CurrencyMessageBuyNoV string
---- @field CurrencyMessageBuybackNoV string
---- @field CurrencyMessageSell string
---- @field CurrencyMessageBuy string
---- @field CurrencyMessageBuyback string
---- @field CurrencyMessageLaunder string
---- @field CurrencyMessageLaunderNoV string
---- @field CurrencyMessageUse string
---- @field CurrencyMessageCraft string
---- @field CurrencyMessageExtract string
---- @field CurrencyMessageUpgrade string
---- @field CurrencyMessageUpgradeFail string
---- @field CurrencyMessageRefine string
---- @field CurrencyMessageDeconstruct string
---- @field CurrencyMessageResearch string
---- @field CurrencyMessageDestroy string
---- @field CurrencyMessageLockpick string
---- @field CurrencyMessageRemove string
---- @field CurrencyMessageQuestTurnIn string
---- @field CurrencyMessageQuestUse string
---- @field CurrencyMessageQuestExhaust string
---- @field CurrencyMessageQuestOffer string
---- @field CurrencyMessageQuestDiscard string
---- @field CurrencyMessageQuestConfiscate string
---- @field CurrencyMessageQuestOpen string
---- @field CurrencyMessageQuestAdminister string
---- @field CurrencyMessageQuestPlace string
---- @field CurrencyMessageQuestCombine string
---- @field CurrencyMessageQuestMix string
---- @field CurrencyMessageQuestBundle string
---- @field CurrencyMessageGroup string
---- @field CurrencyMessageDisguiseEquip string
---- @field CurrencyMessageDisguiseRemove string
---- @field CurrencyMessageDisguiseDestroy string
-
---- Display announcements defaults (Debug + named sections).
---- @class CADisplayAnnouncementsDefaults
---- @field Debug boolean
---- @field General CADisplayAnnouncementSection
---- @field GroupArea CADisplayAnnouncementSection
---- @field Respec CADisplayAnnouncementSection
---- @field ZoneIC CADisplayAnnouncementSectionWithDesc
---- @field ZoneCraglorn CADisplayAnnouncementSection
---- @field ArenaMaelstrom CADisplayAnnouncementSection
---- @field ArenaDragonstar CADisplayAnnouncementSection
---- @field DungeonEndlessArchive CADisplayAnnouncementSection
---- @field DungeonTrial CADisplayAnnouncementSection
---- @field ZoneNightMarket CADisplayAnnouncementSection
---- @field ZoneNightMarketBoulderDash CADisplayAnnouncementSection
---- @field ZoneNightMarketArachnid CADisplayAnnouncementSection
---- @field ZoneNightMarketGuidingLight CADisplayAnnouncementSection
---- @field ZoneNightMarketRewards CADisplayAnnouncementSection
---- @field ZoneNightMarketScavengingMaw CADisplayAnnouncementSection
---- @field ZoneNightMarketZoneHunt CADisplayAnnouncementSection
---- @field ZoneNightMarketEssence CADisplayAnnouncementSection
---- @field ZoneNightMarketMisc CADisplayAnnouncementSection
-
---- Root default settings for ChatAnnouncements.
---- @class CADefaults
---- @field ChatPlayerDisplayOptions integer
---- @field BracketOptionCharacter integer
---- @field BracketOptionItem integer
---- @field BracketOptionLorebook integer
---- @field BracketOptionCollectible integer
---- @field BracketOptionCollectibleUse integer
---- @field BracketOptionAchievement integer
---- @field Achievement CAAchievementDefaults
---- @field Group CAGroupDefaults
---- @field Social CASocialDefaults
---- @field Notify CANotifyDefaults
---- @field Collectibles CACollectiblesDefaults
---- @field Lorebooks CALorebooksDefaults
---- @field Antiquities CAAntiquitiesDefaults
---- @field Quests CAQuestsDefaults
---- @field XP CAXPDefaults
---- @field Skills CASkillsDefaults
---- @field Currency CACurrencyDefaults
---- @field Inventory CAInventoryDefaults
---- @field ContextMessages CAContextMessagesDefaults
---- @field DisplayAnnouncements CADisplayAnnouncementsDefaults
-
 ChatAnnouncements.Enabled = false
---- @type CADefaults
+
+--- @class CADefaults
 ChatAnnouncements.Defaults =
 {
     -- Chat Message Settings
@@ -1411,7 +801,6 @@ ChatAnnouncements.Defaults =
 }
 
 --- Maps ChatAnnouncements.SV.ContextMessages keys to LUIE_STRING_CA_* ids (runtime resolution via _MessageFormatResolver.lua).
---- @type CAContextMessageDefaultStringIds
 ChatAnnouncements.ContextMessageDefaultStringIds =
 {
     CurrencyMessageConfiscate = LUIE_STRING_CA_CURRENCY_MESSAGE_CONFISCATE,
@@ -1529,3 +918,34 @@ ChatAnnouncements.ContextMessageLegacyFormatByStringId =
         "您从公会银行取出 %s。",
     },
 }
+
+--- @class CAItemStackEntry
+--- @field icon string
+--- @field stack integer
+--- @field itemId integer
+--- @field itemType integer
+--- @field itemLink string
+--- @field stolen? boolean
+
+--- @class CAQueuedItemMessage
+--- @field message string
+--- @field type string
+--- @field formattedRecipient string
+--- @field color string|table
+--- @field logPrefix string
+--- @field totalString string
+--- @field groupLoot boolean
+--- @field guildAnnounceGuildId? integer
+
+--- Display announcement sub-section (CA / CSA / Alert toggles).
+--- @class CADisplayAnnouncementSection
+--- @field CA boolean
+--- @field CSA boolean
+--- @field Alert boolean
+
+--- Display announcement section with optional Description (e.g. ZoneIC).
+--- @class CADisplayAnnouncementSectionWithDesc
+--- @field CA boolean
+--- @field CSA boolean
+--- @field Alert boolean
+--- @field Description? boolean

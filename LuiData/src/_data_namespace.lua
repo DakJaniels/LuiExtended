@@ -113,6 +113,7 @@ local DebugStatus = {}
 --- @field BarHighlightSkullEmpoweredCast table<integer, integer> Third-cast ability id -> skull track buff id (reset charges)
 --- @field BarHighlightSkullChargeSource table<integer, string> Skull track buff id -> skullCastCombat | trackBuff
 --- @field BarHighlightSkullSlottedDisplay table<integer, integer> Slotted bound id -> raw charge for bar (0 = none; Venom up to 3)
+--- @field BarHighlightSlottedMajorCap table<integer, table<integer, integer>> Display id -> slotted ability id -> max duration (ms) this slotted row should accept from the player buff
 --- @field BarHighlightStackConsume table<integer, integer> Bound ability id -> combatTrack stack buff id (consume one stack on cast)
 --- @field BarHighlightStackSpendAllOnCast table<integer, integer> Slotted ability id -> track buff id (clear all stacks on cast)
 --- @field BarHighlightReloadStackFromBuff table<integer, boolean> Track buff id: reload bar stacks from GetUnitBuffInfo on slot update
@@ -296,8 +297,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7221
-LuiData.addonVersion = "7.2.2.1"
+LuiData.version = 7222
+LuiData.addonVersion = "7.2.2.2"
 
 --- @class (partial) Data
 LuiData.Data =

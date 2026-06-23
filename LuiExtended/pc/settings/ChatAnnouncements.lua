@@ -6,7 +6,7 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 local LAM = LUIE.LAM
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 local zo_strformat = zo_strformat

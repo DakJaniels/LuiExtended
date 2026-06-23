@@ -6,12 +6,10 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
---- @type CAState
 local S = ChatAnnouncements.State
---- @type CAInternal
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
 
@@ -412,7 +410,7 @@ end
 --- @param _ integer
 --- @param campaignId integer
 --- @param isGroup boolean
---- @param state CampaignQueueRequestState
+--- @param state CampaignQueueRequestStateType
 function ChatAnnouncements.OnCampaignQueueStateChanged(_, campaignId, isGroup, state)
     local campaignName = GetCampaignName(campaignId)
     local stateLabel = CampaignQueueStateLabel(campaignId, isGroup, state)
@@ -2923,11 +2921,11 @@ function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
     end
 
     eventManager:RegisterForUpdate(moduleName .. "ClearMailTakingFlag", 200, function ()
-        S.g_mailIsTakingMail = false
-        if not S.g_mailBatchTakeAll then
-            ChatAnnouncements.SendDelayedMailItems()
-        end
-    end, true)
+                                       S.g_mailIsTakingMail = false
+                                       if not S.g_mailBatchTakeAll then
+                                           ChatAnnouncements.SendDelayedMailItems()
+                                       end
+                                   end, true)
 
     if not I.ShouldSkipMailReceivedDeletedNotifications() and (ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert) then
         local mailString
@@ -2962,8 +2960,8 @@ function ChatAnnouncements.OnMailTakeAttachedMoney(eventId, mailId)
         I.EnqueueMailLootEntry(mailId, mailTarget)
     end
     eventManager:RegisterForUpdate(moduleName .. "ClearMailTakingFlag", 200, function ()
-        S.g_mailIsTakingMail = false
-    end, true)
+                                       S.g_mailIsTakingMail = false
+                                   end, true)
 end
 
 --- @param eventId integer
@@ -3637,7 +3635,6 @@ function ChatAnnouncements.OnCraftedAbilityScriptLockStateChanged(eventId, craft
         end
     end
 end
-
 
 --- @param eventId integer
 --- @param numEligibleSlotsTransferred integer
@@ -4414,7 +4411,6 @@ function ChatAnnouncements.OnInventoryItemUsed(eventId, itemSoundCategory)
     end
 end
 
-
 -- Simple posthook into ZOS crafting mode functions, based off MultiCraft, thanks Ayantir!
 function ChatAnnouncements.CraftModeOverrides()
     -- Get SMITHING mode
@@ -4463,8 +4459,6 @@ function ChatAnnouncements.CraftModeOverrides()
         [6] = ChatAnnouncements.GetContextMessage("CurrencyMessageUse"),
     }
 end
-
-
 
 -- TODO: DELETE - This is a dummy function for testing chat messages being cut off.
 function ChatAnnouncements.Dummy()
@@ -4529,7 +4523,6 @@ function ChatAnnouncements.JusticeDisplayConfiscate()
     end
     S.g_itemsConfiscated = false
 end
-
 
 function ChatAnnouncements.JusticeRemovePrint()
     S.g_itemsConfiscated = false

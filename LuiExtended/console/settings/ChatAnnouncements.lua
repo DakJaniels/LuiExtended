@@ -8,7 +8,7 @@ local LUIE = LUIE
 
 local SettingsAPI = LUIE.ConsoleSettingsAPI
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 local GetAchievementCategoryInfo = GetAchievementCategoryInfo

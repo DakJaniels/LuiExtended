@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\pc\lam_extension\LUIE_ComboBoxStatusbarEntry.xml
+-- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\pc\lam_extension\LUIE_ComboBoxStatusbarEntry.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -33,4 +33,4 @@ LUIE_ComboBoxStatusbarEntryPreviewBar = {}
 ---@field Anchor2 {point: AnchorPosition, offsetX: layout_measurement}
 LUIE_ComboBoxStatusbarEntryLabel = {}
 ---------- LVL: 05 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended\pc\lam_extension\LUIE_ComboBoxStatusbarEntry.xml
+-- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\pc\lam_extension\LUIE_ComboBoxStatusbarEntry.xml
