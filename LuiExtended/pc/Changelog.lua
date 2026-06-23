@@ -49,12 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
-        -- Version Header 7.2.5.5
+    -- Version Header 7.2.5.5
     "|cFFA500LuiExtended Version 7.2.5.5|r",
     "",
-        -- Fix
+    -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default Unit Frames -> Default TARGET Frame with Use Extender option now shows Veterancy Rank Icon to the right of the Alliance Rank Icon.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t General stability and performance improvements...",
     "",
     -- Version Header 7.2.5.4
     "|cFFA500LuiExtended Version 7.2.5.4|r",
