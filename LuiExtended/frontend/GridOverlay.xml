@@ -5,14 +5,14 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
   <Controls>
-    <TopLevelControl name="LUIEGridOverlayShared"
+    <TopLevelControl name="LUIE_Grid_Overlay"
                      mouseEnabled="false"
                      movable="false"
                      clampedToScreen="false"
                      hidden="true"
                      alpha="1"
                      layer="BACKGROUND"
-                     level="1"
+                     level="0"
                      tier="LOW">
       <Anchor point="TOPLEFT"
               relativeTo="GuiRoot"
@@ -27,19 +27,19 @@
     </TopLevelControl>
     <!-- Virtual template for grid lines (used by line pool); two names so
             vertical/horizontal pools get unique control names via ZO_ObjectPool_CreateControl -->
-    <Line name="LUIE_GridOverlay_Line_V"
+    <Line name="LUIE_Grid_Overlay_Line_V"
           virtual="true"
           hidden="true"
           thickness="1"
           layer="BACKGROUND"
-          level="2"
+          level="0"
           tier="LOW" />
-    <Line name="LUIE_GridOverlay_Line_H"
+    <Line name="LUIE_Grid_Overlay_Line_H"
           virtual="true"
           hidden="true"
           thickness="1"
           layer="BACKGROUND"
-          level="2"
+          level="0"
           tier="LOW" />
   </Controls>
 </GuiXml>
