@@ -5,8 +5,8 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
--- ChatAnnouncements namespace
---- @class (partial) ChatAnnouncements
+
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 

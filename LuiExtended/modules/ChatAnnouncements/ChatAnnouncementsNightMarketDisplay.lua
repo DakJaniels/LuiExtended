@@ -3,7 +3,7 @@
 -- Each primary line has its own LUIE string; lookups are built from GetString for localization.
 -- -----------------------------------------------------------------------------
 
---- @class ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 local function BuildPrimaryTextLookup(stringIds)

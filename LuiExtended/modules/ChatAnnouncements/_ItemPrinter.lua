@@ -6,10 +6,9 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
---- @type CAState
 local S = ChatAnnouncements.State
 
 local ChatOutput = LUIE.ChatOutput
@@ -127,12 +126,12 @@ end
 --- @param itemLink string
 --- @param receivedBy string
 --- @param logPrefix string
---- @param gainOrLoss integer
---- @param filter boolean
---- @param groupLoot boolean
---- @param alwaysFirst boolean
---- @param delay boolean
---- @param showCollectionStatus boolean
+--- @param gainOrLoss? integer
+--- @param filter? boolean
+--- @param groupLoot? boolean
+--- @param alwaysFirst? boolean
+--- @param delay? boolean
+--- @param showCollectionStatus? boolean
 function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay, showCollectionStatus)
     if filter then
         if not ChatAnnouncements.ItemFilter(itemType, itemId, itemLink, false) then

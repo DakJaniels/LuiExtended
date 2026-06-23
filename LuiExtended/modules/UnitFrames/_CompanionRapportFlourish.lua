@@ -28,7 +28,7 @@ local RAPPORT_GRADIENT_END = ZO_ColorDef:New("009966")   -- Green
 --- @return AnimationTimeline
 local function CreateRapportFlourishTimeline(label)
     local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_CompanionRapportFlourishAnimation", label)
-    local translateAnimation = timeline:GetAnimation(1)
+    local translateAnimation = timeline:GetAnimation(1) ---@type AnimationObjectTranslate
     translateAnimation:SetTranslateOffsets(0, 0, 0, -FLOURISH_RISE_PX)
     translateAnimation:SetDuration(FLOURISH_DURATION_MS)
 

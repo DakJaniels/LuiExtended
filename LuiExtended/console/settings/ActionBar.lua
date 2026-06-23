@@ -10,6 +10,8 @@ local SettingsAPI = LUIE.ConsoleSettingsAPI
 
 --- @class (partial) LUIE.ActionBar
 local ActionBar = LUIE.ActionBar
+local CastBar = ActionBar.CastBar
+local Backbar = ActionBar.Backbar
 
 local zo_strformat = zo_strformat
 local string_format = string.format
@@ -794,7 +796,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.BarShowBack = value
                 ActionBar.OnSlotsFullUpdate()
-                ActionBar.BackbarToggleSettings()
+                Backbar.BackbarToggleSettings()
             end,
             default = Defaults.BarShowBack,
             disable = function () return not LUIE.SV.ActionBar_Enabled end
@@ -809,7 +811,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.BarDarkUnused = value
                 ActionBar.OnSlotsFullUpdate()
-                ActionBar.BackbarToggleSettings()
+                Backbar.BackbarToggleSettings()
             end,
             default = Defaults.BarDarkUnused,
             disable = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end
@@ -824,7 +826,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.BarDesaturateUnused = value
                 ActionBar.OnSlotsFullUpdate()
-                ActionBar.BackbarToggleSettings()
+                Backbar.BackbarToggleSettings()
             end,
             default = Defaults.BarDesaturateUnused,
             disable = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end
@@ -839,7 +841,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.BarHideUnused = value
                 ActionBar.OnSlotsFullUpdate()
-                ActionBar.BackbarToggleSettings()
+                Backbar.BackbarToggleSettings()
             end,
             default = Defaults.BarHideUnused,
             disable = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end
@@ -1018,7 +1020,7 @@ function ActionBar.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE_TP),
             getFunction = function () return ActionBar.CastBarUnlocked end,
             setFunction = function (value)
-                ActionBar.SetMovingState(value)
+                CastBar.SetMovingState(value)
             end,
             default = false,
             disable = castBarOptionDisabled,
@@ -1031,7 +1033,7 @@ function ActionBar.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_RESET_TP),
             buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
             clickHandler = function ()
-                ActionBar.ResetCastBarPosition()
+                CastBar.ResetCastBarPosition()
                 if ActionBar.consoleSettingsPanel then
                     SettingsAPI:RefreshPanel(ActionBar.consoleSettingsPanel)
                 end
@@ -1050,14 +1052,14 @@ function ActionBar.CreateConsoleSettings()
             max = gw,
             step = 10,
             getFunction = function ()
-                return ActionBar.GetCastBarOffsetX()
+                return CastBar.GetCastBarOffsetX()
             end,
             setFunction = function (value)
                 ActionBar.SV.CastbarOffsetX = value
                 if ActionBar.SV.CastbarOffsetY == nil then
-                    ActionBar.SV.CastbarOffsetY = ActionBar.GetCastBarOffsetY()
+                    ActionBar.SV.CastbarOffsetY = CastBar.GetCastBarOffsetY()
                 end
-                ActionBar.SetCastBarPosition()
+                CastBar.SetCastBarPosition()
             end,
             disable = castBarOptionDisabled,
         }
@@ -1071,14 +1073,14 @@ function ActionBar.CreateConsoleSettings()
             max = gh,
             step = 10,
             getFunction = function ()
-                return ActionBar.GetCastBarOffsetY()
+                return CastBar.GetCastBarOffsetY()
             end,
             setFunction = function (value)
                 if ActionBar.SV.CastbarOffsetX == nil then
-                    ActionBar.SV.CastbarOffsetX = ActionBar.GetCastBarOffsetX()
+                    ActionBar.SV.CastbarOffsetX = CastBar.GetCastBarOffsetX()
                 end
                 ActionBar.SV.CastbarOffsetY = value
-                ActionBar.SetCastBarPosition()
+                CastBar.SetCastBarPosition()
             end,
             disable = castBarOptionDisabled,
         }
@@ -1094,7 +1096,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarSizeW end,
             setFunction = function (value)
                 Settings.CastBarSizeW = value
-                ActionBar.ResizeCastBar()
+                CastBar.ResizeCastBar()
             end,
             default = Defaults.CastBarSizeW,
             disable = castBarOptionDisabled,
@@ -1111,7 +1113,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarSizeH end,
             setFunction = function (value)
                 Settings.CastBarSizeH = value
-                ActionBar.ResizeCastBar()
+                CastBar.ResizeCastBar()
             end,
             default = Defaults.CastBarSizeH,
             disable = castBarOptionDisabled,
@@ -1128,7 +1130,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarIconSize end,
             setFunction = function (value)
                 Settings.CastBarIconSize = value
-                ActionBar.ResizeCastBar()
+                CastBar.ResizeCastBar()
             end,
             default = Defaults.CastBarIconSize,
             disable = castBarOptionDisabled,
@@ -1202,7 +1204,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CastBarFontFace = item.data
                 SettingsAPI:MarkFontDeferred("actionBar")
-                ActionBar.UpdateCastBar()
+                CastBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontFace,
             disable = castBarFontDisabled,
@@ -1221,7 +1223,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.CastBarFontSize = value
                 SettingsAPI:MarkFontDeferred("actionBar")
-                ActionBar.UpdateCastBar()
+                CastBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontSize,
             disable = castBarFontDisabled,
@@ -1245,7 +1247,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CastBarFontStyle = item.data
                 SettingsAPI:MarkFontDeferred("actionBar")
-                ActionBar.UpdateCastBar()
+                CastBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontStyle,
             disable = castBarFontDisabled,
@@ -1260,7 +1262,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarTexture end,
             setFunction = function (combobox, value, item)
                 Settings.CastBarTexture = item.data
-                ActionBar.UpdateCastBar()
+                CastBar.UpdateCastBar()
             end,
             default = Defaults.CastBarTexture,
             disable = castBarOptionDisabled,
@@ -1274,7 +1276,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarGradientC1[1], Settings.CastBarGradientC1[2], Settings.CastBarGradientC1[3], Settings.CastBarGradientC1[4] end,
             setFunction = function (r, g, b, a)
                 Settings.CastBarGradientC1 = { r, g, b, a }
-                ActionBar.UpdateCastBar()
+                CastBar.UpdateCastBar()
             end,
             default = Defaults.CastBarGradientC1,
             disable = castBarOptionDisabled,
@@ -1288,7 +1290,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarGradientC2[1], Settings.CastBarGradientC2[2], Settings.CastBarGradientC2[3], Settings.CastBarGradientC2[4] end,
             setFunction = function (r, g, b, a)
                 Settings.CastBarGradientC2 = { r, g, b, a }
-                ActionBar.UpdateCastBar()
+                CastBar.UpdateCastBar()
             end,
             default = Defaults.CastBarGradientC2,
             disable = castBarOptionDisabled,
@@ -1302,7 +1304,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarIconFrameColor[1], Settings.CastBarIconFrameColor[2], Settings.CastBarIconFrameColor[3], Settings.CastBarIconFrameColor[4] end,
             setFunction = function (r, g, b, a)
                 Settings.CastBarIconFrameColor = { r, g, b, a }
-                ActionBar.UpdateCastBar()
+                CastBar.UpdateCastBar()
             end,
             default = Defaults.CastBarIconFrameColor,
             disable = castBarOptionDisabled,

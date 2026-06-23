@@ -6,7 +6,7 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 local ChatOutput = LUIE.ChatOutput
@@ -26,7 +26,6 @@ ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_MILESTONES = "milestones"
 ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_SUPPRESS_ALL = "suppress_all"
 ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_COMPLETE_ONLY = "complete_only"
 
---- @type CAQuestCounterFilterStaging
 ChatAnnouncements.QuestCounterFilterStaging =
 {
     questIdentifier = "",

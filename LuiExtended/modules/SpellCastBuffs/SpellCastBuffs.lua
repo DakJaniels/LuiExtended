@@ -679,7 +679,7 @@ function SpellCastBuffs.Initialize(enabled)
     InitializePreviewLabels()
     LUIE.RefreshMoverOverlayFonts()
 
-    eventManager:UnregisterForEvent(moduleName .. "CombatState")
+    eventManager:UnregisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE)
     eventManager:RegisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE, function ()
         SpellCastBuffs.ApplyDisplayAlpha()
     end)

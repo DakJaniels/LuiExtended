@@ -310,7 +310,7 @@ function LUIE.CreateSettings()
 
     local function ProfileCopyRefreshBucketDropdown()
         copyPick_bucket = nil
-        local ctrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_Bucket")
+        local ctrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_Bucket") ---@type LUIE_LAM_ProfileCopy_Bucket
         if not (ctrl and ctrl.UpdateChoices) then
             return
         end

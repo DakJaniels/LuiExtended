@@ -10,7 +10,7 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 local LOOT_TOTAL_STRING_ID = LUIE_STRING_CA_LOOT_MESSAGE_TOTAL

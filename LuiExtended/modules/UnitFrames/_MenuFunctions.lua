@@ -54,9 +54,6 @@ end
 local LUIE_COMPASS_BOSS_BAR_HIDDEN_REASON = "LUIE_CustomBossFrames"
 
 function UnitFrames.ResetCompassBarMenu()
-    if not COMPASS_FRAME then
-        return
-    end
     local useCompassBossBar = UnitFrames.GetEffectiveDefaultFramesMode("Boss") == UnitFrames.DEFAULT_FRAMES_MODE_KEEP_DEFAULT
     COMPASS_FRAME:SetBossBarHiddenForReason(LUIE_COMPASS_BOSS_BAR_HIDDEN_REASON, not useCompassBossBar)
     if useCompassBossBar then

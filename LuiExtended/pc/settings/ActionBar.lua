@@ -9,6 +9,8 @@ local SettingsAPI = LUIE.SettingsAPI
 
 --- @class (partial) LUIE.ActionBar
 local ActionBar = LUIE.ActionBar
+local CastBar = ActionBar.CastBar
+local Backbar = ActionBar.Backbar
 
 local zo_strformat = zo_strformat
 local string_format = string.format
@@ -712,7 +714,7 @@ function ActionBar.CreateSettings()
                 setFunc = function (value)
                     Settings.BarShowBack = value
                     ActionBar.OnSlotsFullUpdate()
-                    ActionBar.BackbarToggleSettings()
+                    Backbar.BackbarToggleSettings()
                 end,
                 width = "full",
                 disabled = function () return not LUIE.SV.ActionBar_Enabled end,
@@ -726,7 +728,7 @@ function ActionBar.CreateSettings()
                 setFunc = function (value)
                     Settings.BarDarkUnused = value
                     ActionBar.OnSlotsFullUpdate()
-                    ActionBar.BackbarToggleSettings()
+                    Backbar.BackbarToggleSettings()
                 end,
                 width = "full",
                 disabled = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end,
@@ -740,7 +742,7 @@ function ActionBar.CreateSettings()
                 setFunc = function (value)
                     Settings.BarDesaturateUnused = value
                     ActionBar.OnSlotsFullUpdate()
-                    ActionBar.BackbarToggleSettings()
+                    Backbar.BackbarToggleSettings()
                 end,
                 width = "full",
                 disabled = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end,
@@ -754,7 +756,7 @@ function ActionBar.CreateSettings()
                 setFunc = function (value)
                     Settings.BarHideUnused = value
                     ActionBar.OnSlotsFullUpdate()
-                    ActionBar.BackbarToggleSettings()
+                    Backbar.BackbarToggleSettings()
                 end,
                 width = "full",
                 disabled = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end,
@@ -879,18 +881,18 @@ function ActionBar.CreateSettings()
                 getFunc = function () return castBarMovingEnabled end,
                 setFunc = function (value)
                     castBarMovingEnabled = value
-                    ActionBar.SetMovingState(value)
+                    CastBar.SetMovingState(value)
                 end,
                 width = "half",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
                 default = false,
-                resetFunc = ActionBar.ResetCastBarPosition,
+                resetFunc = CastBar.ResetCastBarPosition,
             },
             {
                 type = "button",
                 name = GetString(LUIE_STRING_LAM_RESETPOSITION),
                 tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_RESET_TP),
-                func = ActionBar.ResetCastBarPosition,
+                func = CastBar.ResetCastBarPosition,
                 width = "half",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
             },
@@ -916,7 +918,7 @@ function ActionBar.CreateSettings()
                 getFunc = function () return Settings.CastBarSizeW end,
                 setFunc = function (value)
                     Settings.CastBarSizeW = value
-                    ActionBar.ResizeCastBar()
+                    CastBar.ResizeCastBar()
                 end,
                 width = "full",
                 disabled = function () return not LUIE.SV.ActionBar_Enabled end,
@@ -931,7 +933,7 @@ function ActionBar.CreateSettings()
                 getFunc = function () return Settings.CastBarSizeH end,
                 setFunc = function (value)
                     Settings.CastBarSizeH = value
-                    ActionBar.ResizeCastBar()
+                    CastBar.ResizeCastBar()
                 end,
                 width = "full",
                 disabled = function () return not LUIE.SV.ActionBar_Enabled end,
@@ -946,7 +948,7 @@ function ActionBar.CreateSettings()
                 getFunc = function () return Settings.CastBarIconSize end,
                 setFunc = function (value)
                     Settings.CastBarIconSize = value
-                    ActionBar.ResizeCastBar()
+                    CastBar.ResizeCastBar()
                 end,
                 width = "full",
                 disabled = function () return not LUIE.SV.ActionBar_Enabled end,
@@ -999,7 +1001,7 @@ function ActionBar.CreateSettings()
                 function (var)
                     Settings.CastBarFontFace = var
                     ActionBar.ApplyFont()
-                    ActionBar.UpdateCastBar()
+                    CastBar.UpdateCastBar()
                 end,
                 "full",
                 function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
@@ -1020,7 +1022,7 @@ function ActionBar.CreateSettings()
                 setFunc = function (value)
                     Settings.CastBarFontSize = value
                     ActionBar.ApplyFont()
-                    ActionBar.UpdateCastBar()
+                    CastBar.UpdateCastBar()
                 end,
                 width = "full",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
@@ -1033,7 +1035,7 @@ function ActionBar.CreateSettings()
                 function (var)
                     Settings.CastBarFontStyle = var
                     ActionBar.ApplyFont()
-                    ActionBar.UpdateCastBar()
+                    CastBar.UpdateCastBar()
                 end,
                 function () return Settings.CastBarFontFace end,
                 function () return Settings.CastBarFontSize end,
@@ -1047,7 +1049,7 @@ function ActionBar.CreateSettings()
                 function () return Settings.CastBarTexture end,
                 function (value)
                     Settings.CastBarTexture = value
-                    ActionBar.UpdateCastBar()
+                    CastBar.UpdateCastBar()
                 end,
                 "full",
                 function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
@@ -1060,7 +1062,7 @@ function ActionBar.CreateSettings()
                 getFunc = function () return unpack(Settings.CastBarGradientC1) end,
                 setFunc = function (r, g, b, a)
                     Settings.CastBarGradientC1 = { r, g, b, a }
-                    ActionBar.UpdateCastBar()
+                    CastBar.UpdateCastBar()
                 end,
                 width = "half",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
@@ -1073,7 +1075,7 @@ function ActionBar.CreateSettings()
                 getFunc = function () return unpack(Settings.CastBarGradientC2) end,
                 setFunc = function (r, g, b, a)
                     Settings.CastBarGradientC2 = { r, g, b, a }
-                    ActionBar.UpdateCastBar()
+                    CastBar.UpdateCastBar()
                 end,
                 width = "half",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
@@ -1086,7 +1088,7 @@ function ActionBar.CreateSettings()
                 getFunc = function () return unpack(Settings.CastBarIconFrameColor) end,
                 setFunc = function (r, g, b, a)
                     Settings.CastBarIconFrameColor = { r, g, b, a }
-                    ActionBar.UpdateCastBar()
+                    CastBar.UpdateCastBar()
                 end,
                 width = "full",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,

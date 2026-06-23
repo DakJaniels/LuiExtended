@@ -14,7 +14,7 @@ MiniMap.MINIMAP_PIN_MIN_SCALE = 0.6
 MiniMap.MINIMAP_PIN_MAX_SCALE = 1.0
 MiniMap.MINIMAP_PIN_MIN_SIZE = 18
 
---- @param pinType MapPinType|nil
+--- @param pinType MapDisplayPinType|nil
 --- @return number
 local function GetMinPinDrawSize(pinType)
     local minSize = MiniMap.MINIMAP_PIN_MIN_SIZE
@@ -30,7 +30,7 @@ end
 --- @param pinWidth number
 --- @param pinHeight number
 --- @param pinScale boolean
---- @param pinType MapPinType|nil
+--- @param pinType MapDisplayPinType|nil
 --- @param mapController MiniMapMapController|nil
 --- @return number drawWidth
 --- @return number drawHeight

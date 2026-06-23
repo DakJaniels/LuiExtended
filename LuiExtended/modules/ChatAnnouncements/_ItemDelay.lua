@@ -6,13 +6,11 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class (partial) ChatAnnouncements
+--- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
---- @type CAState
 local S = ChatAnnouncements.State
 
---- @type CAInternal
 local I = ChatAnnouncements.Internal
 
 local B = ChatAnnouncements.Brackets
@@ -141,13 +139,13 @@ end
 --- @param itemLink string
 --- @param receivedBy string
 --- @param logPrefix string
---- @param gainOrLoss integer
---- @param filter boolean
---- @param groupLoot boolean
---- @param alwaysFirst boolean
---- @param delay boolean
---- @param lootMailId id64|nil
---- @param showCollectionStatus boolean
+--- @param gainOrLoss? integer
+--- @param filter? boolean
+--- @param groupLoot? boolean
+--- @param alwaysFirst? boolean
+--- @param delay? boolean
+--- @param lootMailId? id64
+--- @param showCollectionStatus? boolean
 function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay, lootMailId, showCollectionStatus)
     -- Return if we have an invalid itemId or stack
     if itemId == 0 or not stack then
@@ -227,9 +225,9 @@ end
 --- @param logPrefix string
 --- @param gainOrLoss integer
 --- @param filter boolean
---- @param groupLoot boolean
---- @param alwaysFirst boolean
---- @param delay boolean
+--- @param groupLoot? boolean
+--- @param alwaysFirst? boolean
+--- @param delay? boolean
 function ChatAnnouncements.ItemCounterDelayOut(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
     if delayedItemPoolOut[itemId] then
         stack = delayedItemPoolOut[itemId].stack + stack -- Add stack count first, only if item already exists.
