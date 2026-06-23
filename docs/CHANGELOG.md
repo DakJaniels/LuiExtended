@@ -1,5 +1,20 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.4
+
+### New
+
+- Action Bar: Ultimate now shows cost instead of out of 500. While in werewolf form, the ultimate count reflects your current fury count out of 1000.
+
+### Changes
+
+- Unit Frames: Changed the base draw tier of unitframes so prompts will now be able to draw on top.
+- MiniMap: Disabled tooltips for future me to look into fixing :)
+
+### Fixed
+
+- General stability and performance improvements...
+
 ## Version 7.2.5.3
 
 ### Changes
