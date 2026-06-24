@@ -198,6 +198,7 @@ modules/MiniMap/_PinDimensions.lua
 modules/MiniMap/_HudScene.lua
 modules/MiniMap/_View.lua
 modules/MiniMap/_MapController.lua
+modules/MiniMap/_MiniMapMapController.lua
 modules/MiniMap/_PinController.lua
 modules/MiniMap/_PinMirrorStateMachine.lua
 modules/MiniMap/_MapEventController.lua
