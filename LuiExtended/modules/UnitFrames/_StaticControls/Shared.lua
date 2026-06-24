@@ -402,11 +402,8 @@ function FrameObject:UpdateStaticControlClassIcon()
     end
     local unitDifficulty = GetUnitDifficulty(self.unitTag)
     local classIcon = LUIE.GetClassIcon(GetUnitClassId(self.unitTag))
-    local isMonsterUnit = IsUnitMonster and IsUnitMonster(self.unitTag)
-    local showMonsterClassIcon = not self.isPlayer
-        and UnitFrames.SV.TargetHighlightMonsterUnits
-        and isMonsterUnit
-        and IsUnitAttackable(self.unitTag)
+    local isMonsterUnit = IsUnitMonster(self.unitTag)
+    local showMonsterClassIcon = not self.isPlayer and UnitFrames.SV.TargetHighlightMonsterUnits and isMonsterUnit and IsUnitAttackable(self.unitTag)
     local showClass = (self.isPlayer and classIcon ~= nil) or (unitDifficulty > 1) or showMonsterClassIcon
     local eliteIconPath
     if ZO_IsConsoleOrGameCoreUI() then

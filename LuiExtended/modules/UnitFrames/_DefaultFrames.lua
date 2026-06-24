@@ -442,6 +442,9 @@ function UnitFrames.UpdateDefaultLevelTarget()
     end
     if targetVeteranRankIcon then
         targetVeteranRankIcon:ClearAnchors()
-        targetVeteranRankIcon:SetAnchor(CENTER, allianceRankIcon, RIGHT, 8, -2)
+        targetVeteranRankIcon:SetAnchor(CENTER, allianceRankIcon, RIGHT, 20, 0)
+        -- uncomment to test max rank icons spacing.
+        -- targetVeteranRankIcon:SetTexture"/esoui/art/vengeance/ranks/season00/s00_uniquerank_100.dds"
+        -- allianceRankIcon:SetTexture("/esoui/art/ava/ava_rankicon_grandoverlord.dds")
     end
 end
