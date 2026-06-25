@@ -34,8 +34,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT_TP = "Вкл.: Shift+клик ставит/снимает метку. Выкл.: клик без перетаскивания ставит метку.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS = "Кнопки масштаба",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP = "Кнопки увеличения и уменьшения на карте.",
-    LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER = "Дополнительные параметры",
-    LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "Параметры разработчика.",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER = "Обновление меток",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_DESC = "Как часто обновляются метки на карте.",
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS = "Движущиеся метки (мс)",
@@ -44,8 +42,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Метки под курсором. В основном клавиатура и мышь.",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Показывать в Death Recap",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP = "Показывать, пока открыто окно Death Recap. Выкл. — скрыть карту на этом экране.",
-    LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Отладка конечного автомата меток",
-    LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Зеркало меток, перезагрузка карты и быстрый переход в чат.",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Привязать InfoPanel к миникарте",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "InfoPanel под картой, название зоны сверху. Нужен модуль InfoPanel.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Показывать название зоны",
@@ -73,8 +69,8 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Показывать компас на HUD",
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR = "Цвет метки игрока",
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Цвет стрелки игрока на карте.",
-    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Цвет клина камеры",
-    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Цвет клина направления камеры. Только при следовании за игроком.",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR = "Цвет указателя направления игрока",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR_TP = "Цвет второй стрелки, показывающей направление, куда повёрнут ваш персонаж. Только при следовании за игроком.",
 }
 
 LUIE_RegisterStrings(strings, true)

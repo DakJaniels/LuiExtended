@@ -34,8 +34,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT_TP = "Activé : Maj+clic pose/efface un point. Désactivé : clic sans glisser en pose un.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS = "Afficher les boutons zoom",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP = "Boutons plus et moins de zoom sur la carte.",
-    LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER = "Options avancées",
-    LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "Options développeur.",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER = "Mise à jour des pins",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_DESC = "Fréquence d'actualisation des pins sur la carte.",
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS = "Pins mobiles (ms)",
@@ -44,8 +42,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Pins sous la souris. Surtout clavier et souris.",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Afficher pendant le récap de mort",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP = "Afficher tant que la fenêtre Death Recap est ouverte. Désactivé = masquer la carte sur cet écran.",
-    LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Débogage machine à états (pins)",
-    LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Journalise miroir des pins, rechargement de carte et voyage rapide dans le chat.",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Ancrer le panneau d'info à la mini-carte",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "Panneau d'info sous la carte, nom de zone au-dessus. Nécessite le module InfoPanel.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Afficher le nom de zone",
@@ -73,8 +69,8 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Afficher la boussole sur le HUD",
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR = "Couleur du pip joueur",
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Couleur de la flèche du joueur sur la carte.",
-    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Couleur du cône caméra",
-    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Couleur du cône de direction de la caméra. Uniquement si Suivre le joueur est activé.",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR = "Couleur du repère d'orientation du joueur",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR_TP = "Couleur de la seconde flèche indiquant la direction vers laquelle votre personnage est orienté. Uniquement si Suivre le joueur est activé.",
 }
 
 LUIE_RegisterStrings(strings, true)

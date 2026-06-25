@@ -8,8 +8,9 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
---- Exported map mode id for third-party integration.
-MiniMap.MAP_MODE_LUIE_MINIMAP = 42
+-- Public surface kept stable for keybinds, settings, the info panel, and any
+-- third-party callers. MAP_MODE_LUIE_MINIMAP lives in _Namespace so the engine
+-- and pin tweaks (loaded earlier) can read it.
 
 --- @return boolean
 function MiniMap.IsModuleEnabled()
@@ -21,12 +22,18 @@ function MiniMap.GetZoom()
     return MiniMap.zoom
 end
 
+-- -----------------------------------------------------------------------------
+-- Pin resync registry (compat for callers that listened for pin refreshes)
+-- -----------------------------------------------------------------------------
+
+--- Trigger an async refresh of the native pins on the HUD minimap.
 function MiniMap.RequestPinResync()
-    if MiniMap.mapEventController then
-        MiniMap.mapEventController:SchedulePinSync()
+    if MiniMap.RequestAsyncPinRefresh then
+        MiniMap.RequestAsyncPinRefresh()
     end
 end
 
+--- @param callback function
 function MiniMap.RegisterPinResyncCallback(callback)
     MiniMap.pinResyncCallbacks = MiniMap.pinResyncCallbacks or {}
     MiniMap.pinResyncCallbacks[#MiniMap.pinResyncCallbacks + 1] = callback
@@ -42,6 +49,10 @@ function MiniMap.FirePinResyncCallbacks()
     end
 end
 
+-- -----------------------------------------------------------------------------
+-- Native pin scale lookup (used by the ZO_MapPin:UpdateSize hook in MiniMap.lua)
+-- -----------------------------------------------------------------------------
+
 local PIN_FILTER_GROUP_TO_SCALE_SETTING_KEY =
 {
     [MAP_FILTER_QUESTS] = "pinScaleQuest",
@@ -53,7 +64,7 @@ local PIN_FILTER_GROUP_TO_SCALE_SETTING_KEY =
 
 --- @param pinGroup integer|nil
 --- @param settings MiniMapDefaults
---- @return number|nil categoryScale when pinGroup matches a LAM category
+--- @return number|nil categoryScale when pinGroup maps to a LAM category
 function MiniMap.GetPinCategoryScaleForFilterGroup(pinGroup, settings)
     if not pinGroup or not settings then
         return nil
@@ -62,7 +73,7 @@ function MiniMap.GetPinCategoryScaleForFilterGroup(pinGroup, settings)
     return scaleSettingKey and settings[scaleSettingKey]
 end
 
---- @param pinType MapDisplayPinType|nil
+--- @param pinType integer|nil
 --- @return number
 function MiniMap.GetPinTypeScaleMultiplier(pinType)
     local settings = MiniMap.SV

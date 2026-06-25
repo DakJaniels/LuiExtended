@@ -1,46 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LuiExtended
+  License: The MIT License (MIT)
+
+  MiniMap chrome overlay. The minimap reuses the real ZO_WorldMap, so this file
+  declares only the LUIE chrome that is layered on top of ZO_WorldMap: the frame
+  backdrop, the zone label + divider, the zoom percent label, the hover-reveal
+  mover (padlock + move grip), and the styled zoom buttons. _Chrome.lua creates
+  this template as a child of ZO_WorldMap and positions everything relative to
+  ZO_WorldMap / ZO_WorldMapScroll.
+-->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
   <Controls>
-    <TopLevelControl name="LUIE_MiniMap"
-                     mouseEnabled="true"
-                     movable="true"
-                     resizeHandleSize="8"
-                     clampedToScreen="true"
-                     hidden="true"
-                     shape="BOX"
-                     tier="MEDIUM"
-                     allowBringToTop="true"
-                     space="SPACE_INTERFACE">
-      <Dimensions x="260"
-                  y="260" />
-      <Anchor point="BOTTOMRIGHT"
-              relativeTo="GuiRoot"
-              relativePoint="BOTTOMRIGHT"
-              offsetX="-50"
-              offsetY="-50" />
-      <OnMoveStop>
-        LUIE.MiniMap.OnRootMoveStop(self)
-      </OnMoveStop>
-      <OnResizeStart>
-        LUIE.MiniMap.OnRootResizeStart(self)
-      </OnResizeStart>
-      <OnResizeStop>
-        LUIE.MiniMap.OnRootResizeStop(self)
-      </OnResizeStop>
-      <OnMouseWheel>
-        LUIE.MiniMap.OnRootMouseWheel(self, delta, ctrl, alt, shift, command)
-      </OnMouseWheel>
-      <OnUpdate>
-        LUIE.MiniMap.OnRootUpdate(self, time)
-      </OnUpdate>
-      <OnRectChanged>
-        LUIE.MiniMap.OnRootRectChanged(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
-      </OnRectChanged>
+    <Control name="LUIE_MiniMapChrome"
+             virtual="true">
+      <AnchorFill />
       <Controls>
+        <Backdrop name="$(parent)_Background"
+                  inherits="ZO_FrameBackdrop"
+                  layer="BACKGROUND">
+          <Dimensions x="268"
+                      y="268" />
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT"
+                  offsetX="-3"
+                  offsetY="-3" />
+        </Backdrop>
         <Label name="$(parent)_Zone"
                font="ZoFontGame"
-               layer="1"
+               layer="OVERLAY"
                text="">
           <Anchor point="TOP"
                   relativeTo="$(parent)"
@@ -63,94 +52,22 @@
             </Texture>
           </Controls>
         </Label>
-        <Backdrop name="$(parent)_Background"
-                  inherits="ZO_FrameBackdrop"
-                  resizeToFitDescendents="true"
-                  layer="BACKGROUND">
-          <Dimensions x="268"
-                      y="268" />
-          <Anchor point="TOPLEFT"
-                  relativeTo="$(parent)"
-                  relativePoint="TOPLEFT"
-                  offsetX="-3"
-                  offsetY="-3" />
-        </Backdrop>
-        <Scroll name="$(parent)_Scroll"
-                mouseEnabled="true">
-          <Dimensions x="260"
-                      y="260" />
-          <Anchor point="TOPLEFT"
-                  relativeTo="$(parent)"
-                  relativePoint="TOPLEFT" />
-          <OnMouseDown>
-            LUIE.MiniMap.OnScrollMouseDown(self, button, ctrl, alt, shift, command)
-          </OnMouseDown>
-          <OnMouseUp>
-            LUIE.MiniMap.OnScrollMouseUp(self, button, upInside, ctrl, alt, shift, command)
-          </OnMouseUp>
-          <OnScrollOffsetChanged>
-            LUIE.MiniMap.OnScrollOffsetChanged(self, horizontal, vertical)
-          </OnScrollOffsetChanged>
-          <Controls>
-            <Control name="$(parent)_Map"
-                     mouseEnabled="true"
-                     hidden="false"
-                     layer="3">
-              <Anchor point="TOPLEFT"
-                      relativeTo="$(parent)"
-                      relativePoint="TOPLEFT" />
-              <OnMouseDown>
-                LUIE.MiniMap.OnMapMouseDown(self, button, ctrl, alt, shift, command)
-              </OnMouseDown>
-              <OnMouseUp>
-                LUIE.MiniMap.OnMapMouseUp(self, button, upInside, ctrl, alt, shift, command)
-              </OnMouseUp>
-              <OnUpdate>
-                LUIE.MiniMap.OnMapUpdate(self, time)
-              </OnUpdate>
-              <Controls>
-                <Control name="$(parent)_Pins"
-                         layer="1">
-                  <AnchorFill />
-                </Control>
-              </Controls>
-            </Control>
-            <StatusBar name="$(parent)_StatusOverlay"
-                       layer="2"
-                       color="ffffff"
-                       alpha="0.8"
-                       hidden="false">
-              <AnchorFill />
-              <Controls>
-                <Label name="$(parent)_Label"
-                       font="ZoFontAnnounceMedium"
-                       layer="2"
-                       text="Loading ...">
-                  <Anchor point="CENTER"
-                          relativeTo="$(parent)"
-                          relativePoint="CENTER"
-                          offsetY="0" />
-                </Label>
-              </Controls>
-            </StatusBar>
-          </Controls>
-        </Scroll>
         <Label name="$(parent)_ZoomLabel"
                font="ZoFontGame"
                alpha="0.4"
-               layer="4"
+               layer="OVERLAY"
                tier="HIGH"
                hidden="true"
                text="0%">
           <Anchor point="TOPRIGHT"
-                  relativeTo="$(parent)_Scroll"
+                  relativeTo="$(parent)"
                   relativePoint="TOPRIGHT"
                   offsetX="-4"
                   offsetY="4" />
         </Label>
         <Control name="$(parent)_FrameChromeHover"
                  mouseEnabled="true"
-                 layer="4"
+                 layer="OVERLAY"
                  tier="HIGH">
           <Dimensions x="24"
                       y="24" />
@@ -213,34 +130,12 @@
             </Control>
           </Controls>
         </Control>
-        <Texture name="$(parent)_Player"
-                 resizeToFitFile="true"
-                 layer="2"
-                 textureFile="EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds">
-          <Anchor point="CENTER"
-                  relativeTo="$(parent)_Scroll"
-                  relativePoint="CENTER" />
-        </Texture>
-        <Texture name="$(parent)_PlayerCam"
-                 resizeToFitFile="true"
-                 layer="1"
-                 textureFile="EsoUI/Art/MapPins/UI-WorldMapPlayerCameraPip.dds"
-                 alpha="1">
-          <Anchor point="CENTER"
-                  relativeTo="$(parent)_Player"
-                  relativePoint="CENTER" />
-        </Texture>
         <Control name="$(parent)_ZoomChromeHover"
                  mouseEnabled="true"
-                 layer="2"
+                 layer="OVERLAY"
                  tier="HIGH">
           <Dimensions x="32"
                       y="56" />
-          <Anchor point="BOTTOMRIGHT"
-                  relativeTo="$(parent)_Scroll"
-                  relativePoint="BOTTOMRIGHT"
-                  offsetX="-54"
-                  offsetY="0" />
           <OnMouseEnter>
             LUIE.MiniMap.OnZoomChromeHoverMouseEnter(self)
           </OnMouseEnter>
@@ -253,15 +148,10 @@
                 hidden="true"
                 mouseEnabled="true"
                 mouseOverBlendMode="ADD"
-                layer="4"
+                layer="OVERLAY"
                 tier="HIGH">
           <Dimensions x="24"
                       y="24" />
-          <Anchor point="BOTTOMRIGHT"
-                  relativeTo="$(parent)_Scroll"
-                  relativePoint="BOTTOMRIGHT"
-                  offsetX="-4"
-                  offsetY="-4" />
           <Textures normal="EsoUI/Art/Minimap/minimap_zoomplus_up.dds"
                     pressed="EsoUI/Art/Minimap/minimap_zoomplus_down.dds"
                     disabled="EsoUI/Art/Minimap/minimap_zoomplus_disabled.dds"
@@ -281,15 +171,10 @@
                 hidden="true"
                 mouseEnabled="true"
                 mouseOverBlendMode="ADD"
-                layer="4"
+                layer="OVERLAY"
                 tier="HIGH">
           <Dimensions x="24"
                       y="24" />
-          <Anchor point="BOTTOMRIGHT"
-                  relativeTo="$(parent)_ZoomIn"
-                  relativePoint="BOTTOMLEFT"
-                  offsetX="-2"
-                  offsetY="0" />
           <Textures normal="EsoUI/Art/Minimap/minimap_zoomminus_up.dds"
                     pressed="EsoUI/Art/Minimap/minimap_zoomminus_down.dds"
                     disabled="EsoUI/Art/Minimap/minimap_zoomminus_disabled.dds"
@@ -305,6 +190,6 @@
           </OnMouseExit>
         </Button>
       </Controls>
-    </TopLevelControl>
+    </Control>
   </Controls>
 </GuiXml>

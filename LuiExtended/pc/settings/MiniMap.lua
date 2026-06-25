@@ -172,9 +172,7 @@ function MiniMap.CreateSettings()
             setFunc = function (value)
                 MiniMap.SV.resetZoomLevel = value / 100
                 MiniMap.ClampSavedDefaultZoom()
-                if MiniMap.mapController and MiniMap.mapController:IsReady() then
-                    MiniMap.mapController:ApplyZoom(0)
-                end
+                MiniMap.Zoom(0)
             end,
             width = "full",
             default = Defaults.resetZoomLevel * 100,
@@ -219,16 +217,9 @@ function MiniMap.CreateSettings()
             getFunc = function () return MiniMap.SV.followPlayer end,
             setFunc = function (value)
                 MiniMap.SV.followPlayer = value
-                if MiniMap.runtime then
-                    MiniMap.runtime.mapFollowsPlayer = value
-                end
+                MiniMap.mapFollowsPlayer = value == true and MiniMap.SV.zoneScrollLockEnabled ~= true
                 if value then
                     MiniMap.RecenterFollow()
-                elseif MiniMap.view and MiniMap.runtime then
-                    local scroll = MiniMap.view.scroll
-                    MiniMap.SV.panOffsetX = scroll:GetHorizontalScroll()
-                    MiniMap.SV.panOffsetY = scroll:GetVerticalScroll()
-                    MiniMap.runtime:ApplyScrollFromPanOffsets()
                 end
                 MiniMap.ApplyLiveSettings()
             end,
@@ -311,9 +302,7 @@ function MiniMap.CreateSettings()
             getFunc = function () return MiniMap.SV.keepSquareAspect end,
             setFunc = function (value)
                 MiniMap.SV.keepSquareAspect = value
-                if value then
-                    MiniMap.ApplySquareAspect()
-                end
+                MiniMap.ApplyKeepSquareSetting()
             end,
             width = "half",
             default = Defaults.keepSquareAspect,
@@ -392,9 +381,7 @@ function MiniMap.CreateSettings()
             end,
             setFunc = function (value)
                 MiniMap.SV[slider.key] = value / 100
-                if MiniMap.mapController and MiniMap.mapController:IsReady() then
-                    MiniMap.ApplyContextDefaultZoom()
-                end
+                MiniMap.ApplyContextDefaultZoom()
             end,
             width = "full",
             default = (Defaults[slider.key] or 0.5) * 100,
@@ -511,7 +498,7 @@ function MiniMap.CreateSettings()
         return disabled() or not LUIE.SV.InfoPanel_Enabled
     end
 
-    local cameraWedgeSettingsDisabled = function ()
+    local playerHeadingPipSettingsDisabled = function ()
         return disabled() or not MiniMap.SV.followPlayer
     end
 
@@ -580,24 +567,24 @@ function MiniMap.CreateSettings()
         },
         {
             type = "colorpicker",
-            name = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP),
+            name = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR_TP),
             getFunc = function ()
-                local color = MiniMap.SV.cameraWedgeColor or Defaults.cameraWedgeColor
+                local color = MiniMap.SV.playerHeadingPipColor or Defaults.playerHeadingPipColor
                 return color.r, color.g, color.b, color.a
             end,
             setFunc = function (red, green, blue, alpha)
-                MiniMap.SV.cameraWedgeColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.SV.playerHeadingPipColor = { r = red, g = green, b = blue, a = alpha }
                 MiniMap.ApplyLiveSettings()
             end,
             width = "half",
-            disabled = cameraWedgeSettingsDisabled,
+            disabled = playerHeadingPipSettingsDisabled,
             default =
             {
-                r = Defaults.cameraWedgeColor.r,
-                g = Defaults.cameraWedgeColor.g,
-                b = Defaults.cameraWedgeColor.b,
-                a = Defaults.cameraWedgeColor.a,
+                r = Defaults.playerHeadingPipColor.r,
+                g = Defaults.playerHeadingPipColor.g,
+                b = Defaults.playerHeadingPipColor.b,
+                a = Defaults.playerHeadingPipColor.a,
             },
         },
         {
@@ -675,40 +662,6 @@ function MiniMap.CreateSettings()
         disabled = disabled,
         controls = pinRefreshControls,
     }
-
-    if LUIE.IsDevDebugEnabled() then
-        local devAdvancedControls =
-        {
-            {
-                type = "description",
-                text = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC),
-                width = "full",
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG),
-                tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP),
-                getFunc = function () return MiniMap.SV.pinMirrorStateMachineDebug end,
-                setFunc = function (value)
-                    MiniMap.SV.pinMirrorStateMachineDebug = value
-                    if MiniMap.pinMirrorStateMachine then
-                        MiniMap.pinMirrorStateMachine:ApplyDebugLoggingFromSavedVars()
-                    end
-                end,
-                width = "full",
-                default = Defaults.pinMirrorStateMachineDebug,
-                disabled = disabled,
-            },
-        }
-
-        optionsDataMiniMap[#optionsDataMiniMap + 1] =
-        {
-            type = "submenu",
-            name = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER),
-            disabled = disabled,
-            controls = devAdvancedControls,
-        }
-    end
 
     LAM:RegisterAddonPanel(LUIE.name .. "MiniMapOptions", panelDataMiniMap)
     LAM:RegisterOptionControls(LUIE.name .. "MiniMapOptions", optionsDataMiniMap)

@@ -80,6 +80,7 @@ frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml
 frontend/GridOverlay.xml
+frontend/MiniMap.xml
 frontend/UnitFrames/Animations.xml
 frontend/UnitFrames/SharedTemplates.xml
 frontend/UnitFrames/SmallGroup.xml
@@ -186,27 +187,15 @@ modules/CombatInfo/CombatInfo.lua
 modules/InfoPanel/InfoPanel.lua
 
 # Modules - MiniMap
+# The minimap reuses the real ZO_WorldMap and overlays the LUIE chrome declared in
+# frontend/MiniMap.xml: namespace + coroutine scheduler first, then the chrome
+# helpers, the engine, pin tweaks, and the public API.
 modules/MiniMap/_Namespace.lua
-modules/MiniMap/_FilterController.lua
-modules/MiniMap/_NativeWorldMapContainer.lua
-modules/MiniMap/_VisibilityController.lua
-modules/MiniMap/_ZoomContext.lua
-modules/MiniMap/_ChromeController.lua
-modules/MiniMap/_InfoPanelIntegration.lua
-modules/MiniMap/_PublicAPI.lua
-modules/MiniMap/_PinDimensions.lua
-modules/MiniMap/_HudScene.lua
-modules/MiniMap/_View.lua
-modules/MiniMap/_MapController.lua
-modules/MiniMap/_MiniMapMapController.lua
-modules/MiniMap/_PinController.lua
-modules/MiniMap/_PinMirrorStateMachine.lua
-modules/MiniMap/_MapEventController.lua
-modules/MiniMap/_InputController.lua
-modules/MiniMap/_HudMapPinInteraction.lua
-modules/MiniMap/_Runtime.lua
+modules/MiniMap/_Async.lua
+modules/MiniMap/_Chrome.lua
 modules/MiniMap/MiniMap.lua
-frontend/MiniMap.xml
+modules/MiniMap/_PinTweaks.lua
+modules/MiniMap/_PublicAPI.lua
 
 # Modules - Spell Cast Buffs
 modules/SpellCastBuffs/_Namespace.lua

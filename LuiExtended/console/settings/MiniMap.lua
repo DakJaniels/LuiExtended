@@ -102,7 +102,7 @@ function MiniMap.CreateConsoleSettings()
         return disable() or not LUIE.SV.InfoPanel_Enabled
     end
 
-    local cameraWedgeSettingsDisabled = function ()
+    local playerHeadingPipSettingsDisabled = function ()
         return disable() or not MiniMap.SV.followPlayer
     end
 
@@ -131,9 +131,7 @@ function MiniMap.CreateConsoleSettings()
             setFunction = function (value)
                 MiniMap.SV.resetZoomLevel = value / 100
                 MiniMap.ClampSavedDefaultZoom()
-                if MiniMap.mapController and MiniMap.mapController:IsReady() then
-                    MiniMap.mapController:ApplyZoom(0)
-                end
+                MiniMap.Zoom(0)
             end,
             default = Defaults.resetZoomLevel * 100,
             disable = disable,
@@ -177,16 +175,9 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.SV.followPlayer end,
             setFunction = function (value)
                 MiniMap.SV.followPlayer = value
-                if MiniMap.runtime then
-                    MiniMap.runtime.mapFollowsPlayer = value
-                end
+                MiniMap.mapFollowsPlayer = value == true and MiniMap.SV.zoneScrollLockEnabled ~= true
                 if value then
                     MiniMap.RecenterFollow()
-                elseif MiniMap.view and MiniMap.runtime then
-                    local scroll = MiniMap.view.scroll
-                    MiniMap.SV.panOffsetX = scroll:GetHorizontalScroll()
-                    MiniMap.SV.panOffsetY = scroll:GetVerticalScroll()
-                    MiniMap.runtime:ApplyScrollFromPanOffsets()
                 end
                 MiniMap.ApplyLiveSettings()
             end,
@@ -336,9 +327,7 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.SV.keepSquareAspect end,
             setFunction = function (value)
                 MiniMap.SV.keepSquareAspect = value
-                if value then
-                    MiniMap.ApplySquareAspect()
-                end
+                MiniMap.ApplyKeepSquareSetting()
                 refreshPanelControls()
             end,
             default = Defaults.keepSquareAspect,
@@ -401,9 +390,7 @@ function MiniMap.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 MiniMap.SV[slider.key] = value / 100
-                if MiniMap.mapController and MiniMap.mapController:IsReady() then
-                    MiniMap.ApplyContextDefaultZoom()
-                end
+                MiniMap.ApplyContextDefaultZoom()
             end,
             default = (Defaults[slider.key] or 0.5) * 100,
             disable = disable,
@@ -545,18 +532,18 @@ function MiniMap.CreateConsoleSettings()
         },
         {
             type = LHAS.ST_COLOR,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP),
+            label = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR_TP),
             getFunction = function ()
-                local color = MiniMap.SV.cameraWedgeColor or Defaults.cameraWedgeColor
+                local color = MiniMap.SV.playerHeadingPipColor or Defaults.playerHeadingPipColor
                 return color.r, color.g, color.b, color.a
             end,
             setFunction = function (red, green, blue, alpha)
-                MiniMap.SV.cameraWedgeColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.SV.playerHeadingPipColor = { r = red, g = green, b = blue, a = alpha }
                 MiniMap.ApplyLiveSettings()
             end,
-            default = Defaults.cameraWedgeColor,
-            disable = cameraWedgeSettingsDisabled,
+            default = Defaults.playerHeadingPipColor,
+            disable = playerHeadingPipSettingsDisabled,
         },
         {
             type = LHAS.ST_CHECKBOX,
@@ -616,31 +603,6 @@ function MiniMap.CreateConsoleSettings()
         -- },
     }
 
-    local devAdvancedSectionRows = nil
-    if LUIE.IsDevDebugEnabled() then
-        devAdvancedSectionRows =
-        {
-            {
-                type = LHAS.ST_LABEL,
-                label = GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC),
-            },
-            {
-                type = LHAS.ST_CHECKBOX,
-                label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG),
-                tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP),
-                getFunction = function () return MiniMap.SV.pinMirrorStateMachineDebug end,
-                setFunction = function (value)
-                    MiniMap.SV.pinMirrorStateMachineDebug = value
-                    if MiniMap.pinMirrorStateMachine then
-                        MiniMap.pinMirrorStateMachine:ApplyDebugLoggingFromSavedVars()
-                    end
-                end,
-                default = Defaults.pinMirrorStateMachineDebug,
-                disable = disable,
-            },
-        }
-    end
-
     local settingsData = {}
     settingsData[#settingsData + 1] =
     {
@@ -666,9 +628,6 @@ function MiniMap.CreateConsoleSettings()
     appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_PIN_CATEGORY_HEADER), pinCategorySectionRows)
     appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_CHROME_HEADER), chromeSectionRows)
     appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER), pinRefreshSectionRows)
-    if devAdvancedSectionRows then
-        appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER), devAdvancedSectionRows)
-    end
 
     panel:AddSettings(settingsData)
 end

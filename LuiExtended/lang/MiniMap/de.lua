@@ -34,8 +34,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT_TP = "An: Umschalt+Klick setzt/löscht Wegpunkt. Aus: Klick ohne Ziehen setzt Wegpunkt.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS = "Zoom-Tasten anzeigen",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP = "Plus- und Minus-Zoom auf der Karte anzeigen.",
-    LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER = "Erweiterte Optionen",
-    LUIE_STRING_LAM_MINIMAP_ADVANCED_DESC = "Entwickleroptionen.",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER = "Pin-Aktualisierung",
     LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_DESC = "Wie oft Pins auf der Karte aktualisiert werden.",
     LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS = "Bewegliche Pins (ms)",
@@ -44,8 +42,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Pins unter der Maus. Vor allem Tastatur und Maus.",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Bei Death Recap anzeigen",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP = "Anzeigen, solange das Death-Recap-Fenster offen ist. Aus = Karte auf diesem Bildschirm ausblenden.",
-    LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Pin-Mirror-Zustandsautomat (Debug)",
-    LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Pin-Spiegel, Karten-Neuladen und Schnellreise im Chat protokollieren.",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "InfoPanel an Minimap verankern",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP = "InfoPanel unter die Karte, Zonenname darüber. Braucht das InfoPanel-Modul.",
     LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME = "Zonennamen anzeigen",
@@ -73,8 +69,8 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW = "Kompass am HUD anzeigen",
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR = "Spieler-Pip-Farbe",
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Farbe Ihres Spielerpfeils auf der Karte.",
-    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Kamera-Kegel-Farbe",
-    LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Farbe des Kamera-Richtungskegels. Nur bei Spieler folgen.",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR = "Farbe der Spielerausrichtungsmarkierung",
+    LUIE_STRING_LAM_MINIMAP_PLAYER_HEADING_PIP_COLOR_TP = "Farbe des zweiten Pfeils, der die Blickrichtung deines Charakters anzeigt. Nur bei Spieler folgen.",
 }
 
 LUIE_RegisterStrings(strings, true)
