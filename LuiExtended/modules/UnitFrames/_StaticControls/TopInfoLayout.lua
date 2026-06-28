@@ -12,10 +12,10 @@ local TOPINFO_OVERLAND_ICON_SIZE = 20
 local TOPINFO_LEVEL_ICON_SIZE = 18
 local TOPINFO_NAME_LEVEL_GAP = 4
 local TOPINFO_ROW_ICON_GAP = 2
+-- Fallback CP/level text width (about four digits) used only before the label can be measured.
+local TOPINFO_LEVEL_TEXT_FALLBACK_WIDTH = 36
 local SMALL_GROUP_NAME_ROW_OFFSET_Y = 0
 local SMALL_GROUP_LEADER_NAME_OFFSET = 22
-local SMALL_GROUP_MIN_NAME_WIDTH = 88
-local SMALL_GROUP_LEVEL_STRIP_RESERVE = 36
 local SMALL_GROUP_RIGHT_PADDING = 6
 local TARGET_STAR_GAP = 4
 
@@ -120,6 +120,19 @@ local function GetTopInfoLeftRowStartX(self, rowOffsetY, baseStartX)
     return rowStartX, overlandWidth
 end
 
+--- Champion points for level row; reticleover matches vanilla target frame (effective CP).
+--- @param unitTag string
+--- @return integer
+local function ResolveTopInfoChampionPoints(unitTag)
+    if unitTag == "reticleover" then
+        local effectiveChampionPoints = GetUnitEffectiveChampionPoints(unitTag)
+        if effectiveChampionPoints and effectiveChampionPoints > 0 then
+            return effectiveChampionPoints
+        end
+    end
+    return GetUnitChampionPoints(unitTag)
+end
+
 --- @param self LUIE_CustomFrameObject
 function FrameObject.UpdateTopInfoLevelRow(self)
     if not FrameObject.HasCustomTopInfoFrameCategory(self) then
@@ -139,7 +152,9 @@ function FrameObject.UpdateTopInfoLevelRow(self)
         return
     end
 
-    if not IsUnitOnline(unitTag) then
+    -- Reticle player targets exist before they report online; do not blank the level row for them.
+    local skipOnlineGateForReticlePlayer = unitTag == "reticleover" and IsUnitPlayer(unitTag) and DoesUnitExist(unitTag)
+    if not skipOnlineGateForReticlePlayer and not IsUnitOnline(unitTag) then
         self.levelIcon:SetHidden(true)
         self.veterancyRankIcon:SetHidden(true)
         self.level:SetHidden(true)
@@ -154,7 +169,7 @@ function FrameObject.UpdateTopInfoLevelRow(self)
         veterancyRank = GetUnitVeterancyRank(unitTag)
         levelText = tostring(veterancyRank)
     elseif self.isChampion then
-        levelText = tostring(GetUnitChampionPoints(unitTag))
+        levelText = tostring(ResolveTopInfoChampionPoints(unitTag))
     else
         levelText = tostring(GetUnitLevel(unitTag))
     end
@@ -229,6 +244,16 @@ local function ApplyTopInfoSingleLineLabel(label)
 end
 
 --- @param label LabelControl
+local function ApplyTopInfoLevelNumericLabel(label)
+    if label == nil then
+        return
+    end
+    label:SetVerticalAlignment(TEXT_ALIGN_TOP)
+    label:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
+    label:SetMaxLineCount(1)
+end
+
+--- @param label LabelControl
 --- @param maxWidth number|nil
 --- @return number
 local function GetTopInfoNameRowUsedWidth(label, maxWidth)
@@ -263,6 +288,34 @@ local function GetTopInfoActiveLevelIcon(self)
         return self.levelIcon
     end
     return nil
+end
+
+--- Width of CP/level icon plus numeric text for TopInfo row layout.
+--- Call after ApplyTopInfoRowHeight so icon dimensions are final.
+--- @param self LUIE_CustomFrameObject
+--- @param showLevelRow boolean
+--- @return number
+local function GetTopInfoLevelClusterRequiredWidth(self, showLevelRow)
+    if not showLevelRow or self.level == nil or self.level:IsHidden() then
+        return 0
+    end
+    local iconWidth = TOPINFO_LEVEL_ICON_SIZE
+    local activeIcon = GetTopInfoActiveLevelIcon(self)
+    if activeIcon then
+        local measuredIconWidth = activeIcon:GetWidth()
+        if measuredIconWidth and measuredIconWidth > 0 then
+            iconWidth = measuredIconWidth
+        end
+    end
+    local plainText = StripMarkupForStringWidth(self.level:GetText())
+    local textWidth = 0
+    if plainText ~= "" then
+        textWidth = self.level:GetStringWidth(plainText)
+    end
+    if textWidth <= 0 then
+        textWidth = TOPINFO_LEVEL_TEXT_FALLBACK_WIDTH
+    end
+    return iconWidth + 1 + textWidth
 end
 
 --- @param self LUIE_CustomFrameObject
@@ -323,126 +376,48 @@ local function LayoutTopInfoLevelCluster(self, rowOffsetY, rowStartX, showLevelR
         else
             self.level:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, levelStart, rowOffsetY)
         end
-        ApplyTopInfoSingleLineLabel(self.level)
+        ApplyTopInfoLevelNumericLabel(self.level)
         if showLevelRow then
             local iconWidth = activeIcon and activeIcon:GetWidth() or 0
-            local levelWidth = topInfoWidth - levelStart - rightReserved - iconWidth - 1
-            if levelWidth < 0 then
-                levelWidth = 0
+            if iconWidth <= 0 then
+                iconWidth = TOPINFO_LEVEL_ICON_SIZE
             end
-            self.level:SetWidth(levelWidth)
+            -- Clamp digits to the space between the icon and the reserved right chrome so they
+            -- never expand under the class icon / stars. The upstream name budget guarantees the
+            -- full digits fit when the bar is wide enough.
+            local available = topInfoWidth - levelStart - rightReserved - iconWidth - 1
+            if available < 0 then
+                available = 0
+            end
+            local needed = available
+            local plainText = StripMarkupForStringWidth(self.level:GetText())
+            if plainText ~= "" then
+                needed = self.level:GetStringWidth(plainText)
+            end
+            self.level:SetWidth(zo_min(needed, available))
         end
     end
 end
 
---- @param self LUIE_CustomFrameObject
-function FrameObject.LayoutTopInfoSmallGroup(self)
-    if self.frameCategory ~= "smallGroup" then
-        return
-    end
-    FrameObject.RefreshTopInfoForLayout(self)
-
-    local unitTag = ResolveTopInfoUnitTag(self)
-    local isLeader = unitTag and IsUnitGroupLeader(unitTag)
-    local rowOffsetY = SMALL_GROUP_NAME_ROW_OFFSET_Y
-    local topInfoWidth = self.topInfo:GetWidth()
-    local leaderNameOffset = isLeader and SMALL_GROUP_LEADER_NAME_OFFSET or 0
-
-    if self.leader then
-        self.leader:SetHidden(not isLeader)
-    end
-
-    local rightReserved = SMALL_GROUP_RIGHT_PADDING
-    if self.classIcon and not self.classIcon:IsHidden() then
-        rightReserved = rightReserved + self.classIcon:GetWidth()
-    end
-
-    local showLevelRow = self.level and not self.level:IsHidden()
-    if not showLevelRow then
-        HideTopInfoLevelClusterWhenInactive(self)
-    end
-
-    local rowStartX, overlandWidth = GetTopInfoLeftRowStartX(self, rowOffsetY, leaderNameOffset)
-
-    local levelStripReserve = showLevelRow and SMALL_GROUP_LEVEL_STRIP_RESERVE or 0
-    local nameMaxWidth = topInfoWidth - leaderNameOffset - rightReserved - levelStripReserve - TOPINFO_NAME_LEVEL_GAP - overlandWidth
-    if nameMaxWidth < SMALL_GROUP_MIN_NAME_WIDTH then
-        nameMaxWidth = SMALL_GROUP_MIN_NAME_WIDTH
-    end
-
-    self.name:ClearAnchors()
-    self.name:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, rowStartX, rowOffsetY)
-    self.name:SetWidth(nameMaxWidth)
-    ApplyTopInfoSingleLineLabel(self.name)
-
-    ApplyTopInfoRowHeight(self, rowOffsetY)
-
-    local nameUsedWidth = GetTopInfoNameRowUsedWidth(self.name, nameMaxWidth)
-    local levelStart = rowStartX + nameUsedWidth + TOPINFO_NAME_LEVEL_GAP
-    LayoutTopInfoLevelCluster(self, rowOffsetY, levelStart, showLevelRow, rightReserved)
-end
+-- -----------------------------------------------------------------------------
+--  Per-category right-edge reserved width (TOPRIGHT chrome the inline caption row
+--  must not overlap). Computed before the shared engine runs.
+-- -----------------------------------------------------------------------------
 
 --- @param self LUIE_CustomFrameObject
---- @param barWidth number
---- @param levelStripReserve number|nil
-local function LayoutTopInfoNameFirstRow(self, barWidth, levelStripReserve)
-    local rowOffsetY = 0
-    local topInfoWidth = self.topInfo:GetWidth()
+--- @return number
+local function ComputeTopInfoPlayerRightReserved(self)
     local rightReserved = 0
-
     if self.classIcon and not self.classIcon:IsHidden() then
         rightReserved = rightReserved + self.classIcon:GetWidth() + 1
     end
-
-    local showLevelRow = self.level and not self.level:IsHidden()
-    if not showLevelRow then
-        HideTopInfoLevelClusterWhenInactive(self)
-    end
-
-    local rowStartX, overlandWidth = GetTopInfoLeftRowStartX(self, rowOffsetY, 0)
-
-    local stripReserve = levelStripReserve or SMALL_GROUP_LEVEL_STRIP_RESERVE
-    if not showLevelRow then
-        stripReserve = 0
-    end
-
-    local nameMaxWidth = topInfoWidth - rightReserved - stripReserve - TOPINFO_NAME_LEVEL_GAP - overlandWidth
-    if nameMaxWidth < 40 then
-        nameMaxWidth = 40
-    end
-
-    self.name:ClearAnchors()
-    self.name:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, rowStartX, rowOffsetY)
-    self.name:SetWidth(nameMaxWidth)
-    ApplyTopInfoSingleLineLabel(self.name)
-
-    ApplyTopInfoRowHeight(self, rowOffsetY)
-
-    local nameUsedWidth = GetTopInfoNameRowUsedWidth(self.name, nameMaxWidth)
-    local levelStart = rowStartX + nameUsedWidth + TOPINFO_NAME_LEVEL_GAP
-    LayoutTopInfoLevelCluster(self, rowOffsetY, levelStart, showLevelRow, rightReserved)
+    return rightReserved
 end
 
 --- @param self LUIE_CustomFrameObject
-function FrameObject.LayoutTopInfoPlayer(self)
-    if self.frameCategory ~= "player" then
-        return
-    end
-    FrameObject.RefreshTopInfoForLayout(self)
-    LayoutTopInfoNameFirstRow(self, UnitFrames.SV.PlayerBarWidth, SMALL_GROUP_LEVEL_STRIP_RESERVE)
-end
-
---- @param self LUIE_CustomFrameObject
-function FrameObject.LayoutTopInfoTarget(self)
-    if self.frameCategory ~= "target" then
-        return
-    end
-    FrameObject.RefreshTopInfoForLayout(self)
-
-    local rowOffsetY = 0
-    local topInfoWidth = self.topInfo:GetWidth()
+--- @return number
+local function ComputeTopInfoTargetRightReserved(self)
     local rightReserved = 1
-
     if self.classIcon and not self.classIcon:IsHidden() then
         rightReserved = rightReserved + self.classIcon:GetWidth()
     end
@@ -458,31 +433,130 @@ function FrameObject.LayoutTopInfoTarget(self)
     if self.friendIcon and not self.friendIcon:IsHidden() then
         rightReserved = rightReserved + self.friendIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
     end
+    return rightReserved
+end
+
+--- @param self LUIE_CustomFrameObject
+--- @return number
+local function ComputeTopInfoSmallGroupRightReserved(self)
+    local rightReserved = SMALL_GROUP_RIGHT_PADDING
+    if self.classIcon and not self.classIcon:IsHidden() then
+        rightReserved = rightReserved + self.classIcon:GetWidth()
+    end
+    return rightReserved
+end
+
+--- @param self LUIE_CustomFrameObject
+--- @return number
+local function ComputeTopInfoAvaTargetRightReserved(self)
+    local rightReserved = 0
+    if self.avaRankIcon and not self.avaRankIcon:IsHidden() then
+        rightReserved = rightReserved + self.avaRankIcon:GetWidth() + 1
+    end
+    return rightReserved
+end
+
+--- Shared inline caption-row engine for every TopInfo frame category.
+--- Lays out [name (capped, ellipsized)] [gap] [level icon + digits], hugging the
+--- visible end of the name, while reserving `rightReserved` for the TOPRIGHT chrome
+--- that the caller anchors afterwards. Assumes UpdateTopInfoLevelRow already set the
+--- level text and icon visibility (via RefreshTopInfoForLayout).
+--- @param self LUIE_CustomFrameObject
+--- @param rowOffsetY number
+--- @param rowStartX number x after overland (and small group leader gutter)
+--- @param rightReserved number
+--- @param showLevelRow boolean
+local function LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, rightReserved, showLevelRow)
+    local topInfoWidth = self.topInfo:GetWidth()
+
+    self.name:ClearAnchors()
+    self.name:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, rowStartX, rowOffsetY)
+    ApplyTopInfoSingleLineLabel(self.name)
+
+    -- Scale the level / veterancy icons to the caption height before measuring the block.
+    ApplyTopInfoRowHeight(self, rowOffsetY)
+
+    local levelBlockWidth = GetTopInfoLevelClusterRequiredWidth(self, showLevelRow)
+    local levelGap = (levelBlockWidth > 0) and TOPINFO_NAME_LEVEL_GAP or 0
+
+    -- Name cap reserves the full level block so the digits never collapse to "...".
+    -- On ultra-narrow bars the name keeps shrinking so the CP/level digits stay readable.
+    local nameMaxWidth = topInfoWidth - rowStartX - rightReserved - levelBlockWidth - levelGap
+    if nameMaxWidth < 0 then
+        nameMaxWidth = 0
+    end
+    self.name:SetWidth(nameMaxWidth)
+
+    if not showLevelRow or levelBlockWidth == 0 then
+        LayoutTopInfoLevelCluster(self, rowOffsetY, rowStartX, showLevelRow, rightReserved)
+        return
+    end
+
+    -- Inline: the level cluster starts right after the visible name text.
+    local nameUsedWidth = GetTopInfoNameRowUsedWidth(self.name, nameMaxWidth)
+    local levelStart = rowStartX + nameUsedWidth + levelGap
+    LayoutTopInfoLevelCluster(self, rowOffsetY, levelStart, showLevelRow, rightReserved)
+end
+
+--- @param self LUIE_CustomFrameObject
+function FrameObject.LayoutTopInfoSmallGroup(self)
+    if self.frameCategory ~= "smallGroup" then
+        return
+    end
+    FrameObject.RefreshTopInfoForLayout(self)
+
+    local unitTag = ResolveTopInfoUnitTag(self)
+    local isLeader = unitTag and IsUnitGroupLeader(unitTag)
+    local rowOffsetY = SMALL_GROUP_NAME_ROW_OFFSET_Y
+    local leaderNameOffset = isLeader and SMALL_GROUP_LEADER_NAME_OFFSET or 0
+
+    if self.leader then
+        self.leader:SetHidden(not isLeader)
+    end
 
     local showLevelRow = self.level and not self.level:IsHidden()
     if not showLevelRow then
         HideTopInfoLevelClusterWhenInactive(self)
     end
 
-    local rowStartX, overlandWidth = GetTopInfoLeftRowStartX(self, rowOffsetY, 0)
+    local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, leaderNameOffset)
+    LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoSmallGroupRightReserved(self), showLevelRow)
+end
 
-    local levelStripReserve = showLevelRow and SMALL_GROUP_LEVEL_STRIP_RESERVE or 0
-    local nameMaxWidth = topInfoWidth - rightReserved - levelStripReserve - TOPINFO_NAME_LEVEL_GAP - overlandWidth
-    if nameMaxWidth < 40 then
-        nameMaxWidth = 40
+--- @param self LUIE_CustomFrameObject
+function FrameObject.LayoutTopInfoPlayer(self)
+    if self.frameCategory ~= "player" then
+        return
+    end
+    FrameObject.RefreshTopInfoForLayout(self)
+
+    local rowOffsetY = 0
+    local showLevelRow = self.level and not self.level:IsHidden()
+    if not showLevelRow then
+        HideTopInfoLevelClusterWhenInactive(self)
     end
 
-    self.name:ClearAnchors()
-    self.name:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, rowStartX, rowOffsetY)
-    self.name:SetWidth(nameMaxWidth)
-    ApplyTopInfoSingleLineLabel(self.name)
+    local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, 0)
+    LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoPlayerRightReserved(self), showLevelRow)
+end
 
-    ApplyTopInfoRowHeight(self, rowOffsetY)
+--- @param self LUIE_CustomFrameObject
+function FrameObject.LayoutTopInfoTarget(self)
+    if self.frameCategory ~= "target" then
+        return
+    end
+    FrameObject.RefreshTopInfoForLayout(self)
 
-    local nameUsedWidth = GetTopInfoNameRowUsedWidth(self.name, nameMaxWidth)
-    local levelStart = rowStartX + nameUsedWidth + TOPINFO_NAME_LEVEL_GAP
-    LayoutTopInfoLevelCluster(self, rowOffsetY, levelStart, showLevelRow, rightReserved)
+    local rowOffsetY = 0
+    local showLevelRow = self.level and not self.level:IsHidden()
+    if not showLevelRow then
+        HideTopInfoLevelClusterWhenInactive(self)
+    end
 
+    local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, 0)
+    LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoTargetRightReserved(self), showLevelRow)
+
+    -- Right-edge chrome: class icon, then friend icon, then difficulty stars (right to left).
     if self.classIcon then
         self.classIcon:ClearAnchors()
         self.classIcon:SetAnchor(TOPRIGHT, self.topInfo, TOPRIGHT, -1, rowOffsetY)
@@ -522,62 +596,21 @@ function FrameObject.LayoutTopInfoAvaTarget(self)
     FrameObject.RefreshTopInfoForLayout(self)
 
     local rowOffsetY = 0
-    local topInfoWidth = self.topInfo:GetWidth()
-    local rightReserved = 0
-
-    if self.avaRankIcon and not self.avaRankIcon:IsHidden() then
-        rightReserved = rightReserved + self.avaRankIcon:GetWidth() + 1
-    end
-
     local showLevelRow = self.level and not self.level:IsHidden()
     if not showLevelRow then
         HideTopInfoLevelClusterWhenInactive(self)
     end
 
+    -- AvA target keeps the class icon on the LEFT, before overland + name.
     local classWidth = 0
-    local rowStartX = 0
     if self.classIcon and not self.classIcon:IsHidden() then
         self.classIcon:ClearAnchors()
-        self.classIcon:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, rowStartX, rowOffsetY)
+        self.classIcon:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, 0, rowOffsetY)
         classWidth = self.classIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
-        rowStartX = rowStartX + classWidth
     end
 
-    local overlandWidth = 0
-    if self.overlandDifficultyIcon then
-        if FrameObject.ShouldShowTopInfoOverlandIcon(self) then
-            local difficulty = FrameObject.ResolveTopInfoOverlandDifficulty(self)
-            local iconPath = FrameObject.GetOverlandChallengeDifficultyIconPath(difficulty)
-            self.overlandDifficultyIcon:ClearAnchors()
-            self.overlandDifficultyIcon:SetDimensions(TOPINFO_OVERLAND_ICON_SIZE, TOPINFO_OVERLAND_ICON_SIZE)
-            if iconPath then
-                self.overlandDifficultyIcon:SetTexture(iconPath)
-            end
-            self.overlandDifficultyIcon:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, rowStartX, rowOffsetY)
-            self.overlandDifficultyIcon:SetHidden(false)
-            overlandWidth = self.overlandDifficultyIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
-            rowStartX = rowStartX + overlandWidth
-        else
-            self.overlandDifficultyIcon:SetHidden(true)
-        end
-    end
-
-    local levelStripReserve = showLevelRow and SMALL_GROUP_LEVEL_STRIP_RESERVE or 0
-    local nameMaxWidth = topInfoWidth - rightReserved - classWidth - levelStripReserve - TOPINFO_NAME_LEVEL_GAP - overlandWidth
-    if nameMaxWidth < 40 then
-        nameMaxWidth = 40
-    end
-
-    self.name:ClearAnchors()
-    self.name:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, rowStartX, rowOffsetY)
-    self.name:SetWidth(nameMaxWidth)
-    ApplyTopInfoSingleLineLabel(self.name)
-
-    ApplyTopInfoRowHeight(self, rowOffsetY)
-
-    local nameUsedWidth = GetTopInfoNameRowUsedWidth(self.name, nameMaxWidth)
-    local levelStart = rowStartX + nameUsedWidth + TOPINFO_NAME_LEVEL_GAP
-    LayoutTopInfoLevelCluster(self, rowOffsetY, levelStart, showLevelRow, rightReserved)
+    local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, classWidth)
+    LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoAvaTargetRightReserved(self), showLevelRow)
 
     if self.avaRankIcon and not self.avaRankIcon:IsHidden() then
         self.avaRankIcon:ClearAnchors()

@@ -291,6 +291,11 @@ function UnitFrames.CreateDefaultFrames()
     if UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] then
         local healthEntry = UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH]
         healthEntry.threshold = UnitFrames.targetThreshold
+        -- Center the label on the bar background rather than the whole frame: the frame's
+        -- vertical center is dragged down onto the Level/Name TextArea (anchored below the bar),
+        -- which made the health value/percent overlap the target's level and name text.
+        healthEntry.label:ClearAnchors()
+        healthEntry.label:SetAnchor(CENTER, ZO_TargetUnitFramereticleoverBgContainer, CENTER, 0, 0)
         table.insert(UnitFrames.targetUnitFrame.fadeComponents, healthEntry.label)
     end
 
