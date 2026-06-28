@@ -768,22 +768,22 @@ end
 -- -----------------------------------------------------------------------------
 
 do
-    --- @type table<integer,string>
-    local CLASS_ICONS = {}
+    -- --- @type table<integer,string>
+    -- local CLASS_ICONS = {}
 
-    for i = 1, GetNumClasses() do
-        local ClassInfo = { GetClassInfo(i) }
-        CLASS_ICONS[ClassInfo[1]] = ClassInfo[8]
-    end
+    -- for i = 1, GetNumClasses() do
+    --     local ClassInfo = { GetClassInfo(i) }
+    --     CLASS_ICONS[ClassInfo[1]] = ClassInfo[8]
+    -- end
 
-    ---
-    --- @param classId integer
-    --- @return string
-    local function GetClassIcon(classId)
-        return CLASS_ICONS[classId]
-    end
+    -- ---
+    -- --- @param classId integer
+    -- --- @return string
+    -- local function GetClassIcon(classId)
+    --     return CLASS_ICONS[classId]
+    -- end
 
-    LUIE.GetClassIcon = GetClassIcon
+    LUIE.GetClassIcon = ZO_GetPlatformClassIcon
 end
 -- -----------------------------------------------------------------------------
 

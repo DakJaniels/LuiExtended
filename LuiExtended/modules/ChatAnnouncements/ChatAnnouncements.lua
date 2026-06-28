@@ -473,6 +473,7 @@ function ChatAnnouncements.Initialize(enabled)
     ChatAnnouncements.RegisterLootHistoryHooks()
     ChatAnnouncements.RegisterMailEvents()
     ChatAnnouncements.RegisterXPEvents()
+    ChatAnnouncements.RegisterAbilityProgressionXpEvents()
     ChatAnnouncements.RegisterAchievementsEvent()
     -- TODO: Possibly don't register these unless enabled, I'm not sure -- at least move to better sorted order
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_BAG_CAPACITY_CHANGED, ChatAnnouncements.StorageBag)
@@ -633,6 +634,14 @@ function ChatAnnouncements.RegisterXPEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_EXPERIENCE_GAIN)
     if ChatAnnouncements.SV.XP.Experience or ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
         eventManager:RegisterForEvent(moduleName, EVENT_EXPERIENCE_GAIN, ChatAnnouncements.OnExperienceGain)
+    end
+end
+
+function ChatAnnouncements.RegisterAbilityProgressionXpEvents()
+    eventManager:UnregisterForEvent(moduleName, EVENT_ABILITY_PROGRESSION_XP_UPDATE)
+    if ChatAnnouncements.SV.Skills.SkillAbilityXpCA or ChatAnnouncements.SV.Skills.SkillAbilityXpAlert then
+        eventManager:RegisterForEvent(moduleName, EVENT_ABILITY_PROGRESSION_XP_UPDATE, ChatAnnouncements.OnAbilityProgressionXpUpdate)
+        ChatAnnouncements.RefreshAbilityProgressionXpCache()
     end
 end
 
@@ -4701,6 +4710,7 @@ end
 function ChatAnnouncements.OnPlayerActivated(eventId)
     S.pendingHomeJump = false
     ChatAnnouncements.ResetMailSession()
+    ChatAnnouncements.RefreshAbilityProgressionXpCache()
 
     -- Get current trades if UI is reloaded
     local characterName, _, displayName = GetTradeInviteInfo()

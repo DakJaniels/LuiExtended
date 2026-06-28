@@ -1151,7 +1151,7 @@ function CastBar.ResetCastBarPosition()
     ActionBar.SV.CastbarOffsetY = nil
     ActionBar.SV.CastBarCustomPosition = nil
     CastBar.SetCastBarPosition()
-    ActionBar.SetMovingState(false)
+    CastBar.SetMovingState(false)
 end
 
 -- -----------------------------------------------------------------------------

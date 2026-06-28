@@ -37,6 +37,33 @@ local iconSideLabels =
     GetString(LUIE_STRING_LAM_CT_ANIM_VALUE_ICON_RIGHT),
 }
 
+local animationTypeDropdownItems = {}
+for itemIndex = 1, #CombatTextConstants.animationType do
+    animationTypeDropdownItems[itemIndex] =
+    {
+        name = animationTypeLabels[itemIndex],
+        data = CombatTextConstants.animationType[itemIndex],
+    }
+end
+
+local directionTypeDropdownItems = {}
+for itemIndex = 1, #CombatTextConstants.directionType do
+    directionTypeDropdownItems[itemIndex] =
+    {
+        name = directionTypeLabels[itemIndex],
+        data = CombatTextConstants.directionType[itemIndex],
+    }
+end
+
+local iconSideDropdownItems = {}
+for itemIndex = 1, #CombatTextConstants.iconSide do
+    iconSideDropdownItems[itemIndex] =
+    {
+        name = iconSideLabels[itemIndex],
+        data = CombatTextConstants.iconSide[itemIndex],
+    }
+end
+
 -- Convert to LHAS format {name, data}
 local function GenerateCustomListLHAS(input)
     local items = {}
@@ -1926,12 +1953,14 @@ function CombatText.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_FACE_TP),
             items = fontItems,
-            getFunction = function () return Settings.fontFace end,
+            getFunction = function ()
+                return SettingsAPI:LHASDropdownGetData(Settings.fontFace)
+            end,
             setFunction = function (combobox, value, item)
                 Settings.fontFace = item.data or item.name or value
                 SettingsAPI:MarkFontDeferred("combatText")
             end,
-            default = Defaults.fontFace
+            default = SettingsAPI:LHASDropdownGetData(Defaults.fontFace)
         }
 
         settings[#settings + 1] =
@@ -1944,20 +1973,10 @@ function CombatText.CreateConsoleSettings()
             step = 1,
             format = "%.0f",
             getFunction = function ()
-                if Settings.fontSize == 18 then
-                    if Settings.animations.animationSpeed == 500 and Settings.animations.animationDuration == 500 then
-                        return Defaults.fontSize
-                    end
-                end
                 return Settings.fontSize
             end,
             setFunction = function (fontSize)
                 Settings.fontSize = fontSize
-                if fontSize == Defaults.fontSize and Settings.fontStyle == Defaults.fontStyle then
-                    if Settings.animations.animationSpeed == Defaults.animations.animationSpeed and Settings.animations.animationDuration == Defaults.animations.animationDuration then
-                        Settings.fontSize = Defaults.fontSize
-                    end
-                end
                 SettingsAPI:MarkFontDeferred("combatText")
             end,
             default = Defaults.fontSize
@@ -1970,26 +1989,13 @@ function CombatText.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
             items = fontStyleItems,
             getFunction = function ()
-                local value = Settings.fontStyle
-                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
-                    if choiceValue == value then
-                        return LUIE.FONT_STYLE_CHOICES[i]
-                    end
-                end
-                return LUIE.FONT_STYLE_CHOICES[1]
+                return SettingsAPI:LHASDropdownGetData(Settings.fontStyle)
             end,
             setFunction = function (combobox, value, item)
                 Settings.fontStyle = item.data
                 SettingsAPI:MarkFontDeferred("combatText")
             end,
-            default = (function ()
-                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
-                    if choiceValue == Defaults.fontStyle then
-                        return LUIE.FONT_STYLE_CHOICES[i]
-                    end
-                end
-                return LUIE.FONT_STYLE_CHOICES[1]
-            end)()
+            default = SettingsAPI:LHASDropdownGetData(Defaults.fontStyle)
         }
     end)
 
@@ -2013,15 +2019,9 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CT_ANIMATION_TYPE),
             tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_TYPE_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(CombatTextConstants.animationType) do
-                    items[i] = { name = animationTypeLabels[i], data = option }
-                end
-                return items
-            end,
+            items = animationTypeDropdownItems,
             getFunction = function ()
-                return Settings.animation.animationType
+                return SettingsAPI:LHASDropdownGetData(Settings.animation.animationType)
             end,
             setFunction = function (combobox, value, item)
                 Settings.animation.animationType = item.data or item.name or value
@@ -2030,7 +2030,7 @@ function CombatText.CreateConsoleSettings()
                     CombatText.CreateCombatEventViewer()
                 end
             end,
-            default = Defaults.animation.animationType
+            default = SettingsAPI:LHASDropdownGetData(Defaults.animation.animationType)
         }
 
         settings[#settings + 1] =
@@ -2056,20 +2056,14 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CT_ANIMATION_DIRECTION_IN),
             tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_DIRECTION_IN_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(CombatTextConstants.directionType) do
-                    items[i] = { name = directionTypeLabels[i], data = option }
-                end
-                return items
-            end,
+            items = directionTypeDropdownItems,
             getFunction = function ()
-                return Settings.animation.incoming.directionType
+                return SettingsAPI:LHASDropdownGetData(Settings.animation.incoming.directionType)
             end,
             setFunction = function (combobox, value, item)
                 Settings.animation.incoming.directionType = item.data or item.name or value
             end,
-            default = Defaults.animation.incoming.directionType
+            default = SettingsAPI:LHASDropdownGetData(Defaults.animation.incoming.directionType)
         }
 
         settings[#settings + 1] =
@@ -2077,20 +2071,14 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_IN),
             tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_IN_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(CombatTextConstants.iconSide) do
-                    items[i] = { name = iconSideLabels[i], data = option }
-                end
-                return items
-            end,
+            items = iconSideDropdownItems,
             getFunction = function ()
-                return Settings.animation.incomingIcon
+                return SettingsAPI:LHASDropdownGetData(Settings.animation.incomingIcon)
             end,
             setFunction = function (combobox, value, item)
                 Settings.animation.incomingIcon = item.data or item.name or value
             end,
-            default = Defaults.animation.incomingIcon
+            default = SettingsAPI:LHASDropdownGetData(Defaults.animation.incomingIcon)
         }
 
         settings[#settings + 1] =
@@ -2098,20 +2086,14 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CT_ANIMATION_DIRECTION_OUT),
             tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_DIRECTION_OUT_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(CombatTextConstants.directionType) do
-                    items[i] = { name = directionTypeLabels[i], data = option }
-                end
-                return items
-            end,
+            items = directionTypeDropdownItems,
             getFunction = function ()
-                return Settings.animation.outgoing.directionType
+                return SettingsAPI:LHASDropdownGetData(Settings.animation.outgoing.directionType)
             end,
             setFunction = function (combobox, value, item)
                 Settings.animation.outgoing.directionType = item.data or item.name or value
             end,
-            default = Defaults.animation.outgoing.directionType
+            default = SettingsAPI:LHASDropdownGetData(Defaults.animation.outgoing.directionType)
         }
 
         settings[#settings + 1] =
@@ -2119,20 +2101,14 @@ function CombatText.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_OUT),
             tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_OUT_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(CombatTextConstants.iconSide) do
-                    items[i] = { name = iconSideLabels[i], data = option }
-                end
-                return items
-            end,
+            items = iconSideDropdownItems,
             getFunction = function ()
-                return Settings.animation.outgoingIcon
+                return SettingsAPI:LHASDropdownGetData(Settings.animation.outgoingIcon)
             end,
             setFunction = function (combobox, value, item)
                 Settings.animation.outgoingIcon = item.data or item.name or value
             end,
-            default = Defaults.animation.outgoingIcon
+            default = SettingsAPI:LHASDropdownGetData(Defaults.animation.outgoingIcon)
         }
 
         settings[#settings + 1] =

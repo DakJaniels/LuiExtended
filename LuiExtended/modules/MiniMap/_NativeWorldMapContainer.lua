@@ -13,6 +13,9 @@ local MiniMap = LUIE.MiniMap
 
 local eventManager = GetEventManager()
 
+local pinManager = ZO_WorldMap_GetPinManager()
+local panAndZoom = ZO_WorldMap_GetPanAndZoom()
+
 local nativeWorldMapContainerAttached = false
 local nativeWorldMapContainerHiddenForReload = false
 
@@ -78,9 +81,6 @@ end
 
 --- Runs ZOS g_mapRefresh:UpdateRefreshGroups via the world map OnUpdate handler (keep / link / location dirty groups).
 function MiniMap.FlushWorldMapPinRefreshGroups()
-    if not WORLD_MAP_MANAGER then
-        return
-    end
     local worldMapControl = WORLD_MAP_MANAGER.control
     local onUpdate = worldMapControl:GetHandler("OnUpdate")
     if onUpdate then
@@ -90,7 +90,6 @@ end
 
 --- Stops ZO_MapPanAndZoom from re-anchoring ZO_WorldMapContainer to CENTER while it is parented under the HUD minimap.
 function MiniMap.ResetNativeHudWorldMapPanState()
-    local panAndZoom = ZO_WorldMap_GetPanAndZoom()
     panAndZoom:ClearLockPoint()
     panAndZoom:ClearTargetOffset()
     panAndZoom:ClearTargetNormalizedZoom()
@@ -169,7 +168,6 @@ function MiniMap.TickHudMovingAndPlayerPins(followPlayer)
     if not nativeWorldMapContainerAttached then
         return
     end
-    local pinManager = ZO_WorldMap_GetPinManager()
     local hasGroupOrCompanionPins = MiniMap.HasNativeMovingPinTargets()
     if followPlayer then
         if hasGroupOrCompanionPins then
@@ -186,7 +184,7 @@ end
 
 --- ZOS UpdateMovingPins player block only (MapPin_Manager.lua) for solo follow pip sync.
 function MiniMap.UpdateNativeHudPlayerMapPin()
-    local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+    local playerMapPin = pinManager:GetPlayerPin()
     local xLoc, yLoc, _, isShownInCurrentMap, isSymbolicLocation = GetMapPlayerPosition("player")
     playerMapPin:SetOriginalPosition(xLoc, yLoc)
     playerMapPin:SetIsSymbolicPosition(isSymbolicLocation)
@@ -202,14 +200,14 @@ end
 
 --- Native HUD player pin uses the same pip art as the overlay; size comes from Player Pip scale only.
 function MiniMap.ApplyNativeHudPlayerPinScale()
-    local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+    local playerMapPin = pinManager:GetPlayerPin()
     local drawSize = MiniMap.GetPlayerPinDrawSize()
     playerMapPin:SetScaleModifier(drawSize / MiniMap.PLAYER_PIN_BASE_SIZE)
 end
 
 --- Tints the ZOS HUD player map pin (ZO_WorldMapPins_Manager:GetPlayerPin), not a fixed pool index.
 function MiniMap.ApplyNativeWorldMapPlayerPinColors()
-    local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+    local playerMapPin = pinManager:GetPlayerPin()
     local backgroundControl = playerMapPin.backgroundControl
     local red, green, blue, alpha
     if MiniMap.GetMapFollowsPlayer() then
@@ -231,7 +229,7 @@ function MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
     if not nativeWorldMapContainerAttached or not nativeWorldMapContainerRestore then
         return
     end
-    local playerMapPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+    local playerMapPin = pinManager:GetPlayerPin()
     local playerWorldPinControl = playerMapPin:GetControl()
     nativeWorldMapContainerRestore.playerWorldPinControl = playerWorldPinControl
     if nativeWorldMapContainerRestore.playerWorldPinWasHidden == nil then
@@ -267,11 +265,10 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
     ZO_WorldMapContainer:SetAnchor(TOPLEFT, ZO_WorldMapContainer:GetParent(), TOPLEFT, 0, 0)
 
     WORLD_MAP_TILES_MANAGER:LayoutTiles()
-    for tileIndex = 1, WORLD_MAP_TILES_MANAGER.totalTiles do
-        WORLD_MAP_TILES_MANAGER:GetActiveObject(tileIndex):SetHidden(false)
-    end
+    -- for tileIndex = 1, WORLD_MAP_TILES_MANAGER.totalTiles do
+    --     WORLD_MAP_TILES_MANAGER:GetActiveObject(tileIndex):SetHidden(false)
+    -- end
 
-    local pinManager = ZO_WorldMap_GetPinManager()
     pinManager:UpdateMovingPins()
     pinManager:UpdatePinsForMapSizeChange()
     WORLD_MAP_MANAGER:UpdateBlobs()
@@ -402,7 +399,7 @@ function MiniMap.RestoreWorldMapContainerToWorldMap()
     end
 
     WORLD_MAP_TILES_MANAGER:LayoutTiles()
-    ZO_WorldMap_GetPinManager():UpdatePinsForMapSizeChange()
+    pinManager:UpdatePinsForMapSizeChange()
 
     nativeWorldMapContainerAttached = false
     nativeWorldMapContainerRestore = nil

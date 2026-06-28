@@ -291,6 +291,11 @@ function UnitFrames.CreateDefaultFrames()
     if UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] then
         local healthEntry = UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH]
         healthEntry.threshold = UnitFrames.targetThreshold
+        -- Center the label on the bar background rather than the whole frame: the frame's
+        -- vertical center is dragged down onto the Level/Name TextArea (anchored below the bar),
+        -- which made the health value/percent overlap the target's level and name text.
+        healthEntry.label:ClearAnchors()
+        healthEntry.label:SetAnchor(CENTER, ZO_TargetUnitFramereticleoverBgContainer, CENTER, 0, 0)
         table.insert(UnitFrames.targetUnitFrame.fadeComponents, healthEntry.label)
     end
 
@@ -442,6 +447,9 @@ function UnitFrames.UpdateDefaultLevelTarget()
     end
     if targetVeteranRankIcon then
         targetVeteranRankIcon:ClearAnchors()
-        targetVeteranRankIcon:SetAnchor(CENTER, allianceRankIcon, RIGHT, 8, -2)
+        targetVeteranRankIcon:SetAnchor(CENTER, allianceRankIcon, RIGHT, 20, 0)
+        -- uncomment to test max rank icons spacing.
+        -- targetVeteranRankIcon:SetTexture"/esoui/art/vengeance/ranks/season00/s00_uniquerank_100.dds"
+        -- allianceRankIcon:SetTexture("/esoui/art/ava/ava_rankicon_grandoverlord.dds")
     end
 end

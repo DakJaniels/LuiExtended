@@ -49,6 +49,26 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.6
+    "|cFFA500LuiExtended Version 7.2.5.6|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills — chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Changelog (PC): The version welcome window opens after you enter the world (load screen) instead of during addon load; closing the window marks that version as seen.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: |cFFFFFFQuick Hide Dead|r sub-option label and tooltip clarified.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame — health value and percentage no longer overlap the target's level and name text.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame (|cFFFFFFUse Extender|r) — veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player, target, and group frames — Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: |cFFFFFFReset Position|r for the cast bar correctly turns off cast bar move mode so the bar is not left in a bad state.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Unit Frames and Combat Text settings — dropdown options display and save correctly again.",
+    "",
     -- Version Header 7.2.5.5
     "|cFFA500LuiExtended Version 7.2.5.5|r",
     "",
@@ -1186,7 +1206,7 @@ local function ApplyChangelogScrollTheme()
         ZO_Scroll_SetHideScrollbarOnDisable(scrollContainer, false)
     end
 
-    scrollBar:SetThumbTexture(CHANGELOG_SCROLL_THUMB, CHANGELOG_SCROLL_THUMB_DISABLED, nil, CHANGELOG_SCROLL_THUMB_WIDTH, CHANGELOG_SCROLL_THUMB_HEIGHT)
+    scrollBar:SetThumbTexture(CHANGELOG_SCROLL_THUMB, CHANGELOG_SCROLL_THUMB_DISABLED, "", CHANGELOG_SCROLL_THUMB_WIDTH, CHANGELOG_SCROLL_THUMB_HEIGHT, 0, 0, 1, 1)
 
     scrollBar:SetBackgroundTopTexture(CHANGELOG_SCROLL_TRACK, 0, 0, 1, 1)
     scrollBar:SetBackgroundMiddleTexture(CHANGELOG_SCROLL_TRACK, 0, 0, 1, 1)
@@ -1661,6 +1681,10 @@ function LUIE_Changelog_Manager:OnShown()
     self:RequestLayoutRefresh()
 end
 
+function LUIE_Changelog_Manager:OnHidden()
+    LUIE.SV.WelcomeVersion = LUIE.version
+end
+
 function LUIE_Changelog_Manager:Show()
     self.control:ClearAnchors()
     self.control:SetAnchor(CENTER, GuiRoot, CENTER, 0, -120)
@@ -1705,7 +1729,7 @@ function LUIE.ToggleChangelog(option)
 end
 
 -- -----------------------------------------------------------------------------
--- Called on initialize when LUIE.SV.ShowChangeLog is enabled (see Initialize_PC.lua).
+-- Called on first player activation when LUIE.SV.ShowChangeLog is enabled (see Initialize_PC.lua LoadScreen).
 function LUIE.ChangelogScreen()
     if not IsChangelogFeatureEnabled() then
         return
@@ -1719,8 +1743,6 @@ function LUIE.ChangelogScreen()
     if LUIE.SV.WelcomeVersion ~= LUIE.version then
         manager:Show()
     end
-
-    LUIE.SV.WelcomeVersion = LUIE.version
 end
 
 -- -----------------------------------------------------------------------------

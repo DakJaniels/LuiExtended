@@ -5006,6 +5006,96 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.Skills.SkillAbilityAlert,
             },
             {
+                -- Ability Experience ChatAnnouncements
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Skills.SkillAbilityXpCA
+                end,
+                setFunc = function (value)
+                    Settings.Skills.SkillAbilityXpCA = value
+                    ChatAnnouncements.RegisterAbilityProgressionXpEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Skills.SkillAbilityXpCA,
+            },
+            {
+                -- Ability Experience Alert
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Skills.SkillAbilityXpAlert
+                end,
+                setFunc = function (value)
+                    Settings.Skills.SkillAbilityXpAlert = value
+                    ChatAnnouncements.RegisterAbilityProgressionXpEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Skills.SkillAbilityXpAlert,
+            },
+            {
+                -- Ability Experience Icon
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_ICON)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_ICON_TP),
+                getFunc = function ()
+                    return Settings.Skills.SkillAbilityXpIcon
+                end,
+                setFunc = function (value)
+                    Settings.Skills.SkillAbilityXpIcon = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Skills.SkillAbilityXpCA and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Skills.SkillAbilityXpIcon,
+            },
+            {
+                -- Ability Experience Progress
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_PROGRESS)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_PROGRESS_TP),
+                getFunc = function ()
+                    return Settings.Skills.SkillAbilityXpProgress
+                end,
+                setFunc = function (value)
+                    Settings.Skills.SkillAbilityXpProgress = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not ((Settings.Skills.SkillAbilityXpCA or Settings.Skills.SkillAbilityXpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Skills.SkillAbilityXpProgress,
+            },
+            {
+                -- Ability Experience Filter
+                type = "slider",
+                name = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_FILTER),
+                tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_FILTER_TP),
+                min = 0,
+                max = 5000,
+                step = 50,
+                getFunc = function ()
+                    return Settings.Skills.SkillAbilityXpFilter
+                end,
+                setFunc = function (value)
+                    Settings.Skills.SkillAbilityXpFilter = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not ((Settings.Skills.SkillAbilityXpCA or Settings.Skills.SkillAbilityXpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Skills.SkillAbilityXpFilter,
+            },
+            {
                 -- Skill Line Color
                 type = "colorpicker",
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_SKILL_LINE_COLOR)),

@@ -310,7 +310,7 @@ function LUIE.CreateSettings()
 
     local function ProfileCopyRefreshBucketDropdown()
         copyPick_bucket = nil
-        local ctrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_Bucket") ---@type LUIE_LAM_ProfileCopy_Bucket
+        local ctrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_Bucket") --- @type LUIE_LAM_ProfileCopy_Bucket
         if not (ctrl and ctrl.UpdateChoices) then
             return
         end
@@ -322,7 +322,7 @@ function LUIE.CreateSettings()
     end
 
     local function ProfileCopyRefreshCharacterDropdownOnly()
-        local charCtrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_SourceCharacter")
+        local charCtrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_SourceCharacter") --- @type LUIE_LAM_ProfileCopy_SourceCharacter
         if not (charCtrl and charCtrl.UpdateChoices) then
             return
         end
@@ -337,7 +337,7 @@ function LUIE.CreateSettings()
         if profileCopySplitSourceUI then
             copyPick_characterName = nil
             ProfileCopyRefreshCharacterDropdownOnly()
-            local kindCtrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_SourceKind")
+            local kindCtrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_SourceKind") --- @type LUIE_LAM_ProfileCopy_SourceKind
             if kindCtrl and kindCtrl.UpdateValue then
                 kindCtrl:UpdateValue()
             end
@@ -353,7 +353,7 @@ function LUIE.CreateSettings()
             copyPick_sourceKind = "accountwide"
             copyPick_characterName = nil
         end
-        local ctrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_Account")
+        local ctrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_Account") --- @type LUIE_LAM_ProfileCopy_Account
         if not (ctrl and ctrl.UpdateChoices) then
             return
         end
@@ -1094,7 +1094,8 @@ function LUIE.CreateSettings()
         "full",
         nil,
         Defaults.SuppressZOBuffDebuffWhenHidden,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+        true
     )
 
     -- Startup Message Options

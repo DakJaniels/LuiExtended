@@ -4916,6 +4916,96 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+            getFunction = function ()
+                return Settings.Skills.SkillAbilityXpCA
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillAbilityXpCA = value
+                ChatAnnouncements.RegisterAbilityProgressionXpEvents()
+            end,
+            default = Defaults.Skills.SkillAbilityXpCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+            getFunction = function ()
+                return Settings.Skills.SkillAbilityXpAlert
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillAbilityXpAlert = value
+                ChatAnnouncements.RegisterAbilityProgressionXpEvents()
+            end,
+            default = Defaults.Skills.SkillAbilityXpAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_ICON_TP),
+            getFunction = function ()
+                return Settings.Skills.SkillAbilityXpIcon
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillAbilityXpIcon = value
+            end,
+            default = Defaults.Skills.SkillAbilityXpIcon,
+            disable = function ()
+                return not (Settings.Skills.SkillAbilityXpCA and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_PROGRESS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_PROGRESS_TP),
+            getFunction = function ()
+                return Settings.Skills.SkillAbilityXpProgress
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillAbilityXpProgress = value
+            end,
+            default = Defaults.Skills.SkillAbilityXpProgress,
+            disable = function ()
+                return not ((Settings.Skills.SkillAbilityXpCA or Settings.Skills.SkillAbilityXpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_FILTER),
+            tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_FILTER_TP),
+            min = 0,
+            max = 5000,
+            step = 50,
+            getFunction = function ()
+                return Settings.Skills.SkillAbilityXpFilter
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillAbilityXpFilter = value
+            end,
+            default = Defaults.Skills.SkillAbilityXpFilter,
+            disable = function ()
+                return not ((Settings.Skills.SkillAbilityXpCA or Settings.Skills.SkillAbilityXpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_COLOR,
             label = GetString(LUIE_STRING_LAM_CA_SKILL_LINE_COLOR),
             getFunction = function ()

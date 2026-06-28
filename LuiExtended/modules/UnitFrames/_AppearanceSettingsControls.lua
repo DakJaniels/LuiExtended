@@ -311,7 +311,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
             markFontDeferred()
         end,
         disable = disabledFunc,
-        default = defaultEntry.fontFace,
+        default = settingsAPI:LHASDropdownGetData(defaultEntry.fontFace),
     }
 
     rows[#rows + 1] =
@@ -333,7 +333,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
             GetAppearanceEntry(settings, category).fontStyle = item.data or item.name or value
             markFontDeferred()
         end,
-        default = defaultEntry.fontStyle,
+        default = settingsAPI:LHASDropdownGetData(defaultEntry.fontStyle),
         disable = disabledFunc,
     }
 
@@ -352,7 +352,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
             GetAppearanceEntry(settings, category).texture = item.data or item.name or value
             UnitFrames.CustomFramesApplyTextureForCategory(category)
         end,
-        default = defaultEntry.texture,
+        default = settingsAPI:LHASDropdownGetData(defaultEntry.texture),
         disable = disabledFunc,
     }
 

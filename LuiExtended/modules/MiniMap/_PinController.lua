@@ -9,7 +9,7 @@
 local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
-
+local pinManager = ZO_WorldMap_GetPinManager()
 local WAYPOINT_PIN_TEXTURE = "EsoUI/Art/Compass/compass_waypoint.dds"
 local WAYPOINT_PIN_CONTROL_NAME = "_PlayerWaypoint"
 local PLAYER_MAP_PIN_CONTROL_NAME = "_PlayerMapPin"
@@ -82,7 +82,6 @@ end
 
 --- @param callback fun(mapPin: ZO_MapPin)
 function MiniMapPinController:ForEachMirroredAntiquityDigSiteMapPin(callback)
-    local pinManager = ZO_WorldMap_GetPinManager()
     local antiquityDigSiteKeys = pinManager.m_keyToPinMapping and pinManager.m_keyToPinMapping.antiquityDigSite
     if antiquityDigSiteKeys then
         for _, keysByTag in pairs(antiquityDigSiteKeys) do
@@ -135,7 +134,7 @@ function MiniMapPinController:RestoreAllDigSitePolygonsToWorldMap()
         end
     end
     self:ForEachMirroredAntiquityDigSiteMapPin(restoreIfAttached)
-    for _, mapPin in pairs(ZO_WorldMap_GetPinManager():GetActiveObjects()) do
+    for _, mapPin in pairs(pinManager:GetActiveObjects()) do
         restoreIfAttached(mapPin)
     end
 end
@@ -169,7 +168,7 @@ function MiniMapPinController:GetPinDimensions(pinWidth, pinHeight, pinScale, pi
 end
 
 function MiniMapPinController:ResetNativeWorldMapPinUserScale()
-    for _, mapPin in pairs(ZO_WorldMap_GetPinManager():GetActiveObjects()) do
+    for _, mapPin in pairs(pinManager:GetActiveObjects()) do
         mapPin:ResetScale(false)
     end
 end
@@ -182,7 +181,6 @@ function MiniMapPinController:ApplyUserScaleToNativeWorldMapPins()
     if MiniMap.IsWorldMapBlockingMiniMapWork() then
         return
     end
-    local pinManager = ZO_WorldMap_GetPinManager()
     local playerWorldPin = pinManager:GetPlayerPin()
     for _, mapPin in pairs(pinManager:GetActiveObjects()) do
         if mapPin ~= playerWorldPin then

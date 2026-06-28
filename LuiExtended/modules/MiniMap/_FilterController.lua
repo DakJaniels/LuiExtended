@@ -9,6 +9,7 @@
 local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
+local pinManager = ZO_WorldMap_GetPinManager()
 
 function MiniMap.RefreshWorldMapPingsForMirror()
     WORLD_MAP_MANAGER:RefreshMapPings()
@@ -22,7 +23,6 @@ end
 
 --- Service icons (stable, bank, etc.) on g_mapPinManager; mirrors ZO_MapLocationPins_Manager:RefreshLocations.
 function MiniMap.RefreshWorldMapLocationPinsForMirror()
-    local pinManager = ZO_WorldMap_GetPinManager()
     pinManager:RemovePins("loc")
     for locationIndex = 1, GetNumMapLocations() do
         if IsMapLocationVisible(locationIndex) then
