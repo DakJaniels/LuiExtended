@@ -1094,7 +1094,8 @@ function LUIE.CreateSettings()
         "full",
         nil,
         Defaults.SuppressZOBuffDebuffWhenHidden,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+        true
     )
 
     -- Startup Message Options
