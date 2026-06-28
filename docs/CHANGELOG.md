@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.7
+
+### Fixed
+
+- Chat Announcements: Group loot messages now respect Player Name Display Method (for example @ UserID), including on localized game clients.
+
 ## Version 7.2.5.6
 
 ### New

@@ -52,9 +52,9 @@ local changelogMessages =
     -- Version Header 7.2.5.7
     "|cFFA500LuiExtended Version 7.2.5.7|r",
     "",
-    -- TBD
-    "|cFFFF00TBD:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ...",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Group loot messages now respect |cFFFFFFPlayer Name Display Method|r (for example @ UserID), including on localized game clients.",
     "",
     -- Version Header 7.2.5.6
     "|cFFA500LuiExtended Version 7.2.5.6|r",
