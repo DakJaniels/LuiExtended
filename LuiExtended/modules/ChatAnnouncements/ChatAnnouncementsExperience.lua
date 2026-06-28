@@ -272,12 +272,21 @@ end
 
 -- Print Ability Progression XP Gain
 --- @param abilityNameAndRank string
---- @param change integer
+--- @param change integer the XP gained this update
+--- @param rankProgress integer XP earned into the current rank (currentXP - lastRankXP)
+--- @param rankXpWindow integer total XP span of the current rank (nextRankXP - lastRankXP)
 --- @param texture string|nil
-function ChatAnnouncements.PrintAbilityProgressionXpGain(abilityNameAndRank, change, texture)
+function ChatAnnouncements.PrintAbilityProgressionXpGain(abilityNameAndRank, change, rankProgress, rankXpWindow, texture)
     local showIcon = ChatAnnouncements.SV.Skills.SkillAbilityXpIcon and texture and texture ~= ""
     local formattedIcon = showIcon and (zo_iconFormat(texture, 16, 16) .. " ") or ""
-    local plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN, abilityNameAndRank, ZO_CommaDelimitDecimalNumber(change))
+
+    local plainText
+    if ChatAnnouncements.SV.Skills.SkillAbilityXpProgress and rankXpWindow and rankXpWindow > 0 then
+        local percentLeft = string.format("%.1f", ((rankXpWindow - rankProgress) / rankXpWindow) * 100)
+        plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN_PROGRESS, abilityNameAndRank, ZO_CommaDelimitDecimalNumber(change), ZO_CommaDelimitDecimalNumber(rankProgress), ZO_CommaDelimitDecimalNumber(rankXpWindow), percentLeft)
+    else
+        plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN, abilityNameAndRank, ZO_CommaDelimitDecimalNumber(change))
+    end
 
     if ChatAnnouncements.SV.Skills.SkillAbilityXpCA then
         local finalMessage = ColorizeColors.SkillLineColorize:Colorize(formattedIcon .. plainText)
@@ -289,6 +298,29 @@ function ChatAnnouncements.PrintAbilityProgressionXpGain(abilityNameAndRank, cha
     if ChatAnnouncements.SV.Skills.SkillAbilityXpAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, plainText)
     end
+end
+
+-- Returns true when an ability can no longer gain progression XP: a base (unmorphed)
+-- ability that has reached its morph point, or a morphed ability that has reached max rank.
+-- At max rank the progression XP window stops representing real progress, so we skip it.
+--- @param skillData table
+--- @return boolean
+local function GetAbilityProgressionAtMaxRank(skillData)
+    local progressionData = skillData:GetCurrentProgressionData()
+    if not progressionData then
+        return false
+    end
+
+    if progressionData:IsBase() then
+        return skillData:IsAtMorph()
+    end
+
+    if progressionData:GetCurrentRank() ~= MAX_RANKS_PER_ABILITY then
+        return false
+    end
+
+    local _, maxRankEndXP = progressionData:GetRankXPExtents(MAX_RANKS_PER_ABILITY)
+    return progressionData:GetCurrentXP() >= maxRankEndXP
 end
 
 -- EVENT_ABILITY_PROGRESSION_XP_UPDATE HANDLER
@@ -307,6 +339,10 @@ function ChatAnnouncements.OnAbilityProgressionXpUpdate(eventId, progressionInde
 
     local cached = g_abilityProgressionXpCache[progressionIndex]
     g_abilityProgressionXpCache[progressionIndex] = { lastRankXP = lastRankXP, nextRankXP = nextRankXP, currentXP = currentXP }
+
+    if GetAbilityProgressionAtMaxRank(skillData) then
+        return
+    end
 
     if not cached then
         return
@@ -335,5 +371,7 @@ function ChatAnnouncements.OnAbilityProgressionXpUpdate(eventId, progressionInde
     local abilityName, texture = GetAbilityProgressionAbilityInfo(progressionIndex, morph, rank)
     local abilityNameAndRank = zo_strformat(SI_ABILITY_NAME_AND_RANK, abilityName, rank)
 
-    ChatAnnouncements.PrintAbilityProgressionXpGain(abilityNameAndRank, change, texture)
+    local rankProgress = currentXP - lastRankXP
+    local rankXpWindow = nextRankXP - lastRankXP
+    ChatAnnouncements.PrintAbilityProgressionXpGain(abilityNameAndRank, change, rankProgress, rankXpWindow, texture)
 end

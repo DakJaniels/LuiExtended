@@ -4969,6 +4969,23 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_PROGRESS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_PROGRESS_TP),
+            getFunction = function ()
+                return Settings.Skills.SkillAbilityXpProgress
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillAbilityXpProgress = value
+            end,
+            default = Defaults.Skills.SkillAbilityXpProgress,
+            disable = function ()
+                return not ((Settings.Skills.SkillAbilityXpCA or Settings.Skills.SkillAbilityXpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_SLIDER,
             label = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_FILTER),
             tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_FILTER_TP),

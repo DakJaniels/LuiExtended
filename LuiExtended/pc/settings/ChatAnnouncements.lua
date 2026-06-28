@@ -5059,6 +5059,23 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.Skills.SkillAbilityXpIcon,
             },
             {
+                -- Ability Experience Progress
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_PROGRESS)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_PROGRESS_TP),
+                getFunc = function ()
+                    return Settings.Skills.SkillAbilityXpProgress
+                end,
+                setFunc = function (value)
+                    Settings.Skills.SkillAbilityXpProgress = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not ((Settings.Skills.SkillAbilityXpCA or Settings.Skills.SkillAbilityXpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Skills.SkillAbilityXpProgress,
+            },
+            {
                 -- Ability Experience Filter
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_CA_SKILL_ABILITY_XP_FILTER),
