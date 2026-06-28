@@ -66,7 +66,7 @@ Stale stats, HUD overlap, slash command not working after toggle (did you `/relo
 
 ### MiniMap (BETA)
 
-Only when you intentionally enable the module (**Enable MiniMap** under **Module Settings** on `/luiset`, then `/reloadui`): pin accuracy, FPS impact, visibility with menus/combat, waypoint clicks, console vs PC. MiniMap may be omitted from public release notes unless explicitly called out for a release.
+Only when you intentionally enable the module (**Enable MiniMap** under **Module Settings**, then **`/reloadui`**, then the **MiniMap (BETA)** settings panel): pin accuracy, FPS impact, visibility with menus/combat, waypoint clicks, console vs PC. MiniMap may be omitted from public release notes unless explicitly called out for a release.
 
 ### Core / Misc
 

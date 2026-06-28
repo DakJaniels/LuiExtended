@@ -126,7 +126,7 @@
 
 ### New
 
-- MiniMap (BETA): Optional HUD minimap module (**/luimm**). Zoom (default, subzone, dungeon, battleground, mounted), follow player, lock position and size, per-category pin scales, visibility rules (HUD, combat, looting, mounted, housing, draw tier), waypoint click behavior, and keybinds for zoom, recenter, visibility, combat, and fixed position. Enable under Module Settings on the main LuiExtended panel; requires UI reload.
+- MiniMap (BETA): Optional HUD minimap module. Enable under Module Settings on the main LuiExtended panel, then reload UI; configure under **LuiExtended → MiniMap (BETA)**. Zoom (default, subzone, dungeon, battleground, mounted), follow player, lock position and size, per-category pin scales, visibility rules (HUD, combat, looting, mounted, housing, draw tier), waypoint click behavior, and keybinds for zoom, recenter, visibility, combat, and fixed position.
 - Unit Frames: Optional suppress vanilla player attribute bars, target frame, group and raid frames, and companion frame while the matching LUIE custom frames are enabled (PC and console).
 - Misc Settings: **Unregister Hidden Buff/Debuff UI** stops vanilla buff and debuff UI from running in the background when the game buff UI is disabled.
 - Chat Announcements: Optional **Show Item Type** on loot lines (same pattern as trait and style display).

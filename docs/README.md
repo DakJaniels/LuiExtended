@@ -10,7 +10,7 @@ LuiExtended is an AddOn that adds multiple custom components including
 - **Combat Info** GCD, quickslot cooldown, ability alerts, crowd control tracker, and related combat HUD tools.
 - **Combat Text** Outgoing and incoming damage and healing, warnings, throttling, and resource gain display.
 - **Slash Commands** Home travel, group tools, guild and social shortcuts, assistants, and settings shortcuts. See [Slash commands](#slash-commands) below.
-- **MiniMap (BETA)** Optional HUD minimap. Enable **Enable MiniMap** under **Module Settings** on the main LuiExtended panel (`/luiset`), then `/reloadui`; use `/luimm` on PC for map options.
+- **MiniMap (BETA)** Optional HUD minimap (off by default). Enable **Enable MiniMap** under **Module Settings** on the main LuiExtended panel, **`/reloadui`**, then open **LuiExtended → MiniMap (BETA)** in add-on settings like the other modules.
 
 Initially this [Elder Scrolls Online][1] AddOn was based partially on the [LUI][2] AddOn by LoPony and some features of [Foundry Tactical Combat][3] AddOn.
 
