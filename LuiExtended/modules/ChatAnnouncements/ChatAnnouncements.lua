@@ -3110,30 +3110,27 @@ function I.AchievementPctToColor(pct)
 end
 
 --- @param achievementId integer
---- @return number|nil
+--- @return luaindex|nil topLevelIndex
+--- @return luaindex|nil categoryIndex
+--- @return luaindex|nil achievementIndex
 function I.GetCategoryInfoFromAchievementIdDetailed(achievementId)
-    -- If the user is selecting from the recent achievements list, there
-    --  will not be an open category id, so attempt to get the category
-    --  from the achievement.
-    local categoryId = GetCategoryInfoFromAchievementId(achievementId)
-    if categoryId then
-        return categoryId
+    local topLevelIndex, categoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
+    if topLevelIndex then
+        return topLevelIndex, categoryIndex, achievementIndex
     end
 
     -- Some achievements cannot find their category id properly, so try
-    --  walking the achievement chain and look for one that has a category
-    --  id.
+    -- walking the achievement chain and look for one that has a category id.
     local tryAchievementId = GetFirstAchievementInLine(achievementId)
     while tryAchievementId ~= 0 do
-        categoryId = GetCategoryInfoFromAchievementId(tryAchievementId)
-        if categoryId then
-            return categoryId
+        topLevelIndex, categoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(tryAchievementId)
+        if topLevelIndex then
+            return topLevelIndex, categoryIndex, achievementIndex
         end
         tryAchievementId = GetNextAchievementInLine(tryAchievementId)
     end
 
-    -- We were unable to determine the correct category id.
-    return nil
+    return nil, nil, nil
 end
 
 --- @param eventId integer
