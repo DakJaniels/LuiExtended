@@ -10,7 +10,7 @@ LuiExtended is an AddOn that adds multiple custom components including
 - **Combat Info** GCD, quickslot cooldown, ability alerts, crowd control tracker, and related combat HUD tools.
 - **Combat Text** Outgoing and incoming damage and healing, warnings, throttling, and resource gain display.
 - **Slash Commands** Home travel, group tools, guild and social shortcuts, assistants, and settings shortcuts. See [Slash commands](#slash-commands) below.
-- **MiniMap (BETA)** Optional HUD minimap (`/luimm` on PC). Enable under Misc Settings; requires UI reload.
+- **MiniMap (BETA)** Optional HUD minimap. Enable **Enable MiniMap** under **Module Settings** on the main LuiExtended panel (`/luiset`), then `/reloadui`; use `/luimm` on PC for map options.
 
 Initially this [Elder Scrolls Online][1] AddOn was based partially on the [LUI][2] AddOn by LoPony and some features of [Foundry Tactical Combat][3] AddOn.
 
@@ -18,7 +18,7 @@ Initially this [Elder Scrolls Online][1] AddOn was based partially on the [LUI][
 
 Install **LuiMedia**, **LuiData**, and **LuiExtended** from ESOUI (or this repo) and enable all three. PC also needs **LibAddonMenu-2.0**; console needs **LibHarvensAddonSettings** and **LibConsoleDialogs**. Version minimums are in `LuiExtended.addon` (`## DependsOn` / `## ConsoleDependsOn`).
 
-Each major feature is a **module** you can toggle under LuiExtended settings. For a full breakdown (integrations, beta MiniMap, LuiData relationship, and what to test), see [MODULES.md](MODULES.md). To report bugs or help test, see [HOWTOHELP.md](HOWTOHELP.md). Translators see [LOCALIZATION.md](LOCALIZATION.md).
+Each major feature is a **module** you can toggle under **Module Settings** on the main LuiExtended panel. For a full breakdown (integrations, beta MiniMap, LuiData relationship, and what to test), see [MODULES.md](MODULES.md). To report bugs or help test, see [HOWTOHELP.md](HOWTOHELP.md). Translators see [LOCALIZATION.md](LOCALIZATION.md).
 
 ## Information
 

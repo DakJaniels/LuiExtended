@@ -1,6 +1,6 @@
 # LuiExtended modules and features
 
-LuiExtended is a bundle of optional **modules**. Each module can be enabled or disabled under **LuiExtended → Module Settings** (Misc). Most modules have their own settings panel and slash shortcut on PC (see [README.md](README.md#settings-shortcuts-pc-keyboard-ui)).
+LuiExtended is a bundle of optional **modules**. Each module can be enabled or disabled on the main **LuiExtended** panel (`/luiset` on PC) under the **Module Settings** header (same section as Action Bar, Unit Frames, and the other module toggles). Most modules also have a dedicated settings panel and slash shortcut on PC (see [README.md](README.md#settings-shortcuts-pc-keyboard-ui)).
 
 **Required add-ons:** [LuiMedia](https://www.esoui.com/downloads/info1654-LuiMedia.html) (fonts, sounds, status bar textures, custom ability icons) and [LuiData](https://www.esoui.com/downloads/info1660-LuiData.html) (effect overrides, ability alert definitions, crowd control data, companion slash names, and related tables).
 
@@ -150,7 +150,7 @@ Quality-of-life chat commands (settings: **Slash Commands**). Full list: [README
 
 ## MiniMap (BETA)
 
-Optional HUD minimap (default **off**; enable in Misc module list, then **MiniMap** settings). PC: `/luimm` opens settings. Requires UI reload when enabling the module.
+Optional HUD minimap (default **off**). On the main LuiExtended panel (`/luiset`), under **Module Settings**, turn on **Enable MiniMap**, then **`/reloadui`**. Map options live under **MiniMap (BETA)** (`/luimm` on PC; console uses the MiniMap section in add-on settings).
 
 | Area | What it does |
 | --- | --- |
