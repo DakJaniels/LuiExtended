@@ -1186,7 +1186,7 @@ local function ApplyChangelogScrollTheme()
         ZO_Scroll_SetHideScrollbarOnDisable(scrollContainer, false)
     end
 
-    scrollBar:SetThumbTexture(CHANGELOG_SCROLL_THUMB, CHANGELOG_SCROLL_THUMB_DISABLED, nil, CHANGELOG_SCROLL_THUMB_WIDTH, CHANGELOG_SCROLL_THUMB_HEIGHT)
+    scrollBar:SetThumbTexture(CHANGELOG_SCROLL_THUMB, CHANGELOG_SCROLL_THUMB_DISABLED, "", CHANGELOG_SCROLL_THUMB_WIDTH, CHANGELOG_SCROLL_THUMB_HEIGHT, 0, 0, 1, 1)
 
     scrollBar:SetBackgroundTopTexture(CHANGELOG_SCROLL_TRACK, 0, 0, 1, 1)
     scrollBar:SetBackgroundMiddleTexture(CHANGELOG_SCROLL_TRACK, 0, 0, 1, 1)
@@ -1661,6 +1661,10 @@ function LUIE_Changelog_Manager:OnShown()
     self:RequestLayoutRefresh()
 end
 
+function LUIE_Changelog_Manager:OnHidden()
+    LUIE.SV.WelcomeVersion = LUIE.version
+end
+
 function LUIE_Changelog_Manager:Show()
     self.control:ClearAnchors()
     self.control:SetAnchor(CENTER, GuiRoot, CENTER, 0, -120)
@@ -1705,7 +1709,7 @@ function LUIE.ToggleChangelog(option)
 end
 
 -- -----------------------------------------------------------------------------
--- Called on initialize when LUIE.SV.ShowChangeLog is enabled (see Initialize_PC.lua).
+-- Called on first player activation when LUIE.SV.ShowChangeLog is enabled (see Initialize_PC.lua LoadScreen).
 function LUIE.ChangelogScreen()
     if not IsChangelogFeatureEnabled() then
         return
@@ -1719,8 +1723,6 @@ function LUIE.ChangelogScreen()
     if LUIE.SV.WelcomeVersion ~= LUIE.version then
         manager:Show()
     end
-
-    LUIE.SV.WelcomeVersion = LUIE.version
 end
 
 -- -----------------------------------------------------------------------------

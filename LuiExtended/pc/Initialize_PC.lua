@@ -43,6 +43,9 @@ local function LoadScreen(eventId, initial)
     if not LUIE.SV.StartupInfo then
         LUIE.ChatOutput:Print(LUIE.FormatStartupChatMessage(), true)
     end
+    if LUIE.SV.ShowChangeLog == true then
+        LUIE.ChangelogScreen()
+    end
 end
 
 -- Register events.
@@ -139,10 +142,6 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.SlashCommands.CreateSettings()
     LUIE.SlashCommands.MigrateSettings()
     -- -----------------------------------------------------------------------------
-    -- Display changelog screen
-    if LUIE.SV.ShowChangeLog == true then
-        LUIE.ChangelogScreen()
-    end
     if LUIE.SlashCommandRegistry then
         LUIE.SlashCommandRegistry.ApplyPostInitSlashCommandIntegration()
     else
