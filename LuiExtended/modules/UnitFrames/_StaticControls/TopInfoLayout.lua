@@ -443,6 +443,9 @@ local function ComputeTopInfoSmallGroupRightReserved(self)
     if self.classIcon and not self.classIcon:IsHidden() then
         rightReserved = rightReserved + self.classIcon:GetWidth()
     end
+    if self.friendIcon and not self.friendIcon:IsHidden() then
+        rightReserved = rightReserved + self.friendIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
+    end
     return rightReserved
 end
 
@@ -521,6 +524,16 @@ function FrameObject.LayoutTopInfoSmallGroup(self)
 
     local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, leaderNameOffset)
     LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoSmallGroupRightReserved(self), showLevelRow)
+
+    if self.classIcon then
+        self.classIcon:ClearAnchors()
+        self.classIcon:SetAnchor(RIGHT, self.topInfo, RIGHT, -1, 0)
+    end
+    if self.friendIcon and not self.friendIcon:IsHidden() then
+        self.friendIcon:ClearAnchors()
+        local friendAnchor = self.classIcon or self.topInfo
+        self.friendIcon:SetAnchor(RIGHT, friendAnchor, LEFT, -TOPINFO_ROW_ICON_GAP, 0)
+    end
 end
 
 --- @param self LUIE_CustomFrameObject

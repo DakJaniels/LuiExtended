@@ -1929,6 +1929,60 @@ function UnitFrames.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_FRIEND_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_FRIEND_ICON_TP),
+            getFunction = function ()
+                return Settings.CustomTargetShowFriendIcon
+            end,
+            setFunction = function (value)
+                Settings.CustomTargetShowFriendIcon = value
+                UnitFrames.RefreshCustomTargetFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+            end,
+            default = Defaults.CustomTargetShowFriendIcon,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_GUILD_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_GUILD_ICON_TP),
+            getFunction = function ()
+                return Settings.CustomTargetShowGuildIcon
+            end,
+            setFunction = function (value)
+                Settings.CustomTargetShowGuildIcon = value
+                UnitFrames.RefreshCustomTargetFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+            end,
+            default = Defaults.CustomTargetShowGuildIcon,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_IGNORED_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_IGNORED_ICON_TP),
+            getFunction = function ()
+                return Settings.CustomTargetShowIgnoredIcon
+            end,
+            setFunction = function (value)
+                Settings.CustomTargetShowIgnoredIcon = value
+                UnitFrames.RefreshCustomTargetFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+            end,
+            default = Defaults.CustomTargetShowIgnoredIcon,
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_SLIDER,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_EXETHRESHOLD),
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_EXETHRESHOLD_TP),
@@ -2923,6 +2977,60 @@ function UnitFrames.CreateConsoleSettings()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
             end,
             default = Defaults.RoleIconSmallGroup,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESG_FRIEND_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_FRIEND_ICON_TP),
+            getFunction = function ()
+                return Settings.GroupShowFriendIcon
+            end,
+            setFunction = function (value)
+                Settings.GroupShowFriendIcon = value
+                UnitFrames.RefreshCustomSmallGroupFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+            end,
+            default = Defaults.GroupShowFriendIcon,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESG_GUILD_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_GUILD_ICON_TP),
+            getFunction = function ()
+                return Settings.GroupShowGuildIcon
+            end,
+            setFunction = function (value)
+                Settings.GroupShowGuildIcon = value
+                UnitFrames.RefreshCustomSmallGroupFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+            end,
+            default = Defaults.GroupShowGuildIcon,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESG_IGNORED_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_IGNORED_ICON_TP),
+            getFunction = function ()
+                return Settings.GroupShowIgnoredIcon
+            end,
+            setFunction = function (value)
+                Settings.GroupShowIgnoredIcon = value
+                UnitFrames.RefreshCustomSmallGroupFrameStaticControls()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+            end,
+            default = Defaults.GroupShowIgnoredIcon,
         }
 
         settings[#settings + 1] =

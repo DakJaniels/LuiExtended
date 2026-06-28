@@ -31,12 +31,6 @@ local function categoryUsesSeparateCaptionFont(category)
     return separateCaptionFontCategories[category] == true
 end
 
---- @param unitFrame table|nil
---- @return boolean
-local function IsSmallGroupCustomUnitFrame(unitFrame)
-    return unitFrame ~= nil and unitFrame.frameCategory == "smallGroup"
-end
-
 local function __applyFont(unitTag)
     -- First try selecting font face
     local fontName = UnitFrames.ResolveLuiMediaFontPath(UnitFrames.SV.DefaultFontFace)
@@ -154,14 +148,10 @@ local function ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
         unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
     end
     unitFrame.classIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
-    if unitFrame.friendIcon then
-        if IsSmallGroupCustomUnitFrame(unitFrame) then
-            unitFrame.friendIcon:SetHidden(true)
-        elseif unitFrame.frameCategory ~= "target" then
-            unitFrame.friendIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
-            unitFrame.friendIcon:ClearAnchors()
-            unitFrame.friendIcon:SetAnchor(RIGHT, unitFrame.classIcon, LEFT, nameHeight / 6, 0)
-        end
+    if unitFrame.friendIcon and not usesTopInfoLayout then
+        unitFrame.friendIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
+        unitFrame.friendIcon:ClearAnchors()
+        unitFrame.friendIcon:SetAnchor(RIGHT, unitFrame.classIcon, LEFT, nameHeight / 6, 0)
     end
     if unitFrame.botInfo then
         unitFrame.botInfo:SetHeight(nameHeight)

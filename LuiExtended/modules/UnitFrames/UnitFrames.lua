@@ -1920,6 +1920,22 @@ function UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
     end
 end
 
+function UnitFrames.RefreshCustomTargetFrameStaticControls()
+    if UnitFrames.CustomFrames["reticleover"] then
+        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
+    end
+end
+
+function UnitFrames.RefreshCustomSmallGroupFrameStaticControls()
+    for smallGroupIndex = 1, 4 do
+        local registryKey = "SmallGroup" .. smallGroupIndex
+        local unitFrame = UnitFrames.CustomFrames[registryKey]
+        if unitFrame then
+            UnitFrames.UpdateStaticControls(unitFrame)
+        end
+    end
+end
+
 -- Forces to reload static information on unit frames.
 -- Called from EVENT_LEVEL_UPDATE and EVENT_VETERAN_RANK_UPDATE listeners.
 function UnitFrames.OnLevelUpdate(eventCode, unitTag, level)

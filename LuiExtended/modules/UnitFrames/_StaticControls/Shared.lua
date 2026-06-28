@@ -460,9 +460,32 @@ local function IsGuildMateUnitTag(unitTag)
     return false
 end
 
+--- @param frameCategory string|nil
+--- @return boolean showFriend
+--- @return boolean showGuild
+--- @return boolean showIgnored
+local function GetCustomFrameSocialIconShowFlags(frameCategory)
+    local sv = UnitFrames.SV
+    if frameCategory == "target" then
+        return sv.CustomTargetShowFriendIcon, sv.CustomTargetShowGuildIcon, sv.CustomTargetShowIgnoredIcon
+    end
+    if frameCategory == "smallGroup" then
+        return sv.GroupShowFriendIcon, sv.GroupShowGuildIcon, sv.GroupShowIgnoredIcon
+    end
+    return true, true, true
+end
+
 function FrameObject:UpdateStaticControlFriendIcon()
     if self.friendIcon == nil then
         return
+    end
+    local frameCategory = self.frameCategory
+    local showFriendIcon, showGuildIcon, showIgnoredIcon = GetCustomFrameSocialIconShowFlags(frameCategory)
+    if frameCategory == "target" or frameCategory == "smallGroup" then
+        if not showFriendIcon and not showGuildIcon and not showIgnoredIcon then
+            self.friendIcon:SetHidden(true)
+            return
+        end
     end
     local isIgnored = self.isPlayer and IsUnitIgnored(self.unitTag)
     local isFriend = self.isPlayer and IsUnitFriend(self.unitTag)
@@ -473,8 +496,20 @@ function FrameObject:UpdateStaticControlFriendIcon()
     else
         ignoredIconPath = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_SOCIAL_IGNORE_DDS
     end
-    if isIgnored or isFriend or isGuild then
-        self.friendIcon:SetTexture(isIgnored and ignoredIconPath or isFriend and "/esoui/art/campaign/campaignbrowser_friends.dds" or "/esoui/art/campaign/campaignbrowser_guild.dds")
+    local shouldShowIcon = false
+    local iconPath
+    if isIgnored and showIgnoredIcon then
+        shouldShowIcon = true
+        iconPath = ignoredIconPath
+    elseif isFriend and showFriendIcon then
+        shouldShowIcon = true
+        iconPath = "/esoui/art/campaign/campaignbrowser_friends.dds"
+    elseif isGuild and showGuildIcon then
+        shouldShowIcon = true
+        iconPath = "/esoui/art/campaign/campaignbrowser_guild.dds"
+    end
+    if shouldShowIcon then
+        self.friendIcon:SetTexture(iconPath)
         self.friendIcon:SetHidden(false)
     else
         self.friendIcon:SetHidden(true)
