@@ -48,6 +48,21 @@ local formatOptions =
     GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA_PERCENTAGE)
 }
 
+local formatDropdownItems = {}
+for formatIndex = 1, #formatOptions do
+    local option = formatOptions[formatIndex]
+    formatDropdownItems[formatIndex] = { name = option, data = option }
+end
+
+local defaultFramesFontStyleItems = {}
+for styleIndex = 1, #LUIE.FONT_STYLE_CHOICES do
+    defaultFramesFontStyleItems[styleIndex] =
+    {
+        name = LUIE.FONT_STYLE_CHOICES[styleIndex],
+        data = LUIE.FONT_STYLE_CHOICES_VALUES[styleIndex],
+    }
+end
+
 local Whitelist, WhitelistValues = {}, {}
 
 -- Create a list of Unitnames to use for Summon Whitelist (LHAS format)
@@ -93,6 +108,21 @@ local LHAS = LibHarvensAddonSettings
 function UnitFrames.CreateConsoleSettings()
     local Defaults = UnitFrames.Defaults
     local Settings = UnitFrames.SV
+
+    local function buildDefaultFrameDropdownItems(frameKey)
+        local choices = UnitFrames.GetDefaultFramesOptions(frameKey)
+        local items = {}
+        for choiceIndex = 1, #choices do
+            local choice = choices[choiceIndex]
+            items[choiceIndex] = { name = choice, data = choice }
+        end
+        return items
+    end
+
+    local defaultFramePlayerItems = buildDefaultFrameDropdownItems("Player")
+    local defaultFrameTargetItems = buildDefaultFrameDropdownItems("Target")
+    local defaultFrameGroupItems = buildDefaultFrameDropdownItems("Group")
+    local defaultFrameBossItems = buildDefaultFrameDropdownItems("Boss")
 
     -- Register the settings panel
     if not LUIE.SV.UnitFrames_Enabled then
@@ -190,14 +220,7 @@ function UnitFrames.CreateConsoleSettings()
         {
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_DFRAMES_PLAYER),
-            items = function ()
-                local choices = UnitFrames.GetDefaultFramesOptions("Player")
-                local items = {}
-                for i, choice in ipairs(choices) do
-                    items[i] = { name = choice, data = choice }
-                end
-                return items
-            end,
+            items = defaultFramePlayerItems,
             getFunction = function ()
                 return { data = UnitFrames.GetDefaultFramesSetting("Player") }
             end,
@@ -207,20 +230,13 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-            default = UnitFrames.GetDefaultFramesSetting("Player", true),
+            default = SettingsAPI:LHASDropdownGetData(UnitFrames.GetDefaultFramesSetting("Player", true)),
         }
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_DFRAMES_TARGET),
-            items = function ()
-                local choices = UnitFrames.GetDefaultFramesOptions("Target")
-                local items = {}
-                for i, choice in ipairs(choices) do
-                    items[i] = { name = choice, data = choice }
-                end
-                return items
-            end,
+            items = defaultFrameTargetItems,
             getFunction = function ()
                 return { data = UnitFrames.GetDefaultFramesSetting("Target") }
             end,
@@ -230,20 +246,13 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-            default = UnitFrames.GetDefaultFramesSetting("Target", true),
+            default = SettingsAPI:LHASDropdownGetData(UnitFrames.GetDefaultFramesSetting("Target", true)),
         }
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_DFRAMES_GROUPSMALL),
-            items = function ()
-                local choices = UnitFrames.GetDefaultFramesOptions("Group")
-                local items = {}
-                for i, choice in ipairs(choices) do
-                    items[i] = { name = choice, data = choice }
-                end
-                return items
-            end,
+            items = defaultFrameGroupItems,
             getFunction = function ()
                 return { data = UnitFrames.GetDefaultFramesSetting("Group") }
             end,
@@ -253,20 +262,13 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-            default = UnitFrames.GetDefaultFramesSetting("Group", true),
+            default = SettingsAPI:LHASDropdownGetData(UnitFrames.GetDefaultFramesSetting("Group", true)),
         }
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_DFRAMES_BOSS_COMPASS),
-            items = function ()
-                local choices = UnitFrames.GetDefaultFramesOptions("Boss")
-                local items = {}
-                for i, choice in ipairs(choices) do
-                    items[i] = { name = choice, data = choice }
-                end
-                return items
-            end,
+            items = defaultFrameBossItems,
             getFunction = function ()
                 return { data = UnitFrames.GetDefaultFramesSetting("Boss") }
             end,
@@ -277,7 +279,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-            default = UnitFrames.GetDefaultFramesSetting("Boss", true),
+            default = SettingsAPI:LHASDropdownGetData(UnitFrames.GetDefaultFramesSetting("Boss", true)),
         }
         settings[#settings + 1] =
         {
@@ -359,20 +361,14 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_DFRAMES_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_LABEL_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.Format }
             end,
             setFunction = function (combobox, value, item)
-                Settings.Format = value
+                Settings.Format = item.data or item.name or value
             end,
-            default = Defaults.Format,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.Format),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -393,7 +389,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-            default = Defaults.DefaultFontFace,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.DefaultFontFace),
         }
         settings[#settings + 1] =
         {
@@ -420,13 +416,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_STYLE_TP),
-            items = function ()
-                local fontStyleItems = {}
-                for i, styleName in ipairs(LUIE.FONT_STYLE_CHOICES) do
-                    fontStyleItems[i] = { name = styleName, data = LUIE.FONT_STYLE_CHOICES_VALUES[i] }
-                end
-                return fontStyleItems
-            end,
+            items = defaultFramesFontStyleItems,
             getFunction = function ()
                 return { data = Settings.DefaultFontStyle }
             end,
@@ -434,7 +424,7 @@ function UnitFrames.CreateConsoleSettings()
                 Settings.DefaultFontStyle = item.data or item.name or value
                 SettingsAPI:MarkUnitFramesFontDeferred("default")
             end,
-            default = Defaults.DefaultFontStyle,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.DefaultFontStyle),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -1235,13 +1225,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatOnePlayer }
             end,
@@ -1250,7 +1234,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
-            default = Defaults.CustomFormatOnePlayer,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatOnePlayer),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -1261,13 +1245,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatTwoPlayer }
             end,
@@ -1276,7 +1254,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
-            default = Defaults.CustomFormatTwoPlayer,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatTwoPlayer),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -1758,13 +1736,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatOneTarget }
             end,
@@ -1773,7 +1745,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
-            default = Defaults.CustomFormatOneTarget,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatOneTarget),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -1784,13 +1756,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatTwoTarget }
             end,
@@ -1799,7 +1765,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
-            default = Defaults.CustomFormatTwoTarget,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatTwoTarget),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -2124,7 +2090,7 @@ function UnitFrames.CreateConsoleSettings()
                 Settings.TargetTitlePriority = item.data or item.name or value
                 UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
-            default = Defaults.TargetTitlePriority,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.TargetTitlePriority),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget and Settings.TargetEnableRank and Settings.TargetEnableTitle)
             end,
@@ -2457,13 +2423,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_LABEL_CENTER_FORM),
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_LABEL_CENTER_FORM),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatCenterLabel }
             end,
@@ -2473,7 +2433,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
                 UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
-            default = Defaults.CustomFormatCenterLabel,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatCenterLabel),
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
@@ -2807,13 +2767,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatOneGroup }
             end,
@@ -2822,7 +2776,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
-            default = Defaults.CustomFormatOneGroup,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatOneGroup),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
             end,
@@ -2833,13 +2787,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatTwoGroup }
             end,
@@ -2848,7 +2796,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
-            default = Defaults.CustomFormatTwoGroup,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatTwoGroup),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
             end,
@@ -3214,13 +3162,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatRaid }
             end,
@@ -3229,7 +3171,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
-            default = Defaults.CustomFormatRaid,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatRaid),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
             end,
@@ -3318,7 +3260,7 @@ function UnitFrames.CreateConsoleSettings()
                 Settings.RaidLayout = item.data or item.name or value
                 UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
-            default = Defaults.RaidLayout,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.RaidLayout),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
             end,
@@ -4337,13 +4279,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatCompanion }
             end,
@@ -4352,7 +4288,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutCompanion(false)
             end,
-            default = Defaults.CustomFormatCompanion,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatCompanion),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
             end,
@@ -4720,13 +4656,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatPet }
             end,
@@ -4735,7 +4665,7 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutPet(false)
             end,
-            default = Defaults.CustomFormatPet,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatPet),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
             end,
@@ -5111,13 +5041,7 @@ function UnitFrames.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
-            items = function ()
-                local items = {}
-                for i, option in ipairs(formatOptions) do
-                    items[i] = { name = option, data = option }
-                end
-                return items
-            end,
+            items = formatDropdownItems,
             getFunction = function ()
                 return { data = Settings.CustomFormatBoss }
             end,
@@ -5125,7 +5049,7 @@ function UnitFrames.CreateConsoleSettings()
                 Settings.CustomFormatBoss = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
             end,
-            default = Defaults.CustomFormatBoss,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomFormatBoss),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
             end,
