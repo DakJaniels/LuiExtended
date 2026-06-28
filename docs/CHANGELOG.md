@@ -4,7 +4,7 @@
 
 ### New
 
-- Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills — chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.
+- Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills: chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.
 
 ### Changes
 
@@ -13,11 +13,11 @@
 
 ### Fixed
 
-- Unit Frames: Default target frame — health value and percentage no longer overlap the target's level and name text.
-- Unit Frames: Default target frame (Use Extender) — veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.
-- Unit Frames: Custom player, target, and group frames — Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).
+- Unit Frames: Default target frame: health value and percentage no longer overlap the target's level and name text.
+- Unit Frames: Default target frame (Use Extender): veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.
+- Unit Frames: Custom player, target, and group frames: Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).
 - Action Bar: Reset Position for the cast bar correctly turns off cast bar move mode so the bar is not left in a bad state.
-- Console: Unit Frames and Combat Text settings — dropdown options display and save correctly again.
+- Console: Unit Frames and Combat Text settings dropdown options display and save correctly again.
 
 ## Version 7.2.5.5
 

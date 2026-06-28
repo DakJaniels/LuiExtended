@@ -49,12 +49,19 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.7
+    "|cFFA500LuiExtended Version 7.2.5.7|r",
+    "",
+    -- TBD
+    "|cFFFF00TBD:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ...",
+    "",
     -- Version Header 7.2.5.6
     "|cFFA500LuiExtended Version 7.2.5.6|r",
     "",
     -- New
     "|cFFFF00New:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills — chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills: chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.",
     "",
     -- Changes
     "|cFFFF00Changes:|r",
@@ -63,11 +70,11 @@ local changelogMessages =
     "",
     -- Fix
     "|cFFFF00Fix:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame — health value and percentage no longer overlap the target's level and name text.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame (|cFFFFFFUse Extender|r) — veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player, target, and group frames — Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame: health value and percentage no longer overlap the target's level and name text.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame (|cFFFFFFUse Extender|r): veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player, target, and group frames: Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: |cFFFFFFReset Position|r for the cast bar correctly turns off cast bar move mode so the bar is not left in a bad state.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Unit Frames and Combat Text settings — dropdown options display and save correctly again.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Unit Frames and Combat Text settings dropdown options display and save correctly again.",
     "",
     -- Version Header 7.2.5.5
     "|cFFA500LuiExtended Version 7.2.5.5|r",
