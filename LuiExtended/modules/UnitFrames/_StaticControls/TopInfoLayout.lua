@@ -17,7 +17,7 @@ local TOPINFO_LEVEL_TEXT_FALLBACK_WIDTH = 36
 local SMALL_GROUP_NAME_ROW_OFFSET_Y = 0
 local SMALL_GROUP_LEADER_NAME_OFFSET = 22
 local SMALL_GROUP_RIGHT_PADDING = 6
-local TARGET_STAR_GAP = 4
+local TARGET_STAR_GAP = 1
 
 --- @param text string|nil
 --- @return string
@@ -546,6 +546,10 @@ function FrameObject.LayoutTopInfoTarget(self)
         return
     end
     FrameObject.RefreshTopInfoForLayout(self)
+    -- Resolve difficulty-star visibility here so every layout path (including the
+    -- layout-only reticleover refresh) anchors the stars from the same state and they
+    -- never fall back to their static XML anchors.
+    FrameObject.UpdateStaticControlDifficultyStars(self)
 
     local rowOffsetY = 0
     local showLevelRow = self.level and not self.level:IsHidden()
@@ -557,14 +561,16 @@ function FrameObject.LayoutTopInfoTarget(self)
     LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoTargetRightReserved(self), showLevelRow)
 
     -- Right-edge chrome: class icon, then friend icon, then difficulty stars (right to left).
+    -- Anchored RIGHT/LEFT (vertically centered) to match the static XML grouping so the
+    -- icons stay tight and never drift to the top edge on a re-layout.
     if self.classIcon then
         self.classIcon:ClearAnchors()
-        self.classIcon:SetAnchor(TOPRIGHT, self.topInfo, TOPRIGHT, -1, rowOffsetY)
+        self.classIcon:SetAnchor(RIGHT, self.topInfo, RIGHT, -1, 0)
     end
     if self.friendIcon and not self.friendIcon:IsHidden() then
         self.friendIcon:ClearAnchors()
         local friendAnchor = self.classIcon or self.topInfo
-        self.friendIcon:SetAnchor(TOPRIGHT, friendAnchor, TOPLEFT, -TOPINFO_ROW_ICON_GAP, rowOffsetY)
+        self.friendIcon:SetAnchor(RIGHT, friendAnchor, LEFT, -TOPINFO_ROW_ICON_GAP, 0)
     end
     local starAnchor = self.topInfo
     if self.friendIcon and not self.friendIcon:IsHidden() then
@@ -574,17 +580,17 @@ function FrameObject.LayoutTopInfoTarget(self)
     end
     if self.star1 and not self.star1:IsHidden() then
         self.star1:ClearAnchors()
-        self.star1:SetAnchor(TOPRIGHT, starAnchor, TOPLEFT, -TARGET_STAR_GAP, rowOffsetY)
+        self.star1:SetAnchor(RIGHT, starAnchor, LEFT, -TARGET_STAR_GAP, 0)
         starAnchor = self.star1
     end
     if self.star2 and not self.star2:IsHidden() then
         self.star2:ClearAnchors()
-        self.star2:SetAnchor(TOPRIGHT, starAnchor, TOPLEFT, -TARGET_STAR_GAP, rowOffsetY)
+        self.star2:SetAnchor(RIGHT, starAnchor, LEFT, -TARGET_STAR_GAP, 0)
         starAnchor = self.star2
     end
     if self.star3 and not self.star3:IsHidden() then
         self.star3:ClearAnchors()
-        self.star3:SetAnchor(TOPRIGHT, starAnchor, TOPLEFT, -TARGET_STAR_GAP, rowOffsetY)
+        self.star3:SetAnchor(RIGHT, starAnchor, LEFT, -TARGET_STAR_GAP, 0)
     end
 end
 
