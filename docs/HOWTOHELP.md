@@ -1,38 +1,86 @@
-# LuiExtended Testing Assistance
+# How to help test and report issues
 
-Beta Builds will be available for testing periodically in the [GitHub Releases Section][1]. I'll usually mention in the esoui comments a test build is available.
+Thank you for helping improve LuiExtended. This page explains where to send feedback and what details help most.
 
-You can submit any issues or feature requests in the [Github Issues Section][2], [ESOUI Comments][3], or reach out to me via email at [dakjaniels@outlook.com][4].
+## Where to report
 
-## What I need feedback on
+| Channel | Use for |
+| --- | --- |
+| [GitHub Issues](https://github.com/DakJaniels/LuiExtended/issues) | Bugs and reproducible problems (preferred for tracking). |
+| [GitHub Discussions](https://github.com/DakJaniels/LuiExtended/discussions) | Design questions, broad feedback, or ideas that are not yet a bug report. |
+| [ESOUI comments](https://www.esoui.com/downloads/info818-LuiExtended.html#comments) | General discussion and release reactions. |
+| [GitHub Releases](https://github.com/DakJaniels/LuiExtended/releases) | Pre-release/beta builds when announced. |
+| [dakjaniels@outlook.com](mailto:dakjaniels@outlook.com) | Private or sensitive reports if needed. |
 
-------
+## Before you file an issue
+
+1. Note **LuiExtended version** and **AddOnVersion** (addon manifest or `/script`).
+2. State **PC vs console** and **client language** (en, de, fr, ru, zh for Simplified Chinese, tr, …).
+3. List **other add-ons** that touch the same UI (buff trackers, unit frames, combat text, loot chat, LibGroup*, etc.).
+4. Confirm **LuiMedia** and **LuiData** versions meet the manifest minimums and are enabled.
+5. Say which **module** is involved (Unit Frames, Combat Info, Chat Announcements, …). See [MODULES.md](MODULES.md) for a full map.
+6. For ability/icon/alert issues, include **ability ID**, zone/boss name, and language if not English UI.
+7. Attach **screenshots** or **Lua errors** from `/scriptui` when relevant.
+
+Use the GitHub **bug report** template when opening a new issue; it matches the checklist above.
+
+## What to test and report (by area)
+
+The addon does far more than the short list below; [MODULES.md](MODULES.md) describes every module. These are the areas where detailed reports help most.
 
 ### Localization
 
-- You can find more information about translating LUI to other languages in the [README.md][5] in the i18n folder.
+See [LOCALIZATION.md](LOCALIZATION.md). Report missing keys, wrong grammar, overflow in settings UI, or untranslated strings (compare to `lang/*/default.lua`).
 
-### General
+### Unit Frames
 
-- Report if you don't like the icon style or find the quality of a custom icon for an NPC spell lacking.
+Layout breaks in raid vs group, wrong role colors/icons, LibGroup* overlays, **group food/drink buff icons** (small group frames only), companion/pet/boss frames, Quick Hide Dead behavior, and performance with many units.
 
-### Combat Info - Bar Highlight Tracking
+### Action Bar
 
-- Report if you see any ability fade or improperly tracked on the bar highlight component. Conditions or ways to replicate it would be great but that's not always obvious. This allows me to fix any issues with tracking that ability.
-- Report if the tracking for an ability seems confusing (in some cases one ability has 3 or 4 effects that occur and it can be difficult to determine whats best to track/ignore.
+Cast bar for abilities or interactions, ultimate/companion ultimate display, back bar tracking, GCD/potion timers, bar highlight mismatches.
 
-### Combat Info - Active Combat Alerts
+### Buffs and Debuffs
 
-- Report if an ability spams alerts or is incorrectly timed. For example if you see a mob cast an ability and you get multiple alerts for that ability.
-- Report if an ability isn't tracked properly.
+Missing/extra icons, prominent/priority lists, duration/stack errors, tooltip wrongness, and custom icon preference. Include the **ability ID** in GitHub issues when you can (`/script` or combat log). LUIE does **not** ship party-wide group buff tracking (see [MODULES.md](MODULES.md#buffs-and-debuffs-spellcastbuffs)).
+
+### Combat Info
+
+**Bar highlight:** effect fades early, never appears, or confusing proc choice when one skill has many effects.
+
+**Active combat alerts:** spam, late/early alerts, wrong mitigation text, missing boss mechanics, bad custom icon for an NPC ability.
+
+**Crowd control tracker:** false AOE alerts, immune/stagger display, PvP-only filter behavior, `/luiecc` preview vs live combat.
+
+### Combat Text
+
+Throttling, crit handling, panel overlap, wrong colors, blacklist not applied, low resource warnings.
 
 ### Chat Announcements
 
-- Report if any odd behavior is observed with Chat Announcements messages printed: an incorrect item listed, improper syntax for a message, etc.
-- Report if a setting is not properly applying when toggled. There are a lot of conditionals in Chat Announcements and sometimes its difficult to ensure all options work together seamlessly.
+Wrong item/currency text, duplicate messages with LootLog or similar, toggles that do not apply, tab routing sending messages to the wrong chat tab.
 
-[1]: https://github.com/ArtOfShred/LuiExtended/releases
-[2]: https://github.com/ArtOfShred/LuiExtended/issues
-[3]: https://www.esoui.com/downloads/info818-LuiExtended.html#comments
-[4]: mailto:dakjaniels@outlook.com
-[5]: https://github.com/ArtOfShred/LuiExtended/blob/master/lang/README.md
+### Info Panel and Slash Commands
+
+Stale stats, HUD overlap, slash command not working after toggle (did you `/reloadui`?), guild/home/campaign command edge cases.
+
+### MiniMap (BETA)
+
+Only when you intentionally enable the module: pin accuracy, FPS impact, visibility with menus/combat, waypoint clicks, console vs PC. MiniMap may be omitted from public release notes unless explicitly called out for a release.
+
+### Core / Misc
+
+Profile copy between characters, changelog welcome window, chat output tabs, grid overlay snap, suppress vanilla buff/debuff option conflicting with other UI.
+
+### LuiData
+
+If alerts, buff icons, or CC types are wrong for one ability but UI settings look correct, mention **LuiData** version and ability ID so table updates can be tracked separately from LUIE code.
+
+## Feature requests
+
+Open a **feature request** issue on GitHub. Describe the problem, proposed behavior, which module it belongs to, and whether it affects PC, console, or both.
+
+## Translations and code contributions
+
+- Translations: [LOCALIZATION.md](LOCALIZATION.md), pull requests to `master`.
+- Code: [MIT License](https://github.com/DakJaniels/LuiExtended/blob/master/LICENSE), respect sections noted as borrowed from other add-ons; see [CONTRIBUTORS.md](CONTRIBUTORS.md) and the PR template checklist (changelog files for user-facing changes).
