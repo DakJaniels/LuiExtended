@@ -156,6 +156,8 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
 
     -- EVENT_ABILITY_PROGRESSION_RANK_UPDATE (CSA Handler)
     local function AbilityProgressionRankHook(progressionIndex, rank, maxRank, morph)
+        ChatAnnouncements.RefreshAbilityProgressionXpCacheForProgression(progressionIndex)
+
         local _, _, _, atMorph = GetAbilityProgressionXPInfo(progressionIndex)
         local name = GetAbilityProgressionAbilityInfo(progressionIndex, morph, rank)
 

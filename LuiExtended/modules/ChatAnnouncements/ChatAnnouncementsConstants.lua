@@ -412,6 +412,10 @@ ChatAnnouncements.Defaults =
         SkillAbilityCA = false,
         SkillAbilityCSA = true,
         SkillAbilityAlert = false,
+        SkillAbilityXpCA = false,
+        SkillAbilityXpAlert = false,
+        SkillAbilityXpIcon = false,
+        SkillAbilityXpFilter = 0,
         SkillLineIcon = true,
         SkillLineColor = { 0.75, 0.75, 0.75, 1 },
 

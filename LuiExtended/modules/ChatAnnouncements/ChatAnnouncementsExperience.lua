@@ -27,6 +27,9 @@ local g_xpCombatBufferValue = 0      -- Buffered XP Value
 local g_guildSkillThrottle = 0       -- Buffered Fighter's Guild Reputation Value
 local g_guildSkillThrottleLine = nil -- Grab the name for Fighter's Guild reputation (since index isn't always the same) to pass over to Buffered Printer Function
 
+-- Ability Progression XP cache, keyed by progressionIndex, storing the prior XP window to derive the gain.
+local g_abilityProgressionXpCache = {}
+
 ------------------------------------------------
 -- FUNCTIONS -----------------------------------
 ------------------------------------------------
@@ -233,4 +236,104 @@ function ChatAnnouncements.PrintBufferedGuildRep()
     end
     g_guildSkillThrottle = 0
     g_guildSkillThrottleLine = ""
+end
+
+function ChatAnnouncements.RefreshAbilityProgressionXpCache()
+    g_abilityProgressionXpCache = {}
+
+    if not (ChatAnnouncements.SV.Skills.SkillAbilityXpCA or ChatAnnouncements.SV.Skills.SkillAbilityXpAlert) then
+        return
+    end
+
+    local numSkillTypes = GetNumSkillTypes()
+    for skillType = 1, numSkillTypes do
+        local numSkillLines = GetNumSkillLines(skillType)
+        for skillLineIndex = 1, numSkillLines do
+            local numAbilities = GetNumSkillAbilities(skillType, skillLineIndex)
+            for abilityIndex = 1, numAbilities do
+                local _, _, _, _, _, _, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
+                if progressionIndex and progressionIndex > 0 then
+                    local lastRankXP, nextRankXP, currentXP = GetAbilityProgressionXPInfo(progressionIndex)
+                    g_abilityProgressionXpCache[progressionIndex] = { lastRankXP = lastRankXP, nextRankXP = nextRankXP, currentXP = currentXP }
+                end
+            end
+        end
+    end
+end
+
+--- @param progressionIndex integer
+function ChatAnnouncements.RefreshAbilityProgressionXpCacheForProgression(progressionIndex)
+    if not (ChatAnnouncements.SV.Skills.SkillAbilityXpCA or ChatAnnouncements.SV.Skills.SkillAbilityXpAlert) then
+        return
+    end
+    local lastRankXP, nextRankXP, currentXP = GetAbilityProgressionXPInfo(progressionIndex)
+    g_abilityProgressionXpCache[progressionIndex] = { lastRankXP = lastRankXP, nextRankXP = nextRankXP, currentXP = currentXP }
+end
+
+-- Print Ability Progression XP Gain
+--- @param abilityNameAndRank string
+--- @param change integer
+--- @param texture string|nil
+function ChatAnnouncements.PrintAbilityProgressionXpGain(abilityNameAndRank, change, texture)
+    local showIcon = ChatAnnouncements.SV.Skills.SkillAbilityXpIcon and texture and texture ~= ""
+    local formattedIcon = showIcon and (zo_iconFormat(texture, 16, 16) .. " ") or ""
+    local plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN, abilityNameAndRank, ZO_CommaDelimitDecimalNumber(change))
+
+    if ChatAnnouncements.SV.Skills.SkillAbilityXpCA then
+        local finalMessage = ColorizeColors.SkillLineColorize:Colorize(formattedIcon .. plainText)
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "SKILL" }
+        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
+    end
+
+    if ChatAnnouncements.SV.Skills.SkillAbilityXpAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, plainText)
+    end
+end
+
+-- EVENT_ABILITY_PROGRESSION_XP_UPDATE HANDLER
+--- @param eventId integer
+--- @param progressionIndex integer
+--- @param lastRankXP integer
+--- @param nextRankXP integer
+--- @param currentXP integer
+--- @param atMorph boolean
+function ChatAnnouncements.OnAbilityProgressionXpUpdate(eventId, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph)
+    local skillType, skillLineIndex, skillIndex = GetSkillAbilityIndicesFromProgressionIndex(progressionIndex)
+    local skillData = SKILLS_DATA_MANAGER:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
+    if not skillData then
+        return
+    end
+
+    local cached = g_abilityProgressionXpCache[progressionIndex]
+    g_abilityProgressionXpCache[progressionIndex] = { lastRankXP = lastRankXP, nextRankXP = nextRankXP, currentXP = currentXP }
+
+    if not cached then
+        return
+    end
+
+    local change
+    if lastRankXP > cached.lastRankXP then
+        change = (cached.nextRankXP - cached.currentXP) + (currentXP - lastRankXP)
+    else
+        change = currentXP - cached.currentXP
+    end
+
+    if change <= 0 then
+        return
+    end
+
+    if ChatAnnouncements.SV.Skills.SkillAbilityXpFilter > 0 and change < ChatAnnouncements.SV.Skills.SkillAbilityXpFilter then
+        return
+    end
+
+    if not (ChatAnnouncements.SV.Skills.SkillAbilityXpCA or ChatAnnouncements.SV.Skills.SkillAbilityXpAlert) then
+        return
+    end
+
+    local _, morph, rank = GetAbilityProgressionInfo(progressionIndex)
+    local abilityName, texture = GetAbilityProgressionAbilityInfo(progressionIndex, morph, rank)
+    local abilityNameAndRank = zo_strformat(SI_ABILITY_NAME_AND_RANK, abilityName, rank)
+
+    ChatAnnouncements.PrintAbilityProgressionXpGain(abilityNameAndRank, change, texture)
 end
