@@ -232,3 +232,172 @@ function UnitFrames.MigrateLuiMediaAppearanceKeys()
     end
     LUIE.MarkMigrationDone("unitframes_luimedia_registry_keys")
 end
+
+--- @param backdrop BackdropControl
+--- @param texture string
+--- @param isRoundTexture boolean
+function UnitFrames.ApplyCustomFrameTextureToBackdrop(backdrop, texture, isRoundTexture)
+    backdrop:SetCenterTexture(texture)
+    backdrop:SetBlendMode(TEX_BLEND_MODE_ALPHA)
+    backdrop:SetPixelRoundingEnabled(true)
+    if isRoundTexture then
+        backdrop:SetEdgeColor(0, 0, 0, 0)
+    else
+        backdrop:SetEdgeColor(0, 0, 0, 0.5)
+    end
+end
+
+local function ApplyCustomFrameHealthTextures(healthFrame, texture, isRoundTexture)
+    if not healthFrame then return end
+    UnitFrames.ApplyCustomFrameTextureToBackdrop(healthFrame.backdrop, texture, isRoundTexture)
+    healthFrame.bar:SetTexture(texture)
+    local powerHaloTrack = healthFrame.backdrop:GetNamedChild("_PowerHaloTrack")
+    if powerHaloTrack then
+        powerHaloTrack:SetTexture(texture)
+    end
+    if healthFrame.shieldbackdrop then
+        UnitFrames.ApplyCustomFrameTextureToBackdrop(healthFrame.shieldbackdrop, texture, isRoundTexture)
+    end
+    healthFrame.shield:SetTexture(texture)
+    healthFrame.trauma:SetTexture(texture)
+    if healthFrame.invulnerable then
+        healthFrame.invulnerable:SetTexture(texture)
+    end
+    if healthFrame.invulnerableInlay then
+        local invulnerableInlayPath = ZO_IsConsoleOrGameCoreUI() and [[EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable_munge.dds]] or LUIE_MEDIA_UNITFRAMES_INVULNERABLE_MUNGE_DDS
+        healthFrame.invulnerableInlay:SetTexture(invulnerableInlayPath)
+    end
+end
+
+local function ApplyCustomFrameResourceTextures(resourceFrame, texture, isRoundTexture)
+    if not resourceFrame then return end
+    UnitFrames.ApplyCustomFrameTextureToBackdrop(resourceFrame.backdrop, texture, isRoundTexture)
+    resourceFrame.bar:SetTexture(texture)
+end
+
+local function GetStatusbarTextureForCategory(category)
+    local appearance = UnitFrames.GetCustomFrameAppearance(category)
+    local textureKey = appearance.texture
+    local texture = LUIE.StatusbarTextures[textureKey]
+    local isRoundTexture = textureKey == "Tube" or textureKey == "Steel"
+    return texture, isRoundTexture
+end
+
+function UnitFrames.CustomFramesApplyTexturePlayer()
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("player")
+    local playerFrame = UnitFrames.CustomFrames["player"]
+    if not playerFrame or not playerFrame.tlw then
+        return
+    end
+    ApplyCustomFrameHealthTextures(playerFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+    ApplyCustomFrameResourceTextures(playerFrame[COMBAT_MECHANIC_FLAGS_MAGICKA], texture, isRoundTexture)
+    ApplyCustomFrameResourceTextures(playerFrame[COMBAT_MECHANIC_FLAGS_STAMINA], texture, isRoundTexture)
+    UnitFrames.AlternativeBarApplyTextures(playerFrame.alternative, texture, isRoundTexture)
+end
+
+function UnitFrames.CustomFramesApplyTextureTarget()
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("target")
+    local reticleFrame = UnitFrames.CustomFrames["reticleover"]
+    if not reticleFrame or not reticleFrame.tlw then
+        return
+    end
+    ApplyCustomFrameHealthTextures(reticleFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+end
+
+function UnitFrames.CustomFramesApplyTextureAva()
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("ava")
+    local avaFrame = UnitFrames.CustomFrames["AvaPlayerTarget"]
+    if not avaFrame or not avaFrame.tlw then
+        return
+    end
+    ApplyCustomFrameHealthTextures(avaFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+end
+
+function UnitFrames.CustomFramesApplyTextureCompanion()
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("companion")
+    local companionFrame = UnitFrames.CustomFrames["companion"]
+    if not companionFrame or not companionFrame.tlw then
+        return
+    end
+    ApplyCustomFrameHealthTextures(companionFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+end
+
+function UnitFrames.CustomFramesApplyTextureGroup()
+    if not (UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["SmallGroup1"].tlw) then
+        return
+    end
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("group")
+    for i = 1, 4 do
+        ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["SmallGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+    end
+end
+
+function UnitFrames.CustomFramesApplyTextureRaid()
+    if not (UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw) then
+        return
+    end
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("raid")
+    for i = 1, 12 do
+        ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["RaidGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+    end
+end
+
+function UnitFrames.CustomFramesApplyTexturePet()
+    if not (UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomFrames["PetGroup1"].tlw) then
+        return
+    end
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("pet")
+    for i = 1, 7 do
+        ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["PetGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+    end
+end
+
+function UnitFrames.CustomFramesApplyTextureBoss()
+    if not (UnitFrames.CustomFrames["boss1"] and UnitFrames.CustomFrames["boss1"].tlw) then
+        return
+    end
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("boss")
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+        ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["boss" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+    end
+end
+
+--- Apply bar textures for one appearance profile (player, target, group, raid, companion, pet, boss, ava).
+--- @param category string
+function UnitFrames.CustomFramesApplyTextureForCategory(category)
+    if category == "player" then
+        UnitFrames.CustomFramesApplyTexturePlayer()
+    elseif category == "target" then
+        UnitFrames.CustomFramesApplyTextureTarget()
+    elseif category == "group" then
+        UnitFrames.CustomFramesApplyTextureGroup()
+    elseif category == "raid" then
+        UnitFrames.CustomFramesApplyTextureRaid()
+    elseif category == "companion" then
+        UnitFrames.CustomFramesApplyTextureCompanion()
+    elseif category == "pet" then
+        UnitFrames.CustomFramesApplyTexturePet()
+    elseif category == "boss" then
+        UnitFrames.CustomFramesApplyTextureBoss()
+    elseif category == "ava" then
+        UnitFrames.CustomFramesApplyTextureAva()
+    end
+    if (category == "group" or category == "raid") and UnitFrames.GroupResources then
+        UnitFrames.GroupResources.UpdateAllLayouts()
+    end
+end
+
+-- Apply selected texture for all custom frame appearance profiles (init / full refresh).
+function UnitFrames.CustomFramesApplyTexture()
+    UnitFrames.CustomFramesApplyTexturePlayer()
+    UnitFrames.CustomFramesApplyTextureTarget()
+    UnitFrames.CustomFramesApplyTextureAva()
+    UnitFrames.CustomFramesApplyTextureCompanion()
+    UnitFrames.CustomFramesApplyTextureGroup()
+    UnitFrames.CustomFramesApplyTextureRaid()
+    UnitFrames.CustomFramesApplyTexturePet()
+    UnitFrames.CustomFramesApplyTextureBoss()
+    if UnitFrames.GroupResources then
+        UnitFrames.GroupResources.UpdateAllLayouts()
+    end
+end

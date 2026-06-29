@@ -293,6 +293,7 @@ modules/UnitFrames/_StaticControls/Target.lua
 modules/UnitFrames/_StaticControls/Group.lua
 modules/UnitFrames/_StaticControls/Raid.lua
 modules/UnitFrames/_StaticControls/Generic.lua
+modules/UnitFrames/_AlternativeBar.lua
 modules/UnitFrames/UnitFrames.lua
 
 # SavedVariables migration (requires module Defaults tables)
