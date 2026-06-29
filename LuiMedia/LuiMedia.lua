@@ -10,7 +10,7 @@ local eventManager = GetEventManager()
 LuiMedia = {}
 LuiMedia.__index = LuiMedia
 LuiMedia.__name = "LuiMedia"
-LuiMedia.__version = 7133
+LuiMedia.__version = 7134
 
 -- -----------------------------------------------------------------------------
 -- Font Name Constants
@@ -342,19 +342,64 @@ local function AddConsoleFonts()
     end
 end
 
-local CONSOLE_FONT_STRING = "$(GAMEPAD_BOLD_FONT)|$(GP_18)|soft-shadow-thick"
-local PC_FONT_STRING = "$(BOLD_FONT)|$(KB_18)|soft-shadow-thick"
-local LUIE_FONT_NAME = "LUIE_SystemFont"
 local function AddDefaultFont()
     if not LuiMedia.Fonts[FONT_LUIE_DEFAULT] then
-        local font = ""
+        -- Reuse an existing ZoFont's face rather than creating an addon font object.
+        --   ZoFontHeader        = $(BOLD_FONT)|$(KB_18)|soft-shadow-thick
+        --   ZoFontGamepadBold18 = $(GAMEPAD_BOLD_FONT)|$(GP_18)|soft-shadow-thick
+        -- GetFontInfo() returns the resolved face slug; "LUIE Default Font" stays a sized
+        -- face so per-module size/style sliders keep working.
+        local referenceFont
         if IsInGamepadPreferredMode() or ZO_IsConsoleOrGameCoreUI() then
-            font = CONSOLE_FONT_STRING
+            referenceFont = ZoFontGamepadBold18
         else
-            font = PC_FONT_STRING
+            referenceFont = ZoFontHeader
         end
-        local LUIE_SystemFont = CreateFont(LUIE_FONT_NAME, font)
-        LuiMedia.Fonts[FONT_LUIE_DEFAULT] = LUIE_SystemFont:GetFontInfo()
+        LuiMedia.Fonts[FONT_LUIE_DEFAULT] = referenceFont:GetFontInfo()
+    end
+end
+
+-- ZOS named-font catalog. Registers the engine's pre-defined UI fonts as media whose
+-- value is the SetFont name (e.g. "ZoFontGameSmall"). Selecting one of these gives a
+-- zero-composition font (no ZO_CreateFontString, no extra font instance) alongside the
+-- dynamic custom slug faces. Keys are LUIE-owned so they never collide with LMP stock
+-- faces (LMP:Register cannot overwrite existing keys). Keyboard names are used on PC
+-- (always loaded); gamepad names on console.
+local ZOS_FONT_CATALOG =
+{
+    -- { mediaKey,               keyboardFont,           gamepadFont }
+    { "ESO Standard",            "ZoFontGame",           "ZoFontGamepad18" },
+    { "ESO Standard Bold",       "ZoFontGameBold",       "ZoFontGamepadBold18" },
+    { "ESO Standard Outline",    "ZoFontGameOutline",    "ZoFontGamepad18" },
+    { "ESO Small",               "ZoFontGameSmall",      "ZoFontGamepad18" },
+    { "ESO Large",               "ZoFontGameLarge",      "ZoFontGamepad22" },
+    { "ESO Header",              "ZoFontHeader",         "ZoFontGamepadBold18" },
+    { "ESO Header Medium",       "ZoFontHeader2",        "ZoFontGamepadBold20" },
+    { "ESO Header Large",        "ZoFontHeader3",        "ZoFontGamepadBold27" },
+    { "ESO Title",               "ZoFontWinH1",          "ZoFontGamepad34" },
+    { "ESO Subtitle",            "ZoFontWinH2",          "ZoFontGamepad27" },
+    { "ESO Announce",            "ZoFontAnnounce",       "ZoFontGamepad34" },
+    { "ESO Announce Large",      "ZoFontAnnounceLarge",  "ZoFontGamepad54" },
+}
+
+local function GetCatalogFontName(keyboardName, gamepadName)
+    if ZO_IsConsoleOrGameCoreUI() then
+        return gamepadName
+    end
+    return keyboardName
+end
+
+local function AddZosNamedFonts()
+    for index = 1, #ZOS_FONT_CATALOG do
+        local entry = ZOS_FONT_CATALOG[index]
+        local mediaKey = entry[1]
+        if not LuiMedia.Fonts[mediaKey] then
+            local fontName = GetCatalogFontName(entry[2], entry[3])
+            -- Only expose a named font that actually exists on this platform.
+            if _G[fontName] then
+                LuiMedia.Fonts[mediaKey] = fontName
+            end
+        end
     end
 end
 
@@ -422,6 +467,7 @@ end
 function LuiMedia:Initialize()
     AddConsoleFonts()
     AddDefaultFont()
+    AddZosNamedFonts()
     RegisterWithLMP()
 
     -- Fetch any media already registered by other addons

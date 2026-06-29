@@ -80,9 +80,7 @@ end
 --- @return string
 local function GetSlotLabelFont(iconSize)
     local appearance = UnitFrames.GetCustomFrameAppearance("companion")
-    local fontFace = UnitFrames.ResolveLuiMediaFontPath(appearance.fontFace)
-    local fontStyle = appearance.fontStyle
-    return LUIE.CreateFontString(fontFace, zo_max(12, iconSize - 6), fontStyle)
+    return LUIE.Font.Resolve(appearance.fontFace, zo_max(12, iconSize - 6), appearance.fontStyle)
 end
 
 --- @param unitTag string

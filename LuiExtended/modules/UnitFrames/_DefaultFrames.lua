@@ -276,7 +276,7 @@ function UnitFrames.CreateDefaultFrames()
                 ["label"] = parent:CreateControl("$(parent)LUIEExtenderLabel", CT_LABEL),
                 ["color"] = UnitFrames.SV.DefaultTextColour,
             }
-            UnitFrames.DefaultFrames[unitTag][powerType].label:SetFont("LUIE Default Font")
+            UnitFrames.DefaultFrames[unitTag][powerType].label:SetFont(LUIE.Font.GetDefaultFont())
             UnitFrames.DefaultFrames[unitTag][powerType].label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
             UnitFrames.DefaultFrames[unitTag][powerType].label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
             UnitFrames.DefaultFrames[unitTag][powerType].label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -377,7 +377,7 @@ function UnitFrames.DefaultFramesCreateUnitGroupControls(unitTag)
                     ["classIcon"] = parentName:CreateControl("$(parent)LUIEClassIcon", CT_TEXTURE),
                     ["friendIcon"] = parentName:CreateControl("$(parent)LUIEFriendIcon", CT_TEXTURE),
                 }
-                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetFont("LUIE Default Font")
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetFont(LUIE.Font.GetDefaultFont())
                 UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
                 UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
                 UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)

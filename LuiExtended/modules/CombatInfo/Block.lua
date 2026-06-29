@@ -76,37 +76,25 @@ local bloodlordEmbraceIsEquipped = false
 local function GetTitleFont()
     local sv = CombatInfo.SV.block
     local fontFaceChoice = sv.bloodlordEmbraceFontFace or CombatInfo.Defaults.block.bloodlordEmbraceFontFace
-    local fontFace = LUIE.Fonts[fontFaceChoice]
-    if not fontFace then
-        fontFace = "LUIE Default Font"
-    end
     local fontSize = sv.bloodlordEmbraceTitleSize or CombatInfo.Defaults.block.bloodlordEmbraceTitleSize
     local fontStyle = sv.bloodlordEmbraceFontStyle or CombatInfo.Defaults.block.bloodlordEmbraceFontStyle
-    return LUIE.CreateFontString(fontFace, fontSize, fontStyle)
+    return LUIE.Font.Resolve(fontFaceChoice, fontSize, fontStyle)
 end
 
 local function GetValueFont()
     local sv = CombatInfo.SV.block
     local fontFaceChoice = sv.bloodlordEmbraceFontFace or CombatInfo.Defaults.block.bloodlordEmbraceFontFace
-    local fontFace = LUIE.Fonts[fontFaceChoice]
-    if not fontFace then
-        fontFace = "LUIE Default Font"
-    end
     local fontSize = sv.bloodlordEmbraceValueSize or CombatInfo.Defaults.block.bloodlordEmbraceValueSize
     local fontStyle = sv.bloodlordEmbraceFontStyle or CombatInfo.Defaults.block.bloodlordEmbraceFontStyle
-    return LUIE.CreateFontString(fontFace, fontSize, fontStyle)
+    return LUIE.Font.Resolve(fontFaceChoice, fontSize, fontStyle)
 end
 
 local function GetBlockIndicatorFont()
     local sv = CombatInfo.SV.block
     local fontFaceChoice = sv.blockIndicatorFontFace or CombatInfo.Defaults.block.blockIndicatorFontFace
-    local fontFace = LUIE.Fonts[fontFaceChoice]
-    if not fontFace then
-        fontFace = "LUIE Default Font"
-    end
     local fontSize = sv.blockIndicatorFontSize or CombatInfo.Defaults.block.blockIndicatorFontSize
     local fontStyle = sv.blockIndicatorFontStyle or CombatInfo.Defaults.block.blockIndicatorFontStyle
-    return LUIE.CreateFontString(fontFace, fontSize, fontStyle)
+    return LUIE.Font.Resolve(fontFaceChoice, fontSize, fontStyle)
 end
 
 --- Returns whether any of the given set links are equipped with at least minPieces.

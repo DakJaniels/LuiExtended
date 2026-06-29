@@ -980,19 +980,11 @@ function InfoPanel.ApplyFont()
     end
 
     -- Get font settings
-    local fontName = LUIE.Fonts[InfoPanel.SV.FontFace]
-    if not fontName or fontName == "" then
-        fontName = "LUIE Default Font"
-        -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE:Log("Debug",GetString(LUIE_STRING_ERROR_FONT))
-        -- end
-    end
-
     local fontStyle = InfoPanel.SV.FontStyle
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
 
     -- Create font string
-    g_infoPanelFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
+    g_infoPanelFont = LUIE.Font.Resolve(InfoPanel.SV.FontFace, fontSize, fontStyle)
 
     -- Apply font to all elements
     InfoPanel.ClearAllLayoutWidths()
@@ -1147,13 +1139,9 @@ function InfoPanel.Initialize(enabled)
     uiBotRow = LUIE_InfoPanel_BotRow
 
     -- Create font string from settings
-    local fontName = LUIE.Fonts[InfoPanel.SV.FontFace]
-    if not fontName or fontName == "" then
-        fontName = "LUIE Default Font"
-    end
     local fontStyle = InfoPanel.SV.FontStyle
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
-    g_infoPanelFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
+    g_infoPanelFont = LUIE.Font.Resolve(InfoPanel.SV.FontFace, fontSize, fontStyle)
 
     -- Top Row Controls
     uiLatency.control = LUIE_InfoPanel_TopRow_Latency

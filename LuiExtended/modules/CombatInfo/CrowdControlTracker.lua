@@ -31,8 +31,9 @@ local graceTime = 5
 local isRooted = false
 local rootEndTime = 0
 
-local iconFont = ZO_CreateFontString("$(GAMEPAD_BOLD_FONT)", 25, FONT_STYLE_OUTLINE_THICK)
-local staggerFont = ZO_CreateFontString("$(GAMEPAD_BOLD_FONT)", 36, FONT_STYLE_OUTLINE_THICK)
+-- Named LUIE fonts (see frontend/fontdefs_*.xml) - no runtime composition.
+local iconFont = "LUIE_Font_CrowdControlIcon"
+local staggerFont = "LUIE_Font_CrowdControlStagger"
 
 local iconBorder = LUIE_MEDIA_COMBATINFO_CROWDCONTROLTRACKER_BORDER_DDS
 

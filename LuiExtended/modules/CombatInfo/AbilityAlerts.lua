@@ -1462,14 +1462,8 @@ function AbilityAlerts.ApplyFontAlert()
     end
 
     -- Setup Alerts Font
-    local alertFontName = LUIE.Fonts[CombatInfo.SV.alerts.toggles.alertFontFace]
-    if not alertFontName or alertFontName == "" then
-        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
-        alertFontName = "LUIE Default Font"
-    end
-
     local alertFontStyle = CombatInfo.SV.alerts.toggles.alertFontStyle
     local alertFontSize = (CombatInfo.SV.alerts.toggles.alertFontSize and CombatInfo.SV.alerts.toggles.alertFontSize > 0) and CombatInfo.SV.alerts.toggles.alertFontSize or 16
 
-    g_alertFont = LUIE.CreateFontString(alertFontName, alertFontSize, alertFontStyle)
+    g_alertFont = LUIE.Font.Resolve(CombatInfo.SV.alerts.toggles.alertFontFace, alertFontSize, alertFontStyle)
 end

@@ -126,9 +126,7 @@ local function AddCombatStatsToFrame(frameData, isRaid)
 
             -- Apply font
             local appearance = UnitFrames.GetCustomFrameAppearance("group")
-            local fontFace = UnitFrames.ResolveLuiMediaFontPath(appearance.fontFace)
-            local fontStyle = appearance.fontStyle
-            frameData.combatStats.statsLabel:SetFont(LUIE.CreateFontString(fontFace, fontSize, fontStyle))
+            frameData.combatStats.statsLabel:SetFont(LUIE.Font.Resolve(appearance.fontFace, fontSize, appearance.fontStyle))
         end
     end
 end

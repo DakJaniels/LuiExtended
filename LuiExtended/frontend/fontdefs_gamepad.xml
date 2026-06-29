@@ -1,0 +1,9 @@
+<GuiXml>
+    <!-- LUIE named fonts (gamepad / console). Mirrors fontdefs_keyboard.xml so the same
+         LUIE_Font_* token is valid on both platforms. -->
+
+    <!-- Crowd Control Tracker (fixed, non-user-configurable sizes) -->
+    <Font name="LUIE_Font_CrowdControlIcon" font="$(GAMEPAD_BOLD_FONT)|25|thick-outline"/>
+    <Font name="LUIE_Font_CrowdControlCountdown" font="$(GAMEPAD_BOLD_FONT)|28|thick-outline"/>
+    <Font name="LUIE_Font_CrowdControlStagger" font="$(GAMEPAD_BOLD_FONT)|36|thick-outline"/>
+</GuiXml>

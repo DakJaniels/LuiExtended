@@ -81,6 +81,10 @@ local function ResolveMiniMapFontStyleForPreview(choiceValue, choiceName)
 end
 
 local function CachedMiniMapLamPreviewFontString(facePath, size, style)
+    -- Named fonts (ZoFont*/LUIE_Font_*) are applied as-is; only slug faces compose.
+    if LUIE.Font.IsNamedData(facePath) then
+        return facePath
+    end
     local cacheKey = (facePath or "") .. "\0" .. tostring(size) .. "\0" .. tostring(style or "")
     local cached = miniMapLamPreviewFontStringCache[cacheKey]
     if cached == nil then

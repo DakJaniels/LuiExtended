@@ -109,13 +109,9 @@ function MiniMap.ApplyZoneNameFont()
     local settings = MiniMap.SV
     local defaults = MiniMap.Defaults
     local faceKey = settings.zoneNameFontFace or defaults.zoneNameFontFace
-    local fontName = LUIE.Fonts[faceKey]
-    if not fontName or fontName == "" then
-        fontName = LUIE.Fonts[defaults.zoneNameFontFace] or defaults.zoneNameFontFace
-    end
     local fontSize = (settings.zoneNameFontSize and settings.zoneNameFontSize > 0) and settings.zoneNameFontSize or defaults.zoneNameFontSize
     local fontStyle = settings.zoneNameFontStyle or defaults.zoneNameFontStyle
-    MiniMap.view.zone:SetFont(LUIE.CreateFontString(fontName, fontSize, fontStyle))
+    MiniMap.view.zone:SetFont(LUIE.Font.Resolve(faceKey, fontSize, fontStyle))
 end
 
 --- @param skipPositionGridSnap boolean|nil

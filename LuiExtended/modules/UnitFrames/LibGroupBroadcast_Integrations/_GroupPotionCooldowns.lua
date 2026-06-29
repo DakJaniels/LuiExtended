@@ -181,9 +181,7 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
         if Settings.showRemainingTime and frameData.potionCooldown.label then
             local fontSize = isRaid and 10 or 12
             local appearance = UnitFrames.GetCustomFrameAppearance(isRaid and "raid" or "group")
-            local fontFace = UnitFrames.ResolveLuiMediaFontPath(appearance.fontFace)
-            local fontStyle = appearance.fontStyle
-            frameData.potionCooldown.label:SetFont(LUIE.CreateFontString(fontFace, fontSize, fontStyle))
+            frameData.potionCooldown.label:SetFont(LUIE.Font.Resolve(appearance.fontFace, fontSize, appearance.fontStyle))
         end
     end
 end

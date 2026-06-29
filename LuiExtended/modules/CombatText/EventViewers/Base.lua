@@ -533,8 +533,23 @@ function CombatTextEventViewer:PrepareLabel(label, fontSize, color, text)
     local Settings = LUIE.CombatText.SV
     label:SetText(text)
     label:SetColor(unpack(color))
-    local fontString = LUIE.CreateFontString(Settings.fontFaceApplied, fontSize, Settings.fontStyle)
-    label:SetFont(fontString)
+    -- Named fonts apply directly (no composition); custom slug faces compose per size,
+    -- memoized per size so heavy combat does not allocate a font string per event.
+    if LUIE.CombatText.fontIsNamed then
+        label:SetFont(Settings.fontFaceApplied)
+    else
+        local fontStringCache = LUIE.CombatText.fontStringCache
+        if not fontStringCache then
+            fontStringCache = {}
+            LUIE.CombatText.fontStringCache = fontStringCache
+        end
+        local fontString = fontStringCache[fontSize]
+        if not fontString then
+            fontString = LUIE.CreateFontString(Settings.fontFaceApplied, fontSize, Settings.fontStyle)
+            fontStringCache[fontSize] = fontString
+        end
+        label:SetFont(fontString)
+    end
     label:SetAlpha(LUIE.CombatText.GetTextAlpha())
 end
 

@@ -524,7 +524,7 @@ function ActionBar.Initialize(enabled)
 
     local quickslotLabel = quickslotButtonButton:CreateControl("$(parent)Label", CT_LABEL)
     quickslotLabel:SetAnchor(CENTER, quickslotButtonButton, CENTER, 0, 0)
-    quickslotLabel:SetFont(g_potionFont or "LUIE Default Font")
+    quickslotLabel:SetFont(g_potionFont or LUIE.Font.GetDefaultFont())
     quickslotLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     quickslotLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     quickslotLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -555,7 +555,7 @@ function ActionBar.Initialize(enabled)
 
     -- Ultimate percentage label (overlay on slot)
     local ultimatePctLabel = ActionButton8_button:CreateControl("$(parent)LabelPct", CT_LABEL)
-    ultimatePctLabel:SetFont(g_ultimateFont or "LUIE Default Font")
+    ultimatePctLabel:SetFont(g_ultimateFont or LUIE.Font.GetDefaultFont())
     ultimatePctLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -1515,14 +1515,9 @@ end
 --- @param defaultFontSize integer
 --- @return string
 local function buildModuleFontString(fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
-    local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
-    if not fontName or fontName == "" then
-        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
-        fontName = "LUIE Default Font"
-    end
     local fontStyle = ActionBar.SV[fontStyleKey] or defaultFontStyle
     local fontSize = (ActionBar.SV[fontSizeKey] and ActionBar.SV[fontSizeKey] > 0) and ActionBar.SV[fontSizeKey] or defaultFontSize
-    return LUIE.CreateFontString(fontName, fontSize, fontStyle)
+    return LUIE.Font.Resolve(ActionBar.SV[fontNameKey], fontSize, fontStyle)
 end
 
 -- -----------------------------------------------------------------------------
@@ -1619,7 +1614,7 @@ function ActionBar.CreateCompanionUltimateLabels()
     uiCompanionUltimate.LabelVal = ultimateValueLabel
 
     local ultimatePctLabel = companionButton:CreateControl("$(parent)LUIECompanionLabelPct", CT_LABEL)
-    ultimatePctLabel:SetFont(g_companionUltimateFont or "LUIE Default Font")
+    ultimatePctLabel:SetFont(g_companionUltimateFont or LUIE.Font.GetDefaultFont())
     ultimatePctLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -3453,7 +3448,7 @@ function ActionBar.PlayProcAnimations(slotNum)
 
     -- Create label control
     local label = procLoopTexture:CreateControl("$(parent)Label", CT_LABEL)
-    label:SetFont(g_barFont or "LUIE Default Font")
+    label:SetFont(g_barFont or LUIE.Font.GetDefaultFont())
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -3553,7 +3548,7 @@ function ActionBar.ShowCustomToggle(slotNum)
 
     -- Create label control
     local label = toggleFrame:CreateControl("$(parent)Label", CT_LABEL)
-    label:SetFont(g_barFont or "LUIE Default Font")
+    label:SetFont(g_barFont or LUIE.Font.GetDefaultFont())
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -3568,7 +3563,7 @@ function ActionBar.ShowCustomToggle(slotNum)
 
     -- Create stack label control
     local stack = toggleFrame:CreateControl("$(parent)Stack", CT_LABEL)
-    stack:SetFont(g_barFont or "LUIE Default Font")
+    stack:SetFont(g_barFont or LUIE.Font.GetDefaultFont())
     stack:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     stack:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     stack:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
