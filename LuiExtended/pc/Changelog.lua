@@ -52,9 +52,16 @@ local changelogMessages =
     -- Version Header 7.2.5.7
     "|cFFA500LuiExtended Version 7.2.5.7|r",
     "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom target and custom small group frames: optional friend, guild, and ignored icons (separate toggles).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar / LuiData: Cyrodiil Vengeance bag items (siege deployables, repair kit, and related gear): cast bar times, ability and buff data, and custom tooltips.",
+    "",
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Group loot messages now respect |cFFFFFFPlayer Name Display Method|r (for example @ UserID), including on localized game clients.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Achievement updates and ignored achievement categories resolve the correct category again.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Cast bar duration is more reliable for some abilities when timing comes from combat event data.",
     "",
     -- Version Header 7.2.5.6
     "|cFFA500LuiExtended Version 7.2.5.6|r",

@@ -2,9 +2,16 @@
 
 ## Version 7.2.5.7
 
+### New
+
+- Unit Frames: Custom target and custom small group frames: optional friend, guild, and ignored icons (separate toggles).
+- Action Bar / LuiData: Cyrodiil Vengeance bag items (siege deployables, repair kit, and related gear): cast bar times, ability and buff data, and custom tooltips.
+
 ### Fixed
 
 - Chat Announcements: Group loot messages now respect Player Name Display Method (for example @ UserID), including on localized game clients.
+- Chat Announcements: Achievement updates and ignored achievement categories resolve the correct category again.
+- Action Bar: Cast bar duration is more reliable for some abilities when timing comes from combat event data.
 
 ## Version 7.2.5.6
 
