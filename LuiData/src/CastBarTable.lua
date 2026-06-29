@@ -713,7 +713,17 @@ local castBarTable =
         -- CYRODIIL ----------------------------------------------------
         ----------------------------------------------------------------
 
-        [12256] = 3000, -- Pack Siege (Siege Weapons; CastChannelConvert channel length)
+        -- Pack / stow siege (12256): always 3000ms regardless of siege target (ballista, oil, treb, etc.)
+        [12256] = 3000, -- Pack Siege (CastChannelConvert)
+
+        -- Vengeance bag deploy (GetAbilityCastInfo often 0; combat [Cast] on BEGIN matches these)
+        [240225] = 3000,  -- Flaming Oil of Vengeance
+        [240250] = 1900,  -- Pact Ballista of Vengeance
+        [240223] = 1900,  -- Dominion Ballista of Vengeance
+        [240276] = 1900,  -- Covenant Ballista of Vengeance
+        [240249] = 4200,  -- Pact Stone Trebuchet of Vengeance
+        [240222] = 4200,  -- Dominion Stone Trebuchet of Vengeance
+        [240275] = 4200,  -- Covenant Stone Trebuchet of Vengeance
 
         ----------------------------------------------------------------
         -- QUEST ABILITIES ---------------------------------------------
