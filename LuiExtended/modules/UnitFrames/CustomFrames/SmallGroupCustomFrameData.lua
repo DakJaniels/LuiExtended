@@ -83,10 +83,6 @@ function LUIE.CustomFramesBuildSmallGroup()
             }
 
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
-            local friendIcon = UnitFrames.CustomFrames[unitTag].friendIcon
-            if friendIcon then
-                friendIcon:SetHidden(true)
-            end
             control.defaultUnitTag = GetGroupUnitTagByIndex(i)
             control:SetMouseEnabled(true)
             control:SetHandler("OnMouseUp", UnitFrames.GroupFrames_OnMouseUp)

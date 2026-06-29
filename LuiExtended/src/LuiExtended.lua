@@ -27,14 +27,15 @@ LUIE = {}
 LUIE.__index = LUIE
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.5.6"
-LUIE.addonVersion = 7256
+LUIE.version = "7.2.5.7"
+LUIE.addonVersion = 7257
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"
+LUIE.license = "https://github.com/DakJaniels/LuiExtended/blob/master/LICENSE"
 LUIE.feedback = "https://github.com/DakJaniels/LuiExtended/issues"
-LUIE.translation = "https://github.com/DakJaniels/LuiExtended/tree/translations"
+LUIE.translation = "https://github.com/DakJaniels/LuiExtended/blob/master/docs/LOCALIZATION.md"
 LUIE.donation = "https://paypal.me/dakjaniels"
 if not ZO_IsConsoleOrGameCoreUI() then
     LUIE.LAM = LibAddonMenu2
@@ -386,8 +387,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {

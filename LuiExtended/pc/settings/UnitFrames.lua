@@ -2116,6 +2116,58 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                -- Display Target Friend Icon
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_FRIEND_ICON),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_FRIEND_ICON_TP),
+                getFunc = function ()
+                    return Settings.CustomTargetShowFriendIcon
+                end,
+                setFunc = function (value)
+                    Settings.CustomTargetShowFriendIcon = value
+                    UnitFrames.RefreshCustomTargetFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.CustomTargetShowFriendIcon,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_GUILD_ICON),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_GUILD_ICON_TP),
+                getFunc = function ()
+                    return Settings.CustomTargetShowGuildIcon
+                end,
+                setFunc = function (value)
+                    Settings.CustomTargetShowGuildIcon = value
+                    UnitFrames.RefreshCustomTargetFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.CustomTargetShowGuildIcon,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_IGNORED_ICON),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_IGNORED_ICON_TP),
+                getFunc = function ()
+                    return Settings.CustomTargetShowIgnoredIcon
+                end,
+                setFunc = function (value)
+                    Settings.CustomTargetShowIgnoredIcon = value
+                    UnitFrames.RefreshCustomTargetFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.CustomTargetShowIgnoredIcon,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
                 -- Execute Health % Threshold
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_EXETHRESHOLD),
@@ -2989,6 +3041,57 @@ function UnitFrames.CreateSettings()
             },
             {
                 type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESG_FRIEND_ICON),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_FRIEND_ICON_TP),
+                getFunc = function ()
+                    return Settings.GroupShowFriendIcon
+                end,
+                setFunc = function (value)
+                    Settings.GroupShowFriendIcon = value
+                    UnitFrames.RefreshCustomSmallGroupFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.GroupShowFriendIcon,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESG_GUILD_ICON),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_GUILD_ICON_TP),
+                getFunc = function ()
+                    return Settings.GroupShowGuildIcon
+                end,
+                setFunc = function (value)
+                    Settings.GroupShowGuildIcon = value
+                    UnitFrames.RefreshCustomSmallGroupFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.GroupShowGuildIcon,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESG_IGNORED_ICON),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_IGNORED_ICON_TP),
+                getFunc = function ()
+                    return Settings.GroupShowIgnoredIcon
+                end,
+                setFunc = function (value)
+                    Settings.GroupShowIgnoredIcon = value
+                    UnitFrames.RefreshCustomSmallGroupFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.GroupShowIgnoredIcon,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
+            {
+                type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESG_VETERANCY_RANK),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESG_VETERANCY_RANK_TP),
                 getFunc = function ()
@@ -3581,6 +3684,9 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GroupResources.enabled = value
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.OnSettingsChanged()
+                    end
                 end,
                 width = "full",
                 default = Defaults.GroupResources.enabled,
@@ -3847,6 +3953,9 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GroupCombatStats.enabled = value
+                    if UnitFrames.GroupCombatStats then
+                        UnitFrames.GroupCombatStats.OnSettingsChanged()
+                    end
                 end,
                 width = "full",
                 default = Defaults.GroupCombatStats.enabled,
@@ -4075,6 +4184,9 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GroupPotionCooldowns.enabled = value
+                    if UnitFrames.GroupPotionCooldowns then
+                        UnitFrames.GroupPotionCooldowns.OnSettingsChanged()
+                    end
                 end,
                 width = "full",
                 default = Defaults.GroupPotionCooldowns.enabled,

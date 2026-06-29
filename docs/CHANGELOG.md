@@ -1,10 +1,23 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.7
+
+### New
+
+- Unit Frames: Custom target and custom small group frames: optional friend, guild, and ignored icons (separate toggles).
+- Action Bar / LuiData: Cyrodiil Vengeance bag items (siege deployables, repair kit, and related gear): cast bar times, ability and buff data, and custom tooltips.
+
+### Fixed
+
+- Chat Announcements: Group loot messages now respect Player Name Display Method (for example @ UserID), including on localized game clients.
+- Chat Announcements: Achievement updates and ignored achievement categories resolve the correct category again.
+- Action Bar: Cast bar duration is more reliable for some abilities when timing comes from combat event data.
+
 ## Version 7.2.5.6
 
 ### New
 
-- Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills — chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.
+- Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills: chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.
 
 ### Changes
 
@@ -13,11 +26,11 @@
 
 ### Fixed
 
-- Unit Frames: Default target frame — health value and percentage no longer overlap the target's level and name text.
-- Unit Frames: Default target frame (Use Extender) — veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.
-- Unit Frames: Custom player, target, and group frames — Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).
+- Unit Frames: Default target frame: health value and percentage no longer overlap the target's level and name text.
+- Unit Frames: Default target frame (Use Extender): veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.
+- Unit Frames: Custom player, target, and group frames: Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).
 - Action Bar: Reset Position for the cast bar correctly turns off cast bar move mode so the bar is not left in a bad state.
-- Console: Unit Frames and Combat Text settings — dropdown options display and save correctly again.
+- Console: Unit Frames and Combat Text settings dropdown options display and save correctly again.
 
 ## Version 7.2.5.5
 
@@ -126,7 +139,7 @@
 
 ### New
 
-- MiniMap (BETA): Optional HUD minimap module (**/luimm**). Zoom (default, subzone, dungeon, battleground, mounted), follow player, lock position and size, per-category pin scales, visibility rules (HUD, combat, looting, mounted, housing, draw tier), waypoint click behavior, and keybinds for zoom, recenter, visibility, combat, and fixed position. Enable under Misc Settings; requires UI reload.
+- MiniMap (BETA): Optional HUD minimap module. Enable under Module Settings on the main LuiExtended panel, then reload UI; configure under **LuiExtended → MiniMap (BETA)**. Zoom (default, subzone, dungeon, battleground, mounted), follow player, lock position and size, per-category pin scales, visibility rules (HUD, combat, looting, mounted, housing, draw tier), waypoint click behavior, and keybinds for zoom, recenter, visibility, combat, and fixed position.
 - Unit Frames: Optional suppress vanilla player attribute bars, target frame, group and raid frames, and companion frame while the matching LUIE custom frames are enabled (PC and console).
 - Misc Settings: **Unregister Hidden Buff/Debuff UI** stops vanilla buff and debuff UI from running in the background when the game buff UI is disabled.
 - Chat Announcements: Optional **Show Item Type** on loot lines (same pattern as trait and style display).

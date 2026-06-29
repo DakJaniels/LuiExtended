@@ -747,6 +747,35 @@ local abilityTables =
     Skill_Dominion_Forward_Camp = GetItemLinkName("|H0:item:29533:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),      -- Dominion Forward Camp
     Skill_Covenant_Forward_Camp = GetItemLinkName("|H0:item:29535:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),      -- Covenant Forward Camp
 
+    -- Vengeance bag (Cyrodiil)
+    Item_Vengeance_Repair_Kit = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:223122:175:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h")),                 -- Cyrodiil Repair Kit of Vengeance
+    Item_Vengeance_Flaming_Oil = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214329:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),                    -- Flaming Oil of Vengeance
+    Item_Vengeance_Pact_Ballista = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214324:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),                   -- Pact Ballista of Vengeance
+    Item_Vengeance_Pact_Battering_Ram = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214328:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),              -- Pact Battering Ram of Vengeance
+    Item_Vengeance_Pact_Forward_Camp = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214347:2:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h")),               -- Pact Forward Camp of Vengeance
+    Item_Vengeance_Pact_Meatbag_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:219146:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),          -- Pact Meatbag Catapult of Vengeance
+    Item_Vengeance_Pact_Oil_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:223689:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),              -- Pact Oil Catapult of Vengeance
+    Item_Vengeance_Pact_Scattershot_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:223696:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),      -- Pact Scattershot Catapult of Vengeance
+    Item_Vengeance_Pact_Stone_Trebuchet = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214319:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),            -- Pact Stone Trebuchet of Vengeance
+    Item_Vengeance_Dominion_Ballista = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214323:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),                 -- Dominion Ballista of Vengeance
+    Item_Vengeance_Dominion_Battering_Ram = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214326:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),            -- Dominion Battering Ram of Vengeance
+    Item_Vengeance_Dominion_Forward_Camp = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214346:2:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h")),             -- Dominion Forward Camp of Vengeance
+    Item_Vengeance_Dominion_Meatbag_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:219145:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),        -- Dominion Meatbag Catapult of Vengeance
+    Item_Vengeance_Dominion_Oil_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:223688:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),            -- Dominion Oil Catapult of Vengeance
+    Item_Vengeance_Dominion_Scattershot_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:223694:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),    -- Dominion Scattershot Catapult of Vengeance
+    Item_Vengeance_Dominion_Stone_Trebuchet = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214318:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),          -- Dominion Stone Trebuchet of Vengeance
+    Item_Vengeance_Covenant_Ballista = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214325:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),                 -- Covenant Ballista of Vengeance
+    Item_Vengeance_Covenant_Battering_Ram = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214327:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),            -- Covenant Battering Ram of Vengeance
+    Item_Vengeance_Covenant_Forward_Camp = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214348:2:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h")),             -- Covenant Forward Camp of Vengeance
+    Item_Vengeance_Covenant_Meatbag_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:219147:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),        -- Covenant Meatbag Catapult of Vengeance
+    Item_Vengeance_Covenant_Oil_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:223690:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),            -- Covenant Oil Catapult of Vengeance
+    Item_Vengeance_Covenant_Scattershot_Catapult = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:223695:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),    -- Covenant Scattershot Catapult of Vengeance
+    Item_Vengeance_Covenant_Stone_Trebuchet = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214320:2:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),          -- Covenant Stone Trebuchet of Vengeance
+    Item_Vengeance_Soul_Gem = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214316:32:50:0:0:0:0:0:0:0:0:0:0:0:65:36:0:1:0:0:0|h|h")),                    -- Soul Gem of Vengeance
+    Item_Vengeance_Keep_Recall_Stone = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:220376:6:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h")),               -- Vengeance Keep Recall Stone
+    Item_Vengeance_Tri_Restoration_Potion = zo_strformat("<<C:1>>", GetItemLinkName("|H1:item:214314:123:1:0:0:0:0:0:0:0:0:0:0:0:65:36:0:1:0:0:0|h|h")),      -- Tri-Restoration Potion of Vengeance
+    Item_Vengeance_Keep_Recall_Cooldown = zo_strformat("<<C:1>>", GetAbilityName(254630)),                                                                  -- Vengeance Keep Recall Cooldown
+
     Skill_Razor_Armor = zo_strformat("<<C:1>>", GetAbilityName(36304)),
 
     Skill_Consume_Lifeforce = GetString(LUIE_STRING_SKILL_CONSUME_LIFEFORCE),

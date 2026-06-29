@@ -49,12 +49,26 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.7
+    "|cFFA500LuiExtended Version 7.2.5.7|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom target and custom small group frames: optional friend, guild, and ignored icons (separate toggles).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar / LuiData: Cyrodiil Vengeance bag items (siege deployables, repair kit, and related gear): cast bar times, ability and buff data, and custom tooltips.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Group loot messages now respect |cFFFFFFPlayer Name Display Method|r (for example @ UserID), including on localized game clients.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Achievement updates and ignored achievement categories resolve the correct category again.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Cast bar duration is more reliable for some abilities when timing comes from combat event data.",
+    "",
     -- Version Header 7.2.5.6
     "|cFFA500LuiExtended Version 7.2.5.6|r",
     "",
     -- New
     "|cFFFF00New:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills — chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Optional announcements when an individual ability gains experience (for example from quest rewards). Per skill line under Skills: chat message and/or alert, optional icon, optional progress toward the next ability rank, and a minimum gain filter.",
     "",
     -- Changes
     "|cFFFF00Changes:|r",
@@ -63,11 +77,11 @@ local changelogMessages =
     "",
     -- Fix
     "|cFFFF00Fix:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame — health value and percentage no longer overlap the target's level and name text.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame (|cFFFFFFUse Extender|r) — veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player, target, and group frames — Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame: health value and percentage no longer overlap the target's level and name text.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Default target frame (|cFFFFFFUse Extender|r): veterancy rank icon spacing next to the alliance rank icon improved for wide rank art.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player, target, and group frames: Top Info row layout improved (level, champion points, difficulty icons, and name alignment; clearer reticle target display).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: |cFFFFFFReset Position|r for the cast bar correctly turns off cast bar move mode so the bar is not left in a bad state.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Unit Frames and Combat Text settings — dropdown options display and save correctly again.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Unit Frames and Combat Text settings dropdown options display and save correctly again.",
     "",
     -- Version Header 7.2.5.5
     "|cFFA500LuiExtended Version 7.2.5.5|r",
@@ -185,7 +199,7 @@ local changelogMessages =
     "",
     -- New
     "|cFFFF00New:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t |cFFFFFFMiniMap (BETA)|r: Optional HUD minimap module (`/luimm`). Zoom (default, subzone, dungeon, battleground, mounted), follow player, lock position and size, per-category pin scales, visibility rules (HUD, combat, looting, mounted, housing, draw tier), waypoint click behavior, and keybinds for zoom, recenter, visibility, combat, and fixed position. Enable under Misc Settings; requires UI reload.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t |cFFFFFFMiniMap (BETA)|r: Optional HUD minimap module. Enable under Module Settings on the main LuiExtended panel, then reload UI; configure under LuiExtended → MiniMap (BETA). Zoom (default, subzone, dungeon, battleground, mounted), follow player, lock position and size, per-category pin scales, visibility rules (HUD, combat, looting, mounted, housing, draw tier), waypoint click behavior, and keybinds for zoom, recenter, visibility, combat, and fixed position.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Optional suppress vanilla player attribute bars, target frame, group and raid frames, and companion frame while the matching LUIE custom frames are enabled (PC and console).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Misc Settings: |cFFFFFFUnregister Hidden Buff/Debuff UI|r stops vanilla buff and debuff UI from running in the background when the game buff UI is disabled.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Optional |cFFFFFFShow Item Type|r on loot lines (same pattern as trait and style display).",

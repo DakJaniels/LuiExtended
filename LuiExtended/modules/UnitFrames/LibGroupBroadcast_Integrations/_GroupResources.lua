@@ -270,6 +270,25 @@ local function RefreshResourceBarValuesFromCache()
     end)
 end
 
+-- Hide a single member's resource bars if both magicka and stamina have not
+-- updated within the configured timeout. Defined at file scope so the periodic
+-- timer can pass a stable function reference to ForEachActiveGroupMember
+-- instead of allocating a new closure on every tick.
+local function CheckResourceBarTimeout(unitTag, frameData)
+    local currentSettings = Shared.GetResourceSettings()
+    if not currentSettings or not currentSettings.hideResourceBarsToggle then return end
+
+    local now = GetGameTimeMilliseconds()
+    local timeout = currentSettings.hideResourceBarsTimeout * 1000
+
+    local magLast = GroupResources:GetLastMagickaUpdateTime(unitTag)
+    local stamLast = GroupResources:GetLastStaminaUpdateTime(unitTag)
+
+    if (now - magLast > timeout) and (now - stamLast > timeout) then
+        HideResourceBars(unitTag)
+    end
+end
+
 -- Initialize LibGroupBroadcast integration
 function GroupResourcesManager.Initialize()
     if isInitialized then return end
@@ -295,18 +314,8 @@ function GroupResourcesManager.Initialize()
         local currentSettings = Shared.GetResourceSettings()
         if not currentSettings or not currentSettings.hideResourceBarsToggle then return end
 
-        local now = GetGameTimeMilliseconds()
-        local timeout = currentSettings.hideResourceBarsTimeout * 1000
-
-        -- Iterate over active group members
-        Shared.ForEachActiveGroupMember(function (unitTag, frameData)
-            local magLast = GroupResources:GetLastMagickaUpdateTime(unitTag)
-            local stamLast = GroupResources:GetLastStaminaUpdateTime(unitTag)
-
-            if (now - magLast > timeout) and (now - stamLast > timeout) then
-                HideResourceBars(unitTag)
-            end
-        end)
+        -- Iterate over active group members (stable function reference, no per-tick closure)
+        Shared.ForEachActiveGroupMember(CheckResourceBarTimeout)
     end)
 
     isInitialized = true
@@ -379,5 +388,24 @@ function GroupResourcesManager.GetResourceBarsHeight(isRaid)
         local barHeight = Settings.groupBarHeight
         -- 2px gap from health bar + first bar + 1px gap + second bar
         return 2 + barHeight + 1 + barHeight
+    end
+end
+
+-- React to a runtime settings change without requiring /reloadui. Enabling sets
+-- up callbacks/timers and refreshes frames; disabling tears them down via
+-- Uninitialize so the closures and update slot are released.
+function GroupResourcesManager.OnSettingsChanged()
+    local Settings = Shared.GetResourceSettings()
+    if not Settings then return end
+
+    if Settings.enabled then
+        if not isInitialized then
+            GroupResourcesManager.Initialize()
+        end
+        GroupResourcesManager.SetupFrames()
+    else
+        if isInitialized then
+            GroupResourcesManager.Uninitialize()
+        end
     end
 end

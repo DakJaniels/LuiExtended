@@ -233,6 +233,17 @@ local function UpdatePotionCooldownDisplay(unitTag, potionData)
     icon:SetHidden(false)
 end
 
+-- Refresh a single member's potion cooldown display from the local cache.
+-- Defined at file scope so the periodic timer and RefreshAll() can pass a stable
+-- function reference to ForEachActiveGroupMember instead of allocating a new
+-- closure on every tick.
+local function UpdateMemberPotionCooldown(unitTag, frameData)
+    local potionData = potionDataCache[unitTag]
+    if potionData and frameData.potionCooldown then
+        UpdatePotionCooldownDisplay(unitTag, potionData)
+    end
+end
+
 -- Initialize LibGroupPotionCooldowns integration
 function GroupPotionCooldownsManager.Initialize()
     if isInitialized then return end
@@ -240,8 +251,13 @@ function GroupPotionCooldownsManager.Initialize()
     local Settings = Shared.GetPotionCooldownSettings()
     if not Settings or not Settings.enabled then return end
 
-    -- Register with LibGroupPotionCooldowns
-    lgpc = LibGroupPotionCooldowns.RegisterAddon("LuiExtended")
+    -- Register with LibGroupPotionCooldowns only once per session. The library
+    -- blocks re-registration (LibGroupPotionCooldowns.lua:370-373) and provides no
+    -- UnregisterAddon, so the cached object is retained across Uninitialize/
+    -- Initialize cycles and reused when the feature is re-enabled at runtime.
+    if not lgpc then
+        lgpc = LibGroupPotionCooldowns.RegisterAddon("LuiExtended")
+    end
     if not lgpc then
         -- if LUIE.IsDevDebugEnabled() then
         --     LUIE.Error("[LUIE] Failed to register with LibGroupPotionCooldowns")
@@ -275,13 +291,8 @@ function GroupPotionCooldownsManager.Initialize()
         EVENT_MANAGER:RegisterForUpdate("LUIE_GroupPotionCooldowns_Update", 1000, function ()
             if not IsUnitGrouped("player") then return end
 
-            -- Iterate over active group members and update from cache
-            Shared.ForEachActiveGroupMember(function (unitTag, frameData)
-                local potionData = potionDataCache[unitTag]
-                if potionData and frameData.potionCooldown then
-                    UpdatePotionCooldownDisplay(unitTag, potionData)
-                end
-            end)
+            -- Iterate over active group members (stable function reference, no per-tick closure)
+            Shared.ForEachActiveGroupMember(UpdateMemberPotionCooldown)
         end)
     end
 
@@ -341,11 +352,26 @@ function GroupPotionCooldownsManager.RefreshAll()
     if not lgpc then return end
     if not IsUnitGrouped("player") then return end
 
-    -- Iterate over active group members and update from cache
-    Shared.ForEachActiveGroupMember(function (unitTag, frameData)
-        local potionData = potionDataCache[unitTag]
-        if potionData and frameData.potionCooldown then
-            UpdatePotionCooldownDisplay(unitTag, potionData)
+    -- Iterate over active group members (stable function reference, no per-call closure)
+    Shared.ForEachActiveGroupMember(UpdateMemberPotionCooldown)
+end
+
+-- React to a runtime settings change without requiring /reloadui. Enabling sets
+-- up callbacks/timers and refreshes frames; disabling tears them down via
+-- Uninitialize so the closures and update slot are released.
+function GroupPotionCooldownsManager.OnSettingsChanged()
+    local Settings = Shared.GetPotionCooldownSettings()
+    if not Settings then return end
+
+    if Settings.enabled then
+        if not isInitialized then
+            GroupPotionCooldownsManager.Initialize()
         end
-    end)
+        GroupPotionCooldownsManager.SetupFrames()
+        GroupPotionCooldownsManager.RefreshAll()
+    else
+        if isInitialized then
+            GroupPotionCooldownsManager.Uninitialize()
+        end
+    end
 end

@@ -1,6 +1,6 @@
-# Contributers
+# Contributors
 
-LuiExtended wouldn't be where it was without the contributions of other users and addon authors!
+LuiExtended wouldn't be where it is without the contributions of other users and addon authors!
 
 - Spellbuilder <esoui.com> - The original mastermind behind LuiExtended - we wouldn't be here without him!
 - Eearslya Sleiarion <github.com> - Various component fixes and added options

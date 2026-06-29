@@ -3110,30 +3110,27 @@ function I.AchievementPctToColor(pct)
 end
 
 --- @param achievementId integer
---- @return number|nil
+--- @return luaindex|nil topLevelIndex
+--- @return luaindex|nil categoryIndex
+--- @return luaindex|nil achievementIndex
 function I.GetCategoryInfoFromAchievementIdDetailed(achievementId)
-    -- If the user is selecting from the recent achievements list, there
-    --  will not be an open category id, so attempt to get the category
-    --  from the achievement.
-    local categoryId = GetCategoryInfoFromAchievementId(achievementId)
-    if categoryId then
-        return categoryId
+    local topLevelIndex, categoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
+    if topLevelIndex then
+        return topLevelIndex, categoryIndex, achievementIndex
     end
 
     -- Some achievements cannot find their category id properly, so try
-    --  walking the achievement chain and look for one that has a category
-    --  id.
+    -- walking the achievement chain and look for one that has a category id.
     local tryAchievementId = GetFirstAchievementInLine(achievementId)
     while tryAchievementId ~= 0 do
-        categoryId = GetCategoryInfoFromAchievementId(tryAchievementId)
-        if categoryId then
-            return categoryId
+        topLevelIndex, categoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(tryAchievementId)
+        if topLevelIndex then
+            return topLevelIndex, categoryIndex, achievementIndex
         end
         tryAchievementId = GetNextAchievementInLine(tryAchievementId)
     end
 
-    -- We were unable to determine the correct category id.
-    return nil
+    return nil, nil, nil
 end
 
 --- @param eventId integer
@@ -4297,20 +4294,7 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemLink, quantit
             formattedItemLink = zo_strgsub(itemLink, "^|H0", "|H1", 1)
         end
 
-        local formatName = zo_strformat("<<C:1>>", receivedBy)
-
-        local recipient
-        if S.g_groupLootIndex[formatName] then
-            recipient = ZO_SELECTED_TEXT:Colorize(ChatAnnouncements.ResolveNameLink(S.g_groupLootIndex[formatName].characterName, S.g_groupLootIndex[formatName].displayName))
-        else
-            local nameLink
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(formatName, nil, CHARACTER_LINK_TYPE, formatName)
-            else
-                nameLink = ZO_LinkHandler_CreateLink(formatName, nil, CHARACTER_LINK_TYPE, formatName)
-            end
-            recipient = ZO_SELECTED_TEXT:Colorize(nameLink)
-        end
+        local recipient = ChatAnnouncements.FormatGroupLootRecipient(receivedBy)
         ChatAnnouncements.ItemPrinter(icon, quantity, itemType, itemId, formattedItemLink, recipient, logPrefix, gainOrLoss, false, true)
     end
 end
@@ -4933,12 +4917,49 @@ function ChatAnnouncements.IndexGroupLoot()
     local groupSize = GetGroupSize()
     for i = 1, groupSize do
         local characterName = GetUnitName("group" .. i)
-        local displayName = GetUnitDisplayName("group" .. i)
-        if displayName == nil or displayName == "" then
-            displayName = characterName
+        local displayName = GetUnitDisplayName("group" .. i) or ""
+        local entry = { characterName = characterName, displayName = displayName }
+        S.g_groupLootIndex[characterName] = entry
+        local formattedCharacterName = zo_strformat("<<C:1>>", characterName)
+        if formattedCharacterName ~= characterName then
+            S.g_groupLootIndex[formattedCharacterName] = entry
         end
-        S.g_groupLootIndex[characterName] = { characterName = characterName, displayName = displayName }
     end
+end
+
+--- @param receivedBy string Character name from EVENT_LOOT_RECEIVED
+--- @return table|nil entry with characterName and displayName
+function ChatAnnouncements.GetGroupLootMemberEntry(receivedBy)
+    if receivedBy == nil or receivedBy == "" then
+        return nil
+    end
+    local formattedReceivedBy = zo_strformat("<<C:1>>", receivedBy)
+    local entry = S.g_groupLootIndex[formattedReceivedBy] or S.g_groupLootIndex[receivedBy]
+    if entry then
+        return entry
+    end
+    local groupSize = GetGroupSize()
+    for groupIndex = 1, groupSize do
+        local unitTag = "group" .. groupIndex
+        local characterName = GetUnitName(unitTag)
+        if characterName == receivedBy or characterName == formattedReceivedBy or zo_strformat("<<C:1>>", characterName) == formattedReceivedBy then
+            return { characterName = characterName, displayName = GetUnitDisplayName(unitTag) or "" }
+        end
+    end
+    return nil
+end
+
+--- @param receivedBy string Character name from EVENT_LOOT_RECEIVED
+--- @return string Colored chat link per ChatPlayerDisplayOptions
+function ChatAnnouncements.FormatGroupLootRecipient(receivedBy)
+    local entry = ChatAnnouncements.GetGroupLootMemberEntry(receivedBy)
+    local characterName = zo_strformat("<<C:1>>", receivedBy)
+    local displayName = ""
+    if entry then
+        characterName = entry.characterName
+        displayName = entry.displayName or ""
+    end
+    return ZO_SELECTED_TEXT:Colorize(ChatAnnouncements.ResolveNameLink(characterName, displayName))
 end
 
 -- EVENT_GROUP_TYPE_CHANGED

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ESOUI comments
+    url: https://www.esoui.com/downloads/info818-LuiExtended.html#comments
+    about: Report issues or ask questions on the ESOUI download page.
+  - name: GitHub Discussions
+    url: https://github.com/DakJaniels/LuiExtended/discussions
+    about: General questions and community discussion (if enabled on the repo).
