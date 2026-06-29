@@ -500,6 +500,12 @@ function CastBar.ComputeCastDurationMs(abilityId, result, hitValue, channeled, c
         durationMs = Castbar.CastDurationFix[abilityId] or (result == ACTION_RESULT_EFFECT_GAINED_DURATION and hitValue or 0)
     else
         durationMs = Castbar.CastDurationFix[abilityId] or castTime
+        if (not durationMs or durationMs <= 0)
+        and result == ACTION_RESULT_BEGIN
+        and hitValue
+        and hitValue > 0 then
+            durationMs = hitValue
+        end
     end
     if not durationMs or durationMs <= 0 then
         return 0
