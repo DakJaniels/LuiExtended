@@ -52,6 +52,7 @@ src/_ZO_BuffDebuffSuppression.lua
 src/ChatOutput/Namespace.lua
 src/ChatOutput/TimestampAndFormat.lua
 src/ChatOutput/ChatOutput.lua
+src/ChatOutput/GamepadChatOutput.lua
 src/LuiExtended_Log.lua
 src/Functions.lua
 src/Font.lua

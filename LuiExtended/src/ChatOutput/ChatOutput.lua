@@ -477,10 +477,10 @@ end
 function LUIE_ChatOutput:PrintToChatWindowsViaLibChatMessageFormatter(messageText, isSystem)
     local formattedMessage = self:FormatMessageViaLibChatMessageFormatter(messageText)
     if not formattedMessage then
-        self:PrintToChatWindows(self:FormatForDisplay(messageText), isSystem)
+        self:PrintToChatWindows(self:FormatForDisplay(messageText), isSystem, messageText)
         return
     end
-    self:PrintToChatWindows(formattedMessage, isSystem)
+    self:PrintToChatWindows(formattedMessage, isSystem, messageText)
 end
 
 function LUIE_ChatOutput:UsesPrintToAllTabsMethod()
@@ -776,7 +776,10 @@ function LUIE_ChatOutput:MaybeWarnNoDeliverableTab(isSystem)
     self:AddSystemMessage(GetString(LUIE_STRING_LAM_CA_CHATOUTPUT_NO_DELIVERABLE_TAB))
 end
 
-function LUIE_ChatOutput:PrintToChatWindows(formattedMessage, isSystem)
+--- @param formattedMessage string
+--- @param isSystem boolean|nil
+--- @param rawMessageText string|nil Passed to gamepad chat log for link extraction; defaults to formattedMessage.
+function LUIE_ChatOutput:PrintToChatWindows(formattedMessage, isSystem, rawMessageText)
     local chatOutputSettings = self:GetChatOutputSavedVars()
     if not chatOutputSettings then
         self:AddSystemMessage(formattedMessage)
@@ -794,17 +797,19 @@ function LUIE_ChatOutput:PrintToChatWindows(formattedMessage, isSystem)
             chatContainer:AddEventMessageToWindow(chatWindow, formattedMessage, CHAT_CATEGORY_SYSTEM)
         end
     end
+
+    self:AddDeliveredLineToGamepadChatLog(formattedMessage, rawMessageText or formattedMessage)
 end
 
 --- Delivers via SharedChatContainer:AddEventMessageToWindow on tabs selected in ChatTab[] (see PrintToChatWindows).
 function LUIE_ChatOutput:DeliverToSelectedChatTabs(messageText, isSystem)
     self:MaybeWarnNoDeliverableTab(isSystem)
     if self:ShouldUseExternalFormatting() then
-        self:PrintToChatWindows(self:ApplyExternalSystemFormat(messageText), isSystem)
+        self:PrintToChatWindows(self:ApplyExternalSystemFormat(messageText), isSystem, messageText)
     elseif self.libChatMessage and not self:ShouldUseExternalFormatting() then
         self:PrintToChatWindowsViaLibChatMessageFormatter(messageText, isSystem)
     else
-        self:PrintToChatWindows(self:FormatForDisplay(messageText), isSystem)
+        self:PrintToChatWindows(self:FormatForDisplay(messageText), isSystem, messageText)
     end
 end
 
@@ -919,6 +924,7 @@ function LUIE_ChatOutput:InitializePrintRouting()
         self.libChatMessage = nil
     end
 
+    self:InitializeGamepadChatOutput()
     self:RegisterPlayerActivatedHandlerOnce()
     self:RegisterExternalChatInitializerCallbacksOnce()
     if self:IsPlayerActivatedForChatDelivery() then
