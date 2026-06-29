@@ -167,6 +167,29 @@ local castBarTable =
         [19039] = true,  -- Ebonheart Forward Camp
         [19040] = true,  -- Aldmeri Forward Camp
         [19041] = true,  -- Daggerfall Forward Camp
+
+        [240225] = true,  -- Flaming Oil of Vengeance
+        [240250] = true,  -- Pact Ballista of Vengeance
+        [240251] = true,  -- Pact Battering Ram of Vengeance
+        [240252] = true,  -- Pact Forward Camp of Vengeance
+        [247992] = true,  -- Pact Meatbag Catapult of Vengeance
+        [254032] = true,  -- Pact Oil Catapult of Vengeance
+        [254059] = true,  -- Pact Scattershot Catapult of Vengeance
+        [240249] = true,  -- Pact Stone Trebuchet of Vengeance
+        [240222] = true,  -- Dominion Stone Trebuchet of Vengeance
+        [240223] = true,  -- Dominion Ballista of Vengeance
+        [240224] = true,  -- Dominion Battering Ram of Vengeance
+        [240238] = true,  -- Dominion Forward Camp of Vengeance
+        [247991] = true,  -- Dominion Meatbag Catapult of Vengeance
+        [254031] = true,  -- Dominion Oil Catapult of Vengeance
+        [254058] = true,  -- Dominion Scattershot Catapult of Vengeance
+        [240275] = true,  -- Covenant Stone Trebuchet of Vengeance
+        [240276] = true,  -- Covenant Ballista of Vengeance
+        [240277] = true,  -- Covenant Battering Ram of Vengeance
+        [240278] = true,  -- Covenant Forward Camp of Vengeance
+        [247993] = true,  -- Covenant Meatbag Catapult of Vengeance
+        [254033] = true,  -- Covenant Oil Catapult of Vengeance
+        [254060] = true,  -- Covenant Scattershot Catapult of Vengeance
     },
 
     BreakCastOnMove =
@@ -287,10 +310,34 @@ local castBarTable =
         [16723] = true,  -- Door Repair Kit
         [13601] = true,  -- Advanced Siege Repair Kit
         [112975] = true, -- Wall Repair Kit (Bridge and Milegate Repair Kit)
+        [252149] = true, -- Cyrodiil Repair Kit of Vengeance
 
         [19039] = true,  -- Ebonheart Forward Camp
         [19040] = true,  -- Aldmeri Forward Camp
         [19041] = true,  -- Daggerfall Forward Camp
+
+        [240225] = true,  -- Flaming Oil of Vengeance
+        [240250] = true,  -- Pact Ballista of Vengeance
+        [240251] = true,  -- Pact Battering Ram of Vengeance
+        [240252] = true,  -- Pact Forward Camp of Vengeance
+        [247992] = true,  -- Pact Meatbag Catapult of Vengeance
+        [254032] = true,  -- Pact Oil Catapult of Vengeance
+        [254059] = true,  -- Pact Scattershot Catapult of Vengeance
+        [240249] = true,  -- Pact Stone Trebuchet of Vengeance
+        [240222] = true,  -- Dominion Stone Trebuchet of Vengeance
+        [240223] = true,  -- Dominion Ballista of Vengeance
+        [240224] = true,  -- Dominion Battering Ram of Vengeance
+        [240238] = true,  -- Dominion Forward Camp of Vengeance
+        [247991] = true,  -- Dominion Meatbag Catapult of Vengeance
+        [254031] = true,  -- Dominion Oil Catapult of Vengeance
+        [254058] = true,  -- Dominion Scattershot Catapult of Vengeance
+        [240275] = true,  -- Covenant Stone Trebuchet of Vengeance
+        [240276] = true,  -- Covenant Ballista of Vengeance
+        [240277] = true,  -- Covenant Battering Ram of Vengeance
+        [240278] = true,  -- Covenant Forward Camp of Vengeance
+        [247993] = true,  -- Covenant Meatbag Catapult of Vengeance
+        [254033] = true,  -- Covenant Oil Catapult of Vengeance
+        [254060] = true,  -- Covenant Scattershot Catapult of Vengeance
 
         -- [12355] = true, -- Destroy Siege Weapon (Doesn't show up due to Cyrodiil Limitations)
 
@@ -661,6 +708,12 @@ local castBarTable =
         [39033] = 1100, -- Werewolf Transform Setup (Werewolf)
         [39477] = 1500, -- De-Werewolf (Werewolf)
         [75008] = 6500, -- Werewolf Transformation (Werewolf - Quest Transformation)
+
+        ----------------------------------------------------------------
+        -- CYRODIIL ----------------------------------------------------
+        ----------------------------------------------------------------
+
+        [12256] = 3000, -- Pack Siege (Siege Weapons; CastChannelConvert channel length)
 
         ----------------------------------------------------------------
         -- QUEST ABILITIES ---------------------------------------------
@@ -1199,10 +1252,34 @@ local castBarTable =
         [16723] = true,  -- Door Repair Kit
         [13601] = true,  -- Advanced Siege Repair Kit
         [112975] = true, -- Wall Repair Kit (Bridge and Milegate Repair Kit)
+        [252149] = true, -- Cyrodiil Repair Kit of Vengeance
 
         [19039] = true,  -- Ebonheart Forward Camp
         [19040] = true,  -- Aldmeri Forward Camp
         [19041] = true,  -- Daggerfall Forward Camp
+
+        [240225] = true,  -- Flaming Oil of Vengeance
+        [240250] = true,  -- Pact Ballista of Vengeance
+        [240251] = true,  -- Pact Battering Ram of Vengeance
+        [240252] = true,  -- Pact Forward Camp of Vengeance
+        [247992] = true,  -- Pact Meatbag Catapult of Vengeance
+        [254032] = true,  -- Pact Oil Catapult of Vengeance
+        [254059] = true,  -- Pact Scattershot Catapult of Vengeance
+        [240249] = true,  -- Pact Stone Trebuchet of Vengeance
+        [240222] = true,  -- Dominion Stone Trebuchet of Vengeance
+        [240223] = true,  -- Dominion Ballista of Vengeance
+        [240224] = true,  -- Dominion Battering Ram of Vengeance
+        [240238] = true,  -- Dominion Forward Camp of Vengeance
+        [247991] = true,  -- Dominion Meatbag Catapult of Vengeance
+        [254031] = true,  -- Dominion Oil Catapult of Vengeance
+        [254058] = true,  -- Dominion Scattershot Catapult of Vengeance
+        [240275] = true,  -- Covenant Stone Trebuchet of Vengeance
+        [240276] = true,  -- Covenant Ballista of Vengeance
+        [240277] = true,  -- Covenant Battering Ram of Vengeance
+        [240278] = true,  -- Covenant Forward Camp of Vengeance
+        [247993] = true,  -- Covenant Meatbag Catapult of Vengeance
+        [254033] = true,  -- Covenant Oil Catapult of Vengeance
+        [254060] = true,  -- Covenant Scattershot Catapult of Vengeance
 
         -- [12355] = true, -- Destroy Siege Weapon (Doesn't show up due to Cyrodiil Limitations)
 
