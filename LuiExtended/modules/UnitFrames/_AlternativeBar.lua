@@ -1,4 +1,3 @@
---- @diagnostic disable: undefined-field, missing-fields
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -10,9 +9,6 @@ local LUIE = LUIE
 -- Unit Frames namespace
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
-if not UnitFrames then
-    return
-end
 
 local moduleName = UnitFrames.moduleName
 local eventManager = GetEventManager()

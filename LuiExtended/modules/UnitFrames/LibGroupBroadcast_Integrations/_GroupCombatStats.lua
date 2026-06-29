@@ -221,34 +221,40 @@ local function UpdateCombatStatsText(unitTag, dpsData, hpsData)
     local statsLabel = frameData.combatStats.statsLabel
     if not statsLabel then return end
 
-    local showDPS = Settings.showDPS and dpsData
-    local showHPS = Settings.showHPS and hpsData
+    -- Values come in thousands (e.g. 45.5 -> "45.5k")
+    local dpsValue = (Settings.showDPS and dpsData and dpsData.dps) or 0
+    local hpsValue = (Settings.showHPS and hpsData and hpsData.hps) or 0
+    local hasDpsValue = dpsValue > 0
+    local hasHpsValue = hpsValue > 0
 
-    if not showDPS and not showHPS then
+    if not hasDpsValue and not hasHpsValue then
         statsLabel:SetHidden(true)
         return
     end
 
-    local textParts = {}
+    -- Skip reformatting/setting text when the displayed values are unchanged.
+    -- Avoids both string churn and a SetText call on every event/tick when the
+    -- numbers have not moved.
+    local combatStats = frameData.combatStats
+    if combatStats.lastDpsValue ~= dpsValue or combatStats.lastHpsValue ~= hpsValue then
+        combatStats.lastDpsValue = dpsValue
+        combatStats.lastHpsValue = hpsValue
 
-    if showDPS and dpsData.dps and dpsData.dps > 0 then
-        -- Format DPS (comes in thousands, e.g., 45.5 = 45.5k DPS)
-        local dpsText = string.format("%.1fk", dpsData.dps)
-        table.insert(textParts, string.format("|cFF4444%s|r", dpsText)) -- Red for DPS
+        -- Build the label by direct formatting (no scratch table / concat).
+        -- DPS is red (|cFF4444), HPS is green (|c44FF44).
+        local labelText
+        if hasDpsValue and hasHpsValue then
+            labelText = string.format("|cFF4444%.1fk|r |c44FF44%.1fk|r", dpsValue, hpsValue)
+        elseif hasDpsValue then
+            labelText = string.format("|cFF4444%.1fk|r", dpsValue)
+        else
+            labelText = string.format("|c44FF44%.1fk|r", hpsValue)
+        end
+
+        statsLabel:SetText(labelText)
     end
 
-    if showHPS and hpsData.hps and hpsData.hps > 0 then
-        -- Format HPS (comes in thousands)
-        local hpsText = string.format("%.1fk", hpsData.hps)
-        table.insert(textParts, string.format("|c44FF44%s|r", hpsText)) -- Green for HPS
-    end
-
-    if #textParts > 0 then
-        statsLabel:SetText(table.concat(textParts, " "))
-        statsLabel:SetHidden(false)
-    else
-        statsLabel:SetHidden(true)
-    end
+    statsLabel:SetHidden(false)
 end
 
 -- Hide all DPS/HPS stat labels (called after 6s out of combat)
@@ -276,6 +282,33 @@ local function OnCombatStateChanged(eventCode, inCombat)
     end
 end
 
+-- Refresh a single group member's combat stat displays from the library's live
+-- per-stat tables. Defined at file scope so the periodic update timer and
+-- RefreshAll() can pass a stable function reference to ForEachActiveGroupMember
+-- instead of allocating a new closure on every tick.
+local function UpdateMemberCombatStats(unitTag, frameData)
+    if not frameData.combatStats then return end
+    if not lgcs then return end
+
+    local currentSettings = Shared.GetCombatStatsSettings()
+    if not currentSettings then return end
+
+    -- Update ultimate display from the live ult table (no full-stats deep copy)
+    if currentSettings.showUltimate then
+        local ultData = lgcs:GetUnitULT(unitTag)
+        if ultData then
+            UpdateUltimateDisplay(unitTag, ultData)
+        end
+    end
+
+    -- Update DPS/HPS text from the live dps/hps tables
+    if currentSettings.showDPS or currentSettings.showHPS then
+        local dpsData = lgcs:GetUnitDPS(unitTag)
+        local hpsData = lgcs:GetUnitHPS(unitTag)
+        UpdateCombatStatsText(unitTag, dpsData, hpsData)
+    end
+end
+
 -- Initialize LibGroupCombatStats integration
 function GroupCombatStatsManager.Initialize()
     if isInitialized then return end
@@ -299,8 +332,13 @@ function GroupCombatStatsManager.Initialize()
         return -- Nothing enabled
     end
 
-    -- Register with LibGroupCombatStats
-    lgcs = LibGroupCombatStats.RegisterAddon("LuiExtended", neededStats)
+    -- Register with LibGroupCombatStats only once per session. The library blocks
+    -- re-registration (LibGroupCombatStats.lua:1201-1206) and provides no
+    -- UnregisterAddon, so the cached object is retained across Uninitialize/
+    -- Initialize cycles and reused when the feature is re-enabled at runtime.
+    if not lgcs then
+        lgcs = LibGroupCombatStats.RegisterAddon("LuiExtended", neededStats)
+    end
     if not lgcs then
         -- if LUIE.IsDevDebugEnabled() then
         --     LUIE.Error("[LUIE] Failed to register with LibGroupCombatStats")
@@ -319,10 +357,9 @@ function GroupCombatStatsManager.Initialize()
     -- Register for DPS updates
     if Settings.showDPS then
         dpsUpdateCallback = function (unitTag, dpsData)
-            local stats = lgcs:GetUnitStats(unitTag)
-            if stats then
-                UpdateCombatStatsText(unitTag, dpsData, stats.hps)
-            end
+            -- Read the sibling HPS table by live reference (no full-stats deep copy)
+            local hpsData = lgcs:GetUnitHPS(unitTag)
+            UpdateCombatStatsText(unitTag, dpsData, hpsData)
         end
         lgcs:RegisterForEvent(LibGroupCombatStats.EVENT_GROUP_DPS_UPDATE, dpsUpdateCallback)
     end
@@ -330,10 +367,9 @@ function GroupCombatStatsManager.Initialize()
     -- Register for HPS updates
     if Settings.showHPS then
         hpsUpdateCallback = function (unitTag, hpsData)
-            local stats = lgcs:GetUnitStats(unitTag)
-            if stats then
-                UpdateCombatStatsText(unitTag, stats.dps, hpsData)
-            end
+            -- Read the sibling DPS table by live reference (no full-stats deep copy)
+            local dpsData = lgcs:GetUnitDPS(unitTag)
+            UpdateCombatStatsText(unitTag, dpsData, hpsData)
         end
         lgcs:RegisterForEvent(LibGroupCombatStats.EVENT_GROUP_HPS_UPDATE, hpsUpdateCallback)
     end
@@ -347,23 +383,10 @@ function GroupCombatStatsManager.Initialize()
         if not lgcs then return end
 
         local currentSettings = Shared.GetCombatStatsSettings()
-        if not currentSettings then return end
+        if not currentSettings or not currentSettings.enabled then return end
 
-        -- Iterate over active group members
-        Shared.ForEachActiveGroupMember(function (unitTag, frameData)
-            local stats = lgcs:GetUnitStats(unitTag)
-            if stats and frameData.combatStats then
-                -- Update ultimate display
-                if currentSettings.showUltimate and stats.ult then
-                    UpdateUltimateDisplay(unitTag, stats.ult)
-                end
-
-                -- Update DPS/HPS text
-                if currentSettings.showDPS or currentSettings.showHPS then
-                    UpdateCombatStatsText(unitTag, stats.dps, stats.hps)
-                end
-            end
-        end)
+        -- Iterate over active group members (stable function reference, no per-tick closure)
+        Shared.ForEachActiveGroupMember(UpdateMemberCombatStats)
     end)
 
     isInitialized = true
@@ -389,18 +412,8 @@ function GroupCombatStatsManager.RefreshAll()
     if not lgcs then return end
     if not IsUnitGrouped("player") then return end
 
-    -- Iterate over active group members
-    Shared.ForEachActiveGroupMember(function (unitTag, frameData)
-        local stats = lgcs:GetUnitStats(unitTag)
-        if stats and frameData.combatStats then
-            if stats.ult then
-                UpdateUltimateDisplay(unitTag, stats.ult)
-            end
-            if stats.dps or stats.hps then
-                UpdateCombatStatsText(unitTag, stats.dps, stats.hps)
-            end
-        end
-    end)
+    -- Iterate over active group members (stable function reference, no per-call closure)
+    Shared.ForEachActiveGroupMember(UpdateMemberCombatStats)
 end
 
 -- Tear down everything Initialize() set up. Pairs symmetric unregisters with the
@@ -456,5 +469,25 @@ function GroupCombatStatsManager.HideStats(unitTag)
     -- Hide stats label
     if frameData.combatStats.statsLabel then
         frameData.combatStats.statsLabel:SetHidden(true)
+    end
+end
+
+-- React to a runtime settings change without requiring /reloadui. Enabling sets
+-- up callbacks/timers and refreshes frames; disabling tears them down via
+-- Uninitialize so the closures and update slots are released.
+function GroupCombatStatsManager.OnSettingsChanged()
+    local Settings = Shared.GetCombatStatsSettings()
+    if not Settings then return end
+
+    if Settings.enabled then
+        if not isInitialized then
+            GroupCombatStatsManager.Initialize()
+        end
+        GroupCombatStatsManager.SetupFrames()
+        GroupCombatStatsManager.RefreshAll()
+    else
+        if isInitialized then
+            GroupCombatStatsManager.Uninitialize()
+        end
     end
 end

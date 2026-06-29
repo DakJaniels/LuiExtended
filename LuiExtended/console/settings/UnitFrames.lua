@@ -3637,6 +3637,9 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.GroupResources.enabled = value
+                if UnitFrames.GroupResources then
+                    UnitFrames.GroupResources.OnSettingsChanged()
+                end
             end,
             warning = "Requires LibGroupBroadcast library. " .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
@@ -3917,6 +3920,9 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.GroupCombatStats.enabled = value
+                if UnitFrames.GroupCombatStats then
+                    UnitFrames.GroupCombatStats.OnSettingsChanged()
+                end
             end,
             warning = "Requires LibGroupCombatStats library. " .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
@@ -4080,6 +4086,9 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.GroupPotionCooldowns.enabled = value
+                if UnitFrames.GroupPotionCooldowns then
+                    UnitFrames.GroupPotionCooldowns.OnSettingsChanged()
+                end
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()

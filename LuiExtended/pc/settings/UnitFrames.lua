@@ -3684,6 +3684,9 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GroupResources.enabled = value
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.OnSettingsChanged()
+                    end
                 end,
                 width = "full",
                 default = Defaults.GroupResources.enabled,
@@ -3950,6 +3953,9 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GroupCombatStats.enabled = value
+                    if UnitFrames.GroupCombatStats then
+                        UnitFrames.GroupCombatStats.OnSettingsChanged()
+                    end
                 end,
                 width = "full",
                 default = Defaults.GroupCombatStats.enabled,
@@ -4178,6 +4184,9 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GroupPotionCooldowns.enabled = value
+                    if UnitFrames.GroupPotionCooldowns then
+                        UnitFrames.GroupPotionCooldowns.OnSettingsChanged()
+                    end
                 end,
                 width = "full",
                 default = Defaults.GroupPotionCooldowns.enabled,
