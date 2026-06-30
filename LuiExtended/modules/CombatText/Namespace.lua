@@ -350,6 +350,8 @@ CombatText.Defaults =
         animationDuration = 100,
         outgoingIcon = "left",
         incomingIcon = "right",
+        showIconFrame = false,
+        colorIconFrame = false,
         outgoing =
         {
             directionType = "down",

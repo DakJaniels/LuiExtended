@@ -3474,6 +3474,33 @@ function CombatText.CreateSettings()
                 default = Defaults.animation.outgoingIcon,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_FRAME),
+                tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_FRAME_TP),
+                getFunc = function ()
+                    return Settings.animation.showIconFrame
+                end,
+                setFunc = function (value)
+                    Settings.animation.showIconFrame = value
+                end,
+                default = Defaults.animation.showIconFrame,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_FRAME_COLOR)),
+                tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_FRAME_COLOR_TP),
+                getFunc = function ()
+                    return Settings.animation.colorIconFrame
+                end,
+                setFunc = function (value)
+                    Settings.animation.colorIconFrame = value
+                end,
+                disabled = function ()
+                    return not Settings.animation.showIconFrame
+                end,
+                default = Defaults.animation.colorIconFrame,
+            },
+            {
                 -- Test Button
                 type = "button",
                 name = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST),

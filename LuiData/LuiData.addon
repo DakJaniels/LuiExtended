@@ -16,6 +16,7 @@ src/Globals.lua
 src/_data_namespace.lua
 src/AbilityTables.lua
 src/Tooltips.lua
+src/IconFrameColorSamples.lua
 src/UnitNamesTable.lua
 src/ZoneNamesTable.lua
 

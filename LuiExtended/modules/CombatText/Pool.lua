@@ -148,15 +148,27 @@ function CombatTextPool:Initialize(poolType)
     local function CreateControl(pool)
         local control = CreateControlFromVirtual("LUIE_CombatText_Virtual_Instance", LUIE_CombatText, "LUIE_CombatText_Virtual", pool:GetNextControlId())
         control.label = control:GetNamedChild("_Amount")
-        control.icon = control:GetNamedChild("_Icon")
+        control.iconHost = control:GetNamedChild("_IconHost")
+        control.iconFrame = control.iconHost:GetNamedChild("_IconFrame")
+        control.icon = control.iconHost:GetNamedChild("_Icon")
         return control
     end
 
     local function ResetControl(control)
         control:ClearAnchors()
         control.label:ClearAnchors()
+        if control.iconHost then
+            control.iconHost:ClearAnchors()
+            control.iconHost:SetHidden(true)
+        end
+        if control.iconFrame then
+            control.iconFrame:ClearAnchors()
+            control.iconFrame:SetHidden(true)
+            control.iconFrame:SetColor(1, 1, 1, 1)
+        end
         control.icon:ClearAnchors()
         control.icon:SetHidden(true)
+        control.icon:SetColor(1, 1, 1, 1)
         control.icon._lastTexture = nil
         control:SetHidden(true)
     end

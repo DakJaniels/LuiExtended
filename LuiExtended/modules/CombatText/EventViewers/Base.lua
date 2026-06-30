@@ -412,6 +412,148 @@ function CombatTextEventViewer:GetIconSide(combatType)
     return "none"
 end
 
+local COMBAT_TEXT_ICON_ART_INSET = 2
+local COMBAT_TEXT_ICON_CHROME_WHITE = { 1, 1, 1, 1 }
+
+--- ZOS Skills ability slots (SkillsComponents_Keyboard.lua / SkillsComponents_Gamepad.lua) — neutral frames, not abilityFrame_buff/debuff.
+local function GetCombatTextActiveIconFrameTexture()
+    if IsInGamepadPreferredMode() then
+        return "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame64.dds"
+    end
+    return "EsoUI/Art/ActionBar/abilityFrame64_up.dds"
+end
+
+local function GetCombatTextPassiveIconFrameTexture()
+    if IsInGamepadPreferredMode() then
+        return "EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_64.dds"
+    end
+    return "EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds"
+end
+
+--- Round Skills frame when the combat id is the passive skill or LuiData links it via tooltipMorphId (e.g. Wildfire Embers DoT → 259224).
+--- @param abilityId integer|nil
+--- @return boolean
+function CombatTextEventViewer:ShouldUsePassiveSkillIconFrame(abilityId)
+    if not abilityId then
+        return false
+    end
+    if IsAbilityPassive(abilityId) then
+        return true
+    end
+    local effectOverride = Effects_EffectOverride[abilityId]
+    local morphAbilityId = effectOverride and effectOverride.tooltipMorphId
+    if morphAbilityId and IsAbilityPassive(morphAbilityId) then
+        return true
+    end
+    return false
+end
+
+--- @param abilityId integer|nil
+--- @return string
+function CombatTextEventViewer:GetCombatTextIconFrameTexture(abilityId)
+    if self:ShouldUsePassiveSkillIconFrame(abilityId) then
+        return GetCombatTextPassiveIconFrameTexture()
+    end
+    return GetCombatTextActiveIconFrameTexture()
+end
+
+--- @param texturePath string?
+--- @return string|nil
+local function NormalizeCombatTextIconTextureKey(texturePath)
+    if not texturePath or texturePath == "" then
+        return nil
+    end
+    local key = zo_strlower(texturePath)
+    key = key:gsub("\\", "/")
+    if zo_strsub(key, 1, 1) == "/" then
+        key = zo_strsub(key, 2)
+    end
+    return key
+end
+
+--- @param texturePath string|nil
+--- @return number[]|nil
+local function GetIconFrameColorSampleForTexturePath(texturePath)
+    local sampleKey = NormalizeCombatTextIconTextureKey(texturePath)
+    if not sampleKey then
+        return nil
+    end
+    return LuiData_Data.IconFrameColorSamples[sampleKey]
+end
+
+--- @param iconTexturePath string|nil
+--- @param abilityId integer|nil
+--- @return table {r,g,b,a}
+function CombatTextEventViewer:GetCombatTextIconFrameColor(iconTexturePath, abilityId)
+    if not LUIE.CombatText.SV.animation.colorIconFrame then
+        return COMBAT_TEXT_ICON_CHROME_WHITE
+    end
+
+    local sampledColor = GetIconFrameColorSampleForTexturePath(iconTexturePath)
+    if sampledColor then
+        return sampledColor
+    end
+
+    if abilityId then
+        sampledColor = GetIconFrameColorSampleForTexturePath(self.abilityIconCache[abilityId])
+        if sampledColor then
+            return sampledColor
+        end
+
+        local effectOverride = Effects_EffectOverride[abilityId]
+        if effectOverride then
+            sampledColor = GetIconFrameColorSampleForTexturePath(effectOverride.icon)
+            if sampledColor then
+                return sampledColor
+            end
+            if effectOverride.tooltipMorphId then
+                sampledColor = GetIconFrameColorSampleForTexturePath(GetAbilityIcon(effectOverride.tooltipMorphId))
+                if sampledColor then
+                    return sampledColor
+                end
+            end
+        end
+    end
+
+    return COMBAT_TEXT_ICON_CHROME_WHITE
+end
+
+--- @param control Control
+--- @param abilityId integer|nil
+--- @param iconSize number
+--- @param showFrame boolean
+--- @param iconTintColor table|nil
+--- @param iconTexturePath string|nil
+function CombatTextEventViewer:ApplyCombatTextIconChrome(control, abilityId, iconSize, showFrame, iconTintColor, iconTexturePath)
+    if not control.iconHost or not control.icon then
+        return
+    end
+
+    control.iconHost:SetDimensions(iconSize, iconSize)
+    control.iconHost:SetHidden(false)
+
+    if showFrame and control.iconFrame then
+        control.iconFrame:ClearAnchors()
+        control.iconFrame:SetAnchor(TOPLEFT, control.iconHost, TOPLEFT, 0, 0)
+        control.iconFrame:SetAnchor(BOTTOMRIGHT, control.iconHost, BOTTOMRIGHT, 0, 0)
+        control.iconFrame:SetTexture(self:GetCombatTextIconFrameTexture(abilityId))
+        local frameColor = self:GetCombatTextIconFrameColor(iconTexturePath, abilityId)
+        control.iconFrame:SetColor(frameColor[1], frameColor[2], frameColor[3], frameColor[4])
+        control.iconFrame:SetHidden(false)
+
+        control.icon:ClearAnchors()
+        control.icon:SetAnchor(TOPLEFT, control.iconHost, TOPLEFT, COMBAT_TEXT_ICON_ART_INSET, COMBAT_TEXT_ICON_ART_INSET)
+        control.icon:SetAnchor(BOTTOMRIGHT, control.iconHost, BOTTOMRIGHT, -COMBAT_TEXT_ICON_ART_INSET, -COMBAT_TEXT_ICON_ART_INSET)
+    else
+        if control.iconFrame then
+            control.iconFrame:SetHidden(true)
+        end
+        control.icon:ClearAnchors()
+        control.icon:SetAnchor(TOPLEFT, control.iconHost, TOPLEFT, 0, 0)
+        control.icon:SetAnchor(BOTTOMRIGHT, control.iconHost, BOTTOMRIGHT, 0, 0)
+    end
+end
+
 --- Position icon and label based on icon side<br>
 --- Sets anchors, dimensions, and texture. Uses texture caching to avoid redundant SetTexture calls
 --- @param control {icon:TextureControl,label:LabelControl} | Control The combat text control containing icon and label
@@ -419,15 +561,18 @@ end
 --- @param iconPath string? The icon texture path
 --- @param width number Label text width in pixels
 --- @param height number Label text height in pixels
-function CombatTextEventViewer:PositionIconAndLabel(control, iconSide, iconPath, width, height)
+--- @param abilityId integer|nil
+--- @param iconTintColor table|nil
+function CombatTextEventViewer:PositionIconAndLabel(control, iconSide, iconPath, width, height, abilityId, iconTintColor)
     if iconPath and iconPath ~= "" and iconSide ~= "none" then
+        local Settings = LUIE.CombatText.SV
         -- Set anchors based on side
         if iconSide == "left" then
-            control.icon:SetAnchor(LEFT, control, LEFT, 0, 0)
-            control.label:SetAnchor(LEFT, control.icon, RIGHT, 8, 0)
+            control.iconHost:SetAnchor(LEFT, control, LEFT, 0, 0)
+            control.label:SetAnchor(LEFT, control.iconHost, RIGHT, 8, 0)
         elseif iconSide == "right" then
-            control.icon:SetAnchor(RIGHT, control, RIGHT, 0, 0)
-            control.label:SetAnchor(RIGHT, control.icon, LEFT, -8, 0)
+            control.iconHost:SetAnchor(RIGHT, control, RIGHT, 0, 0)
+            control.label:SetAnchor(RIGHT, control.iconHost, LEFT, -8, 0)
         end
 
         -- Only update texture if changed (performance optimization)
@@ -436,7 +581,7 @@ function CombatTextEventViewer:PositionIconAndLabel(control, iconSide, iconPath,
             control.icon._lastTexture = iconPath
         end
 
-        control.icon:SetDimensions(height, height)
+        self:ApplyCombatTextIconChrome(control, abilityId, height, Settings.animation.showIconFrame, iconTintColor, iconPath)
         control.icon:SetHidden(false)
         control:SetDimensions(width + height + 8, height)
     else
@@ -451,8 +596,14 @@ end
 --- @param width number Label text width in pixels
 --- @param height number Label text height in pixels
 function CombatTextEventViewer:HideIcon(control, width, height)
-    control.icon:SetAnchor(CENTER, control, CENTER, 0, 0)
-    control.label:SetAnchor(CENTER, control.icon, CENTER, 0, 0)
+    if control.iconHost then
+        control.iconHost:SetHidden(true)
+    end
+    if control.iconFrame then
+        control.iconFrame:SetHidden(true)
+    end
+    control.icon:SetHidden(true)
+    control.label:SetAnchor(CENTER, control, CENTER, 0, 0)
     control:SetDimensions(width, height)
 
     -- Clear texture cache
@@ -467,7 +618,8 @@ end
 --- @param abilityId integer? The ability ID (nil for no icon)
 --- @param combatType integer? CombatTextConstants.combatType
 --- @param sourceName string? The source/caster name
-function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sourceName)
+--- @param iconTintColor table|nil {r,g,b,a} label color for optional frame tint
+function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sourceName, iconTintColor)
     local Settings = LUIE.CombatText.SV
     control.label:Clean()
     local width, height = control.label:GetTextDimensions()
@@ -481,12 +633,17 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
             iconPath = self:GetResolvedIconPath(abilityId, sourceName)
         end
 
-        self:PositionIconAndLabel(control, iconSide, iconPath, width, height)
+        self:PositionIconAndLabel(control, iconSide, iconPath, width, height, abilityId, iconTintColor)
     else
         self:HideIcon(control, width, height)
     end
 
-    control.icon:SetAlpha(LUIE.CombatText.GetTextAlpha())
+    local textAlpha = LUIE.CombatText.GetTextAlpha()
+    if control.iconHost then
+        control.iconHost:SetAlpha(textAlpha)
+    else
+        control.icon:SetAlpha(textAlpha)
+    end
 end
 
 --- Register a callback for a combat text event<br>

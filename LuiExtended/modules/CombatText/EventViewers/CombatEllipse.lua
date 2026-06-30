@@ -108,7 +108,7 @@ function CombatTextCombatEllipseEventViewer:View(combatType, powerType, value, a
     end
 
     self:PrepareLabel(control.label, fontSize, textColor, self:FormatString(textFormat, { text = abilityName, value = value, powerType = powerType, damageType = damageType }))
-    self:ControlLayout(control, abilityId, combatType, sourceName)
+    self:ControlLayout(control, abilityId, combatType, sourceName, textColor)
 
     -- Control setup
     local panel
@@ -201,7 +201,7 @@ function CombatTextCombatEllipseEventViewer:View(combatType, powerType, value, a
 
     local animationX, animationXPoolKey = self.poolManager:GetPoolObject(animationXPoolType)
     animationX:GetStepByName("scrollX"):SetDeltaOffsetX(targetX * (w * 0.35))
-    animationX:Apply(control.icon)
+    animationX:Apply(control.iconHost or control.icon)
     animationX:Play()
 
     local animationY, animationYPoolKey = self.poolManager:GetPoolObject(animationYPoolType)
