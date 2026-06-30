@@ -100,6 +100,7 @@
       <Controls>
         <!-- Prefix label -->
         <Label name="$(parent)_Prefix"
+               inheritAlpha="true"
                wrapMode="ELLIPSIS"
                horizontalAlignment="CENTER"
                verticalAlignment="CENTER">
@@ -111,6 +112,7 @@
         </Label>
         <!-- Name label -->
         <Label name="$(parent)_Name"
+               inheritAlpha="true"
                wrapMode="ELLIPSIS"
                horizontalAlignment="CENTER"
                verticalAlignment="CENTER">
@@ -122,6 +124,7 @@
         </Label>
         <!-- Modifier label -->
         <Label name="$(parent)_Modifier"
+               inheritAlpha="true"
                wrapMode="ELLIPSIS"
                horizontalAlignment="CENTER"
                verticalAlignment="CENTER">
@@ -133,6 +136,7 @@
         </Label>
         <!-- Icon container -->
         <Backdrop name="$(parent)_Icon"
+                  inheritAlpha="true"
                   centerColor="000000"
                   edgeColor="000000">
           <Dimensions x="32"
@@ -154,12 +158,14 @@
           <Controls>
             <!-- Icon border -->
             <Texture name="$(parent)_Back"
+                     inheritAlpha="true"
                      textureFile="LuiMedia/media/icons/icon_border/icon_border.dds"
                      layer="BACKGROUND">
               <AnchorFill />
             </Texture>
             <!-- Icon background -->
             <Backdrop name="$(parent)_IconBg"
+                      inheritAlpha="true"
                       centerColor="000000"
                       edgeColor="000000"
                       alpha="0.902">
@@ -179,6 +185,7 @@
             </Backdrop>
             <!-- Cooldown control -->
             <Cooldown name="$(parent)_Cd"
+                      inheritAlpha="true"
                       fillColor="000000"
                       alpha="0"
                       layer="BACKGROUND">
@@ -195,6 +202,7 @@
             </Cooldown>
             <!-- Icon texture -->
             <Texture name="$(parent)_Icon"
+                     inheritAlpha="true"
                      textureFile="/esoui/art/icons/icon_missing.dds"
                      layer="CONTROLS">
               <Anchor point="TOPLEFT"
@@ -212,6 +220,7 @@
         </Backdrop>
         <!-- Mitigation label -->
         <Label name="$(parent)_Mitigation"
+               inheritAlpha="true"
                wrapMode="ELLIPSIS"
                horizontalAlignment="CENTER"
                verticalAlignment="CENTER">
@@ -223,6 +232,7 @@
         </Label>
         <!-- Timer label -->
         <Label name="$(parent)_Timer"
+               inheritAlpha="true"
                wrapMode="ELLIPSIS"
                horizontalAlignment="CENTER"
                verticalAlignment="CENTER">

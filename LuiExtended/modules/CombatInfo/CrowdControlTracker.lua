@@ -137,26 +137,27 @@ function CrowdControlTracker:OnOff()
     if CombatInfo.SV.cct.enabled and not (CombatInfo.SV.cct.enabledOnlyInCyro and LUIE.ResolvePVPZone()) then
         if not self.addonEnabled then
             self.addonEnabled = true
-            eventManager:RegisterForEvent(self.name, EVENT_PLAYER_ACTIVATED, self.Initialize)
-            eventManager:RegisterForEvent(self.name, EVENT_COMBAT_EVENT, function (...)
-                self:OnCombat(...)
+            eventManager:RegisterForEvent(self.name, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
+                self.Initialize()
             end)
-            eventManager:RegisterForEvent(self.name, EVENT_PLAYER_STUNNED_STATE_CHANGED, function (...)
-                self:OnStunnedState(...)
+            eventManager:RegisterForEvent(self.name, EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                self:OnCombat(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             end)
-            eventManager:RegisterForEvent(self.name, EVENT_DISPLAY_ACTIVE_COMBAT_TIP, function (...)
-                self:OnCombatTipAdded(...)
+            eventManager:RegisterForEvent(self.name, EVENT_PLAYER_STUNNED_STATE_CHANGED, function (eventId, playerStunned)
+                self:OnStunnedState(playerStunned)
             end)
-            eventManager:RegisterForEvent(self.name, EVENT_REMOVE_ACTIVE_COMBAT_TIP, function (...)
-                self:OnCombatTipRemoved(...)
+            eventManager:RegisterForEvent(self.name, EVENT_DISPLAY_ACTIVE_COMBAT_TIP, function (eventId, activeCombatTipId)
+                self:OnCombatTipAdded(activeCombatTipId)
             end)
-            eventManager:RegisterForEvent(self.name, EVENT_UNIT_DEATH_STATE_CHANGED, function (eventCode, unitTag, isDead)
+            eventManager:RegisterForEvent(self.name, EVENT_REMOVE_ACTIVE_COMBAT_TIP, function (eventId, activeCombatTipId, result)
+                self:OnCombatTipRemoved(activeCombatTipId, result)
+            end)
+            eventManager:RegisterForEvent(self.name, EVENT_UNIT_DEATH_STATE_CHANGED, function (eventId, unitTag, isDead)
                 if isDead then
                     self:FullReset()
                 end
             end)
             eventManager:AddFilterForEvent(self.name, EVENT_UNIT_DEATH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
-            self.Initialize()
         end
     else
         if self.addonEnabled then
@@ -402,7 +403,7 @@ local function ResolveAbilityIcon(abilityId, sourceName)
     return abilityIcon
 end
 
-function CrowdControlTracker:OnCombat(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, combat_log, sourceUnitId, targetUnitId, abilityId)
+function CrowdControlTracker:OnCombat(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, combat_log, sourceUnitId, targetUnitId, abilityId)
     -- LuiExtended Addition
     abilityName = ResolveAbilityName(abilityId, sourceName)
     local abilityIcon = ResolveAbilityIcon(abilityId, sourceName)
@@ -960,7 +961,7 @@ function CrowdControlTracker:RemoveCC(ccType, currentEndTime)
     self:StopDraw(stagger)
 end
 
-function CrowdControlTracker:OnStunnedState(eventCode, playerStunned)
+function CrowdControlTracker:OnStunnedState(playerStunned)
     -- d('playerStunned: '..tostring(playerStunned))
     if not playerStunned then
         -- d("PriorityOne.endTime", PriorityOne.endTime)
@@ -972,7 +973,7 @@ function CrowdControlTracker:OnStunnedState(eventCode, playerStunned)
     end
 end
 
-function CrowdControlTracker:OnCombatTipAdded(eventCode, combatTipID)
+function CrowdControlTracker:OnCombatTipAdded(combatTipID)
     -- Break roots when another CC type hits since there is some oddity with the tip removal event when a hard CC hits
     if combatTipID == 18 then
         isRooted = false
@@ -982,33 +983,33 @@ function CrowdControlTracker:OnCombatTipAdded(eventCode, combatTipID)
         return
     end
     isRooted = true
-    --[[ CrowdControlTracker:OnCombat(eventCode, result, isError, abilityName, abilityGraphic,
+    --[[ CrowdControlTracker:OnCombat(result, isError, abilityName, abilityGraphic,
     abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType,
     damageType, combat_log, sourceUnitId, targetUnitId, abilityId)]]
-    self:OnCombat(eventCode, ACTION_RESULT_EFFECT_GAINED_DURATION, nil, "Rooted", LUIE_CC_ICON_ROOT, nil, "CombatTip", "CombatTip", LUIE.PlayerNameRaw, 1, rootDuration, nil, nil, nil, 1, nil, GENERIC_ROOT_ABILITY_ID)
+    self:OnCombat(ACTION_RESULT_EFFECT_GAINED_DURATION, nil, "Rooted", LUIE_CC_ICON_ROOT, nil, "CombatTip", "CombatTip", LUIE.PlayerNameRaw, 1, rootDuration, nil, nil, nil, 1, nil, GENERIC_ROOT_ABILITY_ID)
     if isRooted then
         zo_callLater(function ()
-                         self:PopRootAlert(eventCode, combatTipID)
+                         self:PopRootAlert(combatTipID)
                      end, rootDuration + graceTime)
     end
 end
 
-function CrowdControlTracker:PopRootAlert(eventCode, combatTipID)
+function CrowdControlTracker:PopRootAlert(combatTipID)
     if not (combatTipID == 19) or not isRooted then
         return
     end
-    --[[ CrowdControlTracker:OnCombat(eventCode, result, isError, abilityName, abilityGraphic,
+    --[[ CrowdControlTracker:OnCombat(result, isError, abilityName, abilityGraphic,
     abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType,
     damageType, combat_log, sourceUnitId, targetUnitId, abilityId)]]
-    self:OnCombat(eventCode, ACTION_RESULT_EFFECT_GAINED_DURATION, nil, "Rooted", LUIE_CC_ICON_ROOT, nil, "CombatTip", "CombatTip", LUIE.PlayerNameRaw, 1, rootDuration, nil, nil, nil, 1, nil, GENERIC_ROOT_ABILITY_ID)
+    self:OnCombat(ACTION_RESULT_EFFECT_GAINED_DURATION, nil, "Rooted", LUIE_CC_ICON_ROOT, nil, "CombatTip", "CombatTip", LUIE.PlayerNameRaw, 1, rootDuration, nil, nil, nil, 1, nil, GENERIC_ROOT_ABILITY_ID)
     if isRooted then
         zo_callLater(function ()
-                         self:PopRootAlert(eventCode, combatTipID)
+                         self:PopRootAlert(combatTipID)
                      end, rootDuration + graceTime)
     end
 end
 
-function CrowdControlTracker:OnCombatTipRemoved(eventCode, combatTipID, result)
+function CrowdControlTracker:OnCombatTipRemoved(combatTipID, result)
     if not (combatTipID == 19) then
         return
     end
