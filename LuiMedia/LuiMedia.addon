@@ -5,7 +5,7 @@
 ## APIVersion: 101050 101051
 ## AddOnVersion: 7134
 ## Description: Provides custom media (fonts, sounds, textures) for LuiExtended.
-## DependsOn: LibMediaProvider>=37
+## DependsOn: LibMediaProvider>=38
 ## IsLibrary: true
 
 MediaPaths.lua
