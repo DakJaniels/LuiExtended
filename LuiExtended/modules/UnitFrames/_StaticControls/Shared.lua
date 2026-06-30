@@ -181,6 +181,7 @@ local function IsOverlandDifficultyPlayerUnit(unitTag)
     return GetUnitReaction(unitTag) == UNIT_REACTION_PLAYER_ALLY
 end
 
+--- Display overland difficulty for unit frames; nil when hidden (matches vanilla: base game is not shown).
 --- @param unitTag string|nil
 --- @param frameCategory "player"|"target"|"group"|"raid"|nil
 --- @return number|nil
@@ -188,22 +189,26 @@ function FrameObject.ResolveOverlandDifficultyForUnitTag(unitTag, frameCategory)
     if not IsOverlandDifficultyEnabledForCategory(frameCategory) or unitTag == nil then
         return nil
     end
+    local difficulty = nil
     if frameCategory == "target" and UnitFrames.SV.TargetMonsterOverlandDifficulty then
         if not IsUnitMonster(unitTag) or not IsUnitAttackable(unitTag) then
             return nil
         end
-        return GetOverlandDifficulty()
+        difficulty = GetOverlandDifficulty()
     elseif IsOverlandDifficultyPlayerUnit(unitTag) then
-        return GetUnitOverlandDifficulty(unitTag)
+        difficulty = GetUnitOverlandDifficulty(unitTag)
     elseif frameCategory == "target" then
         if not IsUnitMonster(unitTag) or not IsUnitAttackable(unitTag) then
             return nil
         end
-        return GetOverlandDifficulty()
+        difficulty = GetOverlandDifficulty()
     elseif frameCategory == "group" or frameCategory == "player" then
         if IsOverlandDifficultyPlayerUnit(unitTag) then
-            return GetUnitOverlandDifficulty(unitTag)
+            difficulty = GetUnitOverlandDifficulty(unitTag)
         end
+    end
+    if difficulty ~= nil and difficulty > OVERLAND_DIFFICULTY_TYPE_BASEGAME then
+        return difficulty
     end
     return nil
 end
