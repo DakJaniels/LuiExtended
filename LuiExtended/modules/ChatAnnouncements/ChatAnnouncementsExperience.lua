@@ -304,11 +304,18 @@ end
 -- ability that has reached its morph point, or a morphed ability that has reached max rank.
 -- At max rank the progression XP window stops representing real progress, so we skip it.
 --- @param skillData table
+--- @param progressionIndex integer
+--- @param nextRankXP integer
 --- @return boolean
-local function GetAbilityProgressionAtMaxRank(skillData)
-    local progressionData = skillData:GetCurrentProgressionData()
+local function GetAbilityProgressionAtMaxRank(skillData, progressionIndex, nextRankXP)
+    if skillData:IsPassive() or skillData:IsCraftedAbility() then
+        return nextRankXP == 0
+    end
+
+    local _, morph = GetAbilityProgressionInfo(progressionIndex)
+    local progressionData = skillData:GetProgressionData(morph)
     if not progressionData then
-        return false
+        return nextRankXP == 0
     end
 
     if progressionData:IsBase() then
@@ -340,7 +347,7 @@ function ChatAnnouncements.OnAbilityProgressionXpUpdate(eventId, progressionInde
     local cached = g_abilityProgressionXpCache[progressionIndex]
     g_abilityProgressionXpCache[progressionIndex] = { lastRankXP = lastRankXP, nextRankXP = nextRankXP, currentXP = currentXP }
 
-    if GetAbilityProgressionAtMaxRank(skillData) then
+    if GetAbilityProgressionAtMaxRank(skillData, progressionIndex, nextRankXP) then
         return
     end
 
