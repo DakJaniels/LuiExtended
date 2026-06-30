@@ -23,6 +23,8 @@ local Shared = UnitFrames.LibGroupBroadcastShared
 local lgcs
 local isInitialized = false
 local isPlayerInCombat = false
+-- When false, DPS/HPS labels stay hidden even if LibGroupCombatStats still holds last-fight values.
+local shouldShowCombatStatsText = false
 
 -- Stored callback refs so Uninitialize() can unregister them via
 -- lgcs:UnregisterForEvent(eventName, callback) (LibGroupCombatStats.lua:613)
@@ -219,6 +221,11 @@ local function UpdateCombatStatsText(unitTag, dpsData, hpsData)
     local statsLabel = frameData.combatStats.statsLabel
     if not statsLabel then return end
 
+    if not shouldShowCombatStatsText then
+        statsLabel:SetHidden(true)
+        return
+    end
+
     -- Values come in thousands (e.g. 45.5 -> "45.5k")
     local dpsValue = (Settings.showDPS and dpsData and dpsData.dps) or 0
     local hpsValue = (Settings.showHPS and hpsData and hpsData.hps) or 0
@@ -258,8 +265,12 @@ end
 -- Hide all DPS/HPS stat labels (called after 6s out of combat)
 local function HideAllCombatStatsText()
     Shared.ForEachGroupFrame(function (unitTag, frameData)
-        if frameData.combatStats and frameData.combatStats.statsLabel then
-            frameData.combatStats.statsLabel:SetHidden(true)
+        if frameData.combatStats then
+            if frameData.combatStats.statsLabel then
+                frameData.combatStats.statsLabel:SetHidden(true)
+            end
+            frameData.combatStats.lastDpsValue = nil
+            frameData.combatStats.lastHpsValue = nil
         end
     end)
 end
@@ -270,10 +281,13 @@ local function OnCombatStateChanged(eventCode, inCombat)
 
     if inCombat then
         -- Entering combat - cancel any pending hide timer
+        shouldShowCombatStatsText = true
         EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupCombatStats_HideDelay")
     else
-        -- Exiting combat - schedule stats to hide after 6 seconds
+        -- Exiting combat - keep showing recap values briefly, then hide and ignore stale library data
+        EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupCombatStats_HideDelay")
         EVENT_MANAGER:RegisterForUpdate("LUIE_GroupCombatStats_HideDelay", 6000, function ()
+            shouldShowCombatStatsText = false
             HideAllCombatStatsText()
             EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupCombatStats_HideDelay")
         end)
@@ -373,6 +387,8 @@ function GroupCombatStatsManager.Initialize()
     end
 
     -- Register for combat state changes
+    isPlayerInCombat = IsUnitInCombat("player")
+    shouldShowCombatStatsText = isPlayerInCombat
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupCombatStats_Combat", EVENT_PLAYER_COMBAT_STATE, OnCombatStateChanged)
 
     -- Periodic update to refresh all displays with current data
@@ -440,6 +456,8 @@ function GroupCombatStatsManager.Uninitialize()
     EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupCombatStats_Update")
     EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupCombatStats_HideDelay")
 
+    shouldShowCombatStatsText = false
+    isPlayerInCombat = false
     isInitialized = false
 end
 
