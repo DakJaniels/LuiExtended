@@ -521,7 +521,13 @@ function CombatTextEventViewer:GetCombatTextIconFrameColor(iconTexturePath, abil
     return COMBAT_TEXT_ICON_CHROME_WHITE
 end
 
---- @param control Control
+---@class iconHostFrameControl : Control
+---@field iconHost TextureControl
+---@field iconFrame TextureControl
+---@field icon TextureControl
+---@field label LabelControl
+
+--- @param control iconHostFrameControl
 --- @param abilityId integer|nil
 --- @param iconSize number
 --- @param showFrame boolean
@@ -559,7 +565,7 @@ end
 
 --- Position icon and label based on icon side<br>
 --- Sets anchors, dimensions, and texture. Uses texture caching to avoid redundant SetTexture calls
---- @param control {icon:TextureControl,label:LabelControl} | Control The combat text control containing icon and label
+--- @param control iconHostFrameControl The combat text control containing icon and label
 --- @param iconSide string "left", "right", or "none"
 --- @param iconPath string? The icon texture path
 --- @param width number Label text width in pixels
@@ -595,7 +601,7 @@ end
 
 --- Hide icon and center label<br>
 --- Clears texture cache and resets control dimensions
---- @param control {icon:TextureControl,label:LabelControl} | Control The combat text control
+--- @param control iconHostFrameControl The combat text control
 --- @param width number Label text width in pixels
 --- @param height number Label text height in pixels
 function CombatTextEventViewer:HideIcon(control, width, height)
@@ -617,7 +623,7 @@ end
 
 --- Layout combat text control with optional ability icon<br>
 --- Resolves icon, determines positioning, and applies layout
---- @param control {icon:TextureControl,label:LabelControl} | Control The combat text control to layout
+--- @param control iconHostFrameControl The combat text control to layout
 --- @param abilityId integer? The ability ID (nil for no icon)
 --- @param combatType integer? CombatTextConstants.combatType
 --- @param sourceName string? The source/caster name

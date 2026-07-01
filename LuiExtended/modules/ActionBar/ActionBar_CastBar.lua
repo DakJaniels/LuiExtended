@@ -1494,15 +1494,3 @@ function CastBar.TickInterruptChecks()
         end
     end
 end
-
-local forward =
-{
-    "CreateCastBar", "ResizeCastBar", "UpdateCastBar", "ResetCastBarPosition",
-    "GetCastBarOffsetX", "GetCastBarOffsetY", "SetCastBarPosition", "SetMovingState",
-    "GenerateCastbarPreview", "StopCastBar", "OnUpdateCastbar",
-    "SoulGemResurrectionStart", "SoulGemResurrectionEnd",
-    "OnGameCameraUIModeChanged", "OnSiegeEnd",
-}
-for _, name in ipairs(forward) do
-    ActionBar[name] = CastBar[name]
-end
