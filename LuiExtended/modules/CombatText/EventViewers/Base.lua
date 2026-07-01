@@ -474,6 +474,9 @@ end
 --- @param texturePath string|nil
 --- @return number[]|nil
 local function GetIconFrameColorSampleForTexturePath(texturePath)
+    if ZO_IsConsoleOrGameCoreUI() then
+        return nil
+    end
     local sampleKey = NormalizeCombatTextIconTextureKey(texturePath)
     if not sampleKey then
         return nil
@@ -485,7 +488,7 @@ end
 --- @param abilityId integer|nil
 --- @return table {r,g,b,a}
 function CombatTextEventViewer:GetCombatTextIconFrameColor(iconTexturePath, abilityId)
-    if not LUIE.CombatText.SV.animation.colorIconFrame then
+    if ZO_IsConsoleOrGameCoreUI() or not LUIE.CombatText.SV.animation.colorIconFrame then
         return COMBAT_TEXT_ICON_CHROME_WHITE
     end
 

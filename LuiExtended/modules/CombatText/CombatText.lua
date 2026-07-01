@@ -386,6 +386,10 @@ function CombatText.Initialize(enabled)
         common.incAlpha = common.transparencyValue or CombatText.Defaults.common.incAlpha
     end
 
+    if ZO_IsConsoleOrGameCoreUI() and CombatText.SV.animation then
+        CombatText.SV.animation.colorIconFrame = false
+    end
+
     -- Disable module if setting not toggled on
     if not enabled then
         return
