@@ -2,10 +2,10 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101050 101051
-## Version: 7.2.5.7
-## AddOnVersion: 7257
+## Version: 7.2.5.8
+## AddOnVersion: 7258
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements, Slash Commands, and MiniMap.
-## DependsOn: LuiMedia>=7133 LuiData>=7223
+## DependsOn: LuiMedia>=7133 LuiData>=7224
 ## PCDependsOn: LibAddonMenu-2.0>=43
 ## ConsoleDependsOn: LibHarvensAddonSettings>=20108 LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
@@ -52,8 +52,10 @@ src/_ZO_BuffDebuffSuppression.lua
 src/ChatOutput/Namespace.lua
 src/ChatOutput/TimestampAndFormat.lua
 src/ChatOutput/ChatOutput.lua
+src/ChatOutput/GamepadChatOutput.lua
 src/LuiExtended_Log.lua
 src/Functions.lua
+src/Font.lua
 src/StatsActiveEffects.lua
 src/DebugEnvironment.lua
 src/ProtectedHooks.lua
@@ -73,6 +75,10 @@ gamepad/skills.lua
 keyboard/hooks.lua
 keyboard/maphooks.lua
 keyboard/skills.lua
+
+# Font definitions (must load before any control XML that references LUIE_Font_* names)
+frontend/fontdefs_keyboard.xml
+frontend/fontdefs_gamepad.xml
 
 # Frontend
 frontend/AbilityAlerts.xml
@@ -294,6 +300,7 @@ modules/UnitFrames/_StaticControls/Group.lua
 modules/UnitFrames/_StaticControls/Raid.lua
 modules/UnitFrames/_StaticControls/Generic.lua
 modules/UnitFrames/_AlternativeBar.lua
+modules/UnitFrames/_BossThreshold.lua
 modules/UnitFrames/UnitFrames.lua
 
 # SavedVariables migration (requires module Defaults tables)

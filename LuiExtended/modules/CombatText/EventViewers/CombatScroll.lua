@@ -105,7 +105,7 @@ function CombatTextCombatScrollEventViewer:View(combatType, powerType, value, ab
     end
 
     self:PrepareLabel(control.label, fontSize, textColor, self:FormatString(textFormat, { text = abilityName, value = value, powerType = powerType, damageType = damageType }))
-    self:ControlLayout(control, abilityId, combatType, sourceName)
+    self:ControlLayout(control, abilityId, combatType, sourceName, textColor)
 
     -- Control setup
     local panel

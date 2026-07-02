@@ -1,0 +1,11 @@
+<GuiXml>
+    <!-- LUIE named fonts (keyboard). Declared with ZOS font-string macros so they
+         reuse the engine fonts the base UI already loads - no addon CreateFont and no
+         per-call ZO_CreateFontString composition. Cross-platform names are mirrored in
+         fontdefs_gamepad.xml so the same LUIE_Font_* token resolves on console. -->
+
+    <!-- Crowd Control Tracker (fixed, non-user-configurable sizes) -->
+    <Font name="LUIE_Font_CrowdControlIcon" font="$(GAMEPAD_BOLD_FONT)|25|thick-outline"/>
+    <Font name="LUIE_Font_CrowdControlCountdown" font="$(GAMEPAD_BOLD_FONT)|28|thick-outline"/>
+    <Font name="LUIE_Font_CrowdControlStagger" font="$(GAMEPAD_BOLD_FONT)|36|thick-outline"/>
+</GuiXml>

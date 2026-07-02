@@ -234,8 +234,6 @@ function I.InitPlayerFxOverrideState()
     S.currentPlayerFxAbility = I.GetActivePlayerFxAbilityCollectibleId()
 end
 
-I.InitPlayerFxOverrideState()
-
 -- Quest
 S.g_stopDisplaySpam = false   -- Toggled on to stop spam display of EVENT_DISPLAY_ANNOUNCEMENTS from IC zone transitions.
 S.g_questIndex = {}           -- Index of all current quests. Allows us to read the index so that all quest notifications can use the difficulty icon.
@@ -455,6 +453,8 @@ function ChatAnnouncements.Initialize(enabled)
         return
     end
     ChatAnnouncements.Enabled = true
+
+    I.InitPlayerFxOverrideState()
 
     -- Get current group leader
     S.g_currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())

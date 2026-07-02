@@ -275,12 +275,19 @@ function CombatText.GetTextAlpha()
 end
 
 function CombatText.ApplyFont()
-    local fontName = LUIE.Fonts[LUIE.CombatText.SV.fontFace]
-    LUIE.CombatText.SV.fontFaceApplied = fontName
-    if not fontName or fontName == "" then
+    local fontData = LUIE.Font.FetchMedia(LUIE.CombatText.SV.fontFace)
+    if not fontData or fontData == "" then
         ChatOutput:Print(GetString(LUIE_STRING_ERROR_FONT), true)
-        LUIE.CombatText.SV.fontFaceApplied = "$(MEDIUM_FONT)"
+        fontData = "$(MEDIUM_FONT)"
     end
+    -- Cache the resolved data + kind so the per-event hot path avoids a media lookup.
+    -- Named fonts are applied as a token; custom slug faces compose per size.
+    LUIE.CombatText.SV.fontFaceApplied = fontData
+    LUIE.CombatText.fontIsNamed = LUIE.Font.IsNamedData(fontData)
+    -- Reset the per-size font-string cache (face path). Combat fires PrepareLabel on
+    -- every event across a small bounded set of sizes, so memoizing the composed
+    -- "face|size|style" strings keeps per-event allocation (GC churn) at zero.
+    LUIE.CombatText.fontStringCache = {}
 end
 
 --- Create or recreate the combat event viewer based on animation type<br>
@@ -379,6 +386,10 @@ function CombatText.Initialize(enabled)
         common.incAlpha = common.transparencyValue or CombatText.Defaults.common.incAlpha
     end
 
+    if ZO_IsConsoleOrGameCoreUI() and CombatText.SV.animation then
+        CombatText.SV.animation.colorIconFrame = false
+    end
+
     -- Disable module if setting not toggled on
     if not enabled then
         return
@@ -402,7 +413,8 @@ function CombatText.Initialize(enabled)
                 panel.preview.anchorLabelBg = preview:GetNamedChild("_AnchorLabelBg")
                 panel.preview.anchorTexture = preview:GetNamedChild("_AnchorTexture")
             end
-            _G[k .. "_Label"]:SetFont(LUIE.CreateFontString(LUIE.CombatText.SV.fontFaceApplied, 26, LUIE.CombatText.SV.fontStyle))
+            local panelLabelFont = LUIE.CombatText.fontIsNamed and LUIE.CombatText.SV.fontFaceApplied or LUIE.CreateFontString(LUIE.CombatText.SV.fontFaceApplied, 26, LUIE.CombatText.SV.fontStyle)
+            _G[k .. "_Label"]:SetFont(panelLabelFont)
             _G[k .. "_Label"]:SetText(panelTitles[k])
             CombatText.UpdatePanelPreviewLabel(panel)
             if preview then

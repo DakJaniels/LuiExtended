@@ -2267,29 +2267,27 @@ function SpellCastBuffs.ApplyFont()
     end
 
     -- Font setup for standard Buffs & Debuffs
-    local fontName = LUIE.Fonts[SpellCastBuffs.SV.BuffFontFace]
-    if not fontName or fontName == "" then
-        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
-        fontName = "LUIE Default Font"
-    end
+    local buffFontKey = SpellCastBuffs.SV.BuffFontFace
     local fontStyle = SpellCastBuffs.SV.BuffFontStyle
     local fontSize = (SpellCastBuffs.SV.BuffFontSize and SpellCastBuffs.SV.BuffFontSize > 0) and SpellCastBuffs.SV.BuffFontSize or 17
-    SpellCastBuffs.buffsFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
+    SpellCastBuffs.buffsFont = LUIE.Font.Resolve(buffFontKey, fontSize, fontStyle)
 
+    -- Ability-id labels shrink to fit by stepping through a size ladder. This only
+    -- applies to custom slug faces; named fonts are a single fixed token (scaling in
+    -- ApplyAbilityIdLabelFont handles overflow).
     SpellCastBuffs.abilityIdFonts = {}
-    for size = fontSize, 3, -1 do
-        SpellCastBuffs.abilityIdFonts[#SpellCastBuffs.abilityIdFonts + 1] = LUIE.CreateFontString(fontName, size, fontStyle)
+    if LUIE.Font.IsDynamicFaceMedia(buffFontKey) then
+        for size = fontSize, 3, -1 do
+            SpellCastBuffs.abilityIdFonts[#SpellCastBuffs.abilityIdFonts + 1] = LUIE.Font.Resolve(buffFontKey, size, fontStyle)
+        end
+    else
+        SpellCastBuffs.abilityIdFonts[1] = SpellCastBuffs.buffsFont
     end
 
     -- Font Setup for Prominent Buffs & Debuffs
-    local prominentName = LUIE.Fonts[SpellCastBuffs.SV.ProminentLabelFontFace]
-    if not prominentName or prominentName == "" then
-        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
-        prominentName = "LUIE Default Font"
-    end
     local prominentStyle = SpellCastBuffs.SV.ProminentLabelFontStyle
     local prominentSize = (SpellCastBuffs.SV.ProminentLabelFontSize and SpellCastBuffs.SV.ProminentLabelFontSize > 0) and SpellCastBuffs.SV.ProminentLabelFontSize or 17
-    SpellCastBuffs.prominentFont = LUIE.CreateFontString(prominentName, prominentSize, prominentStyle)
+    SpellCastBuffs.prominentFont = LUIE.Font.Resolve(SpellCastBuffs.SV.ProminentLabelFontFace, prominentSize, prominentStyle)
 
     local needs_reset = {}
     -- And reset sizes of already existing icons

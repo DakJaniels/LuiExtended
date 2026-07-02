@@ -32,16 +32,12 @@ local function categoryUsesSeparateCaptionFont(category)
 end
 
 local function __applyFont(unitTag)
-    -- First try selecting font face
-    local fontName = UnitFrames.ResolveLuiMediaFontPath(UnitFrames.SV.DefaultFontFace)
-
     local fontStyle = UnitFrames.SV.DefaultFontStyle
     local fontSize = (UnitFrames.SV.DefaultFontSize and UnitFrames.SV.DefaultFontSize > 0) and UnitFrames.SV.DefaultFontSize or 16
 
-
     if UnitFrames.DefaultFrames[unitTag] then
         local unitFrame = UnitFrames.DefaultFrames[unitTag]
-        local fontString = LUIE.CreateFontString(fontName, fontSize, fontStyle)
+        local fontString = LUIE.Font.Resolve(UnitFrames.SV.DefaultFontFace, fontSize, fontStyle)
         for _, powerType in pairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA }) do
             if unitFrame[powerType] then
                 unitFrame[powerType].label:SetFont(fontString)
@@ -64,16 +60,17 @@ local function ApplyDefaultFrameColor(unitTag)
 end
 
 --- Create a font string for custom frames (module-scope helper to avoid closure in CustomFramesApplyFont).
-local function CustomFramesMakeFont(fontName, fontStyle, size)
-    return LUIE.CreateFontString(fontName, size, fontStyle)
+--- Named media resolves to a token; custom slug faces compose with the requested size.
+local function CustomFramesMakeFont(fontKey, fontStyle, size)
+    return LUIE.Font.Resolve(fontKey, size, fontStyle)
 end
 
 local function ResolveCustomFrameFont(appearance)
-    local fontName = UnitFrames.ResolveLuiMediaFontPath(appearance.fontFace)
+    local fontKey = appearance.fontFace
     local fontStyle = appearance.fontStyle
     local sizeCaption = (appearance.fontOther and appearance.fontOther > 0) and appearance.fontOther or 16
     local sizeBars = (appearance.fontBars and appearance.fontBars > 0) and appearance.fontBars or 14
-    return fontName, fontStyle, sizeCaption, sizeBars
+    return fontKey, fontStyle, sizeCaption, sizeBars
 end
 
 local function ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
@@ -181,9 +178,9 @@ end
 
 local function MakeCustomFrameFontStrings(category)
     local appearance = UnitFrames.GetCustomFrameAppearance(category)
-    local fontName, fontStyle, sizeCaption, sizeBars = ResolveCustomFrameFont(appearance)
+    local fontKey, fontStyle, sizeCaption, sizeBars = ResolveCustomFrameFont(appearance)
     sizeCaption = ResolveCompactCaptionSize(category, sizeCaption, sizeBars)
-    return CustomFramesMakeFont(fontName, fontStyle, sizeCaption), CustomFramesMakeFont(fontName, fontStyle, sizeBars), sizeCaption
+    return CustomFramesMakeFont(fontKey, fontStyle, sizeCaption), CustomFramesMakeFont(fontKey, fontStyle, sizeBars), sizeCaption
 end
 
 -- Public: returns the resolved caption font size for a category, with the same

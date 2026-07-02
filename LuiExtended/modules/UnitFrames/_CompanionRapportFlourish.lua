@@ -58,8 +58,7 @@ function LUIE_CompanionRapportFlourish:BindControls(frameData)
 
     local label = frameData.control:GetNamedChild("_RapportFlourish")
     local appearance = UnitFrames.GetCustomFrameAppearance("companion")
-    local fontFace = UnitFrames.ResolveLuiMediaFontPath(appearance.fontFace)
-    label:SetFont(LUIE.CreateFontString(fontFace, zo_max(14, appearance.fontSize or 14), appearance.fontStyle))
+    label:SetFont(LUIE.Font.Resolve(appearance.fontFace, zo_max(14, appearance.fontSize or 14), appearance.fontStyle))
     label:SetDrawTier(DT_HIGH)
     label:SetHidden(true)
 

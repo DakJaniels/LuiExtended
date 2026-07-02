@@ -524,7 +524,7 @@ function ActionBar.Initialize(enabled)
 
     local quickslotLabel = quickslotButtonButton:CreateControl("$(parent)Label", CT_LABEL)
     quickslotLabel:SetAnchor(CENTER, quickslotButtonButton, CENTER, 0, 0)
-    quickslotLabel:SetFont(g_potionFont or "LUIE Default Font")
+    quickslotLabel:SetFont(g_potionFont or LUIE.Font.GetDefaultFont())
     quickslotLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     quickslotLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     quickslotLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -555,7 +555,7 @@ function ActionBar.Initialize(enabled)
 
     -- Ultimate percentage label (overlay on slot)
     local ultimatePctLabel = ActionButton8_button:CreateControl("$(parent)LabelPct", CT_LABEL)
-    ultimatePctLabel:SetFont(g_ultimateFont or "LUIE Default Font")
+    ultimatePctLabel:SetFont(g_ultimateFont or LUIE.Font.GetDefaultFont())
     ultimatePctLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -1038,22 +1038,6 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
     eventManager:UnregisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE)
     eventManager:UnregisterForEvent(moduleName .. "ShowActionBarSetting", EVENT_INTERFACE_SETTING_CHANGED)
-
-    eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
-        ActionBar.OnPlayerActivated()
-    end)
-
-    eventManager:RegisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE, function ()
-        ActionBar.ApplyDisplayAlpha()
-    end)
-
-    eventManager:RegisterForEvent(moduleName .. "ShowActionBarSetting", EVENT_INTERFACE_SETTING_CHANGED, function (_, settingType, settingId)
-        if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_SHOW_ACTION_BAR then
-            ActionBar.ApplyDisplayAlpha()
-        end
-    end)
-
     eventManager:UnregisterForEvent(moduleName, EVENT_COMBAT_EVENT)
     eventManager:UnregisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT)
     eventManager:UnregisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT)
@@ -1075,6 +1059,23 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "CompanionState", EVENT_ACTIVE_COMPANION_STATE_CHANGED)
     eventManager:UnregisterForEvent(moduleName .. "CompanionAnchorsWpn", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
     eventManager:UnregisterForEvent(moduleName .. "GamepadMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED)
+
+
+    eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
+        ActionBar.OnPlayerActivated()
+    end)
+
+    eventManager:RegisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE, function (eventId, inCombat)
+        ActionBar.ApplyDisplayAlpha()
+    end)
+
+    eventManager:RegisterForEvent(moduleName .. "ShowActionBarSetting", EVENT_INTERFACE_SETTING_CHANGED, function (eventId, settingSystemType, settingId)
+        if settingSystemType == SETTING_TYPE_UI and settingId == UI_SETTING_SHOW_ACTION_BAR then
+            ActionBar.ApplyDisplayAlpha()
+        end
+    end)
+
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
         eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
@@ -1135,19 +1136,19 @@ function ActionBar.RegisterEvents()
     end
     -- EVENT_EFFECT_CHANGED: bar highlights and vampire ultimate label (cast break is on CastBar)
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName, EVENT_EFFECT_CHANGED, function (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType, passThrough, savedId)
+        eventManager:RegisterForEvent(moduleName, EVENT_EFFECT_CHANGED, function (eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType, passThrough, savedId)
             ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType, passThrough, savedId)
         end)
     end
     -- Register for ring slot changes - Oaken soul Ring (187658) equip/unequip toggles backbar visibility when BarShowBack
     Backbar.RegisterEvents()
     -- Drop callout handlers (mirrors ZOS: show valid/invalid slot highlight when dragging abilities)
-    eventManager:RegisterForEvent(moduleName .. "CursorPickup", EVENT_CURSOR_PICKUP, function (_, cursorType, param1, param2, param3)
+    eventManager:RegisterForEvent(moduleName .. "CursorPickup", EVENT_CURSOR_PICKUP, function (eventId, cursorType, param1, param2, param3, param4, param5, param6, itemSoundCategory)
         if cursorType == MOUSE_CONTENT_ACTION and DROP_CALLOUT_VALIDITY_BY_ACTION_TYPE[param1] then
             Backbar.ShowAppropriateAbilityActionButtonDropCallouts(param1, param3)
         end
     end)
-    eventManager:RegisterForEvent(moduleName .. "CursorDropped", EVENT_CURSOR_DROPPED, function (_, cursorType)
+    eventManager:RegisterForEvent(moduleName .. "CursorDropped", EVENT_CURSOR_DROPPED, function (eventId, cursorType, param1, param2, param3, param4, param5, param6)
         if cursorType == MOUSE_CONTENT_ACTION then
             Backbar.HideAllAbilityActionButtonDropCallouts()
         end
@@ -1160,33 +1161,33 @@ function ActionBar.RegisterEvents()
     end
 
     if ActionBar.SV.CompanionUltimateLabelEnabled or ActionBar.SV.CompanionUltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName .. "CompanionPower", EVENT_POWER_UPDATE, function (_, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+        eventManager:RegisterForEvent(moduleName .. "CompanionPower", EVENT_POWER_UPDATE, function (eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
             ActionBar.OnPowerUpdateCompanion(unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
         end)
         eventManager:AddFilterForEvent(moduleName .. "CompanionPower", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_ULTIMATE, REGISTER_FILTER_UNIT_TAG, "companion")
     end
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled or ActionBar.SV.CompanionUltimateLabelEnabled or ActionBar.SV.CompanionUltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName .. "UltCostChanged", EVENT_ULTIMATE_ABILITY_COST_CHANGED, function ()
+        eventManager:RegisterForEvent(moduleName .. "UltCostChanged", EVENT_ULTIMATE_ABILITY_COST_CHANGED, function (eventId, cost, ultimateResource)
             ActionBar.UpdateUltimateLabel()
             ActionBar.UpdateCompanionUltimateLabel()
         end)
     end
 
-    eventManager:RegisterForEvent(moduleName .. "CompanionZone", EVENT_ZONE_CHANGED, function ()
+    eventManager:RegisterForEvent(moduleName .. "CompanionZone", EVENT_ZONE_CHANGED, function (eventId, zoneName, subZoneName, newSubzone, zoneId, subZoneId)
         RefreshCompanionQuickslotAnchors()
     end)
-    eventManager:RegisterForEvent(moduleName .. "CompanionState", EVENT_ACTIVE_COMPANION_STATE_CHANGED, function (_, newState, oldState)
+    eventManager:RegisterForEvent(moduleName .. "CompanionState", EVENT_ACTIVE_COMPANION_STATE_CHANGED, function (eventId, newState, oldState)
         ActionBar.OnActiveCompanionStateChanged(newState)
     end)
-    eventManager:RegisterForEvent(moduleName .. "CompanionAnchorsWpn", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function ()
+    eventManager:RegisterForEvent(moduleName .. "CompanionAnchorsWpn", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function (eventId, activeWeaponPair, locked)
         RefreshCompanionQuickslotAnchors()
     end)
 
-    eventManager:RegisterForEvent(moduleName .. "GamepadMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
+    eventManager:RegisterForEvent(moduleName .. "GamepadMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function (eventId, gamepadPreferred)
         OnGamepadPreferredModeChanged()
     end)
 
-    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, function (_, hidden)
+    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, function (eventId, hidden)
         ActionBar.OnReticleHiddenUpdate(hidden)
     end)
 end
@@ -1515,14 +1516,9 @@ end
 --- @param defaultFontSize integer
 --- @return string
 local function buildModuleFontString(fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
-    local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
-    if not fontName or fontName == "" then
-        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
-        fontName = "LUIE Default Font"
-    end
     local fontStyle = ActionBar.SV[fontStyleKey] or defaultFontStyle
     local fontSize = (ActionBar.SV[fontSizeKey] and ActionBar.SV[fontSizeKey] > 0) and ActionBar.SV[fontSizeKey] or defaultFontSize
-    return LUIE.CreateFontString(fontName, fontSize, fontStyle)
+    return LUIE.Font.Resolve(ActionBar.SV[fontNameKey], fontSize, fontStyle)
 end
 
 -- -----------------------------------------------------------------------------
@@ -1619,7 +1615,7 @@ function ActionBar.CreateCompanionUltimateLabels()
     uiCompanionUltimate.LabelVal = ultimateValueLabel
 
     local ultimatePctLabel = companionButton:CreateControl("$(parent)LUIECompanionLabelPct", CT_LABEL)
-    ultimatePctLabel:SetFont(g_companionUltimateFont or "LUIE Default Font")
+    ultimatePctLabel:SetFont(g_companionUltimateFont or LUIE.Font.GetDefaultFont())
     ultimatePctLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -3453,7 +3449,7 @@ function ActionBar.PlayProcAnimations(slotNum)
 
     -- Create label control
     local label = procLoopTexture:CreateControl("$(parent)Label", CT_LABEL)
-    label:SetFont(g_barFont or "LUIE Default Font")
+    label:SetFont(g_barFont or LUIE.Font.GetDefaultFont())
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -3553,7 +3549,7 @@ function ActionBar.ShowCustomToggle(slotNum)
 
     -- Create label control
     local label = toggleFrame:CreateControl("$(parent)Label", CT_LABEL)
-    label:SetFont(g_barFont or "LUIE Default Font")
+    label:SetFont(g_barFont or LUIE.Font.GetDefaultFont())
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -3568,7 +3564,7 @@ function ActionBar.ShowCustomToggle(slotNum)
 
     -- Create stack label control
     local stack = toggleFrame:CreateControl("$(parent)Stack", CT_LABEL)
-    stack:SetFont(g_barFont or "LUIE Default Font")
+    stack:SetFont(g_barFont or LUIE.Font.GetDefaultFont())
     stack:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     stack:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     stack:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -3626,7 +3622,7 @@ function ActionBar.OnPowerUpdatePlayer(unitTag, powerIndex, powerType, powerValu
                 uiUltimate.LabelPct:SetText(ultimatePercent .. "%")
             end
             if ActionBar.SV.UltimateLabelEnabled then
-                uiUltimate.LabelVal:SetText(powerValue .. "/" .. displayMax )
+                uiUltimate.LabelVal:SetText(powerValue .. "/" .. displayMax)
             end
 
             if ultimatePercent < 100 then

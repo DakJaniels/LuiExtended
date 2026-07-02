@@ -276,7 +276,7 @@ function UnitFrames.CreateDefaultFrames()
                 ["label"] = parent:CreateControl("$(parent)LUIEExtenderLabel", CT_LABEL),
                 ["color"] = UnitFrames.SV.DefaultTextColour,
             }
-            UnitFrames.DefaultFrames[unitTag][powerType].label:SetFont("LUIE Default Font")
+            UnitFrames.DefaultFrames[unitTag][powerType].label:SetFont(LUIE.Font.GetDefaultFont())
             UnitFrames.DefaultFrames[unitTag][powerType].label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
             UnitFrames.DefaultFrames[unitTag][powerType].label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
             UnitFrames.DefaultFrames[unitTag][powerType].label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -377,7 +377,7 @@ function UnitFrames.DefaultFramesCreateUnitGroupControls(unitTag)
                     ["classIcon"] = parentName:CreateControl("$(parent)LUIEClassIcon", CT_TEXTURE),
                     ["friendIcon"] = parentName:CreateControl("$(parent)LUIEFriendIcon", CT_TEXTURE),
                 }
-                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetFont("LUIE Default Font")
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetFont(LUIE.Font.GetDefaultFont())
                 UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
                 UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
                 UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -415,14 +415,56 @@ function UnitFrames.RefreshDefaultTargetLevelDisplayIfNeeded(unitTag)
         return
     end
     UnitFrames.UpdateDefaultLevelTarget()
+    UnitFrames.LayoutDefaultReticleoverTargetIcons()
+end
+
+local DEFAULT_RETICLEOVER_SOCIAL_ICON_GAP = 2
+local DEFAULT_RETICLEOVER_SOCIAL_TEXTAREA_OFFSET_X = 30
+local DEFAULT_RETICLEOVER_SOCIAL_ICON_OFFSET_Y = -4
+local DEFAULT_RETICLEOVER_VETERANCY_RANK_OFFSET = 20
+
+--- Re-anchor ZOS veterancy rank and LUIE friend/guild/ignore icons on the default reticleover frame.
+function UnitFrames.LayoutDefaultReticleoverTargetIcons()
+    local allianceRankIcon = ZO_TargetUnitFramereticleoverRankIcon
+    local targetVeteranRankIcon = ZO_TargetUnitFramereticleoverVeterancyRankIcon
+    if targetVeteranRankIcon and allianceRankIcon then
+        targetVeteranRankIcon:ClearAnchors()
+        targetVeteranRankIcon:SetAnchor(CENTER, allianceRankIcon, RIGHT, DEFAULT_RETICLEOVER_VETERANCY_RANK_OFFSET, 0)
+        -- uncomment to test max rank icons spacing.
+        -- targetVeteranRankIcon:SetTexture"/esoui/art/vengeance/ranks/season00/s00_uniquerank_100.dds"
+        -- allianceRankIcon:SetTexture("/esoui/art/ava/ava_rankicon_grandoverlord.dds")
+    end
+
+    local defaultReticleover = UnitFrames.DefaultFrames.reticleover
+    if not defaultReticleover then
+        return
+    end
+    local friendIcon = defaultReticleover.friendIcon
+    if not friendIcon or friendIcon:IsHidden() then
+        return
+    end
+    local textArea = ZO_TargetUnitFramereticleoverTextArea
+
+    local anchorTo = textArea
+    local offsetX = DEFAULT_RETICLEOVER_SOCIAL_TEXTAREA_OFFSET_X
+    local offsetY = DEFAULT_RETICLEOVER_SOCIAL_ICON_OFFSET_Y
+
+    if targetVeteranRankIcon and not targetVeteranRankIcon:IsHidden() then
+        anchorTo = targetVeteranRankIcon
+        offsetX = DEFAULT_RETICLEOVER_SOCIAL_ICON_GAP
+    elseif allianceRankIcon and not allianceRankIcon:IsHidden() then
+        anchorTo = allianceRankIcon
+        offsetX = DEFAULT_RETICLEOVER_SOCIAL_ICON_GAP
+    end
+
+    friendIcon:ClearAnchors()
+    friendIcon:SetAnchor(TOPLEFT, anchorTo, TOPRIGHT, offsetX, offsetY)
 end
 
 function UnitFrames.UpdateDefaultLevelTarget()
     local targetLevel = ZO_TargetUnitFramereticleoverLevel
     local targetChamp = ZO_TargetUnitFramereticleoverChampionIcon
     local targetName = ZO_TargetUnitFramereticleoverName
-    local targetVeteranRankIcon = ZO_TargetUnitFramereticleoverVeterancyRankIcon
-    local allianceRankIcon = ZO_TargetUnitFramereticleoverRankIcon
     local unitLevel
     local isChampion = IsUnitChampion("reticleover")
     if isChampion then
@@ -444,12 +486,5 @@ function UnitFrames.UpdateDefaultLevelTarget()
         targetChamp:SetHidden(false)
     else
         targetChamp:SetHidden(true)
-    end
-    if targetVeteranRankIcon then
-        targetVeteranRankIcon:ClearAnchors()
-        targetVeteranRankIcon:SetAnchor(CENTER, allianceRankIcon, RIGHT, 20, 0)
-        -- uncomment to test max rank icons spacing.
-        -- targetVeteranRankIcon:SetTexture"/esoui/art/vengeance/ranks/season00/s00_uniquerank_100.dds"
-        -- allianceRankIcon:SetTexture("/esoui/art/ava/ava_rankicon_grandoverlord.dds")
     end
 end

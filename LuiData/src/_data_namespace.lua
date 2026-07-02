@@ -19,6 +19,7 @@
 
 
 --- @class (partial) Data
+--- @field IconFrameColorSamples table<string, number[]>
 --- @field Abilities AbilityTables
 --- @field AbilityBlacklistPresets BlacklistPresets
 --- @field AlertBossNameConvert AlertBossNameConvert
@@ -43,6 +44,8 @@
 
 -- Define all the tables individually first
 local Abilities = {}
+
+local IconFrameColorSamples = {}
 
 local AbilityBlacklistPresets =
 {
@@ -297,13 +300,14 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7223
-LuiData.addonVersion = "7.2.2.3"
+LuiData.version = 7224
+LuiData.addonVersion = "7.2.2.4"
 
 --- @class (partial) Data
 LuiData.Data =
 {
     Abilities = Abilities,
+    IconFrameColorSamples = IconFrameColorSamples,
     AbilityBlacklistPresets = AbilityBlacklistPresets,
     AlertBossNameConvert = AlertBossNameConvert,
     AlertMapOverride = AlertMapOverride,

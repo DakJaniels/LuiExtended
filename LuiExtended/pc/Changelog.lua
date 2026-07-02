@@ -49,6 +49,26 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.8
+    "|cFFA500LuiExtended Version 7.2.5.8|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Optional |cFFFFFFShow Ability Icon Frame|r and |cFFFFFFColor Icon Frame|r (PC) on outgoing combat text, with frames around ability icons (round for passives, square for actives). On PC, |cFFFFFFColor Icon Frame|r tints the frame using colors sampled from each ability icon; otherwise the frame uses the default white style. Console: |cFFFFFFShow Ability Icon Frame|r only.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: LUIE messages appear in the gamepad chat log; unsupported chat links no longer cause errors when clicked.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: On the default target frame, veterancy rank and friend/guild/ignored icons stay aligned when rank or social icons show or hide.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Group DPS/HPS labels show during combat only, then hide shortly after combat ends so old values are not left on screen.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Overland difficulty icon on custom frames only when the game would show difficulty above normal (same as default nameplates).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info: Ability alerts fade out smoothly after the cast finishes; alert icon borders and fade behavior improved.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Skill ability experience announcements no longer fire for passives, crafted abilities, or abilities already at max rank.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Unit Frames health number format dropdowns display and save correctly again.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Toggling Action Bar bar labels no longer turns on the game's built-in action bar ability timers setting.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t PC: Unlock Default UI Frames: player interaction prompt sizing corrected.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t General stability and performance improvements...",
+    "",
     -- Version Header 7.2.5.7
     "|cFFA500LuiExtended Version 7.2.5.7|r",
     "",

@@ -43,7 +43,53 @@ local alertTypes =
     SHARED = "LUIE_ALERT_TYPE_SHARED",
 }
 
-local ZO_EaseOutQuadratic = ZO_EaseOutQuadratic
+
+local ALERT_POST_CAST_FADE_MS = 1000
+
+function AbilityAlerts.StopAlertFadeAnimation(alert)
+    if not alert then
+        return
+    end
+    local fadeAnimation = ZO_AlphaAnimation_GetAnimation(alert)
+    if fadeAnimation then
+        fadeAnimation:Stop(ZO_ALPHA_ANIMATION_OPTION_PREVENT_CALLBACK)
+    end
+end
+
+function AbilityAlerts.CompleteAlertFadeOut(poolKey)
+    if not alertPool then
+        return
+    end
+    local alert = alertPool:GetActiveObject(poolKey)
+    if not alert or not alert.data.duration then
+        return
+    end
+    AbilityAlerts.StopAlertFadeAnimation(alert)
+    alert:SetAlpha(0)
+    alert:SetHidden(true)
+    alert.data = {}
+    alert.data.duration = nil
+    alert.data.postCast = nil
+    alert.data.available = true
+    alertPool:ReleaseObject(poolKey)
+    AbilityAlerts.RepositionAlerts()
+end
+
+function AbilityAlerts.StartAlertFadeOut(poolKey, alert)
+    if alert.data.fadeOutStarted then
+        return
+    end
+    alert.data.fadeOutStarted = true
+    AbilityAlerts.StopAlertFadeAnimation(alert)
+    alert:SetAlpha(1)
+    local fadeAnimation = ZO_AlphaAnimation_GetAnimation(alert)
+    if not fadeAnimation then
+        fadeAnimation = ZO_AlphaAnimation:New(alert)
+    end
+    fadeAnimation:FadeOut(0, ALERT_POST_CAST_FADE_MS, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA, function ()
+        AbilityAlerts.CompleteAlertFadeOut(poolKey)
+    end)
+end
 
 -- Set Alert Colors
 function AbilityAlerts.SetAlertColors()
@@ -61,6 +107,108 @@ function AbilityAlerts.SetAlertColors()
     }
 end
 
+local ALERT_ICON_ART_INSET = 2
+
+local function GetAlertDebuffBorderTexture()
+    if IsInGamepadPreferredMode() then
+        return "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_debuff.dds"
+    end
+    return "EsoUI/Art/ActionBar/abilityFrame_debuff.dds"
+end
+
+--- Crops the 64×64 ability frame atlas to the center iconSize region (matches SpellCastBuffs.ApplyAbilityFrameTextureCoords).
+local function ApplyAbilityFrameTextureCoords(texture, iconSize)
+    if not texture then
+        return
+    end
+    if IsInGamepadPreferredMode() then
+        texture:SetTextureCoords(0.1094, 0.8906, 0.1094, 0.8906)
+    else
+        local inset = (64 - iconSize) / 2 / 64
+        local outer = (64 + iconSize) / 2 / 64
+        texture:SetTextureCoords(inset, outer, inset, outer)
+    end
+end
+
+function AbilityAlerts.GetAlertIconSize()
+    return CombatInfo.SV.alerts.toggles.alertFontSize + 8
+end
+
+function AbilityAlerts.MakeAlertIconHostChromeTransparent(iconHost)
+    if not iconHost then
+        return
+    end
+    iconHost:SetCenterColor(0, 0, 0, 0)
+    iconHost:SetEdgeColor(0, 0, 0, 0)
+end
+
+--- @param alert Control
+function AbilityAlerts.ApplyAlertIconLayout(alert)
+    if not alert or not alert.icon then
+        return
+    end
+
+    local iconSize = AbilityAlerts.GetAlertIconSize()
+    alert.icon:SetDimensions(iconSize, iconSize)
+    AbilityAlerts.MakeAlertIconHostChromeTransparent(alert.icon)
+
+    if alert.icon.back then
+        alert.icon.back:ClearAnchors()
+        alert.icon.back:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 0, 0)
+        alert.icon.back:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, 0, 0)
+        alert.icon.back:SetTexture(GetAlertDebuffBorderTexture())
+        ApplyAbilityFrameTextureCoords(alert.icon.back, iconSize)
+        alert.icon.back:SetHidden(false)
+    end
+
+    local artInset = ALERT_ICON_ART_INSET
+    local panelInset = zo_max(1, artInset - 1)
+
+    if alert.icon.iconbg then
+        alert.icon.iconbg:ClearAnchors()
+        alert.icon.iconbg:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, panelInset, panelInset)
+        alert.icon.iconbg:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -panelInset, -panelInset)
+    end
+
+    if alert.icon.icon then
+        alert.icon.icon:ClearAnchors()
+        alert.icon.icon:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, artInset, artInset)
+        alert.icon.icon:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -artInset, -artInset)
+    end
+
+    if alert.icon.cd then
+        alert.icon.cd:ClearAnchors()
+        alert.icon.cd:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 0, 0)
+        alert.icon.cd:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, 0, 0)
+        alert.icon.cd:ResetCooldown()
+        alert.icon.cd:SetFillColor(0, 0, 0, 0)
+        alert.icon.cd:SetHidden(true)
+    end
+end
+
+--- @param alert Control
+--- @param borderColor number[]|nil
+function AbilityAlerts.ApplyAlertIconFrameColor(alert, borderColor)
+    if not alert or not alert.icon or not alert.icon.back then
+        return
+    end
+
+    AbilityAlerts.ApplyAlertIconLayout(alert)
+
+    if borderColor and borderColor[4] and borderColor[4] > 0 then
+        alert.icon.back:SetColor(borderColor[1], borderColor[2], borderColor[3], borderColor[4])
+    else
+        alert.icon.back:SetColor(1, 1, 1, 1)
+    end
+end
+
+function AbilityAlerts.GetAlertBorderColorForAbility(abilityId, crowdControl)
+    if not CombatInfo.SV.alerts.toggles.showCrowdControlBorder then
+        return { 0, 0, 0, 0 }
+    end
+    return AbilityAlerts.CrowdControlColorSetup(crowdControl, true)
+end
+
 -- Called from menu when font size/face, etc is changed
 function AbilityAlerts.ResetAlertSize()
     local activeCount = alertPool:GetActiveObjectCount()
@@ -74,16 +222,8 @@ function AbilityAlerts.ResetAlertSize()
         alert.modifier:SetFont(g_alertFont)
         alert.mitigation:SetFont(g_alertFont)
         alert.timer:SetFont(g_alertFont)
-        alert.icon:SetDimensions(CombatInfo.SV.alerts.toggles.alertFontSize + 8, CombatInfo.SV.alerts.toggles.alertFontSize + 8)
-        alert.icon.iconbg:ClearAnchors()
-        alert.icon.iconbg:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 3, 3)
-        alert.icon.iconbg:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -3, -3)
-        alert.icon.cd:ClearAnchors()
-        alert.icon.cd:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 1, 1)
-        alert.icon.cd:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -1, -1)
-        alert.icon.icon:ClearAnchors()
-        alert.icon.icon:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 3, 3)
-        alert.icon.icon:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -3, -3)
+        local borderColor = AbilityAlerts.GetAlertBorderColorForAbility(alert.data.id, alert.data.id and Alerts[alert.data.id] and Alerts[alert.data.id].cc or nil)
+        AbilityAlerts.ApplyAlertIconFrameColor(alert, borderColor)
         alert:SetDimensions(alert.prefix:GetTextWidth() + alert.name:GetTextWidth() + alert.modifier:GetTextWidth() + 6 + alert.icon:GetWidth() + 6 + alert.mitigation:GetTextWidth() + alert.timer:GetTextWidth(), height)
 
         -- Reposition alerts with new spacing
@@ -206,10 +346,9 @@ function AbilityAlerts.CreateAlertFrame()
         alert.timer:SetFont(g_alertFont)
 
         -- Set initial dimensions for icon
-        alert.icon:SetDimensions(CombatInfo.SV.alerts.toggles.alertFontSize + 8, CombatInfo.SV.alerts.toggles.alertFontSize + 8)
+        AbilityAlerts.ApplyAlertIconFrameColor(alert, { 0, 0, 0, 0 })
 
-        -- Initialize cooldown control (start it with empty state)
-        alert.icon.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
+        ZO_AlphaAnimation:New(alert)
 
         -- Initialize data structure
         alert.data =
@@ -227,7 +366,13 @@ function AbilityAlerts.CreateAlertFrame()
             ["neverShowInterrupt"] = nil,
             ["effectOnlyInterrupt"] = nil,
             ["mitigationParts"] = nil,
+            ["fadeOutStarted"] = false,
         }
+    end)
+
+    alertPool:SetCustomResetBehavior(function (alert)
+        AbilityAlerts.StopAlertFadeAnimation(alert)
+        alert:SetAlpha(1)
     end)
 
     uiTlw.alertFrame:SetDimensions(500, (CombatInfo.SV.alerts.toggles.alertFontSize * 2) + 4)
@@ -356,8 +501,7 @@ function AbilityAlerts.GenerateAlertFramePreview(state)
             alert.name:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
             alert.modifier:SetText("")
             alert.icon.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
-            alert.icon.cd:SetFillColor(0, 0, 0, 0)
-            alert.icon.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
+            AbilityAlerts.ApplyAlertIconFrameColor(alert, { 0, 0, 0, 0 })
             alert.mitigation:SetText("MITIGATION TEST")
             alert.timer:SetText(CombatInfo.SV.alerts.toggles.alertTimer and " 1.0" or "")
             alert:SetHidden(false)
@@ -404,24 +548,14 @@ function AbilityAlerts.AlertUpdate(currentTime)
                 alert.timer:SetText(alert.data.showDuration and string_format(" %.1f", remain / 1000) or "")
                 alert.timer:SetColor(unpack(CombatInfo.SV.alerts.colors.alertTimer))
             end
-            if postCast <= -1100 then
-                alert:SetAlpha(1)
-                alert:SetHidden(true)
-                alert.data = {}
-                alert.data.duration = nil
-                alert.data.postCast = nil
-                alert.data.available = true
-                alertPool:ReleaseObject(key)
-
-                -- Reposition remaining alerts after releasing this one
-                AbilityAlerts.RepositionAlerts()
+            if postCast <= -1000 then
+                -- Fallback if fade animation did not run (e.g. reload mid-fade).
+                AbilityAlerts.CompleteAlertFadeOut(key)
             elseif remain <= 0 then
                 -- alert:SetHidden(true)
                 -- alert.data = { }
                 if postCast <= 0 then
-                    local duration = 1000 - (postCast * -1)
-                    local progress = duration / 1000
-                    alert:SetAlpha(ZO_EaseOutQuadratic(progress))
+                    AbilityAlerts.StartAlertFadeOut(key, alert)
                 end
                 alert.timer:SetText("")
                 -- Rebuild mitigation text without trailing dash
@@ -463,6 +597,7 @@ function AbilityAlerts.AlertInterrupt(eventCode, result, isError, abilityName, a
             end
 
             if (alert.data.sourceUnitId == targetUnitId or alert.data.sourceUnitId == targetName) and (not alert.data.showDuration == false or alert.data.alwaysShowInterrupt) and remain > 0 and (not alert.data.neverShowInterrupt or deathResults[result]) and not alert.data.effectOnlyInterrupt then
+                AbilityAlerts.StopAlertFadeAnimation(alert)
                 alert.data = {}
                 alert.data.available = true
                 alert.data.id = ""
@@ -474,6 +609,7 @@ function AbilityAlerts.AlertInterrupt(eventCode, result, isError, abilityName, a
                 alert.icon:SetHidden(true)
                 alert.data.duration = currentTime + 1500
                 alert.data.postCast = 0
+                alert.data.fadeOutStarted = false
                 alert.data.showDuration = false
                 alert.prefix:SetText(alert.data.textPrefix)
                 alert.name:SetText(alert.data.textName)
@@ -599,14 +735,8 @@ function AbilityAlerts.PlayAlertSound(abilityId)
 end
 
 function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier, textName, textMitigation, abilityIcon, currentTime, endTime, showDuration, crowdControl, sourceUnitId, postCast, alwaysShowInterrupt, neverShowInterrupt, effectOnlyInterrupt, mitigationParts)
+    local borderColor = AbilityAlerts.GetAlertBorderColorForAbility(abilityId, crowdControl)
     local labelColor
-    local borderColor
-
-    if CombatInfo.SV.alerts.toggles.showCrowdControlBorder then
-        borderColor = AbilityAlerts.CrowdControlColorSetup(crowdControl, true)
-    else
-        borderColor = { 0, 0, 0, 0 }
-    end
     if CombatInfo.SV.alerts.toggles.ccLabelColor then
         labelColor = AbilityAlerts.CrowdControlColorSetup(crowdControl, false)
     else
@@ -642,9 +772,11 @@ function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier
     alert.timer:SetColor(unpack(CombatInfo.SV.alerts.colors.alertTimer))
     alert.icon:SetHidden(false)
     alert:SetHidden(false)
+    alert.data.fadeOutStarted = false
+    AbilityAlerts.StopAlertFadeAnimation(alert)
     alert:SetAlpha(1)
     alert.data.available = false
-    alert.icon.cd:SetFillColor(unpack(borderColor))
+    AbilityAlerts.ApplyAlertIconFrameColor(alert, borderColor)
 
     -- Position the alert control (stack them vertically from the top)
     alert:ClearAnchors()
@@ -1031,6 +1163,7 @@ local function CheckInterruptEvent(unitId, abilityId, resultType)
                 -- d("Current Duration: " .. remain)
 
                 if (alert.data.sourceUnitId == unitId and (not alert.data.showDuration == false or alert.data.alwaysShowInterrupt)) and remain > 0 and (not alert.data.neverShowInterrupt or deathResults[resultType]) then
+                    AbilityAlerts.StopAlertFadeAnimation(alert)
                     alert.data = {}
                     alert.data.available = true
                     alert.data.id = ""
@@ -1042,6 +1175,7 @@ local function CheckInterruptEvent(unitId, abilityId, resultType)
                     alert.icon:SetHidden(true)
                     alert.data.duration = currentTime + 1500
                     alert.data.postCast = 0
+                    alert.data.fadeOutStarted = false
                     alert.data.showDuration = false
                     alert.prefix:SetText(alert.data.textPrefix)
                     alert.name:SetText(alert.data.textName)
@@ -1051,6 +1185,7 @@ local function CheckInterruptEvent(unitId, abilityId, resultType)
                     alert.mitigation:SetText("")
                     alert.timer:SetText("")
                     alert:SetHidden(false)
+                    alert:SetAlpha(1)
 
                     AbilityAlerts.RealignAlerts(key)
                 end
@@ -1462,14 +1597,8 @@ function AbilityAlerts.ApplyFontAlert()
     end
 
     -- Setup Alerts Font
-    local alertFontName = LUIE.Fonts[CombatInfo.SV.alerts.toggles.alertFontFace]
-    if not alertFontName or alertFontName == "" then
-        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
-        alertFontName = "LUIE Default Font"
-    end
-
     local alertFontStyle = CombatInfo.SV.alerts.toggles.alertFontStyle
     local alertFontSize = (CombatInfo.SV.alerts.toggles.alertFontSize and CombatInfo.SV.alerts.toggles.alertFontSize > 0) and CombatInfo.SV.alerts.toggles.alertFontSize or 16
 
-    g_alertFont = LUIE.CreateFontString(alertFontName, alertFontSize, alertFontStyle)
+    g_alertFont = LUIE.Font.Resolve(CombatInfo.SV.alerts.toggles.alertFontFace, alertFontSize, alertFontStyle)
 end

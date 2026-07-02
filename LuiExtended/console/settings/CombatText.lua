@@ -2113,6 +2113,20 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_FRAME),
+            tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_ICON_FRAME_TP),
+            getFunction = function ()
+                return Settings.animation.showIconFrame
+            end,
+            setFunction = function (value)
+                Settings.animation.showIconFrame = value
+            end,
+            default = Defaults.animation.showIconFrame,
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_BUTTON,
             label = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST),
             tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST_TP),

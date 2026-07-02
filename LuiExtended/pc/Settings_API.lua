@@ -53,6 +53,10 @@ SettingsAPI.LAM_DROPDOWN_PREVIEW_FONT_SIZE = 14
 -- Memoize font strings for fontable_dropdown list previews (ZO scroll list recycles rows).
 local lamPreviewFontStringCache = {}
 local function CachedLamPreviewFontString(facePath, size, style)
+    -- Named fonts (ZoFont*/LUIE_Font_*) are applied as-is; only slug faces compose.
+    if LUIE.Font.IsNamedData(facePath) then
+        return facePath
+    end
     local k = (facePath or "") .. "\0" .. tostring(size) .. "\0" .. tostring(style or "")
     local v = lamPreviewFontStringCache[k]
     if v == nil then

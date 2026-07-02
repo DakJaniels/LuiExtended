@@ -14,27 +14,28 @@ local LUIE = LUIE
 --- @field AddFragmentToScenes fun(fragment: ZO_SceneFragment, scenes: ZO_Scene[])
 --- @field RemoveFragmentFromScenes fun(fragment: ZO_SceneFragment, scenes: ZO_Scene[])
 --- @field RegisterHudFadeFragmentOnGameplayScenes fun(topLevelControl: Control): ZO_HUDFadeSceneFragment
-LUIE.HudScene = LUIE.HudScene or {}
+local HudScene = {}
 
 --- @type LUIE.HudScene
-local HudScene = LUIE.HudScene
+LUIE.HudScene = HudScene
 
 --- @type ZO_Scene[]|nil Built on first GetGameplayScenes() (after ZOS scene globals exist).
 HudScene.GAMEPLAY_SCENES = nil
+
+HudScene.GAMEPLAY_SCENES =
+{
+    HUD_SCENE,
+    HUD_UI_SCENE,
+    LOOT_SCENE,
+    SIEGE_BAR_SCENE,
+    SIEGE_BAR_UI_SCENE,
+}
 
 --- @return ZO_Scene[]
 function HudScene.GetGameplayScenes()
     if HudScene.GAMEPLAY_SCENES then
         return HudScene.GAMEPLAY_SCENES
     end
-    HudScene.GAMEPLAY_SCENES =
-    {
-        HUD_SCENE,
-        HUD_UI_SCENE,
-        LOOT_SCENE,
-        SIEGE_BAR_SCENE,
-        SIEGE_BAR_UI_SCENE,
-    }
     local customFramesShared = LUIE.CustomFramesShared
     if customFramesShared then
         customFramesShared.CUSTOM_FRAME_HUD_SCENES = HudScene.GAMEPLAY_SCENES
@@ -99,7 +100,7 @@ function HudScene.RemoveFragmentFromScenes(fragment, scenes)
 end
 
 --- @param topLevelControl Control
---- @return ZO_HUDFadeSceneFragment
+--- @return ZO_HUDFadeSceneFragment|ZO_SceneFragment|nil
 function HudScene.RegisterHudFadeFragmentOnGameplayScenes(topLevelControl)
     local fragment = ZO_HUDFadeSceneFragment:New(topLevelControl, 0, 0)
     HudScene.AddFragmentToScenes(fragment, HudScene.GetGameplayScenes())

@@ -32,10 +32,10 @@ local LUIE = LUIE
 --- @field CreateNoHealingFadeAnimation fun(overlay: StatusBarControl, stripeOverlay: StatusBarControl|nil): AnimationTimeline|nil
 --- @field CreateCombatGlowBorder fun(backdrop: Control): Control
 --- @field CreateDecreasedArmorOverlay fun(parent: Control, small: boolean): Control
-LUIE.CustomFramesShared = LUIE.CustomFramesShared or {}
+local Shared = {}
 
 --- @type LUIE.CustomFramesShared
-local Shared = LUIE.CustomFramesShared
+LUIE.CustomFramesShared = Shared
 
 -- STAT_POWER / possession full-bar halos: lowest layer on backdrop; opaque track + health fill draw above (see ArmorDamage.lua)
 Shared.STAT_POWER_HALO_DRAW_LEVEL = 1
@@ -152,7 +152,7 @@ function Shared.CreateRegenAnimation(parent, anchors, dims, alpha, number)
     end
 
     local updateDims = { dims[2] * 1.9, dims[2] * 0.85 }
-    local control = parent:CreateControl("$(parent)_RegenAnim_" .. number, CT_TEXTURE) ---@type UnitFrames.RegenStripControl
+    local control = parent:CreateControl("$(parent)_RegenAnim_" .. number, CT_TEXTURE) --- @type UnitFrames.RegenStripControl
     if anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         control:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -169,7 +169,7 @@ function Shared.CreateRegenAnimation(parent, anchors, dims, alpha, number)
         local isValid, _, _, _, _, offsetY = control:GetAnchor(i)
         if isValid then
             control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_RegenAnimationTemplate", control)
-            control.animation = control.timeline:GetAnimation(1) ---@type AnimationObjectTranslate
+            control.animation = control.timeline:GetAnimation(1) --- @type AnimationObjectTranslate
             control.animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
             return control
         end

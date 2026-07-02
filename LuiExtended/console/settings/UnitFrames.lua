@@ -25,33 +25,11 @@ local table = table
 local table_insert = table.insert
 
 
-local formatOptions =
-{
-    GetString(LUIE_STRING_LAM_UF_FORMAT_NOTHING),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_TRAUMA),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_TRAUMA_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA_MAX),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_MAX_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_MAX_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_TRAUMA_MAX_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA_MAX_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_TRAUMA_PERCENTAGE),
-    GetString(LUIE_STRING_LAM_UF_FORMAT_CURRENT_SHIELD_TRAUMA_PERCENTAGE)
-}
+-- LHAS items: localized `name`, canonical English `data` (matches SV after MigrateCanonicalFormatStrings).
+local formatDropdownItems = UnitFrames.GetFormatOptionLHASItems()
 
-local formatDropdownItems = {}
-for formatIndex = 1, #formatOptions do
-    local option = formatOptions[formatIndex]
-    formatDropdownItems[formatIndex] = { name = option, data = option }
+local function formatDropdownGetData(storedValue)
+    return SettingsAPI:LHASDropdownGetData(UnitFrames.NormalizeFormatOption(storedValue))
 end
 
 local defaultFramesFontStyleItems = {}
@@ -363,7 +341,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_LABEL_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.Format }
+                return formatDropdownGetData(Settings.Format)
             end,
             setFunction = function (combobox, value, item)
                 Settings.Format = item.data or item.name or value
@@ -1227,7 +1205,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatOnePlayer }
+                return formatDropdownGetData(Settings.CustomFormatOnePlayer)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatOnePlayer = item.data or item.name or value
@@ -1247,7 +1225,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatTwoPlayer }
+                return formatDropdownGetData(Settings.CustomFormatTwoPlayer)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatTwoPlayer = item.data or item.name or value
@@ -1738,7 +1716,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatOneTarget }
+                return formatDropdownGetData(Settings.CustomFormatOneTarget)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatOneTarget = item.data or item.name or value
@@ -1758,7 +1736,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatTwoTarget }
+                return formatDropdownGetData(Settings.CustomFormatTwoTarget)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatTwoTarget = item.data or item.name or value
@@ -2479,7 +2457,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_LABEL_CENTER_FORM),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatCenterLabel }
+                return formatDropdownGetData(Settings.CustomFormatCenterLabel)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatCenterLabel = item.data or item.name or value
@@ -2823,7 +2801,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatOneGroup }
+                return formatDropdownGetData(Settings.CustomFormatOneGroup)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatOneGroup = item.data or item.name or value
@@ -2843,7 +2821,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatTwoGroup }
+                return formatDropdownGetData(Settings.CustomFormatTwoGroup)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatTwoGroup = item.data or item.name or value
@@ -3272,7 +3250,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatRaid }
+                return formatDropdownGetData(Settings.CustomFormatRaid)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatRaid = item.data or item.name or value
@@ -4398,7 +4376,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatCompanion }
+                return formatDropdownGetData(Settings.CustomFormatCompanion)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatCompanion = item.data or item.name or value
@@ -4775,7 +4753,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatPet }
+                return formatDropdownGetData(Settings.CustomFormatPet)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatPet = item.data or item.name or value
@@ -5160,7 +5138,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
             items = formatDropdownItems,
             getFunction = function ()
-                return { data = Settings.CustomFormatBoss }
+                return formatDropdownGetData(Settings.CustomFormatBoss)
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatBoss = item.data or item.name or value

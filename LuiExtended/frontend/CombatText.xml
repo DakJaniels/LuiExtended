@@ -288,8 +288,17 @@
              virtual="true">
       <Controls>
         <Label name="$(parent)_Amount" />
-        <Texture name="$(parent)_Icon"
-                 hidden="true" />
+        <Control name="$(parent)_IconHost"
+                 hidden="true">
+          <Controls>
+            <Texture name="$(parent)_IconFrame"
+                     inheritAlpha="true"
+                     hidden="true" />
+            <Texture name="$(parent)_Icon"
+                     inheritAlpha="true"
+                     hidden="true" />
+          </Controls>
+        </Control>
         <!--Backdrop
         for debugging purposes-->
         <!--Backdrop

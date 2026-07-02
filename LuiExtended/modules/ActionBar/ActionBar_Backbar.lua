@@ -640,22 +640,26 @@ function Backbar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "BackbarSlotEffect", EVENT_ACTION_SLOT_EFFECT_UPDATE)
     eventManager:UnregisterForEvent(moduleName .. "BackbarEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS, Backbar.OnActionUpdateCooldowns)
+    eventManager:RegisterForEvent(moduleName .. "BackbarCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS, function (eventId)
+        Backbar.OnActionUpdateCooldowns()
+    end)
 
-    eventManager:RegisterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (_, bagId, slotIndex)
+    eventManager:RegisterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
         if ActionBar.SV.BarShowBack and bagId == BAG_WORN and (slotIndex == EQUIP_SLOT_RING1 or slotIndex == EQUIP_SLOT_RING2) then
             Backbar.BackbarToggleSettings()
         end
     end)
     eventManager:AddFilterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
-    eventManager:RegisterForEvent(moduleName .. "wolf", EVENT_WEREWOLF_STATE_CHANGED, function (_, werewolf)
+    eventManager:RegisterForEvent(moduleName .. "wolf", EVENT_WEREWOLF_STATE_CHANGED, function (eventId, werewolf)
         if g_backbarContainer then
             g_backbarContainer:SetHidden(werewolf)
         end
     end)
-    eventManager:RegisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE, Backbar.BackbarToggleSettings)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE, function (eventId, result, buildIndex)
+        Backbar.BackbarToggleSettings()
+    end)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarSlotState", EVENT_HOTBAR_SLOT_STATE_UPDATED, function (_, actionSlotIndex, hotbarCategory)
+    eventManager:RegisterForEvent(moduleName .. "BackbarSlotState", EVENT_HOTBAR_SLOT_STATE_UPDATED, function (eventId, actionSlotIndex, hotbarCategory)
         if not ActionBar.SV.BarShowBack then
             return
         end
@@ -665,7 +669,7 @@ function Backbar.RegisterEvents()
         Backbar.OnPhysicalSlotVisualSync(actionSlotIndex)
     end)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarSlotEffect", EVENT_ACTION_SLOT_EFFECT_UPDATE, function (_, hotbarCategory, actionSlotIndex)
+    eventManager:RegisterForEvent(moduleName .. "BackbarSlotEffect", EVENT_ACTION_SLOT_EFFECT_UPDATE, function (eventId, hotbarCategory, actionSlotIndex)
         if not ActionBar.SV.BarShowBack then
             return
         end
@@ -675,20 +679,20 @@ function Backbar.RegisterEvents()
         Backbar.OnPhysicalSlotVisualSync(actionSlotIndex)
     end)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED, function ()
+    eventManager:RegisterForEvent(moduleName .. "BackbarEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED, function (eventId)
         if not ActionBar.SV.BarShowBack then
             return
         end
         Backbar.RefreshAllActivationHighlights()
     end)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarActiveHotbar", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function ()
+    eventManager:RegisterForEvent(moduleName .. "BackbarActiveHotbar", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function (eventId, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
         Backbar._updateButtonActionIds()
         Backbar.RefreshAllActivationHighlights()
         Backbar.OnActionUpdateCooldowns()
     end)
 
-    eventManager:RegisterForEvent(moduleName .. "BackbarAllHotbars", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function ()
+    eventManager:RegisterForEvent(moduleName .. "BackbarAllHotbars", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function (eventId)
         Backbar._updateButtonActionIds()
         Backbar.RefreshAllActivationHighlights()
         Backbar.OnActionUpdateCooldowns()
@@ -748,16 +752,4 @@ function Backbar.OnSetHotbarEffect(changeType)
         Backbar.BackbarToggleSettings()
     end
     return true
-end
-
-local forward =
-{
-    "SetupBackBarIcons", "BackbarHideSlot", "BackbarShowSlot", "ToggleBackbarSaturation",
-    "BackbarSetupTemplate", "BackbarToggleSettings", "SyncDefaultBackRowTimers",
-    "HideAllAbilityActionButtonDropCallouts", "ShowAppropriateAbilityActionButtonDropCallouts",
-    "OakensoulEquipped", "GetInactiveHotbarCategory", "UpdateActivationHighlight", "RefreshAllActivationHighlights",
-    "OnPhysicalSlotVisualSync",
-}
-for _, name in ipairs(forward) do
-    ActionBar[name] = Backbar[name]
 end

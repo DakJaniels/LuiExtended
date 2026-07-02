@@ -137,7 +137,7 @@ function CombatTextCombatCloudEventViewer:View(combatType, powerType, value, abi
     end
 
     self:PrepareLabel(control.label, fontSize, textColor, self:FormatString(textFormat, { text = abilityName, value = value, powerType = powerType, damageType = damageType }))
-    self:ControlLayout(control, abilityId, combatType, sourceName)
+    self:ControlLayout(control, abilityId, combatType, sourceName, textColor)
 
     -- Animation setup
     local animationPoolType = CombatTextConstants.poolType.ANIMATION_CLOUD
