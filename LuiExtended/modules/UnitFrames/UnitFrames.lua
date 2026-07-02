@@ -761,6 +761,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
         -- Update level display based off our setting for Champion Points
         if UnitFrames.DefaultFrames.reticleover.isPlayer then
             UnitFrames.UpdateDefaultLevelTarget()
+            UnitFrames.LayoutDefaultReticleoverTargetIcons()
         end
 
         -- Update color of default target if requested
@@ -2992,4 +2993,7 @@ function UnitFrames.SocialUpdateFrames()
         end
     end
     UnitFrames.ReloadValues("reticleover")
+    if DoesUnitExist("reticleover") then
+        UnitFrames.LayoutDefaultReticleoverTargetIcons()
+    end
 end
