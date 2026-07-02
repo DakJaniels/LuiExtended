@@ -24,13 +24,6 @@ local table_insert = table.insert
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
 
-
-local function SetAbilityBarTimersEnabled()
-    if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)) == 0 then
-        SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS, "true", SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
-    end
-end
-
 local Blacklist, BlacklistValues = {}, {}
 
 -- Convert to LHAS format {name, data}
@@ -653,7 +646,6 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.BarShowLabel end,
             setFunction = function (value)
                 Settings.BarShowLabel = value
-                SetAbilityBarTimersEnabled()
                 ActionBar.ResetBarLabel()
             end,
             default = Defaults.BarShowLabel,
