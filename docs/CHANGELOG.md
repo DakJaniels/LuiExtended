@@ -1,5 +1,24 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.8
+
+### New
+
+- Combat Text: Optional **Show Ability Icon Frame** and **Color Icon Frame** (PC) on outgoing combat text, with frames around ability icons (round for passives, square for actives). On PC, **Color Icon Frame** tints the frame using colors sampled from each ability icon; otherwise the frame uses the default white style. Console: **Show Ability Icon Frame** only.
+- Console: LUIE messages appear in the gamepad chat log; unsupported chat links no longer cause errors when clicked.
+
+### Fixed
+
+- Unit Frames: On the default target frame, veterancy rank and friend/guild/ignored icons stay aligned when rank or social icons show or hide.
+- Unit Frames: Group DPS/HPS labels show during combat only, then hide shortly after combat ends so old values are not left on screen.
+- Unit Frames: Overland difficulty icon on custom frames only when the game would show difficulty above normal (same as default nameplates).
+- Combat Info: Ability alerts fade out smoothly after the cast finishes; alert icon borders and fade behavior improved.
+- Chat Announcements: Skill ability experience announcements no longer fire for passives, crafted abilities, or abilities already at max rank.
+- Console: Unit Frames health number format dropdowns display and save correctly again.
+- Console: Toggling Action Bar bar labels no longer turns on the game's built-in action bar ability timers setting.
+- PC: Unlock Default UI Frames: player interaction prompt sizing corrected.
+- General stability and performance improvements...
+
 ## Version 7.2.5.7
 
 ### New
