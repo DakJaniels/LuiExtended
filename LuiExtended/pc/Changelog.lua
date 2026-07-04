@@ -49,6 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.5.9
+    "|cFFA500LuiExtended Version 7.2.5.9|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Champion and Level info on custom target frame should now refresh properly, it was only being updated if the toggle for overland difficulty icons were enabled.",
+    "",
     -- Version Header 7.2.5.8
     "|cFFA500LuiExtended Version 7.2.5.8|r",
     "",
