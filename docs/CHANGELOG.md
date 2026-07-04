@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.5.9
+
+### Fixed
+
+- Unit Frames: Champion and Level info on custom target frame should now refresh properly, it was only being updated if the toggle for overland difficulty icons were enabled.
+
 ## Version 7.2.5.8
 
 ### New

@@ -1,4 +1,3 @@
---- @diagnostic disable: undefined-field, missing-fields
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -10,6 +9,8 @@ local LUIE = LUIE
 -- Unit Frames namespace
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
+--- @class LUIE_CustomFrameObject
+local FrameObject = LUIE_CustomFrameObject
 
 local type = type
 local pairs = pairs
@@ -256,6 +257,7 @@ function UnitFrames.Initialize(enabled)
     -- Note: EVENT_UNIT_ATTRIBUTE_VISUAL_* events now handled per-unit by coordinator instances
     eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, UnitFrames.OnTargetChange)
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, UnitFrames.OnReticleTargetChanged)
+    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_PLAYER_CHANGED, UnitFrames.OnReticleTargetPlayerChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_DISPOSITION_UPDATE, UnitFrames.OnDispositionUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_UNIT_CREATED, UnitFrames.OnUnitCreated)
     eventManager:RegisterForEvent(moduleName, EVENT_LEVEL_UPDATE, UnitFrames.OnLevelUpdate)
@@ -396,7 +398,6 @@ end
 function UnitFrames.FormatSimpleLabel(label, format)
     label.format = format
 end
-
 
 -- Runs on the EVENT_PLAYER_ACTIVATED listener.
 -- This handler fires every time the player is loaded. Used to set initial values.
@@ -875,6 +876,13 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
     -- Finally if user does not want to have default target frame we have to hide it here all the time
     if not UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.ShouldHideVanillaTargetFrameForCustomTarget() then
         ZO_TargetUnitFramereticleover:SetHidden(true)
+    end
+end
+
+function UnitFrames.OnReticleTargetPlayerChanged(eventCode)
+    local frame = UnitFrames.CustomFrames["reticleover"]
+    if frame then
+        FrameObject.UpdateStaticControls(frame)
     end
 end
 
@@ -1957,7 +1965,7 @@ local function CustomFramesLayoutSetupPlayerCommon(player, buffsWidth)
     end
     player.classIcon:SetHidden(not showName)
     if player.frameCategory == "player" then
-        LUIE_CustomFrameObject.LayoutTopInfoPlayer(player)
+        FrameObject.LayoutTopInfoPlayer(player)
     end
 end
 
@@ -2121,7 +2129,7 @@ local function CustomFramesLayoutRefreshReticleoverAvaRankOnly(unitTag)
         CustomFramesLayoutApplyAvaRankStaticToFrame(UnitFrames.CustomFrames.AvaPlayerTarget, unitTag)
         local avaPlayerTargetFrame = UnitFrames.CustomFrames.AvaPlayerTarget
         if avaPlayerTargetFrame.frameCategory == "avaTarget" then
-            LUIE_CustomFrameObject.LayoutTopInfoAvaTarget(avaPlayerTargetFrame)
+            FrameObject.LayoutTopInfoAvaTarget(avaPlayerTargetFrame)
         end
     end
 end
@@ -2161,9 +2169,9 @@ function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
     end
 
     if target.frameCategory == "avaTarget" then
-        LUIE_CustomFrameObject.LayoutTopInfoAvaTarget(target)
+        FrameObject.LayoutTopInfoAvaTarget(target)
     elseif target.frameCategory == "target" then
-        LUIE_CustomFrameObject.LayoutTopInfoTarget(target)
+        FrameObject.LayoutTopInfoTarget(target)
     end
     target.skull:SetDimensions(2 * UnitFrames.SV.TargetBarHeight, 2 * UnitFrames.SV.TargetBarHeight)
 
@@ -2199,7 +2207,7 @@ function UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
     target.buffAnchor:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
 
     if target.frameCategory == "avaTarget" then
-        LUIE_CustomFrameObject.LayoutTopInfoAvaTarget(target)
+        FrameObject.LayoutTopInfoAvaTarget(target)
     end
 
     thb.backdrop:SetDimensions(UnitFrames.SV.AvaTargetBarWidth, UnitFrames.SV.AvaTargetBarHeight)
@@ -2420,7 +2428,7 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
                 unitFrame.leader:SetTexture(leaderIcons[0])
             end
             if unitFrame.frameCategory == "smallGroup" then
-                LUIE_CustomFrameObject.LayoutTopInfoSmallGroup(unitFrame)
+                FrameObject.LayoutTopInfoSmallGroup(unitFrame)
             end
 
             -- Health bar dimensions
