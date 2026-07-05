@@ -49,6 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.6.0
+    "|cFFA500LuiExtended Version 7.2.6.0|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player completely hide Magicka or Stamina bar no longer leaves a stray bar at the frame corner; hide-bar toggles apply immediately.",
+    "",
     -- Version Header 7.2.5.9
     "|cFFA500LuiExtended Version 7.2.5.9|r",
     "",

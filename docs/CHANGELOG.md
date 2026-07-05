@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.0
+
+### Fixed
+
+- Unit Frames: Custom player completely hide Magicka or Stamina bar no longer leaves a stray bar at the frame corner; hide-bar toggles apply immediately.
+
 ## Version 7.2.5.9
 
 ### Fixed
