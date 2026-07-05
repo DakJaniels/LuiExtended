@@ -2071,6 +2071,8 @@ function UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhide)
 
     phb.backdrop:SetDimensions(UnitFrames.SV.PlayerBarWidth, UnitFrames.SV.PlayerBarHeightHealth)
     phb.backdrop:SetHidden(UnitFrames.SV.HideBarHealth)
+    pmb.backdrop:SetHidden(UnitFrames.SV.HideBarMagicka)
+    psb.backdrop:SetHidden(UnitFrames.SV.HideBarStamina)
 
     local altW = zo_ceil(UnitFrames.SV.PlayerBarWidth * 2 / 3)
     alt.backdrop:SetWidth(altW)

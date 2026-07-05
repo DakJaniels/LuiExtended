@@ -21,6 +21,11 @@ local PetNames = LuiData.Data.PetNames
 
 local pairs = pairs
 
+local function ApplyCustomPlayerHideBarLayout()
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
+    UnitFrames.CustomFramesSetupAlternative()
+end
+
 local nameDisplayOptions =
 {
     GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID),
@@ -2712,6 +2717,7 @@ function UnitFrames.CreateSettings()
                 setFunc = function (value)
                     Settings.HideLabelHealth = value
                     Settings.HideBarHealth = false
+                    ApplyCustomPlayerHideBarLayout()
                 end,
                 width = "full",
                 default = Defaults.HideLabelHealth,
@@ -2730,10 +2736,10 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HideBarHealth = value
+                    ApplyCustomPlayerHideBarLayout()
                 end,
                 width = "full",
                 default = Defaults.HideBarHealth,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.HideLabelHealth)
                 end,
@@ -2749,6 +2755,7 @@ function UnitFrames.CreateSettings()
                 setFunc = function (value)
                     Settings.HideLabelMagicka = value
                     Settings.HideBarMagicka = false
+                    ApplyCustomPlayerHideBarLayout()
                 end,
                 width = "full",
                 default = Defaults.HideLabelMagicka,
@@ -2767,10 +2774,10 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HideBarMagicka = value
+                    ApplyCustomPlayerHideBarLayout()
                 end,
                 width = "full",
                 default = Defaults.HideBarMagicka,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.HideLabelMagicka)
                 end,
@@ -2786,6 +2793,7 @@ function UnitFrames.CreateSettings()
                 setFunc = function (value)
                     Settings.HideLabelStamina = value
                     Settings.HideBarStamina = false
+                    ApplyCustomPlayerHideBarLayout()
                 end,
                 width = "full",
                 default = Defaults.HideLabelStamina,
@@ -2804,10 +2812,10 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HideBarStamina = value
+                    ApplyCustomPlayerHideBarLayout()
                 end,
                 width = "full",
                 default = Defaults.HideBarStamina,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.HideLabelStamina)
                 end,
@@ -2822,10 +2830,10 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ReverseResourceBars = value
+                    ApplyCustomPlayerHideBarLayout()
                 end,
                 width = "full",
                 default = Defaults.ReverseResourceBars,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,

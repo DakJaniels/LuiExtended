@@ -24,6 +24,11 @@ local pairs = pairs
 local table = table
 local table_insert = table.insert
 
+local function ApplyCustomPlayerHideBarLayout()
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
+    UnitFrames.CustomFramesSetupAlternative()
+end
+
 
 -- LHAS items: localized `name`, canonical English `data` (matches SV after MigrateCanonicalFormatStrings).
 local formatDropdownItems = UnitFrames.GetFormatOptionLHASItems()
@@ -2623,6 +2628,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.HideLabelHealth = value
                 Settings.HideBarHealth = false
+                ApplyCustomPlayerHideBarLayout()
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
@@ -2641,8 +2647,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideBarHealth = value
+                ApplyCustomPlayerHideBarLayout()
             end,
-            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.HideLabelHealth)
             end,
@@ -2660,6 +2666,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.HideLabelMagicka = value
                 Settings.HideBarMagicka = false
+                ApplyCustomPlayerHideBarLayout()
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
@@ -2678,8 +2685,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideBarMagicka = value
+                ApplyCustomPlayerHideBarLayout()
             end,
-            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.HideLabelMagicka)
             end,
@@ -2697,6 +2704,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.HideLabelStamina = value
                 Settings.HideBarStamina = false
+                ApplyCustomPlayerHideBarLayout()
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
@@ -2715,8 +2723,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideBarStamina = value
+                ApplyCustomPlayerHideBarLayout()
             end,
-            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.HideLabelStamina)
             end,
@@ -2733,8 +2741,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ReverseResourceBars = value
+                ApplyCustomPlayerHideBarLayout()
             end,
-            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
             end,
