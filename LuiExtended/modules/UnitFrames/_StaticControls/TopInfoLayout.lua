@@ -25,7 +25,7 @@ local function StripMarkupForStringWidth(text)
     if text == nil or text == "" then
         return ""
     end
-    return zo_strgsub(text, "%^%a+", "") or text
+    return (zo_strgsub(text, "%^%a+", "")) or text
 end
 
 --- @param self LUIE_CustomFrameObject
@@ -394,7 +394,7 @@ local function LayoutTopInfoLevelCluster(self, rowOffsetY, rowStartX, showLevelR
             if plainText ~= "" then
                 needed = self.level:GetStringWidth(plainText)
             end
-            self.level:SetWidth(zo_min(needed, available))
+            self.level:SetWidth(zo_min(needed, available)+10)
         end
     end
 end
