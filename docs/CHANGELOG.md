@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.1
+
+### Fixed
+
+- SpellCastBuffs: Active assistant buff icons now use the game's collectible art when no custom icon is configured, so newly added assistants display correctly.
+
 ## Version 7.2.6.0
 
 ### Fixed

@@ -49,6 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.6.1
+    "|cFFA500LuiExtended Version 7.2.6.1|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Active assistant buff icons now use the game's collectible art when no custom icon is configured, so newly added assistants display correctly.",
+    "",
     -- Version Header 7.2.6.0
     "|cFFA500LuiExtended Version 7.2.6.0|r",
     "",
