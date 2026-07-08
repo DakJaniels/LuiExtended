@@ -182,8 +182,8 @@ function SpellCastBuffs.CollectibleBuff()
     -- Assistants
     if GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT, GAMEPLAY_ACTOR_CATEGORY_PLAYER) > 0 and not SpellCastBuffs.SV.IgnoreAssistant then
         local collectible = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-        local name, description = GetCollectibleInfo(collectible)
-        local iconAssistant = AssistantIcons[name] or ""
+        local name, description, collectibleIcon = GetCollectibleInfo(collectible)
+        local iconAssistant = AssistantIcons[name] or collectibleIcon or ""
 
         local abilityId = 999019
         local abilityName = Abilities.Innate_Assistant
@@ -195,6 +195,7 @@ function SpellCastBuffs.CollectibleBuff()
             id = abilityId,
             name = name,
             icon = iconAssistant,
+            backdrop = true,
             tooltip = description,
             dur = 0,
             starts = 1,
