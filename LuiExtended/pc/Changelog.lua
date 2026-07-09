@@ -49,6 +49,19 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.6.2
+    "|cFFA500LuiExtended Version 7.2.6.2|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Optional notifications when you save or equip an armory build (chat, center-screen message, and/or alert), with customizable message color, under Notify settings.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Outfit equip notifications no longer error when the game reports success without an equipped outfit index.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Bloodthorn Cultist Outfit disguise shows the correct buff icon and tooltip.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Disguise enter and exit messages use the correct costume-specific wording for supported disguises, including Bloodthorn Cultist Outfit.",
+    "",
     -- Version Header 7.2.6.1
     "|cFFA500LuiExtended Version 7.2.6.1|r",
     "",

@@ -1,5 +1,17 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.2
+
+### New
+
+- Chat Announcements: Optional notifications when you save or equip an armory build (chat, center-screen message, and/or alert), with customizable message color, under Notify settings.
+
+### Fixed
+
+- Chat Announcements: Outfit equip notifications no longer error when the game reports success without an equipped outfit index.
+- SpellCastBuffs: Bloodthorn Cultist Outfit disguise shows the correct buff icon and tooltip.
+- Chat Announcements: Disguise enter and exit messages use the correct costume-specific wording for supported disguises, including Bloodthorn Cultist Outfit.
+
 ## Version 7.2.6.1
 
 ### Fixed
