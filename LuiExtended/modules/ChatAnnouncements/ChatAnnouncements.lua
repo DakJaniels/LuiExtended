@@ -4648,7 +4648,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
     end
 
     if S.g_disguiseState == 1 and (disguiseState == DISGUISE_STATE_NONE) then
-        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.DisguiseIcons[S.g_currentDisguise].description)
+        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
         if ChatAnnouncements.SV.Notify.DisguiseCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -4667,7 +4667,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
 
     if S.g_disguiseState == 0 and (disguiseState == DISGUISE_STATE_DISGUISED or disguiseState == DISGUISE_STATE_DANGER or disguiseState == DISGUISE_STATE_SUSPICIOUS or disguiseState == DISGUISE_STATE_DISCOVERED) then
         S.g_currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
-        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.DisguiseIcons[S.g_currentDisguise].description)
+        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
         if ChatAnnouncements.SV.Notify.DisguiseCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -4717,7 +4717,7 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
             elseif S.g_disguiseState ~= 0 then
                 S.g_disguiseState = 1
                 S.g_currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
-                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.DisguiseIcons[S.g_currentDisguise].description)
+                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
                 if ChatAnnouncements.SV.Notify.DisguiseCA then
                     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -4737,7 +4737,7 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
         elseif S.g_disguiseState == 1 then
             S.g_disguiseState = GetUnitDisguiseState("player")
             if S.g_disguiseState == 0 then
-                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.DisguiseIcons[S.g_currentDisguise].description)
+                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
                 if ChatAnnouncements.SV.Notify.DisguiseCA then
                     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
