@@ -583,6 +583,7 @@ function ChatAnnouncements.RegisterColorEvents()
     ColorizeColors.StorageRidingColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageRidingColor))
     ColorizeColors.StorageRidingBookColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageRidingBookColor))
     ColorizeColors.StorageBagColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageBagColor))
+    ColorizeColors.ArmoryBuildColorize = ZO_ColorDef:New(unpack(SV.Notify.ArmoryBuildColor))
     ColorizeColors.GuildColorize = ZO_ColorDef:New(unpack(SV.Social.GuildColor))
     ColorizeColors.AntiquityColorize = ZO_ColorDef:New(unpack(SV.Antiquities.AntiquityColor))
 end

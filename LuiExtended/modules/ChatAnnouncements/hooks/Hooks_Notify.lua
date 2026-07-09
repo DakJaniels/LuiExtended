@@ -287,6 +287,64 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         return true
     end
 
+    local function getArmoryBuildDisplayName(buildIndex)
+        if buildIndex == nil then
+            return nil
+        end
+        local buildName = GetArmoryBuildName(buildIndex)
+        if buildName == "" then
+            buildName = zo_strformat(SI_ARMORY_BUILD_DEFAULT_NAME_FORMATTER, buildIndex)
+        end
+        return buildName
+    end
+
+    local function notifyArmoryBuildResponse(eventId, result, buildIndex, isSave)
+        local notify = ChatAnnouncements.SV.Notify
+        if not (ChatAnnouncements.Enabled and (notify.ArmoryBuildCA or notify.ArmoryBuildCSA or notify.ArmoryBuildAlert)) then
+            return
+        end
+
+        local isSuccess = isSave and result == ARMORY_BUILD_SAVE_RESULT_SUCCESS
+            or not isSave and result == ARMORY_BUILD_RESTORE_RESULT_SUCCESS
+
+        if isSuccess then
+            local buildName = getArmoryBuildDisplayName(buildIndex)
+            if buildName == nil then
+                return
+            end
+            local titleStringId = isSave and SI_ARMORY_BUILD_SAVE_SUCCESS_DIALOG_TITLE or SI_ARMORY_BUILD_RESTORE_SUCCESS_DIALOG_TITLE
+            local bodyStringId = isSave and SI_ARMORY_BUILD_SAVE_SUCCESS_DIALOG_TEXT or SI_ARMORY_BUILD_RESTORE_SUCCESS_DIALOG_TEXT
+            local body = zo_strformat(GetString(bodyStringId), buildName)
+            local title = GetString(titleStringId)
+
+            if notify.ArmoryBuildCA then
+                local formattedString = ColorizeColors.ArmoryBuildColorize:Colorize(body)
+                ChatOutput:Print(formattedString, true)
+            end
+            if notify.ArmoryBuildCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
+                messageParams:SetText(title, body)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+            if notify.ArmoryBuildAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, body)
+            end
+        else
+            local resultStringId = isSave and "SI_ARMORYBUILDSAVERESULT" or "SI_ARMORYBUILDRESTORERESULT"
+            local failureMessage = GetString(resultStringId, result)
+            if failureMessage == "" then
+                return
+            end
+            if notify.ArmoryBuildCA then
+                ChatOutput:Print(failureMessage, true)
+            end
+            if notify.ArmoryBuildAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, failureMessage)
+            end
+        end
+    end
+
     -- EVENT_TRADE_INVITE_FAILED (Alert Handler)
     local function TradeInviteFailedAlert(errorReason, inviteeCharacterName, inviteeDisplayName)
         if ChatAnnouncements.SV.Notify.NotificationTradeCA or ChatAnnouncements.SV.Notify.NotificationTradeAlert then
@@ -676,6 +734,13 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     ZO_PreHook(csaHandlers, EVENT_DUEL_COUNTDOWN, DuelCountdownHook)
 
     eventManager:RegisterForEvent(moduleName, EVENT_DUEL_STARTED, ChatAnnouncements.DuelStarted)
+
+    eventManager:RegisterForEvent(moduleName .. "ArmoryBuildSave", EVENT_ARMORY_BUILD_SAVE_RESPONSE, function (eventId, result, buildIndex)
+        notifyArmoryBuildResponse(eventId, result, buildIndex, true)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "ArmoryBuildRestore", EVENT_ARMORY_BUILD_RESTORE_RESPONSE, function (eventId, result, buildIndex)
+        notifyArmoryBuildResponse(eventId, result, buildIndex, false)
+    end)
 
     -- Helper to create formatted name link for mail target
     local function CreateMailTargetLink(targetName)

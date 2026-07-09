@@ -223,6 +223,12 @@ ChatAnnouncements.Defaults =
         CampaignQueueAlert = false,
         OutfitEquipCA = true,
         OutfitEquipAlert = false,
+
+        ArmoryBuildColor = { 0.75, 0.75, 0.75, 1 },
+        ArmoryBuildCA = true,
+        ArmoryBuildCSA = true,
+        ArmoryBuildAlert = false,
+
         ChallengeDifficultyCA = true,
         ChallengeDifficultyAlert = false,
         SocialErrorCA = true,
