@@ -263,9 +263,14 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         local sound = SOUNDS.GENERAL_ALERT_ERROR
         if result == EQUIP_OUTFIT_RESULT_SUCCESS then
             local outfitIndex = GetEquippedOutfitIndex(actorCategory)
-            local name = GetOutfitName(actorCategory, outfitIndex)
-            if name == "" then
-                name = zo_strformat("<<1>> <<2>>", GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS), outfitIndex)
+            local name
+            if outfitIndex == nil then
+                name = GetString(SI_NO_OUTFIT_EQUIP_ENTRY)
+            else
+                name = GetOutfitName(actorCategory, outfitIndex)
+                if name == "" then
+                    name = zo_strformat("<<1>> <<2>>", GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS), outfitIndex)
+                end
             end
             message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_OUTFIT_CONFIRMATION), name)
             alertCategory = UI_ALERT_CATEGORY_ALERT
