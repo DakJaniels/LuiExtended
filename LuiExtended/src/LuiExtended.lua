@@ -27,8 +27,8 @@ LUIE = {}
 LUIE.__index = LUIE
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.6.1"
-LUIE.addonVersion = 7261
+LUIE.version = "7.2.6.2"
+LUIE.addonVersion = 7262
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -387,8 +387,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = false,
-            debug = false,
+            enabled = true,
+            debug = true,
         },
         ["@dack_janiels.luie"] =
         {

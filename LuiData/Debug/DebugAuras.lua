@@ -3968,6 +3968,7 @@ local debugAuras =
 
     -- Disguises
     [46281] = true, -- Necromancer Disguise (Bloodthorn Disguse)
+    [259286] = true, -- Bloodthorn Disguise (Bloodthorn Cultist Outfit)
     [31766] = true, -- Disguised (Colovian Uniform)
     [48429] = true, -- Gold Coast Courier Uniform (Courier Uniform)
     [33221] = true, -- Crown Disguise (Crown Dishdasha)

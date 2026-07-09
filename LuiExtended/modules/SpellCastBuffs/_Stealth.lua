@@ -30,8 +30,9 @@ function SpellCastBuffs.SetDisguiseItem()
 
     local name = GetItemName(BAG_WORN, EQUIP_SLOT_COSTUME)
     local abilityName = Abilities.Innate_Disguise
-    local icon = Effects.DisguiseIcons[SpellCastBuffs.currentDisguise].icon
-    local idTooltip = Effects.DisguiseIcons[SpellCastBuffs.currentDisguise].id or ""
+    local disguiseData = Effects.GetDisguiseDisplayData(SpellCastBuffs.currentDisguise)
+    local icon = disguiseData.icon
+    local idTooltip = disguiseData.id or ""
     local tooltip = Effects.EffectOverride[idTooltip] and Effects.EffectOverride[idTooltip].tooltip or Tooltips.Disguise_Generic
     -- Determine Context
     local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
@@ -51,6 +52,8 @@ function SpellCastBuffs.SetDisguiseItem()
         restart = true,
         iconNum = 0,
     }
+    -- ClearPlayerBuff only marks dirty when it removes an existing entry; re-equip after unequip needs this.
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 -- Called on item slot change for Disguise.

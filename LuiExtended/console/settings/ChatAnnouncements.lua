@@ -9268,6 +9268,80 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CA_NOTIFY_ARMORY_BUILD_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_ARMORY_BUILD), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_ARMORY_BUILD_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+            getFunction = function ()
+                return Settings.Notify.ArmoryBuildCA
+            end,
+            setFunction = function (value)
+                Settings.Notify.ArmoryBuildCA = value
+            end,
+            default = Defaults.Notify.ArmoryBuildCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_ARMORY_BUILD), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_ARMORY_BUILD_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+            getFunction = function ()
+                return Settings.Notify.ArmoryBuildCSA
+            end,
+            setFunction = function (value)
+                Settings.Notify.ArmoryBuildCSA = value
+            end,
+            default = Defaults.Notify.ArmoryBuildCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_ARMORY_BUILD), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_ARMORY_BUILD_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+            getFunction = function ()
+                return Settings.Notify.ArmoryBuildAlert
+            end,
+            setFunction = function (value)
+                Settings.Notify.ArmoryBuildAlert = value
+            end,
+            default = Defaults.Notify.ArmoryBuildAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CA_MISC_SHOW_ARMORY_BUILD_COLOR),
+            getFunction = function ()
+                return Settings.Notify.ArmoryBuildColor[1], Settings.Notify.ArmoryBuildColor[2], Settings.Notify.ArmoryBuildColor[3], Settings.Notify.ArmoryBuildColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.Notify.ArmoryBuildColor = { r, g, b, a }
+                ChatAnnouncements.RegisterColorEvents()
+            end,
+            default = Defaults.Notify.ArmoryBuildColor,
+            disable = function ()
+                return not (Settings.Notify.ArmoryBuildCA or Settings.Notify.ArmoryBuildCSA or Settings.Notify.ArmoryBuildAlert and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_CHECKBOX,
             label = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_NOTIFY_CHALLENGE_DIFFICULTY_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),

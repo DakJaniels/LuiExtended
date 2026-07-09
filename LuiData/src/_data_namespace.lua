@@ -131,6 +131,7 @@ local DebugStatus = {}
 --- @field CompanionAbilityTrack CompanionAbilityTrack Slotted companion ability id -> UF icon track data
 --- @field BarIdOverride BarIdOverride Table of bar ID overrides
 --- @field DisguiseIcons EffectsDisguiseIcons Table of disguise icon definitions
+--- @field GetDisguiseDisplayData fun(itemId: integer): DisguiseIcons Resolve disguise display data (table entry or item-icon fallback)
 --- @field EffectCreateSkillAura EffectCreateSkillAura Table of skill aura creation definitions
 --- @field EffectGroundDisplay EffectGroundDisplay Table of fake ground effect display definitions
 --- @field EffectHideSCT EffectHideSCT Table of effects to hide from SCT
@@ -300,8 +301,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7225
-LuiData.addonVersion = "7.2.2.5"
+LuiData.version = 7226
+LuiData.addonVersion = "7.2.2.6"
 
 --- @class (partial) Data
 LuiData.Data =
