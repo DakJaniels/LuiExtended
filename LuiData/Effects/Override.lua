@@ -1812,6 +1812,7 @@ local effectOverride =
 
     -- Disguises
     [46281] = { tooltip = Tooltips.Disguise_Bloodthorn },                                                                  -- Necromancer Disguise (Bloodthorn Disguise)
+    [259286] = { hide = true },                                                                                           -- Bloodthorn Disguise (Bloodthorn Cultist Outfit) -- shown via fake costume buff 999020
     [30879] = { tooltip = Tooltips.Disguise_Kollopi_Essence },                                                             -- Shimmering Glow (Kollopi Essence)
     [43716] = { tooltip = Tooltips.Disguise_Phaer_Mercenary },                                                             -- Phaer Mercenary Disguise (Phaer Mercenary Disguise)
     [43719] = { tooltip = Tooltips.Disguise_Quendeluun },                                                                  -- Quendeluun Pact Disguise (Quendeluun Veiled Heritance Disguise)

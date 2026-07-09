@@ -51,6 +51,7 @@ local DisguiseIcons =
     [45008] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_VULKHEL_GUARD_MARINE_DISGUISE_DDS, description = "as a First Auridon Marine.", id = 43722 },
     [45781] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_KOLLOPI_ESSENCE_DDS, description = "by the Kollopi Essence.", id = 30879 },
     [45803] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_BLOODTHORN_DISGUISE_DDS, description = "as a Bloodthorn Cultist.", id = 46281 },
+    [223700] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_BLOODTHORN_DISGUISE_DDS, description = "as a Bloodthorn Cultist.", id = 46281 }, -- Bloodthorn Cultist Outfit (live aura 259286 is hidden)
     [54332] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_FORT_AMOL_GUARD_DISGUISE_DDS, description = "as a Fort Amol guard.", id = 47574 },
     [54380] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_STEEL_SHRIKE_UNIFORM_DDS, description = "as a member of the Steel Shrikes.", id = 19013 },
     [54483] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_COURIER_UNIFORM_DDS, description = "as a Gold Coast mercenary courier.", id = 48429 },
@@ -68,3 +69,29 @@ local DisguiseIcons =
 
 --- @type EffectsDisguiseIcons
 Effects.DisguiseIcons = DisguiseIcons
+
+--- Resolve icon/description/tooltip id for a worn costume itemId.
+--- Falls back to the item's game icon when the id is missing from DisguiseIcons.
+--- @param itemId integer
+--- @return DisguiseIcons
+function Effects.GetDisguiseDisplayData(itemId)
+    local disguiseData = DisguiseIcons[itemId]
+    if disguiseData then
+        return disguiseData
+    end
+
+    if itemId ~= 0 then
+        local itemLink = GetItemLink(BAG_WORN, EQUIP_SLOT_COSTUME, LINK_STYLE_DEFAULT)
+        local icon = GetItemLinkIcon(itemLink)
+        if icon and icon ~= "" then
+            return
+            {
+                icon = icon,
+                description = zo_strformat("as <<1>>.", GetItemName(BAG_WORN, EQUIP_SLOT_COSTUME)),
+                id = nil,
+            }
+        end
+    end
+
+    return DisguiseIcons[0]
+end
