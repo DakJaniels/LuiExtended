@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.3
+
+### New
+
+- Chat Announcements: Display Announcements for Dynamic Encounters (PC and console). Separate chat, center-screen, and alert toggles for Vampire Hunt, Flowervine Farm, Bilsa's Delivery, and Misc.
+
 ## Version 7.2.6.2
 
 ### New
