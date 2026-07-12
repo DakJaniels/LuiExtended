@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat Announcements CSA / progress bar helpers
+--  LuiExtended - Chat Announcements CSA / progress bar helpers
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

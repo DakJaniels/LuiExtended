@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — ActionBar namespace, defaults, and module constants
+--  LuiExtended - ActionBar namespace, defaults, and module constants
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

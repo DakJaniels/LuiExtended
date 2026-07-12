@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat Announcements hook shared context (CSA / alerts)
+--  LuiExtended - Chat Announcements hook shared context (CSA / alerts)
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended

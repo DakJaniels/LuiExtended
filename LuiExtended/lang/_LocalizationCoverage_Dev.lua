@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — dev-only localization coverage (not loaded in release builds)
+--  LuiExtended - dev-only localization coverage (not loaded in release builds)
 -- -----------------------------------------------------------------------------
 -- Enable in LuiExtended.addon immediately after lang/_RegisterStrings.lua:
 --   lang/_LocalizationCoverage_Dev.lua

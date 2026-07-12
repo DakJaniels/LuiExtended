@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — MiniMap localization (ru)
+--  LuiExtended - MiniMap localization (ru)
 -- -----------------------------------------------------------------------------
 
 local strings =
@@ -43,7 +43,7 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS = "Наведение на метки (мс)",
     LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP = "Метки под курсором. В основном клавиатура и мышь.",
     LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP = "Показывать в Death Recap",
-    LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP = "Показывать, пока открыто окно Death Recap. Выкл. — скрыть карту на этом экране.",
+    LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP = "Показывать, пока открыто окно Death Recap. Выкл. - скрыть карту на этом экране.",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG = "Отладка конечного автомата меток",
     LUIE_STRING_LAM_MINIMAP_PIN_MIRROR_STATE_MACHINE_DEBUG_TP = "Зеркало меток, перезагрузка карты и быстрый переход в чат.",
     LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL = "Привязать InfoPanel к миникарте",

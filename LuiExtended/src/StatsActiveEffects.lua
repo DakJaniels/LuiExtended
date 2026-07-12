@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Character Stats "Active Effects" (keyboard + gamepad)
+--  LuiExtended - Character Stats "Active Effects" (keyboard + gamepad)
 --  Layer 1: EsoUI/Ingame/Stats (GetArtificialEffectInfo + GetUnitBuffInfo gates).
 --  Layer 2: LUIE icon/name/tooltip enrichment (EffectOverride.hide does not filter listing).
 --  Layer 3: SpellCastBuffs player EffectsList rows absent from unit API.

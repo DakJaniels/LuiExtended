@@ -502,7 +502,7 @@ local function ApplyMultiLineToFrame(healthFrame, markerLineX, markerHeight, sta
         end
     end
     if not thresholdMarkerEntry then
-        -- Stable name keyed by parent-local slot (#thresholdMarkers + 1) — no monotonic
+        -- Stable name keyed by parent-local slot (#thresholdMarkers + 1) - no monotonic
         -- global serial, and the name string is reused if we never expand past
         -- this slot again.
         thresholdMarkerEntry = { line = CreateThresholdLine(thresholdContainer, #thresholdMarkers + 1) }

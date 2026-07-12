@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat Announcements hooks: Cyrodiil Vengeance loadout CSA
+--  LuiExtended - Chat Announcements hooks: Cyrodiil Vengeance loadout CSA
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended

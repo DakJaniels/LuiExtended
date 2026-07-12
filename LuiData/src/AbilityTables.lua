@@ -69,7 +69,7 @@ local darkShade
 local abilityTables =
 {
 
-    -- Dragonknight — Vengeance Cyro templates (see docs/VENGEANCE_SKILL_MAP.csv)
+    -- Dragonknight - Vengeance Cyro templates (see docs/VENGEANCE_SKILL_MAP.csv)
     Skill_Vengeance_Standard = zo_strformat("<<C:1>>", GetAbilityName(237627)),          -- Vengeance Dragonknight Standard
     Skill_Vengeance_Lava_Whip = zo_strformat("<<C:1>>", GetAbilityName(237606)),         -- Vengeance Lava Whip
     Skill_Vengeance_Searing_Strike = zo_strformat("<<C:1>>", GetAbilityName(237607)),    -- Vengeance Searing Strike

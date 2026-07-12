@@ -16,7 +16,7 @@ local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- BarSlotUpdate skips toggled highlights when GetUpdatedAbilityDuration is 0 unless the **track** id (after BarHighlightOverride.newId) is listed here.
--- Does not suppress bar countdown labels — use BarHighlightHideDurationLabel for stack-only charge buffs (e.g. Necromancer skulls).
+-- Does not suppress bar countdown labels - use BarHighlightHideDurationLabel for stack-only charge buffs (e.g. Necromancer skulls).
 -- Do not list ids that still show a real timer from combatTrack (e.g. Power Lash 34117 keeps its 20s label via BarHighlightOverride.duration).
 --------------------------------------------------------------------------------------------------------------------------------
 --- @type table<integer, boolean>
@@ -39,7 +39,7 @@ local addNoDurationBarHighlight =
     -- Two Handed
     [61737] = true, -- Empower (Wrecking Blow); API Dur 0 until combat refresh
 
-    -- Nightblade — Grim Focus line (track buff API duration 0; stacks via counter + slotted id)
+    -- Nightblade - Grim Focus line (track buff API duration 0; stacks via counter + slotted id)
     [122585] = true, -- Grim Focus
     [122586] = true, -- Merciless Resolve
     [122587] = true, -- Relentless Focus

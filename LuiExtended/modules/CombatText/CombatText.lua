@@ -457,7 +457,7 @@ function CombatText.Initialize(enabled)
         CombatText.pointEventViewer:OnEvent(...)
     end)
     -- Point viewer only registered on pointsAllianceListener in Initialize; champion and experience
-    -- listeners are separate objects — forward their POINT callbacks here too.
+    -- listeners are separate objects - forward their POINT callbacks here too.
     CombatText.pointsExperienceListener:RegisterCallback(CombatTextConstants.eventType.POINT, function (...)
         CombatText.pointEventViewer:OnEvent(...)
     end)

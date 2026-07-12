@@ -43,13 +43,13 @@ function SpellCastBuffs.ReloadEffects(unitTag)
         end
     end
 
-    -- Stop doing anything else if we moused off a target (lists cleared above — refresh display)
+    -- Stop doing anything else if we moused off a target (lists cleared above - refresh display)
     if GetUnitName(unitTag) == "" then
         SpellCastBuffs.MarkDisplayDirty()
         return
     end
 
-    -- Bail out if the target is dead (lists cleared — refresh display without refilling)
+    -- Bail out if the target is dead (lists cleared - refresh display without refilling)
     if IsUnitDead(unitTag) then
         SpellCastBuffs.MarkDisplayDirty()
         return

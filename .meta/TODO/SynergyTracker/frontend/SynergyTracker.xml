@@ -5,7 +5,7 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
   <Controls>
-    <!-- Virtual template for a single synergy row — instantiated dynamically in Lua via
+    <!-- Virtual template for a single synergy row - instantiated dynamically in Lua via
     CreateControlFromVirtual -->
     <Control name="LUIE_SynergyTracker_RowTemplate"
              mouseEnabled="true"

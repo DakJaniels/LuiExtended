@@ -113,6 +113,7 @@ modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
 modules/ChatAnnouncements/ChatAnnouncementsCSA.lua
 modules/ChatAnnouncements/QuestCounterFilters.lua
 modules/ChatAnnouncements/ChatAnnouncementsNightMarketDisplay.lua
+modules/ChatAnnouncements/ChatAnnouncementsDynamicEncounterDisplay.lua
 modules/ChatAnnouncements/hooks/_HookShared.lua
 modules/ChatAnnouncements/hooks/Hooks_Inventory.lua
 modules/ChatAnnouncements/hooks/Hooks_Lorebooks.lua

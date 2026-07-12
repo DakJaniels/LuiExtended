@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  Chat Announcements — suppress default CHAT_ROUTER social lines when CA owns them
+--  Chat Announcements - suppress default CHAT_ROUTER social lines when CA owns them
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

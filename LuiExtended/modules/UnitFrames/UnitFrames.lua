@@ -2689,7 +2689,7 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
                 unitFrame.leader:SetTexture(leaderIcons[0])
             end
 
-            -- Set label dimensions (always — driven purely by SV geometry)
+            -- Set label dimensions (always - driven purely by SV geometry)
             unitFrame.dead:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
             unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
 

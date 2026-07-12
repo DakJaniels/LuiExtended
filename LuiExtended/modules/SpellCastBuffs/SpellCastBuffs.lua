@@ -179,7 +179,7 @@ local function InitializePreviewLabels()
     end
 end
 
--- Flex container classification tables — defined here so Initialize can reference them.
+-- Flex container classification tables - defined here so Initialize can reference them.
 -- WRAP_CONTAINERS: multi-row containers whose iconHolder uses FLEX_WRAP_WRAP / WRAP_REVERSE.
 -- SINGLE_AXIS_CONTAINERS: single-line containers that never wrap.
 local WRAP_CONTAINERS =
@@ -824,7 +824,7 @@ end
 
 -- Populate SpellCastBuffs.alignmentDirection from SV settings.
 -- Values are kept as the SV strings ("Left", "Right", "Centered", "Top", "Bottom")
--- and consumed directly by GetFlexJustification — no translation to anchor constants needed.
+-- and consumed directly by GetFlexJustification - no translation to anchor constants needed.
 -- Called from Settings Menu and on Initialize.
 function SpellCastBuffs.SetupContainerAlignment()
     SpellCastBuffs.alignmentDirection = {}
@@ -989,7 +989,7 @@ end
 
 -- Set position of windows. Called from .Initialize() and .ResetTlwPosition()
 function SpellCastBuffs.SetTlwPosition()
-    -- If icons are locked to custom frames, BuffContainers are CT_CONTROLs on UnitFrames; otherwise they are CT_TOPLEVELCONTROLs — only position TLWs.
+    -- If icons are locked to custom frames, BuffContainers are CT_CONTROLs on UnitFrames; otherwise they are CT_TOPLEVELCONTROLs - only position TLWs.
     local lockToUnitFrames = SpellCastBuffs.SV.lockPositionToUnitFrames
     local useSavedPosition = (lockToUnitFrames == nil or not lockToUnitFrames)
 
@@ -1270,7 +1270,7 @@ end
 -- Called from both ResetSingleIcon (full reset) and updateIcons (every re-show).
 --
 -- Uses explicit PHYSICAL edges (not FLEX_EDGE_END/START) because ESO's Yoga implementation
--- does not appear to resolve logical edges by flex direction for SetFlexMargin — FLEX_EDGE_END
+-- does not appear to resolve logical edges by flex direction for SetFlexMargin - FLEX_EDGE_END
 -- maps to a fixed constant that works for ROW but silently applies the wrong physical edge
 -- for COLUMN layouts, resulting in zero vertical gap between stacked icons.
 --
@@ -1400,7 +1400,7 @@ function SpellCastBuffs.ShouldShowBuffIconRadialCooldown(container, effect)
     return true
 end
 
---- ZO_BuffDebuffIcon: Cooldown level 1, Icon level 2 — radial wedge under art.
+--- ZO_BuffDebuffIcon: Cooldown level 1, Icon level 2 - radial wedge under art.
 --- @param buff SpellCastBuffs_BuffIcon_Control
 function SpellCastBuffs.ApplyBuffIconDrawOrder(buff)
     if buff.cd then

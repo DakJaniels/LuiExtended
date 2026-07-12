@@ -1505,7 +1505,7 @@ function CrowdControlTracker:StartAnimation(control, animType, test)
         self.timelineCache = {}
     end
 
-    -- Split "silence" into two cache slots — the original code branched on
+    -- Split "silence" into two cache slots - the original code branched on
     -- LUIE_CCTracker:GetAlpha() < 1 with completely different keyframe shapes
     -- (different scale magnitudes + a CCTracker alpha fade-in). Each shape
     -- gets its own cached timeline.

@@ -87,7 +87,7 @@ function SpellCastBuffs.ResolveEffectCcType(abilityId, statusEffectType, ability
     return nil
 end
 
---- Chat/debug suffix for Effect debug (Show Debug Effect) — CC resolve + fill color hint.
+--- Chat/debug suffix for Effect debug (Show Debug Effect) - CC resolve + fill color hint.
 --- @param abilityId integer
 --- @param statusEffectType StatusEffectType|integer|nil
 --- @param effectType BuffEffectType|integer

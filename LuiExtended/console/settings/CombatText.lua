@@ -258,7 +258,7 @@ function CombatText.CreateConsoleSettings()
             settings[#settings + 1] =
             {
                 type = LHAS.ST_SLIDER,
-                label = zo_strformat("<<1>> — <<2>>", panelTitle, GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X)),
+                label = zo_strformat("<<1>> - <<2>>", panelTitle, GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X)),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
                 min = -maxOffsetX,
                 max = maxOffsetX,
@@ -288,7 +288,7 @@ function CombatText.CreateConsoleSettings()
             settings[#settings + 1] =
             {
                 type = LHAS.ST_SLIDER,
-                label = zo_strformat("<<1>> — <<2>>", panelTitle, GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y)),
+                label = zo_strformat("<<1>> - <<2>>", panelTitle, GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y)),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
                 min = -maxOffsetY,
                 max = maxOffsetY,

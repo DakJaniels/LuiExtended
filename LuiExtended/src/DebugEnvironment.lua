@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — debug environment (LUIE-core addon allowlist via /luie debug)
+--  LuiExtended - debug environment (LUIE-core addon allowlist via /luie debug)
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended

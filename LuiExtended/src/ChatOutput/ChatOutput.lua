@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — LUIE-wide chat output routing (LUIE.SV.ChatOutput)
+--  LuiExtended - LUIE-wide chat output routing (LUIE.SV.ChatOutput)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 
@@ -216,7 +216,7 @@ local function ConvertLuiExtendedTimestampFormatByScanner(luiFormat)
 end
 
 --- Maps LUIE Timestamp Format tokens (HH, m, xy, …) to a LibChatMessage/os.date format (bracketed literals).
---- Uses zo_tokenize colon segments or a plain zo_strsub scan — not zo_strgsub / CreateTimestamp (no clock values).
+--- Uses zo_tokenize colon segments or a plain zo_strsub scan - not zo_strgsub / CreateTimestamp (no clock values).
 --- @param luiFormat string|nil
 --- @return string
 function LUIE_ChatOutput:LuiExtendedFormatToLibChatMessageOsDate(luiFormat)

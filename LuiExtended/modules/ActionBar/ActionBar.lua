@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — ActionBar implementation (namespace: Namespace.lua)
+--  LuiExtended - ActionBar implementation (namespace: Namespace.lua)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 
@@ -849,7 +849,7 @@ local function GetUpdatedAbilityDuration(abilityId)
         end
     end
 
-    -- If duration is 0, may be cast/channel — use cast time (ZOS: GetAbilityCastInfo 2nd return)
+    -- If duration is 0, may be cast/channel - use cast time (ZOS: GetAbilityCastInfo 2nd return)
     if duration == 0 then
         local _, castTime = GetAbilityCastInfo(abilityId, overrideActiveRank, overrideCasterUnitTag)
         duration = castTime

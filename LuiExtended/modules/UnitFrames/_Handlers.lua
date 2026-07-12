@@ -10,7 +10,7 @@ local LUIE = LUIE
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
 
---- Small-group / raid unit backdrop or top-info strip (`control`, `topInfo`) — `defaultUnitTag` set in CustomFrames build and refreshed in `_MenuFunctions.lua`.
+--- Small-group / raid unit backdrop or top-info strip (`control`, `topInfo`) - `defaultUnitTag` set in CustomFrames build and refreshed in `_MenuFunctions.lua`.
 --- @class LUIE_GroupFrameInteractionControl : Control
 --- @field defaultUnitTag string
 

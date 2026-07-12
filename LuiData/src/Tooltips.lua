@@ -46,7 +46,7 @@ local PoisonDamage = GetString(SI_DAMAGETYPE11) .. " Damage"  -- TODO: Localize
 local BleedDamage = GetString(SI_DAMAGETYPE12) .. " Damage"   -- TODO: Localize
 local OblivionDamage = "Oblivion Damage"                      -- TODO: Localize
 
--- Cached string lookups (single GetString per repeated id — reduces load-time C-call churn)
+-- Cached string lookups (single GetString per repeated id - reduces load-time C-call churn)
 local str_BATTLE_RUSH_TP = GetString(LUIE_STRING_SKILL_BATTLE_RUSH_TP)
 local str_DEFENSIVE_SCROLL_BONUS_TP = GetString(LUIE_STRING_SKILL_DEFENSIVE_SCROLL_BONUS_TP)
 local str_EDGE_KEEP_BONUS_TP = GetString(LUIE_STRING_SKILL_EDGE_KEEP_BONUS_TP)

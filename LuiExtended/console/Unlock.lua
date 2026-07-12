@@ -436,7 +436,7 @@ function Unlock.GetUnlockPositionAttr(element)
 end
 
 --- Top-level mover window name (addon-owned TLW; not the ZOS frame being repositioned).
---- `$(parent)_*` children require a non-empty parent name — `CreateTopLevelWindow(nil)` yields duplicate `_Preview`.
+--- `$(parent)_*` children require a non-empty parent name - `CreateTopLevelWindow(nil)` yields duplicate `_Preview`.
 --- @param element Control
 --- @return string
 local function GetUnlockMoverTopLevelName(element)

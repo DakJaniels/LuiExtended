@@ -1,5 +1,5 @@
 <!--
-      LuiExtended — changelog section virtual templates only (no runtime instances).
+      LuiExtended - changelog section virtual templates only (no runtime instances).
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
