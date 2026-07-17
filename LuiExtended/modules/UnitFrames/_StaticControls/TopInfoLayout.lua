@@ -281,10 +281,10 @@ end
 --- @param self LUIE_CustomFrameObject
 --- @return TextureControl|nil
 local function GetTopInfoActiveLevelIcon(self)
-    if self.veterancyRankIcon and not self.veterancyRankIcon:IsHidden() then
+    if self.veterancyRankIcon and not self.veterancyRankIcon:IsControlHidden() then
         return self.veterancyRankIcon
     end
-    if self.levelIcon and not self.levelIcon:IsHidden() then
+    if self.levelIcon and not self.levelIcon:IsControlHidden() then
         return self.levelIcon
     end
     return nil
@@ -296,7 +296,7 @@ end
 --- @param showLevelRow boolean
 --- @return number
 local function GetTopInfoLevelClusterRequiredWidth(self, showLevelRow)
-    if not showLevelRow or self.level == nil or self.level:IsHidden() then
+    if not showLevelRow or self.level == nil or self.level:IsControlHidden() then
         return 0
     end
     local iconWidth = TOPINFO_LEVEL_ICON_SIZE
@@ -328,18 +328,18 @@ local function ApplyTopInfoRowHeight(self, rowOffsetY)
     if rowHeight > 0 then
         self.topInfo:SetHeight(rowHeight)
         self.name:SetHeight(rowHeight)
-        if self.level and not self.level:IsHidden() then
+        if self.level and not self.level:IsControlHidden() then
             self.level:SetHeight(rowHeight)
         end
     end
     local iconSize = rowHeight > 0 and rowHeight or TOPINFO_LEVEL_ICON_SIZE
-    if self.levelIcon and not self.levelIcon:IsHidden() then
+    if self.levelIcon and not self.levelIcon:IsControlHidden() then
         self.levelIcon:SetDimensions(iconSize, iconSize)
     end
-    if self.veterancyRankIcon and not self.veterancyRankIcon:IsHidden() then
+    if self.veterancyRankIcon and not self.veterancyRankIcon:IsControlHidden() then
         self.veterancyRankIcon:SetDimensions(iconSize, iconSize)
     end
-    if self.overlandDifficultyIcon and not self.overlandDifficultyIcon:IsHidden() then
+    if self.overlandDifficultyIcon and not self.overlandDifficultyIcon:IsControlHidden() then
         self.overlandDifficultyIcon:SetDimensions(TOPINFO_OVERLAND_ICON_SIZE, TOPINFO_OVERLAND_ICON_SIZE)
     end
 end
@@ -408,7 +408,7 @@ end
 --- @return number
 local function ComputeTopInfoPlayerRightReserved(self)
     local rightReserved = 0
-    if self.classIcon and not self.classIcon:IsHidden() then
+    if self.classIcon and not self.classIcon:IsControlHidden() then
         rightReserved = rightReserved + self.classIcon:GetWidth() + 1
     end
     return rightReserved
@@ -418,19 +418,19 @@ end
 --- @return number
 local function ComputeTopInfoTargetRightReserved(self)
     local rightReserved = 1
-    if self.classIcon and not self.classIcon:IsHidden() then
+    if self.classIcon and not self.classIcon:IsControlHidden() then
         rightReserved = rightReserved + self.classIcon:GetWidth()
     end
-    if self.star3 and not self.star3:IsHidden() then
+    if self.star3 and not self.star3:IsControlHidden() then
         rightReserved = rightReserved + self.star3:GetWidth() + TARGET_STAR_GAP
     end
-    if self.star2 and not self.star2:IsHidden() then
+    if self.star2 and not self.star2:IsControlHidden() then
         rightReserved = rightReserved + self.star2:GetWidth() + TARGET_STAR_GAP
     end
-    if self.star1 and not self.star1:IsHidden() then
+    if self.star1 and not self.star1:IsControlHidden() then
         rightReserved = rightReserved + self.star1:GetWidth() + TARGET_STAR_GAP
     end
-    if self.friendIcon and not self.friendIcon:IsHidden() then
+    if self.friendIcon and not self.friendIcon:IsControlHidden() then
         rightReserved = rightReserved + self.friendIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
     end
     return rightReserved
@@ -440,10 +440,10 @@ end
 --- @return number
 local function ComputeTopInfoSmallGroupRightReserved(self)
     local rightReserved = SMALL_GROUP_RIGHT_PADDING
-    if self.classIcon and not self.classIcon:IsHidden() then
+    if self.classIcon and not self.classIcon:IsControlHidden() then
         rightReserved = rightReserved + self.classIcon:GetWidth()
     end
-    if self.friendIcon and not self.friendIcon:IsHidden() then
+    if self.friendIcon and not self.friendIcon:IsControlHidden() then
         rightReserved = rightReserved + self.friendIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
     end
     return rightReserved
@@ -453,7 +453,7 @@ end
 --- @return number
 local function ComputeTopInfoAvaTargetRightReserved(self)
     local rightReserved = 0
-    if self.avaRankIcon and not self.avaRankIcon:IsHidden() then
+    if self.avaRankIcon and not self.avaRankIcon:IsControlHidden() then
         rightReserved = rightReserved + self.avaRankIcon:GetWidth() + 1
     end
     return rightReserved
@@ -517,7 +517,7 @@ function FrameObject.LayoutTopInfoSmallGroup(self)
         self.leader:SetHidden(not isLeader)
     end
 
-    local showLevelRow = self.level and not self.level:IsHidden()
+    local showLevelRow = self.level and not self.level:IsControlHidden()
     if not showLevelRow then
         HideTopInfoLevelClusterWhenInactive(self)
     end
@@ -529,7 +529,7 @@ function FrameObject.LayoutTopInfoSmallGroup(self)
         self.classIcon:ClearAnchors()
         self.classIcon:SetAnchor(RIGHT, self.topInfo, RIGHT, -1, 0)
     end
-    if self.friendIcon and not self.friendIcon:IsHidden() then
+    if self.friendIcon and not self.friendIcon:IsControlHidden() then
         self.friendIcon:ClearAnchors()
         local friendAnchor = self.classIcon or self.topInfo
         self.friendIcon:SetAnchor(RIGHT, friendAnchor, LEFT, -TOPINFO_ROW_ICON_GAP, 0)
@@ -544,7 +544,7 @@ function FrameObject.LayoutTopInfoPlayer(self)
     FrameObject.RefreshTopInfoForLayout(self)
 
     local rowOffsetY = 0
-    local showLevelRow = self.level and not self.level:IsHidden()
+    local showLevelRow = self.level and not self.level:IsControlHidden()
     if not showLevelRow then
         HideTopInfoLevelClusterWhenInactive(self)
     end
@@ -565,7 +565,7 @@ function FrameObject.LayoutTopInfoTarget(self)
     FrameObject.UpdateStaticControlDifficultyStars(self)
 
     local rowOffsetY = 0
-    local showLevelRow = self.level and not self.level:IsHidden()
+    local showLevelRow = self.level and not self.level:IsControlHidden()
     if not showLevelRow then
         HideTopInfoLevelClusterWhenInactive(self)
     end
@@ -580,28 +580,28 @@ function FrameObject.LayoutTopInfoTarget(self)
         self.classIcon:ClearAnchors()
         self.classIcon:SetAnchor(RIGHT, self.topInfo, RIGHT, -1, 0)
     end
-    if self.friendIcon and not self.friendIcon:IsHidden() then
+    if self.friendIcon and not self.friendIcon:IsControlHidden() then
         self.friendIcon:ClearAnchors()
         local friendAnchor = self.classIcon or self.topInfo
         self.friendIcon:SetAnchor(RIGHT, friendAnchor, LEFT, -TOPINFO_ROW_ICON_GAP, 0)
     end
     local starAnchor = self.topInfo
-    if self.friendIcon and not self.friendIcon:IsHidden() then
+    if self.friendIcon and not self.friendIcon:IsControlHidden() then
         starAnchor = self.friendIcon
-    elseif self.classIcon and not self.classIcon:IsHidden() then
+    elseif self.classIcon and not self.classIcon:IsControlHidden() then
         starAnchor = self.classIcon
     end
-    if self.star1 and not self.star1:IsHidden() then
+    if self.star1 and not self.star1:IsControlHidden() then
         self.star1:ClearAnchors()
         self.star1:SetAnchor(RIGHT, starAnchor, LEFT, -TARGET_STAR_GAP, 0)
         starAnchor = self.star1
     end
-    if self.star2 and not self.star2:IsHidden() then
+    if self.star2 and not self.star2:IsControlHidden() then
         self.star2:ClearAnchors()
         self.star2:SetAnchor(RIGHT, starAnchor, LEFT, -TARGET_STAR_GAP, 0)
         starAnchor = self.star2
     end
-    if self.star3 and not self.star3:IsHidden() then
+    if self.star3 and not self.star3:IsControlHidden() then
         self.star3:ClearAnchors()
         self.star3:SetAnchor(RIGHT, starAnchor, LEFT, -TARGET_STAR_GAP, 0)
     end
@@ -615,14 +615,14 @@ function FrameObject.LayoutTopInfoAvaTarget(self)
     FrameObject.RefreshTopInfoForLayout(self)
 
     local rowOffsetY = 0
-    local showLevelRow = self.level and not self.level:IsHidden()
+    local showLevelRow = self.level and not self.level:IsControlHidden()
     if not showLevelRow then
         HideTopInfoLevelClusterWhenInactive(self)
     end
 
     -- AvA target keeps the class icon on the LEFT, before overland + name.
     local classWidth = 0
-    if self.classIcon and not self.classIcon:IsHidden() then
+    if self.classIcon and not self.classIcon:IsControlHidden() then
         self.classIcon:ClearAnchors()
         self.classIcon:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, 0, rowOffsetY)
         classWidth = self.classIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
@@ -631,7 +631,7 @@ function FrameObject.LayoutTopInfoAvaTarget(self)
     local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, classWidth)
     LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoAvaTargetRightReserved(self), showLevelRow)
 
-    if self.avaRankIcon and not self.avaRankIcon:IsHidden() then
+    if self.avaRankIcon and not self.avaRankIcon:IsControlHidden() then
         self.avaRankIcon:ClearAnchors()
         self.avaRankIcon:SetAnchor(TOPRIGHT, self.topInfo, TOPRIGHT, -1, rowOffsetY)
     end
