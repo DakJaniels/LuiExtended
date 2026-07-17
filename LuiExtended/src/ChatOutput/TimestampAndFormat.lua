@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat timestamps and CHAT_ROUTER helpers (LUIE.SV.ChatOutput)
+--  LuiExtended - Chat timestamps and CHAT_ROUTER helpers (LUIE.SV.ChatOutput)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

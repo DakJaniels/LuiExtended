@@ -49,7 +49,7 @@ local barHighlightExtraId =
     [114601] = 32715, -- Ferocious Leap stun --> slotted
     [262680] = 32715, -- Ferocious Leap stun --> slotted
     [32717] = 32715,  -- Ferocious Leap knockback aura (target; log, parallel 114601) --> slotted
-    -- Landslide 29465 shared; bar newId 29465 only on 29016 (Take Flight bar uses 262682 stun — not 29465).
+    -- Landslide 29465 shared; bar newId 29465 only on 29016 (Take Flight bar uses 262682 stun - not 29465).
     [259684] = 32715, -- Landslide (U49) --> Ferocious Leap
     [258293] = 31816, -- Magma Fist player buff (6s empower) --> slotted
     [92507] = 29043,  -- Major Sorcery combat (Molten Weapons) --> slotted

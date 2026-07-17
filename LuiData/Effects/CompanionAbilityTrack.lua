@@ -44,7 +44,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Class — Bastian Hallix (Imperial); skillLineId 174–176 (SkillDumper with Bastian active)
+    -- Class - Bastian Hallix (Imperial); skillLineId 174–176 (SkillDumper with Bastian active)
     ---------------------------------------------------------------------------
 
     -- Ardent Warrior (174): ult + 3 actives on line index 1 in UI
@@ -55,7 +55,7 @@ local companionAbilityTrack =
         groundTrackIds = { 157024, 157025, 157026 },
     },
 
-    -- Crag Smash (155186): ~366ms cast nuke; no companion/player aura — CD from BEGIN
+    -- Crag Smash (155186): ~366ms cast nuke; no companion/player aura - CD from BEGIN
     [155186] = {},
 
     -- Fiery Flail (153687): Off Balance 154579 ~7s on reticleover
@@ -96,7 +96,7 @@ local companionAbilityTrack =
     },
 
     -- Radiating Heart (176)
-    -- Kindle (154925): ~266ms cast heal; fleeting GAIN on player/companion — CD from BEGIN (shared: Tanlorin)
+    -- Kindle (154925): ~266ms cast heal; fleeting GAIN on player/companion - CD from BEGIN (shared: Tanlorin)
     [154925] = {},
 
     -- Basalt Barrier (153851): group shield 153851 ~6s on player and companion
@@ -118,7 +118,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Class — Mirri Elendis (Breton); skillLineId 177–179 (SkillDumper with Mirri active)
+    -- Class - Mirri Elendis (Breton); skillLineId 177–179 (SkillDumper with Mirri active)
     ---------------------------------------------------------------------------
 
     -- Deadly Assassin (177)
@@ -136,10 +136,10 @@ local companionAbilityTrack =
         alternateTrackId = 156183,
     },
 
-    -- Warp Strike (153853): gap closer ~400ms; damage 153854 — CD from BEGIN
+    -- Warp Strike (153853): gap closer ~400ms; damage 153854 - CD from BEGIN
     [153853] = {},
 
-    -- Slayer's Blade (153855): execute ~233ms; no target debuff in log — CD from BEGIN
+    -- Slayer's Blade (153855): execute ~233ms; no target debuff in log - CD from BEGIN
     [153855] = {},
 
     -- Living Shade (178)
@@ -168,7 +168,7 @@ local companionAbilityTrack =
     },
 
     -- Soul Thief (179)
-    -- Life Absorption (154790): ~200ms drain; heal burst 154794 — no lasting aura, CD from BEGIN
+    -- Life Absorption (154790): ~200ms drain; heal burst 154794 - no lasting aura, CD from BEGIN
     [154790] = {},
 
     -- Blood Transfusion (157287): ally HOT 157287 ~8s on player
@@ -178,11 +178,11 @@ local companionAbilityTrack =
         trackId = 157287,
     },
 
-    -- Life Siphon (157207): AOE drain; delayed heal 157208 — no lasting aura, CD from BEGIN
+    -- Life Siphon (157207): AOE drain; delayed heal 157208 - no lasting aura, CD from BEGIN
     [157207] = {},
 
     ---------------------------------------------------------------------------
-    -- Class — Sharp-as-Night (Argonian); skillLineId 241–243 (SkillDumper with Sharp-as-Night active)
+    -- Class - Sharp-as-Night (Argonian); skillLineId 241–243 (SkillDumper with Sharp-as-Night active)
     ---------------------------------------------------------------------------
 
     -- Beasts of the Hunt (241)
@@ -219,7 +219,7 @@ local companionAbilityTrack =
     },
 
     -- Verdant Growth (243)
-    -- Fungal Forage (186598): instant heal; combat 187039 ~0.5s on player at cast — CD from BEGIN
+    -- Fungal Forage (186598): instant heal; combat 187039 ~0.5s on player at cast - CD from BEGIN
     [186598] = {},
 
     -- Perennial Bloom (186602): ground heal 187110 ~8s; companion stand-in 196047 (187111 heal ticks)
@@ -264,7 +264,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Class — Isobel Veloise (Breton); skillLineId 200–202 (SkillDumper with Isobel active)
+    -- Class - Isobel Veloise (Breton); skillLineId 200–202 (SkillDumper with Isobel active)
     ---------------------------------------------------------------------------
 
     -- Blazing Might (200)
@@ -349,7 +349,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Class — Ember (Khajiit); skillLineId 196–198 (SkillDumper with Ember active)
+    -- Class - Ember (Khajiit); skillLineId 196–198 (SkillDumper with Ember active)
     ---------------------------------------------------------------------------
 
     -- Lightning Caller (196)
@@ -402,7 +402,7 @@ local companionAbilityTrack =
     },
 
     -- Playful Schemer (198)
-    -- Quick Fix (166018): instant heal ~0.6s cast; no persistent aura — CD from BEGIN
+    -- Quick Fix (166018): instant heal ~0.6s cast; no persistent aura - CD from BEGIN
     [166018] = {},
 
     -- Shared Wards (166069): shield 166069 ~6s + HOT 169289 ~8s on player and companion
@@ -416,11 +416,11 @@ local companionAbilityTrack =
         alternateTrackIds = { 166069 },
     },
 
-    -- Second Wind (166068): CD refresh; only BEGIN in log — CD from BEGIN
+    -- Second Wind (166068): CD refresh; only BEGIN in log - CD from BEGIN
     [166068] = {},
 
     ---------------------------------------------------------------------------
-    -- Class — Tanlorin; skillLineId 264–266 (SkillDumper with Tanlorin active)
+    -- Class - Tanlorin; skillLineId 264–266 (SkillDumper with Tanlorin active)
     -- Blazing Grasp (153839) + Kindle (154925): same slotted ids as Bastian DK lines above
     ---------------------------------------------------------------------------
 
@@ -489,7 +489,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Class — Azandar al-Gazaar (Arcanist); skillLineId 246–248 (SkillDumper with Azandar active)
+    -- Class - Azandar al-Gazaar (Arcanist); skillLineId 246–248 (SkillDumper with Azandar active)
     ---------------------------------------------------------------------------
 
     -- Quill Knight (247)
@@ -518,7 +518,7 @@ local companionAbilityTrack =
     },
 
     -- Revitalizing Researcher (248)
-    -- Triptych Physic (192574): instant triple heal (192575/192576 ticks); no persistent aura — CD from BEGIN
+    -- Triptych Physic (192574): instant triple heal (192575/192576 ticks); no persistent aura - CD from BEGIN
     [192574] = {},
 
     -- Shields of Erudition (192937): group shield ~6s; companion aura 192941 (player ally 192939)
@@ -543,7 +543,7 @@ local companionAbilityTrack =
         alternateTrackIds = { 195242, 195176, 195175 },
     },
 
-    -- The Triune Word (191273): triple hit; combat bundles 191278/191279 — no persistent track (CD from BEGIN)
+    -- The Triune Word (191273): triple hit; combat bundles 191278/191279 - no persistent track (CD from BEGIN)
     [191273] = {},
 
     -- Tendrils of the Colorless Sea (191293): Minor Vulnerability 79717 ~6s on reticleover (combat 191299)
@@ -562,7 +562,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Class — Zerith-var (Khajiit); skillLineId 260–262 (SkillDumper with Zerith-var active)
+    -- Class - Zerith-var (Khajiit); skillLineId 260–262 (SkillDumper with Zerith-var active)
     ---------------------------------------------------------------------------
 
     -- Guardian's Commitment (skillLineId 262)
@@ -645,7 +645,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Weapon — Two Handed (skillLineId 180)
+    -- Weapon - Two Handed (skillLineId 180)
     ---------------------------------------------------------------------------
 
     -- Staggering Swing (152433): stun/debuff 152445 ~2.5s on reticleover; combat bundle 152446
@@ -673,7 +673,7 @@ local companionAbilityTrack =
     [152624] = {},
 
     ---------------------------------------------------------------------------
-    -- Weapon — One Hand and Shield (skillLineId 181)
+    -- Weapon - One Hand and Shield (skillLineId 181)
     ---------------------------------------------------------------------------
 
     -- Provoke (152625): target debuff 157235 on reticleover, 15s
@@ -697,7 +697,7 @@ local companionAbilityTrack =
     [155328] = {},
 
     ---------------------------------------------------------------------------
-    -- Weapon — Dual Wield (skillLineId 182)
+    -- Weapon - Dual Wield (skillLineId 182)
     ---------------------------------------------------------------------------
 
     -- Swift Assault (152629): channel ~600ms; no persistent aura in log (CD from BEGIN)
@@ -714,7 +714,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Weapon — Bow (skillLineId 183)
+    -- Weapon - Bow (skillLineId 183)
     ---------------------------------------------------------------------------
 
     -- Piercing Arrow (152793): charged shot ~1s cast; CD from BEGIN (no target debuff in log)
@@ -735,7 +735,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Weapon — Destruction Staff (skillLineId 184); morphs share base slots in UI
+    -- Weapon - Destruction Staff (skillLineId 184); morphs share base slots in UI
     ---------------------------------------------------------------------------
 
     -- Destructive Blast (157131): base; morphs 157133 flame / 157135 frost / 157136–157137 shock
@@ -825,7 +825,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Weapon — Restoration Staff (skillLineId 185)
+    -- Weapon - Restoration Staff (skillLineId 185)
     ---------------------------------------------------------------------------
 
     -- Rejuvenation (153066): companion HoT 154755 ~8s; player HoT 153066 ~8s (player id not on companion auras)
@@ -850,14 +850,14 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Armor — Light (skillLineId 186); passive Flow (157728) not tracked on UF
+    -- Armor - Light (skillLineId 186); passive Flow (157728) not tracked on UF
     ---------------------------------------------------------------------------
 
     -- Haste (156340): resets other CDs; no track id in log (CD from BEGIN)
     [156340] = {},
 
     ---------------------------------------------------------------------------
-    -- Armor — Medium (skillLineId 187); passive Flexibility (157729) not tracked on UF
+    -- Armor - Medium (skillLineId 187); passive Flexibility (157729) not tracked on UF
     ---------------------------------------------------------------------------
 
     -- Vanish (156596): invis/stealth 156597 ~6s on companion; bundle 156598
@@ -869,14 +869,14 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Armor — Heavy (skillLineId 188); passive Firmness (157730) not tracked on UF
+    -- Armor - Heavy (skillLineId 188); passive Firmness (157730) not tracked on UF
     ---------------------------------------------------------------------------
 
     -- Bulwark (156599): block/reflect ~5s; no combat track id in log yet (CD from BEGIN)
     [156599] = {},
 
     ---------------------------------------------------------------------------
-    -- Guild — Fighters Guild (skillLineId 189)
+    -- Guild - Fighters Guild (skillLineId 189)
     ---------------------------------------------------------------------------
 
     -- Sniping Silver (153686): channel; companion cast aura 154918 ~1s during aim
@@ -905,7 +905,7 @@ local companionAbilityTrack =
     },
 
     ---------------------------------------------------------------------------
-    -- Guild — Mages Guild (skillLineId 190)
+    -- Guild - Mages Guild (skillLineId 190)
     ---------------------------------------------------------------------------
 
     -- Starfall (155403): channeled strike on target; no companion/player aura in log (CD from BEGIN)
@@ -922,7 +922,7 @@ local companionAbilityTrack =
     [155411] = {},
 
     ---------------------------------------------------------------------------
-    -- Guild — Undaunted (skillLineId 191)
+    -- Guild - Undaunted (skillLineId 191)
     ---------------------------------------------------------------------------
 
     -- Crimson Font (155515): ground 155515 ~16s; companion fountain aura 196038 ~16s

@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Quest condition counter CSA filters (user saved vars)
+--  LuiExtended - Quest condition counter CSA filters (user saved vars)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 
@@ -110,7 +110,7 @@ function ChatAnnouncements.FormatQuestCounterFilterRuleLabel(rule)
     elseif rule.mode == ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_COMPLETE_ONLY then
         modeLabel = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_COMPLETE)
     end
-    return zo_strformat("<<1>> — <<2>> — <<3>>", questPart, conditionPart, modeLabel)
+    return zo_strformat("<<1>> - <<2>> - <<3>>", questPart, conditionPart, modeLabel)
 end
 
 function ChatAnnouncements.InvalidateQuestCounterFilterCache()

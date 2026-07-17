@@ -47,7 +47,7 @@ function SettingsAPI.GetFontsList()
     return fontsList
 end
 
--- Fixed size for fontable_dropdown previews (face/style only — not the in-game font size slider).
+-- Fixed size for fontable_dropdown previews (face/style only - not the in-game font size slider).
 SettingsAPI.LAM_DROPDOWN_PREVIEW_FONT_SIZE = 14
 
 -- Memoize font strings for fontable_dropdown list previews (ZO scroll list recycles rows).

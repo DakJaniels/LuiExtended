@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat output settings (LUIE.SV.ChatOutput) for PC + console menus
+--  LuiExtended - Chat output settings (LUIE.SV.ChatOutput) for PC + console menus
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended
@@ -217,7 +217,7 @@ local function SetChatTabCheckboxValue(tabIndex, value, settings)
     settings.ChatTab[tabIndex] = value
 end
 
---- LAM tab rows are created for all slots at addon load; refresh enables/disables rows by live tab count (never hide — avoids LAM gaps).
+--- LAM tab rows are created for all slots at addon load; refresh enables/disables rows by live tab count (never hide - avoids LAM gaps).
 local function RefreshChatTabLAMControlLabels()
     if ZO_IsConsoleOrGameCoreUI() then
         return
@@ -369,7 +369,7 @@ local function GetLibChatMessageTimePrefixFormat()
     return LibChatMessage:GetTimePrefixFormat()
 end
 
---- LibChatMessage os.date format for LAM/edit display (single %, e.g. [%H:%M:%S] — not Lua-escaped %%).
+--- LibChatMessage os.date format for LAM/edit display (single %, e.g. [%H:%M:%S] - not Lua-escaped %%).
 --- @param format string
 --- @return string
 local function FormatLibChatMessageOsDateForSettingsDisplay(format)

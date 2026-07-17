@@ -1,5 +1,19 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.3
+
+### New
+
+- Chat Announcements: Display Announcements for Dynamic Encounters (PC and console). Separate chat, center-screen, and alert toggles for Vampire Hunt, Flowervine Farm, Bilsa's Delivery, and Misc.
+
+### Fixed
+
+- SpellCastBuffs: Adding any **Off Balance** ability id (or the canonical name) to **Prominent Debuffs** now tracks all Off Balance variants and Off Balance Immunity. Profiles that never received the default Off Balance prominent entry are seeded once on load.
+- SpellCastBuffs: **Crowd Control Immunity** (28301 / 38117) can be tracked as a prominent debuff on targets (same target-buff promote path as Off Balance Immunity).
+- Unit Frames: Custom player champion icon and level no longer clear when changing frame settings; they refresh immediately.
+- Unit Frames: Turning off **Target - Display Title** no longer leaves NPC or guild trader captions visible when **Target - Display AVA Rank Name** is still on. Rank name still applies to player targets only.
+- Unit Frames: Invulnerable targets (for example guards) no longer show a health percentage next to the Invulnerable label.
+
 ## Version 7.2.6.2
 
 ### New

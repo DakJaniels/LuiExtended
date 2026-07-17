@@ -415,7 +415,7 @@ end
 local COMBAT_TEXT_ICON_ART_INSET = 2
 local COMBAT_TEXT_ICON_CHROME_WHITE = { 1, 1, 1, 1 }
 
---- ZOS Skills ability slots (SkillsComponents_Keyboard.lua / SkillsComponents_Gamepad.lua) — neutral frames, not abilityFrame_buff/debuff.
+--- ZOS Skills ability slots (SkillsComponents_Keyboard.lua / SkillsComponents_Gamepad.lua) - neutral frames, not abilityFrame_buff/debuff.
 local function GetCombatTextActiveIconFrameTexture()
     if IsInGamepadPreferredMode() then
         return "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame64.dds"

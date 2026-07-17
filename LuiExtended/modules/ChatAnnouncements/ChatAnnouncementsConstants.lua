@@ -808,6 +808,30 @@ ChatAnnouncements.Defaults =
             CSA = true,
             Alert = false,
         },
+        ZoneDynamicEncounterVampireHunt =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneDynamicEncounterFlowervineFarm =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneDynamicEncounterBilsaDelivery =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneDynamicEncounterMisc =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
     },
 }
 

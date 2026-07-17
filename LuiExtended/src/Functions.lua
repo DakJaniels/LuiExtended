@@ -1055,7 +1055,7 @@ do
             return SneakMovementTooltipBody()
         end,
 
-        -- Sneak buff / stealth (live unit buff id — matches client; body depends on stealth state)
+        -- Sneak buff / stealth (live unit buff id - matches client; body depends on stealth state)
         [20309] = function (unitTag)
             unitTag = unitTag or "player"
             local stealthState = GetUnitStealthState(unitTag)
@@ -1093,7 +1093,7 @@ do
             return zo_strformat(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
         end,
 
-        -- Web (stacking Ensnared snare) — GetAbilityDescription / GetAbilityEffectDescription often return |cFFFFFF0|r% placeholders until stack context is applied.
+        -- Web (stacking Ensnared snare) - GetAbilityDescription / GetAbilityEffectDescription often return |cFFFFFF0|r% placeholders until stack context is applied.
         [256674] = function (unitTag)
             unitTag = unitTag or "player"
             local stacks = 0
@@ -1114,7 +1114,7 @@ do
             return zo_strformat(GetString(LUIE_STRING_SKILL_WEB_ENSNARED_STACK_TP), perStack, total)
         end,
 
-        -- Fated Fortune (Herald) — passive rank and timed stack share <<1>> crit bonus; API sheet/effect text stays at 0%%.
+        -- Fated Fortune (Herald) - passive rank and timed stack share <<1>> crit bonus; API sheet/effect text stays at 0%%.
         [184844] = function ()
             return FatedFortuneTooltip(184844)
         end,

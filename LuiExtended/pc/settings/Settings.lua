@@ -775,7 +775,7 @@ function LUIE.CreateSettings()
         charDropdown.reference = "LUIE_LAM_ProfileCopy_SourceCharacter"
         profileControls[#profileControls + 1] = charDropdown
     else
-        -- Source row ($AccountWide or character) — single list when not using character-specific saved vars
+        -- Source row ($AccountWide or character) - single list when not using character-specific saved vars
         local bucketDropdown = SettingsAPI.CreateDropdownOption(
             GetString(LUIE_STRING_LAM_SVPROFILE_COPY_BUCKET),
             GetString(LUIE_STRING_LAM_SVPROFILE_COPY_BUCKET_TP),

@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — ActionBar backbar (inactive hotbar row, DnD, layout)
+--  LuiExtended - ActionBar backbar (inactive hotbar row, DnD, layout)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

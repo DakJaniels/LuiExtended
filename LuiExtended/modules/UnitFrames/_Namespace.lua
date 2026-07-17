@@ -561,8 +561,8 @@ UnitFrames.CustomFrames =
 }
 
 --[[ CustomFrames registry keys vs UAV visualizer unitTags:
-  player, reticleover, companion, bossN, controlledsiege — 1:1 with visualizers.
-  SmallGroupN / RaidGroupN / PetGroupN — registry slots; alias to groupN / playerpetN via same frame object (visualizerUnitTag on frame data).
+  player, reticleover, companion, bossN, controlledsiege - 1:1 with visualizers.
+  SmallGroupN / RaidGroupN / PetGroupN - registry slots; alias to groupN / playerpetN via same frame object (visualizerUnitTag on frame data).
 ]]
 UnitFrames.CustomFramesMovingState = false
 UnitFrames.reticleoverHostile = false  -- boolean: hostile target and TargetEnableSkull (avoids assign-type-mismatch on frame.hostile)

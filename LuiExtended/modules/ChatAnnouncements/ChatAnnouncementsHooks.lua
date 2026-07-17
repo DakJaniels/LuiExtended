@@ -1,6 +1,6 @@
 --- @diagnostic disable: unused-function, duplicate-set-field
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat Announcements alert / CSA prehooks (orchestrator)
+--  LuiExtended - Chat Announcements alert / CSA prehooks (orchestrator)
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended

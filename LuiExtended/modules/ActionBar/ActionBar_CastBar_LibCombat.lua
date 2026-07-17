@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — ActionBar cast bar LibCombat integration
+--  LuiExtended - ActionBar cast bar LibCombat integration
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ local function castBarUi()
 end
 
 --- Pre-clear press-time keys used as `reducedSlot` in SKILL_TIMINGS callbacks.
---- LibCombat uses `(weaponBar - 1) * 10 + slot` (3–8 active bar, 13–18 other weapon bar) — not LUIE UI slot 53+.
+--- LibCombat uses `(weaponBar - 1) * 10 + slot` (3–8 active bar, 13–18 other weapon bar) - not LUIE UI slot 53+.
 --- LUIE backbar action slots 53–57 are cleared in case any event supplies raw slot indices.
 local function resetCastBarSlotPressTracking()
     for slotIndex = ActionBar.BAR_INDEX_START, ActionBar.BAR_INDEX_END do

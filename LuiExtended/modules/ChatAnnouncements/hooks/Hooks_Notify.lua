@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat Announcements hook shared context (CSA / alerts)
+--  LuiExtended - Chat Announcements hook shared context (CSA / alerts)
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended
@@ -176,7 +176,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         return true
     end
 
-    -- EVENT_JUMP_FAILED (Alert Handler) — home slash attribution
+    -- EVENT_JUMP_FAILED (Alert Handler) - home slash attribution
     local function JumpFailedHomeAlert(result)
         if not S.pendingHomeJump then
             return false

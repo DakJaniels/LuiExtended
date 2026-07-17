@@ -90,7 +90,7 @@ function InfoPanel.CreateConsoleSettings()
             end
         })
 
-    -- Position X (center) — bounds from GuiRoot for 4K support
+    -- Position X (center) - bounds from GuiRoot for 4K support
     local gw = GuiRoot:GetWidth()
     local gh = GuiRoot:GetHeight()
     panel:AddSetting(

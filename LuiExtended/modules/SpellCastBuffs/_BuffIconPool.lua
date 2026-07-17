@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — SpellCastBuffs buff icon pools (ZO_ControlPool + ZO_MetaPool)
+--  LuiExtended - SpellCastBuffs buff icon pools (ZO_ControlPool + ZO_MetaPool)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

@@ -180,7 +180,7 @@ S.currentPersonality = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERS
 S.currentPolymorph = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_POLYMORPH, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 S.lastCollectibleUsed = 0
 
--- Customized Actions (COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE) — one active collectible per harvest/ability slot
+-- Customized Actions (COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE) - one active collectible per harvest/ability slot
 S.currentPlayerFxHarvest = {}
 S.currentPlayerFxAbility = 0
 

@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — ActionBar cast bar (UI, combat-driven display, interrupts)
+--  LuiExtended - ActionBar cast bar (UI, combat-driven display, interrupts)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

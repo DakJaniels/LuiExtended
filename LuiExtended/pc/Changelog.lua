@@ -49,6 +49,21 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.6.3
+    "|cFFA500LuiExtended Version 7.2.6.3|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Display Announcements for Dynamic Encounters (PC and console). Separate chat, center-screen, and alert toggles for Vampire Hunt, Flowervine Farm, Bilsa's Delivery, and Misc.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Adding any |cFFFFFFOff Balance|r ability id (or the canonical name) to |cFFFFFFProminent Debuffs|r now tracks all Off Balance variants and Off Balance Immunity. Profiles that never received the default Off Balance prominent entry are seeded once on load.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: |cFFFFFFCrowd Control Immunity|r (28301 / 38117) can be tracked as a prominent debuff on targets (same target-buff promote path as Off Balance Immunity).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player champion icon and level no longer clear when changing frame settings; they refresh immediately.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Turning off |cFFFFFFTarget - Display Title|r no longer leaves NPC or guild trader captions visible when |cFFFFFFTarget - Display AVA Rank Name|r is still on. Rank name still applies to player targets only.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Invulnerable targets (for example guards) no longer show a health percentage next to the Invulnerable label.",
+    "",
     -- Version Header 7.2.6.2
     "|cFFA500LuiExtended Version 7.2.6.2|r",
     "",

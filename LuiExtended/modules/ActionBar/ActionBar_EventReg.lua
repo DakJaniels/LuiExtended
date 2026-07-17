@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — ActionBar combat event registration (loaded after ActionBar.lua)
+--  LuiExtended - ActionBar combat event registration (loaded after ActionBar.lua)
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended

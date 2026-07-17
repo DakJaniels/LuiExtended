@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — SavedVariables migration (per-megaserver profile + per-module globals)
+--  LuiExtended - SavedVariables migration (per-megaserver profile + per-module globals)
 --  See ZO_SavedVars in esoui/libraries/utility/zo_savedvars.lua for path layout.
 -- -----------------------------------------------------------------------------
 

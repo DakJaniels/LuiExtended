@@ -556,6 +556,15 @@ local castBarTable =
         -- Dragonknight
         [20930] = 5000, -- Engulfing Dragonfire (full channel; LibCombat ~4750 + lag)
 
+        -- Arcanist (Fatecarver channels; GetAbilityCastInfo / LibCombat often report 0 for base + Pragmatic)
+        [185805] = 4500, -- Fatecarver (magicka)
+        [193331] = 4500, -- Fatecarver (stamina)
+        [183122] = 4500, -- Exhausting Fatecarver (magicka)
+        [193397] = 4500, -- Exhausting Fatecarver (stamina)
+        [186366] = 4500, -- Pragmatic Fatecarver (magicka)
+        [193398] = 4500, -- Pragmatic Fatecarver (stamina)
+        [189533] = 4500, -- Fatecarver (channel combat track)
+
         -- Innate
         [37059] = 1165,  -- Mount Up (Mount)
         [141013] = 1165, -- Mount Up (Passenger Mount)
@@ -1445,9 +1454,11 @@ local castBarTable =
         [135905] = true, -- Drain Vigor (Vampire)
         [137259] = true, -- Exhilarating Drain (Vampire)
 
-        -- Arcanist (Fatecarver channel combat id + stamina morph)
+        -- Arcanist (Fatecarver channel combat id + stamina morphs)
         [189533] = true, -- Fatecarver (combat track)
         [193331] = true, -- Fatecarver (stamina)
+        [193397] = true, -- Exhausting Fatecarver (stamina)
+        [193398] = true, -- Pragmatic Fatecarver (stamina)
 
         -- Arcanist (Runemend morph channel combat ids)
         [183537] = true, -- Remedy Cascade (channel)

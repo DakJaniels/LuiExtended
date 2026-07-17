@@ -68,7 +68,7 @@ local BUFF_EFFECT_TYPE_DEBUFF = BUFF_EFFECT_TYPE_DEBUFF
     - tooltipSetAbilityId = *number* -- Fill any unset <<n>> from colored numbers in GetAbilityDescription(set ability)
     - tooltipValue2Mod = *number* -- Needed in some cases to derive a value on an ability tooltip. This value is used for effects like the snare from Sun Fire, when the duration needs to be derived from either buff since one can potentially be hidden.
     - dynamicTooltip = true -- Prefer live skill-sheet text via GetAbilityDescription (see LUIE.DynamicTooltip fallback). Handlers in Functions.lua override when special logic is needed (Brace, Sneak, etc.).
-    - tooltipMorphId = *number* -- Optional with dynamicTooltip: buff/bundle ability id differs from the morph shown on the skill sheet — pull description from this id instead of the effect row id.
+    - tooltipMorphId = *number* -- Optional with dynamicTooltip: buff/bundle ability id differs from the morph shown on the skill sheet - pull description from this id instead of the effect row id.
 
     CC Icon Functionality:
     - cc = LUIE_CC_TYPE_* -- Set a CC type for this ability
@@ -306,7 +306,7 @@ local effectOverride =
 
     -- Off-Balance Exploit
     [16825] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off-Balance Exploit
-    [18793] = { hide = true },                                                                                                                                  -- Off Balance Exploit bundle (0 ms; parallel to 16825 — Dizzying log)
+    [18793] = { hide = true },                                                                                                                                  -- Off Balance Exploit bundle (0 ms; parallel to 16825 - Dizzying log)
     [44364] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off-Balance Exploit
     [126567] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
     [126568] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
@@ -1978,7 +1978,7 @@ local effectOverride =
     [44369] = { tooltip = Tooltips.Skill_Venomous_Claw },                      -- Searing Claw (target DOT; tooltip string pre-U49 name)
     [44373] = { tooltip = Tooltips.Skill_Burning_Embers },                     -- Burning Embers (target DOT)
     [261752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 }, -- Burning Embers (self-heal combat at DOT end)
-    -- Wildfire Embers target DoT [263208]/[263309] — CLASS MASTERY block (not Burning Embers)
+    -- Wildfire Embers target DoT [263208]/[263309] - CLASS MASTERY block (not Burning Embers)
     -- On cast hit: 160949 Traumatic Burns (visible), 18084 Burning (~4s); 243742 hidden snare/bundle
 
     -- Dragonfire Breath / Disintegrating Dragonfire / Engulfing Dragonfire (U49+)
@@ -2024,7 +2024,7 @@ local effectOverride =
     [32789] = { hide = true },                          -- Heart of Flame (combat bundle)
     -- Target debuffs: 160949 Traumatic Burns (Core/Heart); Soul adds 18084 Burning (~4s); 243742 combat bundle
 
-    -- Inferno / Incinerate / Cauterize — live sheet text (static strings were pre–Inferno rework / wrong morph names)
+    -- Inferno / Incinerate / Cauterize - live sheet text (static strings were pre–Inferno rework / wrong morph names)
     [28967] = { dynamicTooltip = true, toggle = true },                                         -- Inferno
     [257750] = { hide = true, dynamicTooltip = true, tooltipMorphId = 28967 },                  -- Inferno (1s activation pulse)
     [258548] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },                       -- Minor Fortitude (Inferno bundle)
@@ -2143,7 +2143,7 @@ local effectOverride =
     [118928] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Dragon Leap (combat bundle)
     [32719] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds" },                                 -- Take Flight (slotted)
     [259372] = { hide = true },                                                                             -- Take Flight (travel)
-    [262683] = { hide = true },                                                                             -- Take Flight (U49 combat bundle; player fury aura is 48752 on live — takeflight_leap.txt)
+    [262683] = { hide = true },                                                                             -- Take Flight (U49 combat bundle; player fury aura is 48752 on live - takeflight_leap.txt)
     [48753] = { hide = true },                                                                              -- CC Immunity (Take Flight)
     [48752] = { name = Abilities.Skill_Take_Flight, icon = "/esoui/art/icons/ability_dragonknight_009_b.dds", dynamicTooltip = true, tooltipMorphId = 32719, forcedContainer = "short" }, -- Draconic fury player buff (~15s; log: EFFECT_CHANGED unitTag player, hitValue 15000)
     [114600] = { name = Abilities.Skill_Take_Flight, tooltip = Tooltips.Generic_Knockback },                -- Stun (Take Flight)
@@ -2158,7 +2158,7 @@ local effectOverride =
     [48761] = { hide = true },                                                                              -- Ferocious Leap (combat bundle)
     [61814] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Ferocious Leap (player damage shield, 10s)
     [114601] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Knockback },             -- Stun (Ferocious Leap; combat log)
-    [262680] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Knockback },             -- Stun (U49; export only — log used 114601)
+    [262680] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Knockback },             -- Stun (U49; export only - log used 114601)
     [259684] = { icon = "/esoui/art/icons/ability_dragonknight_009_a.dds", hide = true },                   -- Landslide (U49, Ferocious Leap)
     [118938] = { icon = "/esoui/art/icons/ability_dragonknight_009_a.dds", hide = true },                   -- Ferocious Leap (combat bundle)
 
@@ -2236,7 +2236,7 @@ local effectOverride =
     [20780] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },                                                                                   -- Minor Heroism bundle (inside Fire Keeper ground; player shows 61708/61697)
     [32710] = { dynamicTooltip = true, groundLabel = true },                                                                                             -- Hearth and Home (15s ground)
     [33099] = { hide = true },                                                                                                                           -- Hearth and Home (slotted ground buff; action bar tracks via newId)
-    [32711] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Hearth and Home (ally HOT inside ground — combat HOT/HOT!)
+    [32711] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Hearth and Home (ally HOT inside ground - combat HOT/HOT!)
     [32712] = { duration = 0, groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Snare_Fire, tooltipValue2 = 1, tooltipValue3 = 70 }, -- Hearth and Home (enemy flame/snare inside ground)
     [32714] = { hide = true, dynamicTooltip = true },                                                                                                    -- Major Protection bundle (inside Hearth and Home ground only)
 
@@ -2444,7 +2444,7 @@ local effectOverride =
     [114957] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" }, -- Siphoning Strikes (Siphoning Strikes)
     [36908] = { tooltip = Tooltips.Skill_Leeching_Strikes, dynamicTooltip = true }, -- Leeching Strikes (main aura)
     [215493] = { dynamicTooltip = true, tooltipMorphId = 36935 },        -- Siphoning Attacks bundle buff --> morph 36935
-    [36935] = { dynamicTooltip = true },                                 -- Siphoning Attacks morph — GetAbilityDescription (was stale static TP)
+    [36935] = { dynamicTooltip = true },                                 -- Siphoning Attacks morph - GetAbilityDescription (was stale static TP)
 
     -- Drain Power / Power Extraction / Sap Essence
     [36899] = { icon = "/esoui/art/icons/ability_nightblade_013_a.dds", name = Abilities.Skill_Sap_Essence }, -- Sap Will (Sap Essence)
@@ -2929,7 +2929,7 @@ local effectOverride =
 
     -- Feral Guardian / Eternal Guardian / Wild Guardian
     [101438] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_CC_IMMUNITY_DDS, name = Abilities.Innate_CC_Immunity, tooltip = Tooltips.Generic_CC_Immunity },                                                                                                                                -- Bear Immunity (Feral Guardian - All Morphs)
-    [85982] = { dynamicTooltip = true, toggle = true },                                                                                                                                                                                                                                          -- Feral Guardian — full sheet text via DynamicTooltip
+    [85982] = { dynamicTooltip = true, toggle = true },                                                                                                                                                                                                                                          -- Feral Guardian - full sheet text via DynamicTooltip
     [89135] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_SWIPE_DDS, name = Abilities.Skill_Bite },                                                                                                                                                                                       -- Swipe (Feral Guardian)
     [89128] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_CRUSHING_SWIPE_DDS },                                                                                                                                                                                                           -- Crushing Swipe (Feral Guardian)
     [89129] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_CRUSHING_SWIPE_DDS, tooltip = Tooltips.Generic_Knockdown },                                                                                                                                                                     -- Crushing Swipe (Feral Guardian)
@@ -3390,7 +3390,7 @@ local effectOverride =
     [178457] = { dynamicTooltip = true, tooltipMorphId = 183542 }, -- Apocryphal Gate (cost variant)
     [195167] = { groundLabel = true, dynamicTooltip = true },      -- Apocryphal Gate (entry portal ground; single ground icon)
     [183543] = { dynamicTooltip = true },                          -- Apocryphal Gate (player portal anchor)
-    [183546] = { hide = true },                                    -- Apocryphal Gate (exit portal ground; hidden — use 195167)
+    [183546] = { hide = true },                                    -- Apocryphal Gate (exit portal ground; hidden - use 195167)
     [183544] = { hide = true },                                    -- Apocryphal Gate (travel combat tick)
     [183547] = { hide = true },                                    -- Apocryphal Gate (travel combat tick)
 
@@ -3399,7 +3399,7 @@ local effectOverride =
     [190394] = { dynamicTooltip = true, tooltipMorphId = 186220 }, -- Passage Between Worlds (cost variant)
     [195204] = { groundLabel = true, dynamicTooltip = true },      -- Passage Between Worlds (entry portal ground; single ground icon)
     [186224] = { dynamicTooltip = true },                          -- Passage Between Worlds (player portal anchor)
-    [186226] = { hide = true },                                    -- Passage Between Worlds (exit portal ground; hidden — use 195204)
+    [186226] = { hide = true },                                    -- Passage Between Worlds (exit portal ground; hidden - use 195204)
     [186221] = { hide = true },                                    -- Passage Between Worlds (travel combat tick)
     [186223] = { hide = true },                                    -- Passage Between Worlds (travel combat tick)
 
@@ -3408,7 +3408,7 @@ local effectOverride =
     [197856] = { dynamicTooltip = true, tooltipMorphId = 186211 }, -- Fleet-Footed Gate (cost variant)
     [195190] = { groundLabel = true, dynamicTooltip = true },      -- Fleet-Footed Gate (entry portal ground; single ground icon)
     [186215] = { dynamicTooltip = true },                          -- Fleet-Footed Gate (player portal anchor)
-    [186217] = { hide = true },                                    -- Fleet-Footed Gate (exit portal ground; hidden — use 195190)
+    [186217] = { hide = true },                                    -- Fleet-Footed Gate (exit portal ground; hidden - use 195190)
     [186212] = { hide = true },                                    -- Fleet-Footed Gate (travel combat tick)
     [186214] = { hide = true },                                    -- Fleet-Footed Gate (travel combat tick)
     [187939] = { dynamicTooltip = true },                          -- Major Expedition (Fleet-Footed Gate player buff)
@@ -3421,7 +3421,7 @@ local effectOverride =
     [186366] = { dynamicTooltip = true }, -- Pragmatic Fatecarver (magicka)
     [193398] = { dynamicTooltip = true }, -- Pragmatic Fatecarver (stamina)
 
-    -- Fatecarver (combat / channel / tick — not bar icons)
+    -- Fatecarver (combat / channel / tick - not bar icons)
     [185808] = { hide = true }, -- Fatecarver (damage tick)
     [189533] = { hide = true }, -- Fatecarver (channel bundle)
     [183123] = { hide = true }, -- Exhausting Fatecarver (area)
@@ -3777,7 +3777,7 @@ local effectOverride =
     -----------------------------------------
 
     -- Uppercut / Dizzying Swing / Wrecking Blow (16825/18793: innate Off-Balance Exploit block ~308; bar: BarHighlightOverride)
-    [131562] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                   -- Off Balance (Dizzying Swing, 7s)
+    [131562] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },               -- Off Balance (Dizzying Swing, 7s)
     [137807] = { icon = "/esoui/art/icons/ability_2handed_001_a.dds", tooltip = Tooltips.Generic_Snare, tooltipValue2 = 40 }, -- Dizzying Swing snare (OB immune, 2s)
 
     -- Critical Charge / Stampede / Critical Rush
@@ -8255,7 +8255,7 @@ local effectOverride =
     [52826] = { icon = "/esoui/art/icons/ability_bow_001_a.dds", tooltip = Tooltips.Generic_Reduce_Healing_Received, tooltipValue2 = 50 },                                                                                     -- Lethal Arrow (Pishna Longshot)
 
     -- Stage 7 - Circle of Rituals
-    -- Bloodwraith Kynval (IC): combat aura 56946 / 56947 — same ability ids as player Dragon Fire Scale (en.lang table 198758357).
+    -- Bloodwraith Kynval (IC): combat aura 56946 / 56947 - same ability ids as player Dragon Fire Scale (en.lang table 198758357).
     -- effectOverride allows one [56946] key; DK player overrides ~1982. Alerts: AlertTable ~4552. Do not add a second [56946] here (legacy Reflective Scale name was incorrect for this id).
     [56599] = { hide = true },                                                                                                                                                                                 -- CLDA - Captured Animation (Daedric Sacrifice)
     [55635] = { hide = true },                                                                                                                                                                                 -- CLDA - Daedric Sac Check (Daedric Sacrifice)

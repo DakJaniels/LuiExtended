@@ -18,6 +18,8 @@ local LUIE = LUIE
 --- @field hideTargetEffects table
 --- @field debuffDisplayOverrideId table
 --- @field offBalanceDebuffById table<integer, true>
+--- @field offBalanceRegistryById table<integer, true>
+--- @field ccImmunityAbilityById table<integer, true>
 --- @field windowTitles table<string, string>
 --- @field containerRouting table<string, string>
 --- @field alignmentDirection table<string, string>
@@ -504,6 +506,13 @@ SpellCastBuffs.hidePlayerEffects = {}       --- @type table Table of Effects to 
 SpellCastBuffs.hideTargetEffects = {}       --- @type table Table of Effects to hide on Target - generated on load or updated from Menu
 SpellCastBuffs.debuffDisplayOverrideId = {} --- @type table Table of Effects (by id) that should show on the target regardless of who applied them.
 SpellCastBuffs.offBalanceDebuffById = {}    --- @type table<integer, true> Effect ids that LuiData identifies as the shared Off Balance debuff; populated on init.
+SpellCastBuffs.offBalanceRegistryById = {}  --- @type table<integer, true> All OffBalanceAbilityRegistry ids; used for prominent opt-in detection.
+--- Innate Crowd Control Immunity ability ids (target/player buffs that promote like Off Balance Immunity).
+SpellCastBuffs.ccImmunityAbilityById =
+{
+    [28301] = true,
+    [38117] = true,
+}
 
 --- @type table<string, string>
 SpellCastBuffs.windowTitles =

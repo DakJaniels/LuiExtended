@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat output routing (LUIE.SV.ChatOutput)
+--  LuiExtended - Chat output routing (LUIE.SV.ChatOutput)
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

@@ -686,7 +686,7 @@ function LUIE.CreateConsoleSettings()
             end
         }
     else
-        -- Source row ($AccountWide or character) — single list when not using character-specific saved vars
+        -- Source row ($AccountWide or character) - single list when not using character-specific saved vars
         profileSectionRows[#profileSectionRows + 1] =
         {
             type = LHAS.ST_DROPDOWN,

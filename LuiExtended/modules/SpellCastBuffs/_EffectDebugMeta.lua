@@ -84,7 +84,7 @@ local advancedStatDisplayFormatNames =
     [4] = "FLAT_OR_PERCENT",
 }
 
--- luaindex values from AdvancedStatDisplayType (numeric keys — some _G names are not in all clients)
+-- luaindex values from AdvancedStatDisplayType (numeric keys - some _G names are not in all clients)
 local advancedStatDisplayTypeNames =
 {
     [0] = "NONE",
@@ -198,7 +198,7 @@ if ABILITY_TYPE_SPECIALMOVEREPLACEMENT then
     abilityTypeNames[ABILITY_TYPE_SPECIALMOVEREPLACEMENT] = "SPECIALMOVEREPLACEMENT"
 end
 
---- AbilityType value → label (API order 0..119). Fills gaps without pairs(_G) — insecure scan hits protected globals.
+--- AbilityType value → label (API order 0..119). Fills gaps without pairs(_G) - insecure scan hits protected globals.
 local ABILITY_TYPE_VALUE_LABELS =
 {
     "NONE", "DAMAGE", "HEAL", "RESURRECT", "BLINK", "BONUS", "REGISTERTRIGGER", "SETTARGET", "THREAT", "STUN",
@@ -318,7 +318,7 @@ local mundusStoneTypeNames =
     [MUNDUS_STONE_STEED] = "STEED",
 }
 
--- DerivedStats / STAT_* — numeric effect magnitudes from GetAbilityDerivedStatAndEffectByIndex
+-- DerivedStats / STAT_* - numeric effect magnitudes from GetAbilityDerivedStatAndEffectByIndex
 local derivedStatNames =
 {
     [STAT_ATTACK_POWER] = "ATTACK_POWER",
@@ -376,7 +376,7 @@ local combatUnitTypeNames =
 
 local function formatEnumLabel(nameTable, value)
     if value == nil then
-        return "—"
+        return "-"
     end
     local label = nameTable[value]
     if label then
@@ -399,7 +399,7 @@ end
 
 local function formatStatWithId(nameTable, statId)
     if statId == nil then
-        return "—"
+        return "-"
     end
     local label = nameTable[statId]
     if label then
@@ -410,14 +410,14 @@ end
 
 local function formatBool(value)
     if value == nil then
-        return "—"
+        return "-"
     end
     return value and "yes" or "no"
 end
 
 local function formatSeconds(value)
     if value == nil then
-        return "—"
+        return "-"
     end
     return string.format("%.2fs", value)
 end
@@ -425,7 +425,7 @@ end
 --- Coarser format for live countdown fields so tiny time deltas do not force tooltip rebuilds.
 local function formatRemainingSeconds(value)
     if value == nil then
-        return "—"
+        return "-"
     end
     return string.format("%.1fs", value)
 end
@@ -690,7 +690,7 @@ end
 --- @return string
 function SpellCastBuffs.GetLuiCcTypeLabel(ccType)
     if not ccType then
-        return "—"
+        return "-"
     end
     local label = luiCcTypeNames[ccType]
     if label then
@@ -919,7 +919,7 @@ local function addBuffAbilityApiDebugLines(abilityId, unitTag, addLine)
 
     local channeled, castDurationMs = GetAbilityCastInfo(abilityId, nil, unitTag)
     if channeled or (castDurationMs and castDurationMs > 0) then
-        addLine("GetAbilityCastInfo", string.format("channeled=%s, %s ms", formatBool(channeled), castDurationMs ~= nil and tostring(castDurationMs) or "—"))
+        addLine("GetAbilityCastInfo", string.format("channeled=%s, %s ms", formatBool(channeled), castDurationMs ~= nil and tostring(castDurationMs) or "-"))
     end
 
     local edBuffType, isAvatarVision = GetAbilityEndlessDungeonBuffType(abilityId)

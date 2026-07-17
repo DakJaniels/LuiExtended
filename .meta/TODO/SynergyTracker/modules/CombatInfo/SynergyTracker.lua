@@ -950,7 +950,7 @@ function SynergyTracker:OnSynergyAbilityChanged()
     self:RefreshActiveSynergies()
 end
 
---- Event: Player dead — clear all runtime state
+--- Event: Player dead - clear all runtime state
 function SynergyTracker:OnPlayerDead()
     ZO_ClearTable(self.activeSynergies)
     ZO_ClearTable(self.synergyCooldowns)

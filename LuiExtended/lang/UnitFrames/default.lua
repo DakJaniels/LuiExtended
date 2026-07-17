@@ -453,7 +453,7 @@ local strings =
     LUIE_STRING_UF_FORMAT_PET = "Current (Percentage%)",
     LUIE_STRING_UF_FORMAT_COMPANION = "Current (Percentage%)",
     LUIE_STRING_UF_FORMAT_CENTER_LABEL = "Current + Shield - Trauma / Max (Percentage%)",
-    -- LuiMedia registry keys (saved in SV); copy verbatim into every locale — do not translate.
+    -- LuiMedia registry keys (saved in SV); copy verbatim into every locale - do not translate.
     LUIE_STRING_UF_FONT_DEFAULT = "LUIE Default Font",
     LUIE_STRING_UF_TEXTURE_DEFAULT = "Minimalistic",
     LUIE_STRING_LAM_UF_CFRAMESPT_RANK_PRIORITY_AVA = "AVA Rank",

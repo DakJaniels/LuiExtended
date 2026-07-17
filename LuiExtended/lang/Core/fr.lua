@@ -88,7 +88,7 @@ local strings =
     LUIE_STRING_LAM_SVPROFILE_COPY_KIND_CHARACTER = "Autre personnage",
     LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER = "Personnage source",
     LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER_TP = "Personnage sur ce @compte à copier. Seuls les personnages ayant déjà des données LuiExtended pour cette version apparaissent. Le personnage actuel n'est pas listé si cela reviendrait à se copier sur soi-même.",
-    LUIE_STRING_LAM_SVPROFILE_COPY_TARGET_DESC = "Destination : ce mégaserveur, votre @compte, et soit les options compte partagées soit ce personnage — selon « Paramètres par personnage » ci-dessus.",
+    LUIE_STRING_LAM_SVPROFILE_COPY_TARGET_DESC = "Destination : ce mégaserveur, votre @compte, et soit les options compte partagées soit ce personnage - selon « Paramètres par personnage » ci-dessus.",
     LUIE_STRING_LAM_SVPROFILE_RESETCHAR = "Réinitialiser le personnage actuel",
     LUIE_STRING_LAM_SVPROFILE_RESETCHAR_TP = "Réinitialiser les paramètres actuels du profil de personnage.",
     LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT = "Réinitialiser le compte",
@@ -171,7 +171,7 @@ local strings =
     LUIE_STRING_DEBUG_ENV_STATUS_ACTIVE = "Environnement de débogage : actif (<<1>> add-ons dans l'instantané).",
     LUIE_STRING_DEBUG_ENV_STATUS_INACTIVE = "Environnement de débogage : inactif.",
     LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "Utilisation : /luie debug on | off | status",
-    LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS = "       /luie svstatus — diagnostic de migration SavedVariables",
+    LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS = "       /luie svstatus - diagnostic de migration SavedVariables",
 
     LUIE_STRING_CORE_STARTUP_CHAT = "|cFFFFFF<<1>> par|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r",
     LUIE_STRING_SV_STATUS_HEADER = "|cFFAA00[LUIE] État de migration SavedVariables|r",

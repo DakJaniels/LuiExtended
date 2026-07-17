@@ -18,7 +18,7 @@ local g_currentDuelTarget = nil -- Saved Duel Target for generating Battle Spiri
 local BATTLE_SPIRIT_ICON = "/esoui/art/icons/artificialeffect_battle-spirit.dds"
 local BATTLE_SPIRIT_FAKE_ABILITY_ID = 999014
 
---- Player Battle Spirit when API artificial ids 1/3 are missing (not Cyro Vengeance — no Battle Spirit there).
+--- Player Battle Spirit when API artificial ids 1/3 are missing (not Cyro Vengeance - no Battle Spirit there).
 --- @return boolean
 function SpellCastBuffs.ShouldCreatePlayerBattleSpiritFallback()
     if SpellCastBuffs.SV.IgnoreBattleSpiritPlayer then

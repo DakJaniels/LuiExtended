@@ -298,7 +298,7 @@ end
 
 local function DebugAttributeVisuals(arg1, arg2)
     if not arg1 or arg1 == "" or string.lower(arg1) == "help" then
-        LUIE.ChatOutput:AddSystemMessage("[LUIE] /luieufdebug <frame> <preset>  — frame: player, reticleover, SmallGroup1, sg1, RaidGroup1, boss1, …")
+        LUIE.ChatOutput:AddSystemMessage("[LUIE] /luieufdebug <frame> <preset>  - frame: player, reticleover, SmallGroup1, sg1, RaidGroup1, boss1, …")
         LUIE.ChatOutput:AddSystemMessage("[LUIE] Presets: " .. table.concat(DEBUG_VISUAL_PRESET_NAMES, ", "))
         return
     end
@@ -441,7 +441,7 @@ local function DebugBossThresholdHp(arg)
     else
         percent = tonumber(trimmed)
         if not percent then
-            LUIE.ChatOutput:AddSystemMessage("[LUIE] /luiufbosshp [percent|reset] — e.g. 88, 74, or empty to step through demo HP.")
+            LUIE.ChatOutput:AddSystemMessage("[LUIE] /luiufbosshp [percent|reset] - e.g. 88, 74, or empty to step through demo HP.")
             return
         end
     end

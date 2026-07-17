@@ -4392,7 +4392,7 @@ local debugAuras =
     [32720] = true,  -- Take Flight (Take Flight)
     [32721] = true,  -- Take Flight (Take Flight)
     [259372] = true, -- Take Flight (travel)
-    [262683] = true, -- Take Flight (U49 combat bundle; hide in Override — live player fury is 48752)
+    [262683] = true, -- Take Flight (U49 combat bundle; hide in Override - live player fury is 48752)
     [114600] = true, -- Stun (Take Flight)
     [262682] = true, -- Stun (Take Flight, U49)
     [118936] = true, -- Take Flight (combat bundle)
@@ -4405,7 +4405,7 @@ local debugAuras =
     [262681] = true, -- Ferocious Leap (combat bundle)
     [61814] = true,  -- Ferocious Leap (player damage shield, 10s)
     [114601] = true, -- Stun (Ferocious Leap; combat log)
-    [262680] = true, -- Stun (Ferocious Leap, U49 export — not in log)
+    [262680] = true, -- Stun (Ferocious Leap, U49 export - not in log)
     [118938] = true, -- Ferocious Leap (combat bundle)
 
     [29032] = true,  -- Superheated Ward (Superheated Ward)
@@ -17478,7 +17478,7 @@ local debugAuras =
 
     [116094] = true, -- Malacath's Vengeance (Malacath's Vengeance)
 
-    -- Cyrodiil Vengeance — Dragonknight templates (VENGEANCE_SKILL_MAP.csv; track/combat TBD)
+    -- Cyrodiil Vengeance - Dragonknight templates (VENGEANCE_SKILL_MAP.csv; track/combat TBD)
     [237606] = true, -- Vengeance Lava Whip
     [237607] = true, -- Vengeance Searing Strike
     [237609] = true, -- Vengeance Searing Strike
@@ -17513,7 +17513,7 @@ local debugAuras =
     [237790] = true, -- Vengeance Magma Armor
     [261043] = true, -- Vengeance Petrify
 
-    -- Cyrodiil Vengeance — Necromancer (combat log: Guardian of Sedor)
+    -- Cyrodiil Vengeance - Necromancer (combat log: Guardian of Sedor)
     [238137] = true, -- Vengeance Death Scythe
     [238138] = true, -- Vengeance Death Scythe (heal)
     [246025] = true, -- Vengeance Bone Armor
@@ -17532,7 +17532,7 @@ local debugAuras =
     [238180] = true, -- Vengeance Bone Totem (Major Maim combat)
     [238181] = true, -- Vengeance Bone Totem (bar track)
 
-    -- Cyrodiil Vengeance — Soldier kit (Vengeance Soldier line)
+    -- Cyrodiil Vengeance - Soldier kit (Vengeance Soldier line)
     [255057] = true, -- Sweeping Assault
     [255164] = true, -- Battle Trauma (slotted)
     [255165] = true, -- Battle Trauma
@@ -17549,7 +17549,7 @@ local debugAuras =
     [255512] = true, -- Detonating Strike (player track)
     [255550] = true, -- Detonating Strike (ground tick)
 
-    -- Cyrodiil Vengeance — Vanguard kit (log 2025-06-07)
+    -- Cyrodiil Vengeance - Vanguard kit (log 2025-06-07)
     [255952] = true, -- Demoralizing Disruption (slotted ult)
     [255953] = true, -- Demoralizing Disruption (stun on target)
     [255650] = true, -- Shoulder Toss (slotted)
@@ -17566,7 +17566,7 @@ local debugAuras =
     [255789] = true, -- Unleashed Fury (slotted / channel)
     [255940] = true, -- Unleashed Fury (damage)
 
-    -- Cyrodiil Vengeance — Scout kit (log 2025-06-07)
+    -- Cyrodiil Vengeance - Scout kit (log 2025-06-07)
     [256557] = true, -- Blade Bite (slotted)
     [256560] = true, -- Blade Bite (bleed on target)
     [256584] = true, -- Blade Bite (morph chain; optional audit)

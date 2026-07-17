@@ -8,7 +8,6 @@ local LUIE = LUIE
 local LuiData = LuiData
 --- @type Data
 local Data = LuiData.Data
-local Abilities = Data.Abilities
 local Effects = Data.Effects
 
 --- @class (partial) LUIE.SpellCastBuffs
@@ -16,8 +15,8 @@ local SpellCastBuffs = LUIE.SpellCastBuffs
 
 ---
 --- True when the user has opted this ability into Prominent Debuffs, either by
---- id, by ability name, or by the canonical Off Balance name (so a single
---- "Off Balance" entry covers every renamed OB variant).
+--- id, by ability name, or via Off Balance / CC Immunity expand: any single
+--- related id (or canonical name) covers every variant in that family.
 --- @param abilityId number|nil
 --- @param abilityName string|nil
 --- @return boolean
@@ -29,8 +28,7 @@ function SpellCastBuffs.WantsProminentDebuff(abilityId, abilityName)
     if abilityName and promTable[abilityName] then
         return true
     end
-    local obName = Abilities.Skill_Off_Balance
-    if obName and promTable[obName] then
+    if SpellCastBuffs.HasOffBalanceProminentOptIn() then
         if abilityId and SpellCastBuffs.offBalanceDebuffById[abilityId] then
             return true
         end
@@ -38,14 +36,19 @@ function SpellCastBuffs.WantsProminentDebuff(abilityId, abilityName)
             return true
         end
     end
+    if SpellCastBuffs.HasCCImmunityProminentOptIn() then
+        if abilityId and SpellCastBuffs.ccImmunityAbilityById[abilityId] then
+            return true
+        end
+    end
     return false
 end
 
 ---
---- Off Balance is special: unlike other prominent debuffs it must promote on
---- the target even when an ally applied it, and the Immunity buff must promote
---- from the target *buff* context. Returns the promoted context string, or nil
---- when the ability is not OB-related / not opted in (caller falls back to the
+--- Off Balance and CC Immunity are special: unlike other prominent debuffs they
+--- must promote on the target even when an ally applied them / when they are
+--- target *buffs* (reticleover1). Returns the promoted context string, or nil
+--- when the ability is not related / not opted in (caller falls back to the
 --- normal DetermineContext rules).
 --- @param context SpellCastBuffsContext
 --- @param abilityId number|nil
@@ -63,6 +66,12 @@ function SpellCastBuffs.ResolveProminentDebuffContext(context, abilityId, abilit
             return "promd_player"
         end
     elseif abilityId == Effects.OffBalanceImmunityAbilityId then
+        if context == "reticleover1" or context == "reticleover2" then
+            return "promd_target"
+        elseif context == "player1" or context == "player2" then
+            return "promd_player"
+        end
+    elseif abilityId and SpellCastBuffs.ccImmunityAbilityById[abilityId] then
         if context == "reticleover1" or context == "reticleover2" then
             return "promd_target"
         elseif context == "player1" or context == "player2" then

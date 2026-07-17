@@ -8,7 +8,7 @@
 local LUIE = LUIE
 
 function LUIE.HookKeyboardStats()
-    -- Hook STATS Screen Buffs & Debuffs — vanilla visibility; LUIE tooltips/icons on stats panel only.
+    -- Hook STATS Screen Buffs & Debuffs - vanilla visibility; LUIE tooltips/icons on stats panel only.
 
     -- Define comparator function for sorting effects rows
     local function EffectsRowComparator(left, right)

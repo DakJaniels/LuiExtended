@@ -43,7 +43,7 @@ local barHighlightStack =
     [117625] = 3, -- Venom Skull charges
     [117638] = 3, -- Ricochet Skull charges
 
-    -- Alliance War — Vengeance Scout
+    -- Alliance War - Vengeance Scout
     [256560] = 3, -- Blade Bite bleed stacks on target
 }
 

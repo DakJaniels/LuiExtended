@@ -94,7 +94,7 @@ local barHighlightOverride =
     -- Ferocious Leap: bar tracks 10s shield (61814); Landslide 29465 via BarHighlightExtraId only (log).
     [32715] = { newId = 61814 },  -- Ferocious Leap (slotted) --> damage shield
 
-    -- Earthen Heart — Superheated Ward / Volcanic Ward / Magma Fist (table 198758357; combat log)
+    -- Earthen Heart - Superheated Ward / Volcanic Ward / Magma Fist (table 198758357; combat log)
     [29032] = { newId = 134310, duration = 6000 },                                                            -- Superheated Ward --> player buff 134310 (6s)
     [31820] = { newId = 261754, duration = 6000, noRemove = true },                                           -- Volcanic Ward --> primary player buff 261754 (6s; parallel 258203)
     [258203] = { hide = true },                                                                               -- Volcanic Ward secondary buff (same 6s; CheckOnFade ↔ 261754)
@@ -191,19 +191,19 @@ local barHighlightOverride =
     [177249] = { newId = 147643, noRemove = true, duration = 12000, combatTrack = true },
     [37475] = { newId = 37475, duration = 24000 },                       -- Manifestation of Terror (ground)
     [177251] = { newId = 147643, noRemove = true, duration = 12000, combatTrack = true },
-    -- Summon Shade (base — slotted 38517; bar track 33211)
+    -- Summon Shade (base - slotted 38517; bar track 33211)
     [38517] = { newId = 33211, showFakeAura = true, noRemove = true, duration = 22000 },
     [88662] = { newId = 33211, showFakeAura = true, noRemove = true, duration = 22000 },
     [88663] = { newId = 33211, showFakeAura = true, noRemove = true, duration = 22000 },
     [33211] = { showFakeAura = true, noRemove = true, duration = 22000 },
     [33290] = { newId = 33211, combatTrack = true, noRemove = true, duration = 22000 },
-    -- Dark Shade morph (slotted 35438 — do not newId to 108940; API duration on track is ~1s)
+    -- Dark Shade morph (slotted 35438 - do not newId to 108940; API duration on track is ~1s)
     [35438] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Dark Shade (slotted)
     [88677] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Dark Shade -- Khajiit
     [88678] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Dark Shade -- Argonian
     [108940] = { newId = 35438, combatTrack = true, noRemove = true, duration = 22000 }, -- Dark Shade player buff
     [35434] = { newId = 35438, combatTrack = true, noRemove = true, duration = 22000 },  -- Dark Shade summon combat
-    -- Shadow Image morph (slotted 35441 — do not newId to 35451; API duration on track is ~1s)
+    -- Shadow Image morph (slotted 35441 - do not newId to 35451; API duration on track is ~1s)
     [35441] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Shadow Image (slotted)
     [88696] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Shadow Image -- Khajiit
     [88697] = { showFakeAura = true, noRemove = true, duration = 22000 },                -- Shadow Image -- Argonian
@@ -393,7 +393,7 @@ local barHighlightOverride =
     -- Necromancer ------------
     ---------------------------
 
-    -- Grave Lord — skull charge stacks (combatTrack; max 3 in BarHighlightStack)
+    -- Grave Lord - skull charge stacks (combatTrack; max 3 in BarHighlightStack)
     [114108] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull (slotted / cast 1 projectile)
     [123683] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull charged cast (no corpse; combat log cast 2+)
     [123685] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull every-3rd cast (+ corpse)
@@ -908,7 +908,7 @@ local barHighlightOverride =
     -- Cyrodiil Vengeance (combat log 2025-06; VENGEANCE_SKILL_MAP.csv)
     ---------------------------
 
-    -- Necromancer — Bone Tyrant / Living Death / Grave Lord
+    -- Necromancer - Bone Tyrant / Living Death / Grave Lord
     [253156] = { newId = 253163, combatTrack = true },                                    -- Vengeance Grave Grasp (QUEUED / ON CD / target 253163)
     [246025] = { newId = 246026, combatTrack = true, duration = 20000 },                  -- Vengeance Bone Armor (246025 GAIN DUR; 61694 on player)
     [246026] = { newId = 246026, combatTrack = true, duration = 20000 },                  -- Vengeance Bone Armor (246026 parallel GAIN DUR / FADE)
@@ -918,7 +918,7 @@ local barHighlightOverride =
     [238129] = { newId = 238129, showFakeAura = true, noRemove = true, duration = 3000 }, -- Vengeance Frozen Colossus (ground; log 238129/238130 GAIN)
     [238255] = { newId = 238255, combatTrack = true },                                    -- Vengeance Expunge (QUEUED; cleanse + restore bundle)
 
-    -- Alliance War — Soldier loadout kit
+    -- Alliance War - Soldier loadout kit
     [255057] = { newId = 255057, combatTrack = true },                   -- Sweeping Assault (CD / combat from log ON CD)
     [255164] = { newId = 269944, noRemove = true },                      -- Battle Trauma (reticle target; 269944 + 255165 via ExtraId / CheckOnFade)
     [255184] = { newId = 255184, combatTrack = true, duration = 20000 }, -- Stand Firm (log 255184 GAIN DUR / FADE; Minor Resolve 61693 on player)
@@ -930,7 +930,7 @@ local barHighlightOverride =
     [255498] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (ground BEGIN; remap to proc bar)
     [255512] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (player track GAIN DUR; FADE with proc)
 
-    -- Alliance War — Vanguard kit (log 2025-06-07)
+    -- Alliance War - Vanguard kit (log 2025-06-07)
     [255681] = { newId = 255682, showFakeAura = true, noRemove = true, duration = 20000 }, -- In The Fray --> player track 255682
     [255689] = { newId = 255689, combatTrack = true, duration = 6000 },                     -- Warding Interception + Major Protection 61722
     [255673] = { newId = 269817, noRemove = true },                                          -- Ensnaring Chains --> target ROOT 269817
@@ -939,7 +939,7 @@ local barHighlightOverride =
     [255650] = { newId = 255651 },                                                           -- Shoulder Toss (slotted) --> target stun
     [255651] = { combatTrack = true, noRemove = true, duration = 1400 },                   -- Stun on reticle (~1.4s; log GAIN DUR 1390)
 
-    -- Alliance War — Scout kit (log 2025-06-07)
+    -- Alliance War - Scout kit (log 2025-06-07)
     [256557] = { newId = 256560, noRemove = true },                                          -- Blade Bite --> target bleed
     [256560] = { combatTrack = true, noRemove = true, duration = 6000 },                     -- Bleed track (stacks ≤3)
     [256690] = { combatTrack = true, noRemove = true, duration = 4000 },                     -- Nimble Feint disorient on reticle (log GAIN DUR 4000)

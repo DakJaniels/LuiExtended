@@ -160,7 +160,7 @@ end
 -- Map and Zone Information
 -- -----------------------------------------------------------------------------
 
---- From `GetCurrentZoneLevelScalingConstraints()` — persisted on collected zone/map snapshot for slash debug output.
+--- From `GetCurrentZoneLevelScalingConstraints()` - persisted on collected zone/map snapshot for slash debug output.
 --- @class ZoneMapInfo.ScaleLevelConstraints
 --- @field type ScaleLevelConstraintType
 --- @field min integer

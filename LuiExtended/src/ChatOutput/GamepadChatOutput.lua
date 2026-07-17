@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Gamepad / console chat log sync and link-click guards
+--  LuiExtended - Gamepad / console chat log sync and link-click guards
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 

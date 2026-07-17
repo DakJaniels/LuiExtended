@@ -88,7 +88,7 @@ local strings =
     LUIE_STRING_LAM_SVPROFILE_COPY_KIND_CHARACTER = "另一角色",
     LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER = "来源角色",
     LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER_TP = "从该 @账号上的哪个角色复制。仅显示已有本插件版本 LuiExtended 数据的角色。若等于复制到自身，当前角色不会列出。",
-    LUIE_STRING_LAM_SVPROFILE_COPY_TARGET_DESC = "设置写入位置：本 mega 服务器、你的 @账号，以及账户共享或本角色——与上方「角色特定设置」一致。",
+    LUIE_STRING_LAM_SVPROFILE_COPY_TARGET_DESC = "设置写入位置：本 mega 服务器、你的 @账号，以及账户共享或本角色--与上方「角色特定设置」一致。",
     LUIE_STRING_LAM_SVPROFILE_RESETCHAR = "重置当前角色特定设置",
     LUIE_STRING_LAM_SVPROFILE_RESETCHAR_TP = "重置当前角色的设置。",
     LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT = "重置账户设置",
@@ -171,7 +171,7 @@ local strings =
     LUIE_STRING_DEBUG_ENV_STATUS_ACTIVE = "调试环境：激活（恢复快照中有 <<1>> 个插件）。",
     LUIE_STRING_DEBUG_ENV_STATUS_INACTIVE = "调试环境：未激活。",
     LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "用法：/luie debug on | off | status",
-    LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS = "       /luie svstatus — SavedVariables 迁移诊断",
+    LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS = "       /luie svstatus - SavedVariables 迁移诊断",
 
     LUIE_STRING_CORE_STARTUP_CHAT = "|cFFFFFF<<1>> 作者 |r |c00C000<<2>>|r |cFFFFFFv<<3>>|r",
     LUIE_STRING_SV_STATUS_HEADER = "|cFFAA00[LUIE] SavedVariables 迁移状态|r",

@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  LuiExtended — Chat Announcements hook shared context (CSA / alerts)
+--  LuiExtended - Chat Announcements hook shared context (CSA / alerts)
 -- -----------------------------------------------------------------------------
 
 --- @class (partial) LuiExtended
@@ -240,6 +240,12 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
             if nightMarketSettings then
                 settings = nightMarketSettings
                 debugDisable = true
+            else
+                local dynamicEncounterSettings = ChatAnnouncements.ResolveDynamicEncounterDisplayAnnouncement(primaryText, secondaryText)
+                if dynamicEncounterSettings then
+                    settings = dynamicEncounterSettings
+                    debugDisable = true
+                end
             end
         end
 
