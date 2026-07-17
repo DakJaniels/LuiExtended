@@ -65,6 +65,9 @@ function SpellCastBuffs.AddToCustomList(list, input)
         if name ~= nil and name ~= "" then
             local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
             list[id] = true
+            if list == SpellCastBuffs.SV.PromDebuffTable then
+                SpellCastBuffs.NormalizeProminentDebuffAdd(list, id)
+            end
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
             ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
@@ -76,6 +79,9 @@ function SpellCastBuffs.AddToCustomList(list, input)
     else
         if input ~= "" then
             list[input] = true
+            if list == SpellCastBuffs.SV.PromDebuffTable then
+                SpellCastBuffs.NormalizeProminentDebuffAdd(list, input)
+            end
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
             ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
@@ -93,6 +99,20 @@ function SpellCastBuffs.RemoveFromCustomList(list, input)
         list == SpellCastBuffs.SV.PriorityBuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS) or
         list == SpellCastBuffs.SV.PriorityDebuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS) or
         list == SpellCastBuffs.SV.BlacklistTable and GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST)
+
+    -- Expanding families: removing any OB / CC Immunity key clears the whole family.
+    if list == SpellCastBuffs.SV.PromDebuffTable then
+        local key = (id and id > 0) and id or input
+        if SpellCastBuffs.IsOffBalanceProminentKey(key) then
+            SpellCastBuffs.ClearOffBalanceProminentEntries(list)
+            return
+        end
+        if SpellCastBuffs.IsCCImmunityProminentKey(key) then
+            SpellCastBuffs.ClearCCImmunityProminentEntries(list)
+            return
+        end
+    end
+
     if id and id > 0 then
         local name = zo_strformat("<<C:1>>", GetAbilityName(id))
         local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
@@ -288,9 +308,13 @@ end
 -- counts. The Immunity buff (and any explicit BUFF_EFFECT_TYPE_BUFF entry)
 -- is excluded so ally-applied OB *debuffs* can promote to the prominent
 -- target container without requiring a hand-maintained id list.
+-- Also builds offBalanceRegistryById from Effects.OffBalanceAbilityRegistry so
+-- Prominent Debuffs opt-in can detect any registry id the user added.
 function SpellCastBuffs.BuildOffBalanceDebuffLookup()
     SpellCastBuffs.offBalanceDebuffById = {}
+    SpellCastBuffs.offBalanceRegistryById = {}
     local lookup = SpellCastBuffs.offBalanceDebuffById
+    local registryLookup = SpellCastBuffs.offBalanceRegistryById
     local obTooltip = Tooltips.Generic_Off_Balance
     local obName = Abilities.Skill_Off_Balance
 
@@ -301,6 +325,147 @@ function SpellCastBuffs.BuildOffBalanceDebuffLookup()
             end
         end
     end
+
+    local registry = Effects.OffBalanceAbilityRegistry
+    if registry then
+        for i = 1, #registry do
+            local entry = registry[i]
+            if entry and entry.id then
+                registryLookup[entry.id] = true
+            end
+        end
+    end
+end
+
+--- @param key integer|string|nil
+--- @return boolean
+function SpellCastBuffs.IsOffBalanceProminentKey(key)
+    if key == nil then
+        return false
+    end
+    if key == Abilities.Skill_Off_Balance then
+        return true
+    end
+    if key == Effects.OffBalanceImmunityAbilityId then
+        return true
+    end
+    if type(key) == "number" then
+        return SpellCastBuffs.offBalanceDebuffById[key] == true
+            or SpellCastBuffs.offBalanceRegistryById[key] == true
+    end
+    return false
+end
+
+--- @param key integer|string|nil
+--- @return boolean
+function SpellCastBuffs.IsCCImmunityProminentKey(key)
+    if key == nil then
+        return false
+    end
+    if key == Abilities.Innate_CC_Immunity then
+        return true
+    end
+    if type(key) == "number" and SpellCastBuffs.ccImmunityAbilityById[key] then
+        return true
+    end
+    return false
+end
+
+--- True when PromDebuffTable contains any Off Balance-related id or the canonical name.
+--- @return boolean
+function SpellCastBuffs.HasOffBalanceProminentOptIn()
+    local promTable = SpellCastBuffs.SV and SpellCastBuffs.SV.PromDebuffTable
+    if not promTable then
+        return false
+    end
+    for key in pairs(promTable) do
+        if SpellCastBuffs.IsOffBalanceProminentKey(key) then
+            return true
+        end
+    end
+    return false
+end
+
+--- True when PromDebuffTable contains any CC Immunity id or the canonical name.
+--- @return boolean
+function SpellCastBuffs.HasCCImmunityProminentOptIn()
+    local promTable = SpellCastBuffs.SV and SpellCastBuffs.SV.PromDebuffTable
+    if not promTable then
+        return false
+    end
+    for key in pairs(promTable) do
+        if SpellCastBuffs.IsCCImmunityProminentKey(key) then
+            return true
+        end
+    end
+    return false
+end
+
+--- When adding an OB or CC Immunity key to Prominent Debuffs, also store the canonical name
+--- so expand matching and the remove list stay consistent.
+--- @param list table
+--- @param key integer|string|nil
+function SpellCastBuffs.NormalizeProminentDebuffAdd(list, key)
+    if list == nil or key == nil then
+        return
+    end
+    if SpellCastBuffs.IsOffBalanceProminentKey(key) then
+        local obName = Abilities.Skill_Off_Balance
+        if obName then
+            list[obName] = true
+        end
+    elseif SpellCastBuffs.IsCCImmunityProminentKey(key) then
+        local ccName = Abilities.Innate_CC_Immunity
+        if ccName then
+            list[ccName] = true
+        end
+    end
+end
+
+--- Remove every Off Balance-related entry from a prominent debuff list.
+--- @param list table
+function SpellCastBuffs.ClearOffBalanceProminentEntries(list)
+    if list == nil then
+        return
+    end
+    local keysToClear = {}
+    for key in pairs(list) do
+        if SpellCastBuffs.IsOffBalanceProminentKey(key) then
+            keysToClear[#keysToClear + 1] = key
+        end
+    end
+    for i = 1, #keysToClear do
+        list[keysToClear[i]] = nil
+    end
+    local listRef = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)
+    local obName = Abilities.Skill_Off_Balance or "Off Balance"
+    chatSystem:Maximize()
+    chatSystem.primaryContainer:FadeIn()
+    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), obName, listRef), true)
+    SpellCastBuffs.ReloadEffects("player")
+end
+
+--- Remove every CC Immunity-related entry from a prominent debuff list.
+--- @param list table
+function SpellCastBuffs.ClearCCImmunityProminentEntries(list)
+    if list == nil then
+        return
+    end
+    local keysToClear = {}
+    for key in pairs(list) do
+        if SpellCastBuffs.IsCCImmunityProminentKey(key) then
+            keysToClear[#keysToClear + 1] = key
+        end
+    end
+    for i = 1, #keysToClear do
+        list[keysToClear[i]] = nil
+    end
+    local listRef = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)
+    local ccName = Abilities.Innate_CC_Immunity or "Crowd Control Immunity"
+    chatSystem:Maximize()
+    chatSystem.primaryContainer:FadeIn()
+    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), ccName, listRef), true)
+    SpellCastBuffs.ReloadEffects("player")
 end
 
 -- -----------------------------------------------------------------------------

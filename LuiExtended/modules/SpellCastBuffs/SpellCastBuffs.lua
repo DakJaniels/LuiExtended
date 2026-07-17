@@ -393,6 +393,17 @@ function SpellCastBuffs.Initialize(enabled)
         LUIE.MarkMigrationDone("spellcastbuffs_fontstyles_v2")
     end
 
+    -- Seed the canonical Off Balance name into Prominent Debuffs once so the
+    -- OB expand routing works out of the box. Users can still remove it from the
+    -- list and it will not be re-added (same migration key as V7232).
+    if not LUIE.IsMigrationDone("spellcastbuffs_seed_offbalance_prom") then
+        local obName = Abilities.Skill_Off_Balance
+        if obName and SpellCastBuffs.SV.PromDebuffTable[obName] == nil then
+            SpellCastBuffs.SV.PromDebuffTable[obName] = true
+        end
+        LUIE.MarkMigrationDone("spellcastbuffs_seed_offbalance_prom")
+    end
+
     -- Correct read values
     if SpellCastBuffs.SV.IconSize < 30 or SpellCastBuffs.SV.IconSize > 60 then
         SpellCastBuffs.SV.IconSize = SpellCastBuffs.Defaults.IconSize
@@ -1743,13 +1754,13 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
         local isPromDebuff = SpellCastBuffs.WantsProminentDebuff(id, name)
         AddMenuItem(isPromDebuff and "Remove from Prominent Debuffs" or "Add to Prominent Debuffs", function ()
             if isPromDebuff then
-                SpellCastBuffs.RemoveFromCustomList(promDebuffs, id)
-                SpellCastBuffs.RemoveFromCustomList(promDebuffs, name)
-                local obName = Abilities.Skill_Off_Balance
-                if obName and promDebuffs[obName] then
-                    if (id and SpellCastBuffs.offBalanceDebuffById[id]) or id == Effects.OffBalanceImmunityAbilityId then
-                        SpellCastBuffs.RemoveFromCustomList(promDebuffs, obName)
-                    end
+                if SpellCastBuffs.IsOffBalanceProminentKey(id) or SpellCastBuffs.IsOffBalanceProminentKey(name) then
+                    SpellCastBuffs.ClearOffBalanceProminentEntries(promDebuffs)
+                elseif SpellCastBuffs.IsCCImmunityProminentKey(id) or SpellCastBuffs.IsCCImmunityProminentKey(name) then
+                    SpellCastBuffs.ClearCCImmunityProminentEntries(promDebuffs)
+                else
+                    SpellCastBuffs.RemoveFromCustomList(promDebuffs, id)
+                    SpellCastBuffs.RemoveFromCustomList(promDebuffs, name)
                 end
             else
                 SpellCastBuffs.AddToCustomList(promDebuffs, id)
