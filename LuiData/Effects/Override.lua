@@ -3777,7 +3777,7 @@ local effectOverride =
     -----------------------------------------
 
     -- Uppercut / Dizzying Swing / Wrecking Blow (16825/18793: innate Off-Balance Exploit block ~308; bar: BarHighlightOverride)
-    [131562] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                   -- Off Balance (Dizzying Swing, 7s)
+    [131562] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },               -- Off Balance (Dizzying Swing, 7s)
     [137807] = { icon = "/esoui/art/icons/ability_2handed_001_a.dds", tooltip = Tooltips.Generic_Snare, tooltipValue2 = 40 }, -- Dizzying Swing snare (OB immune, 2s)
 
     -- Critical Charge / Stampede / Critical Rush
