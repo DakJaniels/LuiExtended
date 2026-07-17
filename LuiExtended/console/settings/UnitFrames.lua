@@ -29,6 +29,11 @@ local function ApplyCustomPlayerHideBarLayout()
     UnitFrames.CustomFramesSetupAlternative()
 end
 
+local function ApplyCustomReticleoverTitleRankSettings()
+    UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+end
+
 
 -- LHAS items: localized `name`, canonical English `data` (matches SV after MigrateCanonicalFormatStrings).
 local formatDropdownItems = UnitFrames.GetFormatOptionLHASItems()
@@ -2012,7 +2017,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableTitle = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                ApplyCustomReticleoverTitleRankSettings()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
@@ -2102,7 +2107,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableRank = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                ApplyCustomReticleoverTitleRankSettings()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
@@ -2125,7 +2130,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.TargetTitlePriority = item.data or item.name or value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                ApplyCustomReticleoverTitleRankSettings()
             end,
             default = SettingsAPI:LHASDropdownGetData(Defaults.TargetTitlePriority),
             disable = function ()
@@ -2143,7 +2148,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableRankIcon = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                ApplyCustomReticleoverTitleRankSettings()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)

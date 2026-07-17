@@ -2157,17 +2157,24 @@ function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
     target.buffs:SetWidth(buffsWidth)
     target.debuffs:SetWidth(buffsWidth)
 
-    local showTitle = UnitFrames.SV.TargetEnableTitle or UnitFrames.SV.TargetEnableRank
-    target.title:SetHidden(not showTitle)
-
-    local enableBuffAnchor = showTitle or UnitFrames.SV.TargetEnableRankIcon
-    local buffsAnchor = enableBuffAnchor and target.buffAnchor or target.control
-    if UnitFrames.SV.PlayerFrameOptions == 1 then
-        target.buffs:ClearAnchors()
-        target.buffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
+    -- Title / NPC caption visibility is unit-aware (Title for NPCs; Title or Rank name for players).
+    -- Refresh static title+buff anchors here so layout-only settings do not leave Rank gating NPC captions.
+    local unitTag = target.unitTag or "reticleover"
+    if DoesUnitExist(unitTag) then
+        FrameObject.ApplyStaticControlUnitFields(target)
+        local savedTitle = FrameObject.UpdateStaticControlTitleAndAva(target)
+        FrameObject.UpdateStaticControlReticleBuffAnchors(target, savedTitle)
     else
-        target.debuffs:ClearAnchors()
-        target.debuffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
+        target.title:SetHidden(true)
+        local enableBuffAnchor = UnitFrames.SV.TargetEnableRankIcon
+        local buffsAnchor = enableBuffAnchor and target.buffAnchor or target.control
+        if UnitFrames.SV.PlayerFrameOptions == 1 then
+            target.buffs:ClearAnchors()
+            target.buffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
+        else
+            target.debuffs:ClearAnchors()
+            target.debuffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
+        end
     end
 
     if target.frameCategory == "avaTarget" then
@@ -2183,7 +2190,7 @@ function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
     thb.labelOne:SetDimensions(UnitFrames.SV.TargetBarWidth - 50, UnitFrames.SV.TargetBarHeight - 2)
     thb.labelTwo:SetDimensions(UnitFrames.SV.TargetBarWidth - 50, UnitFrames.SV.TargetBarHeight - 2)
 
-    CustomFramesLayoutRefreshReticleoverAvaRankOnly(target.unitTag or "reticleover")
+    CustomFramesLayoutRefreshReticleoverAvaRankOnly(unitTag)
 
     UnitFrames.CustomFramesTryUnhideTlw("reticleover", unhide)
     if unhide then

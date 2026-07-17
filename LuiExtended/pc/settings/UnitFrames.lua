@@ -26,6 +26,11 @@ local function ApplyCustomPlayerHideBarLayout()
     UnitFrames.CustomFramesSetupAlternative()
 end
 
+local function ApplyCustomReticleoverTitleRankSettings()
+    UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+end
+
 local nameDisplayOptions =
 {
     GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID),
@@ -2220,7 +2225,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetEnableTitle = value
-                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                    ApplyCustomReticleoverTitleRankSettings()
                 end,
                 width = "full",
                 default = Defaults.TargetEnableTitle,
@@ -2306,7 +2311,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetEnableRank = value
-                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                    ApplyCustomReticleoverTitleRankSettings()
                 end,
                 width = "full",
                 default = Defaults.TargetEnableRank,
@@ -2326,7 +2331,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetTitlePriority = value
-                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                    ApplyCustomReticleoverTitleRankSettings()
                 end,
                 width = "full",
                 default = Defaults.TargetTitlePriority,
@@ -2344,7 +2349,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetEnableRankIcon = value
-                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                    ApplyCustomReticleoverTitleRankSettings()
                 end,
                 width = "full",
                 default = Defaults.TargetEnableRankIcon,

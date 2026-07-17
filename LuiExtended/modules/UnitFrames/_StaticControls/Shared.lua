@@ -626,17 +626,31 @@ function FrameObject:UpdateStaticControlTitleAndAva()
                 else
                     title = (ava ~= "") and ava or (title ~= "") and title or ""
                 end
+            else
+                -- Both Display Title and Display AVA Rank Name off.
+                title = ""
             end
             title = title or ""
         else
-            local unitCaption = GetUnitCaption(self.unitTag)
-            title = unitCaption and zo_strformat(SI_TOOLTIP_UNIT_CAPTION, unitCaption) or ""
+            -- NPC captions follow Display Title only; AVA Rank Name is player-only.
+            if UnitFrames.SV.TargetEnableTitle then
+                local unitCaption = GetUnitCaption(self.unitTag)
+                title = unitCaption and zo_strformat(SI_TOOLTIP_UNIT_CAPTION, unitCaption) or ""
+            else
+                title = ""
+            end
         end
         local titletext = StringOnlyGSUB(title, "%^%a+", "")
         self.title:SetText(titletext)
         self.title:SetWidth(self.title:GetStringWidth(titletext))
         if self.unitTag == "reticleover" then
-            self.title:SetHidden(not UnitFrames.SV.TargetEnableRank and not UnitFrames.SV.TargetEnableTitle)
+            local showTitleLabel
+            if self.isPlayer then
+                showTitleLabel = (UnitFrames.SV.TargetEnableTitle or UnitFrames.SV.TargetEnableRank) and title ~= ""
+            else
+                showTitleLabel = UnitFrames.SV.TargetEnableTitle and title ~= ""
+            end
+            self.title:SetHidden(not showTitleLabel)
         end
         if title == "" then
             savedTitle = ""
