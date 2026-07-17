@@ -56,6 +56,11 @@ local changelogMessages =
     "|cFFFF00New:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Display Announcements for Dynamic Encounters (PC and console). Separate chat, center-screen, and alert toggles for Vampire Hunt, Flowervine Farm, Bilsa's Delivery, and Misc.",
     "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Adding any |cFFFFFFOff Balance|r ability id (or the canonical name) to |cFFFFFFProminent Debuffs|r now tracks all Off Balance variants and Off Balance Immunity. Profiles that never received the default Off Balance prominent entry are seeded once on load.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: |cFFFFFFCrowd Control Immunity|r (28301 / 38117) can be tracked as a prominent debuff on targets (same target-buff promote path as Off Balance Immunity).",
+    "",
     -- Version Header 7.2.6.2
     "|cFFA500LuiExtended Version 7.2.6.2|r",
     "",
