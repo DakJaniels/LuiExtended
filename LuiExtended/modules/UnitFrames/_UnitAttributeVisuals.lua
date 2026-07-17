@@ -347,7 +347,9 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
     local shield = (powerType == COMBAT_MECHANIC_FLAGS_HEALTH and UnitFrames.savedHealth[unitTag][4] > 0) and UnitFrames.savedHealth[unitTag][4] or nil
     local trauma = (powerType == COMBAT_MECHANIC_FLAGS_HEALTH and UnitFrames.savedHealth[unitTag][5] > 0) and UnitFrames.savedHealth[unitTag][5] or nil
     local isUnwaveringPower = getAttributeVisual(ATTRIBUTE_VISUAL_UNWAVERING_POWER, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-    local isGuard = (UnitFrames.CustomFrames and UnitFrames.CustomFrames["reticleover"] and attributeFrame == UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH] and IsUnitInvulnerableGuard("reticleover"))
+    local isReticleoverCustomHealth = UnitFrames.CustomFrames and UnitFrames.CustomFrames["reticleover"] and attributeFrame == UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH]
+    local isGuard = isReticleoverCustomHealth and IsUnitInvulnerableGuard("reticleover")
+    local isCritter = isReticleoverCustomHealth and UnitFrames.savedHealth.reticleover and UnitFrames.savedHealth.reticleover[3] <= 9
 
     -- Adjust health bar value to subtract the trauma bar value
     local adjustedBarValue = powerValue
@@ -373,12 +375,18 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
 
             if isGuard and label == "labelOne" then
                 attributeFrame[label]:SetText(" - Invulnerable - ")
+            elseif isCritter and label == "labelOne" then
+                attributeFrame[label]:SetText(" - Critter - ")
+            elseif (isGuard or isCritter) and label == "labelTwo" then
+                -- Unwavering / ReloadValues refresh this path after target select; keep % hidden.
+                attributeFrame[label]:SetText("")
+                attributeFrame[label]:SetHidden(true)
             else
                 attributeFrame[label]:SetText(str)
             end
 
             -- Hide if dead
-            if (label == "labelOne" or label == "labelTwo") and UnitFrames.CustomFrames and UnitFrames.CustomFrames["reticleover"] and attributeFrame == UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH] and powerValue == 0 then
+            if (label == "labelOne" or label == "labelTwo") and isReticleoverCustomHealth and powerValue == 0 then
                 attributeFrame[label]:SetHidden(true)
             end
 

@@ -1422,7 +1422,14 @@ function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
             unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].labelOne:SetHidden(newValue ~= nil)
         end
         if unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].labelTwo ~= nil then
-            unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].labelTwo:SetHidden(newValue ~= nil)
+            local hideLabelTwo = newValue ~= nil
+            -- Clearing dead/offline must not re-show percentage on invulnerable guards / critters.
+            if not hideLabelTwo and unitFrame.unitTag == "reticleover" and DoesUnitExist("reticleover") then
+                local isGuard = IsUnitInvulnerableGuard("reticleover")
+                local isCritter = UnitFrames.savedHealth.reticleover and UnitFrames.savedHealth.reticleover[3] <= 9
+                hideLabelTwo = isGuard or isCritter
+            end
+            unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].labelTwo:SetHidden(hideLabelTwo)
         end
         if unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].name ~= nil then
             unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].name:SetHidden(newValue ~= nil)
