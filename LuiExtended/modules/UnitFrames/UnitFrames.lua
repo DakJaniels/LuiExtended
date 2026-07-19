@@ -75,9 +75,13 @@ function UnitFrames.CustomFramesApplyBarAlignment()
         if stamBar and stamBar.bar then
             local staminaAlignment = UnitFrames.SV.BarAlignPlayerStamina or 1
             stamBar.bar:SetBarAlignment(staminaAlignment - 1)
-            UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(stamBar.bar)
+            if UnitFrames.dodgePrediction then
+                UnitFrames.dodgePrediction:StopSmoothAnimation(stamBar.bar)
+            end
         end
-        UnitFrames.PlayerDodgePrediction.Refresh()
+        if UnitFrames.dodgePrediction then
+            UnitFrames.dodgePrediction:Refresh()
+        end
     end
 
     if UnitFrames.CustomFrames["reticleover"] then
@@ -210,7 +214,9 @@ function UnitFrames.Initialize(enabled)
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()
     UnitFrames.ApplyHideDefaultPlayerAttributeBarsIfNeeded()
-    UnitFrames.PlayerDodgePrediction.Initialize()
+    if not UnitFrames.dodgePrediction then
+        UnitFrames.dodgePrediction = LUIE_PlayerDodgePrediction:New()
+    end
 
     -- Initialize LibGroupBroadcast integrations if available
     if UnitFrames.GroupResources then
@@ -2099,7 +2105,9 @@ function UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhide)
     end
 
     UnitFrames.CustomFramesTryUnhideTlw("player", unhide)
-    UnitFrames.PlayerDodgePrediction.Refresh()
+    if UnitFrames.dodgePrediction then
+        UnitFrames.dodgePrediction:Refresh()
+    end
 end
 
 -- Only AvA rank label/icon on custom reticleover. Do not call full UpdateStaticControls from layout:
