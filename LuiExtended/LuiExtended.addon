@@ -2,8 +2,8 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101050 101051
-## Version: 7.2.6.3
-## AddOnVersion: 7263
+## Version: 7.2.6.4
+## AddOnVersion: 7264
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements, Slash Commands, and MiniMap.
 ## DependsOn: LuiMedia>=7133 LuiData>=7227
 ## PCDependsOn: LibAddonMenu-2.0>=43
