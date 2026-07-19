@@ -1540,7 +1540,9 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ShowPlayerDodgePrediction = value
-                UnitFrames.PlayerDodgePrediction.Refresh()
+                if UnitFrames.dodgePrediction then
+                    UnitFrames.dodgePrediction:Refresh()
+                end
             end,
             default = Defaults.ShowPlayerDodgePrediction,
             disable = function ()
@@ -1558,7 +1560,9 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.PlayerDodgePredictionColor = { r, g, b, a }
-                UnitFrames.PlayerDodgePrediction.Refresh()
+                if UnitFrames.dodgePrediction then
+                    UnitFrames.dodgePrediction:Refresh()
+                end
             end,
             default = Defaults.PlayerDodgePredictionColor,
             disable = function ()

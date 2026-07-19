@@ -296,8 +296,9 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
     end
 
     if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
-        if not UnitFrames.PlayerDodgePrediction.ShouldUseLUIEStaminaSmooth() then
-            UnitFrames.PlayerDodgePrediction.Refresh(true)
+        local dodgePrediction = UnitFrames.dodgePrediction
+        if dodgePrediction and not dodgePrediction:ShouldUseSmoothBar() then
+            dodgePrediction:Refresh(true)
         end
     end
 
@@ -402,14 +403,16 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
 
     -- Update status bar
     if attributeFrame.bar then
+        local dodgePrediction = UnitFrames.dodgePrediction
         if UnitFrames.SV.CustomSmoothBar and not isTraumaFlag then
             if  unitTag == "player"
             and powerType == COMBAT_MECHANIC_FLAGS_STAMINA
-            and UnitFrames.PlayerDodgePrediction.ShouldUseLUIEStaminaSmooth() then
-                UnitFrames.PlayerDodgePrediction.SmoothTransitionStaminaBar(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit)
+            and dodgePrediction
+            and dodgePrediction:ShouldUseSmoothBar() then
+                dodgePrediction:SmoothTransition(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit)
             else
-                if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
-                    UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(attributeFrame.bar)
+                if dodgePrediction and unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
+                    dodgePrediction:StopSmoothAnimation(attributeFrame.bar)
                 end
                 ZO_StatusBar_SmoothTransition(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit, nil, 250)
             end
@@ -420,8 +423,8 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
                 attributeFrame.trauma:SetHidden(true)
             end
         else
-            if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
-                UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(attributeFrame.bar)
+            if dodgePrediction and unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
+                dodgePrediction:StopSmoothAnimation(attributeFrame.bar)
             end
             attributeFrame.bar:SetMinMax(0, powerEffectiveMax)
             attributeFrame.bar:SetValue(adjustedBarValue)
