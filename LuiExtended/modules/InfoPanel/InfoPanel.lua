@@ -196,7 +196,7 @@ function InfoPanelMeterBase:SetInterval(intervalMs)
 end
 
 function InfoPanelMeterBase:GetInterval()
-    return self.intervalMs or 1000
+    return self.intervalMs
 end
 
 function InfoPanelMeterBase:MarkUpdated(nowMs)
@@ -425,9 +425,6 @@ end
 function MemoryMeter:IsEnabled()
     if self.infoPanel.SV.HideMemory then
         return false
-    end
-    if ZO_IsConsoleOrGameCoreUI() then
-        return GetTotalUserAddOnMemoryPoolCapacityMB() > 0
     end
     return true
 end
