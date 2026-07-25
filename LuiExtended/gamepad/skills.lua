@@ -243,13 +243,12 @@ LUIE.HookGamePadStats = function ()
         local buffSlot, abilityId, buffType
         if selectedData.isArtificial then
             abilityId = selectedData.artificialEffectId
-            buffType = BUFF_EFFECT_TYPE_BUFF
-            contentTitle, _, _, _, contentStartTime, contentEndTime = GetArtificialEffectInfo(selectedData.artificialEffectId)
+            contentTitle, _, buffType, _, contentStartTime, contentEndTime = GetArtificialEffectInfo(selectedData.artificialEffectId)
             contentDescription = GetArtificialEffectTooltipText(selectedData.artificialEffectId)
         elseif selectedData.isSyntheticFromScb then
             abilityId = selectedData.abilityId
             buffType = selectedData.effectType or BUFF_EFFECT_TYPE_BUFF
-            contentTitle = selectedData:GetDisplayName()
+            contentTitle = LUIE.GetStatsActiveEffectDisplayName(selectedData.abilityId, "")
             contentStartTime = selectedData.startTime
             contentEndTime = selectedData.endTime
             contentDescription = selectedData.scbTooltipText or ""
