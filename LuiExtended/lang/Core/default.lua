@@ -94,6 +94,7 @@ local strings =
     LUIE_STRING_LAM_UNLOCK_DEFAULT_UI = "Unlock Default UI Elements",
     LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP = "This will unlock and allow you to move the default UI Quest Log, Battleground Score, Loot History, and Equipment Status Windows.",
     LUIE_STRING_LAM_RESET_DEFAULT_UI_TP = "Reset Default UI Elements back to their normal positions.",
+    LUIE_STRING_LAM_HUD_EDITOR_NOTICE = "Default HUD elements are moved with the game HUD Editor in the game menu. LuiExtended registers a few frames the game does not manage so they appear there too, and no longer provides its own unlock movers.",
     LUIE_STRING_LAM_UF = "Unit Frames",
     LUIE_STRING_LAM_CA = "Chat Announce",
     LUIE_STRING_LAM_CI = "Combat Info",

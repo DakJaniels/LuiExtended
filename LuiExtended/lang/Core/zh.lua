@@ -96,6 +96,7 @@ local strings =
     LUIE_STRING_LAM_UNLOCK_DEFAULT_UI = "解锁默认用户界面元素位置",
     LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP = "将会解锁默认用户界面元素设置，您可以自行调整默认任务日志、战场分数、拾取日志以及装备状态窗口的位置。",
     LUIE_STRING_LAM_RESET_DEFAULT_UI_TP = "重置默认用户界面元素为默认位置。",
+    LUIE_STRING_LAM_HUD_EDITOR_NOTICE = "默认 HUD 元素请通过游戏菜单中的 HUD 编辑器移动。LuiExtended 会把游戏未托管的部分框体也注册进去，并不再提供自有的解锁拖动功能。"
     LUIE_STRING_LAM_UF = "单位框架",
     LUIE_STRING_LAM_CA = "聊天信息",
     LUIE_STRING_LAM_CI = "战斗信息",

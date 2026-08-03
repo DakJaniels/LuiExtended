@@ -26,10 +26,11 @@ function MiniMap.RefreshWorldMapLocationPinsForMirror()
     pinManager:RemovePins("loc")
     for locationIndex = 1, GetNumMapLocations() do
         if IsMapLocationVisible(locationIndex) then
-            local icon, normalizedX, normalizedY = GetMapLocationIcon(locationIndex)
+            -- P51: GetMapLocationIcon also returns normalizedRadius; CreatePin accepts it like ZOS MapPin_Manager.
+            local icon, normalizedX, normalizedY, normalizedRadius = GetMapLocationIcon(locationIndex)
             if icon ~= "" and ZO_WorldMap_IsNormalizedPointInsideMapBounds(normalizedX, normalizedY) then
                 local tag = ZO_MapPin.CreateLocationPinTag(locationIndex, icon)
-                pinManager:CreatePin(MAP_PIN_TYPE_LOCATION, tag, normalizedX, normalizedY)
+                pinManager:CreatePin(MAP_PIN_TYPE_LOCATION, tag, normalizedX, normalizedY, normalizedRadius)
             end
         end
     end

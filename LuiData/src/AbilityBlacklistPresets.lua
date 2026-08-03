@@ -22,10 +22,11 @@ local blacklistPresets =
         [61697] = true,  -- Minor Fortitude
         [61704] = true,  -- Minor Endurance
         [61706] = true,  -- Minor Intellect
-        [61685] = true,  -- Minor Sorcery
-        [61691] = true,  -- Minor Prophecy
-        [61662] = true,  -- Minor Brutality
-        [61666] = true,  -- Minor Savagery
+        [61685] = true,  -- Minor Sorcery (removed U51; kept for dual-API / legacy SV)
+        [61691] = true,  -- Minor Prophecy (removed U51; kept for dual-API / legacy SV)
+        [61662] = true,  -- Minor Brutality (U51: Weapon + Spell Damage)
+        [61666] = true,  -- Minor Savagery (U51: Weapon + Spell Critical)
+        -- TODO P51 PTS: add Minor Vexation ability id when observed
         [61744] = true,  -- Minor Berserk
         [61746] = true,  -- Minor Force
         [61549] = true,  -- Minor Vitality
@@ -45,10 +46,12 @@ local blacklistPresets =
         [61698] = true,  -- Major Fortitude
         [61705] = true,  -- Major Endurance
         [61707] = true,  -- Major Intellect
-        [61687] = true,  -- Major Sorcery
-        [61689] = true,  -- Major Prophecy
-        [61665] = true,  -- Major Brutality
-        [61667] = true,  -- Major Savagery
+        [61687] = true,  -- Major Sorcery (removed U51; kept for dual-API / legacy SV)
+        [61689] = true,  -- Major Prophecy (removed U51; kept for dual-API / legacy SV)
+        [61665] = true,  -- Major Brutality (U51: Weapon + Spell Damage)
+        [61667] = true,  -- Major Savagery (U51: Weapon + Spell Critical)
+        -- TODO P51 PTS: add Major Vexation ability id when observed
+        -- TODO P51 PTS: Sorcerer group Offensive Penetration + Templar group Armor unique buff ids
         [61745] = true,  -- Major Berserk
         [61747] = true,  -- Major Force
         [61713] = true,  -- Major Vitality

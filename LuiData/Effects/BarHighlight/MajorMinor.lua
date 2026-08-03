@@ -776,10 +776,11 @@ local majorMinor =
     [61666] = true,  -- Minor Savagery
     [61667] = true,  -- Major Savagery
     [61670] = true,  -- Major Brutality
-    [61685] = true,  -- Minor Sorcery
-    [61687] = true,  -- Major Sorcery
-    [61689] = true,  -- Major Prophecy
-    [61691] = true,  -- Minor Prophecy
+    [61685] = true,  -- Minor Sorcery (removed U51; kept for dual-API / legacy)
+    [61687] = true,  -- Major Sorcery (removed U51; kept for dual-API / legacy)
+    [61689] = true,  -- Major Prophecy (removed U51; kept for dual-API / legacy)
+    [61691] = true,  -- Minor Prophecy (removed U51; kept for dual-API / legacy)
+    -- TODO P51 PTS: add Major/Minor Vexation + new Sorc/Templar unique group buff ids when observed
     [61693] = true,  -- Minor Resolve
     [61694] = true,  -- Major Resolve
     [61695] = true,  -- Minor Spell Reistance

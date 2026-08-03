@@ -4698,10 +4698,11 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
     ChatAnnouncements.RefreshAbilityProgressionXpCache()
 
     -- Get current trades if UI is reloaded
-    local characterName, _, displayName = GetTradeInviteInfo()
+    -- P51 GetTradeInviteInfo: characterName, millisecondsSinceRequest, crossplayDisplayName, platformDisplayName
+    local characterName, _, crossplayDisplayName = GetTradeInviteInfo()
 
-    if characterName ~= "" and displayName ~= "" then
-        local tradeName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+    if characterName ~= "" and crossplayDisplayName ~= "" then
+        local tradeName = ChatAnnouncements.ResolveNameLink(characterName, crossplayDisplayName)
         S.g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", tradeName))
     end
 

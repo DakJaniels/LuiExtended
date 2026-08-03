@@ -96,6 +96,7 @@ local strings =
     LUIE_STRING_LAM_UNLOCK_DEFAULT_UI = "Standard UI Elemente verchiebbar machen",
     LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP = "Aktiviere diese Ootion, um die Standard Benutzeroberfläche Elemente (z.B. die Quest Anzeige, Loot Historie, Ausrüstungs Status Fenster usw.) verschiebbar zu machen.",
     LUIE_STRING_LAM_RESET_DEFAULT_UI_TP = "Setze Standard UI Element Positionen zurück",
+    LUIE_STRING_LAM_HUD_EDITOR_NOTICE = "Standard-HUD-Elemente werden über den HUD-Editor im Spielmenü verschoben. LuiExtended registriert einige vom Spiel nicht verwaltete Rahmen dort mit und bietet keine eigenen Entriegelungs-Verschieber mehr.",
     LUIE_STRING_LAM_UF = "Einheiten Rahmen",
     LUIE_STRING_LAM_CA = "Chat Bekanntgabe",
     LUIE_STRING_LAM_CI = "Kampf Info",

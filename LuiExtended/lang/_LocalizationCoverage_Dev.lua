@@ -63,6 +63,8 @@ local function getLocalizationModuleForStringId(stringId)
     if stringId:match("^LUIE_STRING_LAM_CHANGELOG") then return "Core" end
     if stringId:match("^LUIE_STRING_LAM_STARTUP") then return "Core" end
     if stringId:match("^LUIE_STRING_LAM_SVPROFILE") then return "Core" end
+    if stringId:match("^LUIE_STRING_LAM_HUD_EDITOR") then return "Core" end
+    if stringId:match("^LUIE_STRING_LAM_UNLOCK_DEFAULT") or stringId:match("^LUIE_STRING_LAM_RESET_DEFAULT") then return "Core" end
     if stringId:match("^LUIE_STRING_LAM_MODULE") then return "Core" end
     if stringId:match("^LUIE_STRING_LAM_MISC") then return "Core" end
     if stringId == "LUIE_STRING_LAM_UF" or stringId == "LUIE_STRING_LAM_CA" or stringId == "LUIE_STRING_LAM_CI" then return "Core" end

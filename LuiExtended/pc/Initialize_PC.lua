@@ -38,8 +38,8 @@ end
 --- @param initial boolean
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, eventId)
-    -- Set Positions for moved Default UI elements
-    LUIE.SetElementPosition()
+    -- Alert text alignment (default HUD layout is owned by the game HUD Editor)
+    LUIE.ApplyAlertFrameAlignment()
     if not LUIE.SV.StartupInfo then
         LUIE.ChatOutput:Print(LUIE.FormatStartupChatMessage(), true)
     end
