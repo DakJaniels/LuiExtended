@@ -1482,6 +1482,7 @@ local effectOverride =
     [121913] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HONORS_LOVE_DDS, tooltip = Tooltips.Generic_HoT, tooltipValue2 = 1 },                                                                     -- Honor's Love (Coldharbour's Favorite)
     [123717] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_VASTARIES_TUTELAGE_DDS, tooltip = Tooltips.Set_Vastaries_Tutelage },                                                                      -- Vastarie's Tutelage (Vastarie's Tutelage)
     [123715] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_VASTARIES_TUTELAGE_DDS, tooltip = Tooltips.Set_Vastaries_Tutelage },                                                                      -- Vastarie's Tutelage (Vastarie's Tutelage)
+    [135874] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_STUHNS_FAVOR_DDS, tooltip = Tooltips.Set_Stuhns_Favor, tooltipValue2 = 5312 },                                                            -- Stuhn's Favor (Stuhn's)
     [141916] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_STUHNS_FAVOR_DDS, tooltip = Tooltips.Set_Stuhns_Favor, tooltipValue2 = 5312 },                                                            -- Stuhn's Favor (Stuhn's)
     [135919] = { icon = "/esoui/art/icons/crownstore_skillline_vampire.dds" },                                                                                                                           -- Spell Parasite (Spell Parasite's)
     [137126] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_DRAGONS_APPETITE_DDS, tooltip = Tooltips.Set_Dragons_Appetite, forcedContainer = "short" },                                               -- Dragon's Appetite (of Dragon's Appetite)
@@ -1989,7 +1990,7 @@ local effectOverride =
     [31103] = { dynamicTooltip = true, tooltipMorphId = 20944 },                                 -- Disintegrating Dragonfire (target DOT ~10s; log: 31103 + 61743 breach)
     [31104] = { hide = true },                                                                   -- Engulfing Dragonfire (tick hit combat on target)
     [270517] = { hide = true },                                                                  -- Engulfing Dragonfire (tick ON CD combat; U49 log)
-    [32821] = { dynamicTooltip = true, tooltipMorphId = 20930, toggle = true, unbreakable = 1 }, -- Engulfing channel (player; ~5s refreshed per tick)
+    [32821] = { dynamicTooltip = true, tooltipMorphId = 20930, unbreakable = 1 }, -- Engulfing channel (player; ~5s refreshed per tick)
     [34240] = { hide = true },                                                                   -- Dragonfire Breath Dummy (LMN dump)
     [48946] = { hide = true },                                                                   -- Major Breach combat (Disintegrating); aura UI --> 61743
 
@@ -2013,9 +2014,9 @@ local effectOverride =
     [76502] = { hide = true, tooltip = Tooltips.Skill_Major_Cowardice, tooltipMorphId = 20496 },                                                    -- Major Cowardice combat (display 147643, 15s log)
 
     -- Core of Flame / Soul of Flame / Heart of Flame (channeled ~4s self-buff; unrelated to Hearthfire 15s ground)
-    [31837] = { dynamicTooltip = true, toggle = true }, -- Core of Flame
-    [32792] = { dynamicTooltip = true, toggle = true }, -- Soul of Flame
-    [32785] = { dynamicTooltip = true, toggle = true }, -- Heart of Flame
+    [31837] = { dynamicTooltip = true }, -- Core of Flame
+    [32792] = { dynamicTooltip = true }, -- Soul of Flame
+    [32785] = { dynamicTooltip = true }, -- Heart of Flame
     [31842] = { hide = true },                          -- Core of Flame (hit damage combat)
     [32794] = { hide = true },                          -- Soul of Flame (hit damage combat)
     [32786] = { hide = true },                          -- Heart of Flame (channel heal combat)
