@@ -96,6 +96,7 @@ local strings =
     LUIE_STRING_LAM_UNLOCK_DEFAULT_UI = "Déverrouiller les éléments d'interface utilisateur par défaut",
     LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP = "Cela déverrouillera et vous permettra de déplacer les éléments de l'interface utilisateur par défaut comme le journal des quêtes, le score du champ de bataille, l'historique du butin et les fenêtres d'état de l'équipement.",
     LUIE_STRING_LAM_RESET_DEFAULT_UI_TP = "Réinitialiser les éléments d'interface utilisateur par défaut à leurs positions normales.",
+    LUIE_STRING_LAM_HUD_EDITOR_NOTICE = "Les éléments HUD par défaut se déplacent avec l'éditeur HUD du menu du jeu. LuiExtended y enregistre aussi quelques cadres non gérés par le jeu, et ne propose plus ses propres déplacements déverrouillés.",
     LUIE_STRING_LAM_UF = "Cadres des unités",
     LUIE_STRING_LAM_CA = "Messages d'annonces ",
     LUIE_STRING_LAM_CI = "Informations de combat",

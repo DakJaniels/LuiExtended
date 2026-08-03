@@ -418,12 +418,13 @@ end
 --- @param duelResult DuelResult
 --- @param wasLocalPlayersResult boolean
 --- @param opponentCharacterName string
---- @param opponentDisplayName string
+--- @param opponentCrossplayDisplayName string
 --- @param opponentAlliance Alliance
 --- @param opponentGender Gender
 --- @param opponentClassId integer
 --- @param opponentRaceId integer
-function AbilityAlerts.OnDuelFinished(eventId, duelResult, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName, opponentAlliance, opponentGender, opponentClassId, opponentRaceId)
+--- @param opponentPlatformDisplayName string|nil
+function AbilityAlerts.OnDuelFinished(eventId, duelResult, wasLocalPlayersResult, opponentCharacterName, opponentCrossplayDisplayName, opponentAlliance, opponentGender, opponentClassId, opponentRaceId, opponentPlatformDisplayName)
     g_inDuel = false
 end
 

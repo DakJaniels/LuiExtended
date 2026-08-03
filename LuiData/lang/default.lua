@@ -27,8 +27,9 @@ local strings =
     LUIE_STRING_SKILL_MUNDUS_BASIC_SHADOW = "Increase Critical Damage by |cFFFFFF11|r%.",
     LUIE_STRING_SKILL_MUNDUS_BASIC_RITUAL = "Increase healing done by |cFFFFFF8|r%.",
     LUIE_STRING_SKILL_MUNDUS_BASIC_THIEF = "Increase Weapon and Spell Critical by |cFFFFFF1333|r.",
-    LUIE_STRING_SKILL_MUNDUS_BASIC_WARRIOR = "Increase Weapon Damage by |cFFFFFF238|r.",
-    LUIE_STRING_SKILL_MUNDUS_BASIC_APPRENTICE = "Increase Spell Damage by |cFFFFFF238|r.",
+    -- P51 hybridization: Warrior covers Weapon + Spell Damage; Apprentice is XP/Inspiration (ZOS U51 notes).
+    LUIE_STRING_SKILL_MUNDUS_BASIC_WARRIOR = "Increase Weapon and Spell Damage by |cFFFFFF238|r.",
+    LUIE_STRING_SKILL_MUNDUS_BASIC_APPRENTICE = "Increase Experience and Inspiration gain.",
     LUIE_STRING_SKILL_MUNDUS_BASIC_STEED = "Increase Movement Speed by |cFFFFFF10|r% and Health Recovery by |cFFFFFF238|r.",
 
     -- Mundus Substitute strings for scaled default tooltips
@@ -143,10 +144,11 @@ local strings =
     LUIE_STRING_SKILL_MAJOR_SORCERY_TP = "Increase Spell Damage by |cFFFFFF20|r%.",
     LUIE_STRING_SKILL_MINOR_PROPHECY_TP = "Increase Spell Critical rating by |cFFFFFF1314|r, increasing your Spell Critical chance by |cFFFFFF6|r%.",
     LUIE_STRING_SKILL_MAJOR_PROPHECY_TP = "Increase Spell Critical rating by |cFFFFFF2629|r, increasing your Spell Critical chance by |cFFFFFF12|r%.",
-    LUIE_STRING_SKILL_MINOR_BRUTALITY_TP = "Increase Weapon Damage by |cFFFFFF10|r%.",
-    LUIE_STRING_SKILL_MAJOR_BRUTALITY_TP = "Increase Weapon Damage by |cFFFFFF20|r%.",
-    LUIE_STRING_SKILL_MINOR_SAVAGERY_TP = "Increase Weapon Critical rating by |cFFFFFF1314|r, increasing your Weapon Critical chance by |cFFFFFF6|r%.",
-    LUIE_STRING_SKILL_MAJOR_SAVAGERY_TP = "Increase Weapon Critical rating by |cFFFFFF2629|r, increasing your Weapon Critical chance by |cFFFFFF12|r%.",
+    -- P51: Sorcery merged into Brutality; Prophecy merged into Savagery (ZOS U51 hybridization notes).
+    LUIE_STRING_SKILL_MINOR_BRUTALITY_TP = "Increase Weapon and Spell Damage by |cFFFFFF10|r%.",
+    LUIE_STRING_SKILL_MAJOR_BRUTALITY_TP = "Increase Weapon and Spell Damage by |cFFFFFF20|r%.",
+    LUIE_STRING_SKILL_MINOR_SAVAGERY_TP = "Increase Weapon and Spell Critical rating by |cFFFFFF1314|r, increasing your Weapon and Spell Critical chance by |cFFFFFF6|r%.",
+    LUIE_STRING_SKILL_MAJOR_SAVAGERY_TP = "Increase Weapon and Spell Critical rating by |cFFFFFF2629|r, increasing your Weapon and Spell Critical chance by |cFFFFFF12|r%.",
     LUIE_STRING_SKILL_MINOR_BERSERK_TP = "Increase damage done by |cFFFFFF5|r%.",
     LUIE_STRING_SKILL_MAJOR_BERSERK_TP = "Increase damage done by |cFFFFFF10|r%.",
     LUIE_STRING_SKILL_MINOR_FORCE_TP = "Increase Critical Damage by |cFFFFFF10|r%.",

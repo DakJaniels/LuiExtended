@@ -5,9 +5,6 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local g_ElementMovingEnabled
-
-local GridOverlay = LUIE.GridOverlay
 
 local pairs = pairs
 local ipairs = ipairs
@@ -551,65 +548,9 @@ function LUIE.CreateSettings()
         "half"
     )
 
-    -- Default UI Elements Position Unlock
-    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI),
-        GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP),
-        function () return g_ElementMovingEnabled end,
-        function (value)
-            g_ElementMovingEnabled = value
-            LUIE.SetupElementMover(value)
-        end,
-        "half",
-        nil,
-        false,
-        nil,
-        nil,
-        LUIE.ResetElementPosition
-    )
-
-    -- Grid Snap Settings
-    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_ENABLE), GetString(LUIE_STRING_SHARED_MODULE_DEFAULT_UI)),
-        zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_ENABLE_TP), GetString(LUIE_STRING_SHARED_MODULE_DEFAULT_UI)),
-        function () return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
-        function (value)
-            local accountWideSettings = _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"]
-            accountWideSettings.snapToGrid_default = value
-            local gridSize = accountWideSettings.snapToGridSize_default or 15
-            GridOverlay.Refresh("default", g_ElementMovingEnabled and value, gridSize)
-        end,
-        "half",
-        nil,
-        false
-    )
-
-    -- Grid Size
-    optionsData[#optionsData + 1] = SettingsAPI.CreateSliderOption(
-        zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_SIZE), GetString(LUIE_STRING_SHARED_MODULE_DEFAULT_UI)),
-        zo_strformat(GetString(LUIE_STRING_SHARED_GRID_SNAP_SIZE_TP), GetString(LUIE_STRING_SHARED_MODULE_DEFAULT_UI)),
-        5,
-        100,
-        5,
-        function () return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
-        function (value)
-            local accountWideSettings = _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"]
-            accountWideSettings.snapToGridSize_default = value
-            GridOverlay.Refresh("default", g_ElementMovingEnabled and accountWideSettings.snapToGrid_default, value)
-        end,
-        "half",
-        function () return not _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
-        15
-    )
-
-    -- Default UI Elements Position Reset
-    optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RESETPOSITION),
-        GetString(LUIE_STRING_LAM_RESET_DEFAULT_UI_TP),
-        LUIE.ResetElementPosition,
-        "half",
-        nil,
-        GetString(LUIE_STRING_LAM_RELOADUI_BUTTON)
+    -- Default HUD layout is owned by the game HUD Editor (Update 51+)
+    optionsData[#optionsData + 1] = SettingsAPI.CreateDescriptionOption(
+        GetString(LUIE_STRING_LAM_HUD_EDITOR_NOTICE)
     )
 
     -- Character Profile Settings Submenu

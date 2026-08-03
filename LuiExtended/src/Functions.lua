@@ -210,6 +210,38 @@ do
 end
 
 -- -----------------------------------------------------------------------------
+--- Snap a coordinate to the nearest grid point.
+--- Used by Unit Frames / SpellCastBuffs / Combat Text movers (formerly Unlock.lua).
+--- @param position number
+--- @param gridSize number
+--- @return number
+function LUIE.SnapToGrid(position, gridSize)
+    position = zo_floor(position)
+    if (position % gridSize >= gridSize / 2) then
+        return position + (gridSize - (position % gridSize))
+    end
+    return position - (position % gridSize)
+end
+
+--- Apply grid snapping to coordinates when the matching snapToGrid_* SV is enabled.
+--- @param left number
+--- @param top number
+--- @param gridType string|"default"|"unitFrames"|"buffs"|"combatText"|nil
+--- @return number left
+--- @return number top
+function LUIE.ApplyGridSnap(left, top, gridType)
+    local gridSetting = "snapToGrid" .. (gridType and ("_" .. gridType) or "")
+    local sizeSetting = "snapToGridSize_default"
+
+    if LUIE.SV[gridSetting] then
+        local gridSize = LUIE.SV[sizeSetting] or 10
+        left = LUIE.SnapToGrid(left, gridSize)
+        top = LUIE.SnapToGrid(top, gridSize)
+    end
+    return left, top
+end
+
+-- -----------------------------------------------------------------------------
 --- Toggle the display of the Alert Frame.
 --- Sets the visibility of the ZO_AlertTextNotification based on the value of LUIE.SV.HideAlertFrame.
 function LUIE.SetupAlertFrameVisibility()

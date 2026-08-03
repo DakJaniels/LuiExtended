@@ -69,9 +69,10 @@ end
 -- EVENT_DUEL_STARTED handler for creating Battle Spirit Icon on Target
 --- @param eventId integer|nil
 function SpellCastBuffs.DuelStart(eventId)
-    local duelState, characterName = GetDuelInfo()
+    -- P51 GetDuelInfo: duelState, partnerCharacterName, partnerCrossplayDisplayName, timeRemainingMS, partnerPlatformDisplayName
+    local duelState, partnerCharacterName = GetDuelInfo()
     if duelState == 3 and not SpellCastBuffs.SV.HideTargetBuffs and not SpellCastBuffs.SV.IgnoreBattleSpiritTarget then
-        g_currentDuelTarget = zo_strformat("<<C:1>>", characterName)
+        g_currentDuelTarget = zo_strformat("<<C:1>>", partnerCharacterName)
         SpellCastBuffs.ReloadEffects("reticleover")
     end
 end
@@ -81,12 +82,13 @@ end
 --- @param duelResult DuelResult
 --- @param wasLocalPlayersResult boolean
 --- @param opponentCharacterName string
---- @param opponentDisplayName string
+--- @param opponentCrossplayDisplayName string
 --- @param opponentAlliance Alliance
 --- @param opponentGender Gender
 --- @param opponentClassId integer
 --- @param opponentRaceId integer
-function SpellCastBuffs.DuelEnd(eventId, duelResult, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName, opponentAlliance, opponentGender, opponentClassId, opponentRaceId)
+--- @param opponentPlatformDisplayName string|nil
+function SpellCastBuffs.DuelEnd(eventId, duelResult, wasLocalPlayersResult, opponentCharacterName, opponentCrossplayDisplayName, opponentAlliance, opponentGender, opponentClassId, opponentRaceId, opponentPlatformDisplayName)
     g_currentDuelTarget = nil
     SpellCastBuffs.ReloadEffects("reticleover")
 end
