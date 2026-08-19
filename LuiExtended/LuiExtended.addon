@@ -12,8 +12,11 @@
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
 ## OptionalDependsOn: LibDebugLogger>=268 DebugLogViewer>=697 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028
 ## OptionalDependsOn: LootLog>=408040 Taneth LibCombat LibCombat2 LibSlashCommander
-## SavedVariables: LUIESV LUIE_UnitFrames_SV LUIE_CombatText_SV LUIE_ChatAnnouncements_SV LUIE_SpellCastBuffs_SV
+## SavedVariables: LUIESV ACACUpdateCheckDisabled ACACUC_LuiExtended LUIE_UnitFrames_SV LUIE_CombatText_SV LUIE_ChatAnnouncements_SV LUIE_SpellCastBuffs_SV
 ## SavedVariables: LUIE_ActionBar_SV LUIE_InfoPanel_SV LUIE_SlashCommands_SV LUIE_CombatInfo_SV LUIE_MiniMap_SV
+
+## Clank Clank
+pc/AntiClankerAddonConsortiumUpdateChecker.lua
 
 # Addon Profiler
 ;src/AddonProfiler.lua
