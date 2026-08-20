@@ -3863,6 +3863,40 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.ContextMessages.CurrencyMessageExtract,
             },
             {
+                -- Loot Message (Gem Extraction)
+                type = "editbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GEM_EXTRACT),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GEM_EXTRACT_TP),
+                getFunc = function ()
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageGemExtract")
+                end,
+                setFunc = function (value)
+                    Settings.ContextMessages.CurrencyMessageGemExtract = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.ContextMessages.CurrencyMessageGemExtract,
+            },
+            {
+                -- Loot Message (Gem Extraction - From Item)
+                type = "editbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GEM_EXTRACT_FROM),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GEM_EXTRACT_FROM_TP),
+                getFunc = function ()
+                    return ChatAnnouncements.GetContextMessage("CurrencyMessageGemExtractFrom")
+                end,
+                setFunc = function (value)
+                    Settings.ContextMessages.CurrencyMessageGemExtractFrom = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.ContextMessages.CurrencyMessageGemExtractFrom,
+            },
+            {
                 -- Loot Message (Upgrade)
                 type = "editbox",
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UPGRADE),
