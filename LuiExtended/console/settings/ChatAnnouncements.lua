@@ -5577,6 +5577,23 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CONDENSE),
+            tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CONDENSE_TP),
+            getFunction = function ()
+                return Settings.Collectibles.CollectibleCondense
+            end,
+            setFunction = function (value)
+                Settings.Collectibles.CollectibleCondense = value
+            end,
+            default = Defaults.Collectibles.CollectibleCondense,
+            disable = function ()
+                return not ((Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert) and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_USE_HEADER)
         }
