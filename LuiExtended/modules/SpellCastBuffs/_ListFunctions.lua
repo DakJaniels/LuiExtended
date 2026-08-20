@@ -495,6 +495,8 @@ end
 
 --- Copy refreshable fields onto an existing EffectsList row. Keeps iconNum and displayUid
 --- so a duration/stack refresh does not force every icon to slotRebound.
+--- Lua 5.1 pairs skips nil values, so nil-able fields are assigned explicitly
+--- (duration-0 refresh must clear stale ends or player_long shows a negative timer).
 --- @param existing table
 --- @param fields table
 --- @return table
@@ -506,6 +508,14 @@ function SpellCastBuffs.ApplyEffectRowRefresh(existing, fields)
             existing[key] = value
         end
     end
+    existing.ends = fields.ends
+    existing.forced = fields.forced
+    existing.groundLabel = fields.groundLabel
+    existing.toggle = fields.toggle
+    existing.fakeDuration = fields.fakeDuration
+    existing.tooltip = fields.tooltip
+    existing.stack = fields.stack
+    existing.combatCcType = fields.combatCcType
     existing.iconNum = iconNum
     existing.displayUid = displayUid
     existing.restart = true

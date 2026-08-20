@@ -365,6 +365,34 @@ local function FormatRemainLabelText(remain, container)
     return string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000)
 end
 
+--- Countdown only while remain is positive. Nil/expired/fakeDuration use T, G, or empty
+--- so a stale negative m:ss on player_long cannot stick after a duration-0 refresh.
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param container string
+--- @param effect table
+--- @param remain number|nil
+local function ApplyBuffIconRemainLabel(buff, container, effect, remain)
+    local showCountdown = remain and remain > 0 and not effect.fakeDuration
+    if showCountdown then
+        local labelText = FormatRemainLabelText(remain, container)
+        if buff.lastLabelText ~= labelText then
+            buff.label:SetText(labelText)
+            buff.lastLabelText = labelText
+        end
+        return
+    end
+    local staticLabel
+    if effect.toggle then
+        staticLabel = "T"
+    elseif effect.groundLabel then
+        staticLabel = "G"
+    end
+    if buff.lastLabelText ~= staticLabel then
+        buff.label:SetText(staticLabel)
+        buff.lastLabelText = staticLabel
+    end
+end
+
 --- @param buff SpellCastBuffs_BuffIcon_Control
 --- @param container string
 --- @param force boolean
@@ -437,20 +465,7 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
             SpellCastBuffs.ResetBuffIconChromeAlphas(buff)
 
             local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
-            if not remain or effect.fakeDuration then
-                local staticLabel
-                if effect.toggle then
-                    staticLabel = "T"
-                elseif effect.groundLabel then
-                    staticLabel = "G"
-                end
-                if buff.lastLabelText ~= staticLabel then
-                    buff.label:SetText(staticLabel)
-                    buff.lastLabelText = staticLabel
-                end
-            else
-                buff.lastLabelText = nil
-            end
+            ApplyBuffIconRemainLabel(buff, container, effect, remain)
 
             if buff.name then
                 local nameText = zo_strformat("<<C:1>>", effect.name)
@@ -506,22 +521,20 @@ local function updateIconsLight(currentTimeMs, sortedList, container)
             buff.lastStackText = nil
         end
 
-        if remain and not effect.fakeDuration then
-            local labelText = FormatRemainLabelText(remain, container)
-            if buff.lastLabelText ~= labelText then
-                buff.label:SetText(labelText)
-                buff.lastLabelText = labelText
-            end
-        end
+        ApplyBuffIconRemainLabel(buff, container, effect, remain)
 
         local showRadialCooldown = SpellCastBuffs.ShouldShowBuffIconRadialCooldown(container, effect)
         if buff.cd and container ~= "player_long" then
             if showRadialCooldown then
                 if effect.restart then
-                    if effect.id == 999016 then
-                        effect.dur = 600000
+                    if remain and remain > 0 then
+                        if effect.id == 999016 then
+                            effect.dur = 600000
+                        end
+                        buff.cd:StartCooldown(remain, effect.dur, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
+                    else
+                        SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container, effect)
                     end
-                    buff.cd:StartCooldown(remain, effect.dur, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
                     effect.restart = false
                 end
             elseif effect.restart or not buff.cd:IsHidden() then
@@ -544,7 +557,7 @@ local function updateIconsLight(currentTimeMs, sortedList, container)
             end
         end
 
-        ApplyBuffIconExpireFade(buff, container, remain)
+        ApplyBuffIconExpireFade(buff, container, (remain and remain > 0) and remain or nil)
     end
 end
 
