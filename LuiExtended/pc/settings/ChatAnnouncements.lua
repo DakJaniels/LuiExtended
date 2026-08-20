@@ -5705,6 +5705,23 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.Collectibles.CollectibleSubcategory,
             },
             {
+                -- Condense Multiple Collectible Unlocks
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CONDENSE)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CONDENSE_TP),
+                getFunc = function ()
+                    return Settings.Collectibles.CollectibleCondense
+                end,
+                setFunc = function (value)
+                    Settings.Collectibles.CollectibleCondense = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Collectibles.CollectibleCondense,
+            },
+            {
                 -- Collectible Usage
                 type = "header",
                 name = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_USE_HEADER),

@@ -283,6 +283,7 @@ ChatAnnouncements.Defaults =
         CollectibleColor2 = { 0.75, 0.75, 0.75, 1 },
         CollectibleCategory = true,
         CollectibleSubcategory = true,
+        CollectibleCondense = false,
         CollectibleUseCA = false,
         CollectibleUseAlert = false,
         CollectibleUsePetNickname = false,

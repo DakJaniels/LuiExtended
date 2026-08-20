@@ -32,7 +32,9 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
         if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED then
             local nowOwnedCollectibles = collectiblesByUnlockState[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED]
             if nowOwnedCollectibles then
-                if #nowOwnedCollectibles > MAX_INDIVIDUAL_COLLECTIBLE_UPDATES then
+                local condenseCollectibleUnlocks = ChatAnnouncements.SV.Collectibles.CollectibleCondense
+                    and #nowOwnedCollectibles > MAX_INDIVIDUAL_COLLECTIBLE_UPDATES
+                if condenseCollectibleUnlocks then
                     local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Collectibles", "CollectiblePrefix")
                     local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE)
 
