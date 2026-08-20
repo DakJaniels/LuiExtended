@@ -532,9 +532,12 @@ function SpellCastBuffs.Initialize(enabled)
     -- Set Buff Container Positions
     SpellCastBuffs.SetTlwPosition()
 
+    SpellCastBuffs.RebuildUniqueDisplayContainers()
+
     -- Initialize layout (draw layer, preview, iconHolder, icons) for each container
-    for _, routedContainerKey in pairs(SpellCastBuffs.containerRouting) do
-        InitializeContainerLayout(routedContainerKey)
+    local uniqueContainers = SpellCastBuffs.GetUniqueDisplayContainers()
+    for i = 1, #uniqueContainers do
+        InitializeContainerLayout(uniqueContainers[i])
     end
 
     SpellCastBuffs.Reset()
@@ -831,6 +834,29 @@ function SpellCastBuffs.ResetContainerOrientation()
 
     -- Set Buff Container Positions
     SpellCastBuffs.SetTlwPosition()
+    SpellCastBuffs.RebuildUniqueDisplayContainers()
+end
+
+-- Deduped display containers from containerRouting (promb_* share prominentbuffs, player_long once).
+-- Called after routing is assigned (Initialize, ResetContainerOrientation).
+function SpellCastBuffs.RebuildUniqueDisplayContainers()
+    local seen = {}
+    local unique = SpellCastBuffs.uniqueDisplayContainers
+    ZO_ClearNumericallyIndexedTable(unique)
+    for _, container in pairs(SpellCastBuffs.containerRouting) do
+        if container and not seen[container] then
+            seen[container] = true
+            unique[#unique + 1] = container
+        end
+    end
+end
+
+function SpellCastBuffs.GetUniqueDisplayContainers()
+    local unique = SpellCastBuffs.uniqueDisplayContainers
+    if not unique or #unique == 0 then
+        SpellCastBuffs.RebuildUniqueDisplayContainers()
+    end
+    return SpellCastBuffs.uniqueDisplayContainers
 end
 
 -- Populate SpellCastBuffs.alignmentDirection from SV settings.
@@ -867,7 +893,7 @@ function SpellCastBuffs.SetupContainerAlignment()
         SpellCastBuffs.alignmentDirection.prominentdebuffs = SpellCastBuffs.SV.AlignmentPromDebuffsVert
     end
 
-    for k, v in pairs(SpellCastBuffs.containerRouting) do
+    for _, v in ipairs(SpellCastBuffs.GetUniqueDisplayContainers()) do
         local bc = SpellCastBuffs.BuffContainers[v]
         if bc and bc.iconHolder then
             ApplyFlexContainerConfig(v)
@@ -917,7 +943,7 @@ function SpellCastBuffs.SetupContainerSort()
         SpellCastBuffs.sortDirection.prominentdebuffs = SpellCastBuffs.SV.SortPromDebuffsVert
     end
 
-    for k, v in pairs(SpellCastBuffs.containerRouting) do
+    for _, v in ipairs(SpellCastBuffs.GetUniqueDisplayContainers()) do
         ApplyFlexContainerConfig(v)
     end
 end
@@ -1178,7 +1204,7 @@ function SpellCastBuffs.SetMovingState(state)
         end)
     end
 
-    for _, routedContainerKey in pairs(SpellCastBuffs.containerRouting) do
+    for _, routedContainerKey in ipairs(SpellCastBuffs.GetUniqueDisplayContainers()) do
         SpellCastBuffs.BuffContainers[routedContainerKey].preview:SetHidden(not state)
     end
 
@@ -1257,7 +1283,7 @@ function SpellCastBuffs.Reset()
     SpellCastBuffs.SetupContainerAlignment()
     SpellCastBuffs.SetupContainerSort()
 
-    for _, routedContainerKey in pairs(SpellCastBuffs.containerRouting) do
+    for _, routedContainerKey in ipairs(SpellCastBuffs.GetUniqueDisplayContainers()) do
         local container = buffContainers[routedContainerKey]
         for iconIndex = 1, #container.icons do
             SpellCastBuffs.ResetSingleIcon(routedContainerKey, container.icons[iconIndex])
@@ -1485,7 +1511,7 @@ function SpellCastBuffs.ApplyBuffIconInsetVisual(buff, container, effectContext)
     if buff.iconbg then
         buff.iconbg:SetHidden(not showIconBg)
         if showIconBg then
-            buff.iconbg:SetTexture(SpellCastBuffs.GetGenericIconInsetTexture())
+            SpellCastBuffs.SetTextureIfChanged(buff.iconbg, SpellCastBuffs.GetGenericIconInsetTexture())
         end
     end
 end
@@ -1595,7 +1621,7 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     buff.frame:SetPixelRoundingEnabled(true)
     if buff.buffType then
         local borderTexture = (buff.buffType == BUFF_EFFECT_TYPE_BUFF) and SpellCastBuffs.GetBuffBorderTexture() or SpellCastBuffs.GetDebuffBorderTexture()
-        buff.back:SetTexture(borderTexture)
+        SpellCastBuffs.SetTextureIfChanged(buff.back, borderTexture)
     end
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, buffSize)
     buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
@@ -1653,7 +1679,7 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
 
-            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+            SpellCastBuffs.SetTextureIfChanged(buff.bar.bar, LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
             buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
@@ -1665,7 +1691,7 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
 
-            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+            SpellCastBuffs.SetTextureIfChanged(buff.bar.bar, LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
             buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
@@ -1681,7 +1707,7 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
 
-            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+            SpellCastBuffs.SetTextureIfChanged(buff.bar.bar, LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
             buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
@@ -1693,7 +1719,7 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
 
-            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+            SpellCastBuffs.SetTextureIfChanged(buff.bar.bar, LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
             buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
@@ -2167,7 +2193,7 @@ function SpellCastBuffs.RefreshAllAbilityIdDebugLabels()
     if not SpellCastBuffs.Enabled or not SpellCastBuffs.SV.ShowDebugAbilityId then
         return
     end
-    for _, containerKey in pairs(SpellCastBuffs.containerRouting) do
+    for _, containerKey in ipairs(SpellCastBuffs.GetUniqueDisplayContainers()) do
         local container = SpellCastBuffs.BuffContainers[containerKey]
         if container and container.icons then
             for i = 1, #container.icons do
@@ -2181,22 +2207,6 @@ function SpellCastBuffs.RefreshAllAbilityIdDebugLabels()
                         SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
                         SpellCastBuffs.FitAbilityIdLabelFont(buff)
                     end
-                end
-            end
-        end
-    end
-    local longContainer = SpellCastBuffs.BuffContainers.player_long
-    if longContainer and longContainer.icons then
-        for i = 1, #longContainer.icons do
-            local buff = longContainer.icons[i]
-            if buff and buff.abilityId and not buff:IsHidden() then
-                local idText = buff.lastAbilityIdText or buff.abilityId:GetText()
-                if idText and idText ~= "" then
-                    buff.lastAbilityIdLayoutIconSize = nil
-                    SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
-                    buff.abilityId:SetHidden(false)
-                    SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
-                    SpellCastBuffs.FitAbilityIdLabelFont(buff)
                 end
             end
         end
@@ -2300,15 +2310,12 @@ function SpellCastBuffs.ApplyFont()
     local prominentSize = (SpellCastBuffs.SV.ProminentLabelFontSize and SpellCastBuffs.SV.ProminentLabelFontSize > 0) and SpellCastBuffs.SV.ProminentLabelFontSize or 17
     SpellCastBuffs.prominentFont = LUIE.Font.Resolve(SpellCastBuffs.SV.ProminentLabelFontFace, prominentSize, prominentStyle)
 
-    local needs_reset = {}
-    -- And reset sizes of already existing icons
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        needs_reset[container] = true
-    end
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        if needs_reset[container] then
-            for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
-                local icon = SpellCastBuffs.BuffContainers[container].icons[i]
+    -- And reset fonts of already existing icons (unique containers; player_long is in that list)
+    for _, container in ipairs(SpellCastBuffs.GetUniqueDisplayContainers()) do
+        local buffContainer = SpellCastBuffs.BuffContainers[container]
+        if buffContainer and buffContainer.icons then
+            for i = 1, #buffContainer.icons do
+                local icon = buffContainer.icons[i]
                 icon.label:SetFont(SpellCastBuffs.buffsFont)
                 if icon.stack then
                     icon.stack:SetFont(SpellCastBuffs.buffsFont)
@@ -2324,7 +2331,6 @@ function SpellCastBuffs.ApplyFont()
                 end
             end
         end
-        needs_reset[container] = false
     end
 
     SpellCastBuffs.MarkDisplayLayoutDirty()

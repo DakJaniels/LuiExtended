@@ -162,7 +162,7 @@ function SpellCastBuffs.OnEffectChangedGround(eventId, changeType, effectSlot, e
                 end
 
                 if not skipGroundDuplicate then
-                    SpellCastBuffs.EffectsList[context][abilityId] =
+                    local groundRow =
                     {
                         target = SpellCastBuffs.DetermineTarget(context),
                         type = groundType[i].type,
@@ -181,6 +181,12 @@ function SpellCastBuffs.OnEffectChangedGround(eventId, changeType, effectSlot, e
                         groundLabel = groundLabel,
                         toggle = toggle,
                     }
+                    local existingGround = SpellCastBuffs.EffectsList[context][abilityId]
+                    if existingGround then
+                        SpellCastBuffs.ApplyEffectRowRefresh(existingGround, groundRow)
+                    else
+                        SpellCastBuffs.EffectsList[context][abilityId] = groundRow
+                    end
                 end
             end
         end

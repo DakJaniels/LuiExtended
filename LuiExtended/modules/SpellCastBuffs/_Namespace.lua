@@ -22,6 +22,9 @@ local LUIE = LUIE
 --- @field ccImmunityAbilityById table<integer, true>
 --- @field windowTitles table<string, string>
 --- @field containerRouting table<string, string>
+--- @field uniqueDisplayContainers string[]
+--- @field RebuildUniqueDisplayContainers fun()
+--- @field GetUniqueDisplayContainers fun(): string[]
 --- @field alignmentDirection table<string, string>
 --- @field sortDirection table<string, string>
 --- @field playerActive boolean
@@ -568,6 +571,10 @@ local uiTlw = {} -- GUI
 -- Routing for Auras
 --- @type table<string, string>
 SpellCastBuffs.containerRouting = {}
+
+--- Deduped container keys from containerRouting (promb_* → prominentbuffs, player_long once).
+--- @type string[]
+SpellCastBuffs.uniqueDisplayContainers = {}
 
 SpellCastBuffs.alignmentDirection = {}         --- @type table<string, string> Holds alignment direction for all containers
 SpellCastBuffs.sortDirection = {}              --- @type table<string, string> Holds sorting direction for all containers
