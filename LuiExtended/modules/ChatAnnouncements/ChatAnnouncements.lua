@@ -39,6 +39,9 @@ S.g_activatedFirstLoad = true
 S.g_savedPurchase = {}
 S.g_savedLaunder = {}
 S.g_savedItem = {}
+S.g_savedGemExtractItem = {}
+S.g_savedGemExtractCurrency = {}
+S.g_gemConversionPending = false
 S.g_isLooted = false                -- Toggled on to modify loot notification to "looted."
 S.g_isPickpocketed = false          -- Toggled on to modify loot notification to "pickpocketed."
 S.g_isStolen = false                -- Toggled on to modify loot notification to "stolen."
@@ -1703,7 +1706,19 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     end
 
     local displayInfo = GetCurrencyDisplayInfo(currency, UpOrDown, reason)
-    if displayInfo == nil or displayInfo == "skip" then return end
+    if reason == CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS then
+        I.SetGemConversionPending()
+        if displayInfo == nil or displayInfo == "skip" then
+            if S.g_savedGemExtractItem.itemLink then
+                ChatAnnouncements.FlushGemExtractAnnouncement()
+            else
+                ChatAnnouncements.ScheduleGemExtractFlush()
+            end
+            return
+        end
+    elseif displayInfo == nil or displayInfo == "skip" then
+        return
+    end
     currencyTypeColor = displayInfo.currencyTypeColor
     currencyIcon = displayInfo.currencyIcon
     currencyName = displayInfo.currencyName
@@ -1746,7 +1761,6 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURRENCY_CHANGE_REASON_CRAFT] = "CurrencyMessageUse",
         [CURRENCY_CHANGE_REASON_RECONSTRUCTION] = "CurrencyMessageUse",
         [CURRENCY_CHANGE_REASON_CROWN_CRATE_DUPLICATE] = "CurrencyMessageReceive",
-        [CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_CROWNS_PURCHASED] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_PURCHASED_WITH_SEALS] = "CurrencyMessageSpend",
         [CURRENCY_CHANGE_REASON_PURCHASED_WITH_TRADE_BARS] = "CurrencyMessageSpend",
@@ -1799,6 +1813,8 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
                 return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"), nil, "saved_purchase_return"
             end
             return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"), nil, "continue"
+        elseif changeReason == CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS then
+            return nil, nil, "saved_gem_extract_return"
         elseif changeReason == CURRENCY_CHANGE_REASON_VENDOR and amountDelta < 0 then
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
                 return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "saved_purchase_return"
@@ -1932,6 +1948,26 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         SavePurchaseToBuffer(changeType, formattedValue, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal)
         return
     end
+    if action == "saved_gem_extract_return" then
+        S.g_savedGemExtractCurrency =
+        {
+            currency = currency,
+            formattedValue = formattedValue,
+            changeColor = changeColor,
+            changeType = changeType,
+            currencyTypeColor = currencyTypeColor,
+            currencyIcon = currencyIcon,
+            currencyName = currencyName,
+            currencyTotal = currencyTotal,
+            messageTotal = messageTotal,
+        }
+        if S.g_savedGemExtractItem.itemLink then
+            ChatAnnouncements.FlushGemExtractAnnouncement()
+        else
+            ChatAnnouncements.ScheduleGemExtractFlush()
+        end
+        return
+    end
     messageChange = messageChangeResult
     type = typeResult
 
@@ -2043,6 +2079,9 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
     elseif type == "LUIE_CURRENCY_VENDOR" then
         item = string_format("|r" .. carriedItem .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, item, messageP1))
+    elseif type == "LUIE_CURRENCY_GEM_EXTRACT" then
+        item = string_format("|r" .. carriedItem .. "|c" .. changeColor)
+        formattedMessageP1 = (string_format(messageChange, messageP1, item))
     elseif type == "LUIE_CURRENCY_TRADE" then
         name = string_format("|r" .. S.g_tradeTarget .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
@@ -2535,6 +2574,94 @@ end
 
 function I.IsMailLootActive()
     return S.g_inMail or S.g_mailIsTakingMail or S.g_mailBatchTakeAll or #S.g_mailItemSenderFifo > 0
+end
+
+local GEM_EXTRACT_FLUSH_MS = 150
+local GEM_CONVERSION_PENDING_MS = 2000
+
+function I.IsGemExtractionShowing()
+    local keyboard = ZO_CrownGemification_KeyboardTopLevel
+    if keyboard and not keyboard:IsHidden() then
+        return true
+    end
+    local gamepad = ZO_CrownGemification_GamepadTopLevel
+    if gamepad and not gamepad:IsHidden() then
+        return true
+    end
+    return false
+end
+
+function I.IsGemExtractionActive()
+    return I.IsGemExtractionShowing() or S.g_gemConversionPending
+end
+
+function I.SetGemConversionPending()
+    S.g_gemConversionPending = true
+    eventManager:RegisterForUpdate(moduleName .. "GemConversionPending", GEM_CONVERSION_PENDING_MS, function ()
+        S.g_gemConversionPending = false
+    end, true)
+end
+
+local function ClearGemExtractBuffers()
+    S.g_savedGemExtractItem = {}
+    S.g_savedGemExtractCurrency = {}
+    eventManager:UnregisterForUpdate(moduleName .. "GemExtractFlush")
+end
+
+local function BuildGemExtractCarriedItem(savedItem)
+    local icon = savedItem.icon
+    local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
+    local stack = savedItem.stack or 1
+    local itemCountPrefix = stack > 1 and ("|cFFFFFFx" .. stack .. "|r ") or ""
+    local itemName = savedItem.itemLink or ""
+    if ChatAnnouncements.SV.BracketOptionItem ~= 1 then
+        itemName = zo_strgsub(itemName, "^|H0", "|H1", 1)
+    end
+    return formattedIcon .. itemCountPrefix .. itemName
+end
+
+function ChatAnnouncements.FlushGemExtractAnnouncement()
+    local savedItem = S.g_savedGemExtractItem
+    local savedCurrency = S.g_savedGemExtractCurrency
+    local hasItem = savedItem and savedItem.itemLink
+    local hasCurrency = savedCurrency and savedCurrency.changeType
+    local lootOn = ChatAnnouncements.SV.Inventory.Loot
+    local gemsOn = ChatAnnouncements.SV.Currency.CurrencyCrownGemsChange
+
+    if hasCurrency and hasItem and lootOn and gemsOn then
+        local changeColor = savedCurrency.changeColor
+        local carriedItem = BuildGemExtractCarriedItem(savedItem)
+        local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageGemExtractFrom")
+        ChatAnnouncements.CurrencyPrinter(savedCurrency.currency, savedCurrency.formattedValue, changeColor, savedCurrency.changeType, savedCurrency.currencyTypeColor, savedCurrency.currencyIcon, savedCurrency.currencyName, savedCurrency.currencyTotal, messageChange, savedCurrency.messageTotal, "LUIE_CURRENCY_GEM_EXTRACT", carriedItem, "")
+    elseif hasCurrency and gemsOn then
+        local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageGemExtract")
+        ChatAnnouncements.CurrencyPrinter(savedCurrency.currency, savedCurrency.formattedValue, savedCurrency.changeColor, savedCurrency.changeType, savedCurrency.currencyTypeColor, savedCurrency.currencyIcon, savedCurrency.currencyName, savedCurrency.currencyTotal, messageChange, savedCurrency.messageTotal, nil)
+    elseif hasItem and lootOn then
+        local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+        ChatAnnouncements.ItemPrinter(savedItem.icon, savedItem.stack, savedItem.itemType, savedItem.itemId, savedItem.itemLink, "", ChatAnnouncements.GetContextMessage("CurrencyMessageGemExtract"), gainOrLoss, false)
+    end
+
+    ClearGemExtractBuffers()
+end
+
+function ChatAnnouncements.ScheduleGemExtractFlush()
+    eventManager:RegisterForUpdate(moduleName .. "GemExtractFlush", GEM_EXTRACT_FLUSH_MS, ChatAnnouncements.FlushGemExtractAnnouncement, true)
+end
+
+function ChatAnnouncements.SaveGemExtractItem(icon, stack, itemType, itemId, itemLink)
+    S.g_savedGemExtractItem =
+    {
+        icon = icon,
+        stack = stack,
+        itemType = itemType,
+        itemId = itemId,
+        itemLink = itemLink,
+    }
+    if S.g_savedGemExtractCurrency.changeType then
+        ChatAnnouncements.FlushGemExtractAnnouncement()
+    else
+        ChatAnnouncements.ScheduleGemExtractFlush()
+    end
 end
 
 function I.TouchMailNotifySuppressWindow()
