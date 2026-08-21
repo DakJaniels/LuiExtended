@@ -42,6 +42,7 @@ S.g_savedItem = {}
 S.g_savedGemExtractItem = {}
 S.g_savedGemExtractCurrency = {}
 S.g_gemConversionPending = false
+S.g_pendingPromotionalEventChoiceId = nil
 S.g_isLooted = false                -- Toggled on to modify loot notification to "looted."
 S.g_isPickpocketed = false          -- Toggled on to modify loot notification to "pickpocketed."
 S.g_isStolen = false                -- Toggled on to modify loot notification to "stolen."
@@ -514,6 +515,7 @@ function ChatAnnouncements.Initialize(enabled)
 
     -- Promotional Events Activity
     eventManager:RegisterForEvent(moduleName, EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated)
+    ChatAnnouncements.RegisterPromotionalEventClaimHooks()
 
     eventManager:RegisterForEvent(moduleName, EVENT_CRAFTED_ABILITY_LOCK_STATE_CHANGED, ChatAnnouncements.OnCraftedAbilityLockStateChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_CRAFTED_ABILITY_SCRIPT_LOCK_STATE_CHANGED, ChatAnnouncements.OnCraftedAbilityScriptLockStateChanged)
@@ -3687,6 +3689,188 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventId, c
     end
 end
 
+-- Currency CA toggles keyed by CURT_* (same names as OnCurrencyUpdate).
+local PROMOTIONAL_EVENT_CURRENCY_CHANGE_ENABLED_KEYS =
+{
+    [CURT_MONEY] = "CurrencyGoldChange",
+    [CURT_ALLIANCE_POINTS] = "CurrencyAPShowChange",
+    [CURT_TELVAR_STONES] = "CurrencyTVChange",
+    [CURT_WRIT_VOUCHERS] = "CurrencyWVChange",
+    [CURT_STYLE_STONES] = "CurrencyOutfitTokenChange",
+    [CURT_TRANSMUTE_CRYSTALS] = "CurrencyTransmuteChange",
+    [CURT_UNDAUNTED_KEYS] = "CurrencyUndauntedChange",
+    [CURT_CROWNS] = "CurrencyCrownsChange",
+    [CURT_CROWN_GEMS] = "CurrencyCrownGemsChange",
+    [CURT_ARCHIVAL_FORTUNES] = "CurrencyEndlessChange",
+    [CURT_SEALS] = "CurrencySealsChange",
+    [CURT_TRADE_BARS] = "CurrencyTradeBarsChange",
+    [CURT_TOME_POINTS] = "CurrencyTomePointsChange",
+    [CURT_TOME_POINT_CACHES] = "CurrencyTomePointCachesChange",
+    [CURT_TOME_TOKENS] = "CurrencyTomeTokensChange",
+    [CURT_TOME_CHALLENGE_REROLLS] = "CurrencyTomeChallengeRerollsChange",
+}
+
+local function QueuePromotionalEventClaimMessage(rewardText)
+    local headerText = GetString(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT)
+    local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, rewardText)
+    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "DISPLAY" }
+    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
+end
+
+local function GetPromotionalEventLootIconMarkup(iconPath)
+    if ChatAnnouncements.SV.Inventory.LootIcons then
+        return "|t16:16:" .. iconPath .. "|t "
+    end
+    return ""
+end
+
+local function GetPromotionalEventQuantityPrefix(quantity)
+    if quantity > 1 then
+        return "|cFFFFFFx" .. quantity .. "|r "
+    end
+    return ""
+end
+
+local function IsPromotionalEventCurrencyAnnouncementEnabled(currencyType)
+    local enabledKey = PROMOTIONAL_EVENT_CURRENCY_CHANGE_ENABLED_KEYS[currencyType]
+    if not enabledKey then
+        return false
+    end
+    return ChatAnnouncements.SV.Currency[enabledKey]
+end
+
+local function GetPromotionalEventClaimedRewardText(claimedReward)
+    local rewardType = claimedReward:GetRewardType()
+    local rewardId = claimedReward:GetRewardId()
+    local quantity = claimedReward:GetQuantity()
+
+    if rewardType == REWARD_ENTRY_TYPE_CHOICE then
+        local choiceId = S.g_pendingPromotionalEventChoiceId
+        S.g_pendingPromotionalEventChoiceId = nil
+        if not choiceId then
+            return nil
+        end
+        return GetPromotionalEventClaimedRewardText(REWARDS_MANAGER:GetInfoForReward(choiceId, quantity))
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST then
+        local listRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(GetRewardListIdFromReward(rewardId))
+        for listIndex = 1, #listRewards do
+            local listRewardText = GetPromotionalEventClaimedRewardText(listRewards[listIndex])
+            if listRewardText then
+                QueuePromotionalEventClaimMessage(listRewardText)
+            end
+        end
+        return nil
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_LOOT_CRATE then
+        if not ChatAnnouncements.SV.Inventory.Loot then
+            return nil
+        end
+        local crateId = GetCrownCrateRewardCrateId(rewardId)
+        local crateName = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetCrownCrateName(crateId))
+        local formattedName = B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. crateName .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem]
+        return GetPromotionalEventLootIconMarkup(GetCrownCrateIcon(crateId)) .. GetPromotionalEventQuantityPrefix(quantity) .. formattedName
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_ITEM then
+        if not ChatAnnouncements.SV.Inventory.Loot then
+            return nil
+        end
+        local itemLink = GetItemRewardItemLink(rewardId, quantity, claimedReward:GetDisplayFlags(), B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        return GetPromotionalEventLootIconMarkup(GetItemLinkIcon(itemLink)) .. GetPromotionalEventQuantityPrefix(quantity) .. itemLink
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+        if not ChatAnnouncements.SV.Collectibles.CollectibleCA then
+            return nil
+        end
+        local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
+        local collectibleLink = GetCollectibleLink(collectibleId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionCollectible])
+        local iconMarkup = ""
+        if ChatAnnouncements.SV.Collectibles.CollectibleIcon then
+            iconMarkup = "|t16:16:" .. GetCollectibleIcon(collectibleId) .. "|t "
+        end
+        return iconMarkup .. collectibleLink
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
+        local currencyType = claimedReward:GetCurrencyType()
+        if not IsPromotionalEventCurrencyAnnouncementEnabled(currencyType) then
+            return nil
+        end
+        local iconMarkup = ""
+        if ChatAnnouncements.SV.Currency.CurrencyIcon then
+            iconMarkup = "|t16:16:" .. GetCurrencyLootKeyboardIcon(currencyType) .. "|t "
+        end
+        local formattedAmount = ZO_CommaDelimitDecimalNumber(quantity)
+        local currencyName = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, quantity ~= 1, false))
+        return iconMarkup .. formattedAmount .. " " .. currencyName
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_EXPERIENCE or rewardType == REWARD_ENTRY_TYPE_SKILL_LINE_EXPERIENCE or rewardType == REWARD_ENTRY_TYPE_ACTIVE_COMPANION_EXPERIENCE then
+        if not ChatAnnouncements.SV.XP.Experience then
+            return nil
+        end
+        local formattedName = claimedReward:GetFormattedNameWithStack() or claimedReward:GetFormattedName()
+        return GetPromotionalEventLootIconMarkup(claimedReward:GetKeyboardIcon()) .. formattedName
+    end
+
+    if not ChatAnnouncements.SV.Inventory.Loot then
+        return nil
+    end
+
+    local formattedName = claimedReward:GetFormattedNameWithStack() or claimedReward:GetFormattedName()
+    return GetPromotionalEventLootIconMarkup(claimedReward:GetKeyboardIcon()) .. formattedName
+end
+
+function ChatAnnouncements.PrintPromotionalEventClaimedReward(claimedReward)
+    local rewardText = GetPromotionalEventClaimedRewardText(claimedReward)
+    if rewardText then
+        QueuePromotionalEventClaimMessage(rewardText)
+    end
+end
+
+function ChatAnnouncements.OnPromotionalEventsRewardsClaimed(_campaignData, rewards, _hasCapstoneReward)
+    -- Internal UI fires RewardsClaimed with campaignData only (PromotionalEvent_Manager.lua).
+    if not rewards then
+        return
+    end
+    for rewardIndex = 1, #rewards do
+        local rewardableEventData = rewards[rewardIndex].rewardableEventData
+        local claimedReward = rewardableEventData:GetRewardData()
+        local _, wasFallbackClaimed = rewardableEventData:IsRewardClaimed()
+        if wasFallbackClaimed then
+            claimedReward = claimedReward:GetFallbackRewardData()
+        end
+        ChatAnnouncements.PrintPromotionalEventClaimedReward(claimedReward)
+    end
+    S.g_pendingPromotionalEventChoiceId = nil
+end
+
+function ChatAnnouncements.RegisterPromotionalEventClaimHooks()
+    if ChatAnnouncements._promotionalEventClaimHooksInstalled then
+        return
+    end
+
+    -- Capture the chosen reward id when TryClaimReward runs so RewardsClaimed can
+    -- resolve REWARD_ENTRY_TYPE_CHOICE (keyboard/gamepad pass currentSelectedChoice.rewardId).
+    local function SavePromotionalEventChoiceId(_, rewardChoiceId)
+        if rewardChoiceId then
+            S.g_pendingPromotionalEventChoiceId = rewardChoiceId
+        end
+    end
+
+    ZO_PreHook(ZO_PromotionalEventActivityData, "TryClaimReward", SavePromotionalEventChoiceId)
+    ZO_PreHook(ZO_PromotionalEventMilestoneData, "TryClaimReward", SavePromotionalEventChoiceId)
+    ZO_PreHook(ZO_PromotionalEventCampaignData, "TryClaimReward", SavePromotionalEventChoiceId)
+
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", ChatAnnouncements.OnPromotionalEventsRewardsClaimed)
+    ChatAnnouncements._promotionalEventClaimHooksInstalled = true
+end
+
 --- - *EVENT_CRAFTED_ABILITY_LOCK_STATE_CHANGED*
 --- @param eventId integer
 --- @param craftedAbilityDefId integer
@@ -5230,6 +5414,7 @@ function ChatAnnouncements.PrintQueuedMessages()
         "ANTIQUITY",
         "COLLECTIBLE",
         "ACHIEVEMENT",
+        "DISPLAY",
         "MESSAGE"
     }
 

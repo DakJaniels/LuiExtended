@@ -62,6 +62,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: |cFFFFFFCrowd Control Immunity|r (28301 / 38117) can be tracked as a prominent debuff on targets (same target-buff promote path as Off Balance Immunity).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Collectible unlocks from Crown Store bundles and other multi-unlocks now list each collectible by name. Optional setting to condense those into a single count message.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Items converted in Gem Extraction now use extract wording for the item and Crown Gems instead of consume, use, eat, drink, learn, or receive.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Claiming Golden Pursuit activity, milestone, and capstone rewards now prints to chat, including Crown Crates from Straight to the Crate.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player champion icon and level no longer clear when changing frame settings; they refresh immediately.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Turning off |cFFFFFFTarget - Display Title|r no longer leaves NPC or guild trader captions visible when |cFFFFFFTarget - Display AVA Rank Name|r is still on. Rank name still applies to player targets only.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Invulnerable targets (for example guards) no longer show a health percentage next to the Invulnerable label.",
