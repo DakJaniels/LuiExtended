@@ -124,14 +124,12 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
                 return true
             end
 
+            -- Chat for claimed rewards is printed from PROMOTIONAL_EVENT_MANAGER RewardsClaimed
+            -- (OnPromotionalEventsRewardsClaimed). This prehook only replaces CSA / Alert so
+            -- Display Announcements General chat cannot duplicate the typed Golden Pursuit lines.
             local general = ChatAnnouncements.SV.DisplayAnnouncements.General
             if #rewards > MAX_INDIVIDUAL_CSAS then
                 local primaryText = zo_strformat(SI_PROMOTIONAL_EVENT_REWARDS_CLAIMED_ANNOUNCEMENT, #rewards)
-                if general.CA then
-                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = primaryText, type = "DISPLAY" }
-                    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
-                end
                 if general.CSA then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
                     messageParams:SetText(primaryText)
@@ -156,11 +154,6 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
                 local secondaryText = claimedReward:GetQuantity() > 1 and claimedReward:GetFormattedNameWithStack() or claimedReward:GetFormattedName()
                 local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, secondaryText)
 
-                if general.CA then
-                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "DISPLAY" }
-                    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
-                end
                 if general.CSA then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
                     messageParams:SetText(headerText, secondaryText)
