@@ -39,6 +39,12 @@ S.g_activatedFirstLoad = true
 S.g_savedPurchase = {}
 S.g_savedLaunder = {}
 S.g_savedItem = {}
+S.g_savedGemExtractItem = {}
+S.g_savedGemExtractCurrency = {}
+S.g_gemConversionPending = false
+S.g_gemExtractHookPrinted = false
+S.g_gemExtractPredictedCrownGems = nil
+S.g_pendingPromotionalEventChoiceId = nil
 S.g_isLooted = false                -- Toggled on to modify loot notification to "looted."
 S.g_isPickpocketed = false          -- Toggled on to modify loot notification to "pickpocketed."
 S.g_isStolen = false                -- Toggled on to modify loot notification to "stolen."
@@ -511,6 +517,8 @@ function ChatAnnouncements.Initialize(enabled)
 
     -- Promotional Events Activity
     eventManager:RegisterForEvent(moduleName, EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated)
+    ChatAnnouncements.RegisterPromotionalEventClaimHooks()
+    ChatAnnouncements.RegisterGemExtractHooks()
 
     eventManager:RegisterForEvent(moduleName, EVENT_CRAFTED_ABILITY_LOCK_STATE_CHANGED, ChatAnnouncements.OnCraftedAbilityLockStateChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_CRAFTED_ABILITY_SCRIPT_LOCK_STATE_CHANGED, ChatAnnouncements.OnCraftedAbilityScriptLockStateChanged)
@@ -1703,7 +1711,17 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     end
 
     local displayInfo = GetCurrencyDisplayInfo(currency, UpOrDown, reason)
-    if displayInfo == nil or displayInfo == "skip" then return end
+    if reason == CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS then
+        I.SetGemConversionPending()
+        if displayInfo == nil or displayInfo == "skip" then
+            if not S.g_gemExtractHookPrinted then
+                ChatAnnouncements.ScheduleGemExtractFlush()
+            end
+            return
+        end
+    elseif displayInfo == nil or displayInfo == "skip" then
+        return
+    end
     currencyTypeColor = displayInfo.currencyTypeColor
     currencyIcon = displayInfo.currencyIcon
     currencyName = displayInfo.currencyName
@@ -1746,7 +1764,6 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURRENCY_CHANGE_REASON_CRAFT] = "CurrencyMessageUse",
         [CURRENCY_CHANGE_REASON_RECONSTRUCTION] = "CurrencyMessageUse",
         [CURRENCY_CHANGE_REASON_CROWN_CRATE_DUPLICATE] = "CurrencyMessageReceive",
-        [CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_CROWNS_PURCHASED] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_PURCHASED_WITH_SEALS] = "CurrencyMessageSpend",
         [CURRENCY_CHANGE_REASON_PURCHASED_WITH_TRADE_BARS] = "CurrencyMessageSpend",
@@ -1799,6 +1816,8 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
                 return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"), nil, "saved_purchase_return"
             end
             return ChatAnnouncements.GetContextMessage("CurrencyMessageReceive"), nil, "continue"
+        elseif changeReason == CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS then
+            return nil, nil, "saved_gem_extract_return"
         elseif changeReason == CURRENCY_CHANGE_REASON_VENDOR and amountDelta < 0 then
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
                 return ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "saved_purchase_return"
@@ -1932,6 +1951,10 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         SavePurchaseToBuffer(changeType, formattedValue, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal)
         return
     end
+    if action == "saved_gem_extract_return" then
+        ChatAnnouncements.SaveGemExtractCurrency(currency, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal, UpOrDown)
+        return
+    end
     messageChange = messageChangeResult
     type = typeResult
 
@@ -2043,6 +2066,9 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
     elseif type == "LUIE_CURRENCY_VENDOR" then
         item = string_format("|r" .. carriedItem .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, item, messageP1))
+    elseif type == "LUIE_CURRENCY_GEM_EXTRACT" then
+        item = string_format("|r" .. carriedItem .. "|c" .. changeColor)
+        formattedMessageP1 = (string_format(messageChange, messageP1, item))
     elseif type == "LUIE_CURRENCY_TRADE" then
         name = string_format("|r" .. S.g_tradeTarget .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
@@ -2535,6 +2561,192 @@ end
 
 function I.IsMailLootActive()
     return S.g_inMail or S.g_mailIsTakingMail or S.g_mailBatchTakeAll or #S.g_mailItemSenderFifo > 0
+end
+
+local GEM_EXTRACT_FLUSH_MS = 50
+local GEM_CONVERSION_PENDING_MS = 2000
+local CROWN_GEMS_NAME_KEY = "CurrencyCrownGemsName"
+
+function I.IsGemExtractionShowing()
+    local keyboard = ZO_CrownGemification_KeyboardTopLevel
+    if keyboard and not keyboard:IsHidden() then
+        return true
+    end
+    local gamepad = ZO_CrownGemification_GamepadTopLevel
+    if gamepad and not gamepad:IsHidden() then
+        return true
+    end
+    return false
+end
+
+function I.IsGemExtractionActive()
+    return I.IsGemExtractionShowing() or S.g_gemConversionPending
+end
+
+function I.SetGemConversionPending()
+    S.g_gemConversionPending = true
+    eventManager:RegisterForUpdate(moduleName .. "GemConversionPending", GEM_CONVERSION_PENDING_MS, function ()
+        S.g_gemConversionPending = false
+        S.g_gemExtractHookPrinted = false
+        S.g_gemExtractPredictedCrownGems = nil
+    end, true)
+end
+
+local function ClearGemExtractBuffers()
+    S.g_savedGemExtractItem = {}
+    S.g_savedGemExtractCurrency = {}
+    eventManager:UnregisterForUpdate(moduleName .. "GemExtractFlush")
+end
+
+local function ApplyGemExtractCurrencyAmount(savedCurrency, gemAmount)
+    savedCurrency.gemAmount = gemAmount
+    savedCurrency.changeType = ZO_CommaDelimitDecimalNumber(gemAmount)
+    savedCurrency.currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat(CROWN_GEMS_NAME_KEY), gemAmount)
+end
+
+local function BuildGemExtractCarriedItem(savedItem)
+    local icon = savedItem.icon
+    local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
+    local stack = savedItem.stack or 1
+    local itemCountPrefix = stack > 1 and ("|cFFFFFFx" .. stack .. "|r ") or ""
+    local itemName = savedItem.itemLink or ""
+    if ChatAnnouncements.SV.BracketOptionItem ~= 1 then
+        itemName = zo_strgsub(itemName, "^|H0", "|H1", 1)
+    end
+    return formattedIcon .. itemCountPrefix .. itemName
+end
+
+local function SeedGemExtractCurrencyFromHook(gemCount)
+    local currencySettings = ChatAnnouncements.SV.Currency
+    local changeColorHex = currencySettings.CurrencyContextColor and ColorizeColors.CurrencyUpColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
+    local storedLocation = GetCurrencyPlayerStoredLocation(CURT_CROWN_GEMS)
+    local carriedGems = S.g_gemExtractPredictedCrownGems or GetCurrencyAmount(CURT_CROWN_GEMS, storedLocation)
+    local predictedTotal = carriedGems + gemCount
+    S.g_gemExtractPredictedCrownGems = predictedTotal
+    S.g_savedGemExtractCurrency =
+    {
+        currency = CURT_CROWN_GEMS,
+        formattedValue = ZO_CommaDelimitDecimalNumber(predictedTotal),
+        changeColor = changeColorHex,
+        currencyTypeColor = ColorizeColors.CurrencyCrownGemsColorize:ToHex(),
+        currencyIcon = currencySettings.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS) .. "|t") or "",
+        currencyTotal = currencySettings.CurrencyCrownGemsShowTotal,
+        messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalCrownGems"),
+        gemAmountFromHook = true,
+    }
+    ApplyGemExtractCurrencyAmount(S.g_savedGemExtractCurrency, gemCount)
+end
+
+function ChatAnnouncements.FlushGemExtractAnnouncement()
+    local savedItem = S.g_savedGemExtractItem
+    local savedCurrency = S.g_savedGemExtractCurrency
+    local hasItem = savedItem and savedItem.itemLink
+    local hasCurrency = savedCurrency and savedCurrency.changeType
+    local lootOn = ChatAnnouncements.SV.Inventory.Loot
+    local gemsOn = ChatAnnouncements.SV.Currency.CurrencyCrownGemsChange
+
+    if hasCurrency and hasItem and lootOn and gemsOn then
+        local changeColor = savedCurrency.changeColor
+        local carriedItem = BuildGemExtractCarriedItem(savedItem)
+        local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageGemExtractFrom")
+        ChatAnnouncements.CurrencyPrinter(savedCurrency.currency, savedCurrency.formattedValue, changeColor, savedCurrency.changeType, savedCurrency.currencyTypeColor, savedCurrency.currencyIcon, savedCurrency.currencyName, savedCurrency.currencyTotal, messageChange, savedCurrency.messageTotal, "LUIE_CURRENCY_GEM_EXTRACT", carriedItem, "")
+    elseif hasCurrency and gemsOn then
+        local messageChange = ChatAnnouncements.GetContextMessage("CurrencyMessageGemExtract")
+        ChatAnnouncements.CurrencyPrinter(savedCurrency.currency, savedCurrency.formattedValue, savedCurrency.changeColor, savedCurrency.changeType, savedCurrency.currencyTypeColor, savedCurrency.currencyIcon, savedCurrency.currencyName, savedCurrency.currencyTotal, messageChange, savedCurrency.messageTotal, nil)
+    elseif hasItem and lootOn then
+        local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+        ChatAnnouncements.ItemPrinter(savedItem.icon, savedItem.stack, savedItem.itemType, savedItem.itemId, savedItem.itemLink, "", ChatAnnouncements.GetContextMessage("CurrencyMessageGemExtract"), gainOrLoss, false)
+    end
+
+    ClearGemExtractBuffers()
+end
+
+function ChatAnnouncements.ScheduleGemExtractFlush()
+    eventManager:RegisterForUpdate(moduleName .. "GemExtractFlush", GEM_EXTRACT_FLUSH_MS, ChatAnnouncements.FlushGemExtractAnnouncement, true)
+end
+
+function ChatAnnouncements.BeginGemExtract(gemifiable, itemCount, gemCount)
+    I.SetGemConversionPending()
+    if S.g_savedGemExtractItem.itemLink and not S.g_savedGemExtractItem.fromHook then
+        ChatAnnouncements.FlushGemExtractAnnouncement()
+    end
+    S.g_savedGemExtractItem =
+    {
+        icon = gemifiable.icon,
+        stack = itemCount,
+        itemType = GetItemType(gemifiable.bagId, gemifiable.slotIndex),
+        itemId = gemifiable.itemId,
+        itemLink = GetItemLink(gemifiable.bagId, gemifiable.slotIndex, B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem]),
+        fromHook = true,
+    }
+    SeedGemExtractCurrencyFromHook(gemCount)
+    ChatAnnouncements.FlushGemExtractAnnouncement()
+    S.g_gemExtractHookPrinted = true
+end
+
+function ChatAnnouncements.SaveGemExtractCurrency(currency, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal, amountDelta)
+    if S.g_gemExtractHookPrinted then
+        return
+    end
+    local savedCurrency = S.g_savedGemExtractCurrency
+    local gemAmount = (savedCurrency.gemAmount or 0) + amountDelta
+    S.g_savedGemExtractCurrency =
+    {
+        currency = currency,
+        formattedValue = formattedValue,
+        changeColor = changeColor,
+        currencyTypeColor = currencyTypeColor,
+        currencyIcon = currencyIcon,
+        currencyTotal = currencyTotal,
+        messageTotal = messageTotal,
+    }
+    ApplyGemExtractCurrencyAmount(S.g_savedGemExtractCurrency, gemAmount)
+    ChatAnnouncements.ScheduleGemExtractFlush()
+end
+
+function ChatAnnouncements.SaveGemExtractItem(icon, stack, itemType, itemId, itemLink)
+    if S.g_gemExtractHookPrinted then
+        return
+    end
+    local savedItem = S.g_savedGemExtractItem
+    if savedItem.itemId == itemId then
+        savedItem.stack = (savedItem.stack or 0) + stack
+        ChatAnnouncements.ScheduleGemExtractFlush()
+        return
+    elseif savedItem.itemLink then
+        ChatAnnouncements.FlushGemExtractAnnouncement()
+    end
+
+    S.g_savedGemExtractItem =
+    {
+        icon = icon,
+        stack = stack,
+        itemType = itemType,
+        itemId = itemId,
+        itemLink = itemLink,
+    }
+    ChatAnnouncements.ScheduleGemExtractFlush()
+end
+
+function ChatAnnouncements.RegisterGemExtractHooks()
+    if ChatAnnouncements._gemExtractHooksInstalled then
+        return
+    end
+    ChatAnnouncements._gemExtractHooksInstalled = true
+
+    ZO_PreHook(ZO_CrownGemificationSlot, "GemifyOne", function (gemificationSlot)
+        local gemifiable = gemificationSlot:GetGemifiable()
+        if gemifiable then
+            ChatAnnouncements.BeginGemExtract(gemifiable, gemifiable.requiredPerConversion, gemifiable.gemsAwardedPerConversion)
+        end
+    end)
+
+    ZO_PreHook(ZO_CrownGemificationSlot, "GemifyAll", function (gemificationSlot)
+        local gemifiable = gemificationSlot:GetGemifiable()
+        if gemifiable then
+            ChatAnnouncements.BeginGemExtract(gemifiable, gemificationSlot:GetGemifyAllCount(), gemifiable.gemTotal)
+        end
+    end)
 end
 
 function I.TouchMailNotifySuppressWindow()
@@ -3558,6 +3770,188 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventId, c
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
     end
+end
+
+-- Currency CA toggles keyed by CURT_* (same names as OnCurrencyUpdate).
+local PROMOTIONAL_EVENT_CURRENCY_CHANGE_ENABLED_KEYS =
+{
+    [CURT_MONEY] = "CurrencyGoldChange",
+    [CURT_ALLIANCE_POINTS] = "CurrencyAPShowChange",
+    [CURT_TELVAR_STONES] = "CurrencyTVChange",
+    [CURT_WRIT_VOUCHERS] = "CurrencyWVChange",
+    [CURT_STYLE_STONES] = "CurrencyOutfitTokenChange",
+    [CURT_TRANSMUTE_CRYSTALS] = "CurrencyTransmuteChange",
+    [CURT_UNDAUNTED_KEYS] = "CurrencyUndauntedChange",
+    [CURT_CROWNS] = "CurrencyCrownsChange",
+    [CURT_CROWN_GEMS] = "CurrencyCrownGemsChange",
+    [CURT_ARCHIVAL_FORTUNES] = "CurrencyEndlessChange",
+    [CURT_SEALS] = "CurrencySealsChange",
+    [CURT_TRADE_BARS] = "CurrencyTradeBarsChange",
+    [CURT_TOME_POINTS] = "CurrencyTomePointsChange",
+    [CURT_TOME_POINT_CACHES] = "CurrencyTomePointCachesChange",
+    [CURT_TOME_TOKENS] = "CurrencyTomeTokensChange",
+    [CURT_TOME_CHALLENGE_REROLLS] = "CurrencyTomeChallengeRerollsChange",
+}
+
+local function QueuePromotionalEventClaimMessage(rewardText)
+    local headerText = GetString(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT)
+    local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, rewardText)
+    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "DISPLAY" }
+    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
+end
+
+local function GetPromotionalEventLootIconMarkup(iconPath)
+    if ChatAnnouncements.SV.Inventory.LootIcons then
+        return "|t16:16:" .. iconPath .. "|t "
+    end
+    return ""
+end
+
+local function GetPromotionalEventQuantityPrefix(quantity)
+    if quantity > 1 then
+        return "|cFFFFFFx" .. quantity .. "|r "
+    end
+    return ""
+end
+
+local function IsPromotionalEventCurrencyAnnouncementEnabled(currencyType)
+    local enabledKey = PROMOTIONAL_EVENT_CURRENCY_CHANGE_ENABLED_KEYS[currencyType]
+    if not enabledKey then
+        return false
+    end
+    return ChatAnnouncements.SV.Currency[enabledKey]
+end
+
+local function GetPromotionalEventClaimedRewardText(claimedReward)
+    local rewardType = claimedReward:GetRewardType()
+    local rewardId = claimedReward:GetRewardId()
+    local quantity = claimedReward:GetQuantity()
+
+    if rewardType == REWARD_ENTRY_TYPE_CHOICE then
+        local choiceId = S.g_pendingPromotionalEventChoiceId
+        S.g_pendingPromotionalEventChoiceId = nil
+        if not choiceId then
+            return nil
+        end
+        return GetPromotionalEventClaimedRewardText(REWARDS_MANAGER:GetInfoForReward(choiceId, quantity))
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST then
+        local listRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(GetRewardListIdFromReward(rewardId))
+        for listIndex = 1, #listRewards do
+            local listRewardText = GetPromotionalEventClaimedRewardText(listRewards[listIndex])
+            if listRewardText then
+                QueuePromotionalEventClaimMessage(listRewardText)
+            end
+        end
+        return nil
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_LOOT_CRATE then
+        if not ChatAnnouncements.SV.Inventory.Loot then
+            return nil
+        end
+        local crateId = GetCrownCrateRewardCrateId(rewardId)
+        local crateName = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetCrownCrateName(crateId))
+        local formattedName = B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. crateName .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem]
+        return GetPromotionalEventLootIconMarkup(GetCrownCrateIcon(crateId)) .. GetPromotionalEventQuantityPrefix(quantity) .. formattedName
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_ITEM then
+        if not ChatAnnouncements.SV.Inventory.Loot then
+            return nil
+        end
+        local itemLink = GetItemRewardItemLink(rewardId, quantity, claimedReward:GetDisplayFlags(), B.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        return GetPromotionalEventLootIconMarkup(GetItemLinkIcon(itemLink)) .. GetPromotionalEventQuantityPrefix(quantity) .. itemLink
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+        if not ChatAnnouncements.SV.Collectibles.CollectibleCA then
+            return nil
+        end
+        local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
+        local collectibleLink = GetCollectibleLink(collectibleId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionCollectible])
+        local iconMarkup = ""
+        if ChatAnnouncements.SV.Collectibles.CollectibleIcon then
+            iconMarkup = "|t16:16:" .. GetCollectibleIcon(collectibleId) .. "|t "
+        end
+        return iconMarkup .. collectibleLink
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
+        local currencyType = claimedReward:GetCurrencyType()
+        if not IsPromotionalEventCurrencyAnnouncementEnabled(currencyType) then
+            return nil
+        end
+        local iconMarkup = ""
+        if ChatAnnouncements.SV.Currency.CurrencyIcon then
+            iconMarkup = "|t16:16:" .. GetCurrencyLootKeyboardIcon(currencyType) .. "|t "
+        end
+        local formattedAmount = ZO_CommaDelimitDecimalNumber(quantity)
+        local currencyName = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, quantity ~= 1, false))
+        return iconMarkup .. formattedAmount .. " " .. currencyName
+    end
+
+    if rewardType == REWARD_ENTRY_TYPE_EXPERIENCE or rewardType == REWARD_ENTRY_TYPE_SKILL_LINE_EXPERIENCE or rewardType == REWARD_ENTRY_TYPE_ACTIVE_COMPANION_EXPERIENCE then
+        if not ChatAnnouncements.SV.XP.Experience then
+            return nil
+        end
+        local formattedName = claimedReward:GetFormattedNameWithStack() or claimedReward:GetFormattedName()
+        return GetPromotionalEventLootIconMarkup(claimedReward:GetKeyboardIcon()) .. formattedName
+    end
+
+    if not ChatAnnouncements.SV.Inventory.Loot then
+        return nil
+    end
+
+    local formattedName = claimedReward:GetFormattedNameWithStack() or claimedReward:GetFormattedName()
+    return GetPromotionalEventLootIconMarkup(claimedReward:GetKeyboardIcon()) .. formattedName
+end
+
+function ChatAnnouncements.PrintPromotionalEventClaimedReward(claimedReward)
+    local rewardText = GetPromotionalEventClaimedRewardText(claimedReward)
+    if rewardText then
+        QueuePromotionalEventClaimMessage(rewardText)
+    end
+end
+
+function ChatAnnouncements.OnPromotionalEventsRewardsClaimed(_campaignData, rewards, _hasCapstoneReward)
+    -- Internal UI fires RewardsClaimed with campaignData only (PromotionalEvent_Manager.lua).
+    if not rewards then
+        return
+    end
+    for rewardIndex = 1, #rewards do
+        local rewardableEventData = rewards[rewardIndex].rewardableEventData
+        local claimedReward = rewardableEventData:GetRewardData()
+        local _, wasFallbackClaimed = rewardableEventData:IsRewardClaimed()
+        if wasFallbackClaimed then
+            claimedReward = claimedReward:GetFallbackRewardData()
+        end
+        ChatAnnouncements.PrintPromotionalEventClaimedReward(claimedReward)
+    end
+    S.g_pendingPromotionalEventChoiceId = nil
+end
+
+function ChatAnnouncements.RegisterPromotionalEventClaimHooks()
+    if ChatAnnouncements._promotionalEventClaimHooksInstalled then
+        return
+    end
+
+    -- Capture the chosen reward id when TryClaimReward runs so RewardsClaimed can
+    -- resolve REWARD_ENTRY_TYPE_CHOICE (keyboard/gamepad pass currentSelectedChoice.rewardId).
+    local function SavePromotionalEventChoiceId(_, rewardChoiceId)
+        if rewardChoiceId then
+            S.g_pendingPromotionalEventChoiceId = rewardChoiceId
+        end
+    end
+
+    ZO_PreHook(ZO_PromotionalEventActivityData, "TryClaimReward", SavePromotionalEventChoiceId)
+    ZO_PreHook(ZO_PromotionalEventMilestoneData, "TryClaimReward", SavePromotionalEventChoiceId)
+    ZO_PreHook(ZO_PromotionalEventCampaignData, "TryClaimReward", SavePromotionalEventChoiceId)
+
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", ChatAnnouncements.OnPromotionalEventsRewardsClaimed)
+    ChatAnnouncements._promotionalEventClaimHooksInstalled = true
 end
 
 --- - *EVENT_CRAFTED_ABILITY_LOCK_STATE_CHANGED*
@@ -5104,6 +5498,7 @@ function ChatAnnouncements.PrintQueuedMessages()
         "ANTIQUITY",
         "COLLECTIBLE",
         "ACHIEVEMENT",
+        "DISPLAY",
         "MESSAGE"
     }
 

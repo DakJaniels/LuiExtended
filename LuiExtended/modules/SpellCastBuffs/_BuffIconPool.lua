@@ -16,9 +16,11 @@ SpellCastBuffs.buffIconControlPool = nil
 SpellCastBuffs.buffIconMetaPools = {}
 
 --- Full icon rebuild (sort, pool acquire/release) when true; light tick updates timers only.
+--- Set by effect add/remove/sort-relevant refresh; not by timer ticks or stack-only writes.
 SpellCastBuffs.displayDirty = true
 
---- Bumped when layout-affecting settings change (IconSize, flex, anchors).
+--- Bumped only by MarkDisplayLayoutDirty (IconSize, flex, anchors, Reset).
+--- Must not increment on data-only rebuildDisplaySortedLists — that forces layout/chrome on every icon.
 SpellCastBuffs.displayLayoutVersion = 0
 
 --- Session high water for dev pool metrics (GetTotalObjectCount on source pool).
@@ -34,6 +36,20 @@ end
 function SpellCastBuffs.MarkDisplayLayoutDirty()
     SpellCastBuffs.displayLayoutVersion = SpellCastBuffs.displayLayoutVersion + 1
     SpellCastBuffs.MarkDisplayDirty()
+end
+
+--- Skip ESO SetTexture when the control already holds this path (SetTexture is expensive even for a no-op).
+--- @param textureControl TextureControl|StatusBarControl|nil
+--- @param path string|nil
+function SpellCastBuffs.SetTextureIfChanged(textureControl, path)
+    if not textureControl or path == nil then
+        return
+    end
+    if textureControl.lastSetTexturePath == path then
+        return
+    end
+    textureControl:SetTexture(path)
+    textureControl.lastSetTexturePath = path
 end
 
 function SpellCastBuffs.RecordBuffIconPoolHighWater()
@@ -78,12 +94,18 @@ end
 local function ResetBuffIconDynamicTextures(buff)
     if buff.icon then
         buff.icon:SetTexture(BUFF_ICON_MISSING_TEXTURE)
+        buff.icon.lastSetTexturePath = BUFF_ICON_MISSING_TEXTURE
     end
     if buff.back then
         buff.back:SetTexture(BUFF_ICON_MISSING_TEXTURE)
+        buff.back.lastSetTexturePath = BUFF_ICON_MISSING_TEXTURE
     end
     if buff.frame then
         buff.frame:SetTexture(BUFF_ICON_MISSING_TEXTURE)
+        buff.frame.lastSetTexturePath = BUFF_ICON_MISSING_TEXTURE
+    end
+    if buff.iconbg then
+        buff.iconbg.lastSetTexturePath = nil
     end
 end
 
@@ -160,7 +182,9 @@ local function SetupBuffIconControlReferences(buff)
     ApplyBuffIconTextureReleasePolicy(buff.back)
     ApplyBuffIconTextureReleasePolicy(buff.frame)
 
-    buff.iconbg:SetTexture(SpellCastBuffs.GetGenericIconInsetTexture())
+    local insetTexture = SpellCastBuffs.GetGenericIconInsetTexture()
+    buff.iconbg:SetTexture(insetTexture)
+    buff.iconbg.lastSetTexturePath = insetTexture
 
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
 
@@ -221,7 +245,7 @@ function SpellCastBuffs.GetBuffIconMetaPool(containerKey)
         SpellCastBuffs.ApplyBuffIconSlotDimensions(buff, SpellCastBuffs.SV.IconSize)
         SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
         local borderTexture = SpellCastBuffs.IsDebuffAuraContainer(containerKey) and SpellCastBuffs.GetDebuffBorderTexture() or SpellCastBuffs.GetBuffBorderTexture()
-        buff.back:SetTexture(borderTexture)
+        SpellCastBuffs.SetTextureIfChanged(buff.back, borderTexture)
         SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
     end)
 

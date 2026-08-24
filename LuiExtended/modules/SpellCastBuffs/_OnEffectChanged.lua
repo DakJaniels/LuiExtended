@@ -79,7 +79,6 @@ local function PushStacksToDisplayedBuff(unitTag, displayAbilityId, stackCount)
             end
         end
     end
-    SpellCastBuffs.MarkDisplayDirty()
 end
 
 -- Runs on the EVENT_EFFECT_CHANGED listener.
@@ -334,7 +333,7 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
                     if not SpellCastBuffs.UnitHasBuffAbilityId(unitTag, id) then
                         local icon = Effects.EffectCreateSkillAura[abilityId].icon or GetAbilityIcon(id)
                         local auraUid = SpellCastBuffs.GetEffectUidFake(id)
-                        SpellCastBuffs.EffectsList[simulatedContext][auraUid] =
+                        local auraRow =
                         {
                             uid = auraUid,
                             target = SpellCastBuffs.DetermineTarget(simulatedContext),
@@ -353,6 +352,12 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
                             groundLabel = groundLabel,
                             toggle = toggle,
                         }
+                        local existingAura = SpellCastBuffs.EffectsList[simulatedContext][auraUid]
+                        if existingAura then
+                            SpellCastBuffs.ApplyEffectRowRefresh(existingAura, auraRow)
+                        else
+                            SpellCastBuffs.EffectsList[simulatedContext][auraUid] = auraRow
+                        end
                     end
                 end
             end
@@ -383,7 +388,7 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
 
         -- Buffs are created based on their effectSlot, this allows multiple buffs/debuffs of the same type to appear.
         local nativeUid = SpellCastBuffs.GetEffectUidNative(effectSlot)
-        SpellCastBuffs.EffectsList[context][nativeUid] =
+        local effectRow =
         {
             uid = nativeUid,
             target = SpellCastBuffs.DetermineTarget(context),
@@ -406,6 +411,12 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
                                                             SpellCastBuffs.SnapshotLiveBuffDebugOverlay(
                                                                 unitTag, abilityId, savedEffectSlot, beginTime, endTime, stackCount, effectType, iconName)),
         }
+        local existingRow = SpellCastBuffs.EffectsList[context][nativeUid]
+        if existingRow then
+            SpellCastBuffs.ApplyEffectRowRefresh(existingRow, effectRow)
+        else
+            SpellCastBuffs.EffectsList[context][nativeUid] = effectRow
+        end
         SpellCastBuffs.RemoveSyntheticEffectsForAbilityId(context, abilityId, nativeUid)
         if unitTag == "reticleover" or unitTag == "player" then
             SpellCastBuffs.RemoveDuplicateEffectsInSharedContainer(context, abilityId, nativeUid)

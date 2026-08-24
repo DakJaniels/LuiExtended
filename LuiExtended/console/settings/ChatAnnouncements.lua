@@ -3802,6 +3802,40 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GEM_EXTRACT),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GEM_EXTRACT_TP),
+            getFunction = function ()
+                return Settings.ContextMessages.CurrencyMessageGemExtract
+            end,
+            setFunction = function (value)
+                Settings.ContextMessages.CurrencyMessageGemExtract = value
+            end,
+            default = Defaults.ContextMessages.CurrencyMessageGemExtract,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GEM_EXTRACT_FROM),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_GEM_EXTRACT_FROM_TP),
+            getFunction = function ()
+                return Settings.ContextMessages.CurrencyMessageGemExtractFrom
+            end,
+            setFunction = function (value)
+                Settings.ContextMessages.CurrencyMessageGemExtractFrom = value
+            end,
+            default = Defaults.ContextMessages.CurrencyMessageGemExtractFrom,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UPGRADE),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_UPGRADE_TP),
             getFunction = function ()
@@ -5570,6 +5604,23 @@ function ChatAnnouncements.CreateConsoleSettings()
                 Settings.Collectibles.CollectibleSubcategory = value
             end,
             default = Defaults.Collectibles.CollectibleSubcategory,
+            disable = function ()
+                return not ((Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert) and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CONDENSE),
+            tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CONDENSE_TP),
+            getFunction = function ()
+                return Settings.Collectibles.CollectibleCondense
+            end,
+            setFunction = function (value)
+                Settings.Collectibles.CollectibleCondense = value
+            end,
+            default = Defaults.Collectibles.CollectibleCondense,
             disable = function ()
                 return not ((Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert) and LUIE.SV.ChatAnnouncements_Enable)
             end

@@ -493,6 +493,35 @@ function SpellCastBuffs.GetEffectUidNameAura(unitName, abilityId)
     return "name:" .. tostring(unitName) .. ":" .. tostring(abilityId)
 end
 
+--- Copy refreshable fields onto an existing EffectsList row. Keeps iconNum and displayUid
+--- so a duration/stack refresh does not force every icon to slotRebound.
+--- Lua 5.1 pairs skips nil values, so nil-able fields are assigned explicitly
+--- (duration-0 refresh must clear stale ends or player_long shows a negative timer).
+--- @param existing table
+--- @param fields table
+--- @return table
+function SpellCastBuffs.ApplyEffectRowRefresh(existing, fields)
+    local iconNum = existing.iconNum
+    local displayUid = existing.displayUid
+    for key, value in pairs(fields) do
+        if key ~= "iconNum" and key ~= "displayUid" then
+            existing[key] = value
+        end
+    end
+    existing.ends = fields.ends
+    existing.forced = fields.forced
+    existing.groundLabel = fields.groundLabel
+    existing.toggle = fields.toggle
+    existing.fakeDuration = fields.fakeDuration
+    existing.tooltip = fields.tooltip
+    existing.stack = fields.stack
+    existing.combatCcType = fields.combatCcType
+    existing.iconNum = iconNum
+    existing.displayUid = displayUid
+    existing.restart = true
+    return existing
+end
+
 --- @param listKey integer|string
 --- @return boolean
 function SpellCastBuffs.IsSyntheticEffectKey(listKey)
@@ -529,16 +558,21 @@ function SpellCastBuffs.RemoveSyntheticEffectsForAbilityId(context, abilityId, k
         return
     end
     local fakeUid = GetEffectUidFake(abilityId)
+    local removedAny = false
     for listKey, effect in pairs(effectsList) do
         if listKey ~= keepUid and effect.id == abilityId then
             if listKey == fakeUid or SpellCastBuffs.IsSyntheticEffectKey(listKey) then
                 effectsList[listKey] = nil
+                removedAny = true
             elseif type(listKey) == "number" and effect.buffSlot == nil then
                 effectsList[listKey] = nil
+                removedAny = true
             end
         end
     end
-    SpellCastBuffs.MarkDisplayDirty()
+    if removedAny then
+        SpellCastBuffs.MarkDisplayDirty()
+    end
 end
 
 --- @param context string
@@ -579,8 +613,15 @@ function SpellCastBuffs.SetFakeCombatEffect(context, abilityId, entry)
     local uid = GetEffectUidFake(abilityId)
     entry.uid = uid
     local effectsList = SpellCastBuffs.EffectsList[context]
-    effectsList[uid] = entry
+    local existing = effectsList[uid] or effectsList[abilityId]
     effectsList[abilityId] = nil
+    if existing then
+        SpellCastBuffs.ApplyEffectRowRefresh(existing, entry)
+        existing.uid = uid
+        effectsList[uid] = existing
+        return
+    end
+    effectsList[uid] = entry
     SpellCastBuffs.MarkDisplayDirty()
 end
 
@@ -593,14 +634,18 @@ function SpellCastBuffs.RemoveDuplicateEffectsInSharedContainer(keepContext, abi
     if not keepContainer or not abilityId then
         return
     end
+    local removedAny = false
     for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
         if context ~= keepContext and SpellCastBuffs.containerRouting[context] == keepContainer then
             for listKey, effect in pairs(effectsList) do
                 if effect.id == abilityId and listKey ~= keepUid then
                     effectsList[listKey] = nil
+                    removedAny = true
                 end
             end
         end
     end
-    SpellCastBuffs.MarkDisplayDirty()
+    if removedAny then
+        SpellCastBuffs.MarkDisplayDirty()
+    end
 end
