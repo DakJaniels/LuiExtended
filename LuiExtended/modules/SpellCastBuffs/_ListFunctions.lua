@@ -159,6 +159,10 @@ function SpellCastBuffs.UpdateContextHideList()
     SpellCastBuffs.hidePlayerEffects[86139] = true
     SpellCastBuffs.hidePlayerEffects[86143] = true
 
+    if not SpellCastBuffs.SV.ShowResurrectionImmunity then
+        SpellCastBuffs.hidePlayerEffects[14646] = true
+    end
+
     if SpellCastBuffs.SV.IgnoreMundusPlayer then
         for k, v in pairs(Effects.IsBoon) do
             SpellCastBuffs.hidePlayerEffects[k] = v

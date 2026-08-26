@@ -3000,25 +3000,27 @@ function SpellCastBuffs.OnVibration(eventCode, duration, coarseMotor, fineMotor,
     elseif SpellCastBuffs.playerResurrectStage == 2 and duration == 0 then
         SpellCastBuffs.playerResurrectStage = 3
     elseif SpellCastBuffs.playerResurrectStage == 3 and duration == 350 and SpellCastBuffs.SV.ShowResurrectionImmunity then
-        -- We got correct sequence, so let us create a buff and reset the SpellCastBuffs.playerResurrectStage
+        -- Self-rez rumble fallback when combat GAINED_DURATION for 14646 was missed (relog while dead).
         SpellCastBuffs.playerResurrectStage = nil
-        local currentTimeMs = GetFrameTimeMilliseconds()
         local abilityId = 14646
         local abilityName = Abilities.Innate_Resurrection_Immunity
         local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
-        SpellCastBuffs.EffectsList[context][abilityId] =
-        {
-            target = SpellCastBuffs.DetermineTarget(context),
-            type = 1,
-            id = abilityId,
-            name = abilityName,
-            icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RESURRECTION_IMMUNITY_DDS,
-            dur = 10000,
-            starts = currentTimeMs,
-            ends = currentTimeMs + 10000,
-            restart = true,
-            iconNum = 0,
-        }
+        if SpellCastBuffs.GetFakeEffectEntry(context, abilityId) or SpellCastBuffs.UnitHasBuffAbilityId("player", abilityId) then
+            return
+        end
+        SpellCastBuffs.SetFakeCombatEffect(
+            context,
+            abilityId,
+            SpellCastBuffs.BuildFakeCombatEffectEntry(
+                context,
+                BUFF_EFFECT_TYPE_BUFF,
+                abilityId,
+                abilityName,
+                LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RESURRECTION_IMMUNITY_DDS,
+                14000,
+                0
+            )
+        )
     else
         -- This event does not seem to have anything to do with player self-resurrection
         SpellCastBuffs.playerResurrectStage = nil

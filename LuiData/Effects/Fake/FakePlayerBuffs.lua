@@ -99,6 +99,13 @@ local fakePlayerBuffs =
 
     -- Player (Basic)
     [123970] = { duration = 3000 }, -- Lesser Reincarnate
+    [14646] =
+    {
+        duration = 14000,
+        icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RESURRECTION_IMMUNITY_DDS,
+        name = Abilities.Innate_Resurrection_Immunity,
+        refreshOnly = true,
+    }, -- Recently Revived (Resurrection Immunity)
 
     -----------------
     -- Class --------
