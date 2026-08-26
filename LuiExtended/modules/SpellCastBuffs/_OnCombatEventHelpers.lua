@@ -607,6 +607,9 @@ function SpellCastBuffs.HandleIncomingFakePlayerBuff(result, abilityId, sourceNa
     if SpellCastBuffs.ShouldIgnoreFakeCombatEvent(config, result) then
         return
     end
+    if SpellCastBuffs.hidePlayerEffects[abilityId] then
+        return
+    end
 
     local effectName = config.name or GetAbilityName(abilityId)
     if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName]) then
