@@ -914,12 +914,72 @@ local function ApplyInfoPanelDividerAnchors()
     divider:SetAnchor(RIGHT, uiPanel, RIGHT, 0, 0)
 end
 
+-- XML base metrics (LuiExtended/frontend/InfoPanel.xml): row y="20", divider y="4",
+-- panel y="48" = topPad(2) + row(20) + divider(4) + row(20) + botPad(2). These are the
+-- minimum/default sizes, not a ceiling - grow rowHeight from the resolved font's actual
+-- height the same way ZOS does (see ZO_CheckButton_SetLabelWrapMode, ZO_FractionDisplay).
+local INFO_PANEL_BASE_ROW_HEIGHT = 20
+local INFO_PANEL_TOP_PAD = 2
+local INFO_PANEL_BOTTOM_PAD = 2
+local INFO_PANEL_DIVIDER_HEIGHT = 4
+
+-- Last rowHeight actually applied via ApplyInfoPanelRowHeights, mirroring the
+-- label.infoPanelLayoutWidth cache pattern above - avoids re-running SetHeight on every
+-- meter/row/control on every layout pass (e.g. every FPS/clock tick) when the font-derived
+-- rowHeight has not changed, which was visibly "rearranging" every element each tick.
+local infoPanelAppliedRowHeight = nil
+
+--- @return number rowHeight Resolved font height, floored at the XML base row height.
+local function GetInfoPanelRowHeight()
+    local fontHeight = uiFps.label and uiFps.label:GetFontHeight()
+    if not fontHeight or fontHeight <= 0 then
+        fontHeight = uiFps.label and uiFps.label:GetTextHeight()
+    end
+    if not fontHeight or fontHeight <= 0 then
+        fontHeight = InfoPanel.SV.FontSize
+    end
+    return zo_max(INFO_PANEL_BASE_ROW_HEIGHT, fontHeight or INFO_PANEL_BASE_ROW_HEIGHT)
+end
+
+--- @param rowHeight number
+local function ApplyInfoPanelRowHeights(rowHeight)
+    -- Top row
+    if uiLatency.control then uiLatency.control:SetHeight(rowHeight) end
+    if uiLatency.label then uiLatency.label:SetHeight(rowHeight) end
+    if uiFps.label then uiFps.label:SetHeight(rowHeight) end
+    if uiMemory.label then uiMemory.label:SetHeight(rowHeight) end
+    if uiClock.label then uiClock.label:SetHeight(rowHeight) end
+    if uiGems.control then uiGems.control:SetHeight(rowHeight) end
+    if uiGems.label then uiGems.label:SetHeight(rowHeight) end
+
+    -- Bottom row
+    if uiFeedTimer.control then uiFeedTimer.control:SetHeight(rowHeight) end
+    if uiFeedTimer.label then uiFeedTimer.label:SetHeight(rowHeight) end
+    if uiArmour.control then uiArmour.control:SetHeight(rowHeight) end
+    if uiArmour.label then uiArmour.label:SetHeight(rowHeight) end
+    if uiWeapons.control then uiWeapons.control:SetHeight(rowHeight) end
+    if uiBags.control then uiBags.control:SetHeight(rowHeight) end
+    if uiBags.label then uiBags.label:SetHeight(rowHeight) end
+    if uiGold.control then uiGold.control:SetHeight(rowHeight) end
+    if uiGold.label then uiGold.label:SetHeight(rowHeight) end
+
+    uiTopRow:SetHeight(rowHeight)
+    uiBotRow:SetHeight(rowHeight)
+end
+
 local function PerformInfoPanelLayout()
     if not InfoPanel.Enabled or not uiPanel then
         return
     end
 
     uiPanel:SetTransformScale(1)
+
+    local rowHeight = GetInfoPanelRowHeight()
+    if infoPanelAppliedRowHeight ~= rowHeight then
+        infoPanelAppliedRowHeight = rowHeight
+        ApplyInfoPanelRowHeights(rowHeight)
+        uiPanel:SetHeight(INFO_PANEL_TOP_PAD + rowHeight + INFO_PANEL_DIVIDER_HEIGHT + rowHeight + INFO_PANEL_BOTTOM_PAD)
+    end
 
     local topWidth = LayoutInfoPanelRow(uiTopRow, INFO_PANEL_TOP_ROW_LAYOUT)
     local botWidth = LayoutInfoPanelRow(uiBotRow, INFO_PANEL_BOTTOM_ROW_LAYOUT)
