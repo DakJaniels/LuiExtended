@@ -35,6 +35,12 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         S.g_itemReceivedIsQuestAbandon = false
     end
 
+    --- @param questIndex integer
+    --- @return boolean
+    local function ShouldSuppressWritCrafterQuestAnnouncement(questIndex)
+        return WritCreater and WritCreater.GetSettings and WritCreater:GetSettings() and WritCreater:GetSettings().suppressQuestAnnouncements and I.isQuestWritQuest(questIndex)
+    end
+
     -- EVENT_QUEST_ADDED (CSA Handler)
     local function QuestAddedHook(journalIndex, questName, objectiveName)
         eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
@@ -51,6 +57,11 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
             questType = questType,
             zoneDisplayType = zoneDisplayType,
         }
+
+        -- Honor Writ Crafter "Hide Writ Quest Announcements" for LUIE CA/CSA/Alert accept spam.
+        if ShouldSuppressWritCrafterQuestAnnouncement(journalIndex) then
+            return true
+        end
 
         if ChatAnnouncements.SV.Quests.QuestAcceptCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_ACCEPTED)
@@ -224,7 +235,7 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         end
 
         -- Check WritCreater settings first
-        if WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and I.isQuestWritQuest(journalIndex) then
+        if ShouldSuppressWritCrafterQuestAnnouncement(journalIndex) then
             --             if LUIE.IsDevDebugEnabled() then
             --                 LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
             -- --> Quest: %s
@@ -464,7 +475,7 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
     -- Note: Quest Advancement displays all the "appropriate" conditions that the player needs to do to advance the current step
     local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged, soundOverride)
         -- Check if WritCreater is enabled & then call a copy of a local function from WritCreater to check if this is a Writ Quest
-        if WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and I.isQuestWritQuest(questIndex) then
+        if ShouldSuppressWritCrafterQuestAnnouncement(questIndex) then
             --             if LUIE.IsDevDebugEnabled() then
             --                 LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
             -- --> Quest: %s
@@ -569,7 +580,7 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
                 return
             end
             -- Suppress announcements for writ quests if configured
-            if WritCreater:GetSettings().suppressQuestAnnouncements and I.isQuestWritQuest(questIndex) then
+            if ShouldSuppressWritCrafterQuestAnnouncement(questIndex) then
                 return true
             end
         end
