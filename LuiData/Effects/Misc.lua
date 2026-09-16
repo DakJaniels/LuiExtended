@@ -491,6 +491,25 @@ Effects.DebuffDisplayOverrideIdAlways =
     [132831] = true, -- Major Vulnerability Invulnerability
 
     ----------------------------------------------------------------
+    -- STATUS EFFECTS (sourceType is often not PLAYER)
+    ----------------------------------------------------------------
+    [95136] = true,  -- Chill (Frost Status Effect)
+    [21481] = true,  -- Chill (Frost Status Effect)
+    [130814] = true, -- Chill (Frost Status Effect)
+    [130816] = true, -- Chill (Frost Status Effect)
+    [95134] = true,  -- Concussion (Shock Status Effect)
+    [21487] = true,  -- Concussion (Shock Status Effect)
+    [130808] = true, -- Concussion (Shock Status Effect)
+    [130810] = true, -- Concussion (Shock Status Effect)
+    [178118] = true, -- Overcharged (Magic Status Effect)
+    [148797] = true, -- Overcharged (Magic Status Effect)
+    [178127] = true, -- Diseased (Disease Status Effect)
+    [21925] = true,  -- Diseased (Disease Status Effect)
+    [178123] = true, -- Sundered (Physical Status Effect)
+    [148800] = true, -- Sundered (Physical Status Effect)
+    [149573] = true, -- Sundered (Physical Status Effect - Siege)
+
+    ----------------------------------------------------------------
     -- NPC ABILITIES -----------------------------------------------
     ----------------------------------------------------------------
 

@@ -47,6 +47,7 @@ local LUIE = LUIE
 --- @field CombatCcByAbilityId table<integer, { ccType: integer, expires: number, targetUnitTag?: string }>
 --- @field CombatCcByTargetAbilityId table<string, integer>
 --- @field combatDamageTypeByAbilityId table<integer, { damageType: integer, expires: number }>
+--- @field reticleCombatUnitId integer|nil
 local SpellCastBuffs = ZO_Object:Subclass()
 
 ------------------------------------------------
@@ -472,6 +473,8 @@ SpellCastBuffs.SV = ...
 --- | `"reticleover2"`
 --- | `"ground"`
 --- | `"saved"`
+--- | `"promd_ground"`
+--- | `"promb_ground"`
 --- | `"promd_player"`
 --- | `"promb_player"`
 --- | `"promd_target"`
@@ -606,6 +609,10 @@ SpellCastBuffs.werewolfQuest = 0   --- @type number
 -- Counter variable for ACTION_RESULT_EFFECT_GAINED / ACTION_RESULT_EFFECT_FADED tracking for some buffs that are broken
 --- @type table
 SpellCastBuffs.InternalStackCounter = {}
+
+--- Combat unitId of the current reticleover target, cached from EVENT_EFFECT_CHANGED
+--- or matching EVENT_COMBAT_EVENT. There is no GetUnitId("reticleover") API.
+SpellCastBuffs.reticleCombatUnitId = nil
 
 --- @class (partial) LUIE.SpellCastBuffs : SpellCastBuffs
 LUIE.SpellCastBuffs = SpellCastBuffs:New()

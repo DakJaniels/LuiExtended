@@ -230,6 +230,7 @@ modules/SpellCastBuffs/_OnCombatAddNameEvent.lua
 modules/SpellCastBuffs/_OnCombatEventHelpers.lua
 modules/SpellCastBuffs/_OnCombatEventIn.lua
 modules/SpellCastBuffs/_OnCombatEventOut.lua
+modules/SpellCastBuffs/_OnCombatEventStatus.lua
 modules/SpellCastBuffs/_EffectDebugMeta.lua
 modules/SpellCastBuffs/_OnEffectChanged.lua
 modules/SpellCastBuffs/_OnEffectChangedGround.lua

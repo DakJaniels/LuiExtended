@@ -76,6 +76,7 @@ Effects/DisguiseIcons.lua
 # Effects - Fake Effects
 Effects/Fake/FakeAddGroundDamageAura.lua
 Effects/Fake/FakeEffectGroundDisplay.lua
+Effects/Fake/CombatEventStatusEffects.lua
 Effects/Fake/FakeExternalBuffs.lua
 Effects/Fake/FakeExternalDebuffs.lua
 Effects/Fake/FakePlayerBuffs.lua

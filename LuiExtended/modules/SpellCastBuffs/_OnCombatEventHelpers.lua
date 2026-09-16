@@ -290,6 +290,7 @@ end
 --- @field toggle? boolean
 --- @field fakeDuration? boolean
 --- @field savedName? string
+--- @field savedUnitId? integer
 
 --- @param context string
 --- @param effectType integer
@@ -334,6 +335,9 @@ function SpellCastBuffs.BuildFakeCombatEffectEntry(context, effectType, id, name
     end
     if opts.savedName ~= nil then
         entry.savedName = opts.savedName
+    end
+    if opts.savedUnitId ~= nil then
+        entry.savedUnitId = opts.savedUnitId
     end
     return entry
 end

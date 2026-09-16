@@ -143,6 +143,7 @@ local DebugStatus = {}
 --- @field EffectPullStacks table<integer, integer> Visible buff id --> stack buff id (SpellCastBuffs)
 --- @field EffectPushStacksFromHidden table<integer, integer> Hidden stack buff id --> visible buff id
 --- @field EffectSourceOverride EffectSourceOverride Table of effect source overrides
+--- @field CombatEventStatusEffects CombatEventStatusEffects Status effects tracked via ability-id-filtered EVENT_COMBAT_EVENT
 --- @field FakeExternalBuffs FakeExternalBuffs Table of fake external buff definitions
 --- @field FakeExternalDebuffs FakeExternalDebuffs Table of fake player debuff definitions
 --- @field FakePlayerBuffs FakePlayerBuffs Table of fake external debuff definitions
@@ -222,6 +223,7 @@ local Effects =
     EffectPullStacks = {},
     EffectPushStacksFromHidden = {},
     EffectSourceOverride = {},
+    CombatEventStatusEffects = {},
     FakeExternalBuffs = {},
     FakeExternalDebuffs = {},
     FakePlayerBuffs = {},

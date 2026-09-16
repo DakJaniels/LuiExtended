@@ -100,6 +100,10 @@ end
 --- @param abilityId integer
 --- @param sourceType CombatUnitType
 function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+    if unitTag == "reticleover" then
+        SpellCastBuffs.CacheReticleCombatUnitId(unitId)
+    end
+
     -- Change the effect type / name before we determine if we want to filter anything else.
     if Effects.EffectOverride[abilityId] then
         effectName = Effects.EffectOverride[abilityId].name or effectName
@@ -141,6 +145,11 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
         if effectType == BUFF_EFFECT_TYPE_DEBUFF and not (sourceType == COMBAT_UNIT_TYPE_PLAYER) and not (SpellCastBuffs.debuffDisplayOverrideId[abilityId] or Effects.DebuffDisplayOverrideName[effectName]) then
             return
         end
+    end
+
+    -- Native aura takes over any combat-event fake for the same status effect.
+    if SpellCastBuffs.IsCombatEventStatusEffect(abilityId) then
+        SpellCastBuffs.ClearCombatEventStatusEffectFakeForUnit(abilityId, unitTag)
     end
 
     -- Ignore Siphoner on non-player targets
