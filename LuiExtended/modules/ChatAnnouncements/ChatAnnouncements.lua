@@ -1013,8 +1013,15 @@ end
 --- @param questIndex integer
 --- @return string|false
 function I.rejectQuest(questIndex)
-    for itemLink, _ in pairs(WritCreater:GetSettings().skipItemQuests) do
-        if not WritCreater:GetSettings().skipItemQuests[itemLink] then
+    if not WritCreater or not WritCreater.GetSettings then
+        return false
+    end
+    local settings = WritCreater:GetSettings()
+    if not settings or not settings.skipItemQuests then
+        return false
+    end
+    for itemLink, _ in pairs(settings.skipItemQuests) do
+        if not settings.skipItemQuests[itemLink] then
             for i = 1, GetJournalQuestNumConditions(questIndex, QUEST_MAIN_STEP_INDEX) do
                 if DoesItemLinkFulfillJournalQuestCondition(itemLink, questIndex, 1, i) then
                     return itemLink
