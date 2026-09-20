@@ -201,10 +201,10 @@ EVENT_MANAGER:RegisterForEvent(NAME, EVENT_PLAYER_ACTIVATED, function()
 
     local linkHandler = function(_, _, _, _, linkType)
         if (linkType == "ACACUC") then
-            if (_G[PANEL_ID]) then
+            if (_G[PANEL_ID] or CreateSettingsMenu()) then
                 LibAddonMenu2:OpenToPanel(_G[PANEL_ID])
             else
-                CHAT_ROUTER:AddSystemMessage("[LibForgottenAddons] Cannot open settings because LibAddonMenu-2.0 is not installed, or the outdated addon message was from a previous session.")
+                CHAT_ROUTER:AddSystemMessage("[LibForgottenAddons] Cannot open settings because LibAddonMenu-2.0 is not available.")
             end
             return true
         end
