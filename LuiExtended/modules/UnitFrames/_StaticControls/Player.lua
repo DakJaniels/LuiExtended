@@ -15,3 +15,5 @@ function FrameObject:UpdatePlayerFrameStaticControls()
     FrameObject.UpdateStaticControlTitleAndAva(self)
     FrameObject.UpdateStaticControlDeadAndGroupAlpha(self)
 end
+
+return FrameObject

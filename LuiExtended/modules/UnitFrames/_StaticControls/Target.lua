@@ -29,3 +29,5 @@ function FrameObject:UpdateTargetFrameStaticControls()
     FrameObject.UpdateStaticControlReticleBuffAnchors(self, savedTitle)
     FrameObject.UpdateStaticControlDeadAndGroupAlpha(self)
 end
+
+return FrameObject

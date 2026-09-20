@@ -13,3 +13,5 @@ function FrameObject:UpdateRaidFrameStaticControls()
     end
     FrameObject.UpdateStaticControlDeadAndGroupAlpha(self)
 end
+
+return FrameObject
