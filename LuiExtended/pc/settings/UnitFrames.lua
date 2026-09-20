@@ -3255,6 +3255,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GroupCombatGlow = value
+                    UnitFrames.UpdateGroupCombatGlow()
                 end,
                 width = "full",
                 default = Defaults.GroupCombatGlow,
@@ -3646,6 +3647,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.RaidCombatGlow = value
+                    UnitFrames.UpdateGroupCombatGlow()
                 end,
                 width = "full",
                 default = Defaults.RaidCombatGlow,

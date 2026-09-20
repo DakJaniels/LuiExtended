@@ -312,11 +312,6 @@ function UnitFrames.Initialize(enabled)
             UnitFrames.CustomFramesSetPositions()
         end)
 
-        -- Register periodic update for group combat glow (checks every 500ms)
-        if UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] then
-            eventManager:RegisterForUpdate(moduleName .. "_CombatGlow", 500, UnitFrames.UpdateGroupCombatGlow)
-        end
-
         if UnitFrames.CustomFrames["companion"] then
             eventManager:RegisterForUpdate(moduleName .. "_CompanionCombat", 500, function ()
                 UnitFrames.CustomFramesApplyCompanionInCombat()
@@ -1029,6 +1024,14 @@ end
 function UnitFrames.OnPlayerCombatState(eventCode, inCombat)
     UnitFrames.statFull.combat = not inCombat
     UnitFrames.CustomFramesApplyInCombat()
+    -- Group members often enter/leave combat with the local player; one full read of IsUnitInCombat per slot.
+    UnitFrames.UpdateGroupCombatGlow()
+end
+
+local function HideFrameCombatGlow(frame)
+    if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] and frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow then
+        frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow:SetHidden(true)
+    end
 end
 
 local function UpdateFrameCombatGlow(frame, unitTag, glowColor)
@@ -1037,6 +1040,11 @@ local function UpdateFrameCombatGlow(frame, unitTag, glowColor)
     end
     local glow = frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow
     if not unitTag or not DoesUnitExist(unitTag) then
+        glow:SetHidden(true)
+        return
+    end
+    -- Disconnected group members keep a stale IsUnitInCombat / IsUnitActivelyEngaged flag.
+    if ZO_Group_IsGroupUnitTag(unitTag) and not IsUnitOnline(unitTag) then
         glow:SetHidden(true)
         return
     end
@@ -1052,24 +1060,49 @@ local function UpdateGroupFrameCombatGlow(frame, unitTag, isGroupFrame)
     UpdateFrameCombatGlow(frame, unitTag, glowColor)
 end
 
--- Updates combat glow on group frames based on combat state
-function UnitFrames.UpdateGroupCombatGlow()
-    if not IsUnitGrouped("player") then
+--- Refresh combat glow on the custom frame aliased to a game unitTag (groupN).
+--- @param unitTag string
+function UnitFrames.RefreshCombatGlowForUnit(unitTag)
+    if not unitTag then
         return
     end
-    if UnitFrames.SV.GroupCombatGlow and UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["SmallGroup1"].tlw then
+    local frame = UnitFrames.CustomFrames[unitTag]
+    if not frame then
+        return
+    end
+    local isSmallGroupFrame = UnitFrames.isRaid ~= true
+    local glowEnabled = isSmallGroupFrame and UnitFrames.SV.GroupCombatGlow or UnitFrames.SV.RaidCombatGlow
+    if glowEnabled then
+        UpdateGroupFrameCombatGlow(frame, unitTag, isSmallGroupFrame)
+    else
+        HideFrameCombatGlow(frame)
+    end
+end
+
+-- Updates combat glow on group frames based on combat state
+function UnitFrames.UpdateGroupCombatGlow()
+    local isGrouped = IsUnitGrouped("player")
+    if UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["SmallGroup1"].tlw then
         for i = 1, 4 do
             local frame = UnitFrames.CustomFrames["SmallGroup" .. i]
             if frame then
-                UpdateGroupFrameCombatGlow(frame, frame.unitTag, true)
+                if isGrouped and UnitFrames.SV.GroupCombatGlow then
+                    UpdateGroupFrameCombatGlow(frame, frame.unitTag, true)
+                else
+                    HideFrameCombatGlow(frame)
+                end
             end
         end
     end
-    if UnitFrames.SV.RaidCombatGlow and UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw then
+    if UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw then
         for i = 1, 12 do
             local frame = UnitFrames.CustomFrames["RaidGroup" .. i]
             if frame then
-                UpdateGroupFrameCombatGlow(frame, frame.unitTag, false)
+                if isGrouped and UnitFrames.SV.RaidCombatGlow then
+                    UpdateGroupFrameCombatGlow(frame, frame.unitTag, false)
+                else
+                    HideFrameCombatGlow(frame)
+                end
             end
         end
     end
@@ -1117,6 +1150,7 @@ function UnitFrames.OnGroupMemberConnectedStatus(eventCode, unitTag, isOnline)
     if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].dead then
         UnitFrames.CustomFramesSetDeadLabel(UnitFrames.CustomFrames[unitTag], isOnline and nil or strOffline)
     end
+    UnitFrames.RefreshCombatGlowForUnit(unitTag)
     if isOnline and (UnitFrames.SV.ColorRoleGroup or UnitFrames.SV.ColorRoleRaid) then
         UnitFrames.CustomFramesApplyColors()
     end
@@ -1182,6 +1216,10 @@ function UnitFrames.OnDeath(eventCode, unitTag, isDead)
 
     if unitTag == "player" then
         UnitFrames.UpdatePlayerFrameDeathVisibility()
+    end
+
+    if ZO_Group_IsGroupUnitTag(unitTag) then
+        UnitFrames.RefreshCombatGlowForUnit(unitTag)
     end
 end
 
@@ -1561,6 +1599,7 @@ function UnitFrames.CustomFramesGroupUpdate()
     end
 
     UnitFrames.RefreshCustomFrameShields()
+    UnitFrames.UpdateGroupCombatGlow()
 
     -- Setup LibGroupBroadcast integrations on active frames
     if UnitFrames.GroupCombatStats then

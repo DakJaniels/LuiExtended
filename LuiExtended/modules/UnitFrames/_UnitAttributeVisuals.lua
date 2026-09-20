@@ -314,6 +314,10 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
             UnitFrames.CustomFrames["reticleover"].skull:SetHidden(false)
         end
     end
+
+    if powerType == COMBAT_MECHANIC_FLAGS_HEALTH and customFrame and ZO_Group_IsGroupUnitTag(unitTag) then
+        UnitFrames.RefreshCombatGlowForUnit(unitTag)
+    end
 end
 
 -- -----------------------------------------------------------------------------
