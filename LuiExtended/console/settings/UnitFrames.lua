@@ -3182,6 +3182,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.GroupCombatGlow = value
+                UnitFrames.UpdateGroupCombatGlow()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -3581,6 +3582,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.RaidCombatGlow = value
+                UnitFrames.UpdateGroupCombatGlow()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
