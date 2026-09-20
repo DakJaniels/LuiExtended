@@ -17,3 +17,5 @@ function FrameObject:UpdateGroupFrameStaticControls()
     end
     FrameObject.UpdateStaticControlDeadAndGroupAlpha(self)
 end
+
+return FrameObject
