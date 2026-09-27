@@ -2086,6 +2086,9 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
     elseif type == "LUIE_CURRENCY_GUILD_BANK" then
         local guildLabel = ChatAnnouncements.FormatGuildLabelForChat(ChatAnnouncements.GetActiveGuildBankId()) or ""
+        if guildLabel ~= "" then
+            guildLabel = guildLabel .. "|c" .. changeColor
+        end
         formattedMessageP1 = ChatAnnouncements.FormatGuildBankContextMessage(messageChange, messageP1, guildLabel)
     else
         formattedMessageP1 = (string_format(messageChange, messageP1))
