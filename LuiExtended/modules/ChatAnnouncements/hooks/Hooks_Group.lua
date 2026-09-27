@@ -218,6 +218,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         if isLocalPlayer then
             S.g_currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())
             S.g_currentGroupLeaderDisplayName = GetUnitDisplayName(GetGroupLeaderUnitTag())
+            S.g_lastLargeGroup = false
         end
 
         -- Only print this out if we didn't JUST join an LFG group.
