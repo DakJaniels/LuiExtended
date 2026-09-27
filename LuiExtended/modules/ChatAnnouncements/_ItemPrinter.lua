@@ -266,6 +266,9 @@ function ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, f
         or ChatAnnouncements.ContextMessageMatches(logPrefix, "CurrencyMessageWithdrawGuild") then
             local guildId = guildAnnounceGuildId or S.g_guildBankAnnounceGuildId or ChatAnnouncements.GetActiveGuildBankId()
             local guildLabel = ChatAnnouncements.FormatGuildLabelForChat(guildId) or ""
+            if guildLabel ~= "" then
+                guildLabel = guildLabel .. "|c" .. color
+            end
             return ChatAnnouncements.FormatGuildBankContextMessage(logPrefix, formattedMessageP1, guildLabel)
         end
         return string_format(logPrefix, formattedMessageP1, "")
