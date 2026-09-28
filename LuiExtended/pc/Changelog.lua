@@ -49,6 +49,37 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.6.4
+    "|cFFA500LuiExtended Version 7.2.6.4|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Chill, Concussion, Overcharged, Diseased, and Sundered show as short debuffs on you and your current target when the game does not send a normal aura.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Recently Revived shows as Resurrection Immunity on the player when |cFFFFFFShow Resurrection Immunity (Player only)|r is on.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Collectible unlocks from Crown Store bundles and other multi-unlocks now list each collectible by name. Optional setting to condense those into a single count message.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Items converted in Gem Extraction now use extract wording for the item and Crown Gems instead of consume, use, eat, drink, learn, or receive. |cFFFFFFExtract All|r reports the full stack and total Crown Gems in one message.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Claiming Golden Pursuit activity, milestone, and capstone rewards now prints to chat, including Crown Crates from Straight to the Crate.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Update 51 buff text: Major/Minor Brutality is Weapon and Spell Damage; Major/Minor Savagery is Weapon and Spell Critical. The Warrior Mundus is Weapon and Spell Damage. The Apprentice Mundus is Experience and Inspiration.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Settings: |cFFFFFFUnlock Default UI Elements|r is gone. Those frames move in the game HUD Editor. LuiExtended adds Battleground Score, Objective and Resurrection Meter, Player Interaction Prompt, Experience/Champion Bar, Interact Text, Ram, and Tutorials to that editor.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Addon list title is plain Lui Extended.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Core of Flame, Soul of Flame, Heart of Flame, and the Engulfing Dragonfire channel no longer sort as toggles in prominent buffs and debuffs, so they follow remaining duration. Stuhn's Favor for prominent tracking is 141916 or 135874; 14196 is Kagouti Charge (Rush).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: A buff countdown no longer stays on screen as a negative timer after the effect ends.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom group and raid frames no longer show a combat glow on disconnected members.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: The roll-dodge marker on the custom player stamina bar uses the game's current dodge cost.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Large-group and small-group messages no longer repeat for the same size, for another member joining a large group, or when zoning replays the change. The game's own group-size chat line is hidden while Chat Announcements is on.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Guild bank deposit and withdraw lines keep the rest of the message in the currency color after the guild name.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: With Lazy Writ Crafter set to hide writ quest announcements, accepting a writ is suppressed along with later writ updates.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: Rows grow with large fonts and UI scale, and stop rearranging on every clock or FPS tick.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: Console memory readout is no longer hidden when the game reports no addon memory pool.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Gamepad character effects use the game's buff or debuff type for artificial effects, and SpellCastBuffs stand-in effects use their LuiExtended names.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Player interaction: group mount ride and dismount is offered when the target is a passenger as well as a rider. Duel, trade, tribute, and friend actions, and the related announcements, keep resolving the other player on Update 51.",
+    "",
     -- Version Header 7.2.6.3
     "|cFFA500LuiExtended Version 7.2.6.3|r",
     "",
@@ -60,9 +91,6 @@ local changelogMessages =
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Adding any |cFFFFFFOff Balance|r ability id (or the canonical name) to |cFFFFFFProminent Debuffs|r now tracks all Off Balance variants and Off Balance Immunity. Profiles that never received the default Off Balance prominent entry are seeded once on load.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: |cFFFFFFCrowd Control Immunity|r (28301 / 38117) can be tracked as a prominent debuff on targets (same target-buff promote path as Off Balance Immunity).",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Collectible unlocks from Crown Store bundles and other multi-unlocks now list each collectible by name. Optional setting to condense those into a single count message.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Items converted in Gem Extraction now use extract wording for the item and Crown Gems instead of consume, use, eat, drink, learn, or receive.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Claiming Golden Pursuit activity, milestone, and capstone rewards now prints to chat, including Crown Crates from Straight to the Crate.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player champion icon and level no longer clear when changing frame settings; they refresh immediately.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Turning off |cFFFFFFTarget - Display Title|r no longer leaves NPC or guild trader captions visible when |cFFFFFFTarget - Display AVA Rank Name|r is still on. Rank name still applies to player targets only.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Invulnerable targets (for example guards) no longer show a health percentage next to the Invulnerable label.",
