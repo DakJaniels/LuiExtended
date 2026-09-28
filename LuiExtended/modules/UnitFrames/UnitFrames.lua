@@ -1781,8 +1781,10 @@ function UnitFrames.CustomFramesSetPositions()
         if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
             local savedPos = UnitFrames.SV[UnitFrames.CustomFrames[unitTag].tlw.customPositionAttr]
             local anchors = (savedPos ~= nil and #savedPos == 2) and { TOPLEFT, TOPLEFT, savedPos[1], savedPos[2] } or default_anchors[unitTag]
+            local layoutOffsetX = LUIE.FormatUiLayoutMeasurement(anchors[3])
+            local layoutOffsetY = LUIE.FormatUiLayoutMeasurement(anchors[4])
             UnitFrames.CustomFrames[unitTag].tlw:ClearAnchors()
-            UnitFrames.CustomFrames[unitTag].tlw:SetAnchor(anchors[1], GuiRoot, anchors[2], anchors[3], anchors[4])
+            UnitFrames.CustomFrames[unitTag].tlw:SetAnchor(anchors[1], GuiRoot, anchors[2], layoutOffsetX, layoutOffsetY)
             if UnitFrames.CustomFrames[unitTag].tlw.preview.anchorLabel then
                 UnitFrames.CustomFrames[unitTag].tlw.preview.anchorLabel:SetText((savedPos ~= nil and #savedPos == 2) and zo_strformat("<<1>>, <<2>>", savedPos[1], savedPos[2]) or "default")
             end

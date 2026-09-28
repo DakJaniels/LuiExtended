@@ -995,7 +995,7 @@ local function ApplySimpleTlwPosition(container, savedX, savedY, defaultPoint, d
         if IsSnapToGridBuffsEnabled() then
             positionX, positionY = LUIE.ApplyGridSnap(positionX, positionY, "buffs")
         end
-        container:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, positionX, positionY)
+        container:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, LUIE.FormatUiLayoutMeasurement(positionX), LUIE.FormatUiLayoutMeasurement(positionY))
     else
         container:SetAnchor(defaultPoint, defaultOwner, defaultOwnerPoint, defaultOffsetX, defaultOffsetY)
     end
@@ -1022,7 +1022,7 @@ local function ApplyDualAlignmentTlwPosition(container, savedVX, savedVY, savedH
         if IsSnapToGridBuffsEnabled() then
             positionX, positionY = LUIE.ApplyGridSnap(positionX, positionY, "buffs")
         end
-        container:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, positionX, positionY)
+        container:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, LUIE.FormatUiLayoutMeasurement(positionX), LUIE.FormatUiLayoutMeasurement(positionY))
     else
         container:SetAnchor(defaultAnchor.point, defaultAnchor.owner, defaultAnchor.ownerPoint, defaultAnchor.offsetX, defaultAnchor.offsetY)
     end
@@ -1140,7 +1140,7 @@ function SpellCastBuffs.SetMovingState(state)
             if IsSnapToGridBuffsEnabled() then
                 left, top = LUIE.ApplyGridSnap(left, top, "buffs")
                 self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, LUIE.FormatUiLayoutMeasurement(left), LUIE.FormatUiLayoutMeasurement(top))
             end
             saveCallback(self, left, top)
         end)

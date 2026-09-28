@@ -223,6 +223,13 @@ function LUIE.SnapToGrid(position, gridSize)
     return position - (position % gridSize)
 end
 
+--- Layout measurement in UI units. Line and mover anchors use this so they stay in one space when custom UI scale changes.
+--- @param layoutValue number
+--- @return string
+function LUIE.FormatUiLayoutMeasurement(layoutValue)
+    return string_format("%dui", zo_round(layoutValue))
+end
+
 --- Apply grid snapping to coordinates when the matching snapToGrid_* SV is enabled.
 --- @param left number
 --- @param top number
