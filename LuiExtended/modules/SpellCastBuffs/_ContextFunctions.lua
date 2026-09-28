@@ -45,11 +45,12 @@ function SpellCastBuffs.WantsProminentDebuff(abilityId, abilityName)
 end
 
 ---
---- Off Balance and CC Immunity are special: unlike other prominent debuffs they
---- must promote on the target even when an ally applied them / when they are
---- target *buffs* (reticleover1). Returns the promoted context string, or nil
---- when the ability is not related / not opted in (caller falls back to the
---- normal DetermineContext rules).
+--- Off Balance, CC Immunity, and combat-event status effects are special: unlike
+--- other prominent debuffs they must promote on the target even when an ally
+--- applied them / when they are target *buffs* (reticleover1). Status effects
+--- also promote player2 so incoming Chill/etc. can land in Prominent Debuffs.
+--- Returns the promoted context string, or nil when the ability is not related /
+--- not opted in (caller falls back to the normal DetermineContext rules).
 --- @param context SpellCastBuffsContext
 --- @param abilityId number|nil
 --- @param abilityName string|nil
@@ -75,6 +76,12 @@ function SpellCastBuffs.ResolveProminentDebuffContext(context, abilityId, abilit
         if context == "reticleover1" or context == "reticleover2" then
             return "promd_target"
         elseif context == "player1" or context == "player2" then
+            return "promd_player"
+        end
+    elseif abilityId and SpellCastBuffs.IsCombatEventStatusEffect(abilityId) then
+        if context == "reticleover2" then
+            return "promd_target"
+        elseif context == "player2" then
             return "promd_player"
         end
     end

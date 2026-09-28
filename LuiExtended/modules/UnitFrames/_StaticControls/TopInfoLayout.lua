@@ -652,3 +652,5 @@ function FrameObject.LayoutTopInfoForFrame(self)
         FrameObject.LayoutTopInfoAvaTarget(self)
     end
 end
+
+return FrameObject

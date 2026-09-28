@@ -140,6 +140,7 @@ S.g_guildBankAnnounceGuildId = nil -- Guild id for deferred guild-bank item anno
 -- Group
 S.g_currentGroupLeaderRawName = nil     -- Tracks current Group Leader Name
 S.g_currentGroupLeaderDisplayName = nil -- Tracks current Group Leader Display Name
+S.g_lastLargeGroup = nil                -- Last EVENT_GROUP_TYPE_CHANGED classification; nil until seeded
 
 -- LFG
 S.g_currentActivityId = nil       -- current activity ID for LFG.
@@ -1013,8 +1014,15 @@ end
 --- @param questIndex integer
 --- @return string|false
 function I.rejectQuest(questIndex)
-    for itemLink, _ in pairs(WritCreater:GetSettings().skipItemQuests) do
-        if not WritCreater:GetSettings().skipItemQuests[itemLink] then
+    if not WritCreater or not WritCreater.GetSettings then
+        return false
+    end
+    local settings = WritCreater:GetSettings()
+    if not settings or not settings.skipItemQuests then
+        return false
+    end
+    for itemLink, _ in pairs(settings.skipItemQuests) do
+        if not settings.skipItemQuests[itemLink] then
             for i = 1, GetJournalQuestNumConditions(questIndex, QUEST_MAIN_STEP_INDEX) do
                 if DoesItemLinkFulfillJournalQuestCondition(itemLink, questIndex, 1, i) then
                     return itemLink
@@ -2079,6 +2087,9 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
     elseif type == "LUIE_CURRENCY_GUILD_BANK" then
         local guildLabel = ChatAnnouncements.FormatGuildLabelForChat(ChatAnnouncements.GetActiveGuildBankId()) or ""
+        if guildLabel ~= "" then
+            guildLabel = guildLabel .. "|c" .. changeColor
+        end
         formattedMessageP1 = ChatAnnouncements.FormatGuildBankContextMessage(messageChange, messageP1, guildLabel)
     else
         formattedMessageP1 = (string_format(messageChange, messageP1))
@@ -5091,6 +5102,11 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
     ChatAnnouncements.ResetMailSession()
     ChatAnnouncements.RefreshAbilityProgressionXpCache()
 
+    -- Seed once so a zone-in replay of EVENT_GROUP_TYPE_CHANGED does not announce the current size.
+    if S.g_lastLargeGroup == nil then
+        S.g_lastLargeGroup = IsUnitGrouped("player") and GetGroupSize() > STANDARD_GROUP_SIZE_THRESHOLD
+    end
+
     -- Get current trades if UI is reloaded
     -- P51 GetTradeInviteInfo: characterName, millisecondsSinceRequest, crossplayDisplayName, platformDisplayName
     local characterName, _, crossplayDisplayName = GetTradeInviteInfo()
@@ -5362,6 +5378,16 @@ end
 --- @param eventId integer
 --- @param largeGroup boolean
 function ChatAnnouncements.OnGroupTypeChanged(eventId, largeGroup)
+    -- Same classification (already large and another member joins, or a door replay) is not a reclassification.
+    if S.g_lastLargeGroup == largeGroup then
+        return
+    end
+    local hadPreviousLargeGroup = S.g_lastLargeGroup ~= nil
+    S.g_lastLargeGroup = largeGroup
+    if not hadPreviousLargeGroup then
+        return
+    end
+
     local message
     if largeGroup then
         message = GetString(SI_CHAT_ANNOUNCEMENT_IN_LARGE_GROUP)

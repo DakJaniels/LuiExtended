@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
---  Chat Announcements - suppress default CHAT_ROUTER social lines when CA owns them
+--  Chat Announcements - suppress default CHAT_ROUTER social/group lines when CA owns them
 --  Distributed under The MIT License (MIT) (see LICENSE file)
 -- -----------------------------------------------------------------------------
 
@@ -21,6 +21,7 @@ local SOCIAL_FORMATTER_EVENT_KEYS =
     [EVENT_IGNORE_ADDED] = true,
     [EVENT_IGNORE_REMOVED] = true,
     [EVENT_SOCIAL_ERROR] = true,
+    [EVENT_GROUP_TYPE_CHANGED] = true,
 }
 
 local function GetChatOutputSocialSettings()
@@ -43,6 +44,10 @@ local function ShouldShowSocialErrorInChat(error)
 end
 
 local function ShouldSuppressFriendStatusRouter()
+    return ChatAnnouncements.Enabled
+end
+
+local function ShouldSuppressGroupTypeChangedRouter()
     return ChatAnnouncements.Enabled
 end
 
@@ -82,6 +87,9 @@ local function RegisterChatRouterPreHookOnce()
             return false
         end
         if eventKey == EVENT_FRIEND_PLAYER_STATUS_CHANGED then
+            return true
+        end
+        if eventKey == EVENT_GROUP_TYPE_CHANGED then
             return true
         end
         if eventKey == EVENT_IGNORE_ADDED or eventKey == EVENT_IGNORE_REMOVED then
@@ -147,6 +155,7 @@ function ChatAnnouncements.ChainChatRouterSocialSuppressions()
     RegisterFormatterPostHookOnce()
     RegisterExternalChatFormatterCallbacksOnce()
     ChatOutput:WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatusRouter)
+    ChatOutput:WrapFormatter(EVENT_GROUP_TYPE_CHANGED, ShouldSuppressGroupTypeChangedRouter)
     ChatOutput:WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnoreRouter)
     ChatOutput:WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnoreRouter)
     ChatOutput:WrapFormatter(EVENT_SOCIAL_ERROR, ShouldSuppressSocialErrorRouter)

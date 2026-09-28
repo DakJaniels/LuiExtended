@@ -585,6 +585,10 @@ function SpellCastBuffs.Initialize(enabled)
         eventManager:RegisterForEvent(moduleName .. "Event4" .. tostring(k), EVENT_COMBAT_EVENT, SpellCastBuffs.OnCombatAddNameEvent)
         eventManager:AddFilterForEvent(moduleName .. "Event4" .. tostring(k), EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, k)
     end
+    for statusAbilityId in pairs(Effects.CombatEventStatusEffects) do
+        eventManager:RegisterForEvent(moduleName .. "Status" .. tostring(statusAbilityId), EVENT_COMBAT_EVENT, SpellCastBuffs.OnCombatEventStatus)
+        eventManager:AddFilterForEvent(moduleName .. "Status" .. tostring(statusAbilityId), EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, statusAbilityId, REGISTER_FILTER_IS_ERROR, false)
+    end
     eventManager:RegisterForEvent(moduleName, EVENT_BOSSES_CHANGED, SpellCastBuffs.AddNameOnBossEngaged)
 
     -- Stealth Events
@@ -2558,6 +2562,7 @@ end
 -- Runs on the EVENT_RETICLE_TARGET_CHANGED listener.
 -- This handler fires every time the player's reticle target changes
 function SpellCastBuffs.OnReticleTargetChanged(eventCode)
+    SpellCastBuffs.reticleCombatUnitId = nil
     SpellCastBuffs.ReloadEffects("reticleover")
 end
 
@@ -2589,26 +2594,72 @@ end
 
 -- Called by EVENT_RETICLE_TARGET_CHANGED listener - Saves active FAKE debuffs on enemies and moves them back and forth between the active container or hidden.
 function SpellCastBuffs.RestoreSavedFakeEffects()
-    -- Restore Ground Effects
-    for _, effectsList in pairs({ SpellCastBuffs.EffectsList.ground, SpellCastBuffs.EffectsList.saved }) do
-        -- local container = SpellCastBuffs.containerRouting[context]
-        for k, v in pairs(effectsList) do
-            if v.savedName ~= nil then
-                local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
-                if unitName == v.savedName then
-                    if SpellCastBuffs.EffectsList.saved[k] then
-                        SpellCastBuffs.EffectsList.ground[k] = SpellCastBuffs.EffectsList.saved[k]
-                        SpellCastBuffs.EffectsList.ground[k].iconNum = 0
-                        SpellCastBuffs.EffectsList.saved[k] = nil
-                    end
-                else
-                    if SpellCastBuffs.EffectsList.ground[k] then
-                        SpellCastBuffs.EffectsList.saved[k] = SpellCastBuffs.EffectsList.ground[k]
-                        SpellCastBuffs.EffectsList.ground[k] = nil
-                    end
+    local reticleName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
+    local reticleUnitId = SpellCastBuffs.reticleCombatUnitId
+    local lists =
+    {
+        ground = SpellCastBuffs.EffectsList.ground,
+        promd_ground = SpellCastBuffs.EffectsList.promd_ground,
+        saved = SpellCastBuffs.EffectsList.saved,
+    }
+
+    --- @param effectRow table
+    --- @return boolean
+    local function fakeMatchesReticle(effectRow)
+        if effectRow.savedUnitId and effectRow.savedUnitId ~= 0 and reticleUnitId and reticleUnitId ~= 0 then
+            return effectRow.savedUnitId == reticleUnitId
+        end
+        return effectRow.savedName ~= nil and reticleName == effectRow.savedName
+    end
+
+    --- @param effectRow table
+    --- @return string|nil
+    local function resolveFakeRestoreContext(effectRow)
+        if not fakeMatchesReticle(effectRow) then
+            return "saved"
+        end
+        if effectRow.id and SpellCastBuffs.UnitHasBuffAbilityId("reticleover", effectRow.id) then
+            return nil
+        end
+        if SpellCastBuffs.WantsProminentDebuff(effectRow.id, effectRow.name) then
+            return "promd_ground"
+        end
+        return "ground"
+    end
+
+    local pendingMoves = {}
+    for listName, effectsList in pairs(lists) do
+        for listKey, effectRow in pairs(effectsList) do
+            if effectRow.savedName ~= nil or (effectRow.savedUnitId and effectRow.savedUnitId ~= 0) then
+                local destContext = resolveFakeRestoreContext(effectRow)
+                if destContext ~= listName then
+                    pendingMoves[#pendingMoves + 1] =
+                    {
+                        listKey = listKey,
+                        fromList = listName,
+                        destContext = destContext,
+                        effectRow = effectRow,
+                    }
                 end
             end
         end
+    end
+
+    for i = 1, #pendingMoves do
+        local move = pendingMoves[i]
+        lists[move.fromList][move.listKey] = nil
+        if move.destContext then
+            move.effectRow.iconNum = 0
+            if move.destContext == "promd_ground" then
+                move.effectRow.target = "prominent"
+            else
+                move.effectRow.target = "reticleover"
+            end
+            lists[move.destContext][move.listKey] = move.effectRow
+        end
+    end
+    if #pendingMoves > 0 then
+        SpellCastBuffs.MarkDisplayDirty()
     end
 end
 
