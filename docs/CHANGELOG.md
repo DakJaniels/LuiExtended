@@ -1,5 +1,35 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.4
+
+### New
+
+- SpellCastBuffs: Chill, Concussion, Overcharged, Diseased, and Sundered show as short debuffs on you and your current target when the game does not send a normal aura.
+- SpellCastBuffs: Recently Revived shows as Resurrection Immunity on the player when **Show Resurrection Immunity (Player only)** is on.
+- Chat Announcements: Collectible unlocks from Crown Store bundles and other multi-unlocks now list each collectible by name. Optional setting to condense those into a single count message.
+- Chat Announcements: Items converted in Gem Extraction now use extract wording for the item and Crown Gems instead of consume, use, eat, drink, learn, or receive. **Extract All** reports the full stack and total Crown Gems in one message.
+- Chat Announcements: Claiming Golden Pursuit activity, milestone, and capstone rewards now prints to chat, including Crown Crates from Straight to the Crate.
+
+### Changes
+
+- Update 51 buff text: Major/Minor Brutality is Weapon and Spell Damage; Major/Minor Savagery is Weapon and Spell Critical. The Warrior Mundus is Weapon and Spell Damage. The Apprentice Mundus is Experience and Inspiration.
+- Settings: **Unlock Default UI Elements** is gone. Those frames move in the game HUD Editor. LuiExtended adds Battleground Score, Objective and Resurrection Meter, Player Interaction Prompt, Experience/Champion Bar, Interact Text, Ram, and Tutorials to that editor.
+- Addon list title is plain Lui Extended.
+
+### Fixed
+
+- SpellCastBuffs: Core of Flame, Soul of Flame, Heart of Flame, and the Engulfing Dragonfire channel no longer sort as toggles in prominent buffs and debuffs, so they follow remaining duration. Stuhn's Favor for prominent tracking is 141916 or 135874; 14196 is Kagouti Charge (Rush).
+- SpellCastBuffs: A buff countdown no longer stays on screen as a negative timer after the effect ends.
+- Unit Frames: Custom group and raid frames no longer show a combat glow on disconnected members.
+- Unit Frames: The roll-dodge marker on the custom player stamina bar uses the game's current dodge cost.
+- Chat Announcements: Large-group and small-group messages no longer repeat for the same size, for another member joining a large group, or when zoning replays the change. The game's own group-size chat line is hidden while Chat Announcements is on.
+- Chat Announcements: Guild bank deposit and withdraw lines keep the rest of the message in the currency color after the guild name.
+- Chat Announcements: With Lazy Writ Crafter set to hide writ quest announcements, accepting a writ is suppressed along with later writ updates.
+- Info Panel: Rows grow with large fonts and UI scale, and stop rearranging on every clock or FPS tick.
+- Info Panel: Console memory readout is no longer hidden when the game reports no addon memory pool.
+- Gamepad character effects use the game's buff or debuff type for artificial effects, and SpellCastBuffs stand-in effects use their LuiExtended names.
+- Player interaction: group mount ride and dismount is offered when the target is a passenger as well as a rider. Duel, trade, tribute, and friend actions, and the related announcements, keep resolving the other player on Update 51.
+
 ## Version 7.2.6.3
 
 ### New
