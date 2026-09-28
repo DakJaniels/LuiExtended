@@ -22,6 +22,7 @@
 - SpellCastBuffs: A buff countdown no longer stays on screen as a negative timer after the effect ends.
 - Unit Frames: Custom group and raid frames no longer show a combat glow on disconnected members.
 - Unit Frames: The roll-dodge marker on the custom player stamina bar uses the game's current dodge cost.
+- Alignment grid: Lines stay 1 pixel thick and stay lined up when custom UI scale changes.
 - Chat Announcements: Large-group and small-group messages no longer repeat for the same size, for another member joining a large group, or when zoning replays the change. The game's own group-size chat line is hidden while Chat Announcements is on.
 - Chat Announcements: Guild bank deposit and withdraw lines keep the rest of the message in the currency color after the guild name.
 - Chat Announcements: With Lazy Writ Crafter set to hide writ quest announcements, accepting a writ is suppressed along with later writ updates.
