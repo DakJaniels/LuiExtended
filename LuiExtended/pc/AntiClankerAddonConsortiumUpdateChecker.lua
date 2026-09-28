@@ -1,28 +1,28 @@
 local NAME = "AntiClankerAddonConsortiumUpdateChecker"
-local VERSION = 17
+local VERSION = 20
 
 if type(_G[NAME]) == "number" and _G[NAME] >= VERSION then return end
 _G[NAME] = VERSION
 
 local KNOWN_VERSIONS = {
     -- Kyzeragon
-    ["CrutchAlerts"]          = 22600,
-    ["KyzderpsDerps"]         = 1530,
+    ["CrutchAlerts"]          = 22700,
+    ["KyzderpsDerps"]         = 1540,
 
     -- code65536
-    ["CharacterKnowledge"]    = 301020,
+    ["CharacterKnowledge"]    = 301030,
     ["CollectiblesTracker"]   = 306000,
-    ["CombatAlerts"]          = 206050,
+    ["CombatAlerts"]          = 206060,
     ["GroupBuffPanels"]       = 203030,
     ["ItemBrowser"]           = 407010,
-    ["LootLog"]               = 409060,
+    ["LootLog"]               = 409070,
     ["Raidificator"]          = 407030,
 
     -- M0R_Gaming
     ["M0RMarkers"]            = 223,
 
     -- DakJaniels
-    ["LuiExtended"]           = 7263,
+    ["LuiExtended"]           = 7264,
 
     -- m00nyONE
     ["LibGroupCombatStats"]   = 20260726,
@@ -145,7 +145,7 @@ end
 local function CheckVersions()
     local am = GetAddOnManager()
 
-    local haveAnyNotified = false
+    local messageQueue = nil
     for i = 1, am:GetNumAddOns() do
         local addonName, addonTitle, _, _, addonEnabled = am:GetAddOnInfo(i)
 
@@ -164,8 +164,8 @@ local function CheckVersions()
                 end
 
                 if (timesNotified < 3) then
-                    CHAT_ROUTER:AddSystemMessage(zo_strformat(MESSAGE, addonTitle, installedVersion, expectedVersion))
-                    haveAnyNotified = true
+                    messageQueue = messageQueue or {}
+                    table.insert(messageQueue, zo_strformat(MESSAGE, addonTitle, installedVersion, expectedVersion))
 
                     -- Save number of times this version has been notified
                     sv = GetSV(addonName, true)
@@ -176,10 +176,15 @@ local function CheckVersions()
         end
     end
 
-    if (haveAnyNotified) then
+    if (messageQueue) then
         if (CreateSettingsMenu()) then -- menu creation can fail if no LAM
-            CHAT_ROUTER:AddSystemMessage("[LibForgottenAddons] For more information, |c20aaf5|H0:ACACUC:1|h[open the settings]|h|r.")
+            table.insert(messageQueue, "[LibForgottenAddons] For more information, |c20aaf5|H0:ACACUC:1|h[open the settings]|h|r.")
         end
+        zo_callLater(function()
+            for _, message in ipairs(messageQueue) do
+                CHAT_ROUTER:AddSystemMessage(message)
+            end
+        end, 6000)
     end
 end
 
@@ -191,7 +196,7 @@ EVENT_MANAGER:UnregisterForEvent(NAME, EVENT_PLAYER_ACTIVATED) -- In case we are
 
 EVENT_MANAGER:RegisterForEvent(NAME, EVENT_PLAYER_ACTIVATED, function()
     if (GetEnablementState()) then
-        zo_callLater(CheckVersions, 6000)
+        CheckVersions()
     else
         SLASH_COMMANDS["/libforgottenaddonsenable"] = function()
             CHAT_ROUTER:AddSystemMessage("[LibForgottenAddons] Enabled. This will take effect on the next reload.")
@@ -199,6 +204,7 @@ EVENT_MANAGER:RegisterForEvent(NAME, EVENT_PLAYER_ACTIVATED, function()
         end
     end
 
+    -- Always register the link handler because there can be an error with unhandled links, e.g. if clicking an old link in pChat history
     local linkHandler = function(_, _, _, _, linkType)
         if (linkType == "ACACUC") then
             if (_G[PANEL_ID] or CreateSettingsMenu()) then
@@ -209,8 +215,6 @@ EVENT_MANAGER:RegisterForEvent(NAME, EVENT_PLAYER_ACTIVATED, function()
             return true
         end
     end
-
-    -- Always register the link handler because there can be an error with unhandled links, e.g. if clicking an old link in pChat history
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, linkHandler)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, linkHandler)
 end, true)
