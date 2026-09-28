@@ -120,7 +120,7 @@ function UnitFrames.CustomFramesSetMovingState(state)
         if state then
             local left, top = tlw:GetLeft(), tlw:GetTop()
             tlw:ClearAnchors()
-            tlw:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+            tlw:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, LUIE.FormatUiLayoutMeasurement(left), LUIE.FormatUiLayoutMeasurement(top))
             tlw:SetHidden(false)
         elseif not CustomFramesIsHudGameplaySceneActive() then
             -- Unlock forces visible on GuiRoot; hide again when not on a HUD gameplay scene (e.g. gameMenuInGame).
@@ -134,7 +134,10 @@ function UnitFrames.CustomFramesSetMovingState(state)
             local left, top = self:GetLeft(), self:GetTop()
             left, top = LUIE.ApplyGridSnap(left, top, "unitFrames")
             self:ClearAnchors()
-            self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+            self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, LUIE.FormatUiLayoutMeasurement(left), LUIE.FormatUiLayoutMeasurement(top))
+            if self.preview and self.preview.anchorLabel then
+                self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", left, top))
+            end
             UnitFrames.SV[self.customPositionAttr] = { left, top }
         end
         tlw:SetHandler("OnMoveStop", OnMoveStop)

@@ -30,14 +30,14 @@
     <Line name="LUIE_Grid_Overlay_Line_V"
           virtual="true"
           hidden="true"
-          thickness="1"
+          thickness="1px"
           layer="BACKGROUND"
           level="0"
           tier="LOW" />
     <Line name="LUIE_Grid_Overlay_Line_H"
           virtual="true"
           hidden="true"
-          thickness="1"
+          thickness="1px"
           layer="BACKGROUND"
           level="0"
           tier="LOW" />

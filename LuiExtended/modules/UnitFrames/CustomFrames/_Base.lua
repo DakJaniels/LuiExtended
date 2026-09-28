@@ -417,7 +417,14 @@ function LUIE_CustomFrameData_Base:SetupMovementAndPreview(moduleName, eventMana
 
     local function tlwOnMoveStop(tlwSelf)
         eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
-        UnitFrames.SV[tlwSelf.customPositionAttr] = { tlwSelf:GetLeft(), tlwSelf:GetTop() }
+        local left, top = tlwSelf:GetLeft(), tlwSelf:GetTop()
+        left, top = LUIE.ApplyGridSnap(left, top, "unitFrames")
+        tlwSelf:ClearAnchors()
+        tlwSelf:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, LUIE.FormatUiLayoutMeasurement(left), LUIE.FormatUiLayoutMeasurement(top))
+        if tlwSelf.preview and tlwSelf.preview.anchorLabel then
+            tlwSelf.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", left, top))
+        end
+        UnitFrames.SV[tlwSelf.customPositionAttr] = { left, top }
     end
 
     self.tlw:SetHandler("OnMoveStart", tlwOnMoveStart)

@@ -30,6 +30,7 @@ local SCENE_NAMES = { "hud", "hudui", "gameMenuInGame", "siegeBar", "siegeBarUI"
 -- -----------------------------------------------------------------------------
 
 local windowManager = GetWindowManager()
+local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 local zo_floor = zo_floor
 local zo_round = zo_round
@@ -44,7 +45,8 @@ local function ApplyLineStyle(line)
     line:SetDrawTier(DT_LOW)
     line:SetDrawLevel(2)
     line:SetColor(GRID_COLOR.r, GRID_COLOR.g, GRID_COLOR.b, GRID_COLOR.a)
-    line:SetThickness(1)
+    line:SetThickness("1px")
+    line:SetPixelRoundingEnabled(true)
 end
 
 -- -----------------------------------------------------------------------------
@@ -149,26 +151,30 @@ function GridOverlay:UpdateLines(gridSize)
     if not self.verticalPool or not self.horizontalPool then
         return
     end
-    local rootWidth = GuiRoot:GetWidth() or 0
-    local rootHeight = GuiRoot:GetHeight() or 0
+    local canvasWidth, canvasHeight = self.control:GetDimensions()
+    canvasWidth = canvasWidth or 0
+    canvasHeight = canvasHeight or 0
+    local layoutOffsetZero = LUIE.FormatUiLayoutMeasurement(0)
 
-    local verticalLineCount = zo_floor(rootWidth / gridSize)
+    local verticalLineCount = zo_floor(canvasWidth / gridSize)
     for lineIndex = 0, verticalLineCount do
         local offsetX = zo_round(lineIndex * gridSize)
+        local layoutOffsetX = LUIE.FormatUiLayoutMeasurement(offsetX)
         local line = self:AcquireLine(self.verticalPool, lineIndex)
         line:ClearAnchors()
-        line:SetAnchor(TOPLEFT, self.control, TOPLEFT, offsetX, 0)
-        line:SetAnchor(BOTTOMLEFT, self.control, BOTTOMLEFT, offsetX, 0)
+        line:SetAnchor(TOPLEFT, self.control, TOPLEFT, layoutOffsetX, layoutOffsetZero)
+        line:SetAnchor(BOTTOMLEFT, self.control, BOTTOMLEFT, layoutOffsetX, layoutOffsetZero)
     end
     self:ReleaseUnused(self.verticalPool, verticalLineCount)
 
-    local horizontalLineCount = zo_floor(rootHeight / gridSize)
+    local horizontalLineCount = zo_floor(canvasHeight / gridSize)
     for lineIndex = 0, horizontalLineCount do
         local offsetY = zo_round(lineIndex * gridSize)
+        local layoutOffsetY = LUIE.FormatUiLayoutMeasurement(offsetY)
         local line = self:AcquireLine(self.horizontalPool, lineIndex)
         line:ClearAnchors()
-        line:SetAnchor(TOPLEFT, self.control, TOPLEFT, 0, offsetY)
-        line:SetAnchor(TOPRIGHT, self.control, TOPRIGHT, 0, offsetY)
+        line:SetAnchor(TOPLEFT, self.control, TOPLEFT, layoutOffsetZero, layoutOffsetY)
+        line:SetAnchor(TOPRIGHT, self.control, TOPRIGHT, layoutOffsetZero, layoutOffsetY)
     end
     self:ReleaseUnused(self.horizontalPool, horizontalLineCount)
 end
@@ -303,3 +309,130 @@ function GridOverlayManager.HideAll()
 end
 
 LUIE.GridOverlay = GridOverlayManager
+
+-- Saved preview offsets are UI units on the canvas that was active when they were stored.
+-- Custom scale changes how many UI units fit on screen, so the same 1620,200 is a different point after the toggle.
+local CANVAS_RATIO_EPSILON = 0.001
+local UI_SCALE_REFRESH_DELAY_MS = 50
+local uiScaleRefreshGeneration = 0
+local cachedCanvasWidth = 0
+local cachedCanvasHeight = 0
+
+local BUFF_PREVIEW_OFFSET_KEYS =
+{
+    { "playerbOffsetX", "playerbOffsetY" },
+    { "playerdOffsetX", "playerdOffsetY" },
+    { "targetbOffsetX", "targetbOffsetY" },
+    { "targetdOffsetX", "targetdOffsetY" },
+    { "player_longOffsetX", "player_longOffsetY" },
+    { "prominentbVOffsetX", "prominentbVOffsetY" },
+    { "prominentbHOffsetX", "prominentbHOffsetY" },
+    { "prominentdVOffsetX", "prominentdVOffsetY" },
+    { "prominentdHOffsetX", "prominentdHOffsetY" },
+}
+
+local function TranslatePreviewCoordinate(coordinate, canvasRatio)
+    return zo_round(coordinate * canvasRatio)
+end
+
+local function TranslateUnitFramePreviewPositions(canvasRatioX, canvasRatioY)
+    local unitFrames = LUIE.UnitFrames
+    local customFramesShared = LUIE.CustomFramesShared
+    if not unitFrames or not unitFrames.SV or not unitFrames.CustomFrames or not customFramesShared then
+        return
+    end
+    local registryKeys = customFramesShared.MOVER_ANCHOR_REGISTRY_KEYS
+    if not registryKeys then
+        return
+    end
+    for keyIndex = 1, #registryKeys do
+        local unitTag = registryKeys[keyIndex]
+        local customFrame = unitFrames.CustomFrames[unitTag]
+        if customFrame and customFrame.tlw and customFrame.tlw.customPositionAttr then
+            local savedPosition = unitFrames.SV[customFrame.tlw.customPositionAttr]
+            if type(savedPosition) == "table" and savedPosition[1] and savedPosition[2] then
+                local translatedLeft = TranslatePreviewCoordinate(savedPosition[1], canvasRatioX)
+                local translatedTop = TranslatePreviewCoordinate(savedPosition[2], canvasRatioY)
+                translatedLeft, translatedTop = LUIE.ApplyGridSnap(translatedLeft, translatedTop, "unitFrames")
+                unitFrames.SV[customFrame.tlw.customPositionAttr] = { translatedLeft, translatedTop }
+            end
+        end
+    end
+end
+
+local function TranslateBuffPreviewPositions(canvasRatioX, canvasRatioY)
+    local spellCastBuffs = LUIE.SpellCastBuffs
+    if not spellCastBuffs or not spellCastBuffs.SV then
+        return
+    end
+    local savedVariables = spellCastBuffs.SV
+    for keyIndex = 1, #BUFF_PREVIEW_OFFSET_KEYS do
+        local offsetKeys = BUFF_PREVIEW_OFFSET_KEYS[keyIndex]
+        local savedOffsetX = savedVariables[offsetKeys[1]]
+        local savedOffsetY = savedVariables[offsetKeys[2]]
+        if type(savedOffsetX) == "number" and type(savedOffsetY) == "number" then
+            local translatedLeft = TranslatePreviewCoordinate(savedOffsetX, canvasRatioX)
+            local translatedTop = TranslatePreviewCoordinate(savedOffsetY, canvasRatioY)
+            translatedLeft, translatedTop = LUIE.ApplyGridSnap(translatedLeft, translatedTop, "buffs")
+            savedVariables[offsetKeys[1]] = translatedLeft
+            savedVariables[offsetKeys[2]] = translatedTop
+        end
+    end
+end
+
+local function ApplyTranslatedPreviewAnchors()
+    if GridOverlayManager.sharedOverlay then
+        ApplyRequesters(GridOverlayManager)
+    end
+    local unitFrames = LUIE.UnitFrames
+    if unitFrames and unitFrames.SV and unitFrames.CustomFrames and unitFrames.CustomFramesSetPositions then
+        unitFrames.CustomFramesSetPositions()
+    end
+    local spellCastBuffs = LUIE.SpellCastBuffs
+    if spellCastBuffs and spellCastBuffs.SV and spellCastBuffs.BuffContainers and spellCastBuffs.SetTlwPosition then
+        spellCastBuffs.SetTlwPosition()
+    end
+end
+
+--- Keep a preview's fraction of the screen when custom scale changes the UI canvas, then snap in that new space.
+local function TranslatePreviewPositionsForCanvasChange()
+    local canvasWidth, canvasHeight = GuiRoot:GetDimensions()
+    if not canvasWidth or canvasWidth <= 0 or not canvasHeight or canvasHeight <= 0 then
+        return
+    end
+    if cachedCanvasWidth > 0 and cachedCanvasHeight > 0 then
+        local canvasRatioX = canvasWidth / cachedCanvasWidth
+        local canvasRatioY = canvasHeight / cachedCanvasHeight
+        if zo_abs(canvasRatioX - 1) > CANVAS_RATIO_EPSILON or zo_abs(canvasRatioY - 1) > CANVAS_RATIO_EPSILON then
+            TranslateUnitFramePreviewPositions(canvasRatioX, canvasRatioY)
+            TranslateBuffPreviewPositions(canvasRatioX, canvasRatioY)
+        end
+    end
+    cachedCanvasWidth = canvasWidth
+    cachedCanvasHeight = canvasHeight
+    ApplyTranslatedPreviewAnchors()
+end
+
+local function ScheduleTranslatePreviewPositionsForCanvasChange()
+    uiScaleRefreshGeneration = uiScaleRefreshGeneration + 1
+    local scheduledGeneration = uiScaleRefreshGeneration
+    zo_callLater(function ()
+        if scheduledGeneration ~= uiScaleRefreshGeneration then
+            return
+        end
+        TranslatePreviewPositionsForCanvasChange()
+    end, UI_SCALE_REFRESH_DELAY_MS)
+end
+
+local GRID_OVERLAY_UI_SCALE_EVENT = "LUIE_GridOverlay_UIScale"
+eventManager:RegisterForEvent(GRID_OVERLAY_UI_SCALE_EVENT, EVENT_INTERFACE_SETTING_CHANGED, function (_, settingSystemType, settingId)
+    if settingSystemType ~= SETTING_TYPE_UI then
+        return
+    end
+    if settingId == UI_SETTING_USE_CUSTOM_SCALE or settingId == UI_SETTING_CUSTOM_SCALE then
+        ScheduleTranslatePreviewPositionsForCanvasChange()
+    end
+end)
+eventManager:RegisterForEvent(GRID_OVERLAY_UI_SCALE_EVENT, EVENT_SCREEN_RESIZED, function ()
+    TranslatePreviewPositionsForCanvasChange()
+end)
