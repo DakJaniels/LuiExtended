@@ -281,7 +281,7 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
         UnitFrames.UpdateAttribute(unitTag, powerType, defaultPowerEntry, powerValue, powerEffectiveMax, false, nil)
     end
 
-    if customFrame and customPowerEntry and not skipCustomPowerUpdate then
+    if customFrame and customPowerEntry and not skipCustomPowerUpdate and not customFrame.libUnit then
         UnitFrames.UpdateCustomFramePower(unitTag, powerType, powerValue, powerMax, powerEffectiveMax, false, nil)
     end
 

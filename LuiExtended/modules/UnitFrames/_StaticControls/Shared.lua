@@ -15,6 +15,14 @@ local TARGET_OVERLAND_ICON_SIZE = 23
 --- @class LUIE_CustomFrameObject
 local FrameObject = LUIE_CustomFrameObject
 
+local function GetFrameElement(frame, elementName)
+    local unit = frame.libUnit
+    if not unit then
+        return nil
+    end
+    return unit:GetElement(elementName)
+end
+
 ---
 --- @param iconPath string
 --- @param text string
@@ -215,7 +223,46 @@ end
 
 --- @param self LUIE_CustomFrameObject
 --- @return number|nil
+function FrameObject.ResolveOverlandDifficultyForFrame(self, frameCategory)
+    local unitTypeElement = GetFrameElement(self, "UnitType")
+    if not unitTypeElement then
+        local overlandUnitTag = FrameObject.ResolveOverlandGameUnitTag(self)
+        return FrameObject.ResolveOverlandDifficultyForUnitTag(overlandUnitTag, frameCategory)
+    end
+    if not IsOverlandDifficultyEnabledForCategory(frameCategory) then
+        return nil
+    end
+    local reactionElement = GetFrameElement(self, "Reaction")
+    local isAlly = reactionElement and reactionElement.reaction == UNIT_REACTION_PLAYER_ALLY
+    local difficulty
+    if frameCategory == "target" and UnitFrames.SV.TargetMonsterOverlandDifficulty then
+        if not unitTypeElement.isMonster or not unitTypeElement.isAttackable then
+            return nil
+        end
+        difficulty = unitTypeElement.playerOverlandDifficulty
+    elseif unitTypeElement.isPlayer or isAlly then
+        difficulty = unitTypeElement.unitOverlandDifficulty
+    elseif frameCategory == "target" then
+        if not unitTypeElement.isMonster or not unitTypeElement.isAttackable then
+            return nil
+        end
+        difficulty = unitTypeElement.playerOverlandDifficulty
+    elseif frameCategory == "group" or frameCategory == "player" then
+        if unitTypeElement.isPlayer or isAlly then
+            difficulty = unitTypeElement.unitOverlandDifficulty
+        end
+    end
+    if difficulty ~= nil and difficulty > OVERLAND_DIFFICULTY_TYPE_BASEGAME then
+        return difficulty
+    end
+    return nil
+end
+
 function FrameObject.ResolveTopInfoOverlandDifficulty(self)
+    if self.libUnit then
+        local frameCategory = FrameObject.GetStaticControlDisplayCategory(self)
+        return FrameObject.ResolveOverlandDifficultyForFrame(self, frameCategory)
+    end
     local overlandUnitTag = FrameObject.ResolveOverlandGameUnitTag(self)
     if overlandUnitTag == nil then
         return nil
@@ -250,7 +297,12 @@ function UnitFrames.ApplyOverlandDifficultyNameIcon(unitTag, nameText, frameCate
 end
 
 function FrameObject:ShouldShowVeterancyRankOnFrame()
-    if not self.isPlayer or not IsVeterancySeasonActive() or not IsInVeterancyProgressionZone() then
+    local levelElement = GetFrameElement(self, "Level")
+    if levelElement then
+        if not levelElement.shouldShowVeterancyInfo then
+            return false
+        end
+    elseif not self.isPlayer or not IsVeterancySeasonActive() or not IsInVeterancyProgressionZone() then
         return false
     end
     local frameCategory = FrameObject.GetStaticControlDisplayCategory(self)
@@ -304,6 +356,16 @@ function UnitFrames.ScheduleReticleoverOverlandStaticRefresh()
 end
 
 function FrameObject:ApplyStaticControlUnitFields()
+    local unitTypeElement = GetFrameElement(self, "UnitType")
+    local levelElement = GetFrameElement(self, "Level")
+    local championElement = GetFrameElement(self, "ChampionPoints")
+    if unitTypeElement then
+        self.isPlayer = unitTypeElement.isPlayer
+        self.isChampion = levelElement and levelElement.isChampion
+        self.isLevelCap = championElement and championElement.championPoints == UnitFrames.MaxChampionPoint
+        self.avaRankValue = unitTypeElement.avaRank
+        return
+    end
     self.isPlayer = IsUnitPlayer(self.unitTag)
     self.isChampion = IsUnitChampion(self.unitTag)
     self.isLevelCap = (GetUnitChampionPoints(self.unitTag) == UnitFrames.MaxChampionPoint)
@@ -324,6 +386,24 @@ end
 --- @param displayOption integer
 --- @return string
 function FrameObject:BuildBaseStaticControlNameText(displayOption)
+    local nameElement = GetFrameElement(self, "Name")
+    if nameElement then
+        if nameElement.isPendingSummon and nameElement.formattedUnitName then
+            if nameElement.summoningStatusText and nameElement.summoningStatusText ~= "" then
+                return nameElement.formattedUnitName .. " " .. nameElement.summoningStatusText
+            end
+            return nameElement.formattedUnitName
+        end
+        if self.isPlayer then
+            if displayOption == 3 then
+                return (nameElement.unitName or "") .. " " .. (nameElement.displayName or "")
+            elseif displayOption == 1 then
+                return nameElement.displayName or ""
+            end
+            return nameElement.unitName or ""
+        end
+        return nameElement.formattedUnitName or nameElement.unitName or ""
+    end
     if self.isPlayer then
         if displayOption == 3 then
             return GetUnitName(self.unitTag) .. " " .. GetUnitDisplayName(self.unitTag)
@@ -342,7 +422,8 @@ function FrameObject:ApplyStaticControlTargetMarkerToName(nameText, frameCategor
     if not UnitFrames.SV.CustomTargetMarker then
         return nameText
     end
-    local targetMarkerType = GetUnitTargetMarkerType(self.unitTag)
+    local nameElement = GetFrameElement(self, "Name")
+    local targetMarkerType = nameElement and nameElement.targetMarkerType or GetUnitTargetMarkerType(self.unitTag)
     if targetMarkerType == TARGET_MARKER_TYPE_NONE then
         return nameText
     end
@@ -375,6 +456,17 @@ function FrameObject:ApplyStaticControlOverlandToName(nameText, frameCategory)
     if not applyOverlandToThisName then
         return nameText
     end
+    if self.libUnit then
+        local difficulty = FrameObject.ResolveOverlandDifficultyForFrame(self, frameCategory)
+        if difficulty == nil then
+            return nameText
+        end
+        local iconPath = FrameObject.GetOverlandChallengeDifficultyIconPath(difficulty)
+        if iconPath then
+            return UnitFrames.FormatNameWithOverlandDifficultyIcon(iconPath, nameText, frameCategory)
+        end
+        return nameText
+    end
     local overlandUnitTag = FrameObject.ResolveOverlandGameUnitTag(self)
     if overlandUnitTag then
         return UnitFrames.ApplyOverlandDifficultyNameIcon(overlandUnitTag, nameText, frameCategory)
@@ -386,7 +478,8 @@ function FrameObject:UpdateStaticControlRoleIcon()
     if self.roleIcon == nil then
         return
     end
-    local role = GetGroupMemberSelectedRole(self.unitTag)
+    local roleElement = GetFrameElement(self, "Role")
+    local role = roleElement and roleElement.role or GetGroupMemberSelectedRole(self.unitTag)
     local unitRole = LUIE.GetRoleIcon(role)
     self.roleIcon:SetTexture(unitRole)
 end
@@ -395,7 +488,11 @@ function FrameObject:UpdateStaticControlDifficultyStars()
     if self.star1 == nil or self.star2 == nil or self.star3 == nil then
         return
     end
-    local unitDifficulty = GetUnitDifficulty(self.unitTag)
+    local unitTypeElement = GetFrameElement(self, "UnitType")
+    local unitDifficulty = unitTypeElement and unitTypeElement.unitDifficulty or GetUnitDifficulty(self.unitTag)
+    if not unitDifficulty then
+        unitDifficulty = 0
+    end
     self.star1:SetHidden(unitDifficulty < 2)
     self.star2:SetHidden(unitDifficulty < 3)
     self.star3:SetHidden(unitDifficulty < 4)
@@ -405,10 +502,31 @@ function FrameObject:UpdateStaticControlClassIcon()
     if self.classIcon == nil then
         return
     end
-    local unitDifficulty = GetUnitDifficulty(self.unitTag)
-    local classIcon = LUIE.GetClassIcon(GetUnitClassId(self.unitTag))
-    local isMonsterUnit = IsUnitMonster(self.unitTag)
-    local showMonsterClassIcon = not self.isPlayer and UnitFrames.SV.TargetHighlightMonsterUnits and isMonsterUnit and IsUnitAttackable(self.unitTag)
+    local unitTypeElement = GetFrameElement(self, "UnitType")
+    local classElement = GetFrameElement(self, "Class")
+    local unitDifficulty
+    local classId
+    local isMonsterUnit
+    local isAttackable
+    if unitTypeElement then
+        unitDifficulty = unitTypeElement.unitDifficulty
+        isMonsterUnit = unitTypeElement.isMonster
+        isAttackable = unitTypeElement.isAttackable
+    else
+        unitDifficulty = GetUnitDifficulty(self.unitTag)
+        isMonsterUnit = IsUnitMonster(self.unitTag)
+        isAttackable = IsUnitAttackable(self.unitTag)
+    end
+    if classElement then
+        classId = classElement.classId
+    else
+        classId = GetUnitClassId(self.unitTag)
+    end
+    if not unitDifficulty then
+        unitDifficulty = 0
+    end
+    local classIcon = LUIE.GetClassIcon(classId)
+    local showMonsterClassIcon = not self.isPlayer and UnitFrames.SV.TargetHighlightMonsterUnits and isMonsterUnit and isAttackable
     local showClass = (self.isPlayer and classIcon ~= nil) or (unitDifficulty > 1) or showMonsterClassIcon
     local eliteIconPath
     if ZO_IsConsoleOrGameCoreUI() then
@@ -434,8 +552,16 @@ function FrameObject:UpdateStaticControlClassName()
     if not self.className then
         return
     end
-    local classId = GetUnitClassId(self.unitTag)
-    local className = zo_strformat(GetString(SI_CLASS_NAME), GetClassName(GENDER_MALE, classId))
+    local classElement = GetFrameElement(self, "Class")
+    local classId
+    local className
+    if classElement then
+        classId = classElement.classId
+        className = classElement.className
+    else
+        classId = GetUnitClassId(self.unitTag)
+        className = zo_strformat(GetString(SI_CLASS_NAME), GetClassName(GENDER_MALE, classId))
+    end
     local showClass = self.isPlayer and className ~= nil and UnitFrames.SV.TargetEnableClass
     if showClass then
         local classNameText = StringOnlyGSUB(className, "%^%a+", "")
@@ -451,8 +577,10 @@ end
 --- LUIE guild check by unit tag (not the ESO `IsGuildMate` display-name API).
 --- @param unitTag string
 --- @return boolean
-local function IsGuildMateUnitTag(unitTag)
-    local displayName = GetUnitDisplayName(unitTag)
+local function IsGuildMateUnitTag(unitTag, displayName)
+    if not displayName then
+        displayName = GetUnitDisplayName(unitTag)
+    end
     if displayName == UnitFrames.playerDisplayName then
         return false
     end
@@ -492,9 +620,18 @@ function FrameObject:UpdateStaticControlFriendIcon()
             return
         end
     end
-    local isIgnored = self.isPlayer and IsUnitIgnored(self.unitTag)
-    local isFriend = self.isPlayer and IsUnitFriend(self.unitTag)
-    local isGuild = self.isPlayer and not isFriend and not isIgnored and IsGuildMateUnitTag(self.unitTag)
+    local unitTypeElement = GetFrameElement(self, "UnitType")
+    local nameElement = GetFrameElement(self, "Name")
+    local isIgnored
+    local isFriend
+    if unitTypeElement then
+        isIgnored = self.isPlayer and unitTypeElement.isIgnored
+        isFriend = self.isPlayer and unitTypeElement.isFriend
+    else
+        isIgnored = self.isPlayer and IsUnitIgnored(self.unitTag)
+        isFriend = self.isPlayer and IsUnitFriend(self.unitTag)
+    end
+    local isGuild = self.isPlayer and not isFriend and not isIgnored and IsGuildMateUnitTag(self.unitTag, nameElement and nameElement.displayName)
     local ignoredIconPath
     if ZO_IsConsoleOrGameCoreUI() then
         ignoredIconPath = [[EsoUI/Art/Contacts/tabIcon_ignored_up.dds]]
@@ -562,8 +699,10 @@ function FrameObject:UpdateStaticControlLevelRow()
         end
         local iconPath
         local levelText
+        local levelElement = GetFrameElement(self, "Level")
+        local championElement = GetFrameElement(self, "ChampionPoints")
         if shouldShowVeterancyInfo then
-            local veterancyRank = GetUnitVeterancyRank(self.unitTag)
+            local veterancyRank = levelElement and levelElement.veterancyRank or GetUnitVeterancyRank(self.unitTag)
             if GetVeterancyRankTitle and SI_VETERANCY_RANK_AND_TITLE_FORMATTER then
                 local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
                 levelText = zo_strformat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, veterancyRank, GetVeterancyRankTitle(veterancyRank, seasonId))
@@ -580,14 +719,16 @@ function FrameObject:UpdateStaticControlLevelRow()
             else
                 iconPath = ZO_GetChampionPointsIconSmall()
             end
-            levelText = tostring(GetUnitChampionPoints(self.unitTag))
+            local championPoints = championElement and championElement.championPoints or GetUnitChampionPoints(self.unitTag)
+            levelText = tostring(championPoints)
         else
             if IsInGamepadPreferredMode() then
                 iconPath = ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
             else
                 iconPath = ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
             end
-            levelText = tostring(GetUnitLevel(self.unitTag))
+            local unitLevel = levelElement and levelElement.level or GetUnitLevel(self.unitTag)
+            levelText = tostring(unitLevel)
         end
         if iconPath then
             self.levelIcon:SetTexture(iconPath)
@@ -610,12 +751,20 @@ end
 --- @return string|nil savedTitle empty string when title cleared
 function FrameObject:UpdateStaticControlTitleAndAva()
     local savedTitle
+    local nameElement = GetFrameElement(self, "Name")
+    local raceElement = GetFrameElement(self, "Race")
+    local unitTypeElement = GetFrameElement(self, "UnitType")
     if self.title ~= nil then
         local title
         local ava = ""
         if self.isPlayer then
-            title = GetUnitTitle(self.unitTag)
-            ava = GetAvARankName(GetUnitGender(self.unitTag), self.avaRankValue)
+            if nameElement then
+                title = nameElement.title
+            else
+                title = GetUnitTitle(self.unitTag)
+            end
+            local gender = raceElement and raceElement.gender or GetUnitGender(self.unitTag)
+            ava = GetAvARankName(gender, self.avaRankValue)
             if UnitFrames.SV.TargetEnableRank and not UnitFrames.SV.TargetEnableTitle then
                 title = (ava ~= "") and ava or ""
             elseif UnitFrames.SV.TargetEnableTitle and not UnitFrames.SV.TargetEnableRank then
@@ -634,7 +783,7 @@ function FrameObject:UpdateStaticControlTitleAndAva()
         else
             -- NPC captions follow Display Title only; AVA Rank Name is player-only.
             if UnitFrames.SV.TargetEnableTitle then
-                local unitCaption = GetUnitCaption(self.unitTag)
+                local unitCaption = nameElement and nameElement.caption or GetUnitCaption(self.unitTag)
                 title = unitCaption and zo_strformat(SI_TOOLTIP_UNIT_CAPTION, unitCaption) or ""
             else
                 title = ""
@@ -659,7 +808,7 @@ function FrameObject:UpdateStaticControlTitleAndAva()
     if self.avaRank ~= nil then
         if self.isPlayer then
             self.avaRankIcon:SetTexture(GetAvARankIcon(self.avaRankValue))
-            local alliance = GetUnitAlliance(self.unitTag)
+            local alliance = unitTypeElement and unitTypeElement.alliance or GetUnitAlliance(self.unitTag)
             self.avaRankIcon:SetColor(GetAllianceColor(alliance):UnpackRGBA())
             if self.unitTag == "reticleover" and UnitFrames.SV.TargetEnableRankIcon then
                 self.avaRank:SetText(tostring(self.avaRankValue))
@@ -707,17 +856,32 @@ function FrameObject:UpdateStaticControlReticleBuffAnchors(savedTitle)
 end
 
 function FrameObject:UpdateStaticControlDeadAndGroupAlpha()
+    local onlineElement = GetFrameElement(self, "Online")
+    local deathElement = GetFrameElement(self, "Death")
+    local supportRangeElement = GetFrameElement(self, "SupportRange")
     if self.dead ~= nil then
-        if not IsUnitOnline(self.unitTag) then
+        local isOnline = onlineElement and onlineElement.isOnline
+        if not onlineElement then
+            isOnline = IsUnitOnline(self.unitTag)
+        end
+        local isDead = deathElement and deathElement.isDead
+        if not deathElement then
+            isDead = IsUnitDead(self.unitTag)
+        end
+        if not isOnline then
             UnitFrames.OnGroupMemberConnectedStatus(nil, self.unitTag, false)
-        elseif IsUnitDead(self.unitTag) then
+        elseif isDead then
             UnitFrames.OnDeath(nil, self.unitTag, true)
         else
             UnitFrames.CustomFramesSetDeadLabel(self, nil)
         end
     end
     if self.unitTag and "group" == (zo_strsub(self.unitTag, 0, 5)) and self.control then
-        self.control:SetAlpha(IsUnitInGroupSupportRange(self.unitTag) and (UnitFrames.SV.GroupAlpha * 0.01) or (UnitFrames.SV.GroupAlpha * 0.01) / 2)
+        local isInRange = supportRangeElement and supportRangeElement.isInGroupSupportRange
+        if not supportRangeElement then
+            isInRange = IsUnitInGroupSupportRange(self.unitTag)
+        end
+        self.control:SetAlpha(isInRange and (UnitFrames.SV.GroupAlpha * 0.01) or (UnitFrames.SV.GroupAlpha * 0.01) / 2)
     end
 end
 

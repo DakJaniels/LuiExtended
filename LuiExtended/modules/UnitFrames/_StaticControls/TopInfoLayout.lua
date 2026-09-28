@@ -123,12 +123,28 @@ end
 --- Champion points for level row; reticleover matches vanilla target frame (effective CP).
 --- @param unitTag string
 --- @return integer
-local function ResolveTopInfoChampionPoints(unitTag)
+local function GetFrameElement(frame, elementName)
+    local unit = frame.libUnit
+    if not unit then
+        return nil
+    end
+    return unit:GetElement(elementName)
+end
+
+local function ResolveTopInfoChampionPoints(frame, unitTag)
+    local levelElement = GetFrameElement(frame, "Level")
+    local championElement = GetFrameElement(frame, "ChampionPoints")
     if unitTag == "reticleover" then
-        local effectiveChampionPoints = GetUnitEffectiveChampionPoints(unitTag)
+        local effectiveChampionPoints = levelElement and levelElement.effectiveChampionPoints
+        if not levelElement then
+            effectiveChampionPoints = GetUnitEffectiveChampionPoints(unitTag)
+        end
         if effectiveChampionPoints and effectiveChampionPoints > 0 then
             return effectiveChampionPoints
         end
+    end
+    if championElement then
+        return championElement.championPoints
     end
     return GetUnitChampionPoints(unitTag)
 end
@@ -153,8 +169,15 @@ function FrameObject.UpdateTopInfoLevelRow(self)
     end
 
     -- Reticle player targets exist before they report online; do not blank the level row for them.
-    local skipOnlineGateForReticlePlayer = unitTag == "reticleover" and IsUnitPlayer(unitTag) and DoesUnitExist(unitTag)
-    if not skipOnlineGateForReticlePlayer and not IsUnitOnline(unitTag) then
+    local unitTypeElement = GetFrameElement(self, "UnitType")
+    local onlineElement = GetFrameElement(self, "Online")
+    local isPlayerUnit = unitTypeElement and unitTypeElement.isPlayer or (not unitTypeElement and IsUnitPlayer(unitTag))
+    local skipOnlineGateForReticlePlayer = unitTag == "reticleover" and isPlayerUnit and (onlineElement ~= nil or DoesUnitExist(unitTag))
+    local isOnline = onlineElement and onlineElement.isOnline
+    if not onlineElement then
+        isOnline = IsUnitOnline(unitTag)
+    end
+    if not skipOnlineGateForReticlePlayer and not isOnline then
         self.levelIcon:SetHidden(true)
         self.veterancyRankIcon:SetHidden(true)
         self.level:SetHidden(true)
@@ -166,12 +189,15 @@ function FrameObject.UpdateTopInfoLevelRow(self)
     local veterancyRank
 
     if showVeterancyIcon then
-        veterancyRank = GetUnitVeterancyRank(unitTag)
+        local levelElement = GetFrameElement(self, "Level")
+        veterancyRank = levelElement and levelElement.veterancyRank or GetUnitVeterancyRank(unitTag)
         levelText = tostring(veterancyRank)
     elseif self.isChampion then
-        levelText = tostring(ResolveTopInfoChampionPoints(unitTag))
+        levelText = tostring(ResolveTopInfoChampionPoints(self, unitTag))
     else
-        levelText = tostring(GetUnitLevel(unitTag))
+        local levelElement = GetFrameElement(self, "Level")
+        local unitLevel = levelElement and levelElement.level or GetUnitLevel(unitTag)
+        levelText = tostring(unitLevel)
     end
 
     self.level:SetText(levelText)
@@ -509,7 +535,8 @@ function FrameObject.LayoutTopInfoSmallGroup(self)
     FrameObject.RefreshTopInfoForLayout(self)
 
     local unitTag = ResolveTopInfoUnitTag(self)
-    local isLeader = unitTag and IsUnitGroupLeader(unitTag)
+    local leaderElement = GetFrameElement(self, "Leader")
+    local isLeader = leaderElement and leaderElement.isGroupLeader or (not leaderElement and unitTag and IsUnitGroupLeader(unitTag))
     local rowOffsetY = SMALL_GROUP_NAME_ROW_OFFSET_Y
     local leaderNameOffset = isLeader and SMALL_GROUP_LEADER_NAME_OFFSET or 0
 

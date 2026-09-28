@@ -295,9 +295,13 @@ end
 
 local function GetRoundedBossHealthPercent(bossIndex)
     local unitTag = "boss" .. bossIndex
+    local bossFrame = UnitFrames.CustomFrames and UnitFrames.CustomFrames[unitTag]
+    local healthElement = bossFrame and bossFrame.libUnit and bossFrame.libUnit:GetElement("Health")
     local savedHealth = UnitFrames.savedHealth and UnitFrames.savedHealth[unitTag]
     local powerValue, powerMax
-    if savedHealth and savedHealth[2] and savedHealth[2] > 0 then
+    if healthElement and healthElement.powerMax and healthElement.powerMax > 0 then
+        powerValue, powerMax = healthElement.powerValue, healthElement.powerMax
+    elseif savedHealth and savedHealth[2] and savedHealth[2] > 0 then
         powerValue, powerMax = savedHealth[1], savedHealth[2]
     elseif DoesUnitExist(unitTag) then
         powerValue, powerMax = GetUnitPower(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH)
@@ -312,6 +316,11 @@ end
 
 local function BossHasThresholdHealthData(bossIndex)
     local unitTag = "boss" .. bossIndex
+    local bossFrame = UnitFrames.CustomFrames and UnitFrames.CustomFrames[unitTag]
+    local healthElement = bossFrame and bossFrame.libUnit and bossFrame.libUnit:GetElement("Health")
+    if healthElement and healthElement.powerMax and healthElement.powerMax > 0 then
+        return true
+    end
     if DoesUnitExist(unitTag) then
         return true
     end

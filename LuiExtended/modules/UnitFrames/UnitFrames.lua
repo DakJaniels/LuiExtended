@@ -263,7 +263,6 @@ function UnitFrames.Initialize(enabled)
     -- Note: EVENT_UNIT_ATTRIBUTE_VISUAL_* events now handled per-unit by coordinator instances
     eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, UnitFrames.OnTargetChange)
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, UnitFrames.OnReticleTargetChanged)
-    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_PLAYER_CHANGED, UnitFrames.OnReticleTargetPlayerChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_DISPOSITION_UPDATE, UnitFrames.OnDispositionUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_UNIT_CREATED, UnitFrames.OnUnitCreated)
     eventManager:RegisterForEvent(moduleName, EVENT_LEVEL_UPDATE, UnitFrames.OnLevelUpdate)
@@ -280,13 +279,8 @@ function UnitFrames.Initialize(enabled)
 
         eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DESTROYED, UnitFrames.OnUnitDestroyed)
         eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_COMPANION_STATE_CHANGED, UnitFrames.ActiveCompanionStateChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_ADDED, UnitFrames.SocialUpdateFrames)
-        eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_REMOVED, UnitFrames.SocialUpdateFrames)
-        eventManager:RegisterForEvent(moduleName, EVENT_IGNORE_ADDED, UnitFrames.SocialUpdateFrames)
-        eventManager:RegisterForEvent(moduleName, EVENT_IGNORE_REMOVED, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_COMBAT_STATE, UnitFrames.OnPlayerCombatState)
         UnitFrames.AlternativeBarRegisterEvents()
-        eventManager:RegisterForEvent(moduleName, EVENT_GROUP_SUPPORT_RANGE_UPDATE, UnitFrames.OnGroupSupportRangeUpdate)
         eventManager:RegisterForEvent(moduleName, EVENT_GROUP_MEMBER_CONNECTED_STATUS, UnitFrames.OnGroupMemberConnectedStatus)
         eventManager:RegisterForEvent(moduleName, EVENT_GROUP_MEMBER_ROLE_CHANGED, UnitFrames.OnGroupMemberRoleChange)
         eventManager:RegisterForEvent(moduleName, EVENT_GROUP_UPDATE, UnitFrames.OnGroupMemberChange)
@@ -475,10 +469,18 @@ function UnitFrames.CompanionUpdate()
         return
     end
     local unitTag = "companion"
-    if DoesUnitExist(unitTag) then
-        if UnitFrames.CustomFrames[unitTag] then
-            UnitFrames.CustomFrames[unitTag].control:SetHidden(false)
-            UnitFrames.ReloadValues(unitTag)
+    local companionFrame = UnitFrames.CustomFrames[unitTag]
+    if companionFrame.BindLibUnit then
+        companionFrame:BindLibUnit(unitTag)
+    end
+    local nameElement = companionFrame.libUnit and companionFrame.libUnit:GetElement("Name")
+    local showCompanion = nameElement and (nameElement.isPendingSummon or nameElement.formattedUnitName)
+    if showCompanion then
+        companionFrame.control:SetHidden(false)
+        if not nameElement.isPendingSummon then
+            if not companionFrame.libUnit then
+                UnitFrames.ReloadValues(unitTag)
+            end
             UnitFrames.CustomFramesApplyCompanionInCombat(true)
             UnitFrames.UpdateCompanionCombatGlow()
         end
@@ -486,7 +488,10 @@ function UnitFrames.CompanionUpdate()
             UnitFrames.companionAbilityTrack:RefreshAll()
         end
     else
-        UnitFrames.CustomFrames[unitTag].control:SetHidden(true)
+        if companionFrame.UnbindLibUnit then
+            companionFrame:UnbindLibUnit()
+        end
+        companionFrame.control:SetHidden(true)
         if UnitFrames.companionAbilityTrack then
             UnitFrames.companionAbilityTrack:RefreshAll()
         end
@@ -776,17 +781,20 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
 
         -- And color of custom target name always. Also change 'labelOne' for critters
         if UnitFrames.CustomFrames["reticleover"] then
-            UnitFrames.reticleoverHostile = (reactionType == UNIT_REACTION_HOSTILE) and UnitFrames.SV.TargetEnableSkull
-            UnitFrames.CustomFrames["reticleover"].skull:SetHidden(not UnitFrames.reticleoverHostile or (UnitFrames.savedHealth.reticleover[1] == 0) or (100 * UnitFrames.savedHealth.reticleover[1] / UnitFrames.savedHealth.reticleover[3] > UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].threshold))
-            UnitFrames.CustomFrames["reticleover"].name:SetColor(color[1], color[2], color[3], 1)
-            UnitFrames.CustomFrames["reticleover"].className:SetColor(color[1], color[2], color[3], 1)
-            if isCritter then
-                UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].labelOne:SetText(" - Critter - ")
+            local reticleFrame = UnitFrames.CustomFrames["reticleover"]
+            if not (reticleFrame.libUnit and reticleFrame.ApplyLibUnitTargetChrome) then
+                UnitFrames.reticleoverHostile = (reactionType == UNIT_REACTION_HOSTILE) and UnitFrames.SV.TargetEnableSkull
+                UnitFrames.CustomFrames["reticleover"].skull:SetHidden(not UnitFrames.reticleoverHostile or (UnitFrames.savedHealth.reticleover[1] == 0) or (100 * UnitFrames.savedHealth.reticleover[1] / UnitFrames.savedHealth.reticleover[3] > UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].threshold))
+                UnitFrames.CustomFrames["reticleover"].name:SetColor(color[1], color[2], color[3], 1)
+                UnitFrames.CustomFrames["reticleover"].className:SetColor(color[1], color[2], color[3], 1)
+                if isCritter then
+                    UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].labelOne:SetText(" - Critter - ")
+                end
+                if isGuard then
+                    UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].labelOne:SetText(" - Invulnerable - ")
+                end
+                UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].labelTwo:SetHidden(isCritter or isGuard or not UnitFrames.CustomFrames["reticleover"].dead:IsHidden())
             end
-            if isGuard then
-                UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].labelOne:SetText(" - Invulnerable - ")
-            end
-            UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].labelTwo:SetHidden(isCritter or isGuard or not UnitFrames.CustomFrames["reticleover"].dead:IsHidden())
 
             if IsUnitReincarnating("reticleover") then
                 UnitFrames.CustomFramesSetDeadLabel(UnitFrames.CustomFrames["reticleover"], strResSelf)
@@ -880,23 +888,51 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
     end
 end
 
-function UnitFrames.OnReticleTargetPlayerChanged(eventCode)
-    local frame = UnitFrames.CustomFrames["reticleover"]
-    if frame then
-        FrameObject.UpdateStaticControls(frame)
-    end
-end
-
--- Runs on the EVENT_DISPOSITION_UPDATE listener.
--- Used to reread parameters of the target
+-- Default target label and reticle only. Custom frame color comes from the Reaction element.
 function UnitFrames.OnDispositionUpdate(eventCode, unitTag)
-    if unitTag == "reticleover" then
-        UnitFrames.OnReticleTargetChanged(eventCode)
+    if unitTag ~= "reticleover" or not DoesUnitExist("reticleover") then
+        return
+    end
+    local isWithinRange = IsUnitInGroupSupportRange("reticleover")
+    local color, reticle_color
+    local interactableCheck = false
+    local reactionType = GetUnitReaction("reticleover")
+    local attackable = IsUnitAttackable("reticleover")
+    if reactionType == UNIT_REACTION_HOSTILE then
+        color = UnitFrames.SV.Target_FontColour_Hostile
+        reticle_color = attackable and UnitFrames.SV.Target_FontColour_Hostile or UnitFrames.SV.Target_FontColour
+        interactableCheck = true
+    elseif reactionType == UNIT_REACTION_PLAYER_ALLY then
+        color = UnitFrames.SV.Target_FontColour_FriendlyPlayer
+        reticle_color = UnitFrames.SV.Target_FontColour_FriendlyPlayer
+    elseif attackable and reactionType ~= UNIT_REACTION_HOSTILE then
+        color = UnitFrames.SV.Target_FontColour
+        reticle_color = color
+    else
+        color = (reactionType == UNIT_REACTION_FRIENDLY or reactionType == UNIT_REACTION_NPC_ALLY) and UnitFrames.SV.Target_FontColour_FriendlyNPC or UnitFrames.SV.Target_FontColour
+        reticle_color = color
+        interactableCheck = true
+    end
+    if interactableCheck and GetGameCameraInteractableActionInfo() ~= nil then
+        reticle_color = UnitFrames.SV.ReticleColour_Interact
+    end
+    if UnitFrames.SV.TargetColourByReaction and UnitFrames.defaultTargetNameLabel then
+        UnitFrames.defaultTargetNameLabel:SetColor(color[1], color[2], color[3], isWithinRange and 1 or 0.5)
+    end
+    if UnitFrames.SV.ReticleColourByReaction then
+        ZO_ReticleContainerReticle:SetColor(reticle_color[1], reticle_color[2], reticle_color[3], 1)
     end
 end
 
 -- Used to query initial values and display them in corresponding control
 function UnitFrames.ReloadValues(unitTag)
+    local customFrame = UnitFrames.CustomFrames[unitTag]
+    local customFrameUsesLibUnit = customFrame and customFrame.UsesLibUnitFramework and customFrame:UsesLibUnitFramework()
+    local customFrameAlreadyBound = customFrameUsesLibUnit and customFrame.libUnit and customFrame.libUnitTag == unitTag
+    if customFrameUsesLibUnit and not customFrameAlreadyBound then
+        customFrame:BindLibUnit(unitTag)
+    end
+
     UnitFrames.ClearPowerUpdateSnapshot(unitTag)
     -- Build list of powerTypes this unitTag has in both DefaultFrames and CustomFrames
     local powerTypes = {}
@@ -907,7 +943,7 @@ function UnitFrames.ReloadValues(unitTag)
             end
         end
     end
-    if UnitFrames.CustomFrames[unitTag] then
+    if UnitFrames.CustomFrames[unitTag] and not customFrameUsesLibUnit then
         for powerType, _ in pairs(UnitFrames.CustomFrames[unitTag]) do
             if type(powerType) == "number" then
                 powerTypes[powerType] = true
@@ -934,12 +970,13 @@ function UnitFrames.ReloadValues(unitTag)
         coordinator:OnUnitChanged()
     end)
 
-    -- Now we need to update Name labels, classIcon
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
-    UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames[unitTag])
+    if not customFrameAlreadyBound then
+        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames[unitTag])
+    end
     UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
 
-    if unitTag == "player" then
+    if unitTag == "player" and not customFrameUsesLibUnit then
         UnitFrames.statFull[COMBAT_MECHANIC_FLAGS_HEALTH] = (UnitFrames.savedHealth.player[1] == UnitFrames.savedHealth.player[3])
         UnitFrames.CustomFramesApplyInCombat()
     end
@@ -974,23 +1011,14 @@ end
 
 -- Re-run UpdateStaticControls on player, target, and group after overland/veterancy season changes or related LAM toggles.
 function UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
-    if UnitFrames.CustomFrames["reticleover"] then
-        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["reticleover"])
-    end
     if UnitFrames.CustomFrames["AvaPlayerTarget"] then
         UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["AvaPlayerTarget"])
-    end
-    if UnitFrames.CustomFrames["player"] then
-        UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["player"])
     end
     for i = 1, 12 do
         local unitTag = "group" .. i
         if UnitFrames.DefaultFrames[unitTag] and DoesUnitExist(unitTag) then
             UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
         end
-    end
-    if UnitFrames.CustomFramesGroupUpdate then
-        UnitFrames.CustomFramesGroupUpdate()
     end
 end
 
@@ -1014,7 +1042,10 @@ end
 -- Called from EVENT_LEVEL_UPDATE and EVENT_VETERAN_RANK_UPDATE listeners.
 function UnitFrames.OnLevelUpdate(eventCode, unitTag, level)
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
-    UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames[unitTag])
+    local customFrame = UnitFrames.CustomFrames[unitTag]
+    if not (customFrame and customFrame.libUnit) then
+        UnitFrames.UpdateStaticControls(customFrame)
+    end
     UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
 
     -- For Custom Player Frame we have to setup experience bar
@@ -1144,13 +1175,6 @@ function UnitFrames.UpdatePetCombatGlow()
     end
 end
 
--- Runs on the EVENT_GROUP_SUPPORT_RANGE_UPDATE listener.
-function UnitFrames.OnGroupSupportRangeUpdate(eventCode, unitTag, status)
-    if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].control then
-        UnitFrames.CustomFrames[unitTag].control:SetAlpha(status and (UnitFrames.SV.GroupAlpha * 0.01) or (UnitFrames.SV.GroupAlpha * 0.01) / 2)
-    end
-end
-
 -- Runs on the EVENT_GROUP_MEMBER_CONNECTED_STATUS listener.
 function UnitFrames.OnGroupMemberConnectedStatus(eventCode, unitTag, isOnline)
     if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].dead then
@@ -1167,7 +1191,6 @@ function UnitFrames.OnGroupMemberRoleChange(eventCode, unitTag, dps, healer, tan
         if UnitFrames.SV.ColorRoleGroup or UnitFrames.SV.ColorRoleRaid then
             UnitFrames.CustomFramesApplyColorsSingle(unitTag)
         end
-        UnitFrames.ReloadValues(unitTag)
         UnitFrames.CustomFramesApplyLayoutGroup(false)
         UnitFrames.CustomFramesApplyLayoutRaid(false)
     end
@@ -1289,7 +1312,7 @@ function UnitFrames.OnTargetMarkerUpdate(eventId)
     for _, baseType in ipairs(unitTypes) do
         -- Handle base unit frame (no index)
         local baseFrame = UnitFrames.CustomFrames[baseType]
-        if baseFrame then
+        if baseFrame and not baseFrame.libUnit then
             if UnitFrames.SV.CustomTargetMarker then
                 local markerType = GetUnitTargetMarkerType(baseType)
                 if markerType ~= TARGET_MARKER_TYPE_NONE then
@@ -1330,7 +1353,7 @@ function UnitFrames.OnTargetMarkerUpdate(eventId)
         for i = 1, MAX_GROUP_SIZE_THRESHOLD do
             local unitTag = baseType .. i
             local unitFrame = UnitFrames.CustomFrames[unitTag]
-            if unitFrame then
+            if unitFrame and not unitFrame.libUnit then
                 if UnitFrames.SV.CustomTargetMarker then
                     local markerType = GetUnitTargetMarkerType(unitTag)
                     if markerType ~= TARGET_MARKER_TYPE_NONE then
@@ -1470,7 +1493,12 @@ function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
             -- Clearing dead/offline must not re-show percentage on invulnerable guards / critters.
             if not hideLabelTwo and unitFrame.unitTag == "reticleover" and DoesUnitExist("reticleover") then
                 local isGuard = IsUnitInvulnerableGuard("reticleover")
-                local isCritter = UnitFrames.savedHealth.reticleover and UnitFrames.savedHealth.reticleover[3] <= 9
+                local healthElement = unitFrame.libUnit and unitFrame.libUnit:GetElement("Health")
+                local effectiveMax = healthElement and healthElement.powerEffectiveMax
+                local isCritter = effectiveMax and effectiveMax <= 9
+                if not healthElement then
+                    isCritter = UnitFrames.savedHealth.reticleover and UnitFrames.savedHealth.reticleover[3] <= 9
+                end
                 hideLabelTwo = isGuard or isCritter
             end
             unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].labelTwo:SetHidden(hideLabelTwo)
@@ -1535,16 +1563,30 @@ function UnitFrames.CustomFramesGroupUpdate()
     local groupSize = GetGroupSize()
     CustomFramesHideDefaultGroupFrames(groupSize)
 
-    -- Build list of group members
+    -- Build list of group members from the library, sorted by the Name element.
     local groupList = {}
     local memberCount = 0
+    local liveGroupUnitTags = LUF:GetLiveGroupUnitTags()
+    local presentGroupTags = {}
 
-    for i = 1, 12 do
-        local unitTag = "group" .. i
-        if DoesUnitExist(unitTag) then
-            table_insert(groupList, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
+    for tagIndex = 1, #liveGroupUnitTags do
+        local unitTag = liveGroupUnitTags[tagIndex]
+        local groupIndex = LUF:IsGroupUnitTag(unitTag) and tonumber(unitTag:match("^group(%d+)$"))
+        if groupIndex and groupIndex >= 1 and groupIndex <= 12 then
+            local unit = LUF:GetUnit(unitTag) or LUF:CreateUnit(unitTag)
+            local nameElement = unit:GetElement("Name") or unit:RegisterElement("Name")
+            if nameElement and not unit.isEnabled then
+                nameElement:Update(nil)
+            end
+            presentGroupTags[unitTag] = true
+            table_insert(groupList, { unitTag = unitTag, unitName = (nameElement and nameElement.unitName) or "" })
             memberCount = memberCount + 1
-        else
+        end
+    end
+
+    for groupIndex = 1, 12 do
+        local unitTag = "group" .. groupIndex
+        if not presentGroupTags[unitTag] then
             UnitFrames.CustomFrames[unitTag] = nil
         end
     end
@@ -1561,15 +1603,27 @@ function UnitFrames.CustomFramesGroupUpdate()
 
     -- For small groups, optionally exclude player
     if not useRaidFrames and UnitFrames.SV.GroupExcludePlayer then
+        local playerUnit = LUF:GetUnit("player") or LUF:CreateUnit("player")
+        local playerGroupElement = playerUnit:GetElement("Group") or playerUnit:RegisterElement("Group")
+        if playerGroupElement and not playerUnit.isEnabled then
+            playerGroupElement:Update(nil)
+        end
+        local localPlayerGroupUnitTag = playerGroupElement and playerGroupElement.localPlayerGroupUnitTag
         for i = 1, #groupList do
-            if AreUnitsEqual("player", groupList[i].unitTag) then
+            if groupList[i].unitTag == localPlayerGroupUnitTag then
                 UnitFrames.CustomFrames[groupList[i].unitTag] = nil
                 table_remove(groupList, i)
 
                 -- Hide the last SmallGroup frame
                 local unitTag = "SmallGroup" .. memberCount
-                UnitFrames.CustomFrames[unitTag].unitTag = nil
-                UnitFrames.CustomFrames[unitTag].control:SetHidden(true)
+                local hiddenFrame = UnitFrames.CustomFrames[unitTag]
+                if hiddenFrame then
+                    if hiddenFrame.UnbindLibUnit then
+                        hiddenFrame:UnbindLibUnit()
+                    end
+                    hiddenFrame.unitTag = nil
+                    hiddenFrame.control:SetHidden(true)
+                end
                 break
             end
         end
@@ -1597,10 +1651,14 @@ function UnitFrames.CustomFramesGroupUpdate()
             end
 
             frame.unitTag = member.unitTag
-            if frame.SyncAttributeVisualizerUnitTag then
-                frame:SyncAttributeVisualizerUnitTag()
+            if frame.BindLibUnit then
+                frame:BindLibUnit(member.unitTag)
+            else
+                if frame.SyncAttributeVisualizerUnitTag then
+                    frame:SyncAttributeVisualizerUnitTag()
+                end
+                UnitFrames.ReloadValues(member.unitTag)
             end
-            UnitFrames.ReloadValues(member.unitTag)
         end
     end
 
@@ -1668,10 +1726,12 @@ function UnitFrames.CustomFramesUnreferenceGroupControl(groupType, first)
                 end
             end
 
-            frame.unitTag = nil
-            if frame.SyncAttributeVisualizerUnitTag then
+            if frame.UnbindLibUnit and frame.UsesLibUnitFramework and frame:UsesLibUnitFramework() then
+                frame:UnbindLibUnit()
+            elseif frame.SyncAttributeVisualizerUnitTag then
                 frame:SyncAttributeVisualizerUnitTag()
             end
+            frame.unitTag = nil
             frame.control:SetHidden(true)
         end
     end
@@ -1691,9 +1751,16 @@ function UnitFrames.OnBossesChanged(eventCode)
         if frame and frame.tlw then
             if DoesUnitExist(unitTag) then
                 frame.control:SetHidden(false)
-                UnitFrames.ReloadValues(unitTag)
+                if frame.BindLibUnit then
+                    frame:BindLibUnit(unitTag)
+                else
+                    UnitFrames.ReloadValues(unitTag)
+                end
                 hasBosses = true
             else
+                if frame.UnbindLibUnit then
+                    frame:UnbindLibUnit()
+                end
                 frame.control:SetHidden(true)
             end
         end
@@ -2394,6 +2461,13 @@ end
 
 -- Re-apply shield, trauma, and no-healing overlay visibility after shield mode or layout changes.
 function UnitFrames.RefreshCustomFrameShields()
+    if UnitFrames.CustomFrames then
+        for _, frame in pairs(UnitFrames.CustomFrames) do
+            if frame.libUnit and frame.ApplyLibUnitResources then
+                frame:ApplyLibUnitResources()
+            end
+        end
+    end
     if not UnitFrames.savedHealth then
         return
     end
@@ -3061,11 +3135,19 @@ end
 function UnitFrames.SocialUpdateFrames()
     for i = 1, 12 do
         local unitTag = "group" .. i
-        if DoesUnitExist(unitTag) then
+        local frame = UnitFrames.CustomFrames[unitTag]
+        if frame and frame.libUnit then
+            frame:UpdateStaticControls()
+        elseif DoesUnitExist(unitTag) then
             UnitFrames.ReloadValues(unitTag)
         end
     end
-    UnitFrames.ReloadValues("reticleover")
+    local reticleFrame = UnitFrames.CustomFrames["reticleover"]
+    if reticleFrame and reticleFrame.libUnit then
+        reticleFrame:UpdateStaticControls()
+    else
+        UnitFrames.ReloadValues("reticleover")
+    end
     if DoesUnitExist("reticleover") then
         UnitFrames.LayoutDefaultReticleoverTargetIcons()
     end

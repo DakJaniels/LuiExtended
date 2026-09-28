@@ -27,11 +27,11 @@ local function SetupFullCombatFrame(frame)
 end
 
 function Visualizers.SetupPlayerFrame(frame)
-    SetupFullCombatFrame(frame)
+    frame:BindLibUnit("player")
 end
 
 function Visualizers.SetupTargetFrame(frame)
-    SetupFullCombatFrame(frame)
+    frame:BindLibUnit("reticleover")
 end
 
 function Visualizers.SetupAvaTargetFrame(frame)
@@ -39,19 +39,17 @@ function Visualizers.SetupAvaTargetFrame(frame)
 end
 
 function Visualizers.SetupGroupFrame(frame)
-    SetupFullCombatFrame(frame)
 end
 
 function Visualizers.SetupRaidFrame(frame)
-    SetupFullCombatFrame(frame)
 end
 
 function Visualizers.SetupBossFrame(frame)
-    SetupFullCombatFrame(frame)
+    frame:BindLibUnit(frame:GetFrameRegistryKey())
 end
 
 function Visualizers.SetupCompanionFrame(frame)
-    SetupFullCombatFrame(frame)
+    frame:BindLibUnit("companion")
 end
 
 function Visualizers.SetupPetFrame(frame)

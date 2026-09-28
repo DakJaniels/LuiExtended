@@ -243,6 +243,11 @@ function LUIE_CustomFramePowerData_Base:ApplyShieldBarMode(frame, shieldOverlay)
     end
     powerBar.shield:SetDrawLevel(Shared.HEALTH_BAR_FILL_DRAW_LEVEL + 2)
 
+    if frame.ApplyLibUnitResources and frame.libUnit then
+        frame:ApplyLibUnitResources()
+        return
+    end
+
     local saved = GetSavedHealthForCustomFrame(frame)
     local shieldValue = saved and saved[4] or 0
     if shieldValue <= 0 then
