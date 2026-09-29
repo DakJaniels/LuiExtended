@@ -36,8 +36,8 @@ local BASELINE_DIMENSIONS =
 local function scaleCoords(coords, frameType, baselineDimensions, frameDimensions, widthResolutionScale, heightResolutionScale, aspectRatioScale)
     local baseline = baselineDimensions[frameType] or baselineDimensions.player
     local current = frameDimensions[frameType] or baseline
-    local widthRatio = current.width / baseline.width
-    local heightRatio = current.height / baseline.height
+    local widthRatio = (current.width or baseline.width) / baseline.width
+    local heightRatio = (current.height or baseline.height) / baseline.height
     local scaledX = coords[1] * widthResolutionScale * widthRatio
     local scaledY = coords[2] * zo_pow(heightResolutionScale, 1.2) * aspectRatioScale * heightRatio
     return { scaledX, scaledY }
