@@ -1,0 +1,16 @@
+******************
+***Enums Added ***
+******************
+
+* IsRumorNew(*integer* _rumorId_)
+** _Returns:_ *bool* _isNew_
+
+* MarkRumorSeen(*integer* _rumorId_)
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_RUMOR_NEW_STATUS_CLEARED (*integer* _rumorId_)

@@ -1,5 +1,12 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.7
+
+### New
+
+- Chat Announcements: Nowhere Vault center-screen announcements (room objectives, progress, and completions) can be shown in chat, center screen, or alerts. They only appear in The Nowhere Vault.
+- Chat Announcements: Rumor started and rumor investigated have their own chat, center-screen, and alert toggles. Rumor start failed has chat and alert toggles.
+
 ## Version 7.2.6.6
 
 ### Fixed
