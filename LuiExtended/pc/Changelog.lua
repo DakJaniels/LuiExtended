@@ -49,6 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.6.5
+    "|cFFA500LuiExtended Version 7.2.6.5|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Loading or clearing your target no longer fails while restoring saved target debuffs.",
+    "",
     -- Version Header 7.2.6.4
     "|cFFA500LuiExtended Version 7.2.6.4|r",
     "",

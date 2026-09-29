@@ -1,9 +1,9 @@
 ﻿## Title: Lui Extended
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
-## APIVersion: 101050 101051
-## Version: 7.2.6.4
-## AddOnVersion: 7264
+## APIVersion: 101051 101052
+## Version: 7.2.6.5
+## AddOnVersion: 7265
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements, Slash Commands, and MiniMap.
 ## DependsOn: LuiMedia>=7133 LuiData>=7228
 ## PCDependsOn: LibAddonMenu-2.0>=43

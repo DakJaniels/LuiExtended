@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.5
+
+### Fixed
+
+- SpellCastBuffs: Loading or clearing your target no longer fails while restoring saved target debuffs.
+
 ## Version 7.2.6.4
 
 ### New
