@@ -142,7 +142,7 @@ function SpellCastBuffs.ClearCombatEventStatusEffectFakeForUnit(abilityId, unitT
         return
     end
     if unitTag == "reticleover" then
-        local reticleName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
+        local reticleName = SpellCastBuffs.GetFormattedReticleUnitName()
         SpellCastBuffs.ClearCombatEventStatusEffectFakeReticle(abilityId, reticleName, SpellCastBuffs.reticleCombatUnitId)
     end
 end
