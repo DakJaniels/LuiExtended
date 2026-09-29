@@ -1710,6 +1710,11 @@ end
 
 --- Set anchors for all top level windows of CustomFrames
 function UnitFrames.CustomFramesSetPositions()
+    -- SV starts as {} and Enabled stays false until Initialize. Screen resize can run before that.
+    if not UnitFrames.Enabled then
+        return
+    end
+
     --- @type table<string, table>
     local default_anchors = {}
 
