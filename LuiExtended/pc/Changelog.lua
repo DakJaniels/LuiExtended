@@ -49,6 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.6.6
+    "|cFFA500LuiExtended Version 7.2.6.6|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Changing custom UI scale or resizing the window no longer errors when custom frames are still loading or turned off.",
+    "",
     -- Version Header 7.2.6.5
     "|cFFA500LuiExtended Version 7.2.6.5|r",
     "",

@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.6.6
+
+### Fixed
+
+- Unit Frames: Changing custom UI scale or resizing the window no longer errors when custom frames are still loading or turned off.
+
 ## Version 7.2.6.5
 
 ### Fixed
