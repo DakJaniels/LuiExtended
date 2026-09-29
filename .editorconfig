@@ -3,11 +3,11 @@
 # [basic]
 
 # optional space/tab
-indent_style = tab
+indent_style = space
 # if indent_style is space, this is valid
 indent_size = 4
 # if indent_style is tab, this is valid
-tab_width = 2
+tab_width = 4
 # none/single/double
 quote_style = double
 
@@ -37,7 +37,7 @@ call_arg_parentheses = keep
 detect_end_of_line = false
 
 # this will check text end with new line
-insert_final_newline = false
+insert_final_newline = true
 
 # [space]
 space_around_table_field_list = true
@@ -171,7 +171,7 @@ end_statement_with_semicolon = replace_with_newline
 
 
 [*.xml]
-indent_style = tab
+indent_style = space
 indent_size = 2
 end_of_line = auto
 charset = utf-8
