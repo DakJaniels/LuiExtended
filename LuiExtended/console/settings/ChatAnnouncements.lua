@@ -7150,6 +7150,58 @@ function ChatAnnouncements.CreateConsoleSettings()
         ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, Defaults, panel, SettingsAPI)
     end)
 
+    -- Build Rumor Announcements Section
+    buildSectionSettings("Rumors", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CA_RUMOR_HEADER),
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_CONSOLE_SECTION_CA_RUMOR),
+        }
+
+        local rumorCheckboxRows =
+        {
+            { settingKey = "RumorStartedCA", label = LUIE_STRING_LAM_CA_RUMOR_STARTED, tooltip = LUIE_STRING_LAM_CA_RUMOR_STARTED_TP, channel = "CA" },
+            { settingKey = "RumorStartedCSA", label = LUIE_STRING_LAM_CA_RUMOR_STARTED, tooltip = LUIE_STRING_LAM_CA_RUMOR_STARTED_TP, channel = "CSA" },
+            { settingKey = "RumorStartedAlert", label = LUIE_STRING_LAM_CA_RUMOR_STARTED, tooltip = LUIE_STRING_LAM_CA_RUMOR_STARTED_TP, channel = "Alert" },
+            { settingKey = "RumorCompleteCA", label = LUIE_STRING_LAM_CA_RUMOR_COMPLETE, tooltip = LUIE_STRING_LAM_CA_RUMOR_COMPLETE_TP, channel = "CA" },
+            { settingKey = "RumorCompleteCSA", label = LUIE_STRING_LAM_CA_RUMOR_COMPLETE, tooltip = LUIE_STRING_LAM_CA_RUMOR_COMPLETE_TP, channel = "CSA" },
+            { settingKey = "RumorCompleteAlert", label = LUIE_STRING_LAM_CA_RUMOR_COMPLETE, tooltip = LUIE_STRING_LAM_CA_RUMOR_COMPLETE_TP, channel = "Alert" },
+            { settingKey = "RumorStartFailedCA", label = LUIE_STRING_LAM_CA_RUMOR_START_FAILED, tooltip = LUIE_STRING_LAM_CA_RUMOR_START_FAILED_TP, channel = "CA" },
+            { settingKey = "RumorStartFailedAlert", label = LUIE_STRING_LAM_CA_RUMOR_START_FAILED, tooltip = LUIE_STRING_LAM_CA_RUMOR_START_FAILED_TP, channel = "Alert" },
+        }
+        for _, rumorCheckboxRow in ipairs(rumorCheckboxRows) do
+            local channelShort = rumorCheckboxRow.channel == "CA" and LUIE_STRING_LAM_CA_SHARED_CA_SHORT
+                or rumorCheckboxRow.channel == "CSA" and LUIE_STRING_LAM_CA_SHARED_CSA_SHORT
+                or LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT
+            local channelFull = rumorCheckboxRow.channel == "CA" and LUIE_STRING_LAM_CA_SHARED_CA
+                or rumorCheckboxRow.channel == "CSA" and LUIE_STRING_LAM_CA_SHARED_CSA
+                or LUIE_STRING_LAM_CA_SHARED_ALERT
+            local settingKey = rumorCheckboxRow.settingKey
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_CHECKBOX,
+                label = zo_strformat(GetString(rumorCheckboxRow.label), GetString(channelShort)),
+                tooltip = zo_strformat(GetString(rumorCheckboxRow.tooltip), GetString(channelFull)),
+                getFunction = function ()
+                    return Settings.Rumors[settingKey]
+                end,
+                setFunction = function (value)
+                    Settings.Rumors[settingKey] = value
+                end,
+                default = Defaults.Rumors[settingKey],
+                disable = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end
+            }
+        end
+    end)
+
     -- Build Social Announcements Section
     buildSectionSettings("Social", function (settings)
         settings[#settings + 1] =
@@ -8600,6 +8652,7 @@ function ChatAnnouncements.CreateConsoleSettings()
             { svKey = "ZoneDynamicEncounterVampireHunt",    label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_VAMPIRE_HUNT,    tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_VAMPIRE_HUNT_TP    },
             { svKey = "ZoneDynamicEncounterFlowervineFarm", label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_FLOWERVINE_FARM, tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_FLOWERVINE_FARM_TP },
             { svKey = "ZoneDynamicEncounterBilsaDelivery",  label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_BILSA_DELIVERY,  tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_BILSA_DELIVERY_TP  },
+            { svKey = "ZoneDynamicEncounterNowhereVault",  label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT, tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT_TP },
             { svKey = "ZoneDynamicEncounterMisc",           label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_MISC,            tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_MISC_TP            },
         }
         for _, section in ipairs(dynamicEncounterDisplaySections) do
@@ -9676,6 +9729,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_ACHIEVE_HEADER), sectionGroups["Achievements"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_QUEST_HEADER), sectionGroups["Quest"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_HEADER), sectionGroups["QuestCounterFilters"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_RUMOR_HEADER), sectionGroups["Rumors"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_SOCIAL_HEADER), sectionGroups["Social"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_GROUP_HEADER), sectionGroups["Group"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER), sectionGroups["Display"])

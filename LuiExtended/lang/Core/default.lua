@@ -131,6 +131,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_CA_SHARED = "Shared currency and loot context menu options.",
     LUIE_STRING_CONSOLE_SECTION_CA_COLLECTIBLE = "Collectible and lorebook announcement options.",
     LUIE_STRING_CONSOLE_SECTION_CA_ANTIQUITY = "Antiquities and scrying announcement options.",
+    LUIE_STRING_CONSOLE_SECTION_CA_RUMOR = "Rumor started, investigated, and start-failed announcement options.",
     LUIE_STRING_CONSOLE_SECTION_CA_ACHIEVEMENT = "Achievement announcement options.",
     LUIE_STRING_CONSOLE_SECTION_CA_SOCIAL = "Social announcement options.",
     LUIE_STRING_CONSOLE_SECTION_CA_GROUP = "Group announcement options.",

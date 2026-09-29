@@ -331,6 +331,19 @@ ChatAnnouncements.Defaults =
         AntiquityIcon = true,
     },
 
+    -- Rumors (center-screen started/completed, alert-only start failed)
+    Rumors =
+    {
+        RumorStartedCA = true,
+        RumorStartedCSA = true,
+        RumorStartedAlert = false,
+        RumorCompleteCA = true,
+        RumorCompleteCSA = true,
+        RumorCompleteAlert = false,
+        RumorStartFailedCA = true,
+        RumorStartFailedAlert = false,
+    },
+
     -- Quest
     Quests =
     {
@@ -824,6 +837,12 @@ ChatAnnouncements.Defaults =
             Alert = false,
         },
         ZoneDynamicEncounterBilsaDelivery =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneDynamicEncounterNowhereVault =
         {
             CA = false,
             CSA = true,

@@ -87,6 +87,7 @@ local REGISTER_ORDER =
     "RegisterSkills",
     "RegisterCollectibles",
     "RegisterQuests",
+    "RegisterRumors",
     "RegisterXP",
     "RegisterDisplayAnnouncements",
     "RegisterAchievement",

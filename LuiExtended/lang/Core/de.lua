@@ -133,6 +133,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_CA_SHARED = "Gemeinsame Währungs- und Beute-Kontextmenü-Optionen.",
     LUIE_STRING_CONSOLE_SECTION_CA_COLLECTIBLE = "Bekanntgaben für Sammlerstücke und Lorebooks.",
     LUIE_STRING_CONSOLE_SECTION_CA_ANTIQUITY = "Bekanntgaben für Antiquitäten und Wahrsagerei.",
+    LUIE_STRING_CONSOLE_SECTION_CA_RUMOR = "Bekanntgaben für begonnene, untersuchte und fehlgeschlagene Gerüchte.",
     LUIE_STRING_CONSOLE_SECTION_CA_ACHIEVEMENT = "Erfolgs-Bekanntgaben.",
     LUIE_STRING_CONSOLE_SECTION_CA_SOCIAL = "Soziale Bekanntgaben.",
     LUIE_STRING_CONSOLE_SECTION_CA_GROUP = "Gruppen-Bekanntgaben.",

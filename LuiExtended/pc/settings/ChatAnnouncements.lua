@@ -7497,6 +7497,96 @@ function ChatAnnouncements.CreateSettings()
         controls = questCounterFilterControls,
     }
 
+    -- Chat Announcements - Rumor Announcements Options Submenu
+    optionsDataChatAnnouncements[#optionsDataChatAnnouncements + 1] =
+    {
+        type = "submenu",
+        name = GetString(LUIE_STRING_LAM_CA_RUMOR_HEADER),
+        controls =
+        {
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_STARTED), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_STARTED_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function () return Settings.Rumors.RumorStartedCA end,
+                setFunc = function (value) Settings.Rumors.RumorStartedCA = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.Rumors.RumorStartedCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_STARTED), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_STARTED_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function () return Settings.Rumors.RumorStartedCSA end,
+                setFunc = function (value) Settings.Rumors.RumorStartedCSA = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.Rumors.RumorStartedCSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_STARTED), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_STARTED_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function () return Settings.Rumors.RumorStartedAlert end,
+                setFunc = function (value) Settings.Rumors.RumorStartedAlert = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.Rumors.RumorStartedAlert,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_COMPLETE), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_COMPLETE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function () return Settings.Rumors.RumorCompleteCA end,
+                setFunc = function (value) Settings.Rumors.RumorCompleteCA = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.Rumors.RumorCompleteCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_COMPLETE), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_COMPLETE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function () return Settings.Rumors.RumorCompleteCSA end,
+                setFunc = function (value) Settings.Rumors.RumorCompleteCSA = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.Rumors.RumorCompleteCSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_COMPLETE), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_COMPLETE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function () return Settings.Rumors.RumorCompleteAlert end,
+                setFunc = function (value) Settings.Rumors.RumorCompleteAlert = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.Rumors.RumorCompleteAlert,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_START_FAILED), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_START_FAILED_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function () return Settings.Rumors.RumorStartFailedCA end,
+                setFunc = function (value) Settings.Rumors.RumorStartFailedCA = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.Rumors.RumorStartFailedCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_START_FAILED), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_RUMOR_START_FAILED_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function () return Settings.Rumors.RumorStartFailedAlert end,
+                setFunc = function (value) Settings.Rumors.RumorStartFailedAlert = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.Rumors.RumorStartFailedAlert,
+            },
+        },
+    }
+
     -- Chat Announcements - Social Announcements Options Submenu
     optionsDataChatAnnouncements[#optionsDataChatAnnouncements + 1] =
     {
@@ -9443,6 +9533,36 @@ function ChatAnnouncements.CreateSettings()
                 width = "full",
                 disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
                 default = Defaults.DisplayAnnouncements.ZoneDynamicEncounterBilsaDelivery.Alert,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function () return Settings.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.CA end,
+                setFunc = function (value) Settings.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.CA = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.CA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function () return Settings.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.CSA end,
+                setFunc = function (value) Settings.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.CSA = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.CSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function () return Settings.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.Alert end,
+                setFunc = function (value) Settings.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.Alert = value end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ChatAnnouncements_Enable end,
+                default = Defaults.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault.Alert,
             },
             {
                 type = "checkbox",
