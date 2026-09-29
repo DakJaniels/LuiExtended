@@ -1297,7 +1297,7 @@ function SpellCastBuffs.Reset()
     if IsPlayerActivated() then
         SpellCastBuffs.playerActive = true
         SpellCastBuffs.ReloadEffects("player")
-        if GetUnitName("reticleover") ~= "" then
+        if DoesUnitExist("reticleover") then
             SpellCastBuffs.ReloadEffects("reticleover")
         end
     end
@@ -2592,9 +2592,23 @@ function SpellCastBuffs.ShowRecallCooldown()
     end
 end
 
+--- Formatted hard-target name for reticleover.
+--- GetRawUnitName stays "" when the unit is gone. GetUnitName can be nil, and zo_strformat asserts on nil.
+--- @return string
+function SpellCastBuffs.GetFormattedReticleUnitName()
+    if not DoesUnitExist("reticleover") then
+        return ""
+    end
+    local rawUnitName = GetRawUnitName("reticleover")
+    if type(rawUnitName) ~= "string" or rawUnitName == "" then
+        return ""
+    end
+    return zo_strformat("<<C:1>>", rawUnitName)
+end
+
 -- Called by EVENT_RETICLE_TARGET_CHANGED listener - Saves active FAKE debuffs on enemies and moves them back and forth between the active container or hidden.
 function SpellCastBuffs.RestoreSavedFakeEffects()
-    local reticleName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
+    local reticleName = SpellCastBuffs.GetFormattedReticleUnitName()
     local reticleUnitId = SpellCastBuffs.reticleCombatUnitId
     local lists =
     {

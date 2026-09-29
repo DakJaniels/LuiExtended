@@ -20,7 +20,7 @@ function SpellCastBuffs.ReloadEffects(unitTag)
     end
 
     -- When reticle is cleared, optionally keep target buffs/debuffs visible (target frame linger in cursor mode)
-    if unitTag == "reticleover" and GetUnitName(unitTag) == "" then
+    if unitTag == "reticleover" and not DoesUnitExist(unitTag) then
         if LUIE.UnitFrames and LUIE.UnitFrames.SV and LUIE.UnitFrames.SV.TargetLingerInCursorMode and LUIE.UnitFrames.targetFrameLingered then
             return
         end

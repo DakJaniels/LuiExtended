@@ -917,7 +917,7 @@ local function placeOutgoingReticleTargetFakeEffect(abilityId, targetName, sourc
         return
     end
 
-    local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
+    local unitName = SpellCastBuffs.GetFormattedReticleUnitName()
     local listKey = unitName == target and "ground" or "saved"
     opts = opts or {}
     opts.groundLabel = groundLabel
