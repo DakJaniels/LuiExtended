@@ -297,7 +297,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         if buildName == "" then
             buildName = zo_strformat(SI_ARMORY_BUILD_DEFAULT_NAME_FORMATTER, buildIndex)
         end
-        return buildName
+        return EscapeMarkup(buildName, ALLOW_MARKUP_TYPE_COLOR_ONLY)
     end
 
     local function notifyArmoryBuildResponse(eventId, result, buildIndex, isSave)
