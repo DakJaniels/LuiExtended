@@ -50,6 +50,7 @@ local BUFF_EFFECT_TYPE_DEBUFF = BUFF_EFFECT_TYPE_DEBUFF
 
     Duration or Modification:
     - duration = *number* -- Modify the duration display of this effect. Option 1 - Set a negative value - to subtract x seconds from the duration of the effect. Option 2 - Set to 0 to display the buff for an unlimited amount of time until an action result of fade occurs.
+    - durationFromAbility = true -- When the live effect end is infinite (endTime 0 or duration <= 0), start a countdown from GetAbilityDuration. Do not also set duration.
     - noDuplicate = true -- Adds to a table that uses an expensive function - in some cases effects like Shuffle add a new aura every time the effect is cast. This will flag the effect to only show the latest casted one and hide the others.
     - refreshOnly = true -- Only show this effect when the duration is updated/refreshed - Toggle this to hide some goofy effects that have a travel time aura for their projectile before the actual effect applies.
 
@@ -1868,6 +1869,7 @@ local effectOverride =
 
     -- Necromancer (skillLineId 353, line 45)
     [263448] = { icon = "/esoui/art/icons/passive_necromancer_011.dds", dynamicTooltip = true },       -- Nothing Wasted
+    [263461] = { icon = "/esoui/art/icons/passive_necromancer_011.dds", dynamicTooltip = true, tooltipMorphId = 263448, stackMax = 10, durationFromAbility = true }, -- Nothing Wasted (player buff; API duration infinite, GetAbilityDuration 12000; stacks to 10)
     [263465] = { icon = "/esoui/art/icons/passive_armor_003.dds", dynamicTooltip = true },              -- Malevolent Promise
     [263509] = { icon = "/esoui/art/icons/passive_armor_001.dds", dynamicTooltip = true },              -- Cycle Unending
     [263549] = { icon = "/esoui/art/icons/passive_necromancer_010.dds", dynamicTooltip = true },       -- Pound of Flesh
@@ -9892,6 +9894,7 @@ local effectOverride =
 --- @field hideGround boolean? # Hide if ground effect damaging auras shown - prioritizes damage aura display even if immune to other effects
 --- @field hideReduce boolean? # Hide if "HIDE PAIRED AURAS" enabled - merges similar effects to reduce UI clutter
 --- @field duration number? # Modify duration display: negative = subtract seconds, 0 = show until fade
+--- @field durationFromAbility boolean? # Infinite live end: countdown from GetAbilityDuration. Do not also set duration.
 --- @field noDuplicate boolean? # Only show latest cast for effects that create new aura each cast
 --- @field refreshOnly boolean? # Only show when duration refreshed - hides travel time auras
 --- @field tooltip string? # Custom tooltip from Tooltips enum

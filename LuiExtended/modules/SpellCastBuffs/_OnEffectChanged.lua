@@ -312,6 +312,21 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
             endTime = endTime - Effects.EffectOverride[abilityId].duration
         end
 
+        -- Infinite live end (endTime 0 or duration <= 0): countdown from GetAbilityDuration, anchored to now.
+        -- Opt-in only. Do not combine with EffectOverride.duration (that path shifts the event times first).
+        local effectOverride = Effects.EffectOverride[abilityId]
+        if effectOverride and effectOverride.durationFromAbility then
+            local liveDurationMissing = (endTime == 0) or (duration <= 0)
+            if liveDurationMissing and not IsAbilityPermanent(abilityId) and not IsAbilityDurationToggled(abilityId, unitTag) then
+                local abilityDurationMs = GetAbilityDuration(abilityId, nil, unitTag)
+                if abilityDurationMs and abilityDurationMs > 0 then
+                    beginTime = GetGameTimeSeconds()
+                    duration = abilityDurationMs / 1000
+                    endTime = beginTime + duration
+                end
+            end
+        end
+
         if Effects.EffectPullDuration[abilityId] then
             local matchId = Effects.EffectPullDuration[abilityId]
             for i = 1, GetNumBuffs(unitTag) do
