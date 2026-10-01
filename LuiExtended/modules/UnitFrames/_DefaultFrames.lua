@@ -22,7 +22,22 @@ local pairs = pairs
 
 local eventManager = GetEventManager()
 
-local defaultPos = {}
+-- Pyramid geometry from the previous SetAnchor layout.
+local PYRAMID_HEALTH_BUTTON_GAP = 47
+local PYRAMID_MAGICKA_OFFSET_X = -1
+local PYRAMID_MAGICKA_OFFSET_Y = 2
+local PYRAMID_STAMINA_OFFSET_X = 1
+local PYRAMID_STAMINA_OFFSET_Y = 2
+local PYRAMID_SIEGE_OFFSET_X = 300
+local PYRAMID_RAM_OFFSET_X = 300
+local PYRAMID_SMALL_GROUP_OFFSET_X = 20
+local PYRAMID_SMALL_GROUP_OFFSET_Y = 80
+-- PlayerAttributeBars.xml: SiegeHealth TOP to Health BOTTOM, offsetY -1.
+local SIEGE_HEALTH_DEFAULT_OFFSET_Y = -1
+
+local consoleDefaultPos = {}
+local consoleDefaultPosCaptured = false
+local defaultFrameHudCallbacksRegistered = false
 
 local PLAYER_ATTRIBUTE_BAR_SUFFIXES =
 {
@@ -157,53 +172,278 @@ local function GetAnchorInfo(frame)
     return { point, relativeTo, relativePoint, offsetX, offsetY }
 end
 
--- Save default frame positions
-function UnitFrames.SaveDefaultFramePositions()
-    -- Get Default Positions
-    defaultPos.health = GetAnchorInfo(ZO_PlayerAttributeHealth)
-    defaultPos.magicka = GetAnchorInfo(ZO_PlayerAttributeMagicka)
-    defaultPos.stamina = GetAnchorInfo(ZO_PlayerAttributeStamina)
-    defaultPos.siege = GetAnchorInfo(ZO_PlayerAttributeSiegeHealth)
-    defaultPos.ram = GetAnchorInfo(ZO_RAM.control)
-    defaultPos.smallGroup = GetAnchorInfo(ZO_SmallGroupAnchorFrame)
+-- Console still uses raw anchors. HUD_MANAGER:GetSavedAnchor returns the default anchor there.
+local function CaptureConsoleDefaultFramePositions()
+    if consoleDefaultPosCaptured then
+        return
+    end
+    if not ZO_PlayerAttributeHealth or not ZO_RAM or not ZO_RAM.control or not ZO_SmallGroupAnchorFrame then
+        return
+    end
+    consoleDefaultPos.health = GetAnchorInfo(ZO_PlayerAttributeHealth)
+    consoleDefaultPos.magicka = GetAnchorInfo(ZO_PlayerAttributeMagicka)
+    consoleDefaultPos.stamina = GetAnchorInfo(ZO_PlayerAttributeStamina)
+    consoleDefaultPos.siege = GetAnchorInfo(ZO_PlayerAttributeSiegeHealth)
+    consoleDefaultPos.ram = GetAnchorInfo(ZO_RAM.control)
+    consoleDefaultPos.smallGroup = GetAnchorInfo(ZO_SmallGroupAnchorFrame)
+    if consoleDefaultPos.health and consoleDefaultPos.magicka and consoleDefaultPos.stamina and consoleDefaultPos.siege and consoleDefaultPos.ram and consoleDefaultPos.smallGroup then
+        consoleDefaultPosCaptured = true
+    end
+end
+
+local function RepositionDefaultFramesConsole()
+    CaptureConsoleDefaultFramePositions()
+    local verticalAdjust = UnitFrames.SV.RepositionFramesAdjust or 0
+    if not UnitFrames.SV.RepositionFrames then
+        if consoleDefaultPosCaptured then
+            ZO_PlayerAttributeHealth:ClearAnchors()
+            ZO_PlayerAttributeHealth:SetAnchor(consoleDefaultPos.health[1], consoleDefaultPos.health[2], consoleDefaultPos.health[3], consoleDefaultPos.health[4], consoleDefaultPos.health[5] - verticalAdjust)
+            ZO_PlayerAttributeMagicka:ClearAnchors()
+            ZO_PlayerAttributeMagicka:SetAnchor(consoleDefaultPos.magicka[1], consoleDefaultPos.magicka[2], consoleDefaultPos.magicka[3], consoleDefaultPos.magicka[4], consoleDefaultPos.magicka[5] - verticalAdjust)
+            ZO_PlayerAttributeStamina:ClearAnchors()
+            ZO_PlayerAttributeStamina:SetAnchor(consoleDefaultPos.stamina[1], consoleDefaultPos.stamina[2], consoleDefaultPos.stamina[3], consoleDefaultPos.stamina[4], consoleDefaultPos.stamina[5] - verticalAdjust)
+            ZO_PlayerAttributeSiegeHealth:ClearAnchors()
+            ZO_PlayerAttributeSiegeHealth:SetAnchor(consoleDefaultPos.siege[1], consoleDefaultPos.siege[2], consoleDefaultPos.siege[3], consoleDefaultPos.siege[4], consoleDefaultPos.siege[5] - verticalAdjust)
+            ZO_RAM.control:ClearAnchors()
+            ZO_RAM.control:SetAnchor(consoleDefaultPos.ram[1], consoleDefaultPos.ram[2], consoleDefaultPos.ram[3], consoleDefaultPos.ram[4], consoleDefaultPos.ram[5] - verticalAdjust)
+            ZO_SmallGroupAnchorFrame:ClearAnchors()
+            ZO_SmallGroupAnchorFrame:SetAnchor(consoleDefaultPos.smallGroup[1], consoleDefaultPos.smallGroup[2], consoleDefaultPos.smallGroup[3], consoleDefaultPos.smallGroup[4], consoleDefaultPos.smallGroup[5] - verticalAdjust)
+        end
+        return
+    end
+
+    ZO_PlayerAttributeHealth:ClearAnchors()
+    ZO_PlayerAttributeHealth:SetAnchor(BOTTOM, ActionButton5, TOP, 0, -PYRAMID_HEALTH_BUTTON_GAP - verticalAdjust)
+    ZO_PlayerAttributeMagicka:ClearAnchors()
+    ZO_PlayerAttributeMagicka:SetAnchor(TOPRIGHT, ZO_PlayerAttributeHealth, BOTTOM, PYRAMID_MAGICKA_OFFSET_X, PYRAMID_MAGICKA_OFFSET_Y)
+    ZO_PlayerAttributeStamina:ClearAnchors()
+    ZO_PlayerAttributeStamina:SetAnchor(TOPLEFT, ZO_PlayerAttributeHealth, BOTTOM, PYRAMID_STAMINA_OFFSET_X, PYRAMID_STAMINA_OFFSET_Y)
+    ZO_PlayerAttributeSiegeHealth:ClearAnchors()
+    ZO_PlayerAttributeSiegeHealth:SetAnchor(CENTER, ZO_PlayerAttributeHealth, CENTER, PYRAMID_SIEGE_OFFSET_X, 0)
+    ZO_RAM.control:ClearAnchors()
+    ZO_RAM.control:SetAnchor(BOTTOM, ZO_PlayerAttributeHealth, TOP, PYRAMID_RAM_OFFSET_X, 0)
+    ZO_SmallGroupAnchorFrame:ClearAnchors()
+    ZO_SmallGroupAnchorFrame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, PYRAMID_SMALL_GROUP_OFFSET_X, PYRAMID_SMALL_GROUP_OFFSET_Y)
+end
+
+--- Keyboard and gamepad HUD elements share one control. HUDManager.lua GetKeyboardElementForControl / GetGamepadElementForControl.
+--- @param control Control|nil
+--- @return ZO_HUDManager_Element|nil
+local function GetActivePlatformHudElement(control)
+    if IsInGamepadPreferredMode() then
+        return HUD_MANAGER:GetGamepadElementForControl(control)
+    end
+    return HUD_MANAGER:GetKeyboardElementForControl(control)
+end
+
+--- Screen position of an anchor point, expressed the same way as ZO_GetControlPointOffsetFromGuiRoot.
+--- @param anchorPoint AnchorPosition
+--- @param screenX number
+--- @param screenY number
+--- @return number offsetX
+--- @return number offsetY
+local function GetGuiRootOffsetForAnchorPoint(anchorPoint, screenX, screenY)
+    local guiRootCenterX, guiRootCenterY = GuiRoot:GetCenter()
+    local offsetX
+    if anchorPoint == TOPLEFT or anchorPoint == LEFT or anchorPoint == BOTTOMLEFT then
+        offsetX = screenX
+    elseif anchorPoint == TOP or anchorPoint == CENTER or anchorPoint == BOTTOM then
+        offsetX = screenX - guiRootCenterX
+    else
+        offsetX = screenX - GuiRoot:GetRight()
+    end
+
+    local offsetY
+    if anchorPoint == TOPLEFT or anchorPoint == TOP or anchorPoint == TOPRIGHT then
+        offsetY = screenY
+    elseif anchorPoint == LEFT or anchorPoint == CENTER or anchorPoint == RIGHT then
+        offsetY = screenY - guiRootCenterY
+    else
+        offsetY = screenY - GuiRoot:GetBottom()
+    end
+    return offsetX, offsetY
+end
+
+--- @param element ZO_HUDManager_Element|nil
+--- @param desiredOffsetX number
+--- @param desiredOffsetY number
+local function ApplyHudElementGuiRootOffset(element, desiredOffsetX, desiredOffsetY)
+    if not element then
+        return
+    end
+    local control = element:GetControl()
+    -- Saved or default anchor first, so ApplyOffset reads the element's primary anchor point.
+    element:RevertOffsetModifications()
+    local anchorPoint = element.primaryAnchorPoint
+    local controlOffsetX, controlOffsetY = ZO_GetControlPointOffsetFromGuiRoot(control, anchorPoint)
+    local refOffsetX, refOffsetY = ZO_GetControlPointOffsetFromGuiRoot(control.hudElementRef, anchorPoint)
+    local applyOffsetX = desiredOffsetX - (controlOffsetX - refOffsetX)
+    local applyOffsetY = desiredOffsetY - (controlOffsetY - refOffsetY)
+    element:ApplyOffset(applyOffsetX, applyOffsetY, false)
+end
+
+--- @param element ZO_HUDManager_Element|nil
+--- @param verticalAdjust number
+local function ApplySavedAnchorVerticalAdjust(element, verticalAdjust)
+    if not element then
+        return
+    end
+    element:RevertOffsetModifications()
+    if verticalAdjust == 0 then
+        return
+    end
+    local _, refOffsetX, refOffsetY = element:GetConvertedRefControlAnchorInfo()
+    element:ApplyOffset(refOffsetX, refOffsetY - verticalAdjust, false)
+end
+
+--- @param element ZO_HUDManager_Element|nil
+local function ResetHudElementToDefaultAnchor(element)
+    if not element then
+        return
+    end
+    element:ResetToDefaultAnchor(false)
+end
+
+--- FRAME_OPTIONS Combine defaults to true (PlayerAttributeBars.lua).
+--- @param frameElement ZO_HUDManager_Element|nil
+--- @return boolean
+local function GetPlayerAttributeResourcesCombined(frameElement)
+    if not frameElement then
+        return true
+    end
+    local combineValue = frameElement:GetCustomOptionValue("Combine")
+    if combineValue == nil then
+        return true
+    end
+    return combineValue
+end
+
+local function RestoreSiegeHealthDefaultAnchor()
+    local siegeHealth = ZO_PlayerAttributeSiegeHealth
+    local health = ZO_PlayerAttributeHealth
+    if not siegeHealth or not health then
+        return
+    end
+    siegeHealth:ClearAnchors()
+    siegeHealth:SetAnchor(TOP, health, BOTTOM, 0, SIEGE_HEALTH_DEFAULT_OFFSET_Y)
+end
+
+local function ApplyPyramidSiegeHealthAnchor()
+    local siegeHealth = ZO_PlayerAttributeSiegeHealth
+    local health = ZO_PlayerAttributeHealth
+    if not siegeHealth or not health then
+        return
+    end
+    siegeHealth:ClearAnchors()
+    siegeHealth:SetAnchor(CENTER, health, CENTER, PYRAMID_SIEGE_OFFSET_X, 0)
+end
+
+--- @param verticalAdjust number
+local function ApplyPyramidPlayerFrameLayout(verticalAdjust)
+    local healthElement = GetActivePlatformHudElement(ZO_PlayerAttributeHealth)
+    local magickaElement = GetActivePlatformHudElement(ZO_PlayerAttributeMagicka)
+    local staminaElement = GetActivePlatformHudElement(ZO_PlayerAttributeStamina)
+    local frameElement = GetActivePlatformHudElement(ZO_PlayerAttribute)
+    local ramElement = GetActivePlatformHudElement(ZO_RAM.control)
+    local smallGroupElement = GetActivePlatformHudElement(ZO_SmallGroupAnchorFrame)
+
+    if healthElement and ActionButton5 then
+        local healthControl = healthElement:GetControl()
+        local buttonCenterX = ActionButton5:GetCenter()
+        local buttonTop = ActionButton5:GetTop()
+        local healthBottom = buttonTop - PYRAMID_HEALTH_BUTTON_GAP - verticalAdjust
+        local healthCenterY = healthBottom - (healthControl:GetHeight() / 2)
+        local desiredOffsetX, desiredOffsetY = GetGuiRootOffsetForAnchorPoint(healthElement.primaryAnchorPoint, buttonCenterX, healthCenterY)
+        ApplyHudElementGuiRootOffset(healthElement, desiredOffsetX, desiredOffsetY)
+    end
+
+    local healthCenterX = ZO_PlayerAttributeHealth:GetCenter()
+    local healthBottom = ZO_PlayerAttributeHealth:GetBottom()
+    local healthTop = ZO_PlayerAttributeHealth:GetTop()
+
+    if magickaElement then
+        local magickaControl = magickaElement:GetControl()
+        local anchorScreenX = healthCenterX + PYRAMID_MAGICKA_OFFSET_X
+        local anchorScreenY = healthBottom + PYRAMID_MAGICKA_OFFSET_Y + (magickaControl:GetHeight() / 2)
+        local desiredOffsetX, desiredOffsetY = GetGuiRootOffsetForAnchorPoint(magickaElement.primaryAnchorPoint, anchorScreenX, anchorScreenY)
+        ApplyHudElementGuiRootOffset(magickaElement, desiredOffsetX, desiredOffsetY)
+    end
+
+    if staminaElement then
+        local staminaControl = staminaElement:GetControl()
+        local anchorScreenX = healthCenterX + PYRAMID_STAMINA_OFFSET_X
+        local anchorScreenY = healthBottom + PYRAMID_STAMINA_OFFSET_Y + (staminaControl:GetHeight() / 2)
+        local desiredOffsetX, desiredOffsetY = GetGuiRootOffsetForAnchorPoint(staminaElement.primaryAnchorPoint, anchorScreenX, anchorScreenY)
+        ApplyHudElementGuiRootOffset(staminaElement, desiredOffsetX, desiredOffsetY)
+    end
+
+    if frameElement then
+        frameElement:RevertOffsetModifications()
+    end
+
+    ApplyPyramidSiegeHealthAnchor()
+
+    if ramElement then
+        local anchorScreenX = healthCenterX + PYRAMID_RAM_OFFSET_X
+        local anchorScreenY = healthTop
+        local desiredOffsetX, desiredOffsetY = GetGuiRootOffsetForAnchorPoint(ramElement.primaryAnchorPoint, anchorScreenX, anchorScreenY)
+        ApplyHudElementGuiRootOffset(ramElement, desiredOffsetX, desiredOffsetY)
+    end
+
+    if smallGroupElement then
+        local desiredOffsetX, desiredOffsetY = GetGuiRootOffsetForAnchorPoint(smallGroupElement.primaryAnchorPoint, PYRAMID_SMALL_GROUP_OFFSET_X, PYRAMID_SMALL_GROUP_OFFSET_Y)
+        ApplyHudElementGuiRootOffset(smallGroupElement, desiredOffsetX, desiredOffsetY)
+    end
+end
+
+--- @param verticalAdjust number
+local function ApplyVerticalPlayerFrameAdjust(verticalAdjust)
+    local healthElement = GetActivePlatformHudElement(ZO_PlayerAttributeHealth)
+    local magickaElement = GetActivePlatformHudElement(ZO_PlayerAttributeMagicka)
+    local staminaElement = GetActivePlatformHudElement(ZO_PlayerAttributeStamina)
+    local frameElement = GetActivePlatformHudElement(ZO_PlayerAttribute)
+    local ramElement = GetActivePlatformHudElement(ZO_RAM.control)
+    local smallGroupElement = GetActivePlatformHudElement(ZO_SmallGroupAnchorFrame)
+    local resourcesCombined = GetPlayerAttributeResourcesCombined(frameElement)
+
+    if resourcesCombined then
+        ResetHudElementToDefaultAnchor(healthElement)
+        ResetHudElementToDefaultAnchor(magickaElement)
+        ResetHudElementToDefaultAnchor(staminaElement)
+        RestoreSiegeHealthDefaultAnchor()
+        ApplySavedAnchorVerticalAdjust(frameElement, verticalAdjust)
+    else
+        if frameElement then
+            frameElement:RevertOffsetModifications()
+        end
+        ApplySavedAnchorVerticalAdjust(healthElement, verticalAdjust)
+        ApplySavedAnchorVerticalAdjust(magickaElement, verticalAdjust)
+        ApplySavedAnchorVerticalAdjust(staminaElement, verticalAdjust)
+        RestoreSiegeHealthDefaultAnchor()
+    end
+
+    ApplySavedAnchorVerticalAdjust(ramElement, verticalAdjust)
+    ApplySavedAnchorVerticalAdjust(smallGroupElement, verticalAdjust)
 end
 
 -- Adjust default frame position.
 function UnitFrames.RepositionDefaultFrames()
-    if not UnitFrames.SV.RepositionFrames then
-        if defaultPos.health then
-            ZO_PlayerAttributeHealth:ClearAnchors()
-            ZO_PlayerAttributeHealth:SetAnchor(defaultPos.health[1], defaultPos.health[2], defaultPos.health[3], defaultPos.health[4], defaultPos.health[5] - UnitFrames.SV.RepositionFramesAdjust)
-            ZO_PlayerAttributeMagicka:ClearAnchors()
-            ZO_PlayerAttributeMagicka:SetAnchor(defaultPos.magicka[1], defaultPos.magicka[2], defaultPos.magicka[3], defaultPos.magicka[4], defaultPos.magicka[5] - UnitFrames.SV.RepositionFramesAdjust)
-            ZO_PlayerAttributeStamina:ClearAnchors()
-            ZO_PlayerAttributeStamina:SetAnchor(defaultPos.stamina[1], defaultPos.stamina[2], defaultPos.stamina[3], defaultPos.stamina[4], defaultPos.stamina[5] - UnitFrames.SV.RepositionFramesAdjust)
-            ZO_PlayerAttributeSiegeHealth:ClearAnchors()
-            ZO_PlayerAttributeSiegeHealth:SetAnchor(defaultPos.siege[1], defaultPos.siege[2], defaultPos.siege[3], defaultPos.siege[4], defaultPos.siege[5] - UnitFrames.SV.RepositionFramesAdjust)
-            ZO_RAM.control:ClearAnchors()
-            ZO_RAM.control:SetAnchor(defaultPos.ram[1], defaultPos.ram[2], defaultPos.ram[3], defaultPos.ram[4], defaultPos.ram[5] - UnitFrames.SV.RepositionFramesAdjust)
-            ZO_SmallGroupAnchorFrame:ClearAnchors()
-            ZO_SmallGroupAnchorFrame:SetAnchor(defaultPos.smallGroup[1], defaultPos.smallGroup[2], defaultPos.smallGroup[3], defaultPos.smallGroup[4], defaultPos.smallGroup[5] - UnitFrames.SV.RepositionFramesAdjust)
-        end
+    if not UnitFrames.Enabled then
+        return
+    end
+    if not UnitFrames.SV or UnitFrames.SV.RepositionFrames == nil then
+        return
+    end
+    if ZO_IsConsoleOrGameCoreUI() then
+        RepositionDefaultFramesConsole()
+        return
     end
 
-    -- Reposition frames
+    local verticalAdjust = UnitFrames.SV.RepositionFramesAdjust or 0
     if UnitFrames.SV.RepositionFrames then
-        -- Shift to center magicka and stamina bars
-        ZO_PlayerAttributeHealth:ClearAnchors()
-        ZO_PlayerAttributeHealth:SetAnchor(BOTTOM, ActionButton5, TOP, 0, -47 - UnitFrames.SV.RepositionFramesAdjust)
-        ZO_PlayerAttributeMagicka:ClearAnchors()
-        ZO_PlayerAttributeMagicka:SetAnchor(TOPRIGHT, ZO_PlayerAttributeHealth, BOTTOM, -1, 2)
-        ZO_PlayerAttributeStamina:ClearAnchors()
-        ZO_PlayerAttributeStamina:SetAnchor(TOPLEFT, ZO_PlayerAttributeHealth, BOTTOM, 1, 2)
-        -- Shift to the right siege weapon health and ram control
-        ZO_PlayerAttributeSiegeHealth:ClearAnchors()
-        ZO_PlayerAttributeSiegeHealth:SetAnchor(CENTER, ZO_PlayerAttributeHealth, CENTER, 300, 0)
-        ZO_RAM.control:ClearAnchors()
-        ZO_RAM.control:SetAnchor(BOTTOM, ZO_PlayerAttributeHealth, TOP, 300, 0)
-        -- Shift a little upwards small group unit frames
-        ZO_SmallGroupAnchorFrame:ClearAnchors()
-        ZO_SmallGroupAnchorFrame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 20, 80) -- default is 28,100
+        ApplyPyramidPlayerFrameLayout(verticalAdjust)
+    else
+        ApplyVerticalPlayerFrameAdjust(verticalAdjust)
     end
 end
 
@@ -487,4 +727,37 @@ function UnitFrames.UpdateDefaultLevelTarget()
     else
         targetChamp:SetHidden(true)
     end
+end
+
+-- HUD_MANAGER:PropagateSettings reverts anchors before this fires (load, resize, gamepad mode).
+local function OnDefaultFrameHudPropagateSettings()
+    UnitFrames.RepositionDefaultFrames()
+end
+
+--- @param element ZO_HUDManager_Element
+local function OnDefaultFrameHudOffsetsChanged(element)
+    if element:GetControl() ~= ZO_ActionBar1 then
+        return
+    end
+    UnitFrames.RepositionDefaultFrames()
+end
+
+--- @param oldState integer
+--- @param newState integer
+local function OnHudEditorSceneStateChange(oldState, newState)
+    if newState ~= SCENE_HIDDEN then
+        return
+    end
+    UnitFrames.RepositionDefaultFrames()
+end
+
+function UnitFrames.RegisterDefaultFrameHudCallbacks()
+    if defaultFrameHudCallbacksRegistered then
+        return
+    end
+
+    HUD_MANAGER:RegisterCallback("PropagateSettings", OnDefaultFrameHudPropagateSettings)
+    HUD_MANAGER:RegisterCallback("OffsetsChanged", OnDefaultFrameHudOffsetsChanged)
+    HUD_EDITOR_SCENE_KEYBOARD:RegisterCallback("StateChange", OnHudEditorSceneStateChange)
+    defaultFrameHudCallbacksRegistered = true
 end

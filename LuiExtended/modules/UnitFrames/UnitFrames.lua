@@ -247,7 +247,6 @@ function UnitFrames.Initialize(enabled)
 
     UnitFrames.ResetCompassBarMenu()
 
-    UnitFrames.SaveDefaultFramePositions()
     UnitFrames.RepositionDefaultFrames()
     UnitFrames.SetDefaultFramesTransparency()
 
@@ -450,6 +449,8 @@ function UnitFrames.OnPlayerActivated(eventId, initial)
     UnitFrames.CompanionUpdate()
     UnitFrames.CustomPetUpdate()
     UnitFrames.UpdatePlayerFrameDeathVisibility()
+    UnitFrames.RegisterDefaultFrameHudCallbacks()
+    UnitFrames.RepositionDefaultFrames()
 end
 
 function UnitFrames.CustomFramesUnreferencePetControl(first)
