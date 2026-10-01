@@ -1120,6 +1120,7 @@ local tooltips =
     Skill_Ring_of_Preservation = GetString(LUIE_STRING_SKILL_RING_OF_PRESERVATION_TP),
     Skill_Expert_Hunter = GetString(LUIE_STRING_SKILL_EXPERT_HUNTER_TP),
     Skill_Evil_Hunter = GetString(LUIE_STRING_SKILL_EVIL_HUNTER_TP),
+    Skill_Camouflaged_Hunter = GetString(LUIE_STRING_SKILL_CAMOUFLAGED_HUNTER_TP),
     Skill_Trap_Beast = GetString(LUIE_STRING_SKILL_TRAP_BEAST_TP),
     Skill_Trap_Beast_Debuff = GetString(LUIE_STRING_SKILL_TRAP_BEAST_DEBUFF_TP),
     Skill_Barbed_Trap = GetString(LUIE_STRING_SKILL_BARBED_TRAP_TP),
@@ -1128,6 +1129,8 @@ local tooltips =
     Skill_Dawnbreaker_of_Smiting = GetString(LUIE_STRING_SKILL_DAWNBREAKER_OF_SMITING_TP),
 
     -- Mages Guild
+    Skill_Magelight = GetString(LUIE_STRING_SKILL_MAGELIGHT_TP),
+    Skill_Inner_Light = GetString(LUIE_STRING_SKILL_INNER_LIGHT_TP),
     Skill_Radiant_Magelight = GetString(LUIE_STRING_SKILL_RADIANT_MAGELIGHT_TP),
     Skill_Structured_Entropy = GetString(LUIE_STRING_SKILL_STRUCTURED_ENTROPY_TP),
     Skill_Fire_Rune = GetString(LUIE_STRING_SKILL_FIRE_RUNE_TP),

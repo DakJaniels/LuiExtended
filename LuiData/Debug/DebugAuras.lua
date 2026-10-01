@@ -9886,8 +9886,8 @@ local debugAuras =
     -------------------------------------
 
     [47717] = true, -- Quick Strike (Guard T1)
-    [46220] = true, -- Puncture (Guard T1 + T2)
-    [46221] = true, -- Puncture (Guard T1 + T2)
+    [46220] = true, -- Perforate (Guard T1 + T2)
+    [46221] = true, -- Perforate (Guard T1 + T2)
     [46830] = true, -- Bleeding Strike (Guard T2)
     [46832] = true, -- Bleeding (Guard T2)
     [46831] = true, -- Bleeding (Guard T2)

@@ -425,6 +425,117 @@ function SpellCastBuffs.HandleIncomingGroundDamageAura(result, abilityId, abilit
     SpellCastBuffs.MarkDisplayDirty()
 end
 
+--- Max charges for a real player buff whose stack label is counted from hit damage.
+--- The track id is a value in BarHighlightStackConsumeOnDamage and a key in BarHighlightStack.
+--- Crystal Weapon 46331: API stack stays 0, so the buff icon uses this count.
+--- @param abilityId integer
+--- @return integer|nil
+local function GetChargeStackMax(abilityId)
+    local stackMaxByAbilityId = Effects.BarHighlightStack
+    local consumeOnDamage = Effects.BarHighlightStackConsumeOnDamage
+    if not stackMaxByAbilityId or not consumeOnDamage then
+        return nil
+    end
+    local maxStacks = stackMaxByAbilityId[abilityId]
+    if not maxStacks or maxStacks <= 0 then
+        return nil
+    end
+    for _, trackAbilityId in pairs(consumeOnDamage) do
+        if trackAbilityId == abilityId then
+            return maxStacks
+        end
+    end
+    return nil
+end
+
+--- Write the stack label on every displayed row for this ability id.
+--- A nil or non-positive count hides the label. The next icon update reads the row in place.
+--- @param abilityId integer
+--- @param stackCount integer|nil
+function SpellCastBuffs.SetDisplayedEffectStacks(abilityId, stackCount)
+    local stacks = stackCount
+    if stacks == nil or stacks <= 0 then
+        stacks = nil
+    end
+    for _, effectsList in pairs(SpellCastBuffs.EffectsList) do
+        for _, effectRow in pairs(effectsList) do
+            if effectRow.id == abilityId then
+                effectRow.stack = stacks
+            end
+        end
+    end
+end
+
+--- Cast or refresh: the charge window starts full again.
+--- @param abilityId integer
+function SpellCastBuffs.ResetChargeStacks(abilityId)
+    local maxStacks = GetChargeStackMax(abilityId)
+    if not maxStacks then
+        return
+    end
+    SpellCastBuffs.chargeStacksRemaining[abilityId] = maxStacks
+    SpellCastBuffs.SetDisplayedEffectStacks(abilityId, maxStacks)
+end
+
+--- One connecting hit spends one charge. At 0 the label hides; the buff fade removes the icon.
+--- @param damageAbilityId integer
+function SpellCastBuffs.SpendChargeStackOnDamage(damageAbilityId)
+    local consumeOnDamage = Effects.BarHighlightStackConsumeOnDamage
+    if not consumeOnDamage then
+        return
+    end
+    local trackAbilityId = consumeOnDamage[damageAbilityId]
+    if not trackAbilityId then
+        return
+    end
+    local remaining = SpellCastBuffs.chargeStacksRemaining[trackAbilityId]
+    if not remaining or remaining <= 0 then
+        return
+    end
+    remaining = remaining - 1
+    SpellCastBuffs.chargeStacksRemaining[trackAbilityId] = remaining
+    if remaining > 0 then
+        SpellCastBuffs.SetDisplayedEffectStacks(trackAbilityId, remaining)
+    else
+        SpellCastBuffs.SetDisplayedEffectStacks(trackAbilityId, nil)
+    end
+end
+
+--- Keep a stored charge count across effect updates that report stack 0.
+--- A fresh gain fills the count. A later update keeps whatever hits have spent.
+--- Fade drops the stored count so the next cast does not inherit it.
+--- @param abilityId integer
+--- @param changeType EffectResult
+--- @param stackCount integer
+--- @return integer
+function SpellCastBuffs.ResolveChargeStacks(abilityId, changeType, stackCount)
+    local maxStacks = GetChargeStackMax(abilityId)
+    if not maxStacks then
+        return stackCount
+    end
+    if changeType == EFFECT_RESULT_FADED then
+        SpellCastBuffs.chargeStacksRemaining[abilityId] = nil
+        return stackCount
+    end
+    if changeType == EFFECT_RESULT_GAINED then
+        SpellCastBuffs.chargeStacksRemaining[abilityId] = maxStacks
+        return maxStacks
+    end
+    local remaining = SpellCastBuffs.chargeStacksRemaining[abilityId]
+    if remaining == nil then
+        remaining = maxStacks
+        SpellCastBuffs.chargeStacksRemaining[abilityId] = remaining
+    end
+    return remaining
+end
+
+--- @param abilityId integer
+function SpellCastBuffs.ClearChargeStacks(abilityId)
+    if GetChargeStackMax(abilityId) then
+        SpellCastBuffs.chargeStacksRemaining[abilityId] = nil
+    end
+end
+
 --- @param result ActionResult
 --- @param abilityId integer
 function SpellCastBuffs.HandleIncomingCrystallizedShield(result, abilityId)
@@ -616,7 +727,7 @@ function SpellCastBuffs.HandleIncomingFakePlayerBuff(result, abilityId, sourceNa
     end
 
     local effectName = config.name or GetAbilityName(abilityId)
-    if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName]) then
+    if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) or SpellCastBuffs.IsProminentBuff(abilityId, effectName)) then
         return
     end
     if config.onlyExtra and not SpellCastBuffs.SV.ExtraBuffs then
@@ -818,7 +929,7 @@ local function resolveFakePlayerOfflineAuraContext(config, abilityId, effectName
     end
     if SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) then
         context = "promd_player"
-    elseif SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] then
+    elseif SpellCastBuffs.IsProminentBuff(abilityId, effectName) then
         context = "promb_player"
     end
     return context
@@ -841,7 +952,7 @@ function SpellCastBuffs.HandleOutgoingFakePlayerOfflineAura(result, abilityId, s
     end
 
     local effectName = config.name or GetAbilityName(abilityId)
-    if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) or SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] or config.ground) then
+    if SpellCastBuffs.SV.HidePlayerBuffs and not (SpellCastBuffs.WantsProminentDebuff(abilityId, effectName) or SpellCastBuffs.IsProminentBuff(abilityId, effectName) or config.ground) then
         return
     end
 

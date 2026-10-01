@@ -1767,15 +1767,19 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
         end)
 
         -- Prominent Buffs
+        -- prominentByIdOnly abilities (Crystal Weapon 46331 / 143808) share a display name, so the name must not be stored.
         local promBuffs = SpellCastBuffs.SV.PromBuffTable
-        local isPromBuff = promBuffs[id] or promBuffs[name]
+        local matchProminentByName = SpellCastBuffs.MatchesProminentByName(id)
+        local isPromBuff = SpellCastBuffs.IsProminentBuff(id, name)
         AddMenuItem(isPromBuff and "Remove from Prominent Buffs" or "Add to Prominent Buffs", function ()
             if isPromBuff then
                 SpellCastBuffs.RemoveFromCustomList(promBuffs, id)
                 SpellCastBuffs.RemoveFromCustomList(promBuffs, name)
             else
                 SpellCastBuffs.AddToCustomList(promBuffs, id)
-                SpellCastBuffs.AddToCustomList(promBuffs, name)
+                if matchProminentByName then
+                    SpellCastBuffs.AddToCustomList(promBuffs, name)
+                end
             end
         end)
 
@@ -1794,7 +1798,9 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
                 end
             else
                 SpellCastBuffs.AddToCustomList(promDebuffs, id)
-                SpellCastBuffs.AddToCustomList(promDebuffs, name)
+                if SpellCastBuffs.MatchesProminentByName(id) then
+                    SpellCastBuffs.AddToCustomList(promDebuffs, name)
+                end
             end
         end)
 

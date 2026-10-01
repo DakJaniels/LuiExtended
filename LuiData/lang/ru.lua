@@ -192,10 +192,10 @@ local strings =
     LUIE_STRING_SKILL_MAJOR_BRITTLE_TP = "Increase Critical Damage taken by |cFFFFFF20|r%.",
 
     -- Slayer / Aegis
-    LUIE_STRING_SKILL_MINOR_SLAYER_TP = "Ваши атаки наносят на |cFFFFFF5|r% больше урона по противникам в Подземельях, Испытаниях и на Аренах.",
-    LUIE_STRING_SKILL_MAJOR_SLAYER_TP = "Ваши атаки наносят на |cFFFFFF10|r% больше урона по противникам в Подземельях, Испытаниях и на Аренах.",
-    LUIE_STRING_SKILL_MINOR_AEGIS_TP = "Вы получаете на |cFFFFFF5|r% меньше урона от противников в Подземельях, Испытаниях и на Аренах.",
-    LUIE_STRING_SKILL_MAJOR_AEGIS_TP = "Вы получаете на |cFFFFFF10|r% меньше урона от противников в Подземельях, Испытаниях и на Аренах.",
+    LUIE_STRING_SKILL_MINOR_SLAYER_TP = "Ваши атаки наносят на |cFFFFFF5|r% больше урона по монстрам.",
+    LUIE_STRING_SKILL_MAJOR_SLAYER_TP = "Ваши атаки наносят на |cFFFFFF10|r% больше урона по монстрам.",
+    LUIE_STRING_SKILL_MINOR_AEGIS_TP = "Вы получаете на |cFFFFFF5|r% меньше урона от монстров.",
+    LUIE_STRING_SKILL_MAJOR_AEGIS_TP = "Вы получаете на |cFFFFFF10|r% меньше урона от монстров.",
 
     -- Empower
     LUIE_STRING_SKILL_EMPOWER_TP = "Increase damage done with Heavy Attacks against monsters by |cFFFFFF70|r%.",
@@ -371,7 +371,7 @@ local strings =
     ----------------------------------------------------------------
 
     -- Dragonknight Skills
-    LUIE_STRING_SKILL_SEETHING_FURY_TP = "Increase the damage of your next Molten Whip by |cFFFFFF33|r% and your Weapon and Spell Damage by |cFFFFFF75|r for |cFFFFFF<<1>>|r seconds.\n\nThis effect can stack up to |cFFFFFF3|r times.",
+    LUIE_STRING_SKILL_SEETHING_FURY_TP = "Увеличивает урон от следующего применения способности «Лавовый хлыст» на |cFFFFFF33|r% в течение |cFFFFFF<<1>>|r секунд (эффект вдвое слабее против игроков).\n\nЭтот эффект суммируется до |cFFFFFF3|r раз.",
     LUIE_STRING_SKILL_VENOMOUS_CLAW_TP = "Afflicted with Poison Damage every |cFFFFFF2|r seconds for |cFFFFFF<<1>>|r seconds.\n\nDeals |cFFFFFF12|r% more damage every |cFFFFFF2|r seconds.",
     LUIE_STRING_SKILL_BURNING_EMBERS_TP = "Подвержен урону от Огня каждые |cFFFFFF2|r секунды в течение |cFFFFFF<<1>>|r секунд.\n\nИсцеляет рыцаря-дракона на |cFFFFFF75|r% от нанесённого урона по завершению действия эффекта.",
     LUIE_STRING_SKILL_ENGULFING_FLAMES_TP = "Подвержен урону от Огня каждые |cFFFFFF2|r секунды в течение |cFFFFFF<<1>>|r секунд.\n\nIncrease damage taken from Flame Damage attacks by up to |cFFFFFF10|r%.",
@@ -437,7 +437,7 @@ local strings =
     -- Sorcerer
     LUIE_STRING_SKILL_PERSISTENCE = "Your next Health, Magicka, or Stamina ability used within |cFFFFFF4|r seconds costs |cFFFFFF<<1>>|r% less.",
     LUIE_STRING_SKILL_CRYSTAL_WEAVER_TP = "Your next non-Ultimate ability cast within |cFFFFFF<<1>>|r <<1[second/seconds]>> costs |cFFFFFF10|r% less.",
-    LUIE_STRING_SKILL_CRYSTAL_WEAPON_TP = "Your next Light or Heavy Attack used within |cFFFFFF<<1>>|r <<1[second/seconds]>> deals additional Physical Damage and reduces the target's Armor by |cFFFFFF1000|r for |cFFFFFF5|r seconds.",
+    LUIE_STRING_SKILL_CRYSTAL_WEAPON_TP = "Вы на |cFFFFFF<<1>>|r секунд покрываете свое оружие темными кристаллами, отчего ваши следующие |cFFFFFF3|r обычные или силовые атаки наносят дополнительный урон и уменьшают показатель брони противника на |cFFFFFF1000|r на |cFFFFFF5|r секунд. Первый удар наносит больше урона, чем остальные. Пока способность активна, вы не можете скрыть свое присутствие.",
     LUIE_STRING_SKILL_CRYSTAL_FRAGMENTS_TP = "Ваше следующее применение Crystal Fragments в течение |cFFFFFF<<1>>|r секунд происходит мгновенно, наносит на |cFFFFFF66|r% больше урона, и расходует на |cFFFFFF50|r% меньше Магии.",
     LUIE_STRING_SKILL_SHATTERING_PRISON_TP = "Immobilized for |cFFFFFF<<1>>|r <<1[second/seconds]>>.\n\nThe shards deal Magic Damage when the effect ends.",
     LUIE_STRING_SKILL_RUNE_CAGE_TP = "Imprisoned in a sphere of dark magic and stunned for |cFFFFFF<<1>>|r seconds.\n\nDeals Magic Damage if the stun lasts the full duration.",
@@ -571,7 +571,7 @@ local strings =
     LUIE_STRING_SKILL_MYSTIC_SIPHON_TP = "Enemies within |cFFFFFF5|r meters of the corpse and between you and the corpse take Shock Damage over |cFFFFFF<<1>>|r seconds.\n\nYou also restore |cFFFFFF1260|r Magicka over |cFFFFFF<<1>>|r seconds while siphoning the corpse.",
     LUIE_STRING_SKILL_FROZEN_COLOSSUS_TP = "A frostbitten Flesh Colossus smashes the ground three times over |cFFFFFF3|r seconds, dealing Frost Damage to enemies within |cFFFFFF8|r meters.\n\nDealing damage applies Major Vulnerability to any enemy hit for |cFFFFFF12|r seconds.",
     LUIE_STRING_SKILL_FROZEN_COLOSSUS_GROUND_TP = "Taking Frost Damage every |cFFFFFF1|r second.\n\nWhen you take damage from this effect you are afflicted with Major Vulnerability for |cFFFFFF12|r seconds.",
-    LUIE_STRING_SKILL_PESTILENT_COLOSSUS_TP = "A pestilent Flesh Colossus smashes the ground three times over |cFFFFFF3|r seconds, dealing increasing Disease Damage to enemies within |cFFFFFF8|r meters.\n\nDealing damage applies Major Vulnerability to any enemy hit for |cFFFFFF12|r seconds.",
+    LUIE_STRING_SKILL_PESTILENT_COLOSSUS_TP = "Чумной колосс бьет по земле три раза в течение |cFFFFFF3|r секунд, нанося возрастающий урон болезнью противникам в радиусе |cFFFFFF8|r метров. Последний удар всегда накладывает эффект состояния «Болезнь».\n\nНанесение урона накладывает на пораженных противников эффект «Великая уязвимость» на |cFFFFFF12|r секунд.",
     LUIE_STRING_SKILL_PESTILENT_COLOSSUS_GROUND_TP = "Taking Disease Damage every |cFFFFFF1|r second.\n\nWhen you take damage from this effect you are afflicted with Major Vulnerability for |cFFFFFF12|r seconds.",
     LUIE_STRING_SKILL_GLACIAL_COLOSSUS_TP = "A frostbitten Flesh Colossus smashes the ground three times over |cFFFFFF3|r seconds, dealing Frost Damage to enemies within |cFFFFFF8|r meters.\n\nThe final smash stuns all enemies hit for |cFFFFFF<<2>>|r seconds.\n\nDealing damage applies Major Vulnerability to any enemy hit for |cFFFFFF12|r seconds.",
     LUIE_STRING_SKILL_GLACIAL_COLOSSUS_GROUND_TP = "Taking Frost Damage every |cFFFFFF1|r second.\n\nWhen you take damage from this effect you are afflicted with Major Vulnerability for |cFFFFFF12|r seconds.\n\nThe final hit will knock you down for |cFFFFFF4|r seconds.",
@@ -727,8 +727,9 @@ local strings =
     -- Fighters Guild
     LUIE_STRING_SKILL_CIRCLE_OF_PROTECTION_TP = "You and allies in the |cFFFFFF5|r meter radius of the rune gain Minor Protection and Minor Endurance.",
     LUIE_STRING_SKILL_RING_OF_PRESERVATION_TP = "You and allies in the |cFFFFFF5|r meter radius of the rune gain Minor Protection and Minor Endurance and are healed every |cFFFFFF0.5|r seconds.",
-    LUIE_STRING_SKILL_EXPERT_HUNTER_TP = "Revealing stealthed and invisible enemies within |cFFFFFF6|r meters for |cFFFFFF<<1>>|r seconds.\n\nExposed enemies cannot return to stealth or invisibility for |cFFFFFF3|r seconds.",
-    LUIE_STRING_SKILL_EVIL_HUNTER_TP = "Revealing stealthed and invisible enemies within |cFFFFFF6|r meters for |cFFFFFF<<1>>|r seconds.\n\nExposed enemies cannot return to stealth or invisibility for |cFFFFFF3|r seconds.\n\nWhile active, increases the damage of your Stamina costing Fighters Guild abilities by |cFFFFFF25|r%.",
+    LUIE_STRING_SKILL_EXPERT_HUNTER_TP = "Увеличивает радиус обнаружения скрытых противников на |cFFFFFF35|r м на |cFFFFFF<<1>>|r секунд.\n\nПока способность выбрана, вы получаете эффект «Великая свирепость», повышающий шанс критического удара на |cFFFFFF12|r%.",
+    LUIE_STRING_SKILL_EVIL_HUNTER_TP = "Увеличивает радиус обнаружения скрытых противников на |cFFFFFF<<1>>|r секунд.\n\nУрон от ваших способностей из ветки «Гильдия бойцов», расходующих запас сил, увеличивается на |cFFFFFF25|r% на |cFFFFFF20|r секунд.\n\nПока способность выбрана, вы получаете эффект «Великая свирепость», повышающий шанс критического удара на |cFFFFFF12|r%.",
+    LUIE_STRING_SKILL_CAMOUFLAGED_HUNTER_TP = "Увеличивает радиус обнаружения скрытых противников на |cFFFFFF<<1>>|r секунд.\n\nПока способность выбрана, вы получаете эффект «Великая свирепость», повышающий шанс критического удара на |cFFFFFF12|r%. Нанося противнику критические удары сбоку, вы получаете эффект «Малая ярость» на |cFFFFFF5|r секунд.",
     LUIE_STRING_SKILL_TRAP_BEAST_TP = "Triggers when an enemy comes within |cFFFFFF2.5|r meters of the trap, dealing Physical Damage and additional Physical Damage over |cFFFFFF10|r seconds, granting you Minor Force for the duration.\n\nEnemies who activate the trap are immobilized for |cFFFFFF2|r seconds.",
     LUIE_STRING_SKILL_TRAP_BEAST_DEBUFF_TP = "Afflicted with Physical Damage every |cFFFFFF2|r seconds for |cFFFFFF10|r seconds and immobilized for |cFFFFFF2|r seconds.",
     LUIE_STRING_SKILL_BARBED_TRAP_TP = "Triggers when an enemy comes within |cFFFFFF2.5|r meters of the trap, dealing Physical Damage and additional Physical Damage over |cFFFFFF18|r seconds, granting you Minor Force for the duration.\n\nEnemies who activate the trap are immobilized for |cFFFFFF2|r seconds.",
@@ -737,7 +738,9 @@ local strings =
     LUIE_STRING_SKILL_DAWNBREAKER_OF_SMITING_TP = "Afflicted with Physical Damage every |cFFFFFF2|r seconds for |cFFFFFF6|r seconds.\n\nStunned for |cFFFFFF2|r seconds.",
 
     -- Mages Guild
-    LUIE_STRING_SKILL_RADIANT_MAGELIGHT_TP = "Revealing stealthed and invisible enemies within |cFFFFFF12|r meters for |cFFFFFF<<1>>|r seconds.\n\nExposed enemies cannot return to stealth or invisibility for |cFFFFFF3|r seconds.",
+    LUIE_STRING_SKILL_MAGELIGHT_TP = "Раскрывает скрытых и невидимых противников в радиусе |cFFFFFF8|r метров в течение |cFFFFFF<<1>>|r секунд. Обнаруженные противники не могут вернуться в режим скрытности или невидимости в течение |cFFFFFF4|r секунд. Свет сияет так ярко, что вы не можете скрыть свое присутствие, пока способность активна.",
+    LUIE_STRING_SKILL_INNER_LIGHT_TP = "Раскрывает скрытых и невидимых противников в радиусе |cFFFFFF8|r метров в течение |cFFFFFF<<1>>|r секунд. Обнаруженные противники не могут вернуться в режим скрытности или невидимости в течение |cFFFFFF4|r секунд. Свет сияет так ярко, что вы не можете скрыть свое присутствие, пока способность активна.\n\nПока способность выбрана, вы получаете эффект «Великая свирепость», повышающий шанс критического удара на |cFFFFFF12|r%, а ваш максимальный запас магии увеличивается.",
+    LUIE_STRING_SKILL_RADIANT_MAGELIGHT_TP = "Раскрывает скрытых и невидимых противников в радиусе |cFFFFFF12|r метров в течение |cFFFFFF<<1>>|r секунд. Обнаруженные противники не могут вернуться в режим скрытности или невидимости в течение |cFFFFFF4|r секунд. Свет сияет так ослепительно, что вы не можете скрыть свое присутствие, пока способность активна.\n\nТакже вас и ближайших союзников нельзя оглушить атаками из режима скрытности.",
     LUIE_STRING_SKILL_STRUCTURED_ENTROPY_TP = "Afflicted with Magic Damage every |cFFFFFF2|r seconds for |cFFFFFF<<1>>|r seconds.\n\nYour attacker heals every |cFFFFFF2|r seconds while Structured Entropy remains active.",
     LUIE_STRING_SKILL_FIRE_RUNE_TP = "When triggered, the rune blasts all enemies in the target |cFFFFFF3|r meter area for Flame Damage.",
     LUIE_STRING_SKILL_VOLCANIC_RUNE_TP = "When triggered, the rune blasts all enemies in the target |cFFFFFF3|r meter area for Flame Damage, knocks them into the air, and stuns them for |cFFFFFF3|r seconds.",
@@ -755,9 +758,9 @@ local strings =
     LUIE_STRING_SKILL_TIME_BORROWED_TIME_STUN_TP = "Negating the next |cFFFFFF5000|r points of healing for |cFFFFFF<<1>>|r seconds.\n\nStunned for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_TIME_FREEZE_TP = "Gradually being slowed over time for |cFFFFFF4|r seconds.\n\nIf you are still in the area of effect at end of this duration you will be stunned for |cFFFFFF3|r seconds.",
     LUIE_STRING_SKILL_TIME_FREEZE_GROUND_TP = "Gradually reducing the Movement Speed of enemies within the |cFFFFFF8|r meter radius of the target location.\n\nAt the end of the duration, enemies are stunned for |cFFFFFF3|r seconds.",
-    LUIE_STRING_SKILL_IMBUE_WEAPON_TP = "Your next Light Attack used within |cFFFFFF2|r seconds deals additional Physical Damage.\n\nIf the power is not consumed in time, you restore |cFFFFFF60|r% of the cost in Stamina.",
-    LUIE_STRING_SKILL_ELEMENTAL_WEAPON_TP = "Your next Light Attack used within |cFFFFFF2|r seconds deals additional Magic Damage and applies the Burning, Concussion, or Chill elemental status effect.\n\nIf the power is not consumed in time, you restore |cFFFFFF60|r% of the cost in Magicka.",
-    LUIE_STRING_SKILL_CRUSHING_WEAPON_TP = "Your next Light Attack used within |cFFFFFF2|r seconds deals additional Physical Damage and heals you for |cFFFFFF28|r% of the damage done.\n\nIf the power is not consumed in time, you restore |cFFFFFF60|r% of the cost in Stamina.",
+    LUIE_STRING_SKILL_IMBUE_WEAPON_TP = "Ваша следующая обычная или силовая атака, совершенная в течение |cFFFFFF<<1>>|r секунд, дополнительно нанесет физический урон. Пока способность активна, вы не можете скрыть свое присутствие.\n\nПосле применения урон, наносимый атаками оружием, увеличивается на |cFFFFFF5|r% на |cFFFFFF<<1>>|r секунд.",
+    LUIE_STRING_SKILL_ELEMENTAL_WEAPON_TP = "Ваша следующая обычная или силовая атака, совершенная в течение |cFFFFFF<<1>>|r секунд, дополнительно нанесет магический урон и наложит стихийный эффект состояния «Горение», «Контузия» или «Обморожение». Пока способность активна, вы не можете скрыть свое присутствие.\n\nПосле применения урон, наносимый атаками оружием, увеличивается на |cFFFFFF5|r% на |cFFFFFF<<1>>|r секунд.",
+    LUIE_STRING_SKILL_CRUSHING_WEAPON_TP = "Ваша следующая обычная или силовая атака, совершенная в течение |cFFFFFF<<1>>|r секунд, дополнительно нанесет физический урон и наложит эффект «Великий прорыв» на |cFFFFFF<<1>>|r секунд. Пока способность активна, вы не можете скрыть свое присутствие.\n\nПосле применения урон, наносимый атаками оружием, увеличивается на |cFFFFFF8|r% на |cFFFFFF<<1>>|r секунд.",
     LUIE_STRING_SKILL_MEND_WOUNDS_TP = "Your Light and Heavy attacks are replaced with healing abilities that can only be used on allies.\n\nYour Light Attack launches a restorative sphere at your ally, instantly healing them.\n\nYour Heavy Attack heals every |cFFFFFF1|r second and restores Magicka to you while channeling.",
     LUIE_STRING_SKILL_MEND_SPIRIT_TP = "Your Light and Heavy attacks are replaced with healing abilities that can only be used on allies.\n\nYour Light Attack launches a restorative sphere at your ally, instantly healing them.\n\nYour Heavy Attack heals every |cFFFFFF1|r second and restores Magicka to you while channeling.\n\nAfter you heal an ally you grant them Major Resolve for |cFFFFFF5|r seconds.",
     LUIE_STRING_SKILL_SYMBIOSIS_TP = "Your Light and Heavy attacks are replaced with healing abilities that can only be used on allies.\n\nYour Light Attack launches a restorative sphere at your ally, instantly healing them.\n\nYour Heavy Attack heals every |cFFFFFF1|r second and restores Magicka to you while channeling.\n\nYou heal yourself for |cFFFFFF50|r% of the amount of healing done to the ally.",
