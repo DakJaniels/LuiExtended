@@ -55,6 +55,8 @@ local changelogMessages =
     -- New
     "|cFFFF00New:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: High Seas of Tamriel center-screen announcements (ship battle, diving chamber, and Lucky Gretch) can be shown in chat, center screen, or alerts. They only appear during Voyage on the Abecean Sea.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: The custom player frame follows the gameplay Prioritize Damage Shield Visibility setting. When that setting is not Off, each of your damage shields is drawn on its own layer and the prioritized shield stays fully visible.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Health label formats can include xLayers, which shows how many damage shield layers are on the player.",
     "",
     -- Version Header 7.2.6.8
     "|cFFA500LuiExtended Version 7.2.6.8|r",

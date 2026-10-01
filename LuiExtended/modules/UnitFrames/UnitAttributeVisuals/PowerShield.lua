@@ -26,6 +26,10 @@ function PowerShieldModule:OnUnitChanged(unitTag)
         return
     end
 
+    if unitTag == "player" then
+        LUIE.PlayerDamageShieldLayers.BeginUnitChange()
+    end
+
     -- Reinitialize all relevant visuals for the new unit using GetInitialValueAndMarkMostRecent
     -- This properly marks sequence IDs to prevent stale events
     local shieldValue, shieldMaxValue = self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, unitTag)
@@ -69,6 +73,10 @@ function PowerShieldModule:UpdateShield(unitTag, value, maxValue)
 
     UnitFrames.savedHealth[unitTag][4] = value
 
+    if unitTag == "player" then
+        LUIE.PlayerDamageShieldLayers.OnShieldSum(value)
+    end
+
     local healthValue, healthEffectiveMax = GetHealthPowerForUnit(unitTag)
 
     self:ForEachUnitFrameTable(unitTag, function (frameTable)
@@ -87,6 +95,13 @@ end
 function PowerShieldModule:UpdateShieldBar(attributeFrame, shieldValue, healthEffectiveMax)
     if attributeFrame == nil or attributeFrame.shield == nil then
         return
+    end
+
+    if attributeFrame.shieldLayers and LUIE.PlayerDamageShieldLayers.UpdateShieldBar(attributeFrame, shieldValue, healthEffectiveMax) then
+        return
+    end
+    if attributeFrame.shieldLayers then
+        LUIE.PlayerDamageShieldLayers.HideLayerBars(attributeFrame)
     end
 
     local hideShield = not (shieldValue > 0)
@@ -247,6 +262,13 @@ end
 -- -----------------------------------------------------------------------------
 -- Event Handlers
 -- -----------------------------------------------------------------------------
+
+function PowerShieldModule:ClearUnitTag(unitTag)
+    LUIE_UnitAttributeVisualizerModuleBase.ClearUnitTag(self, unitTag)
+    if unitTag == "player" then
+        LUIE.PlayerDamageShieldLayers.ClearForUnitTag()
+    end
+end
 
 function PowerShieldModule:OnVisualizationAdded(unitTag, unitAttributeVisual, statType, attributeType, powerType, value, maxValue, sequenceId)
     if unitAttributeVisual == ATTRIBUTE_VISUAL_POWER_SHIELDING then

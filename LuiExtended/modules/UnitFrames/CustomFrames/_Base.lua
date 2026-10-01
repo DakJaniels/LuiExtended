@@ -242,6 +242,9 @@ function LUIE_CustomFramePowerData_Base:ApplyShieldBarMode(frame, shieldOverlay)
         powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.shieldbackdrop, BOTTOMRIGHT, -1, -1)
     end
     powerBar.shield:SetDrawLevel(Shared.HEALTH_BAR_FILL_DRAW_LEVEL + 2)
+    if powerBar.shieldLayers then
+        LUIE.PlayerDamageShieldLayers.ApplyAnchors(powerBar)
+    end
 
     local saved = GetSavedHealthForCustomFrame(frame)
     local shieldValue = saved and saved[4] or 0

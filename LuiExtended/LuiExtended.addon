@@ -274,6 +274,7 @@ modules/UnitFrames/_GroupElectionInfo.lua
 # Unit Attribute Visuals Modules
 modules/UnitFrames/UnitAttributeVisuals/_ModuleBase.lua
 modules/UnitFrames/UnitAttributeVisuals/PowerShield.lua
+modules/UnitFrames/UnitAttributeVisuals/PlayerDamageShieldLayers.lua
 modules/UnitFrames/UnitAttributeVisuals/Regeneration.lua
 modules/UnitFrames/UnitAttributeVisuals/Unwavering.lua
 modules/UnitFrames/UnitAttributeVisuals/StatChange.lua

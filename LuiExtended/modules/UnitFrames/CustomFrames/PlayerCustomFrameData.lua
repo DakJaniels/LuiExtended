@@ -40,6 +40,7 @@ function LUIE.CustomFramesBuildPlayer()
                 ["trauma"] = phb:GetNamedChild("_Trauma"),
                 ["bar"] = phb:GetNamedChild("_Bar"),
                 ["shield"] = phb:GetNamedChild("_Shield"),
+                ["shieldLayers"] = {},
                 ["noHealingOverlay"] = phb:GetNamedChild("_NoHealingOverlay"),
                 ["noHealingStripe"] = phb:GetNamedChild("_NoHealingStripe"),
                 ["possessionOverlay"] = phb:GetNamedChild("_PossessionOverlay"),
