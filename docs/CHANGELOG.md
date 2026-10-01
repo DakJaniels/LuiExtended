@@ -1,11 +1,19 @@
 # LuiExtended Changelog
 
-## Version 7.2.6.7
+## Version 7.2.6.8
+
+### Note
+
+- 7.2.6.7 was 67. You know what that means. Welcome to 7.2.6.8.
 
 ### New
 
 - Chat Announcements: Nowhere Vault center-screen announcements (room objectives, progress, and completions) can be shown in chat, center screen, or alerts. They only appear in The Nowhere Vault.
 - Chat Announcements: Rumor started and rumor investigated have their own chat, center-screen, and alert toggles. Rumor start failed has chat and alert toggles.
+
+### Fixed
+
+- Chat Announcements: Saving or equipping an armory build no longer breaks the message when the build name contains formatting codes. Color codes in the name are kept.
 
 ## Version 7.2.6.6
 

@@ -49,13 +49,21 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
-    -- Version Header 7.2.6.7
-    "|cFFA500LuiExtended Version 7.2.6.7|r",
+    -- Version Header 7.2.6.8
+    "|cFFA500LuiExtended Version 7.2.6.8|r",
+    "",
+    -- Note
+    "|cFFFF00Note:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t 7.2.6.7 was 67. You know what that means. Welcome to 7.2.6.8.",
     "",
     -- New
     "|cFFFF00New:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Nowhere Vault center-screen announcements (room objectives, progress, and completions) can be shown in chat, center screen, or alerts. They only appear in The Nowhere Vault.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Rumor started and rumor investigated have their own chat, center-screen, and alert toggles. Rumor start failed has chat and alert toggles.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Saving or equipping an armory build no longer breaks the message when the build name contains formatting codes. Color codes in the name are kept.",
     "",
     -- Version Header 7.2.6.6
     "|cFFA500LuiExtended Version 7.2.6.6|r",
