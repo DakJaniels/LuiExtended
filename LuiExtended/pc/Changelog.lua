@@ -55,8 +55,26 @@ local changelogMessages =
     -- New
     "|cFFFF00New:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: High Seas of Tamriel center-screen announcements (ship battle, diving chamber, and Lucky Gretch) can be shown in chat, center screen, or alerts. They only appear during Voyage on the Abecean Sea.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: The custom player frame follows the gameplay Prioritize Damage Shield Visibility setting. When that setting is not Off, each of your damage shields is drawn on its own layer and the prioritized shield stays fully visible.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Health label formats can include xLayers, which shows how many damage shield layers are on the player.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: The custom player frame follows the gameplay |cFFFFFFPrioritize Damage Shield Visibility|r setting. When that setting is not Off, each of your damage shields is drawn on its own layer and the prioritized shield stays fully visible.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom player health labels can include xLayers, which shows how many damage shield layers are on you.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Crystal Weapon shows 3 charges on the ability highlight. Each Light or Heavy Attack spends one charge.",
+    "",
+    -- Note
+    "|cFFFF00Note:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Group, raid, target, boss, pet, and companion frames still leave xLayers blank. Those format choices show up because the format list is shared. I will look into showing the layer count on those frames.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Skill tooltips match current text for Battle Spirit (damage shield strength capped at 300% of Max Health, less per group member past 4), Minor and Major Slayer and Aegis, Seething Fury, Crystal Weapon, Pestilent Colossus, Expert Hunter, Evil Hunter, Camouflaged Hunter, Magelight, Inner Light, Radiant Magelight, Imbue Weapon, Elemental Weapon, and Crushing Weapon.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Prominent tracking for Crystal Weapon no longer mixes your charges with the target armor shred. They share a name and are tracked separately.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Landslide stacks use the Landslide icon, show up to 12 stacks, and count down 6 seconds from the latest stack.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Nothing Wasted shows a countdown from the ability duration and stacks up to 10, instead of staying up with no timer.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Drain Power, Power Extraction, and Sap Essence show Major Brutality instead of Major Sorcery.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Expert Hunter, Evil Hunter, and Camouflaged Hunter no longer show a separate Revealed aura. Imbue Weapon, Elemental Weapon, and Crushing Weapon no longer show a restore aura.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: |cFFFFFFReposition Default Player Frames|r on keyboard and gamepad keeps the pyramid layout and vertical offset when the game HUD editor owns those bars. Console behavior is unchanged.",
     "",
     -- Version Header 7.2.6.8
     "|cFFA500LuiExtended Version 7.2.6.8|r",

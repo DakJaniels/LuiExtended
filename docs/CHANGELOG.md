@@ -5,6 +5,26 @@
 ### New
 
 - Chat Announcements: High Seas of Tamriel center-screen announcements (ship battle, diving chamber, and Lucky Gretch) can be shown in chat, center screen, or alerts. They only appear during Voyage on the Abecean Sea.
+- Unit Frames: The custom player frame follows the gameplay **Prioritize Damage Shield Visibility** setting. When that setting is not Off, each of your damage shields is drawn on its own layer and the prioritized shield stays fully visible.
+- Unit Frames: Custom player health labels can include xLayers, which shows how many damage shield layers are on you.
+- Action Bar: Crystal Weapon shows 3 charges on the ability highlight. Each Light or Heavy Attack spends one charge.
+
+### Note
+
+- Unit Frames: Group, raid, target, boss, pet, and companion frames still leave xLayers blank. Those format choices show up because the format list is shared. I will look into showing the layer count on those frames.
+
+### Changes
+
+- Skill tooltips match current text for Battle Spirit (damage shield strength capped at 300% of Max Health, less per group member past 4), Minor and Major Slayer and Aegis, Seething Fury, Crystal Weapon, Pestilent Colossus, Expert Hunter, Evil Hunter, Camouflaged Hunter, Magelight, Inner Light, Radiant Magelight, Imbue Weapon, Elemental Weapon, and Crushing Weapon.
+
+### Fixed
+
+- SpellCastBuffs: Prominent tracking for Crystal Weapon no longer mixes your charges with the target armor shred. They share a name and are tracked separately.
+- SpellCastBuffs: Landslide stacks use the Landslide icon, show up to 12 stacks, and count down 6 seconds from the latest stack.
+- SpellCastBuffs: Nothing Wasted shows a countdown from the ability duration and stacks up to 10, instead of staying up with no timer.
+- SpellCastBuffs: Drain Power, Power Extraction, and Sap Essence show Major Brutality instead of Major Sorcery.
+- SpellCastBuffs: Expert Hunter, Evil Hunter, and Camouflaged Hunter no longer show a separate Revealed aura. Imbue Weapon, Elemental Weapon, and Crushing Weapon no longer show a restore aura.
+- Unit Frames: **Reposition Default Player Frames** on keyboard and gamepad keeps the pyramid layout and vertical offset when the game HUD editor owns those bars. Console behavior is unchanged.
 
 ## Version 7.2.6.8
 
