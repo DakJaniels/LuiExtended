@@ -854,6 +854,12 @@ ChatAnnouncements.Defaults =
             CSA = true,
             Alert = false,
         },
+        ZoneHighSeas =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
     },
 }
 

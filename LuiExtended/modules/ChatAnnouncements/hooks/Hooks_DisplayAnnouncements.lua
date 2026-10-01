@@ -241,10 +241,16 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
                 settings = nightMarketSettings
                 debugDisable = true
             else
-                local dynamicEncounterSettings = ChatAnnouncements.ResolveDynamicEncounterDisplayAnnouncement(primaryText, secondaryText)
-                if dynamicEncounterSettings then
-                    settings = dynamicEncounterSettings
+                local highSeasSettings = ChatAnnouncements.ResolveHighSeasDisplayAnnouncement(primaryText, secondaryText)
+                if highSeasSettings then
+                    settings = highSeasSettings
                     debugDisable = true
+                else
+                    local dynamicEncounterSettings = ChatAnnouncements.ResolveDynamicEncounterDisplayAnnouncement(primaryText, secondaryText)
+                    if dynamicEncounterSettings then
+                        settings = dynamicEncounterSettings
+                        debugDisable = true
+                    end
                 end
             end
         end
