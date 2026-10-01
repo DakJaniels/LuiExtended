@@ -47,10 +47,12 @@ local BUFF_EFFECT_TYPE_DEBUFF = BUFF_EFFECT_TYPE_DEBUFF
     - hide = true -- Hide this aura from displaying
     - hideGround = true -- Hide this aura from displaying if ground effect damaging aurs are set to show - we want damage to always prioritize so that the aura always shows even if the player is immune to a snare or other effect of the ability
     - hideReduce = true -- Hide this aura if the "HIDE PAIRED AURAS" menu setting is enabled. Merging similar effects so as not to clutter the UI such as the snare from the NPC Throw Dagger ability
+    - prominentByIdOnly = true -- Prominent buff/debuff lists match this ability by id only. A shared display name must not pull in a different ability.
 
     Duration or Modification:
     - duration = *number* -- Modify the duration display of this effect. Option 1 - Set a negative value - to subtract x seconds from the duration of the effect. Option 2 - Set to 0 to display the buff for an unlimited amount of time until an action result of fade occurs.
     - durationFromAbility = true -- When the live effect end is infinite (endTime 0 or duration <= 0), start a countdown from GetAbilityDuration. Do not also set duration.
+    - falloffDuration = *number* -- Milliseconds. Live end is 0. Countdown from now on each effect update (stack falloff window). Do not also set duration.
     - noDuplicate = true -- Adds to a table that uses an expensive function - in some cases effects like Shuffle add a new aura every time the effect is cast. This will flag the effect to only show the latest casted one and hide the others.
     - refreshOnly = true -- Only show this effect when the duration is updated/refreshed - Toggle this to hide some goofy effects that have a travel time aura for their projectile before the actual effect applies.
 
@@ -1850,7 +1852,7 @@ local effectOverride =
 
     -- Dragonknight (skillLineId 351, line 43)
     [238232] = { icon = "/esoui/art/icons/ability_weapon_005.dds", dynamicTooltip = true },           -- Inexorable Descent (skill sheet / mastery passive)
-    [263197] = { icon = "/esoui/art/icons/ability_weapon_005.dds", dynamicTooltip = true, tooltipMorphId = 238232 }, -- Inexorable Descent (player buff; log: with 29465 Landslide stacks)
+    [263197] = { icon = "/esoui/art/icons/ability_weapon_005.dds", dynamicTooltip = true, tooltipMorphId = 238232 }, -- Inexorable Descent (combat echo of 29465 stacks; LibDebugLogger (6): no effect row, GAIN hitValue = stacks, FADE hitValue 6000)
     [240268] = { icon = "/esoui/art/icons/ability_dragonknight_031.dds", dynamicTooltip = true },      -- Booming Voice (Class Mastery skill sheet)
     [263200] = { icon = "/esoui/art/icons/ability_dragonknight_031.dds", dynamicTooltip = true, tooltipMorphId = 240268 }, -- Booming Voice (Storm Voice rank 2 proc carrier, ~15s delay; table 198758357)
     [270020] = { icon = "/esoui/art/icons/ability_dragonknight_031.dds", dynamicTooltip = true, tooltipMorphId = 240268 }, -- Booming Voice (recovery buff after delay; not Take Flight draconic fury)
@@ -1924,9 +1926,9 @@ local effectOverride =
 
     -- Earthen Heart
     -- Battle Roar slotted name id 259223 (offset 33273852); do not use Landslide combat ids 29463–29467 here.
-    -- Landslide passive stack (Earthen Heart skill menu: weapon_005; not Dragon Leap ground 29465/009).
-    [29463] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide passive (rank 1 / stack buff)
-    [44984] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide passive (rank 2 / stack buff)
+    -- Passive skill rows (character sheet). Live stack buff is 29465; effect bar behaviour on 44984 is NEVER.
+    [29463] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide (passive rank 1)
+    [44984] = { icon = "/esoui/art/icons/ability_weapon_005.dds" },                                          -- Landslide (passive rank 2)
     [29468] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 1)
     [44996] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 2)
     [29474] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS, hide = true }, -- Blessing at the Peak (passive POWER clutter; table 198758357)
@@ -2137,7 +2139,7 @@ local effectOverride =
     [48745] = { hide = true },                                                                              -- Dragon Leap (combat bundle)
     [114590] = { name = Abilities.Skill_Dragon_Leap, tooltip = Tooltips.Generic_Knockback },                -- Stun (Dragon Leap)
     [262678] = { name = Abilities.Skill_Dragon_Leap, tooltip = Tooltips.Generic_Knockback },                -- Stun (Dragon Leap, U49)
-    [29465] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hideReduce = true },                -- Landslide (ground aura, offset 32837063)
+    [29465] = { icon = "/esoui/art/icons/ability_weapon_005.dds", stackMax = 12, falloffDuration = 6000 }, -- Landslide (player stacks; effect begin/end 0; falloff window is 6000 ms, LibDebugLogger (6))
     [29466] = { hide = true },                                                                              -- Landslide (ground tick)
     [29467] = { hide = true },                                                                              -- Landslide
     [259228] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Landslide (U49)
@@ -2518,8 +2520,8 @@ local effectOverride =
     -- Crystal Shard / Crystal Weapon / Crystal Fragments
     [143744] = { tooltip = Tooltips.Skill_Crystal_Weaver },                                             -- Crystal Weaver (Crystal Shard)
 
-    [46331] = { tooltip = Tooltips.Skill_Crystal_Weapon },                                              -- Crystal Weapon (Crystal Weapon)
-    [143808] = { tooltip = Tooltips.Generic_Reduce_Physical_Spell_Resist_Value, tooltipValue2 = 1000 }, -- Crystal Weapon (Crystal Weapon)
+    [46331] = { tooltip = Tooltips.Skill_Crystal_Weapon, prominentByIdOnly = true },                                              -- Crystal Weapon (player charges; do not share prominent tracking with 143808)
+    [143808] = { tooltip = Tooltips.Generic_Reduce_Physical_Spell_Resist_Value, tooltipValue2 = 1000, prominentByIdOnly = true }, -- Crystal Weapon (target armor shred; do not share prominent tracking with 46331)
 
     [46327] = { name = Abilities.Skill_Crystal_Fragments, tooltip = Tooltips.Skill_Crystal_Fragments }, -- Crystal Fragments Proc (Crystal Fragments)
     [114716] = { hide = true },                                                                         -- Crystal Fragments hit FX
@@ -4397,11 +4399,11 @@ local effectOverride =
 
     -- Expert Hunter / Evil Hunter / Camouflaged Hunter
     [35762] = { tooltip = Tooltips.Skill_Expert_Hunter },                                                                                  -- Expert Hunter (Expert Hunter)
-    [80307] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, tooltip = Tooltips.Generic_Reveal }, -- Expert Hunter (Expert Hunter)
+    [80307] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, tooltip = Tooltips.Generic_Reveal, hide = true }, -- Expert Hunter (Expert Hunter)
     [40194] = { tooltip = Tooltips.Skill_Evil_Hunter },                                                                                    -- Evil Hunter (Evil Hunter)
-    [80381] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, tooltip = Tooltips.Generic_Reveal }, -- Evil Hunter (Evil Hunter)
-    [40195] = { tooltip = Tooltips.Skill_Expert_Hunter },                                                                                  -- Camouflaged Hunter (Camouflaged Hunter)
-    [80338] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, tooltip = Tooltips.Generic_Reveal }, -- Camouflaged Hunter (Camouflaged Hunter)
+    [80381] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, tooltip = Tooltips.Generic_Reveal, hide = true }, -- Evil Hunter (Evil Hunter)
+    [40195] = { tooltip = Tooltips.Skill_Camouflaged_Hunter },                                                                             -- Camouflaged Hunter (Camouflaged Hunter)
+    [80338] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, tooltip = Tooltips.Generic_Reveal, hide = true }, -- Camouflaged Hunter (Camouflaged Hunter)
 
     -- Trap Beast / Barbed Trap / Lightweight Beast Trap
     [35750] = { tooltip = Tooltips.Skill_Trap_Beast, stack = 1 },                 -- Trap Beast (Trap Beast)
@@ -4442,9 +4444,9 @@ local effectOverride =
     ----------------------------------------------------------------
 
     -- Magelight / Radiant Magelight / Inner Light
-    [30920] = { tooltip = Tooltips.Skill_Expert_Hunter },                                                                                                                                   -- Magelight (Magelight)
+    [30920] = { tooltip = Tooltips.Skill_Magelight },                                                                                                                                       -- Magelight (Magelight)
     [31079] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, tooltip = Tooltips.Generic_Reveal },                                                  -- Magelight (Magelight)
-    [40478] = { tooltip = Tooltips.Skill_Expert_Hunter },                                                                                                                                   -- Inner Light (Inner Light)
+    [40478] = { tooltip = Tooltips.Skill_Inner_Light },                                                                                                                                     -- Inner Light (Inner Light)
     [40480] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Generic_Reveal }, -- Inner Light (Inner Light)
     [40483] = { tooltip = Tooltips.Skill_Radiant_Magelight },                                                                                                                               -- Radiant Magelight (Radiant Magelight)
     [40484] = { icon = "/esoui/art/icons/ability_debuff_reveal.dds", name = Abilities.Skill_Revealed, tooltip = Tooltips.Generic_Reveal },                                                  -- Radiant Magelight (Radiant Magelight)
@@ -4522,11 +4524,11 @@ local effectOverride =
 
     -- Imbue Weapon / Elemental Weapon / Crushing Weapon
     [103483] = { tooltip = Tooltips.Skill_Imbue_Weapon },                                                       -- Imbue Weapon (Imbue Weapon)
-    [110420] = { icon = "/esoui/art/icons/ability_psijic_003.dds", name = Abilities.Skill_Imbue_Weapon },       -- Imbue Weapon Restore (Imbue Weapon)
+    [110420] = { icon = "/esoui/art/icons/ability_psijic_003.dds", name = Abilities.Skill_Imbue_Weapon, hide = true },       -- Imbue Weapon Restore (Imbue Weapon)
     [103571] = { tooltip = Tooltips.Skill_Elemental_Weapon },                                                   -- Elemental Weapon (Elemental Weapon)
-    [110421] = { icon = "/esoui/art/icons/ability_psijic_003_a.dds", name = Abilities.Skill_Elemental_Weapon }, -- Elemental Weapon Restore (Elemental Weapon)
+    [110421] = { icon = "/esoui/art/icons/ability_psijic_003_a.dds", name = Abilities.Skill_Elemental_Weapon, hide = true }, -- Elemental Weapon Restore (Elemental Weapon)
     [103623] = { tooltip = Tooltips.Skill_Crushing_Weapon },                                                    -- Crushing Weapon (Crushing Weapon)
-    [110422] = { icon = "/esoui/art/icons/ability_psijic_003_b.dds", name = Abilities.Skill_Crushing_Weapon },  -- Crushing Weapon Restore (Crushing Weapon)
+    [110422] = { icon = "/esoui/art/icons/ability_psijic_003_b.dds", name = Abilities.Skill_Crushing_Weapon, hide = true },  -- Crushing Weapon Restore (Crushing Weapon)
 
     -- Accelerate / Channeled Acceleration / Race Against Time
     [122260] = { icon = "/esoui/art/icons/ability_psijic_005_b.dds", tooltip = Tooltips.Innate_Snare_Immobilize_Immunity }, -- Race Against Time (Race Against Time)
@@ -5418,7 +5420,7 @@ local effectOverride =
 
     -- Cyrodiil
     [47717] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_1H_LIGHT_DDS },                                                                                                                             -- Quick Strike (Cyrodiil Guard T1)
-    [46221] = { tooltip = Tooltips.Generic_Increase_Damage_Taken, tooltipValue2 = 30 },                                                                                                                           -- Puncture (Cyrodiil Guard T1 & T2)
+    [46221] = { tooltip = Tooltips.Generic_Increase_Damage_Taken, tooltipValue2 = 30 },                                                                                                                           -- Perforate (Cyrodiil Guard T1 & T2)
     [46830] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_1H_BLEED_DDS },                                                                                                                             -- Bleeding Strike (Cyrodiil Guard T2)
     [46832] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_1H_BLEED_DDS, name = Abilities.Skill_Bleeding_Strike, tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 1 },                                -- Bleeding (Cyrodiil Guard T2)
     [46831] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_1H_BLEED_DDS, name = Abilities.Skill_Bleeding_Strike },                                                                                     -- Bleeding (Cyrodiil Guard T2)
@@ -9893,8 +9895,10 @@ local effectOverride =
 --- @field hide boolean? # Hide this aura from displaying
 --- @field hideGround boolean? # Hide if ground effect damaging auras shown - prioritizes damage aura display even if immune to other effects
 --- @field hideReduce boolean? # Hide if "HIDE PAIRED AURAS" enabled - merges similar effects to reduce UI clutter
+--- @field prominentByIdOnly boolean? # Prominent lists match by ability id only (shared display name must not include another ability)
 --- @field duration number? # Modify duration display: negative = subtract seconds, 0 = show until fade
 --- @field durationFromAbility boolean? # Infinite live end: countdown from GetAbilityDuration. Do not also set duration.
+--- @field falloffDuration integer? # Milliseconds. Live end is 0. Countdown from now on each effect update. Do not also set duration.
 --- @field noDuplicate boolean? # Only show latest cast for effects that create new aura each cast
 --- @field refreshOnly boolean? # Only show when duration refreshed - hides travel time auras
 --- @field tooltip string? # Custom tooltip from Tooltips enum

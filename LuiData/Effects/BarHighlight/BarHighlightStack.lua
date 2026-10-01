@@ -22,6 +22,7 @@ local barHighlightStack =
     [24330] = 2,  -- Haunting Curse (Haunting Curse)
     [89491] = 1,  -- Haunting Curse (Haunting Curse)
     [203447] = 4, -- Bound Armaments (Bound Armaments)
+    [46331] = 3,  -- Crystal Weapon charges (API stack count stays 0; bar counts hits)
 
     -- Warden
     [86009] = 2,  -- Scorch (Scorch)
@@ -77,6 +78,7 @@ local barHighlightStackZeroEffect =
     [117625] = "keep",
     [117638] = "keep",
     [215672] = "clear", -- stacks spent on activate; hide bar when API reports 0
+    [46331] = "keep",   -- Crystal Weapon: effect stack count is always 0; charges are counted from hit damage
 }
 
 --- @class (partial) BarHighlightStack
@@ -87,6 +89,18 @@ Effects.BarHighlightStackConsume = barHighlightStackConsume
 
 --- @class (partial) BarHighlightStackZeroEffect
 Effects.BarHighlightStackZeroEffect = barHighlightStackZeroEffect
+
+--- Damage ability id -> charge track id. Each player damage event spends one bar charge.
+--- Crystal Weapon: first hit 143804, later hits 181056. Do not map armor shred 143808 or the instant 143805.
+--- @type table<integer, integer>
+local barHighlightStackConsumeOnDamage =
+{
+    [143804] = 46331, -- Crystal Weapon first hit
+    [181056] = 46331, -- Crystal Weapon later hits
+}
+
+--- @class (partial) BarHighlightStackConsumeOnDamage
+Effects.BarHighlightStackConsumeOnDamage = barHighlightStackConsumeOnDamage
 
 --- Track buff ids: bar stack count only from GetUnitBuffInfo on this id (ignore EVENT/COMBAT stackCount).
 --- @type table<integer, boolean>

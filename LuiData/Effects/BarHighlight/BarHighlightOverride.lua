@@ -227,16 +227,16 @@ local barHighlightOverride =
     [33326] = { newId = 33333, duration = 20000, noRemove = true },                       -- Cripple
     [36943] = { newId = 36947, duration = 20000, noRemove = true },                       -- Debilitate
     [36957] = { newId = 36960, duration = 18000, noRemove = true },                       -- Crippling Grasp
-    [33316] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000 },  -- Drain Power --> Major Sorcery
-    [33317] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [33316] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000 },  -- Drain Power --> Major Brutality
+    [33317] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
     [131342] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
-    [36901] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000 }, -- Power Extraction --> Major Sorcery
-    [131344] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [36901] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000 }, -- Power Extraction --> Major Brutality
+    [131344] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
     [36903] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
     [175664] = { newId = 147417, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true }, -- Minor Courage (Power Extraction)
     [126675] = { newId = 79867, noRemove = true, duration = 10000, combatTrack = true }, -- Minor Cowardice (Power Extraction)
-    [36891] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000 },  -- Sap Essence --> Major Sorcery
-    [62240] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
+    [36891] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000 },  -- Sap Essence --> Major Brutality
+    [62240] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
     [131343] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },
     [25091] = { newId = 25093, duration = 4000, noRemove = true },                       -- Soul Shred
     [35508] = { newId = 61713, showFakeAura = true, noRemove = true, duration = 4000 }, -- Soul Siphon --> Major Vitality
@@ -262,7 +262,9 @@ local barHighlightOverride =
     [28348] = { newId = 28348, duration = 12000 },                  -- absorption field (ground)
     [43714] = { newId = 143744, duration = 3000 },                  -- crystal shard (crystal weaver)
     [46324] = { newId = 46327, duration = 8000 },                   -- crystal fragments (proc)
-    [46331] = { newId = 46331, duration = 6000 },                   -- crystal weapon (self buff)
+    [46331] = { newId = 46331, duration = 6000, combatTrack = true }, -- crystal weapon (self buff, 3 charges)
+    [143804] = { combatTrack = true },                                -- crystal weapon first hit (damage spends one charge)
+    [181056] = { combatTrack = true },                                -- crystal weapon later hits (damage spends one charge)
     [28025] = { newId = 143659, noRemove = true, duration = 4000 }, -- encase (target immobilize)
     [28308] = { newId = 143663, noRemove = true, duration = 4000 }, -- shattering prison
     [28311] = { newId = 143668, noRemove = true, duration = 4000 }, -- restraining prison

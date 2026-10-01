@@ -44,6 +44,7 @@ local LUIE = LUIE
 --- @field werewolfCounter number
 --- @field werewolfQuest number
 --- @field InternalStackCounter table
+--- @field chargeStacksRemaining table<integer, integer> Hit-counted charges left on a real buff whose API stack stays 0
 --- @field CombatCcByAbilityId table<integer, { ccType: integer, expires: number, targetUnitTag?: string }>
 --- @field CombatCcByTargetAbilityId table<string, integer>
 --- @field combatDamageTypeByAbilityId table<integer, { damageType: integer, expires: number }>
@@ -609,6 +610,10 @@ SpellCastBuffs.werewolfQuest = 0   --- @type number
 -- Counter variable for ACTION_RESULT_EFFECT_GAINED / ACTION_RESULT_EFFECT_FADED tracking for some buffs that are broken
 --- @type table
 SpellCastBuffs.InternalStackCounter = {}
+
+--- Remaining charges for buffs counted from hit damage (BarHighlightStackConsumeOnDamage). API stack count stays 0.
+--- @type table<integer, integer>
+SpellCastBuffs.chargeStacksRemaining = {}
 
 --- Combat unitId of the current reticleover target, cached from EVENT_EFFECT_CHANGED
 --- or matching EVENT_COMBAT_EVENT. There is no GetUnitId("reticleover") API.

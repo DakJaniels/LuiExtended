@@ -13,6 +13,36 @@ local Effects = Data.Effects
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
+--- Shared display names must not pull a different ability into the same prominent list.
+--- Crystal Weapon: player charges 46331 and target armor shred 143808 are both named Crystal Weapon.
+--- @param abilityId number|nil
+--- @return boolean
+function SpellCastBuffs.MatchesProminentByName(abilityId)
+    if not abilityId then
+        return true
+    end
+    local override = Effects.EffectOverride[abilityId]
+    if override and override.prominentByIdOnly then
+        return false
+    end
+    return true
+end
+
+--- True when this ability is in Prominent Buffs, by id, or by name when the name is not shared.
+--- @param abilityId number|nil
+--- @param abilityName string|nil
+--- @return boolean
+function SpellCastBuffs.IsProminentBuff(abilityId, abilityName)
+    local promTable = SpellCastBuffs.SV.PromBuffTable
+    if abilityId and promTable[abilityId] then
+        return true
+    end
+    if abilityName and SpellCastBuffs.MatchesProminentByName(abilityId) and promTable[abilityName] then
+        return true
+    end
+    return false
+end
+
 ---
 --- True when the user has opted this ability into Prominent Debuffs, either by
 --- id, by ability name, or via Off Balance / CC Immunity expand: any single
@@ -25,7 +55,7 @@ function SpellCastBuffs.WantsProminentDebuff(abilityId, abilityName)
     if abilityId and promTable[abilityId] then
         return true
     end
-    if abilityName and promTable[abilityName] then
+    if abilityName and SpellCastBuffs.MatchesProminentByName(abilityId) and promTable[abilityName] then
         return true
     end
     if SpellCastBuffs.HasOffBalanceProminentOptIn() then
@@ -101,13 +131,14 @@ function SpellCastBuffs.DetermineContext(context, abilityId, abilityName, castBy
         return obContext
     end
 
-    if SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[abilityName] then
+    local matchProminentByName = SpellCastBuffs.MatchesProminentByName(abilityId)
+    if SpellCastBuffs.SV.PromDebuffTable[abilityId] or (matchProminentByName and SpellCastBuffs.SV.PromDebuffTable[abilityName]) then
         if context == "player1" then
             context = "promd_player"
         elseif context == "reticleover2" and castByPlayer == COMBAT_UNIT_TYPE_PLAYER then
             context = "promd_target"
         end
-    elseif SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[abilityName] then
+    elseif SpellCastBuffs.IsProminentBuff(abilityId, abilityName) then
         if context == "player1" then
             context = "promb_player"
         elseif context == "reticleover2" and castByPlayer == COMBAT_UNIT_TYPE_PLAYER then
@@ -126,9 +157,10 @@ end
 --- @return string context The resolved context string (e.g., "promd_player", "promb_player", or original context).
 function SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
     if context == "player1" then
-        if SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[abilityName] then
+        local matchProminentByName = SpellCastBuffs.MatchesProminentByName(abilityId)
+        if SpellCastBuffs.SV.PromDebuffTable[abilityId] or (matchProminentByName and SpellCastBuffs.SV.PromDebuffTable[abilityName]) then
             context = "promd_player"
-        elseif SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[abilityName] then
+        elseif SpellCastBuffs.IsProminentBuff(abilityId, abilityName) then
             context = "promb_player"
         end
     end

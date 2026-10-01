@@ -147,6 +147,10 @@ local g_barCombatStackMax = {}             -- Max stacks (Effects.BarHighlightSt
 --- @type {[integer]:integer}
 local g_barConsumeStackOnCast = {}         -- Bound id -> track id (Effects.BarHighlightStackConsume)
 --- @type {[integer]:integer}
+local g_barConsumeStackOnDamage = {}       -- Damage ability id -> charge track id (Effects.BarHighlightStackConsumeOnDamage)
+--- @type {[integer]:boolean}
+local g_barStackResetOnGainDuration = {}   -- Charge track ids that restart at max stacks on EFFECT_GAINED_DURATION
+--- @type {[integer]:integer}
 local g_barStackSpendAllOnCast = {}        -- Slotted id -> track id (Effects.BarHighlightStackSpendAllOnCast)
 --- @type {[integer]: "keep"|"clear"}
 local g_barCombatStackZeroEffect = {}      -- Effects.BarHighlightStackZeroEffect for track buff ids
@@ -901,6 +905,8 @@ function ActionBar.UpdateBarHighlightTables()
     g_barCombatTrack = {}
     g_barCombatStackMax = {}
     g_barConsumeStackOnCast = {}
+    g_barConsumeStackOnDamage = {}
+    g_barStackResetOnGainDuration = {}
     g_barCombatStackZeroEffect = {}
     g_barCombatEventRemap = {}
     g_barCombatTrackRemainOnSlotted = {}
@@ -979,6 +985,12 @@ function ActionBar.UpdateBarHighlightTables()
         end
         for slottedAbilityId, combatTrackAbilityId in pairs(Effects.BarHighlightStackConsume) do
             g_barConsumeStackOnCast[slottedAbilityId] = combatTrackAbilityId
+        end
+        if Effects.BarHighlightStackConsumeOnDamage then
+            for damageAbilityId, trackAbilityId in pairs(Effects.BarHighlightStackConsumeOnDamage) do
+                g_barConsumeStackOnDamage[damageAbilityId] = trackAbilityId
+                g_barStackResetOnGainDuration[trackAbilityId] = true
+            end
         end
         g_barStackSpendAllOnCast = {}
         local spendAllTracks = {}
@@ -2901,6 +2913,14 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
     local combatAbilityId = abilityId
     local barAbilityId = g_barCombatEventRemap[abilityId] or abilityId
 
+    if not isError and sourceType == COMBAT_UNIT_TYPE_PLAYER
+    and (result == ACTION_RESULT_DAMAGE or result == ACTION_RESULT_CRITICAL_DAMAGE) then
+        local chargeTrackAbilityId = g_barConsumeStackOnDamage[abilityId]
+        if chargeTrackAbilityId then
+            DecrementBarHighlightCombatStack(chargeTrackAbilityId)
+        end
+    end
+
     if sourceType == COMBAT_UNIT_TYPE_PLAYER and targetType == COMBAT_UNIT_TYPE_PLAYER then
         g_toggledSlotsPlayer[barAbilityId] = true
     end
@@ -2961,7 +2981,8 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                         local durationStacks = buffOnlyTrack and ResolveBarHighlightStacks(barAbilityId, "player", nil)
                         if not buffOnlyTrack or (durationStacks and durationStacks > 0) then
                             g_toggledSlotsRemain[barAbilityId] = currentTimeMS + hitValue
-                            if not g_toggledSlotsStack[barAbilityId] then
+                            local resetStacksOnGainDuration = g_barStackResetOnGainDuration[barAbilityId]
+                            if resetStacksOnGainDuration or not g_toggledSlotsStack[barAbilityId] then
                                 if buffOnlyTrack then
                                     g_toggledSlotsStack[barAbilityId] = durationStacks
                                 else
