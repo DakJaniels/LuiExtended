@@ -49,6 +49,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.6.9
+    "|cFFA500LuiExtended Version 7.2.6.9|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: High Seas of Tamriel center-screen announcements (ship battle, diving chamber, and Lucky Gretch) can be shown in chat, center screen, or alerts. They only appear during Voyage on the Abecean Sea.",
+    "",
     -- Version Header 7.2.6.8
     "|cFFA500LuiExtended Version 7.2.6.8|r",
     "",

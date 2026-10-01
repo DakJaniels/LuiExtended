@@ -8664,6 +8664,16 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_HIGH_SEAS)
+        }
+
+        AddDisplayAnnouncementCheckbox("ZoneHighSeas", LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS, LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS_TP, "CA")
+        AddDisplayAnnouncementCheckbox("ZoneHighSeas", LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS, LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS_TP, "CSA")
+        AddDisplayAnnouncementCheckbox("ZoneHighSeas", LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS, LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS_TP, "Alert")
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_ZONE)
         }
 
