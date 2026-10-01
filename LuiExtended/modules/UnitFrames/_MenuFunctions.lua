@@ -462,6 +462,9 @@ local function CustomFramesApplyColorsInternal(sections)
                     thb.backdrop:SetCenterColor(unpack(health_bg))
                     ApplyHealthBarHalos(thb, health)
                     thb.shield:SetColor(unpack(shield))
+                    if thb.shieldLayers then
+                        LUIE.PlayerDamageShieldLayers.RefreshFromSavedHealth()
+                    end
                     thb.trauma:SetColor(unpack(trauma))
                     if thb.invulnerable then
                         thb.invulnerable:SetColor(unpack(invulnerablecolor))

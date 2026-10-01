@@ -259,6 +259,9 @@ local function ApplyCustomFrameHealthTextures(healthFrame, texture, isRoundTextu
         UnitFrames.ApplyCustomFrameTextureToBackdrop(healthFrame.shieldbackdrop, texture, isRoundTexture)
     end
     healthFrame.shield:SetTexture(texture)
+    if healthFrame.shieldLayers then
+        LUIE.PlayerDamageShieldLayers.RefreshFromSavedHealth()
+    end
     healthFrame.trauma:SetTexture(texture)
     if healthFrame.invulnerable then
         healthFrame.invulnerable:SetTexture(texture)

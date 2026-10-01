@@ -510,6 +510,7 @@ UnitFrames.SV = {}
 --- @field labelTwo Control|nil
 --- @field shield StatusBarControl|nil
 --- @field shieldbackdrop BackdropControl|nil
+--- @field shieldLayers StatusBarControl[]|nil
 --- @field trauma StatusBarControl|nil
 --- @field invulnerable Control|nil
 --- @field invulnerableInlay Control|nil

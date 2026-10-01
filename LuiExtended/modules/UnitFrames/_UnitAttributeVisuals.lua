@@ -370,6 +370,12 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
         if attributeFrame[label] then
             local format = tostring(attributeFrame[label].format or UnitFrames.SV.Format)
             local str = format
+            local shieldLayerCount = 0
+            if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
+                shieldLayerCount = LUIE.PlayerDamageShieldLayers.GetActiveLayerCount()
+            end
+            local shieldLayerText = shieldLayerCount > 0 and ("x" .. tostring(shieldLayerCount)) or ""
+            str = StringOnlyGSUB(str, "xLayers", shieldLayerText)
             str = StringOnlyGSUB(str, "Percentage", tostring(pct))
             str = StringOnlyGSUB(str, "Max", FormatNumber(powerEffectiveMax))
             str = StringOnlyGSUB(str, "Current", FormatNumber(powerValue))
