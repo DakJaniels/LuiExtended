@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\AvAFrame.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/UnitFrames/AvAFrame.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -296,4 +296,4 @@ LUIE_UF_AvaPlayerTargetFrame_Template_Target_Health_PossessionOverlay_GlowRight 
 ---@field TextureCoords {left: number, right: number, top: number, bottom: number}
 LUIE_UF_AvaPlayerTargetFrame_Template_Target_Health_PossessionOverlay_GlowCenter = {}
 ---------- LVL: 11 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\AvAFrame.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/UnitFrames/AvAFrame.xml

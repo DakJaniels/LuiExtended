@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\CombatText.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/CombatText.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -122,9 +122,9 @@ LUIE_CombatText_Resource = {}
 LUIE_CombatText_Virtual_Amount = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
----@class LUIE_CombatText_Virtual_Icon : TextureControl
+---@class LUIE_CombatText_Virtual_IconHost : Control
 ---@field public hidden boolean
-LUIE_CombatText_Virtual_Icon = {}
+LUIE_CombatText_Virtual_IconHost = {}
 ---------- LVL: 05 ----------
 ---------- LVL: 06 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -242,5 +242,17 @@ LUIE_CombatText_Resource_Backdrop = {}
 ---@field public wrapMode TextWrapMode
 ---@field AnchorFill boolean
 LUIE_CombatText_Resource_Label = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_CombatText_Virtual_IconHost_IconFrame : TextureControl
+---@field public inheritAlpha boolean
+---@field public hidden boolean
+LUIE_CombatText_Virtual_IconHost_IconFrame = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_CombatText_Virtual_IconHost_Icon : TextureControl
+---@field public inheritAlpha boolean
+---@field public hidden boolean
+LUIE_CombatText_Virtual_IconHost_Icon = {}
 ---------- LVL: 07 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\CombatText.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/CombatText.xml

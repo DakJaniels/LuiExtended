@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\SpellCastBuffs.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/SpellCastBuffs.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -196,4 +196,4 @@ LUIE_SCB_EffectsRegion_Template_Preview_Label = {}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_SCB_Tlw_Template_Preview_Label = {}
 ---------- LVL: 07 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\SpellCastBuffs.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/SpellCastBuffs.xml

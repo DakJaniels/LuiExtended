@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\Animations.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/UnitFrames/Animations.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -32,4 +32,4 @@ LUIE_CompanionRapportFlourishAnimation = {}
 ---------- LVL: 03 ----------
 ---------- LVL: 04 ----------
 ---------- LVL: 05 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\Animations.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/UnitFrames/Animations.xml

@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\PlayerFrame.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/UnitFrames/PlayerFrame.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -410,4 +410,4 @@ LUIE_UF_PlayerFrame_Template_Player_BotInfo_Alternative_Bar = {}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement}
 LUIE_UF_PlayerFrame_Template_Player_BotInfo_Alternative_Icon = {}
 ---------- LVL: 11 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\PlayerFrame.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/UnitFrames/PlayerFrame.xml

@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\SharedTemplates.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/UnitFrames/SharedTemplates.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -90,4 +90,4 @@ LUIE_DecreasedArmorOverlay_NormalTex = {}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_DecreasedArmorOverlay_Small_SmallTex = {}
 ---------- LVL: 05 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\SharedTemplates.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/UnitFrames/SharedTemplates.xml

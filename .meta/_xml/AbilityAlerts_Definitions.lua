@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\AbilityAlerts.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/AbilityAlerts.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -38,6 +38,7 @@ LUIE_AlertFrame_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Prefix : LabelControl
+---@field public inheritAlpha boolean
 ---@field public wrapMode TextWrapMode
 ---@field public horizontalAlignment TextAlignment
 ---@field public verticalAlignment TextAlignment
@@ -46,6 +47,7 @@ LUIE_AlertTemplate_Prefix = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Name : LabelControl
+---@field public inheritAlpha boolean
 ---@field public wrapMode TextWrapMode
 ---@field public horizontalAlignment TextAlignment
 ---@field public verticalAlignment TextAlignment
@@ -54,6 +56,7 @@ LUIE_AlertTemplate_Name = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Modifier : LabelControl
+---@field public inheritAlpha boolean
 ---@field public wrapMode TextWrapMode
 ---@field public horizontalAlignment TextAlignment
 ---@field public verticalAlignment TextAlignment
@@ -62,6 +65,7 @@ LUIE_AlertTemplate_Modifier = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon : BackdropControl
+---@field public inheritAlpha boolean
 ---@field public centerColor string
 ---@field public edgeColor string
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
@@ -72,6 +76,7 @@ LUIE_AlertTemplate_Icon = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Mitigation : LabelControl
+---@field public inheritAlpha boolean
 ---@field public wrapMode TextWrapMode
 ---@field public horizontalAlignment TextAlignment
 ---@field public verticalAlignment TextAlignment
@@ -80,6 +85,7 @@ LUIE_AlertTemplate_Mitigation = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Timer : LabelControl
+---@field public inheritAlpha boolean
 ---@field public wrapMode TextWrapMode
 ---@field public horizontalAlignment TextAlignment
 ---@field public verticalAlignment TextAlignment
@@ -124,6 +130,7 @@ LUIE_AlertFrame_Preview_AnchorLabel = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_Back : TextureControl
+---@field public inheritAlpha boolean
 ---@field public textureFile string
 ---@field public layer DrawLayer
 ---@field AnchorFill boolean
@@ -131,6 +138,7 @@ LUIE_AlertTemplate_Icon_Back = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_IconBg : BackdropControl
+---@field public inheritAlpha boolean
 ---@field public centerColor string
 ---@field public edgeColor string
 ---@field public alpha number
@@ -141,6 +149,7 @@ LUIE_AlertTemplate_Icon_IconBg = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_Cd : CooldownControl
+---@field public inheritAlpha boolean
 ---@field public fillColor string
 ---@field public alpha number
 ---@field public layer DrawLayer
@@ -150,10 +159,11 @@ LUIE_AlertTemplate_Icon_Cd = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_Icon : TextureControl
+---@field public inheritAlpha boolean
 ---@field public textureFile string
 ---@field public layer DrawLayer
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 LUIE_AlertTemplate_Icon_Icon = {}
 ---------- LVL: 07 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\AbilityAlerts.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/AbilityAlerts.xml
