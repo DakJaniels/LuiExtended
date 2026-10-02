@@ -1,9 +1,19 @@
 <GuiXml>
-    <!-- LUIE named fonts (gamepad / console). Mirrors fontdefs_keyboard.xml so the same
-         LUIE_Font_* token is valid on both platforms. -->
+    <!-- LUIE named fonts for gamepad, console, and gamecore. Each platform has its own
+         LUIE_Font_* token so these names do not collide with fontdefs_keyboard.xml.
+         Console and gamecore match the gamepad face and size until a platform-specific
+         size is chosen. There is no GP_28 macro, so the countdown size stays 28. -->
 
     <!-- Crowd Control Tracker (fixed, non-user-configurable sizes) -->
-    <Font name="LUIE_Font_CrowdControlIcon" font="$(GAMEPAD_BOLD_FONT)|25|thick-outline"/>
-    <Font name="LUIE_Font_CrowdControlCountdown" font="$(GAMEPAD_BOLD_FONT)|28|thick-outline"/>
-    <Font name="LUIE_Font_CrowdControlStagger" font="$(GAMEPAD_BOLD_FONT)|36|thick-outline"/>
+    <Font name="LUIE_Font_Gamepad_CrowdControlIcon" font="$(GAMEPAD_BOLD_FONT)|$(GP_25)|thick-outline"/>
+    <Font name="LUIE_Font_Gamepad_CrowdControlCountdown" font="$(GAMEPAD_BOLD_FONT)|28|thick-outline"/>
+    <Font name="LUIE_Font_Gamepad_CrowdControlStagger" font="$(GAMEPAD_BOLD_FONT)|$(GP_36)|thick-outline"/>
+
+    <Font name="LUIE_Font_Console_CrowdControlIcon" font="$(GAMEPAD_BOLD_FONT)|$(GP_25)|thick-outline"/>
+    <Font name="LUIE_Font_Console_CrowdControlCountdown" font="$(GAMEPAD_BOLD_FONT)|28|thick-outline"/>
+    <Font name="LUIE_Font_Console_CrowdControlStagger" font="$(GAMEPAD_BOLD_FONT)|$(GP_36)|thick-outline"/>
+
+    <Font name="LUIE_Font_GameCore_CrowdControlIcon" font="$(GAMEPAD_BOLD_FONT)|$(GP_25)|thick-outline"/>
+    <Font name="LUIE_Font_GameCore_CrowdControlCountdown" font="$(GAMEPAD_BOLD_FONT)|28|thick-outline"/>
+    <Font name="LUIE_Font_GameCore_CrowdControlStagger" font="$(GAMEPAD_BOLD_FONT)|$(GP_36)|thick-outline"/>
 </GuiXml>

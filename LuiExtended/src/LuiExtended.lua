@@ -113,29 +113,28 @@ end
 --- Applies console/PC-correct fonts to all mover coord + preview labels (XML defaults + runtime-created controls).
 function LUIE.RefreshMoverOverlayFonts()
     for i = 1, #MOVER_OVERLAY_TLW_NAMES do
-        local tlw = _G[MOVER_OVERLAY_TLW_NAMES[i]]
+        local tlw = rawget(_G, MOVER_OVERLAY_TLW_NAMES[i])
         if tlw then
             ApplyMoverPreviewControlFonts(tlw.preview)
             ApplyMoverPreviewControlFonts(tlw:GetNamedChild("_Preview"))
         end
     end
 
-    local alertFrame = _G["LUIE_AlertFrame"]
+    local alertFrame = rawget(_G, "LUIE_AlertFrame")
     if alertFrame then
         ApplyMoverPreviewControlFonts(alertFrame:GetNamedChild("_Preview"))
     end
 
     for _, panelName in ipairs({ "LUIE_CombatText_Incoming", "LUIE_CombatText_Outgoing" }) do
-        local panel = _G[panelName]
+        local panel = rawget(_G, panelName)
         if panel then
             ApplyMoverPreviewControlFonts(panel:GetNamedChild("_Preview"))
         end
     end
 
-    local castBar = _G["LUIE_ACTIONBAR_CASTBAR_TLC"]
-    if castBar and castBar.preview then
-        LUIE.ApplyFramePreviewLabelFont(castBar.previewLabel)
-        LUIE.ApplyPositionLabelFont(castBar.preview.anchorLabel)
+    local castBar = rawget(_G, "LUIE_ACTIONBAR_CASTBAR_TLC")
+    if castBar then
+        ApplyMoverPreviewControlFonts(castBar:GetNamedChild("_Preview"))
     end
 
     local spellCastBuffs = LUIE.SpellCastBuffs

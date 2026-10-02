@@ -1391,14 +1391,94 @@ function CombatText.CreateConsoleSettings()
         -- Mitigation types (Miss, Immune, Parried, Reflected, Damage Shielded, Dodged, Blocked, Interrupted)
         local mitigationTypes =
         {
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_MISS),          incoming = "showMiss",         outgoing = "showMiss",         format = "miss",         color = "miss"         },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_IMMUNE),        incoming = "showImmune",       outgoing = "showImmune",       format = "immune",       color = "immune"       },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_PARRIED),       incoming = "showParried",      outgoing = "showParried",      format = "parried",      color = "parried"      },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_REFLECTED),     incoming = "showReflected",    outgoing = "showReflected",    format = "reflected",    color = "reflected"    },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_DAMAGE_SHIELD), incoming = "showDamageShield", outgoing = "showDamageShield", format = "damageShield", color = "damageShield" },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_DODGED),        incoming = "showDodged",       outgoing = "showDodged",       format = "dodged",       color = "dodged"       },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_BLOCKED),       incoming = "showBlocked",      outgoing = "showBlocked",      format = "blocked",      color = "blocked"      },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_INTERRUPTED),   incoming = "showInterrupted",  outgoing = "showInterrupted",  format = "interrupted",  color = "interrupted"  },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_MISS),
+                incoming = "showMiss",
+                outgoing = "showMiss",
+                format = "miss",
+                color = "miss",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_MISS_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_MISS_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_MISS_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_MISS_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_IMMUNE),
+                incoming = "showImmune",
+                outgoing = "showImmune",
+                format = "immune",
+                color = "immune",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_IMMUNE_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_IMMUNE_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_IMMUNE_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_IMMUNE_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_PARRIED),
+                incoming = "showParried",
+                outgoing = "showParried",
+                format = "parried",
+                color = "parried",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_PARRIED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_PARRIED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_PARRIED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_PARRIED_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_REFLECTED),
+                incoming = "showReflected",
+                outgoing = "showReflected",
+                format = "reflected",
+                color = "reflected",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_REFLECTED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_REFLECTED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_REFLECTED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_REFLETCED_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_DAMAGE_SHIELD),
+                incoming = "showDamageShield",
+                outgoing = "showDamageShield",
+                format = "damageShield",
+                color = "damageShield",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_DAMAGE_SHIELD_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_DAMAGE_SHIELD_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_DAMAGE_SHIELD_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_DAMAGE_SHIELD_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_DODGED),
+                incoming = "showDodged",
+                outgoing = "showDodged",
+                format = "dodged",
+                color = "dodged",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_DODGED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_DODGED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_DODGED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_DODGED_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_BLOCKED),
+                incoming = "showBlocked",
+                outgoing = "showBlocked",
+                format = "blocked",
+                color = "blocked",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_BLOCKED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_BLOCKED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_BLOCKED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_BLOCKED_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_INTERRUPTED),
+                incoming = "showInterrupted",
+                outgoing = "showInterrupted",
+                format = "interrupted",
+                color = "interrupted",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_INTERRUPTED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_INTERRUPTED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_INTERRUPTED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_INTERRUPTED_TP,
+            },
         }
 
         for _, mitType in ipairs(mitigationTypes) do
@@ -1412,7 +1492,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_CHECKBOX,
                 label = zo_strformat("<<1>> <<2>> (<<3>>)", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), mitType.header, GetString(LUIE_STRING_LAM_CT_SHARED_INCOMING)),
-                tooltip = GetString("LUIE_STRING_LAM_CT_INCOMING_" .. mitType.header:upper() .. "_TP"),
+                tooltip = GetString(mitType.incomingTooltip),
                 getFunction = function () return Settings.toggles.incoming[mitType.incoming] end,
                 setFunction = function (v) Settings.toggles.incoming[mitType.incoming] = v end,
                 default = Defaults.toggles.incoming[mitType.incoming]
@@ -1422,7 +1502,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_CHECKBOX,
                 label = zo_strformat("<<1>> <<2>> (<<3>>)", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), mitType.header, GetString(LUIE_STRING_LAM_CT_SHARED_OUTGOING)),
-                tooltip = GetString("LUIE_STRING_LAM_CT_OUTGOING_" .. mitType.header:upper() .. "_TP"),
+                tooltip = GetString(mitType.outgoingTooltip),
                 getFunction = function () return Settings.toggles.outgoing[mitType.outgoing] end,
                 setFunction = function (v) Settings.toggles.outgoing[mitType.outgoing] = v end,
                 default = Defaults.toggles.outgoing[mitType.outgoing]
@@ -1432,7 +1512,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_EDIT,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-                tooltip = GetString("LUIE_STRING_LAM_CT_FORMAT_COMBAT_" .. mitType.format:upper() .. "_TP"),
+                tooltip = GetString(mitType.formatTooltip),
                 getFunction = function () return Settings.formats[mitType.format] end,
                 setFunction = function (v) Settings.formats[mitType.format] = v end,
                 default = Defaults.formats[mitType.format]
@@ -1442,7 +1522,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_COLOR,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-                tooltip = GetString("LUIE_STRING_LAM_CT_COLOR_COMBAT_" .. mitType.color:upper() .. "_TP"),
+                tooltip = GetString(mitType.colorTooltip),
                 getFunction = function () return Settings.colors[mitType.color][1], Settings.colors[mitType.color][2], Settings.colors[mitType.color][3], Settings.colors[mitType.color][4] end,
                 setFunction = function (r, g, b, a) Settings.colors[mitType.color] = { r, g, b, a } end,
                 default = Defaults.colors[mitType.color]
@@ -1488,12 +1568,72 @@ function CombatText.CreateConsoleSettings()
         -- Crowd Control types (Disoriented, Feared, Off-Balance, Silenced, Stunned, Charmed)
         local ccTypes =
         {
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_DISORIENTED), incoming = "showDisoriented", outgoing = "showDisoriented", format = "disoriented", color = "disoriented" },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_FEARED),      incoming = "showFeared",      outgoing = "showFeared",      format = "feared",      color = "feared"      },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_OFF_BALANCE), incoming = "showOffBalanced", outgoing = "showOffBalanced", format = "offBalanced", color = "offBalanced" },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_SILENCED),    incoming = "showSilenced",    outgoing = "showSilenced",    format = "silenced",    color = "silenced"    },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_STUNNED),     incoming = "showStunned",     outgoing = "showStunned",     format = "stunned",     color = "stunned"     },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_CHARMED),     incoming = "showCharmed",     outgoing = "showCharmed",     format = "charmed",     color = "charmed"     },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_DISORIENTED),
+                incoming = "showDisoriented",
+                outgoing = "showDisoriented",
+                format = "disoriented",
+                color = "disoriented",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_DISORIENTED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_DISORIENTED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_DISORIENTED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_DISORIENTED_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_FEARED),
+                incoming = "showFeared",
+                outgoing = "showFeared",
+                format = "feared",
+                color = "feared",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_FEARED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_FEARED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_FEARED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_FEARED_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_OFF_BALANCE),
+                incoming = "showOffBalanced",
+                outgoing = "showOffBalanced",
+                format = "offBalanced",
+                color = "offBalanced",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_OFF_BALANCE_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_OFF_BALANCE_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_OFF_BALANCE_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_OFF_BALANCE_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_SILENCED),
+                incoming = "showSilenced",
+                outgoing = "showSilenced",
+                format = "silenced",
+                color = "silenced",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_SILENCED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_SILENCED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_SILENCED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_SILENCED_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_STUNNED),
+                incoming = "showStunned",
+                outgoing = "showStunned",
+                format = "stunned",
+                color = "stunned",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_STUNNED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_STUNNED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_STUNNED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_STUNNED_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_CHARMED),
+                incoming = "showCharmed",
+                outgoing = "showCharmed",
+                format = "charmed",
+                color = "charmed",
+                incomingTooltip = LUIE_STRING_LAM_CT_INCOMING_CHARMED_TP,
+                outgoingTooltip = LUIE_STRING_LAM_CT_OUTGOING_CHARMED_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_COMBAT_CHARMED_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_COMBAT_CHARMED_TP,
+            },
         }
 
         for _, ccType in ipairs(ccTypes) do
@@ -1507,7 +1647,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_CHECKBOX,
                 label = zo_strformat("<<1>> <<2>> (<<3>>)", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), ccType.header, GetString(LUIE_STRING_LAM_CT_SHARED_INCOMING)),
-                tooltip = GetString("LUIE_STRING_LAM_CT_INCOMING_" .. ccType.header:upper() .. "_TP"),
+                tooltip = GetString(ccType.incomingTooltip),
                 getFunction = function () return Settings.toggles.incoming[ccType.incoming] end,
                 setFunction = function (v) Settings.toggles.incoming[ccType.incoming] = v end,
                 default = Defaults.toggles.incoming[ccType.incoming]
@@ -1517,7 +1657,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_CHECKBOX,
                 label = zo_strformat("<<1>> <<2>> (<<3>>)", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), ccType.header, GetString(LUIE_STRING_LAM_CT_SHARED_OUTGOING)),
-                tooltip = GetString("LUIE_STRING_LAM_CT_OUTGOING_" .. ccType.header:upper() .. "_TP"),
+                tooltip = GetString(ccType.outgoingTooltip),
                 getFunction = function () return Settings.toggles.outgoing[ccType.outgoing] end,
                 setFunction = function (v) Settings.toggles.outgoing[ccType.outgoing] = v end,
                 default = Defaults.toggles.outgoing[ccType.outgoing]
@@ -1527,7 +1667,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_EDIT,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-                tooltip = GetString("LUIE_STRING_LAM_CT_FORMAT_COMBAT_" .. ccType.format:upper() .. "_TP"),
+                tooltip = GetString(ccType.formatTooltip),
                 getFunction = function () return Settings.formats[ccType.format] end,
                 setFunction = function (v) Settings.formats[ccType.format] = v end,
                 default = Defaults.formats[ccType.format]
@@ -1537,7 +1677,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_COLOR,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-                tooltip = GetString("LUIE_STRING_LAM_CT_COLOR_COMBAT_" .. ccType.color:upper() .. "_TP"),
+                tooltip = GetString(ccType.colorTooltip),
                 getFunction = function () return Settings.colors[ccType.color][1], Settings.colors[ccType.color][2], Settings.colors[ccType.color][3], Settings.colors[ccType.color][4] end,
                 setFunction = function (r, g, b, a) Settings.colors[ccType.color] = { r, g, b, a } end,
                 default = Defaults.colors[ccType.color]
@@ -1724,9 +1864,33 @@ function CombatText.CreateConsoleSettings()
         -- Point Gain types (Alliance, Experience, Champion)
         local pointTypes =
         {
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_POINTS_ALLIANCE),   toggle = "showPointsAlliance",   format = "pointsAlliance",   color = "pointsAlliance"   },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_POINTS_EXPERIENCE), toggle = "showPointsExperience", format = "pointsExperience", color = "pointsExperience" },
-            { header = GetString(LUIE_STRING_LAM_CT_SHARED_POINTS_CHAMPION),   toggle = "showPointsChampion",   format = "pointsChampion",   color = "pointsChampion"   },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_POINTS_ALLIANCE),
+                toggle = "showPointsAlliance",
+                format = "pointsAlliance",
+                color = "pointsAlliance",
+                toggleTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_POINTS_ALLIANCE_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_ALLIANCE_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_ALLIANCE_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_POINTS_EXPERIENCE),
+                toggle = "showPointsExperience",
+                format = "pointsExperience",
+                color = "pointsExperience",
+                toggleTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_POINTS_EXPERIENCE_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_EXPERIENCE_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_EXPERIENCE_TP,
+            },
+            {
+                header = GetString(LUIE_STRING_LAM_CT_SHARED_POINTS_CHAMPION),
+                toggle = "showPointsChampion",
+                format = "pointsChampion",
+                color = "pointsChampion",
+                toggleTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_POINTS_CHAMPION_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_CHAMPION_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_CHAMPION_TP,
+            },
         }
 
         for _, pointType in ipairs(pointTypes) do
@@ -1740,7 +1904,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_CHECKBOX,
                 label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), pointType.header),
-                tooltip = GetString("LUIE_STRING_LAM_CT_NOTIFICATION_" .. pointType.header:upper() .. "_TP"),
+                tooltip = GetString(pointType.toggleTooltip),
                 getFunction = function () return Settings.toggles[pointType.toggle] end,
                 setFunction = function (v) Settings.toggles[pointType.toggle] = v end,
                 default = Defaults.toggles[pointType.toggle]
@@ -1750,7 +1914,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_EDIT,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-                tooltip = GetString("LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_" .. pointType.format:upper() .. "_TP"),
+                tooltip = GetString(pointType.formatTooltip),
                 getFunction = function () return Settings.formats[pointType.format] end,
                 setFunction = function (v) Settings.formats[pointType.format] = v end,
                 default = Defaults.formats[pointType.format]
@@ -1760,7 +1924,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_COLOR,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-                tooltip = GetString("LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_" .. pointType.color:upper() .. "_TP"),
+                tooltip = GetString(pointType.colorTooltip),
                 getFunction = function () return Settings.colors[pointType.color][1], Settings.colors[pointType.color][2], Settings.colors[pointType.color][3], Settings.colors[pointType.color][4] end,
                 setFunction = function (r, g, b, a) Settings.colors[pointType.color] = { r, g, b, a } end,
                 default = Defaults.colors[pointType.color]
@@ -1870,23 +2034,56 @@ function CombatText.CreateConsoleSettings()
         -- Resource Warning types (Low Health, Low Magicka, Low Stamina)
         local resourceTypes =
         {
-            { header = "HEALTH",  toggle = "showLowHealth",  format = "lowHealth",  color = "lowHealth"  },
-            { header = "MAGICKA", toggle = "showLowMagicka", format = "lowMagicka", color = "lowMagicka" },
-            { header = "STAMINA", toggle = "showLowStamina", format = "lowStamina", color = "lowStamina" },
+            {
+                header = "HEALTH",
+                toggle = "showLowHealth",
+                format = "lowHealth",
+                color = "lowHealth",
+                label = LUIE_STRING_LAM_CT_SHARED_LOW_HEALTH,
+                toggleTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_LOW_HEALTH_TP,
+                warningLabel = LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_HEALTH,
+                warningTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_HEALTH_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_RESOURCE_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_LOW_HEALTH_TP,
+            },
+            {
+                header = "MAGICKA",
+                toggle = "showLowMagicka",
+                format = "lowMagicka",
+                color = "lowMagicka",
+                label = LUIE_STRING_LAM_CT_SHARED_LOW_MAGICKA,
+                toggleTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_LOW_MAGICKA_TP,
+                warningLabel = LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_MAGICKA,
+                warningTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_MAGICKA_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_RESOURCE_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_LOW_MAGICKA_TP,
+            },
+            {
+                header = "STAMINA",
+                toggle = "showLowStamina",
+                format = "lowStamina",
+                color = "lowStamina",
+                label = LUIE_STRING_LAM_CT_SHARED_LOW_STAMINA,
+                toggleTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_LOW_STAMINA_TP,
+                warningLabel = LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_STAMINA,
+                warningTooltip = LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_STAMINA_TP,
+                formatTooltip = LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_RESOURCE_TP,
+                colorTooltip = LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_LOW_STAMINA_TP,
+            },
         }
 
         for _, resType in ipairs(resourceTypes) do
             settings[#settings + 1] =
             {
                 type = LHAS.ST_LABEL,
-                label = GetString("LUIE_STRING_LAM_CT_NOTIFICATION_LOW_" .. resType.header)
+                label = GetString(resType.label)
             }
 
             settings[#settings + 1] =
             {
                 type = LHAS.ST_CHECKBOX,
-                label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString("LUIE_STRING_LAM_CT_NOTIFICATION_LOW_" .. resType.header)),
-                tooltip = GetString("LUIE_STRING_LAM_CT_NOTIFICATION_LOW_" .. resType.header .. "_TP"),
+                label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(resType.label)),
+                tooltip = GetString(resType.toggleTooltip),
                 getFunction = function () return Settings.toggles[resType.toggle] end,
                 setFunction = function (v) Settings.toggles[resType.toggle] = v end,
                 default = Defaults.toggles[resType.toggle]
@@ -1895,8 +2092,8 @@ function CombatText.CreateConsoleSettings()
             settings[#settings + 1] =
             {
                 type = LHAS.ST_SLIDER,
-                label = GetString("LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_" .. resType.header),
-                tooltip = GetString("LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_" .. resType.header .. "_TP"),
+                label = GetString(resType.warningLabel),
+                tooltip = GetString(resType.warningTooltip),
                 min = 15,
                 max = 50,
                 step = 1,
@@ -1911,7 +2108,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_EDIT,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-                tooltip = GetString("LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_LOW_" .. resType.format:upper() .. "_TP"),
+                tooltip = GetString(resType.formatTooltip),
                 getFunction = function () return Settings.formats[resType.format] end,
                 setFunction = function (v) Settings.formats[resType.format] = v end,
                 default = Defaults.formats[resType.format]
@@ -1921,7 +2118,7 @@ function CombatText.CreateConsoleSettings()
             {
                 type = LHAS.ST_COLOR,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-                tooltip = GetString("LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_LOW_" .. resType.color:upper() .. "_TP"),
+                tooltip = GetString(resType.colorTooltip),
                 getFunction = function () return Settings.colors[resType.color][1], Settings.colors[resType.color][2], Settings.colors[resType.color][3], Settings.colors[resType.color][4] end,
                 setFunction = function (r, g, b, a) Settings.colors[resType.color] = { r, g, b, a } end,
                 default = Defaults.colors[resType.color]

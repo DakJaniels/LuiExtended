@@ -19,6 +19,9 @@ local IsCharmAbility = IsCharmAbility
 local table_insert = table.insert
 local table_remove = table.remove
 local pairs = pairs
+local IsGameCoreUI = IsGameCoreUI
+local IsConsoleUI = IsConsoleUI
+local IsInGamepadPreferredMode = IsInGamepadPreferredMode
 
 local PriorityOne, PriorityTwo, PriorityThree, PriorityFour, PrioritySix, PrioritySeven, PriorityEight
 
@@ -32,8 +35,57 @@ local isRooted = false
 local rootEndTime = 0
 
 -- Named LUIE fonts (see frontend/fontdefs_*.xml) - no runtime composition.
-local iconFont = "LUIE_Font_CrowdControlIcon"
-local staggerFont = "LUIE_Font_CrowdControlStagger"
+-- Console and gamecore are also gamepad mode, so they are checked first.
+local keyboardCrowdControlFonts =
+{
+    icon = "LUIE_Font_Keyboard_CrowdControlIcon",
+    stagger = "LUIE_Font_Keyboard_CrowdControlStagger",
+    countdown = "LUIE_Font_Keyboard_CrowdControlCountdown",
+}
+local gamepadCrowdControlFonts =
+{
+    icon = "LUIE_Font_Gamepad_CrowdControlIcon",
+    stagger = "LUIE_Font_Gamepad_CrowdControlStagger",
+    countdown = "LUIE_Font_Gamepad_CrowdControlCountdown",
+}
+local consoleCrowdControlFonts =
+{
+    icon = "LUIE_Font_Console_CrowdControlIcon",
+    stagger = "LUIE_Font_Console_CrowdControlStagger",
+    countdown = "LUIE_Font_Console_CrowdControlCountdown",
+}
+local gamecoreCrowdControlFonts =
+{
+    icon = "LUIE_Font_GameCore_CrowdControlIcon",
+    stagger = "LUIE_Font_GameCore_CrowdControlStagger",
+    countdown = "LUIE_Font_GameCore_CrowdControlCountdown",
+}
+
+local textFrameUsesStaggerFont = false
+
+--- Active platform's Crowd Control named fonts.
+--- @return table platformFonts icon, stagger, and countdown font names
+local function GetCrowdControlPlatformFonts()
+    if IsGameCoreUI() then
+        return gamecoreCrowdControlFonts
+    elseif IsConsoleUI() then
+        return consoleCrowdControlFonts
+    elseif IsInGamepadPreferredMode() then
+        return gamepadCrowdControlFonts
+    end
+    return keyboardCrowdControlFonts
+end
+
+--- Applies the active platform fonts to the tracker text and countdown labels.
+local function ApplyCrowdControlPlatformFonts()
+    local platformFonts = GetCrowdControlPlatformFonts()
+    if textFrameUsesStaggerFont then
+        LUIE_CCTracker_TextFrame_Label:SetFont(platformFonts.stagger)
+    else
+        LUIE_CCTracker_TextFrame_Label:SetFont(platformFonts.icon)
+    end
+    LUIE_CCTracker_Timer_Label:SetFont(platformFonts.countdown)
+end
 
 local iconBorder = LUIE_MEDIA_COMBATINFO_CROWDCONTROLTRACKER_BORDER_DDS
 
@@ -158,6 +210,9 @@ function CrowdControlTracker:OnOff()
                 end
             end)
             eventManager:AddFilterForEvent(self.name, EVENT_UNIT_DEATH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
+            eventManager:RegisterForEvent(self.name, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
+                ApplyCrowdControlPlatformFonts()
+            end)
         end
     else
         if self.addonEnabled then
@@ -168,6 +223,7 @@ function CrowdControlTracker:OnOff()
             eventManager:UnregisterForEvent(self.name, EVENT_REMOVE_ACTIVE_COMBAT_TIP)
             eventManager:UnregisterForEvent(self.name, EVENT_PLAYER_STUNNED_STATE_CHANGED)
             eventManager:UnregisterForEvent(self.name, EVENT_UNIT_DEATH_STATE_CHANGED)
+            eventManager:UnregisterForEvent(self.name, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED)
             LUIE_CCTracker:SetHidden(true)
         end
     end
@@ -1178,7 +1234,9 @@ function CrowdControlTracker:BreakFreeHidden(hidden)
 end
 
 function CrowdControlTracker:SetupInfo(ccText, ccColor, abilityIcon)
-    LUIE_CCTracker_TextFrame_Label:SetFont(iconFont)
+    textFrameUsesStaggerFont = false
+    local platformFonts = GetCrowdControlPlatformFonts()
+    LUIE_CCTracker_TextFrame_Label:SetFont(platformFonts.icon)
     LUIE_CCTracker_TextFrame_Label:SetText(ccText)
     LUIE_CCTracker_TextFrame_Label:SetColor(unpack(ccColor))
     LUIE_CCTracker_IconFrame_Icon:SetTexture(abilityIcon)
@@ -1218,7 +1276,9 @@ function CrowdControlTracker:SetupDisplay(displayType)
         LUIE_CCTracker_IconFrame_Icon:SetTextureCoords(0, 1, 0, 1)
         LUIE_CCTracker_TextFrame_Label:SetText(CrowdControlTracker.controlText[ACTION_RESULT_STAGGERED])
         LUIE_CCTracker_TextFrame_Label:SetColor(unpack(CombatInfo.SV.cct.colors[ACTION_RESULT_STAGGERED]))
-        LUIE_CCTracker_TextFrame_Label:SetFont(staggerFont)
+        textFrameUsesStaggerFont = true
+        local platformFonts = GetCrowdControlPlatformFonts()
+        LUIE_CCTracker_TextFrame_Label:SetFont(platformFonts.stagger)
         if CombatInfo.SV.cct.showOptions == "icon" then
             self:TextHidden(true)
         else
@@ -1604,7 +1664,8 @@ end
 function CrowdControlTracker:InitControls()
     CrowdControlTracker.ApplyPosition()
     LUIE_CCTracker:SetScale(CombatInfo.SV.cct.controlScale)
-    LUIE_CCTracker_TextFrame_Label:SetFont(iconFont)
+    textFrameUsesStaggerFont = false
+    ApplyCrowdControlPlatformFonts()
     if CombatInfo.SV.cct.unlock then
         LUIE_CCTracker_TextFrame_Label:SetText("Unlocked")
     else

@@ -755,9 +755,14 @@ function UnitFrames.RegisterDefaultFrameHudCallbacks()
     if defaultFrameHudCallbacksRegistered then
         return
     end
+    if ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
 
     HUD_MANAGER:RegisterCallback("PropagateSettings", OnDefaultFrameHudPropagateSettings)
     HUD_MANAGER:RegisterCallback("OffsetsChanged", OnDefaultFrameHudOffsetsChanged)
-    HUD_EDITOR_SCENE_KEYBOARD:RegisterCallback("StateChange", OnHudEditorSceneStateChange)
+    if HUD_EDITOR_SCENE_KEYBOARD then
+        HUD_EDITOR_SCENE_KEYBOARD:RegisterCallback("StateChange", OnHudEditorSceneStateChange)
+    end
     defaultFrameHudCallbacksRegistered = true
 end

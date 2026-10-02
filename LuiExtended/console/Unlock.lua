@@ -105,11 +105,11 @@ local function RefreshActiveAlertLineAlignment(alertMessages)
     end
 end
 
+-- Console UI never loads Keyboard/AlertText_Keyboard.lua, so ALERT_MESSAGES is not defined there.
 function Unlock.InstallAlertTextSetupHooks()
     if Unlock.alertTextSetupHooksInstalled then
         return
     end
-    WrapAlertFadingControlBufferTemplates(ALERT_MESSAGES)
     WrapAlertFadingControlBufferTemplates(ALERT_MESSAGES_GAMEPAD)
     Unlock.alertTextSetupHooksInstalled = true
 end
@@ -139,14 +139,11 @@ function Unlock.ApplyAlertFrameAlignment()
     Unlock.InstallAlertTextSetupHooks()
     local alignment = GetResolvedAlertFrameAlignment()
 
-    local alertFrames = { ZO_AlertTextNotification, ZO_AlertTextNotificationGamepad }
-    for _, alertFrame in ipairs(alertFrames) do
-        if alertFrame then
-            Unlock.ApplyAlertTextFadingBufferAnchor(alertFrame, alignment)
-        end
+    -- ZO_AlertTextNotification is the keyboard top-level from AlertText_Keyboard.xml.
+    if ZO_AlertTextNotificationGamepad then
+        Unlock.ApplyAlertTextFadingBufferAnchor(ZO_AlertTextNotificationGamepad, alignment)
     end
 
-    RefreshActiveAlertLineAlignment(ALERT_MESSAGES)
     RefreshActiveAlertLineAlignment(ALERT_MESSAGES_GAMEPAD)
 end
 
