@@ -128,7 +128,7 @@ local effectOverride =
     [61662] = { tooltip = Tooltips.Skill_Minor_Brutality },                   -- Minor Brutality
     [61665] = { tooltip = Tooltips.Skill_Major_Brutality },                   -- Major Brutality
     [183049] = { hide = true, tooltip = Tooltips.Skill_Major_Brutality },     -- Major Brutality (Herald of the Tome bundle)
-    [203342] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy },      -- Major Prophecy (Herald of the Tome bundle)
+    [203342] = { hide = true, tooltip = Tooltips.Skill_Major_Savagery },      -- Major Savagery (Herald of the Tome bundle)
     [183166] = { hide = true, tooltip = Tooltips.Skill_Minor_Maim },          -- Minor Maim (Apocrypha bundle)
     [183431] = { hide = true, tooltip = Tooltips.Skill_Minor_Maim },          -- Minor Maim (Runic Sunder bundle)
     [186532] = { hide = true, tooltip = Tooltips.Skill_Minor_Maim },          -- Minor Maim (Runic Embrace bundle)
@@ -925,7 +925,7 @@ local effectOverride =
     [120024] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_WORM_CULT_DDS, tooltip = Tooltips.Generic_Increase_Magicka_Recovery_No_Dur, tooltipValue2 = 145 },                                           -- Worm's Raiment (Target Iron Atronach, Trial)
     [120026] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HIRCINE_DDS, tooltip = Tooltips.Generic_Increase_Stamina_Recovery_No_Dur, tooltipValue2 = 145 },                                             -- Hircine's Veneer (Target Iron Atronach, Trial)
     [265932] = { hide = true, tooltip = Tooltips.Skill_Major_Brutality },                                                                                                                                   -- Major Brutality (trial dummy refresh bundle)
-    [265933] = { hide = true, tooltip = Tooltips.Skill_Major_Sorcery },                                                                                                                                     -- Major Sorcery (trial dummy refresh bundle)
+    [265933] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },                                                                                                                                     -- Minor Heroism (trial dummy refresh bundle)
     [265984] = { hide = true, tooltip = Tooltips.Skill_Major_Savagery },                                                                                                                                    -- Major Savagery (trial dummy refresh; same type as DK slotted 61667)
     [265985] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy },                                                                                                                                    -- Major Prophecy (trial dummy refresh; same type as DK slotted 61689)
     ----------------------------------------------------------------
@@ -2045,8 +2045,8 @@ local effectOverride =
     [258619] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },                       -- Minor Fortitude (Cauterize bundle)
     -- Slotted Inferno line: combat bundles for Major Prophecy / Savagery (player buff frames use 61689 / 61667)
     [75088] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 28967 }, -- Major Prophecy (Inferno slotted)
-    [76420] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 32853 }, -- Major Prophecy (Incinerate slotted)
-    [76426] = { hide = true, tooltip = Tooltips.Skill_Major_Savagery },                         -- Major Savagery (Inferno line slotted combat)
+    [76420] = { hide = true, tooltip = Tooltips.Skill_Major_Savagery, tooltipMorphId = 32853 }, -- Major Savagery (Incinerate slotted)
+    [76426] = { hide = true, tooltip = Tooltips.Skill_Major_Evasion },                         -- Major Evasion (Inferno line slotted combat)
     [76433] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 32881 }, -- Major Prophecy (Cauterize slotted)
 
     -- Dragonknight Standard / Shifting Standard / Standard of Might
@@ -2483,7 +2483,7 @@ local effectOverride =
     [31384] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SORCERER_BLOOD_MAGIC_DDS },                                                                                     -- Blood Magic (Blood Magic - Rank 1)
     [45173] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SORCERER_BLOOD_MAGIC_DDS },                                                                                     -- Blood Magic (Blood Magic - Rank 2)
     [252508] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SORCERER_BLOOD_MAGIC_DDS },                                                                                    -- Blood Magic (cast proc)
-    [62320] = { hide = true },                                                                                                                                            -- Exploitation Minor Prophecy combat (display 61691)
+    -- 62320 Exploitation is the group Offensive Penetration buff. It is no longer a hidden copy of Minor Prophecy.
 
     -- Daedric Summoning
 

@@ -26,7 +26,6 @@ local blacklistPresets =
         [61691] = true,  -- Minor Prophecy (removed U51; kept for dual-API / legacy SV)
         [61662] = true,  -- Minor Brutality (U51: Weapon + Spell Damage)
         [61666] = true,  -- Minor Savagery (U51: Weapon + Spell Critical)
-        -- TODO P51 PTS: add Minor Vexation ability id when observed
         [61744] = true,  -- Minor Berserk
         [61746] = true,  -- Minor Force
         [61549] = true,  -- Minor Vitality
@@ -50,8 +49,6 @@ local blacklistPresets =
         [61689] = true,  -- Major Prophecy (removed U51; kept for dual-API / legacy SV)
         [61665] = true,  -- Major Brutality (U51: Weapon + Spell Damage)
         [61667] = true,  -- Major Savagery (U51: Weapon + Spell Critical)
-        -- TODO P51 PTS: add Major Vexation ability id when observed
-        -- TODO P51 PTS: Sorcerer group Offensive Penetration + Templar group Armor unique buff ids
         [61745] = true,  -- Major Berserk
         [61747] = true,  -- Major Force
         [61713] = true,  -- Major Vitality
@@ -79,6 +76,8 @@ local blacklistPresets =
         [61733] = true,  -- Minor Mangle
         [140699] = true, -- Minor Timidity
         [145975] = true, -- Minor Brittle
+        [260850] = true, -- Minor Vexation
+        [263403] = true, -- Minor Vexation
     },
 
     -- Major Debuffs
@@ -90,6 +89,7 @@ local blacklistPresets =
         [61727] = true,  -- Major Defile
         [147643] = true, -- Major Cowardice
         [145977] = true, -- Major Brittle
+        [263406] = true, -- Major Vexation
     },
 }
 
