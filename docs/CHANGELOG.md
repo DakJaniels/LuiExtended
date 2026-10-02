@@ -1,5 +1,32 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.0
+
+### New
+
+- MiniMap: **Zone Name Above Map** places the zone name above the map without moving InfoPanel.
+- MiniMap: **Show Player Pip** can be turned off. The camera direction cone stays while following.
+- MiniMap: **HarvestMap Pins (%)** scales HarvestMap pins on the minimap. World map pin size is unchanged.
+- Slash Commands: **Choose Fence to Summon**. /fence and /smuggler summon the fence you pick. PC and console.
+
+### Changes
+
+- Skill tooltips match current text for Earthspike Mantle, Earthshield Mantle, Shatterspike Mantle, Crystal Weapon, Fetcher Infection, Rally, Healing Springs, Mist Form, Blood Mist, Propelling Shield, the Blackrose destruction staff, Minor and Major Savagery, Minor and Major Force, Gallop, Minor and Major Heroism, Minor Magickasteal, Minor Lifesteal, Minor Timidity, and Empower.
+- Combat Text shared labels updated in German, French, Russian, and Chinese.
+- Assistant names updated in English, French, Russian, and Chinese.
+
+### Fixed
+
+- Action Bar: On console, the cast bar uses the console combat library for ability names and icons.
+- Combat Info: Crowd control tracker text on console and gamepad uses the gamepad fonts.
+- Console: Alert text alignment uses the gamepad alert frame.
+- MiniMap: The frame can sit flush with the screen edge. Resizing it into a corner keeps that position after reload.
+- MiniMap: The corner padlock shows locked and unlocked, and hides after you lock the frame. The move grip stays inside the frame so the map can sit flush with the screen.
+- MiniMap: Map tiles load on login and reload without opening the world map and zooming all the way out.
+- MiniMap: HarvestMap pins show on the minimap without opening the world map and zooming out.
+- MiniMap: The player pip stays on the city map while you are in a submap, without opening the world map.
+- MiniMap: LibMapPins pins (SkyShards, Quest Map, Lost Treasure, Destinations, and the same library) draw for the minimap sheet without opening the world map.
+
 ## Version 7.2.6.9
 
 ### New
