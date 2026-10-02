@@ -18,6 +18,7 @@ local panAndZoom = ZO_WorldMap_GetPanAndZoom()
 
 local nativeWorldMapContainerAttached = false
 local nativeWorldMapContainerHiddenForReload = false
+local nativeWorldMapContainerStagedForTileLoad = false
 
 --- @class MiniMapNativeWorldMapContainerRestore
 --- @field parent Control
@@ -40,13 +41,118 @@ local function GetNativeHudMapOverlayLayoutReapplyUpdateName()
 end
 
 --- Hides reparented ZO_WorldMapContainer while ReloadWorldMap runs so ZO_WorldMap_UpdateMap cannot flash full-zone dimensions.
+--- A staged tile load stays shown at alpha 0. ZO_MapPanAndZoom:CanInitializeMap releases the texture unit when ZO_WorldMapContainer1 is hidden.
 --- @param hidden boolean
 function MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(hidden)
     nativeWorldMapContainerHiddenForReload = hidden == true
     if not nativeWorldMapContainerAttached then
         return
     end
+    if nativeWorldMapContainerHiddenForReload and nativeWorldMapContainerStagedForTileLoad then
+        ZO_WorldMapContainer:SetHidden(false)
+        ZO_WorldMapContainer:SetAlpha(0)
+        return
+    end
     ZO_WorldMapContainer:SetHidden(nativeWorldMapContainerHiddenForReload)
+    if not nativeWorldMapContainerHiddenForReload then
+        nativeWorldMapContainerStagedForTileLoad = false
+        ZO_WorldMapContainer:SetAlpha(1)
+    end
+end
+
+--- @return boolean
+function MiniMap.IsNativeWorldMapContainerStagedForTileLoad()
+    return nativeWorldMapContainerStagedForTileLoad
+end
+
+--- Parents ZO_WorldMapContainer under the visible minimap so GetMapTileTexture can finish loading.
+--- ZO_WorldMapTiles_Manager:UpdateTextures calls SetTexture, and a hidden tile drops that texture (RELEASE_TEXTURE_AT_ZERO_REFERENCES on ZO_MapTile).
+function MiniMap.ShowNativeWorldMapContainerForTileLoad()
+    if ZO_WorldMap_IsWorldMapShowing() then
+        return
+    end
+    local view = MiniMap.view
+    if not view or not view.map then
+        return
+    end
+    nativeWorldMapContainerStagedForTileLoad = true
+    if not nativeWorldMapContainerAttached then
+        ZO_WorldMapContainer:SetParent(view.map)
+        ZO_WorldMapContainer:SetMouseEnabled(false)
+    end
+    ZO_WorldMapContainer:SetAlpha(0)
+    ZO_WorldMapContainer:SetHidden(false)
+    MiniMap.ClampStagedWorldMapContainerToMiniMapScroll()
+end
+
+--- Fits a staged container to the minimap scroll without LayoutTiles. LayoutTiles hides tiles and releases the texture unit.
+function MiniMap.ClampStagedWorldMapContainerToMiniMapScroll()
+    if not nativeWorldMapContainerStagedForTileLoad then
+        return
+    end
+    local view = MiniMap.view
+    if not view or not view.map or not view.scroll then
+        return
+    end
+    local scrollWidth = view.scroll:GetWidth()
+    local scrollHeight = view.scroll:GetHeight()
+    if scrollWidth <= 0 or scrollHeight <= 0 then
+        return
+    end
+    ZO_WorldMapContainer:ClearAnchors()
+    ZO_WorldMapContainer:SetAnchor(TOPLEFT, view.map, TOPLEFT, 0, 0)
+    ZO_WorldMapContainer:SetDimensions(scrollWidth, scrollHeight)
+
+    local horizontalTiles = WORLD_MAP_TILES_MANAGER.horizontalTiles
+    local verticalTiles = WORLD_MAP_TILES_MANAGER.verticalTiles
+    local totalTiles = WORLD_MAP_TILES_MANAGER.totalTiles
+    if not horizontalTiles or horizontalTiles < 1 or not verticalTiles or verticalTiles < 1 or not totalTiles then
+        return
+    end
+    local tileWidth = scrollWidth / horizontalTiles
+    local tileHeight = scrollHeight / verticalTiles
+    for tileIndex = 1, totalTiles do
+        local tileControl = WORLD_MAP_TILES_MANAGER:GetActiveObject(tileIndex)
+        if tileControl then
+            tileControl:SetHidden(false)
+            tileControl:ClearAnchors()
+            tileControl:SetDimensions(tileWidth, tileHeight)
+            local xOffset = zo_mod(tileIndex - 1, horizontalTiles) * tileWidth
+            local yOffset = zo_floor((tileIndex - 1) / horizontalTiles) * tileHeight
+            tileControl:SetAnchor(TOPLEFT, ZO_WorldMapContainer, TOPLEFT, xOffset, yOffset)
+        end
+    end
+end
+
+--- Puts a not-yet-attached container back on ZO_WorldMapScroll. Attached restores go through RestoreWorldMapContainerToWorldMap.
+function MiniMap.ReturnStagedWorldMapContainerToWorldMap()
+    if not nativeWorldMapContainerStagedForTileLoad then
+        return
+    end
+    nativeWorldMapContainerStagedForTileLoad = false
+    if nativeWorldMapContainerAttached then
+        return
+    end
+    ZO_WorldMapContainer:SetAlpha(1)
+    ZO_WorldMapContainer:SetParent(ZO_WorldMapScroll)
+    ZO_WorldMapContainer:ClearAnchors()
+    ZO_WorldMapContainer:SetAnchor(CENTER, ZO_WorldMapScroll, CENTER, 0, 0)
+    ZO_WorldMapContainer:SetMouseEnabled(true)
+end
+
+--- ZO_MapPanAndZoom:InitializeMap sets normalized zoom 0 and offset 0 once ZO_WorldMapContainer1 is loaded and shown.
+function MiniMap.InitializeNativeWorldMapZoomedOutWhenPending()
+    if not panAndZoom.pendingInitializeMap then
+        return
+    end
+    local firstTile = WORLD_MAP_TILES_MANAGER:GetActiveObject(1)
+    if firstTile and firstTile:IsHidden() then
+        firstTile:SetHidden(false)
+    end
+    if panAndZoom:CanInitializeMap() then
+        panAndZoom:InitializeMap()
+        MiniMap.ReapplyNativeWorldMapTileTexturesAfterLayout()
+    end
 end
 
 --- @return boolean
@@ -60,6 +166,11 @@ function MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
         return
     end
     if nativeWorldMapContainerHiddenForReload then
+        if nativeWorldMapContainerStagedForTileLoad then
+            ZO_WorldMapContainer:SetHidden(false)
+            ZO_WorldMapContainer:SetAlpha(0)
+            return
+        end
         ZO_WorldMapContainer:SetHidden(true)
         return
     end
@@ -160,8 +271,13 @@ function MiniMap.HasNativeMovingPinTargets()
 end
 
 --- Native HUD player pin + group/companion moving pins. Called from OnFollowTick after its guards.
+--- Player normalized position is the sample from GetMapPlayerPositionForMirror so a parent-zone map index cannot place the pip.
 --- @param followPlayer boolean|nil
-function MiniMap.TickHudMovingAndPlayerPins(followPlayer)
+--- @param normalizedX number|nil
+--- @param normalizedY number|nil
+--- @param isShownInCurrentMap boolean|nil
+--- @param isSymbolicLocation boolean|nil
+function MiniMap.TickHudMovingAndPlayerPins(followPlayer, normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation)
     if followPlayer == nil then
         followPlayer = MiniMap.GetMapFollowsPlayer()
     end
@@ -172,23 +288,47 @@ function MiniMap.TickHudMovingAndPlayerPins(followPlayer)
     if followPlayer then
         if hasGroupOrCompanionPins then
             pinManager:UpdateMovingPins()
-        else
-            MiniMap.UpdateNativeHudPlayerMapPin()
         end
     else
         pinManager:UpdateMovingPins()
     end
+    MiniMap.UpdateNativeHudPlayerMapPin(normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation)
     MiniMap.ApplyNativeHudPlayerPinScale()
     MiniMap.ApplyNativeWorldMapPlayerPinColors()
+    if MiniMap.SV.showPlayerPip == false then
+        local playerMapPin = pinManager:GetPlayerPin()
+        playerMapPin:GetControl():SetHidden(true)
+    end
 end
 
 --- ZOS UpdateMovingPins player block only (MapPin_Manager.lua) for solo follow pip sync.
-function MiniMap.UpdateNativeHudPlayerMapPin()
+--- @param normalizedX number|nil
+--- @param normalizedY number|nil
+--- @param isShownInCurrentMap boolean|nil
+--- @param isSymbolicLocation boolean|nil
+function MiniMap.UpdateNativeHudPlayerMapPin(normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation)
     local playerMapPin = pinManager:GetPlayerPin()
-    local xLoc, yLoc, _, isShownInCurrentMap, isSymbolicLocation = GetMapPlayerPosition("player")
+    if not playerMapPin then
+        return
+    end
+    local xLoc, yLoc = normalizedX, normalizedY
+    if xLoc == nil or yLoc == nil then
+        xLoc, yLoc, _, isShownInCurrentMap, isSymbolicLocation = MiniMap.GetMapPlayerPositionForMirror("player")
+    end
     playerMapPin:SetOriginalPosition(xLoc, yLoc)
     playerMapPin:SetIsSymbolicPosition(isSymbolicLocation)
     playerMapPin:SetLocation(xLoc, yLoc)
+    -- SetLocation anchors with ZO_MAP_CONSTANTS (WorldMap.lua ZO_MapPin:UpdateLocation).
+    -- Those constants are the world-map window after SetMapWindowSize, while the city tiles stay on the minimap content size.
+    -- Wayshrines keep the layout anchors; only this moving pin was rewritten every tick, so it sat in the lower part of the city.
+    local containerWidth, containerHeight = ZO_WorldMapContainer:GetDimensions()
+    local constantWidth, constantHeight = ZO_WorldMap_GetMapDimensions()
+    if containerWidth > 0 and containerHeight > 0
+    and (zo_abs(containerWidth - constantWidth) > 1 or zo_abs(containerHeight - constantHeight) > 1) then
+        local playerPinControl = playerMapPin:GetControl()
+        playerPinControl:ClearAnchors()
+        playerPinControl:SetAnchor(CENTER, playerPinControl:GetParent(), TOPLEFT, xLoc * containerWidth, yLoc * containerHeight)
+    end
     if isShownInCurrentMap then
         playerMapPin:SetHidden(false)
         local rotation = isSymbolicLocation and 0 or GetPlayerCameraHeading()
@@ -235,6 +375,9 @@ function MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
     if nativeWorldMapContainerRestore.playerWorldPinWasHidden == nil then
         nativeWorldMapContainerRestore.playerWorldPinWasHidden = playerWorldPinControl:IsHidden()
     end
+    if MiniMap.SV.showPlayerPip == false then
+        playerWorldPinControl:SetHidden(true)
+    end
     MiniMap.ApplyNativeWorldMapPlayerPinColors()
 end
 
@@ -250,6 +393,35 @@ local function RestoreWorldMapPlayerPinVisibility()
     nativeWorldMapContainerRestore.playerWorldPinWasHidden = nil
 end
 
+--- SetMapWindowSize (WorldMap.lua) writes ZO_MAP_CONSTANTS and the container to the world-map window.
+--- The follow scroll still uses minimap content size, so the player pin (updated every tick) lands in the wrong part of a submap.
+--- Opening and closing the world map runs this layout last, which is why the pip then stays correct.
+function MiniMap.SyncNativeHudMapGeometryToContent()
+    if not nativeWorldMapContainerAttached then
+        return
+    end
+    if MiniMap.playerMapMirrorDepth > 0 or MiniMap.IsPinMirrorMachineBusy() then
+        return
+    end
+    local mapController = MiniMap.mapController
+    if not mapController or not mapController:IsReady() then
+        return
+    end
+    local mapContentWidth = mapController:GetMapContentWidth()
+    local mapContentHeight = mapController:GetMapContentHeight()
+    if mapContentWidth <= 0 or mapContentHeight <= 0 then
+        return
+    end
+    local containerWidth, containerHeight = ZO_WorldMapContainer:GetDimensions()
+    if zo_abs(containerWidth - mapContentWidth) <= 1
+    and zo_abs(containerHeight - mapContentHeight) <= 1
+    and zo_abs(ZO_MAP_CONSTANTS.MAP_WIDTH - mapContentWidth) <= 1
+    and zo_abs(ZO_MAP_CONSTANTS.MAP_HEIGHT - mapContentHeight) <= 1 then
+        return
+    end
+    MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentHeight)
+end
+
 --- @param mapContentWidth number
 --- @param mapContentHeight number
 function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentHeight)
@@ -263,11 +435,12 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
     ZO_WorldMapContainer:SetDimensions(mapContentWidth, mapContentHeight)
     ZO_WorldMapContainer:ClearAnchors()
     ZO_WorldMapContainer:SetAnchor(TOPLEFT, ZO_WorldMapContainer:GetParent(), TOPLEFT, 0, 0)
+    ZO_WorldMapContainer:SetAlpha(1)
+    ZO_WorldMapContainer:SetHidden(false)
+    nativeWorldMapContainerStagedForTileLoad = false
 
     WORLD_MAP_TILES_MANAGER:LayoutTiles()
-    -- for tileIndex = 1, WORLD_MAP_TILES_MANAGER.totalTiles do
-    --     WORLD_MAP_TILES_MANAGER:GetActiveObject(tileIndex):SetHidden(false)
-    -- end
+    MiniMap.ReapplyNativeWorldMapTileTexturesAfterLayout()
 
     pinManager:UpdateMovingPins()
     pinManager:UpdatePinsForMapSizeChange()
@@ -285,6 +458,11 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
     if GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL then
         ZO_WorldMap_RefreshKeepNetwork()
     end
+
+    if MiniMap.pinController then
+        MiniMap.pinController:RefreshHarvestMapPinsForHud()
+    end
+    MiniMap.RefreshCustomPinsForHud()
 end
 
 --- @param mapController MiniMapMapController|nil
@@ -352,12 +530,19 @@ function MiniMap.TryAttachNativeWorldMapContainer()
         return
     end
 
+    local restoreParent = ZO_WorldMapContainer:GetParent()
+    local containerMouseEnabled = ZO_WorldMapContainer:IsMouseEnabled()
+    if nativeWorldMapContainerStagedForTileLoad or restoreParent == view.map then
+        restoreParent = ZO_WorldMapScroll
+        containerMouseEnabled = true
+    end
+
     nativeWorldMapContainerRestore =
     {
-        parent = ZO_WorldMapContainer:GetParent(),
+        parent = restoreParent,
         mapConstantsWidth = ZO_MAP_CONSTANTS.MAP_WIDTH,
         mapConstantsHeight = ZO_MAP_CONSTANTS.MAP_HEIGHT,
-        containerMouseEnabled = ZO_WorldMapContainer:IsMouseEnabled(),
+        containerMouseEnabled = containerMouseEnabled,
     }
 
     ZO_WorldMapContainer:SetParent(view.map)
@@ -374,8 +559,10 @@ end
 
 function MiniMap.RestoreWorldMapContainerToWorldMap()
     if not nativeWorldMapContainerAttached then
+        MiniMap.ReturnStagedWorldMapContainerToWorldMap()
         return
     end
+    nativeWorldMapContainerStagedForTileLoad = false
 
     MiniMap.CancelNativeHudMapOverlayLayoutReapply()
     RestoreWorldMapPlayerPinVisibility()
@@ -385,6 +572,7 @@ function MiniMap.RestoreWorldMapContainerToWorldMap()
 
     local restore = nativeWorldMapContainerRestore
     local restoreParent = restore and restore.parent or ZO_WorldMapScroll
+    ZO_WorldMapContainer:SetAlpha(1)
     ZO_WorldMapContainer:SetParent(restoreParent)
     ZO_WorldMapContainer:ClearAnchors()
     ZO_WorldMapContainer:SetAnchor(CENTER, restoreParent, CENTER, 0, 0)
@@ -405,6 +593,7 @@ function MiniMap.RestoreWorldMapContainerToWorldMap()
     nativeWorldMapContainerRestore = nil
 
     if MiniMap.pinController then
+        MiniMap.pinController:ApplyHarvestMapCompositeScale()
         MiniMap.pinController:RestoreAllDigSitePolygonsToWorldMap()
     end
 end
@@ -418,5 +607,6 @@ end
 
 function MiniMap.ShutdownNativeWorldMapContainer()
     nativeWorldMapContainerHiddenForReload = false
+    MiniMap.ReturnStagedWorldMapContainerToWorldMap()
     MiniMap.RestoreWorldMapContainerToWorldMap()
 end

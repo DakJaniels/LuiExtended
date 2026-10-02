@@ -38,9 +38,10 @@ end
 
 function MiniMapRuntime:UpdateCenterPlayerPipVisibility()
     local followPlayer = MiniMap.GetMapFollowsPlayer()
+    local showPlayerPip = MiniMap.SV.showPlayerPip ~= false
     local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
-    self.view.player:SetHidden(not followPlayer)
-    if followPlayer and nativeHudMapAttached then
+    self.view.player:SetHidden((not followPlayer) or (not showPlayerPip))
+    if showPlayerPip and followPlayer and nativeHudMapAttached then
         self.view.playerCam:SetHidden(true)
     else
         self.view.playerCam:SetHidden(not followPlayer)
@@ -131,9 +132,12 @@ function MiniMapRuntime:OnFollowTick()
         return
     end
 
+    MiniMap.SyncHudMapSheetToPlayerLocation()
+    MiniMap.SyncNativeHudMapGeometryToContent()
+
     self:UpdateCenterPlayerPipVisibility()
 
-    local playerNormalizedX, playerNormalizedY, playerHeading = MiniMap.GetMapPlayerPositionForMirror("player")
+    local playerNormalizedX, playerNormalizedY, playerHeading, isShownInCurrentMap, isSymbolicLocation = MiniMap.GetMapPlayerPositionForMirror("player")
     local playerCameraHeading = GetPlayerCameraHeading()
     local scroll = self.view.scroll
     local mapContentWidth = self.mapController:GetMapContentWidth()
@@ -175,7 +179,7 @@ function MiniMapRuntime:OnFollowTick()
     self.lastPlayerNormX = playerNormalizedX
     self.lastPlayerNormY = playerNormalizedY
 
-    MiniMap.TickHudMovingAndPlayerPins(followPlayer)
+    MiniMap.TickHudMovingAndPlayerPins(followPlayer, playerNormalizedX, playerNormalizedY, isShownInCurrentMap, isSymbolicLocation)
 end
 
 function MiniMapRuntime:ApplyScrollFromPanOffsets()

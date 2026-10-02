@@ -39,6 +39,7 @@ local miniMapPinCategoryScales =
     { key = "pinScalePoi",       name = LUIE_STRING_LAM_MINIMAP_PINSCALE_POI       },
     { key = "pinScaleWayshrine", name = LUIE_STRING_LAM_MINIMAP_PINSCALE_WAYSHRINE },
     { key = "pinScaleOther",     name = LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER     },
+    { key = "pinScaleHarvestMap", name = LUIE_STRING_LAM_MINIMAP_PINSCALE_HARVESTMAP, tooltip = LUIE_STRING_LAM_MINIMAP_PINSCALE_HARVESTMAP_TP },
 }
 
 local function GetMiniMapCompassOverrideDropdownItems()
@@ -201,6 +202,9 @@ function MiniMap.CreateConsoleSettings()
             setFunction = function (value)
                 MiniMap.SV.lockPosition = value
                 MiniMap.ApplyLiveSettings()
+                if MiniMap.frameChromeStateMachine then
+                    MiniMap.frameChromeStateMachine:NotifySettingsLockChanged()
+                end
             end,
             default = Defaults.lockPosition,
             disable = disable,
@@ -427,6 +431,7 @@ function MiniMap.CreateConsoleSettings()
         {
             type = LHAS.ST_SLIDER,
             label = GetString(category.name),
+            tooltip = category.tooltip and GetString(category.tooltip) or nil,
             min = 50,
             max = 200,
             step = 5,
@@ -470,6 +475,18 @@ function MiniMap.CreateConsoleSettings()
             end,
             default = Defaults.showZoneName,
             disable = disable,
+        },
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_ABOVE),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_ABOVE_TP),
+            getFunction = function () return MiniMap.SV.zoneNameAboveMap == true end,
+            setFunction = function (value)
+                MiniMap.SV.zoneNameAboveMap = value
+                MiniMap.ApplyLiveSettings()
+            end,
+            default = Defaults.zoneNameAboveMap,
+            disable = zoneNameFontDisabled,
         },
         {
             type = LHAS.ST_LABEL,
@@ -527,6 +544,18 @@ function MiniMap.CreateConsoleSettings()
             end,
             default = Defaults.zoneNameFontStyle,
             disable = zoneNameFontDisabled,
+        },
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_PLAYER_PIP),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_PLAYER_PIP_TP),
+            getFunction = function () return MiniMap.SV.showPlayerPip ~= false end,
+            setFunction = function (value)
+                MiniMap.SV.showPlayerPip = value
+                MiniMap.ApplyLiveSettings()
+            end,
+            default = Defaults.showPlayerPip,
+            disable = disable,
         },
         {
             type = LHAS.ST_COLOR,

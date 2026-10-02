@@ -42,6 +42,10 @@ function MiniMap.FirePinResyncCallbacks()
     end
 end
 
+--- HarvestMap tour pin from Tour/Helper.lua ZO_WorldMap_AddCustomPin("MAP_PIN_TYPE_HARVEST_TOUR", ...).
+--- Resource pins are texture composites, scaled in ApplyHarvestMapCompositeScale.
+local HARVEST_MAP_TOUR_PIN_TYPE_STRING = "MAP_PIN_TYPE_HARVEST_TOUR"
+
 local PIN_FILTER_GROUP_TO_SCALE_SETTING_KEY =
 {
     [MAP_FILTER_QUESTS] = "pinScaleQuest",
@@ -63,12 +67,37 @@ function MiniMap.GetPinCategoryScaleForFilterGroup(pinGroup, settings)
 end
 
 --- @param pinType MapDisplayPinType|nil
+--- @return boolean
+function MiniMap.IsHarvestMapCustomPinType(pinType)
+    if not pinType then
+        return false
+    end
+    local worldMapPinManager = ZO_WorldMap_GetPinManager()
+    local customPins = worldMapPinManager.customPins
+    if not customPins then
+        return false
+    end
+    local customPinData = customPins[pinType]
+    if not customPinData or not customPinData.pinTypeString then
+        return false
+    end
+    return customPinData.pinTypeString == HARVEST_MAP_TOUR_PIN_TYPE_STRING
+end
+
+--- @param pinType MapDisplayPinType|nil
 --- @return number
 function MiniMap.GetPinTypeScaleMultiplier(pinType)
     local settings = MiniMap.SV
     local baseScale = settings.defaultPinScale or 1
     if pinType and settings.pinTypeScales and settings.pinTypeScales[pinType] then
         return baseScale * settings.pinTypeScales[pinType]
+    end
+    if pinType and MiniMap.IsHarvestMapCustomPinType(pinType) then
+        local harvestMapScale = settings.pinScaleHarvestMap
+        if harvestMapScale == nil then
+            harvestMapScale = 1
+        end
+        return baseScale * harvestMapScale
     end
     if pinType then
         local pinGroup = ZO_MapPin.PIN_TYPE_TO_PIN_GROUP[pinType]

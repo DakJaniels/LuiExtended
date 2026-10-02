@@ -12,6 +12,59 @@ local MINIMAP_ZOOM_MIN_FALLBACK = 0.35
 local MINIMAP_ZOOM_MAX = 1.8
 local MINIMAP_MAP_RELOAD_MAX_ATTEMPTS = 10
 
+--- World map open (ZO_MapPanAndZoom:OnWorldMapShowing) calls SetMapToPlayerLocation and leaves that map in place.
+--- DoesCurrentMapMatchMapForPlayerLocation stays true on the parent zone while the minimap sheet is the city, so the follow tick never entered the mirror and kept writing zone coordinates onto the city tiles.
+function MiniMap.SyncHudMapSheetToPlayerLocation()
+    if MiniMap.playerMapMirrorDepth > 0 or MiniMap.IsPinMirrorMachineBusy() then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        return
+    end
+    local mapController = MiniMap.mapController
+    if not mapController or not mapController.map then
+        return
+    end
+    local mapNameBefore = GetMapName()
+    if mapNameBefore == mapController.map.rawName then
+        return
+    end
+    SetMapToPlayerLocation()
+    if GetMapName() == mapNameBefore then
+        MiniMap.SetMapToPlayerLocationForHud()
+    end
+    local mapNameAfter = GetMapName()
+    if mapNameAfter == mapController.map.rawName then
+        if mapNameAfter ~= mapNameBefore then
+            MiniMap.RefreshCustomPinsForHud()
+        end
+        return
+    end
+    if mapNameAfter == mapNameBefore then
+        return
+    end
+    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
+    if pinMirrorStateMachine then
+        pinMirrorStateMachine:RequestMapReload("PlayerSubmap")
+    end
+end
+
+--- SetMapToPlayerLocation stays on the parent zone while the player is inside a clickable submap (Vivec City).
+--- HarvestMap MapTools:SetMapToPlayerLocation drills in with WouldProcessMapClick / ProcessMapClick.
+--- MapZoomOut is intentionally not used here: it leaves the city and the pip is then placed with zone coordinates.
+function MiniMap.SetMapToPlayerLocationForHud()
+    SetMapToPlayerLocation()
+    local normalizedX, normalizedY = GetMapPlayerPosition("player")
+    if not normalizedX or not normalizedY then
+        return
+    end
+    local playerZoneIndex = GetUnitZoneIndex("player")
+    local mapZoneIndex = GetCurrentMapZoneIndex()
+    if WouldProcessMapClick(normalizedX, normalizedY) and playerZoneIndex == mapZoneIndex then
+        ProcessMapClick(normalizedX, normalizedY)
+    end
+end
+
 --- Save world-map list index, run mirror work on player map, then restore selection.
 --- @param mirrorCallback function
 --- @return boolean true when mirror work ran or was queued on the single-flight slot
@@ -24,32 +77,41 @@ function MiniMap.RunWithPlayerMapForMirror(mirrorCallback)
         return true
     end
     MiniMap.playerMapMirrorDepth = MiniMap.playerMapMirrorDepth + 1
-    if MiniMap.playerMapMirrorDepth == 1 then
+    if MiniMap.playerMapMirrorDepth == 1 and not MiniMap.IsNativeWorldMapContainerStagedForTileLoad() then
         MiniMap.ClearPlayerMapMirrorZosTilesUpdatedState()
     end
     local savedMapIndex = GetCurrentMapIndex()
-    SetMapToPlayerLocation()
+    MiniMap.SetMapToPlayerLocationForHud()
     local mapIndexAfterPlayerLocation = GetCurrentMapIndex()
     local playerMapIndexChanged = savedMapIndex ~= mapIndexAfterPlayerLocation
-    if playerMapIndexChanged or not MiniMap.IsNativeWorldMapContainerAttached() then
+    local tileLoadAlreadyRequested = MiniMap.IsNativeWorldMapContainerStagedForTileLoad()
+        and MiniMap.playerMapMirrorZosTilesUpdated
+        and not playerMapIndexChanged
+        and MiniMap.playerMapMirrorZosTilesMapRawName == GetMapName()
+    if (playerMapIndexChanged or not MiniMap.IsNativeWorldMapContainerAttached()) and not tileLoadAlreadyRequested then
         ZO_WorldMap_UpdateMap()
         MiniMap.MarkPlayerMapMirrorZosTilesUpdated()
         MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
     end
     mirrorCallback()
-    if savedMapIndex ~= nil and savedMapIndex ~= GetCurrentMapIndex() then
-        if MiniMap.IsNativeWorldMapContainerAttached() then
-            SetMapToPlayerLocation()
-        else
-            SetMapToMapListIndex(savedMapIndex)
-        end
+    -- While the HUD owns the sheet (attached or staged for tile load), keep the player location map.
+    -- SetMapToMapListIndex(saved) puts the parent zone back and the next GetMapPlayerPosition writes zone coordinates onto the city tiles.
+    -- ZO_WorldMap_OnHide clears g_playerChoseCurrentMap, and OnWorldMapShowing calls SetMapToPlayerLocation again when the world map opens.
+    local hudOwnsMapSheet = MiniMap.IsNativeWorldMapContainerAttached() or MiniMap.IsNativeWorldMapContainerStagedForTileLoad()
+    if not hudOwnsMapSheet and savedMapIndex ~= nil and savedMapIndex ~= GetCurrentMapIndex() then
+        SetMapToMapListIndex(savedMapIndex)
         ZO_WorldMap_UpdateMap()
         MiniMap.MarkPlayerMapMirrorZosTilesUpdated()
         MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
     end
     MiniMap.playerMapMirrorDepth = MiniMap.playerMapMirrorDepth - 1
     if MiniMap.playerMapMirrorDepth == 0 then
-        MiniMap.ClearPlayerMapMirrorZosTilesUpdatedState()
+        local mapController = MiniMap.mapController
+        local tileLoadStillPending = MiniMap.IsNativeWorldMapContainerStagedForTileLoad()
+            and (not mapController or not mapController:IsReady())
+        if not tileLoadStillPending then
+            MiniMap.ClearPlayerMapMirrorZosTilesUpdatedState()
+        end
     end
     local pendingMirrorCallback = MiniMap.playerMapMirrorPendingCallback
     if MiniMap.playerMapMirrorDepth == 0 and pendingMirrorCallback then
@@ -352,18 +414,34 @@ function MiniMap.ShouldInvokeNativeWorldMapUpdateTexturesForMapData(mapData)
     return false
 end
 
+--- LayoutTiles releases every tile (ZO_ControlPool reset hides them) and does not call SetTexture.
+--- Hidden ZO_MapTile controls use RELEASE_TEXTURE_AT_ZERO_REFERENCES, so the art has to be set again.
+function MiniMap.ReapplyNativeWorldMapTileTexturesAfterLayout()
+    local totalTiles = WORLD_MAP_TILES_MANAGER.totalTiles
+    if not totalTiles or totalTiles < 1 then
+        return
+    end
+    for tileIndex = 1, totalTiles do
+        local tileControl = WORLD_MAP_TILES_MANAGER:GetActiveObject(tileIndex)
+        if tileControl then
+            tileControl:SetHidden(false)
+            tileControl:SetTexture(GetMapTileTexture(tileIndex))
+        end
+    end
+end
+
 --- @param mapData MiniMapMapData
 --- @param invokeUpdateTextures boolean
 function MiniMap.BindNativeWorldMapTilesForHud(mapData, invokeUpdateTextures)
-    -- if invokeUpdateTextures then
-    --     WORLD_MAP_TILES_MANAGER:UpdateTextures()
-    --     return
-    -- end
-    -- WORLD_MAP_TILES_MANAGER:UpdateMapData()
-    -- if WORLD_MAP_TILES_MANAGER.totalTiles ~= mapData.numTiles
-    -- or not WORLD_MAP_TILES_MANAGER:GetActiveObject(1) then
-    --     WORLD_MAP_TILES_MANAGER:UpdateTextures()
-    -- end
+    if invokeUpdateTextures then
+        WORLD_MAP_TILES_MANAGER:UpdateTextures()
+        return
+    end
+    WORLD_MAP_TILES_MANAGER:UpdateMapData()
+    if WORLD_MAP_TILES_MANAGER.totalTiles ~= mapData.numTiles
+    or not WORLD_MAP_TILES_MANAGER:GetActiveObject(1) then
+        WORLD_MAP_TILES_MANAGER:UpdateTextures()
+    end
 end
 
 --- @class MiniMapNativeWorldMapTilesReadyOptions
@@ -373,19 +451,25 @@ end
 --- @param readyOptions MiniMapNativeWorldMapTilesReadyOptions|nil
 --- @return boolean texturesLoaded
 function MiniMap.WaitForNativeWorldMapTilesReady(mapData, readyOptions)
+    MiniMap.ShowNativeWorldMapContainerForTileLoad()
     local invokeUpdateTextures = readyOptions and readyOptions.invokeUpdateTextures == true
     MiniMap.BindNativeWorldMapTilesForHud(mapData, invokeUpdateTextures)
 
     for tileIndex = 1, mapData.numTiles do
         local nativeTile = WORLD_MAP_TILES_MANAGER:GetActiveObject(tileIndex)
         if nativeTile then
+            if nativeTile:IsHidden() then
+                nativeTile:SetHidden(false)
+            end
             if mapData.tileWidth == 0 or mapData.tileHeight == 0 then
                 mapData.tileWidth, mapData.tileHeight = nativeTile:GetTextureFileDimensions()
             end
             if not nativeTile:IsTextureLoaded() then
+                MiniMap.ClampStagedWorldMapContainerToMiniMapScroll()
                 return false
             end
         else
+            MiniMap.ClampStagedWorldMapContainerToMiniMapScroll()
             return false
         end
     end
@@ -393,7 +477,11 @@ function MiniMap.WaitForNativeWorldMapTilesReady(mapData, readyOptions)
         local logicalWidth, logicalHeight = ZO_WorldMap_GetMapDimensions()
         MiniMap.AssignMiniMapMapDataPixelDimensions(mapData, logicalWidth, logicalHeight)
     end
-    return mapData.tileWidth > 0 and mapData.tileHeight > 0
+    if mapData.tileWidth <= 0 or mapData.tileHeight <= 0 then
+        return false
+    end
+    MiniMap.InitializeNativeWorldMapZoomedOutWhenPending()
+    return true
 end
 
 --- Player map coords for mirror scroll/pins; global map index may differ after restore.
@@ -404,11 +492,11 @@ end
 --- @return boolean|nil isShownInCurrentMap
 function MiniMap.GetMapPlayerPositionForMirror(unitTag)
     unitTag = unitTag or "player"
-    local normalizedX, normalizedY, heading, isShownInCurrentMap
+    local normalizedX, normalizedY, heading, isShownInCurrentMap, isSymbolicLocation
     MiniMap.RunHudMapReadInPlayerMapContext(function ()
-        normalizedX, normalizedY, heading, isShownInCurrentMap = GetMapPlayerPosition(unitTag)
+        normalizedX, normalizedY, heading, isShownInCurrentMap, isSymbolicLocation = GetMapPlayerPosition(unitTag)
     end)
-    return normalizedX, normalizedY, heading, isShownInCurrentMap
+    return normalizedX, normalizedY, heading, isShownInCurrentMap, isSymbolicLocation
 end
 
 --- @return number|nil waypointX

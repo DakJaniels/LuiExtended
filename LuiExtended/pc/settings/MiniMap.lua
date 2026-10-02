@@ -45,6 +45,7 @@ local miniMapPinCategoryScales =
     { key = "pinScalePoi",       name = LUIE_STRING_LAM_MINIMAP_PINSCALE_POI       },
     { key = "pinScaleWayshrine", name = LUIE_STRING_LAM_MINIMAP_PINSCALE_WAYSHRINE },
     { key = "pinScaleOther",     name = LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER     },
+    { key = "pinScaleHarvestMap", name = LUIE_STRING_LAM_MINIMAP_PINSCALE_HARVESTMAP, tooltip = LUIE_STRING_LAM_MINIMAP_PINSCALE_HARVESTMAP_TP },
 }
 
 local function GetMiniMapFontChoicesList()
@@ -248,6 +249,9 @@ function MiniMap.CreateSettings()
             setFunc = function (value)
                 MiniMap.SV.lockPosition = value
                 MiniMap.ApplyLiveSettings()
+                if MiniMap.frameChromeStateMachine then
+                    MiniMap.frameChromeStateMachine:NotifySettingsLockChanged()
+                end
             end,
             width = "half",
             default = Defaults.lockPosition,
@@ -443,6 +447,7 @@ function MiniMap.CreateSettings()
             width = "half",
             default = 100,
             disabled = disabled,
+            tooltip = category.tooltip and GetString(category.tooltip) or nil,
         }
     end
 
@@ -555,10 +560,36 @@ function MiniMap.CreateSettings()
             disabled = disabled,
         },
         {
+            type = "checkbox",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_ABOVE),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_ABOVE_TP),
+            getFunc = function () return MiniMap.SV.zoneNameAboveMap == true end,
+            setFunc = function (value)
+                MiniMap.SV.zoneNameAboveMap = value
+                MiniMap.ApplyLiveSettings()
+            end,
+            width = "full",
+            default = Defaults.zoneNameAboveMap,
+            disabled = zoneNameFontDisabled,
+        },
+        {
             type = "submenu",
             name = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_HEADER),
             disabled = zoneNameFontDisabled,
             controls = zoneNameFontSubmenuControls,
+        },
+        {
+            type = "checkbox",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_PLAYER_PIP),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_PLAYER_PIP_TP),
+            getFunc = function () return MiniMap.SV.showPlayerPip ~= false end,
+            setFunc = function (value)
+                MiniMap.SV.showPlayerPip = value
+                MiniMap.ApplyLiveSettings()
+            end,
+            width = "full",
+            default = Defaults.showPlayerPip,
+            disabled = disabled,
         },
         {
             type = "colorpicker",

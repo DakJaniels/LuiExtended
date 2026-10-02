@@ -49,6 +49,24 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.7.0
+    "|cFFA500LuiExtended Version 7.2.7.0|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFZone Name Above Map|r places the zone name above the map without moving InfoPanel.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFShow Player Pip|r can be turned off. The camera direction cone stays while following.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFHarvestMap Pins (%)|r scales HarvestMap pins on the minimap. World map pin size is unchanged.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: The frame can sit flush with the screen edge. Resizing it into a corner keeps that position after reload.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: The corner padlock shows locked and unlocked, and hides after you lock the frame. The move grip stays inside the frame so the map can sit flush with the screen.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Map tiles load on login and reload without opening the world map and zooming all the way out.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: HarvestMap pins show on the minimap without opening the world map and zooming out.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: The player pip stays on the city map while you are in a submap, without opening the world map.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: LibMapPins pins (SkyShards, Quest Map, Lost Treasure, Destinations, and the same library) draw for the minimap sheet without opening the world map.",
+    "",
     -- Version Header 7.2.6.9
     "|cFFA500LuiExtended Version 7.2.6.9|r",
     "",
