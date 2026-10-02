@@ -20,11 +20,24 @@ local eventManager = GetEventManager()
 -- -----------------------------------------------------------------------------
 
 local function IsPChatAvailable()
-    return pChat ~= nil and not ZO_IsConsoleOrGameCoreUI()
+    if ZO_IsConsoleOrGameCoreUI() or not LUIE.IsItEnabled("pChat") then
+        return false
+    end
+    return pChat ~= nil
 end
 
 local function IsRChatAvailable()
-    return rChat ~= nil and not ZO_IsConsoleOrGameCoreUI()
+    if ZO_IsConsoleOrGameCoreUI() or not LUIE.IsItEnabled("rChat") then
+        return false
+    end
+    return rChat ~= nil
+end
+
+local function IsLibChatMessageAvailable()
+    if not LUIE.IsItEnabled("LibChatMessage") then
+        return false
+    end
+    return LibChatMessage ~= nil
 end
 
 --- @return function|nil
@@ -43,7 +56,7 @@ local function GetExternalFormatSysMessage()
         end
     end
 
-    if rChat_ZOS and type(rChat_ZOS.FormatSysMessage) == "function" then
+    if IsRChatAvailable() and rChat_ZOS and type(rChat_ZOS.FormatSysMessage) == "function" then
         return rChat_ZOS.FormatSysMessage
     end
 
@@ -83,7 +96,7 @@ end
 
 --- Disables LibChatMessage history when pChat restore is active (pChat wins).
 function LUIE_ChatOutput:DisableLibChatMessageHistoryWhenPChatRestoreIsActive()
-    if not LibChatMessage or not self:IsPChatChatRestoreEnabled() then
+    if not IsLibChatMessageAvailable() or not self:IsPChatChatRestoreEnabled() then
         return
     end
     if LibChatMessage:IsChatHistoryEnabled() then
@@ -294,7 +307,7 @@ end
 
 --- Writes LibChatMessage:SetTimePrefixFormat from LUIE/pChat timestamp tokens (token conversion).
 function LUIE_ChatOutput:SyncLuiExtendedTimestampFormatToLibChatMessage()
-    if not LibChatMessage or not self.libChatMessage then
+    if not IsLibChatMessageAvailable() or not self.libChatMessage then
         return
     end
     local chatOutputSettings = self:GetChatOutputSavedVars()
@@ -334,7 +347,7 @@ end
 
 --- Apply Include Timestamp + LCM time mode to LibChatMessage APIs.
 function LUIE_ChatOutput:ApplyLibChatMessageTimePrefixSettings()
-    if not LibChatMessage or not self.libChatMessage then
+    if not IsLibChatMessageAvailable() or not self.libChatMessage then
         return
     end
     local chatOutputSettings = self:GetChatOutputSavedVars()
@@ -916,7 +929,7 @@ function LUIE_ChatOutput:RegisterPlayerActivatedHandlerOnce()
 end
 
 function LUIE_ChatOutput:InitializePrintRouting()
-    if LibChatMessage then
+    if IsLibChatMessageAvailable() then
         self.libChatMessage = LibChatMessage("LuiExtended", "LUIE")
         self:ApplyLibChatMessageTimePrefixSettings()
         self:DisableLibChatMessageHistoryWhenPChatRestoreIsActive()

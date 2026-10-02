@@ -787,7 +787,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     end
 
     -- Hook MAIL_SEND.Send to capture mail target and validate COD
-    if MAIL_SEND then
+    if not ZO_IsConsoleOrGameCoreUI() and MAIL_SEND then
         MAIL_SEND.Send = function (self)
             windowManager:SetFocusByName("")
 

@@ -15,7 +15,6 @@ local string_format = string.format
 local LuiData = LuiData
 local Castbar = LuiData.Data.CastBarTable
 
-local LibCombat = LibCombat
 local OtherAddonCompatability = LUIE.OtherAddonCompatability
 local Private = CastBar.Private
 
@@ -62,6 +61,9 @@ local SKILL_STATUS_LABEL =
 }
 
 local function libCombatSkillTimingsEventType()
+    if ZO_IsConsoleOrGameCoreUI() then
+        return LIBCOMBAT_LOG_EVENT_SKILL_CAST
+    end
     return LIBCOMBAT_EVENT_SKILL_TIMINGS or 19
 end
 
@@ -101,8 +103,7 @@ local function resetCastBarSlotPressTracking()
 end
 
 function CastBar.GetWeaveLineWidth()
-    -- LibCombat defines LIBCOMBAT_LINE_SIZE at load (see LibCombat.lua); optional dep ensures order when present.
-    if LIBCOMBAT_LINE_SIZE ~= nil then
+    if not ZO_IsConsoleOrGameCoreUI() and LIBCOMBAT_LINE_SIZE ~= nil then
         return tostring(LIBCOMBAT_LINE_SIZE)
     end
     return "1"
@@ -138,8 +139,13 @@ function CastBar.HideWeaveLines()
 end
 
 function CastBar.UnregisterLibCombatEvents()
-    if OtherAddonCompatability.isLibCombatEnabled and LibCombat and LibCombat.UnregisterForCombatEvent then
-        LibCombat:UnregisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType())
+    local libCombat = CastBar.GetLibCombat()
+    if OtherAddonCompatability.isLibCombatEnabled and libCombat and libCombat.UnregisterForCombatEvent then
+        if ZO_IsConsoleOrGameCoreUI() then
+            libCombat.UnregisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType())
+        else
+            libCombat:UnregisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType())
+        end
         -- logCastBarLibCombat("Unregister SKILL_TIMINGS (%s)", Private.moduleName)
     end
     g_skillTimingsRegistered = false
@@ -167,11 +173,17 @@ function CastBar.RegisterLibCombatEvents()
     end
     CastBar.UnregisterLibCombatEvents()
     resetCastBarSlotPressTracking()
-    if not LibCombat or not LibCombat.RegisterForCombatEvent then
+    local libCombat = CastBar.GetLibCombat()
+    if not libCombat or not libCombat.RegisterForCombatEvent then
         -- logCastBarLibCombat("Register skipped: LibCombat API missing")
         return
     end
-    local registered = LibCombat:RegisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType(), CastBar.OnLibCombatSkillTimings)
+    local registered
+    if ZO_IsConsoleOrGameCoreUI() then
+        registered = libCombat.RegisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType(), CastBar.OnLibCombatSkillTimings)
+    else
+        registered = libCombat:RegisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType(), CastBar.OnLibCombatSkillTimings)
+    end
     g_skillTimingsRegistered = registered == true
     Private.SetLibCombatTimingsActive(g_skillTimingsRegistered)
     -- logCastBarLibCombat("Register SKILL_TIMINGS (%s) ok=%s", Private.moduleName, tostring(g_skillTimingsRegistered))

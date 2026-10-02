@@ -264,7 +264,7 @@ function LUIE_ChatOutputSettingsUI:RefreshChatTabRoutingRows()
 end
 
 local function IsLibChatMessageLoaded()
-    return LibChatMessage ~= nil
+    return rawget(_G, "LibChatMessage") ~= nil
 end
 
 local function GetChatBypassTooltip()

@@ -85,6 +85,7 @@ frontend/fontdefs_gamepad.xml
 
 # Frontend
 frontend/AbilityAlerts.xml
+frontend/ActionBar.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml

@@ -16,8 +16,17 @@ local Effects = Data.Effects
 local Abilities = Data.Abilities
 local Castbar = Data.CastBarTable
 
-local LibCombat = LibCombat
 local OtherAddonCompatability = LUIE.OtherAddonCompatability
+
+function CastBar.GetLibCombat()
+    if not OtherAddonCompatability.isLibCombatEnabled then
+        return nil
+    end
+    if ZO_IsConsoleOrGameCoreUI() then
+        return LibCombat2
+    end
+    return LibCombat
+end
 
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
@@ -475,8 +484,14 @@ function CastBar.GetCastDisplayNameAndIcon(abilityId)
         icon = override.icon or GetAbilityIcon(abilityId)
         name = override.name or zo_strformat("<<C:1>>", GetAbilityName(abilityId))
     elseif OtherAddonCompatability.isLibCombatEnabled then
-        icon = LibCombat.GetFormattedAbilityIcon(abilityId)
-        name = LibCombat.GetFormattedAbilityName(abilityId)
+        local libCombat = CastBar.GetLibCombat()
+        if libCombat then
+            icon = libCombat.GetFormattedAbilityIcon(abilityId)
+            name = libCombat.GetFormattedAbilityName(abilityId)
+        else
+            icon = GetAbilityIcon(abilityId)
+            name = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+        end
     else
         icon = GetAbilityIcon(abilityId)
         name = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
@@ -919,6 +934,23 @@ function CastBar.TickWeaveGcdFeedback(currentTimeMS)
     end
 end
 
+function CastBar.OnMoveStart(control)
+    local preview = control:GetNamedChild("_Preview")
+    local anchorLabel = preview and preview:GetNamedChild("_AnchorLabel")
+    eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
+        if anchorLabel then
+            anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", control:GetLeft(), control:GetTop()))
+        end
+    end)
+end
+
+function CastBar.OnMoveStop(control)
+    eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
+    ActionBar.SV.CastbarOffsetX = control:GetLeft()
+    ActionBar.SV.CastbarOffsetY = control:GetTop()
+    ActionBar.SV.CastBarCustomPosition = { control:GetLeft(), control:GetTop() }
+end
+
 function CastBar.CreateCastBar()
     local fontString
     if ZO_IsConsoleOrGameCoreUI() then
@@ -926,70 +958,17 @@ function CastBar.CreateCastBar()
     else
         fontString = "ZoFontGameMedium"
     end
-    topLevelWindows.castBar = windowManager:CreateTopLevelWindow("LUIE_ACTIONBAR_CASTBAR_TLC")
-    topLevelWindows.castBar:SetClampedToScreen(true)
-    topLevelWindows.castBar:SetMouseEnabled(false)
-    topLevelWindows.castBar:SetMovable(false)
-    topLevelWindows.castBar:SetHidden(true)
-
+    topLevelWindows.castBar = windowManager:GetControlByName("LUIE_ACTIONBAR_CASTBAR_TLC")
     topLevelWindows.castBar:SetDimensions(ActionBar.SV.CastBarSizeW + ActionBar.SV.CastBarIconSize + 4, ActionBar.SV.CastBarSizeH)
 
-    -- Setup Preview
-    topLevelWindows.castBar.preview = topLevelWindows.castBar:CreateControl("$(parent)Preview", CT_BACKDROP)
-    topLevelWindows.castBar.preview:SetCenterColor(0, 0, 0, 0.4)
-    topLevelWindows.castBar.preview:SetEdgeColor(0, 0, 0, 0.6)
-    topLevelWindows.castBar.preview:SetEdgeTexture("", 8, 1, 1, 1)
-    topLevelWindows.castBar.preview:SetDrawLayer(DL_BACKGROUND)
-    topLevelWindows.castBar.preview:SetAnchorFill(topLevelWindows.castBar)
-    topLevelWindows.castBar.preview:SetHidden(true)
-    topLevelWindows.castBar.previewLabel = topLevelWindows.castBar.preview:CreateControl("$(parent)Label", CT_LABEL)
+    topLevelWindows.castBar.preview = topLevelWindows.castBar:GetNamedChild("_Preview")
+    topLevelWindows.castBar.previewLabel = topLevelWindows.castBar.preview:GetNamedChild("_Label")
     topLevelWindows.castBar.previewLabel:SetFont(ZO_IsConsoleOrGameCoreUI() and LUIE.GetPositionLabelFont() or fontString)
-    topLevelWindows.castBar.previewLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-    topLevelWindows.castBar.previewLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-    topLevelWindows.castBar.previewLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    topLevelWindows.castBar.previewLabel:SetAnchor(CENTER, topLevelWindows.castBar.preview, CENTER)
-    topLevelWindows.castBar.previewLabel:SetText("Cast Bar")
-
-    -- Callback used to hide anchor coords preview label on movement start
-    topLevelWindows.castBar:SetHandler("OnMoveStart", function ()
-        eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
-            topLevelWindows.castBar.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", topLevelWindows.castBar:GetLeft(), topLevelWindows.castBar:GetTop()))
-        end)
-    end)
-
-    -- Callback used to save new position of frames
-    topLevelWindows.castBar:SetHandler("OnMoveStop", function ()
-        eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
-        ActionBar.SV.CastbarOffsetX = topLevelWindows.castBar:GetLeft()
-        ActionBar.SV.CastbarOffsetY = topLevelWindows.castBar:GetTop()
-        ActionBar.SV.CastBarCustomPosition = { topLevelWindows.castBar:GetLeft(), topLevelWindows.castBar:GetTop() }
-    end)
-
-    topLevelWindows.castBar.preview.anchorTexture = topLevelWindows.castBar.preview:CreateControl("$(parent)AnchorTexture", CT_TEXTURE)
-    topLevelWindows.castBar.preview.anchorTexture:SetAnchor(TOPLEFT, topLevelWindows.castBar.preview, TOPLEFT)
-    topLevelWindows.castBar.preview.anchorTexture:SetDimensions(16, 16)
-    topLevelWindows.castBar.preview.anchorTexture:SetTexture("/esoui/art/reticle/border_topleft.dds")
-    topLevelWindows.castBar.preview.anchorTexture:SetDrawLayer(DL_OVERLAY)
-    topLevelWindows.castBar.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
-
-    topLevelWindows.castBar.preview.anchorLabel = topLevelWindows.castBar.preview:CreateControl("$(parent)AnchorLabel", CT_LABEL)
+    topLevelWindows.castBar.preview.anchorTexture = topLevelWindows.castBar.preview:GetNamedChild("_AnchorTexture")
+    topLevelWindows.castBar.preview.anchorLabel = topLevelWindows.castBar.preview:GetNamedChild("_AnchorLabel")
     topLevelWindows.castBar.preview.anchorLabel:SetFont(LUIE.GetPositionLabelFont())
-    topLevelWindows.castBar.preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-    topLevelWindows.castBar.preview.anchorLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
-    topLevelWindows.castBar.preview.anchorLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    topLevelWindows.castBar.preview.anchorLabel:SetAnchor(BOTTOMLEFT, topLevelWindows.castBar.preview, TOPLEFT, 0, -1)
-    topLevelWindows.castBar.preview.anchorLabel:SetText("xxx, yyy")
-    topLevelWindows.castBar.preview.anchorLabel:SetColor(1, 1, 0, 1)
-    topLevelWindows.castBar.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
-    topLevelWindows.castBar.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
-    topLevelWindows.castBar.preview.anchorLabelBg = topLevelWindows.castBar.preview.anchorLabel:CreateControl("$(parent)Bg", CT_BACKDROP)
-    topLevelWindows.castBar.preview.anchorLabelBg:SetCenterColor(0, 0, 0, 1)
-    topLevelWindows.castBar.preview.anchorLabelBg:SetEdgeColor(0, 0, 0, 1)
-    topLevelWindows.castBar.preview.anchorLabelBg:SetEdgeTexture("", 8, 1, 1, 1)
-    topLevelWindows.castBar.preview.anchorLabelBg:SetDrawLayer(DL_BACKGROUND)
+    topLevelWindows.castBar.preview.anchorLabelBg = topLevelWindows.castBar.preview:GetNamedChild("_AnchorLabelBg")
     topLevelWindows.castBar.preview.anchorLabelBg:SetAnchorFill(topLevelWindows.castBar.preview.anchorLabel)
-    topLevelWindows.castBar.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
-    topLevelWindows.castBar.preview.anchorLabelBg:SetDrawTier(DT_LOW)
 
     local fragment = ZO_HUDFadeSceneFragment:New(topLevelWindows.castBar, 0, 0)
 
@@ -998,74 +977,43 @@ function CastBar.CreateCastBar()
     sceneManager:GetScene("siegeBar"):AddFragment(fragment)
     sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
 
-    g_castBarState = topLevelWindows.castBar:CreateControl("$(parent)Backdrop", CT_BACKDROP)
-    g_castBarState:SetCenterColor(0, 0, 0, 0.5)
-    g_castBarState:SetEdgeColor(0, 0, 0, 1)
-    g_castBarState:SetEdgeTexture("", 8, 1, 1, 1)
-    g_castBarState:SetDrawLayer(DL_BACKGROUND)
-    g_castBarState:SetAnchor(LEFT, topLevelWindows.castBar, LEFT)
-
+    g_castBarState = topLevelWindows.castBar:GetNamedChild("_Icon")
     g_castBarState.starts = 0
     g_castBarState.ends = 0
     g_castBarState.remain = 0
-
     g_castBarState:SetDimensions(ActionBar.SV.CastBarIconSize, ActionBar.SV.CastBarIconSize)
 
-    g_castBarState.back = g_castBarState:CreateControl("$(parent)Back", CT_TEXTURE)
-    g_castBarState.back:SetAnchor(TOPLEFT, g_castBarState, TOPLEFT)
-    g_castBarState.back:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT)
-    g_castBarState.back:SetDrawLayer(DL_OVERLAY)
-    g_castBarState.back:SetDrawTier(DT_MEDIUM)
-
-    g_castBarState.iconbg = g_castBarState:CreateControl("$(parent)IconBg", CT_TEXTURE)
-    g_castBarState.iconbg:SetDrawLayer(DL_BACKGROUND)
+    g_castBarState.back = g_castBarState:GetNamedChild("_Back")
+    g_castBarState.iconbg = g_castBarState:GetNamedChild("_IconBg")
     g_castBarState.iconbg:SetDrawLevel(g_castBarState:GetDrawLevel() + 1)
-    g_castBarState.iconbg:SetAnchor(TOPLEFT, g_castBarState, TOPLEFT)
-    g_castBarState.iconbg:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT)
-
-    g_castBarState.icon = g_castBarState:CreateControl("$(parent)Icon", CT_TEXTURE)
-    g_castBarState.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
-    g_castBarState.icon:SetDrawLayer(DL_CONTROLS)
+    g_castBarState.icon = g_castBarState:GetNamedChild("_Icon")
     local iconArtInset = CAST_BAR_ICON_ABILITY_INSET_PIXELS
+    g_castBarState.icon:ClearAnchors()
     g_castBarState.icon:SetAnchor(TOPLEFT, g_castBarState, TOPLEFT, iconArtInset, iconArtInset)
     g_castBarState.icon:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT, -iconArtInset, -iconArtInset)
-
     CastBar.ApplyCastBarIconFrameVisual()
 
+    local barBackdrop = g_castBarState:GetNamedChild("_BarBackdrop")
     g_castBarState.bar =
     {
-        ["backdrop"] = g_castBarState:CreateControl("$(parent)Backdrop", CT_BACKDROP),
-        ["bar"] = g_castBarState:CreateControl("$(parent)Bar", CT_STATUSBAR),
-        ["name"] = g_castBarState:CreateControl("$(parent)Name", CT_LABEL),
-        ["timer"] = g_castBarState:CreateControl("$(parent)Time", CT_LABEL),
+        ["backdrop"] = barBackdrop,
+        ["bar"] = barBackdrop:GetNamedChild("_Bar"),
+        ["name"] = barBackdrop:GetNamedChild("_Name"),
+        ["timer"] = barBackdrop:GetNamedChild("_Timer"),
+        ["lineLA"] = barBackdrop:GetNamedChild("_LineLA"),
+        ["lineSkill"] = barBackdrop:GetNamedChild("_LineSkill"),
+        ["lineDelay"] = barBackdrop:GetNamedChild("_LineDelay"),
     }
-    g_castBarState.bar.backdrop:SetCenterColor(0, 0, 0, 0.4)
-    g_castBarState.bar.backdrop:SetEdgeColor(0, 0, 0, 0.6)
-    g_castBarState.bar.backdrop:SetEdgeTexture("", 8, 1, 1, 1)
-    g_castBarState.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
     g_castBarState.bar.backdrop:SetDimensions(ActionBar.SV.CastBarSizeW, ActionBar.SV.CastBarSizeH)
     g_castBarState.bar.bar:SetDimensions(ActionBar.SV.CastBarSizeW - 4, ActionBar.SV.CastBarSizeH - 4)
     g_castBarState.bar.name:SetFont(g_castbarFont or fontString)
-    g_castBarState.bar.name:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-    g_castBarState.bar.name:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-    g_castBarState.bar.name:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
     g_castBarState.bar.timer:SetFont(g_castbarFont or fontString)
-    g_castBarState.bar.timer:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-    g_castBarState.bar.timer:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-    g_castBarState.bar.timer:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
     g_castBarState.id = 0
 
     local weaveLineWidth = CastBar.GetWeaveLineWidth()
-    local function createWeaveLine(parent, name)
-        local line = parent:CreateControl(name, CT_TEXTURE)
-        line:SetColor(1, 1, 1, 1)
-        line:SetDimensions(weaveLineWidth, ActionBar.SV.CastBarSizeH)
-        line:SetHidden(true)
-        return line
-    end
-    g_castBarState.bar.lineLA = createWeaveLine(g_castBarState.bar.backdrop, "$(parent)LineLA")
-    g_castBarState.bar.lineSkill = createWeaveLine(g_castBarState.bar.backdrop, "$(parent)LineSkill")
-    g_castBarState.bar.lineDelay = createWeaveLine(g_castBarState.bar.backdrop, "$(parent)LineDelay")
+    g_castBarState.bar.lineLA:SetDimensions(weaveLineWidth, ActionBar.SV.CastBarSizeH)
+    g_castBarState.bar.lineSkill:SetDimensions(weaveLineWidth, ActionBar.SV.CastBarSizeH)
+    g_castBarState.bar.lineDelay:SetDimensions(weaveLineWidth, ActionBar.SV.CastBarSizeH)
 
     g_castBarState.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 1)
     g_castBarState.bar.backdrop:SetDrawLayer(DL_BACKGROUND)

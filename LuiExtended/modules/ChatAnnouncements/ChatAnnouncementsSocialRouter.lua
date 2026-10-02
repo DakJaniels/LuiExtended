@@ -29,11 +29,17 @@ local function GetChatOutputSocialSettings()
 end
 
 local function IsPChatAvailable()
-    return pChat ~= nil and not ZO_IsConsoleOrGameCoreUI()
+    if ZO_IsConsoleOrGameCoreUI() or not LUIE.IsItEnabled("pChat") then
+        return false
+    end
+    return pChat ~= nil
 end
 
 local function IsRChatAvailable()
-    return rChat ~= nil and not ZO_IsConsoleOrGameCoreUI()
+    if ZO_IsConsoleOrGameCoreUI() or not LUIE.IsItEnabled("rChat") then
+        return false
+    end
+    return rChat ~= nil
 end
 
 local function ShouldShowSocialErrorInChat(error)
