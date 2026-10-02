@@ -1511,14 +1511,14 @@ local strings =
     LUIE_STRING_PET_NAME_ASSISTANT_EZABI = "Эзаби",
     LUIE_STRING_PET_NAME_ASSISTANT_FEZEZ = "Фезез",
     LUIE_STRING_PET_NAME_ASSISTANT_PIRHARRI = "Контрабандистка Пирарри",
-    LUIE_STRING_PET_NAME_ASSISTANT_GHRASHAROG = "Грашарог, Oружейная Помощник",
-    LUIE_STRING_PET_NAME_ASSISTANT_GILADIL = "Деконструкция Гиладила",
+    LUIE_STRING_PET_NAME_ASSISTANT_GHRASHAROG = "Грашарог",
+    LUIE_STRING_PET_NAME_ASSISTANT_GILADIL = "Старьевщица Гиладил",
     LUIE_STRING_PET_NAME_ASSISTANT_NUZHIMEH = "Нузима",
     LUIE_STRING_PET_NAME_ASSISTANT_TYTHIS = "Тифис Андромо",
     LUIE_STRING_PET_NAME_ASSISTANT_BARON = "Барон Звонкие Перья",
-    LUIE_STRING_PET_NAME_ASSISTANT_PEDDLER = "Скупщица трофеев",
-    LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMB = "Фактотум Управляющий недвижимостью",
-    LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMM = "Фактотум Торговый представитель",
+    LUIE_STRING_PET_NAME_ASSISTANT_PEDDLER = "Торговка трофеями",
+    LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMB = "Фактотум-казначей",
+    LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMM = "Фактотум — торговый представитель",
 }
 
 for stringId, stringValue in pairs(strings) do

@@ -73,6 +73,7 @@ local petNames =
         [GetString(LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMB)] = true,
         [GetString(LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMM)] = true,
         [GetString(LUIE_STRING_PET_NAME_ASSISTANT_GHRASHAROG)] = true,
+        [GetString(LUIE_STRING_PET_NAME_ASSISTANT_GILADIL)] = true,
     },
 }
 --- @class (partial) PetNames

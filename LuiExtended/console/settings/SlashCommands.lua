@@ -50,6 +50,7 @@ local GetMerchantItems = CreateCollectibleItemsFunction(CollectibleTables.Mercha
 local GetCompanionItems = CreateCollectibleItemsFunction(CollectibleTables.Companions)
 local GetArmoryItems = CreateCollectibleItemsFunction(CollectibleTables.Armory)
 local GetDeconItems = CreateCollectibleItemsFunction(CollectibleTables.Decon)
+local GetFenceItems = CreateCollectibleItemsFunction(CollectibleTables.Fence)
 
 -- Home options (create fresh each time to avoid reference sharing)
 local function GetHomeItems()
@@ -355,13 +356,30 @@ function SlashCommands.CreateConsoleSettings()
         {
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE),
-            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP), GetCollectibleName(300)),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP),
             getFunction = function () return Settings.SlashFence end,
             setFunction = function (value)
                 Settings.SlashFence = value
                 SlashCommands.RegisterSlashCommands()
             end,
-            default = Defaults.SlashFence
+            default = Defaults.SlashFence,
+            disable = function () return #GetFenceItems() == 0 end
+        }
+
+        -- Choose Fence
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_CHOICE),
+            items = GetFenceItems,
+            getFunction = function ()
+                return { data = Settings.SlashFenceChoice }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.SlashFenceChoice = item.data
+            end,
+            default = Defaults.SlashFenceChoice,
+            disable = function () return not Settings.SlashFence end
         }
 
         -- SlashEye

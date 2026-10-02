@@ -16,7 +16,7 @@
         <Down>LUIE.SlashCommands.SlashDecon()</Down>
       </Action>
       <Action name="LUIE_COMMAND_FENCE">
-        <Down>LUIE.SlashCommands.SlashCollectible(300)</Down>
+        <Down>LUIE.SlashCommands.SlashFence()</Down>
       </Action>
       <Action name="LUIE_COMMAND_MERCHANT">
         <Down>LUIE.SlashCommands.SlashMerchant()</Down>
