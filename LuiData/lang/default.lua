@@ -27,7 +27,7 @@ local strings =
     LUIE_STRING_SKILL_MUNDUS_BASIC_SHADOW = "Increase Critical Damage by |cFFFFFF11|r%.",
     LUIE_STRING_SKILL_MUNDUS_BASIC_RITUAL = "Increase healing done by |cFFFFFF8|r%.",
     LUIE_STRING_SKILL_MUNDUS_BASIC_THIEF = "Increase Weapon and Spell Critical by |cFFFFFF1333|r.",
-    -- P51 hybridization: Warrior covers Weapon + Spell Damage; Apprentice is XP/Inspiration (ZOS U51 notes).
+    -- Warrior is Weapon and Spell Damage. Apprentice is experience and inspiration.
     LUIE_STRING_SKILL_MUNDUS_BASIC_WARRIOR = "Increase Weapon and Spell Damage by |cFFFFFF238|r.",
     LUIE_STRING_SKILL_MUNDUS_BASIC_APPRENTICE = "Increase Experience and Inspiration gain.",
     LUIE_STRING_SKILL_MUNDUS_BASIC_STEED = "Increase Movement Speed by |cFFFFFF10|r% and Health Recovery by |cFFFFFF238|r.",
@@ -144,15 +144,15 @@ local strings =
     LUIE_STRING_SKILL_MAJOR_SORCERY_TP = "Increase Spell Damage by |cFFFFFF20|r%.",
     LUIE_STRING_SKILL_MINOR_PROPHECY_TP = "Increase Spell Critical rating by |cFFFFFF1314|r, increasing your Spell Critical chance by |cFFFFFF6|r%.",
     LUIE_STRING_SKILL_MAJOR_PROPHECY_TP = "Increase Spell Critical rating by |cFFFFFF2629|r, increasing your Spell Critical chance by |cFFFFFF12|r%.",
-    -- P51: Sorcery merged into Brutality; Prophecy merged into Savagery (ZOS U51 hybridization notes).
+    -- Sorcery merged into Brutality. Prophecy merged into Savagery.
     LUIE_STRING_SKILL_MINOR_BRUTALITY_TP = "Increase Weapon and Spell Damage by |cFFFFFF10|r%.",
     LUIE_STRING_SKILL_MAJOR_BRUTALITY_TP = "Increase Weapon and Spell Damage by |cFFFFFF20|r%.",
-    LUIE_STRING_SKILL_MINOR_SAVAGERY_TP = "Increase Weapon and Spell Critical rating by |cFFFFFF1314|r, increasing your Weapon and Spell Critical chance by |cFFFFFF6|r%.",
-    LUIE_STRING_SKILL_MAJOR_SAVAGERY_TP = "Increase Weapon and Spell Critical rating by |cFFFFFF2629|r, increasing your Weapon and Spell Critical chance by |cFFFFFF12|r%.",
+    LUIE_STRING_SKILL_MINOR_SAVAGERY_TP = "Increase Critical rating by |cFFFFFF1314|r, increasing your Critical Chance by |cFFFFFF6|r%.",
+    LUIE_STRING_SKILL_MAJOR_SAVAGERY_TP = "Increase Critical rating by |cFFFFFF2629|r, increasing your Critical Chance by |cFFFFFF12|r%.",
     LUIE_STRING_SKILL_MINOR_BERSERK_TP = "Increase damage done by |cFFFFFF5|r%.",
     LUIE_STRING_SKILL_MAJOR_BERSERK_TP = "Increase damage done by |cFFFFFF10|r%.",
-    LUIE_STRING_SKILL_MINOR_FORCE_TP = "Increase Critical Damage by |cFFFFFF10|r%.",
-    LUIE_STRING_SKILL_MAJOR_FORCE_TP = "Increase Critical Damage by |cFFFFFF20|r%.",
+    LUIE_STRING_SKILL_MINOR_FORCE_TP = "Increase Critical Damage done by |cFFFFFF10|r%.",
+    LUIE_STRING_SKILL_MAJOR_FORCE_TP = "Increase Critical Damage done by |cFFFFFF20|r%.",
     LUIE_STRING_SKILL_MINOR_VITALITY_TP = "Increase healing received and damage shield strength by |cFFFFFF6|r%.",
     LUIE_STRING_SKILL_MAJOR_VITALITY_TP = "Increase healing received and damage shield strength by |cFFFFFF12|r%.",
     LUIE_STRING_SKILL_MINOR_MENDING_TP = "Increase healing done by |cFFFFFF8|r%.",
@@ -163,9 +163,9 @@ local strings =
     LUIE_STRING_SKILL_MAJOR_EVASION_TP = "Reduce damage taken from area of effect attacks by |cFFFFFF20|r%.",
     LUIE_STRING_SKILL_MINOR_EXPEDITION_TP = "Increase Movement Speed by |cFFFFFF15|r%.",
     LUIE_STRING_SKILL_MAJOR_EXPEDITION_TP = "Increase Movement Speed by |cFFFFFF30|r%.",
-    LUIE_STRING_Skill_Gallop_TP = "Increase Mounted Speed by |cFFFFFF15|r%.",
-    LUIE_STRING_SKILL_MINOR_HEROISM_TP = "Gain |cFFFFFF1|r Ultimate every |cFFFFFF1.5|r seconds.",
-    LUIE_STRING_SKILL_MAJOR_HEROISM_TP = "Gain |cFFFFFF3|r Ultimate every |cFFFFFF1.5|r seconds.",
+    LUIE_STRING_Skill_Gallop_TP = "Increase Mount Speed by |cFFFFFF15|r%.",
+    LUIE_STRING_SKILL_MINOR_HEROISM_TP = "While in combat, gain |cFFFFFF1|r Ultimate every |cFFFFFF1.5|r seconds.",
+    LUIE_STRING_SKILL_MAJOR_HEROISM_TP = "While in combat, gain |cFFFFFF3|r Ultimate every |cFFFFFF1.5|r seconds.",
     LUIE_STRING_SKILL_MINOR_TOUGHNESS_TP = "Increase Max Health by |cFFFFFF10|r%.",
     LUIE_STRING_SKILL_MINOR_COURAGE_TP = "Increase Weapon and Spell Damage by |cFFFFFF215|r.",
     LUIE_STRING_SKILL_MAJOR_COURAGE_TP = "Increase Weapon and Spell Damage by |cFFFFFF430|r.",
@@ -180,16 +180,16 @@ local strings =
     LUIE_STRING_SKILL_MAJOR_MAIM_TP = "Reduce damage done by |cFFFFFF10|r%.",
     LUIE_STRING_SKILL_MINOR_DEFILE_TP = "Reduce healing received and damage shield strength by |cFFFFFF6|r%.",
     LUIE_STRING_SKILL_MAJOR_DEFILE_TP = "Reduce healing received and damage shield strength by |cFFFFFF12|r%.",
-    LUIE_STRING_SKILL_MINOR_MAGICKASTEAL_TP = "Enemies that attack you restore |cFFFFFF168|r Magicka every |cFFFFFF1|r second.",
-    LUIE_STRING_SKILL_MINOR_MAGICKASTEAL_OTHER_TP = "Restore |cFFFFFF168|r Magicka every |cFFFFFF1|r second when damaged.",
-    LUIE_STRING_SKILL_MINOR_LIFESTEAL_TP = "Enemies that attack you restore |cFFFFFF600|r Health every |cFFFFFF1|r second.",
-    LUIE_STRING_SKILL_MINOR_LIFESTEAL_OTHER_TP = "Restore |cFFFFFF600|r Health every |cFFFFFF1|r second when damaged.",
+    LUIE_STRING_SKILL_MINOR_MAGICKASTEAL_TP = "Enemies that attack you restore Magicka.",
+    LUIE_STRING_SKILL_MINOR_MAGICKASTEAL_OTHER_TP = "Restore Magicka when damaged.",
+    LUIE_STRING_SKILL_MINOR_LIFESTEAL_TP = "Enemies that attack you are healed.",
+    LUIE_STRING_SKILL_MINOR_LIFESTEAL_OTHER_TP = "Healed when damaged.",
     LUIE_STRING_SKILL_MINOR_ENERVATION_TP = "Reduce Critical Damage done by |cFFFFFF10|r%.",
     LUIE_STRING_SKILL_MINOR_UNCERTAINTY_TP = "Reduce Weapon and Spell Critical rating by |cFFFFFF1314|r, reducing your Weapon and Spell Critical chance by |cFFFFFF6|r%.",
     LUIE_STRING_SKILL_MINOR_COWARDICE_TP = "Reduce Weapon and Spell Damage by |cFFFFFF215|r.",
     LUIE_STRING_SKILL_MAJOR_COWARDICE_TP = "Reduce Weapon and Spell Damage by |cFFFFFF430|r.",
     LUIE_STRING_SKILL_MINOR_MANGLE_TP = "Reduce Max Health by |cFFFFFF10|r%.",
-    LUIE_STRING_SKILL_MINOR_TIMIDITY_TP = "Drain |cFFFFFF1|r Ultimate every |cFFFFFF1.5|r seconds while in combat.",
+    LUIE_STRING_SKILL_MINOR_TIMIDITY_TP = "While in combat, consume |cFFFFFF1|r Ultimate every |cFFFFFF1.5|r seconds.",
     LUIE_STRING_SKILL_MINOR_BRITTLE_TP = "Increase Critical Damage taken by |cFFFFFF10|r%.",
     LUIE_STRING_SKILL_MAJOR_BRITTLE_TP = "Increase Critical Damage taken by |cFFFFFF20|r%.",
 
@@ -200,7 +200,7 @@ local strings =
     LUIE_STRING_SKILL_MAJOR_AEGIS_TP = "Reduces damage taken from monsters by |cFFFFFF10|r%.",
 
     -- Empower
-    LUIE_STRING_SKILL_EMPOWER_TP = "Increase damage done with Heavy Attacks against monsters by |cFFFFFF70|r%.",
+    LUIE_STRING_SKILL_EMPOWER_TP = "Increase damage done with Heavy Attacks by |cFFFFFF70|r%. Does not apply while Battle Spirit is active.",
 
     -- Potions
     LUIE_STRING_SKILL_SPELL_RESISTANCE_POTION_TP = "Increase Spell Resistance by |cFFFFFF5280|r for |cFFFFFF<<1>>|r <<1[second/seconds]>>.",

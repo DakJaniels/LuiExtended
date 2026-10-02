@@ -3,7 +3,7 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
--- Assistant unit names, plus Update 51 strings whose English text changed.
+-- Assistant unit names, plus LuiData strings whose English text changed.
 -- Every other LuiData string stays on the English default.
 local strings =
 {
@@ -25,8 +25,19 @@ local strings =
     LUIE_STRING_SKILL_BATTLE_SPIRIT_IMPERIAL_CITY_TP = "• 受到的伤害、护盾强度和生命恢复降低|cFFFFFF50|r%\n• 伤害护盾强度上限为|cFFFFFF300%|r，基于你最大生命值的|cFFFFFF300|r%。超过4名小队成员后，每增加一名成员都会降低。\n• 受到的治疗降低|cFFFFFF55|r%\n• 当|cFFFFFF8|r个或更多持续治疗效果处于激活状态时，受到的治疗再降低|cFFFFFF33|r%",
     LUIE_STRING_SKILL_MINOR_BRUTALITY_TP = "使武器和法术伤害提高|cFFFFFF10|r%。",
     LUIE_STRING_SKILL_MAJOR_BRUTALITY_TP = "使武器和法术伤害提高|cFFFFFF20|r%。",
-    LUIE_STRING_SKILL_MINOR_SAVAGERY_TP = "使武器和法术暴击等级提高|cFFFFFF1314|r，使武器和法术暴击率提高|cFFFFFF6|r%。",
-    LUIE_STRING_SKILL_MAJOR_SAVAGERY_TP = "使武器和法术暴击等级提高|cFFFFFF2629|r，使武器和法术暴击率提高|cFFFFFF12|r%。",
+    LUIE_STRING_SKILL_MINOR_SAVAGERY_TP = "使暴击等级提高|cFFFFFF1314|r，使暴击率提高|cFFFFFF6|r%。",
+    LUIE_STRING_SKILL_MAJOR_SAVAGERY_TP = "使暴击等级提高|cFFFFFF2629|r，使暴击率提高|cFFFFFF12|r%。",
+    LUIE_STRING_SKILL_MINOR_FORCE_TP = "使造成的暴击伤害提高|cFFFFFF10|r%。",
+    LUIE_STRING_SKILL_MAJOR_FORCE_TP = "使造成的暴击伤害提高|cFFFFFF20|r%。",
+    LUIE_STRING_Skill_Gallop_TP = "使坐骑速度提高|cFFFFFF15|r%。",
+    LUIE_STRING_SKILL_MINOR_HEROISM_TP = "战斗中每|cFFFFFF1.5|r秒获得|cFFFFFF1|r终极点。",
+    LUIE_STRING_SKILL_MAJOR_HEROISM_TP = "战斗中每|cFFFFFF1.5|r秒获得|cFFFFFF3|r终极点。",
+    LUIE_STRING_SKILL_MINOR_MAGICKASTEAL_TP = "攻击你的敌人将回复魔力。",
+    LUIE_STRING_SKILL_MINOR_MAGICKASTEAL_OTHER_TP = "受到伤害时回复魔力。",
+    LUIE_STRING_SKILL_MINOR_LIFESTEAL_TP = "攻击你的敌人将被治疗。",
+    LUIE_STRING_SKILL_MINOR_LIFESTEAL_OTHER_TP = "受到伤害时被治疗。",
+    LUIE_STRING_SKILL_MINOR_TIMIDITY_TP = "战斗中每|cFFFFFF1.5|r秒消耗|cFFFFFF1|r终极点。",
+    LUIE_STRING_SKILL_EMPOWER_TP = "重攻击造成的伤害提高|cFFFFFF70|r%。已激活战斗意志时不会生效。",
     LUIE_STRING_SKILL_MINOR_VITALITY_TP = "使受到的治疗和伤害护盾强度提高|cFFFFFF6|r%。",
     LUIE_STRING_SKILL_MAJOR_VITALITY_TP = "使受到的治疗和伤害护盾强度提高|cFFFFFF12|r%。",
     LUIE_STRING_SKILL_MINOR_DEFILE_TP = "使受到的治疗和伤害护盾强度降低|cFFFFFF6|r%。",
