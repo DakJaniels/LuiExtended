@@ -445,15 +445,7 @@ function LUIE.HookKeyboardMap()
     ZO_MapKeepUpgrade_Shared.RefreshLevels = function (self)
         self.levelsGridList:ClearGridList()
 
-        -- P51: GetKeepMaxUpgradeLevel removed; keepUpgradeObject:GetHighestUpgradeLevel() wraps
-        -- GetKeepHighestUpgradeLevel(keepId, bgQueryType, upgradeLine). Fall back for dual API 101050.
-        local highestUpgradeLevel
-        if self.keepUpgradeObject.GetHighestUpgradeLevel then
-            highestUpgradeLevel = self.keepUpgradeObject:GetHighestUpgradeLevel()
-        else
-            highestUpgradeLevel = GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep())
-        end
-        for currentLevel = 0, highestUpgradeLevel do
+        for currentLevel = 0, self.keepUpgradeObject:GetHighestUpgradeLevel() do
             local numUpgrades = self.keepUpgradeObject:GetNumLevelUpgrades(currentLevel)
             if numUpgrades > 0 then
                 local levelHeaderText = zo_strformat(SI_KEEP_UPGRADE_LEVEL_SECTION_HEADER, currentLevel)

@@ -308,7 +308,7 @@ local function UpdateChoices(control, choices, choicesValues, choicesTooltips)
             entry[LUIE_COMBO_ENTRY_ITEMFONT_KEY] = control.data.itemFont
         end
 
-        control.dropdown:AddItem(entry, not control.data.sort and ZO_COMBOBOX_SUPRESS_UPDATE) -- if sort type/order isn't specified, then don't sort
+        control.dropdown:AddItem(entry, not control.data.sort and ZO_COMBOBOX_SUPPRESS_UPDATE) -- if sort type/order isn't specified, then don't sort
     end
 
     if control.UpdateValue then

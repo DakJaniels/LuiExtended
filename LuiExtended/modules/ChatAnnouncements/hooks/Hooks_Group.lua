@@ -812,8 +812,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         local isLeader = IsUnitGroupLeader("player")
         local groupSize = GetGroupSize()
 
-        if isLeader and groupSize == SMALL_GROUP_SIZE_THRESHOLD then
-            ZO_Dialogs_ShowPlatformDialog("LARGE_GROUP_INVITE_WARNING", characterOrDisplayName, { mainTextParams = { SMALL_GROUP_SIZE_THRESHOLD } })
+        if isLeader and groupSize == STANDARD_GROUP_SIZE_THRESHOLD then
+            ZO_Dialogs_ShowPlatformDialog("LARGE_GROUP_INVITE_WARNING", characterOrDisplayName, { mainTextParams = { STANDARD_GROUP_SIZE_THRESHOLD } })
         else
             GroupInviteByName(characterOrDisplayName)
 
