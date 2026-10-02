@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\MiniMap.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/MiniMap.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -214,4 +214,4 @@ LUIE_MiniMap_FrameChromeHover_FrameChrome_MoveGrip = {}
 ---@field Anchor {point: AnchorPosition}
 LUIE_MiniMap_FrameChromeHover_FrameChrome_MoveGripIcon = {}
 ---------- LVL: 11 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\MiniMap.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/MiniMap.xml

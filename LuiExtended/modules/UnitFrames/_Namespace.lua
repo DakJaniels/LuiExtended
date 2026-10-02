@@ -533,6 +533,7 @@ UnitFrames.SV = {}
 --- @field format string|nil
 
 --- @class UnitFrames.CustomFrameResourceRow : UnitFrames.CustomFramePowerEntry
+--- @alias LUIE_PositionableTopLevelWindow LUIE_UF_PlayerFrame_Template 
 
 --- Per-unit custom frame root (TLW, buff anchors, and numeric COMBAT_MECHANIC_FLAGS_* power rows).
 --- @class UnitFrames.CustomFrameUnitEntry : LUIE_CustomFrameObject

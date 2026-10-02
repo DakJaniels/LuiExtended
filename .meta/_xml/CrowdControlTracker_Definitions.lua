@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\CrowdControlTracker.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/CrowdControlTracker.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -138,7 +138,6 @@ LUIE_CCTracker_TextFrame_Label = {}
 ---@field public horizontalAlignment TextAlignment
 ---@field public verticalAlignment TextAlignment
 ---@field public inheritAlpha boolean
----@field public font string
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field Anchor {point: AnchorPosition, offsetY: layout_measurement}
 LUIE_CCTracker_Timer_Label = {}
@@ -231,4 +230,4 @@ LUIE_CCTracker_BreakFreeFrame_Right_IconBorder = {}
 ---@field Anchor {point: AnchorPosition, offsetY: layout_measurement}
 LUIE_CCTracker_BreakFreeFrame_Right_IconBorderHighlight = {}
 ---------- LVL: 09 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\CrowdControlTracker.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/CrowdControlTracker.xml

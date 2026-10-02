@@ -1,4 +1,4 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\SmallGroup.xml
+-- ////// START : GENERATED FROM LuiExtended/frontend/UnitFrames/SmallGroup.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
@@ -390,4 +390,4 @@ LUIE_UF_SmallGroupMember_Template_LibGroupContainer_PotionBackdrop_Icon = {}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_UF_SmallGroupMember_Template_LibGroupContainer_PotionBackdrop_Label = {}
 ---------- LVL: 09 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Desktop/LUIE_WORKSPACE/LuiExtended/LuiExtended\frontend\UnitFrames\SmallGroup.xml
+-- ////// END   : GENERATED FROM LuiExtended/frontend/UnitFrames/SmallGroup.xml
