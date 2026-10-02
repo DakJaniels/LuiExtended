@@ -53,13 +53,14 @@ local collectibleIds =
         10617, -- Aderene
         11877, -- Tzozabrar
         13063, -- Siluruz
-        -- TODO: Pontius Remus - Lupine Scavenger
+        14018, -- Pontius
     },
 
     -- Fence
     Fence =
     {
-        300, -- Pirharri
+        300,   -- Pirharri
+        14204, -- Cambio
     },
 
     -- Companions

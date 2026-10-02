@@ -1507,17 +1507,17 @@ local strings =
     LUIE_STRING_PET_NAME_MORKULDIN_SWORD = "Morkuldin Sword",
 
     -- Pet Names (Assistants)
-    LUIE_STRING_PET_NAME_ASSISTANT_EZABI = "Ezabi la Banquière",
-    LUIE_STRING_PET_NAME_ASSISTANT_FEZEZ = "Fezez le Marchand",
-    LUIE_STRING_PET_NAME_ASSISTANT_PIRHARRI = "Pirharri la Contrebandière",
-    LUIE_STRING_PET_NAME_ASSISTANT_GHRASHAROG = "Ghrasharog, Armory Assistant",
-    LUIE_STRING_PET_NAME_ASSISTANT_GILADIL = "Giladil the Ragpicker",
-    LUIE_STRING_PET_NAME_ASSISTANT_NUZHIMEH = "Nuzhimeh la Marchande",
-    LUIE_STRING_PET_NAME_ASSISTANT_TYTHIS = "Tythis Andromo le Banquier",
-    LUIE_STRING_PET_NAME_ASSISTANT_BARON = "Baron Jangleplume",
-    LUIE_STRING_PET_NAME_ASSISTANT_PEDDLER = "Peddler of Prizes",
-    LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMB = "Factotum Property Steward",
-    LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMM = "Factotum Commerce Delegate",
+    LUIE_STRING_PET_NAME_ASSISTANT_EZABI = "Ezabi",
+    LUIE_STRING_PET_NAME_ASSISTANT_FEZEZ = "Fezez",
+    LUIE_STRING_PET_NAME_ASSISTANT_PIRHARRI = "Pirharri la contrebandière",
+    LUIE_STRING_PET_NAME_ASSISTANT_GHRASHAROG = "Ghrasharog",
+    LUIE_STRING_PET_NAME_ASSISTANT_GILADIL = "Giladil la Chiffonnière",
+    LUIE_STRING_PET_NAME_ASSISTANT_NUZHIMEH = "Nuzhimeh",
+    LUIE_STRING_PET_NAME_ASSISTANT_TYTHIS = "Tythis Andromo",
+    LUIE_STRING_PET_NAME_ASSISTANT_BARON = "Baron Pencheplume",
+    LUIE_STRING_PET_NAME_ASSISTANT_PEDDLER = "Colporteuse de Récompenses",
+    LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMB = "factotum intendant de propriété",
+    LUIE_STRING_PET_NAME_ASSISTANT_FACTOTUMM = "factotum délégué commercial",
 }
 
 for stringId, stringValue in pairs(strings) do

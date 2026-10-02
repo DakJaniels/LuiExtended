@@ -302,9 +302,7 @@ function SlashCommandRegistry.RegisterSlashCommandsModule()
         SlashCommandRegistry.Register(slashCommandRegistrationNamespace.SlashCommands,
                                       {
                                           aliases = { "/smuggler", "/fence" },
-                                          callback = function ()
-                                              SlashCommands.SlashCollectible(300)
-                                          end,
+                                          callback = SlashCommands.SlashFence,
                                           description = GetString(LUIE_STRING_LSC_FENCE),
                                       })
     end
@@ -320,9 +318,7 @@ function SlashCommandRegistry.RegisterSlashCommandsModule()
         SlashCommandRegistry.Register(slashCommandRegistrationNamespace.SlashCommands,
                                       {
                                           aliases = { "/decon", "/deconstruction" },
-                                          callback = function ()
-                                              SlashCommands.SlashCollectible(10184)
-                                          end,
+                                          callback = SlashCommands.SlashDecon,
                                           description = GetString(LUIE_STRING_LSC_DECON),
                                       })
     end

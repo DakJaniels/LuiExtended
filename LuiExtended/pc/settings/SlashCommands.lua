@@ -48,6 +48,7 @@ local merchantOptions, merchantOptionsKeys = CreateOptions(CollectibleTables.Mer
 local companionOptions, companionOptionsKeys = CreateOptions(CollectibleTables.Companions)
 local armoryOptions, armoryOptionsKeys = CreateOptions(CollectibleTables.Armory)
 local deconOptions, deconOptionsKeys = CreateOptions(CollectibleTables.Decon)
+local fenceOptions, fenceOptionsKeys = CreateOptions(CollectibleTables.Fence)
 
 function SlashCommands.MigrateSettings()
     local Settings = SlashCommands.SV
@@ -73,6 +74,10 @@ function SlashCommands.MigrateSettings()
         local _, id = next(deconOptionsKeys)
         Settings.SlashDeconChoice = id
     end
+    if CollectibleTables.Fence[Settings.SlashFenceChoice] == nil then
+        local _, id = next(fenceOptionsKeys)
+        Settings.SlashFenceChoice = id
+    end
 
     if #bankerOptions == 0 then
         Settings.SlashBanker = false
@@ -88,6 +93,9 @@ function SlashCommands.MigrateSettings()
     end
     if #deconOptions == 0 then
         Settings.SlashDecon = false
+    end
+    if #fenceOptions == 0 then
+        Settings.SlashFence = false
     end
 end
 
@@ -363,16 +371,29 @@ function SlashCommands.CreateSettings()
     -- SlashFence
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE),
-        zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP), GetCollectibleName(300)),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP),
         function () return Settings.SlashFence end,
         function (value)
             Settings.SlashFence = value
             SlashCommands.RegisterSlashCommands()
         end,
         "full",
-        nil,
+        function () return #fenceOptions == 0 end,
         Defaults.SlashFence,
         GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- Choose Fence
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_CHOICE),
+        nil,
+        fenceOptions,
+        function () return GetFormattedCollectibleName(Settings.SlashFenceChoice) end,
+        function (value) Settings.SlashFenceChoice = fenceOptionsKeys[value] end,
+        1,
+        "full",
+        function () return not Settings.SlashFence end,
+        Defaults.SlashFenceChoice
     )
 
     -- SlashEye

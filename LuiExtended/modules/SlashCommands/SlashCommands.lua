@@ -44,6 +44,7 @@ SlashCommands.Defaults =
     SlashDecon = true,
     SlashDeconChoice = 1,
     SlashFence = true,
+    SlashFenceChoice = 300,
     SlashEye = true,
     SlashReadyCheck = true,
     SlashOutfit = true,
@@ -189,23 +190,15 @@ function SlashCommands.RegisterSlashCommands()
         SLASH_COMMANDS["/vendor"] = SlashCommands.SlashMerchant
     end
     if SlashCommands.SV.SlashFence then
-        SLASH_COMMANDS["/smuggler"] = function (...)
-            SlashCommands.SlashCollectible(300)
-        end
-        SLASH_COMMANDS["/fence"] = function (...)
-            SlashCommands.SlashCollectible(300)
-        end
+        SLASH_COMMANDS["/smuggler"] = SlashCommands.SlashFence
+        SLASH_COMMANDS["/fence"] = SlashCommands.SlashFence
     end
     if SlashCommands.SV.SlashArmory then
         SLASH_COMMANDS["/armory"] = SlashCommands.SlashArmory
     end
     if SlashCommands.SV.SlashDecon then
-        SLASH_COMMANDS["/decon"] = function (...)
-            SlashCommands.SlashCollectible(10184)
-        end
-        SLASH_COMMANDS["/deconstruction"] = function (...)
-            SlashCommands.SlashCollectible(10184)
-        end
+        SLASH_COMMANDS["/decon"] = SlashCommands.SlashDecon
+        SLASH_COMMANDS["/deconstruction"] = SlashCommands.SlashDecon
     end
     if SlashCommands.SV.SlashEye then
         SLASH_COMMANDS["/eye"] = function (...)

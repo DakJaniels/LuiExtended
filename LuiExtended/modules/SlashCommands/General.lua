@@ -297,6 +297,10 @@ function SlashCommands.SlashDecon()
     SlashCommands.SlashCollectible(SlashCommands.SV.SlashDeconChoice)
 end
 
+function SlashCommands.SlashFence()
+    SlashCommands.SlashCollectible(SlashCommands.SV.SlashFenceChoice)
+end
+
 local TOOLS_CATEGORY_ID = 66
 local cachedCakeId
 
