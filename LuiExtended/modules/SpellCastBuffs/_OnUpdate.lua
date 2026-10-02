@@ -889,7 +889,6 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
 
     if SpellCastBuffs.devDebugEnabled then
         SpellCastBuffs.RecordBuffIconPoolHighWater()
+        SpellCastBuffs.TickDebugMetaTooltipLiveUpdate()
     end
-
-    SpellCastBuffs.TickDebugMetaTooltipLiveUpdate()
 end
