@@ -9,6 +9,7 @@ local LUIE = LUIE
 local MiniMap = LUIE.MiniMap
 
 local DEFAULT_RESIZE_HANDLE_SIZE = 8
+local MINIMAP_FRAME_BACKDROP_PAD = 3
 local MINIMAP_ZOOM_LABEL_MAX_ALPHA = 0.4
 local MINIMAP_ZOOM_CHROME_HOLD_MS = 1250
 local MINIMAP_ZOOM_CHROME_FADE_OUT_MS = 200
@@ -37,6 +38,7 @@ local MINIMAP_ZOOM_BUTTON_MAX_ALPHA = 1
 --- @field frameChromeAttachSide string|nil
 --- @field framePositionLock ButtonControl|nil
 --- @field frameMoveGrip Control|nil
+--- @field offsetSaveSuppressed boolean|nil
 --- @field zoomLabelHideLaterId integer|nil
 --- @field zoomLabelFadeUpdateActive boolean|nil
 --- @field zoomButtonsHideLaterId integer|nil
@@ -78,6 +80,75 @@ function MiniMapView:GetResizeHandleInset(settings)
     return DEFAULT_RESIZE_HANDLE_SIZE
 end
 
+--- Pixels the root may extend past GuiRoot so the backdrop outer edge can meet the screen.
+--- Backdrop is placed at resizeInset - MINIMAP_FRAME_BACKDROP_PAD (see ApplyRootClientLayout).
+--- Negative SetClampedToScreenInsets let the control pass the screen (ESOUIDocumentation.txt; Tribute uses the same sign).
+--- @param settings MiniMapDefaults
+--- @return number
+function MiniMapView:GetFrameScreenEdgeBleed(settings)
+    local backdropInsetFromRoot = self:GetResizeHandleInset(settings) - MINIMAP_FRAME_BACKDROP_PAD
+    if backdropInsetFromRoot < 0 then
+        return 0
+    end
+    return backdropInsetFromRoot
+end
+
+--- Zone label and divider hang off the root. Hidden label contributes no overflow.
+--- @return number overflowLeft
+--- @return number overflowTop
+--- @return number overflowRight
+--- @return number overflowBottom
+function MiniMapView:GetZoneLabelScreenOverflow()
+    local root = self.root
+    local zoneLabel = self.zone
+    if not root or not zoneLabel or zoneLabel:IsHidden() then
+        return 0, 0, 0, 0
+    end
+    local overflowLeft = 0
+    local overflowTop = 0
+    local overflowRight = 0
+    local overflowBottom = 0
+    local rootLeft = root:GetLeft()
+    local rootTop = root:GetTop()
+    local rootRight = root:GetRight()
+    local rootBottom = root:GetBottom()
+    local function AccumulatePastRoot(control)
+        if not control or control:IsHidden() then
+            return
+        end
+        local controlLeft = control:GetLeft()
+        local controlTop = control:GetTop()
+        local controlRight = control:GetRight()
+        local controlBottom = control:GetBottom()
+        if controlLeft < rootLeft then
+            overflowLeft = zo_max(overflowLeft, rootLeft - controlLeft)
+        end
+        if controlTop < rootTop then
+            overflowTop = zo_max(overflowTop, rootTop - controlTop)
+        end
+        if controlRight > rootRight then
+            overflowRight = zo_max(overflowRight, controlRight - rootRight)
+        end
+        if controlBottom > rootBottom then
+            overflowBottom = zo_max(overflowBottom, controlBottom - rootBottom)
+        end
+    end
+    AccumulatePastRoot(zoneLabel)
+    AccumulatePastRoot(self.zoneDivider)
+    return overflowLeft, overflowTop, overflowRight, overflowBottom
+end
+
+--- @param settings MiniMapDefaults
+function MiniMapView:ApplyScreenEdgeClamp(settings)
+    local backdropBleed = self:GetFrameScreenEdgeBleed(settings)
+    local overflowLeft, overflowTop, overflowRight, overflowBottom = self:GetZoneLabelScreenOverflow()
+    self.root:SetClampedToScreenInsets(
+        -(backdropBleed + overflowLeft),
+        -(backdropBleed + overflowTop),
+        -(backdropBleed + overflowRight),
+        -(backdropBleed + overflowBottom))
+end
+
 --- Map/scroll area inside root; leaves root resize-handle strip mouse-free when size is unlocked.
 --- @param settings MiniMapDefaults
 function MiniMapView:ApplyRootClientLayout(settings)
@@ -87,7 +158,7 @@ function MiniMapView:ApplyRootClientLayout(settings)
     local inset = self:GetResizeHandleInset(settings)
     local contentWidth = width - 2 * inset
     local contentHeight = height - 2 * inset
-    local framePad = 3
+    local framePad = MINIMAP_FRAME_BACKDROP_PAD
 
     self.scroll:ClearAnchors()
     self.scroll:SetAnchor(TOPLEFT, root, TOPLEFT, inset, inset)
@@ -101,13 +172,16 @@ end
 
 function MiniMapView:ApplySavedLayout(settings)
     local root = self.root
-    root:ClearAnchors()
-    root:SetAnchor(BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, settings.offsetX, settings.offsetY)
+    self.offsetSaveSuppressed = true
     root:SetDimensions(settings.width, settings.height)
-    self:ApplyInteractionLocks(settings)
     self:ApplyChromeVisibility(settings)
     self:ApplyZoneLabelPlacement()
+    self:ApplyScreenEdgeClamp(settings)
+    root:ClearAnchors()
+    root:SetAnchor(BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, settings.offsetX, settings.offsetY)
+    self:ApplyInteractionLocks(settings)
     self:ApplyFrameChromePlacement()
+    self.offsetSaveSuppressed = false
 end
 
 function MiniMapView:ApplyZoneLabelPlacement()
@@ -121,9 +195,10 @@ function MiniMapView:ApplyZoneLabelPlacement()
     local zoneOffset = MiniMap.ZONE_LABEL_CHROME_OFFSET
     local zoneDivider = self.zoneDivider
     local infoPanelFillsZoneSlot = MiniMap.IsInfoPanelAnchorActive()
+    local zoneNameAboveMap = MiniMap.SV ~= nil and MiniMap.SV.zoneNameAboveMap == true
 
     zoneLabel:ClearAnchors()
-    if infoPanelFillsZoneSlot then
+    if infoPanelFillsZoneSlot or zoneNameAboveMap then
         zoneLabel:SetAnchor(BOTTOM, scroll, TOP, 0, -zoneOffset)
     else
         zoneLabel:SetAnchor(TOP, root, BOTTOM, 0, zoneOffset)
@@ -144,13 +219,12 @@ function MiniMapView:GetFrameChromeAttachSide()
     if not anchorTarget then
         return "left"
     end
-    local hotspotWidth = MiniMap.FRAME_CHROME_HOVER_SIZE
     local chromeWidth = MiniMap.FRAME_CHROME_BAR_WIDTH
     local margin = MiniMap.FRAME_CHROME_LEFT_EDGE_MARGIN
     local outsideX = MiniMap.FRAME_CHROME_OUTSIDE_OFFSET_X
     local cornerLeft = anchorTarget:GetLeft()
     local guiLeft = GuiRoot:GetLeft()
-    local neededLeft = hotspotWidth + chromeWidth + outsideX + margin
+    local neededLeft = chromeWidth + outsideX + margin
     if cornerLeft - neededLeft < guiLeft then
         return "right"
     end
@@ -169,11 +243,11 @@ function MiniMapView:ApplyFrameChromeControlOrder(side)
     lockButton:ClearAnchors()
     moveGrip:ClearAnchors()
     if side == "left" then
-        lockButton:SetAnchor(RIGHT, frameChrome, RIGHT, 0, 0)
-        moveGrip:SetAnchor(RIGHT, lockButton, LEFT, -gap, 0)
-    else
         lockButton:SetAnchor(LEFT, frameChrome, LEFT, 0, 0)
         moveGrip:SetAnchor(LEFT, lockButton, RIGHT, gap, 0)
+    else
+        lockButton:SetAnchor(RIGHT, frameChrome, RIGHT, 0, 0)
+        moveGrip:SetAnchor(RIGHT, lockButton, LEFT, -gap, 0)
     end
 end
 
@@ -185,28 +259,26 @@ function MiniMapView:ApplyFrameChromePlacement()
     if not frameChromeHover or not root then
         return
     end
-    local anchorTarget = scroll or root
-    local hoverSize = MiniMap.FRAME_CHROME_HOVER_SIZE
-    local outsideX = MiniMap.FRAME_CHROME_OUTSIDE_OFFSET_X
-    local outsideY = MiniMap.FRAME_CHROME_OUTSIDE_OFFSET_Y
+    local anchorTarget = self.background or scroll or root
+    local barWidth = MiniMap.FRAME_CHROME_BAR_WIDTH
+    local barHeight = MiniMap.FRAME_CHROME_BAR_HEIGHT
+    local cornerInset = MiniMap.FRAME_CHROME_OUTSIDE_OFFSET_X
     local side = self:GetFrameChromeAttachSide()
     self.frameChromeAttachSide = side
 
+    -- Keep the grip inside the backdrop. A grip outside the frame hits the screen
+    -- before the frame does, so StartMoving cannot bring the edge flush.
     frameChromeHover:ClearAnchors()
-    frameChromeHover:SetDimensions(hoverSize, hoverSize)
+    frameChromeHover:SetDimensions(barWidth, barHeight)
     if side == "left" then
-        frameChromeHover:SetAnchor(TOPRIGHT, anchorTarget, BOTTOMLEFT, -outsideX, outsideY)
+        frameChromeHover:SetAnchor(BOTTOMLEFT, anchorTarget, BOTTOMLEFT, cornerInset, -cornerInset)
     else
-        frameChromeHover:SetAnchor(TOPLEFT, anchorTarget, BOTTOMRIGHT, outsideX, outsideY)
+        frameChromeHover:SetAnchor(BOTTOMRIGHT, anchorTarget, BOTTOMRIGHT, -cornerInset, -cornerInset)
     end
 
     if frameChrome then
         frameChrome:ClearAnchors()
-        if side == "left" then
-            frameChrome:SetAnchor(TOPRIGHT, frameChromeHover, BOTTOMRIGHT, 0, 0)
-        else
-            frameChrome:SetAnchor(TOPLEFT, frameChromeHover, BOTTOMLEFT, 0, 0)
-        end
+        frameChrome:SetAnchor(BOTTOMLEFT, frameChromeHover, BOTTOMLEFT, 0, 0)
         self:ApplyFrameChromeControlOrder(side)
     end
 end
@@ -221,6 +293,7 @@ function MiniMapView:ApplyInteractionLocks(settings)
         root:SetResizeHandleSize(DEFAULT_RESIZE_HANDLE_SIZE)
     end
     self:ApplyRootClientLayout(settings)
+    self:ApplyScreenEdgeClamp(settings)
     if MiniMap.inputController then
         MiniMap.inputController:ApplyFrameDragMouseEnabled()
     end
@@ -286,7 +359,6 @@ function MiniMapView:ApplyChromeVisibility(settings)
     end
     self:SetZoomButtonsIdleChromeState()
     self:ApplyZoneChrome(settings)
-    self:ApplyFrameChromeFromSettings(settings)
 end
 
 --- @param settings MiniMapDefaults
@@ -295,22 +367,6 @@ function MiniMapView:ApplyZoneChrome(settings)
     self.zone:SetHidden(not showZoneName)
     self.zone:SetMouseEnabled(false)
     self.zoneDivider:SetHidden(not showZoneName)
-end
-
---- @param settings MiniMapDefaults
-function MiniMapView:ApplyFrameChromeFromSettings(settings)
-    local lockButton = self.framePositionLock
-    local moveGrip = self.frameMoveGrip
-    local positionLocked = settings.lockPosition == true
-    local padlockState = positionLocked and TOGGLE_BUTTON_CLOSED or TOGGLE_BUTTON_OPEN
-    ZO_ToggleButton_SetState(lockButton, padlockState)
-    if moveGrip then
-        moveGrip:SetHidden(positionLocked)
-        moveGrip:SetMouseEnabled(not positionLocked)
-    end
-    if MiniMap.inputController then
-        MiniMap.inputController:RefreshFrameChromeVisibility()
-    end
 end
 
 function MiniMapView:ShowLoading(message)
@@ -502,13 +558,15 @@ function MiniMapView:SetupPlayerIcons()
     self.playerCam:SetBlendMode(TEX_BLEND_MODE_ALPHA)
     self:ApplyPlayerIconDimensions()
     MiniMap.ApplyPlayerPipColors()
-    self:ApplyFrameChromeFromSettings(MiniMap.SV)
     self:ApplyFrameChromePlacement()
 end
 
 -- Handlers called from MiniMap.xml
 
 function MiniMap.OnRootMoveStop(control)
+    if MiniMap.view and MiniMap.view.offsetSaveSuppressed then
+        return
+    end
     MiniMap.SV.offsetX = control:GetRight() - GuiRoot:GetRight()
     MiniMap.SV.offsetY = control:GetBottom() - GuiRoot:GetBottom()
     if MiniMap.SV.positionGridDivisor and MiniMap.SV.positionGridDivisor > 1 then
@@ -539,6 +597,7 @@ function MiniMap.OnRootResizeStop(control)
     end
     MiniMap.resize = false
     MiniMap.resizeIsWidthDriven = nil
+    MiniMap.OnRootMoveStop(control)
 end
 
 function MiniMap.OnRootMouseWheel(control, delta, ctrl, alt, shift, command)

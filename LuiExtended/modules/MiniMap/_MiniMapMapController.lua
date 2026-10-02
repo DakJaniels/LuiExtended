@@ -153,6 +153,7 @@ function MiniMapMapController:ScheduleWorldMapReloadRetryOrFail(view, statusMess
     end
     view.statusLabel:SetText("Loading failed")
     view:HideLoading()
+    MiniMap.ReturnStagedWorldMapContainerToWorldMap()
     MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
     local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
     if pinMirrorStateMachine then
@@ -270,6 +271,7 @@ function MiniMapMapController:ReloadWorldMap(reason, reloadAttemptIndex)
     local view = self.view
     local wasReady = self.ready
     self.ready = false
+    MiniMap.ShowNativeWorldMapContainerForTileLoad()
     MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(true)
     MiniMap.pinMirrorStateMachine:OnMapReloadStarted()
     view:ShowLoading("Loading")
@@ -281,6 +283,7 @@ function MiniMapMapController:ReloadWorldMap(reason, reloadAttemptIndex)
     end)
     if not mirrorWorkScheduled then
         mapController.ready = wasReady
+        MiniMap.ReturnStagedWorldMapContainerToWorldMap()
         if wasReady then
             MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
         end

@@ -173,6 +173,82 @@ function MiniMapPinController:ResetNativeWorldMapPinUserScale()
     end
 end
 
+--- HarvestMap resource pins are CT_TEXTURECOMPOSITE controls on QP_Container.
+--- MAIN_MAP_MODE.Activate parents that container to ZO_WorldMapContainer (MapPinController.lua).
+--- PinTypeManager:UpdateSize sets dimensions from layout.size and does not reset control scale.
+function MiniMapPinController:ApplyHarvestMapCompositeScale()
+    local harvestMap = _G["Harvest"]
+    if not harvestMap or not harvestMap.pinController then
+        return
+    end
+    local pinTypeManagers = harvestMap.pinController.pinTypeManagers
+    if not pinTypeManagers then
+        return
+    end
+    local compositeScale = 1
+    if MiniMap.Enabled and MiniMap.IsNativeWorldMapContainerAttached() and not MiniMap.IsWorldMapBlockingMiniMapWork() then
+        compositeScale = MiniMap.SV.pinScaleHarvestMap
+        if compositeScale == nil then
+            compositeScale = 1
+        end
+    end
+    for _, pinTypeManager in pairs(pinTypeManagers) do
+        local composite = pinTypeManager.composite
+        if composite then
+            composite:SetScale(compositeScale)
+        end
+    end
+end
+
+--- QP_Container stays under the hidden ZO_WorldMap until it is parented to ZO_WorldMapContainer.
+--- MAIN_MAP_MODE is local to HarvestMap MapPinController.lua, so Activate cannot be called from here.
+--- That Activate parents pinController.container the same way. OnMapSizeChange sets MAP_WIDTH.
+--- MapPins:RedrawPins is the ZO_WorldMap_UpdateMap prehook, which runs before the tile texture and size exist.
+function MiniMapPinController:RefreshHarvestMapPinsForHud()
+    local harvestMap = _G["Harvest"]
+    if not harvestMap or not harvestMap.pinController or not harvestMap.mapPins then
+        return
+    end
+    local harvestPinContainer = harvestMap.pinController.container
+    if not harvestPinContainer then
+        return
+    end
+    if not MiniMap.IsNativeWorldMapContainerAttached() then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        return
+    end
+    local mapWidth, mapHeight = ZO_WorldMapContainer:GetDimensions()
+    if mapWidth <= 0 or mapHeight <= 0 then
+        return
+    end
+    harvestMap.pinController:OnMapSizeChange(mapWidth, mapHeight)
+    harvestPinContainer:ClearAnchors()
+    harvestPinContainer:SetAnchor(TOPLEFT, ZO_WorldMapContainer, TOPLEFT, 0, 0)
+    harvestPinContainer:SetParent(ZO_WorldMapContainer)
+    if MiniMap.playerMapMirrorDepth > 0 or DoesCurrentMapMatchMapForPlayerLocation() then
+        harvestMap.mapPins:RedrawPins()
+    end
+end
+
+--- LibMapPins layout callbacks run only from ZO_WorldMapPins_Manager:RefreshCustomPins (MapPin_Manager.lua).
+--- ZO_WorldMap_UpdateMap calls that before minimap MAP_WIDTH is set. A nil resize callback never looks up GetMapTileTexture again.
+function MiniMap.RefreshCustomPinsForHud()
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        return
+    end
+    if not MiniMap.IsNativeWorldMapContainerAttached() then
+        return
+    end
+    local mapController = MiniMap.mapController
+    local loadedMapRawName = mapController and mapController.map and mapController.map.rawName
+    if MiniMap.playerMapMirrorDepth == 0 and GetMapName() ~= loadedMapRawName then
+        return
+    end
+    ZO_WorldMap_GetPinManager():RefreshCustomPins()
+end
+
 --- LAM pin scale on reparented g_mapPinManager pins (UpdateSize already ran in layout).
 function MiniMapPinController:ApplyUserScaleToNativeWorldMapPins()
     if not MiniMap.Enabled or not MiniMap.IsNativeWorldMapContainerAttached() then
@@ -187,6 +263,7 @@ function MiniMapPinController:ApplyUserScaleToNativeWorldMapPins()
             mapPin:SetScaleModifier(MiniMap.GetPinTypeScaleMultiplier(mapPin:GetPinType()))
         end
     end
+    self:ApplyHarvestMapCompositeScale()
 end
 
 function MiniMapPinController:GetPlayerWaypointTexture()
@@ -312,6 +389,14 @@ end
 
 --- @param mapData MiniMapMapData
 function MiniMapPinController:SyncPlayerMapPin(mapData)
+    if MiniMap.SV.showPlayerPip == false then
+        self:ReleaseOverlayPin(PLAYER_MAP_PIN_CONTROL_NAME)
+        if MiniMap.IsNativeWorldMapContainerAttached() then
+            MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
+        end
+        return
+    end
+
     if MiniMap.IsNativeWorldMapContainerAttached() then
         MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
         if not MiniMap.GetMapFollowsPlayer() then
@@ -362,3 +447,11 @@ function MiniMapPinController:SyncLuiOverlays(mapData)
     self:SyncPlayerWaypoint(mapData)
     self:SyncPlayerMapPin(mapData)
 end
+
+local function ReapplyMiniMapPinScaleAfterWorldMapPinRefresh()
+    if MiniMap.pinController then
+        MiniMap.pinController:ApplyUserScaleToNativeWorldMapPins()
+    end
+end
+
+ZO_PostHook(ZO_WorldMapPins_Manager, "RefreshCustomPins", ReapplyMiniMapPinScaleAfterWorldMapPinRefresh)

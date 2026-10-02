@@ -21,6 +21,7 @@ local LUIE = LUIE
 --- @field runtime MiniMapRuntime|nil
 --- @field mapEventController MiniMapMapEventController|nil
 --- @field pinMirrorStateMachine MiniMapPinMirrorStateMachine|nil
+--- @field frameChromeStateMachine MiniMapFrameChromeStateMachine|nil
 --- @field inputController MiniMapInputController|nil
 --- @field hudSceneFragment MiniMapHUDSceneFragment|nil
 --- @field worldMapBlocksMiniMapWork boolean
@@ -39,6 +40,7 @@ MiniMap.pinController = nil
 MiniMap.runtime = nil
 MiniMap.mapEventController = nil
 MiniMap.pinMirrorStateMachine = nil
+MiniMap.frameChromeStateMachine = nil
 MiniMap.inputController = nil
 MiniMap.hudSceneFragment = nil
 MiniMap.worldMapBlocksMiniMapWork = false
@@ -199,10 +201,12 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field pinScaleWayshrine number
 --- @field pinScaleDigSite number
 --- @field pinScaleOther number
+--- @field pinScaleHarvestMap number
 --- @field pinTypeScales table
 --- @field compassOverride number
 --- @field keepSquareAspect boolean
 --- @field positionGridDivisor number
+--- @field showPlayerPip boolean
 --- @field playerPipColor { r: number, g: number, b: number, a: number }
 --- @field cameraWedgeColor { r: number, g: number, b: number, a: number }
 --- @field borderOpacity number
@@ -210,6 +214,7 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field anchorInfoPanelToMiniMap boolean
 --- @field infoPanelRestoreAnchor MiniMapInfoPanelRestoreAnchor|nil
 --- @field showZoneName boolean
+--- @field zoneNameAboveMap boolean
 --- @field zoneNameFontFace string
 --- @field zoneNameFontSize number
 --- @field zoneNameFontStyle number
@@ -290,16 +295,19 @@ MiniMap.Defaults =
     pinScaleWayshrine = 1,
     pinScaleDigSite = 1,
     pinScaleOther = 1,
+    pinScaleHarvestMap = 1,
     pinTypeScales = {},
     compassOverride = 0,
     keepSquareAspect = false,
     positionGridDivisor = 0,
+    showPlayerPip = true,
     playerPipColor = { r = 1, g = 1, b = 1, a = 1 },
     cameraWedgeColor = { r = 1, g = 1, b = 1, a = 1 },
     borderOpacity = 1,
     pinMirrorStateMachineDebug = false,
     anchorInfoPanelToMiniMap = false,
     showZoneName = true,
+    zoneNameAboveMap = false,
     zoneNameFontFace = "LUIE Default Font",
     zoneNameFontSize = 18,
     zoneNameFontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
@@ -467,8 +475,9 @@ function MiniMap.ApplyPlayerPipColors()
     local wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha = MiniMap.GetCameraWedgeColor()
     MiniMap.view.player:SetColor(playerRed, playerGreen, playerBlue, playerAlpha)
     local followPlayer = MiniMap.GetMapFollowsPlayer()
+    local showPlayerPip = MiniMap.SV.showPlayerPip ~= false
     local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
-    if not (nativeHudMapAttached and followPlayer) then
+    if not (nativeHudMapAttached and followPlayer and showPlayerPip) then
         MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
     end
     if nativeHudMapAttached then
@@ -489,6 +498,9 @@ function MiniMap.ApplyLiveSettings()
     end
     MiniMap.ApplyPlayerPipColors()
     MiniMap.runtime:UpdateCenterPlayerPipVisibility()
+    if MiniMap.IsNativeWorldMapContainerAttached() then
+        MiniMap.TickHudMovingAndPlayerPins()
+    end
     MiniMap.inputController:ApplyFrameDragMouseEnabled()
     MiniMap.ApplyChromeFromSettings()
     MiniMap.ApplyChromeStacking()

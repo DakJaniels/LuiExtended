@@ -27,6 +27,7 @@ function MiniMap.Initialize(enabled)
             MiniMap.pinMirrorStateMachine:Stop()
             MiniMap.pinMirrorStateMachine = nil
         end
+        MiniMap.frameChromeStateMachine = nil
         MiniMap.playerMapMirrorDepth = 0
         MiniMap.playerMapMirrorPendingCallback = nil
         MiniMap.pendingPostReloadUILayout = nil
@@ -66,6 +67,7 @@ function MiniMap.Initialize(enabled)
     local followPlayer = MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true
     MiniMap.runtime.mapFollowsPlayer = followPlayer
     MiniMap.pinMirrorStateMachine = MiniMap.MiniMapPinMirrorStateMachine:New(nil, MiniMap.mapController, MiniMap.pinController)
+    MiniMap.frameChromeStateMachine = MiniMap.MiniMapFrameChromeStateMachine:New()
     MiniMap.mapEventController = MiniMap.MiniMapMapEventController:New(
         MiniMap.mapController,
         MiniMap.pinController,
@@ -81,6 +83,7 @@ function MiniMap.Initialize(enabled)
     MiniMap.view:SetZoomLabel(MiniMap.zoom)
     MiniMap.mapEventController:Register()
     MiniMap.ApplyLiveSettings()
+    MiniMap.frameChromeStateMachine:Start()
     MiniMap.RegisterVisibilityEvents()
     MiniMap.ApplyChromeFromSettings()
     MiniMap.ApplyFragmentHiddenReasons()

@@ -22,7 +22,6 @@ local MINIMAP_FRAME_CHROME_HIDE_DELAY_MS = 200
 --- @field panScrollStartX number
 --- @field panScrollStartY number
 --- @field pendingWaypointClick boolean
---- @field frameChromeHideCallId integer|nil
 --- @field zoomChromeExitCallId integer|nil
 local MiniMapInputController = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapInputController = MiniMapInputController
@@ -37,7 +36,6 @@ function MiniMapInputController:Initialize(view, mapController, runtime)
     self.panDragActive = false
     self.panDragMoved = false
     self.pendingWaypointClick = false
-    self.frameChromeHideCallId = nil
     self.zoomChromeExitCallId = nil
 end
 
@@ -276,83 +274,19 @@ function MiniMapInputController:ApplyFrameDragMouseEnabled()
     end
 end
 
-function MiniMapInputController:IsFrameChromePinnedOpen()
-    return MiniMap.SV.lockPosition ~= true
-end
-
-function MiniMapInputController:IsMouseOverFrameChromeHoverRegion()
-    local frameChromeHover = self.view.frameChromeHover
-    if frameChromeHover and MouseIsOver(frameChromeHover) then
-        return true
-    end
-    local frameChrome = self.view.frameChrome
-    if frameChrome and MouseIsOver(frameChrome) then
-        return true
-    end
-    local lockButton = self.view.framePositionLock
-    if lockButton and MouseIsOver(lockButton) then
-        return true
-    end
-    local moveGrip = self.view.frameMoveGrip
-    if moveGrip and not moveGrip:IsHidden() and MouseIsOver(moveGrip) then
-        return true
-    end
-    return false
-end
-
-function MiniMapInputController:ShowFrameChrome()
-    local frameChrome = self.view.frameChrome
-    if frameChrome then
-        frameChrome:SetHidden(false)
-    end
-end
-
-function MiniMapInputController:HideFrameChromeIfPointerLeft()
-    if self:IsFrameChromePinnedOpen() then
-        return
-    end
-    if self:IsMouseOverFrameChromeHoverRegion() then
-        return
-    end
-    local frameChrome = self.view.frameChrome
-    if frameChrome then
-        frameChrome:SetHidden(true)
-    end
-end
-
-function MiniMapInputController:CancelFrameChromeHide()
-    if self.frameChromeHideCallId then
-        zo_removeCallLater(self.frameChromeHideCallId)
-        self.frameChromeHideCallId = nil
-    end
-end
-
-function MiniMapInputController:RefreshFrameChromeVisibility()
-    if self:IsFrameChromePinnedOpen() or self:IsMouseOverFrameChromeHoverRegion() then
-        self:ShowFrameChrome()
-    else
-        self:HideFrameChromeIfPointerLeft()
+function MiniMapInputController:FireFrameChromeCommand(commandName)
+    local frameChromeStateMachine = MiniMap.frameChromeStateMachine
+    if frameChromeStateMachine then
+        frameChromeStateMachine:FireCallbacks(commandName)
     end
 end
 
 function MiniMapInputController:OnFrameChromeHoverEnter()
-    self:CancelFrameChromeHide()
-    self:ShowFrameChrome()
+    self:FireFrameChromeCommand(MINIMAP_FRAME_CHROME_TRIGGER_COMMANDS.POINTER_ENTER)
 end
 
 function MiniMapInputController:OnFrameChromeHoverExit()
-    self:CancelFrameChromeHide()
-    if self:IsFrameChromePinnedOpen() then
-        return
-    end
-    local inputController = self
-    self.frameChromeHideCallId = zo_callLater(function ()
-                                                  inputController.frameChromeHideCallId = nil
-                                                  if inputController:IsFrameChromePinnedOpen() then
-                                                      return
-                                                  end
-                                                  inputController:HideFrameChromeIfPointerLeft()
-                                              end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
+    self:FireFrameChromeCommand(MINIMAP_FRAME_CHROME_TRIGGER_COMMANDS.POINTER_EXIT)
 end
 
 function MiniMapInputController:IsZoomButtonsFeatureEnabled()
@@ -414,9 +348,14 @@ function MiniMapInputController:OnZoomChromeHoverExit()
 end
 
 function MiniMapInputController:OnFramePositionLockClicked(lockButton)
-    self:CancelFrameChromeHide()
+    local positionWillLock = MiniMap.SV.lockPosition ~= true
     MiniMap.SV.lockPosition = not MiniMap.SV.lockPosition
     MiniMap.ApplyLiveSettings()
+    if positionWillLock then
+        self:FireFrameChromeCommand(MINIMAP_FRAME_CHROME_TRIGGER_COMMANDS.PADLOCK_LOCK)
+    else
+        self:FireFrameChromeCommand(MINIMAP_FRAME_CHROME_TRIGGER_COMMANDS.UNLOCK)
+    end
 end
 
 --- @param button integer
