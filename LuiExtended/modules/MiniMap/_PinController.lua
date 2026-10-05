@@ -455,3 +455,4 @@ local function ReapplyMiniMapPinScaleAfterWorldMapPinRefresh()
 end
 
 ZO_PostHook(ZO_WorldMapPins_Manager, "RefreshCustomPins", ReapplyMiniMapPinScaleAfterWorldMapPinRefresh)
+ZO_PostHook(ZO_WorldMapPins_Manager, "RefreshGroupPins", ReapplyMiniMapPinScaleAfterWorldMapPinRefresh)

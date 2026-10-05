@@ -153,6 +153,7 @@ function MiniMapMapController:ScheduleWorldMapReloadRetryOrFail(view, statusMess
     end
     view.statusLabel:SetText("Loading failed")
     view:HideLoading()
+    MiniMap.keepPreviousHudMapTilesVisible = false
     MiniMap.ReturnStagedWorldMapContainerToWorldMap()
     MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
     local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
@@ -209,6 +210,7 @@ function MiniMapMapController:FinalizeWorldMapReloadFromMirror(mapData, logicalW
     end
     self:ClampZoomToLimits(true)
     self.view:HideLoading()
+    MiniMap.keepPreviousHudMapTilesVisible = false
     MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
     MiniMap.SchedulePostReloadUILayout(self, mapData)
     MiniMap.pinMirrorStateMachine:ScheduleNotifyMapReloadCompleteAfterMirror()
@@ -271,10 +273,18 @@ function MiniMapMapController:ReloadWorldMap(reason, reloadAttemptIndex)
     local view = self.view
     local wasReady = self.ready
     self.ready = false
+    if wasReady then
+        MiniMap.keepPreviousHudMapTilesVisible = true
+    end
     MiniMap.ShowNativeWorldMapContainerForTileLoad()
-    MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(true)
     MiniMap.pinMirrorStateMachine:OnMapReloadStarted()
-    view:ShowLoading("Loading")
+    if MiniMap.keepPreviousHudMapTilesVisible then
+        ZO_WorldMapContainer:SetAlpha(1)
+        ZO_WorldMapContainer:SetHidden(false)
+    else
+        MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(true)
+        view:ShowLoading("Loading")
+    end
     reloadAttemptIndex = reloadAttemptIndex + 1
 
     local mapController = self
@@ -283,6 +293,7 @@ function MiniMapMapController:ReloadWorldMap(reason, reloadAttemptIndex)
     end)
     if not mirrorWorkScheduled then
         mapController.ready = wasReady
+        MiniMap.keepPreviousHudMapTilesVisible = false
         MiniMap.ReturnStagedWorldMapContainerToWorldMap()
         if wasReady then
             MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)

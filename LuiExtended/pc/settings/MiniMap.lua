@@ -637,6 +637,43 @@ function MiniMap.CreateSettings()
         },
         {
             type = "checkbox",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED_TP),
+            getFunc = function () return MiniMap.SV.mapEdgeColorEnabled == true end,
+            setFunc = function (value)
+                MiniMap.SV.mapEdgeColorEnabled = value
+                MiniMap.ApplyLiveSettings()
+            end,
+            width = "full",
+            default = Defaults.mapEdgeColorEnabled,
+            disabled = disabled,
+        },
+        {
+            type = "colorpicker",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_TP),
+            getFunc = function ()
+                local color = MiniMap.SV.mapEdgeColor or Defaults.mapEdgeColor
+                return color.r, color.g, color.b, color.a
+            end,
+            setFunc = function (red, green, blue, alpha)
+                MiniMap.SV.mapEdgeColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.ApplyLiveSettings()
+            end,
+            width = "full",
+            disabled = function ()
+                return disabled() or MiniMap.SV.mapEdgeColorEnabled ~= true
+            end,
+            default =
+            {
+                r = Defaults.mapEdgeColor.r,
+                g = Defaults.mapEdgeColor.g,
+                b = Defaults.mapEdgeColor.b,
+                a = Defaults.mapEdgeColor.a,
+            },
+        },
+        {
+            type = "checkbox",
             name = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP),
             getFunc = function () return MiniMap.SV.anchorInfoPanelToMiniMap == true end,

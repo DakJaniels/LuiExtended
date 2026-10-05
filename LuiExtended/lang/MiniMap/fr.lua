@@ -81,6 +81,10 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Couleur de la flèche du joueur sur la carte.",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Couleur du cône caméra",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Couleur du cône de direction de la caméra. Uniquement si Suivre le joueur est activé.",
+    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED = "Colorer le bord de la carte",
+    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED_TP = "Remplace le tourbillon gris hors du bord de la carte par une couleur unie.",
+    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR = "Couleur du bord de carte",
+    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_TP = "Couleur hors du bord de la carte lorsque Colorer le bord de la carte est activé.",
 }
 
 LUIE_RegisterStrings(strings, true)
