@@ -81,10 +81,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "地图上玩家箭头的颜色。",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "相机楔形颜色",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "相机朝向楔形的颜色。仅在跟随玩家时生效。",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED = "地图边缘着色",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED_TP = "用纯色替换地图边缘外的灰色漩涡。",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR = "地图边缘颜色",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_TP = "开启地图边缘着色时，地图边缘外使用的颜色。",
 }
 
 LUIE_RegisterStrings(strings, true)

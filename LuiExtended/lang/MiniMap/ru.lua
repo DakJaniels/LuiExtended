@@ -81,10 +81,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Цвет стрелки игрока на карте.",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Цвет клина камеры",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Цвет клина направления камеры. Только при следовании за игроком.",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED = "Красить край карты",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED_TP = "Заменяет серое завихрение за краем карты сплошным цветом.",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR = "Цвет края карты",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_TP = "Цвет за краем карты, когда включено Красить край карты.",
 }
 
 LUIE_RegisterStrings(strings, true)

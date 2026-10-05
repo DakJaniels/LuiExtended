@@ -208,8 +208,6 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field positionGridDivisor number
 --- @field showPlayerPip boolean
 --- @field playerPipColor { r: number, g: number, b: number, a: number }
---- @field mapEdgeColorEnabled boolean
---- @field mapEdgeColor { r: number, g: number, b: number, a: number }
 --- @field cameraWedgeColor { r: number, g: number, b: number, a: number }
 --- @field borderOpacity number
 --- @field pinMirrorStateMachineDebug boolean
@@ -304,8 +302,6 @@ MiniMap.Defaults =
     positionGridDivisor = 0,
     showPlayerPip = true,
     playerPipColor = { r = 1, g = 1, b = 1, a = 1 },
-    mapEdgeColorEnabled = false,
-    mapEdgeColor = { r = 0.72, g = 0.61, b = 0.45, a = 1 },
     cameraWedgeColor = { r = 1, g = 1, b = 1, a = 1 },
     borderOpacity = 1,
     pinMirrorStateMachineDebug = false,

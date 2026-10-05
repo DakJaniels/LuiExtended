@@ -81,10 +81,6 @@ local strings =
     LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP = "Farbe Ihres Spielerpfeils auf der Karte.",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR = "Kamera-Kegel-Farbe",
     LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP = "Farbe des Kamera-Richtungskegels. Nur bei Spieler folgen.",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED = "Kartenrand färben",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED_TP = "Ersetzt den grauen Wirbel außerhalb des Kartenrands durch eine flache Farbe.",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR = "Kartenrandfarbe",
-    LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_TP = "Farbe außerhalb des Kartenrands, wenn Kartenrand färben aktiv ist.",
 }
 
 LUIE_RegisterStrings(strings, true)

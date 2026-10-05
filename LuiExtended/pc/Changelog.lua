@@ -57,7 +57,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFZone Name Above Map|r places the zone name above the map without moving InfoPanel.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFShow Player Pip|r can be turned off. The camera direction cone stays while following.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFHarvestMap Pins (%)|r scales HarvestMap pins on the minimap. World map pin size is unchanged.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFColor Map Edge|r replaces the gray swirl outside the map edge with a flat color. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: The area outside the map uses the world map background. The full world map is unchanged.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Slash Commands: |cFFFFFFChoose Fence to Summon|r. /fence and /smuggler summon the fence you pick. PC and console.",
     "",
     -- Changes
