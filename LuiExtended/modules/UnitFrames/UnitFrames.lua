@@ -1302,26 +1302,13 @@ function UnitFrames.OnTargetMarkerUpdate(eventId)
                     end
                 else
                     -- If no marker, reset to default name
-                    local nameText
-                    if IsUnitPlayer(baseType) then
-                        local DisplayOption = UnitFrames.SV.DisplayOptionsGroupRaid
-                        if baseType == "player" then
-                            DisplayOption = UnitFrames.SV.DisplayOptionsPlayer
-                        elseif baseType == "reticleover" then
-                            DisplayOption = UnitFrames.SV.DisplayOptionsTarget
-                        end
-
-                        if DisplayOption == 3 then
-                            nameText = GetUnitName(baseType) .. " " .. GetUnitDisplayName(baseType)
-                        elseif DisplayOption == 1 then
-                            nameText = GetUnitDisplayName(baseType)
-                        else
-                            nameText = GetUnitName(baseType)
-                        end
-                    else
-                        nameText = GetUnitName(baseType)
+                    local displayOption = UnitFrames.SV.DisplayOptionsGroupRaid
+                    if baseType == "player" then
+                        displayOption = UnitFrames.SV.DisplayOptionsPlayer
+                    elseif baseType == "reticleover" then
+                        displayOption = UnitFrames.SV.DisplayOptionsTarget
                     end
-                    baseFrame.name:SetText(nameText)
+                    baseFrame.name:SetText(UnitFrames.GetPlayerDisplayNameText(baseType, displayOption))
                 end
             end
             UnitFrames.UpdateStaticControls(baseFrame)
@@ -1343,21 +1330,7 @@ function UnitFrames.OnTargetMarkerUpdate(eventId)
                         end
                     else
                         -- If no marker, reset to default name
-                        local nameText
-                        if IsUnitPlayer(unitTag) then
-                            local DisplayOption = UnitFrames.SV.DisplayOptionsGroupRaid
-
-                            if DisplayOption == 3 then
-                                nameText = GetUnitName(unitTag) .. " " .. GetUnitDisplayName(unitTag)
-                            elseif DisplayOption == 1 then
-                                nameText = GetUnitDisplayName(unitTag)
-                            else
-                                nameText = GetUnitName(unitTag)
-                            end
-                        else
-                            nameText = GetUnitName(unitTag)
-                        end
-                        unitFrame.name:SetText(nameText)
+                        unitFrame.name:SetText(UnitFrames.GetPlayerDisplayNameText(unitTag, UnitFrames.SV.DisplayOptionsGroupRaid))
                     end
                 end
                 UnitFrames.UpdateStaticControls(unitFrame)

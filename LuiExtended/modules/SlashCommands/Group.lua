@@ -93,8 +93,9 @@ function SlashCommands.SlashRegroup()
             local groupMemberString
             local groupMemberName = GetUnitName(memberTag)
             local groupMemberAccountName = GetUnitDisplayName(memberTag)
-            local memberLink = LUIE.ChatAnnouncements.ResolveNameLink(groupMemberName, groupMemberAccountName)
-            local memberNoLink = LUIE.ChatAnnouncements.ResolveNameNoLink(groupMemberName, groupMemberAccountName)
+            local groupMemberPlatformDisplayName = GetUnitPlatformDisplayName(memberTag)
+            local memberLink = LUIE.ChatAnnouncements.ResolveNameLink(groupMemberName, groupMemberAccountName, groupMemberPlatformDisplayName)
+            local memberNoLink = LUIE.ChatAnnouncements.ResolveNameNoLink(groupMemberName, groupMemberAccountName, groupMemberPlatformDisplayName)
 
             -- Place inside counter incremented index, this way if we have offline members in the group we still index everything in an ordered integer list.
             g_regroupStacks[index] = { memberLink = memberLink, memberName = groupMemberName }

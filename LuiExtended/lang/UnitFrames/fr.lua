@@ -437,6 +437,7 @@ local strings =
     LUIE_STRING_LAM_UF_HIDE_PLAYER_FRAME_DEATH_TP = "Cachez le cadre personnalisé de l'unité du joueur pendant que vous êtes mort ; cela réapparaîtra lorsque vous serez en vie.",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME = "Nom du personnage",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID = "Nom du personnage @UserID",
+    LUIE_STRING_LAM_UF_NAMEDISPLAY_PLATFORM = "Nom de plateforme",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID = "@UserID",
     LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION = "Afficher l'esquive du prochain lancer sur la barre d'endurance",
     LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_COLOR = "Couleur de la ligne Dodge suivante",

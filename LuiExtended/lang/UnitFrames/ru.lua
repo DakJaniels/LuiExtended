@@ -437,6 +437,7 @@ local strings =
     LUIE_STRING_LAM_UF_HIDE_PLAYER_FRAME_DEATH_TP = "Скройте рамку пользовательского юнита игрока, пока вы мертвы; оно появится снова, когда вы будете живы.",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME = "Имя персонажа",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID = "Имя персонажа @UserID",
+    LUIE_STRING_LAM_UF_NAMEDISPLAY_PLATFORM = "Имя платформы",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID = "@UserID",
     LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION = "Показать следующий бросок уклонения на шкале выносливости",
     LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_COLOR = "Следующий цвет линии уклонения",

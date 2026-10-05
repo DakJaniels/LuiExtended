@@ -321,18 +321,33 @@ function FrameObject:GetStaticControlDisplayOption()
     return UnitFrames.SV.DisplayOptionsGroupRaid
 end
 
+--- Player name for a display-method index. 1 = @UserID, 2 = character name, 3 = both, 4 = platform name.
+--- Empty platform names fall back to the crossplay @UserID, matching ZO_TryGetPlatformDisplayNameForUnitTag.
+--- @param unitTag string
+--- @param displayOption integer
+--- @return string
+function UnitFrames.GetPlayerDisplayNameText(unitTag, displayOption)
+    if not IsUnitPlayer(unitTag) then
+        return GetUnitName(unitTag)
+    end
+    if displayOption == 3 then
+        return GetUnitName(unitTag) .. " " .. GetUnitDisplayName(unitTag)
+    elseif displayOption == 1 then
+        return GetUnitDisplayName(unitTag)
+    elseif displayOption == 4 then
+        local platformDisplayName = GetUnitPlatformDisplayName(unitTag)
+        if platformDisplayName ~= nil and platformDisplayName ~= "" then
+            return platformDisplayName
+        end
+        return GetUnitDisplayName(unitTag)
+    end
+    return GetUnitName(unitTag)
+end
+
 --- @param displayOption integer
 --- @return string
 function FrameObject:BuildBaseStaticControlNameText(displayOption)
-    if self.isPlayer then
-        if displayOption == 3 then
-            return GetUnitName(self.unitTag) .. " " .. GetUnitDisplayName(self.unitTag)
-        elseif displayOption == 1 then
-            return GetUnitDisplayName(self.unitTag)
-        end
-        return GetUnitName(self.unitTag)
-    end
-    return GetUnitName(self.unitTag)
+    return UnitFrames.GetPlayerDisplayNameText(self.unitTag, displayOption)
 end
 
 --- @param nameText string

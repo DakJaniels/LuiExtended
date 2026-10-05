@@ -32,13 +32,13 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     local function DuelInviteReceivedAlert(inviterCharacterName, inviterCrossplayDisplayName, timeRemainingMS, inviterPlatformDisplayName)
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
-            local finalName = ChatAnnouncements.ResolveNameLink(inviterCharacterName, inviterCrossplayDisplayName)
+            local finalName = ChatAnnouncements.ResolveNameLink(inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
             ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), finalName), true)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterCharacterName, inviterCrossplayDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
             local formattedString = zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), finalAlertName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
         end
@@ -66,13 +66,13 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     local function DuelInviteSentAlert(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
-            local finalName = ChatAnnouncements.ResolveNameLink(inviteeCharacterName, inviteeCrossplayDisplayName)
+            local finalName = ChatAnnouncements.ResolveNameLink(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
             ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_SENT), finalName), true)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviteeCharacterName, inviteeCrossplayDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
             local formattedString = zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_SENT), finalAlertName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
         end
@@ -107,7 +107,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(targetCrossplayDisplayName, targetCharacterName, targetPlatformDisplayName)
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
-            local finalName = ChatAnnouncements.ResolveNameLink(targetCharacterName, targetCrossplayDisplayName)
+            local finalName = ChatAnnouncements.ResolveNameLink(targetCharacterName, targetCrossplayDisplayName, targetPlatformDisplayName)
             if userFacingName then
                 ChatOutput:Print(zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason), finalName), true)
             else
@@ -117,7 +117,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(targetCharacterName, targetCrossplayDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(targetCharacterName, targetCrossplayDisplayName, targetPlatformDisplayName)
             local formattedString = zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason), finalAlertName)
             if userFacingName then
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, formattedString)
@@ -370,8 +370,8 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     -- P51: inviterCrossplayDisplayName, inviterPlatformDisplayName
     local function TradeInviteConsideringAlert(inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
         if ChatAnnouncements.SV.Notify.NotificationTradeCA or ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-            local finalName = ChatAnnouncements.ResolveNameLink(inviterCharacterName, inviterCrossplayDisplayName)
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterCharacterName, inviterCrossplayDisplayName)
+            local finalName = ChatAnnouncements.ResolveNameLink(inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
             S.g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", finalName))
 
             if ChatAnnouncements.SV.Notify.NotificationTradeCA then
@@ -388,8 +388,8 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     -- P51: inviteeCrossplayDisplayName, inviteePlatformDisplayName
     local function TradeInviteWaitingAlert(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
         if ChatAnnouncements.SV.Notify.NotificationTradeCA or ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-            local finalName = ChatAnnouncements.ResolveNameLink(inviteeCharacterName, inviteeCrossplayDisplayName)
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviteeCharacterName, inviteeCrossplayDisplayName)
+            local finalName = ChatAnnouncements.ResolveNameLink(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
             S.g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", finalName))
 
             if ChatAnnouncements.SV.Notify.NotificationTradeCA then
@@ -678,7 +678,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
 
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelWonCA then
-            local finalName = ChatAnnouncements.ResolveNameLink(opponentCharacterName, opponentCrossplayDisplayName)
+            local finalName = ChatAnnouncements.ResolveNameLink(opponentCharacterName, opponentCrossplayDisplayName, opponentPlatformDisplayName)
             local resultChatString
             if wasLocalPlayersResult then
                 resultChatString = resultString
@@ -690,7 +690,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
 
         if ChatAnnouncements.SV.Social.DuelWonCSA or ChatAnnouncements.SV.Social.DuelWonAlert then
             -- Setup String for CSA/Alert
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(opponentCharacterName, opponentCrossplayDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(opponentCharacterName, opponentCrossplayDisplayName, opponentPlatformDisplayName)
             local resultCSAString
             if wasLocalPlayersResult then
                 resultCSAString = resultString

@@ -274,9 +274,14 @@ function SettingsAPI:NormalizeChatNameDisplayIndex(storedValue, defaultIndex)
                                                   ["@UserID"] = 1,
                                                   ["Character Name"] = 2,
                                                   ["Character Name @UserID"] = 3,
+                                                  ["Platform Name"] = 4,
+                                                  [GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID)] = 1,
+                                                  [GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME)] = 2,
+                                                  [GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID)] = 3,
+                                                  [GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_PLATFORM)] = 4,
                                               },
                                               defaultIndex,
-                                              3)
+                                              4)
 end
 
 --- @param storedValue any
@@ -514,7 +519,8 @@ function SettingsAPI:GetNameDisplayOptionsList()
     {
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID),
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME),
-        GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID)
+        GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID),
+        GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_PLATFORM),
     }
     for i, option in ipairs(nameDisplayOptions) do
         table_insert(nameDisplayItemsList, { name = option, data = i })
@@ -603,6 +609,7 @@ function SettingsAPI:GetChatNameDisplayOptionsList()
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID),
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME),
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID),
+        GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_PLATFORM),
     }
     return self:ConvertOptionsToItems(chatNameDisplayOptions)
 end

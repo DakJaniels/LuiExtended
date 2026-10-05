@@ -54,6 +54,7 @@ local changelogMessages =
     "",
     -- New
     "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames and Chat Announcements: |cFFFFFFPlayer Name Display Method|r includes |cFFFFFFPlatform Name|r. Console players show their Gamertag or Online ID. An empty platform name falls back to @UserID.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFZone Name Above Map|r places the zone name above the map without moving InfoPanel.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFShow Player Pip|r can be turned off. The camera direction cone stays while following.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFHarvestMap Pins (%)|r scales HarvestMap pins on the minimap. World map pin size is unchanged.",

@@ -932,13 +932,21 @@ local function NameFieldNonEmpty(name)
 end
 
 -- Called by most functions that use character or display name to resolve LINK display method.
+-- platformDisplayName is optional. Index 4 shows it, and links still target the crossplay @UserID.
+-- An empty platform name uses the same result as index 1.
 --- @param characterName string
 --- @param displayName string
+--- @param platformDisplayName string|nil
 --- @return string
-function ChatAnnouncements.ResolveNameLink(characterName, displayName)
+function ChatAnnouncements.ResolveNameLink(characterName, displayName, platformDisplayName)
     local hasChar = NameFieldNonEmpty(characterName)
     local hasDisplay = NameFieldNonEmpty(displayName)
+    local hasPlatform = NameFieldNonEmpty(platformDisplayName)
     local opt = ChatAnnouncements.SV.ChatPlayerDisplayOptions
+
+    if opt == 4 and not hasPlatform then
+        opt = 1
+    end
 
     if opt == 1 then
         if hasDisplay then
@@ -965,18 +973,30 @@ function ChatAnnouncements.ResolveNameLink(characterName, displayName)
             return ChatAnnouncements.CreateCharacterLink(characterName)
         end
         return ""
+    elseif opt == 4 then
+        if hasDisplay then
+            return ChatAnnouncements.CreateDisplayNameLink(platformDisplayName, displayName)
+        end
+        return platformDisplayName
     end
     return ""
 end
 
 -- Called by most functions that use character or display name to resolve NON-LINK display method (mostly used for alerts).
+-- platformDisplayName is optional. Index 4 shows it, or the index 1 name when it is empty.
 --- @param characterName string
 --- @param displayName string
+--- @param platformDisplayName string|nil
 --- @return string
-function ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+function ChatAnnouncements.ResolveNameNoLink(characterName, displayName, platformDisplayName)
     local hasChar = NameFieldNonEmpty(characterName)
     local hasDisplay = NameFieldNonEmpty(displayName)
+    local hasPlatform = NameFieldNonEmpty(platformDisplayName)
     local opt = ChatAnnouncements.SV.ChatPlayerDisplayOptions
+
+    if opt == 4 and not hasPlatform then
+        opt = 1
+    end
 
     if opt == 1 then
         return (hasDisplay and displayName) or (hasChar and characterName) or ""
@@ -984,6 +1004,8 @@ function ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
         return (hasChar and characterName) or (hasDisplay and displayName) or ""
     elseif opt == 3 then
         return zo_strformat("<<1>><<2>>", hasChar and characterName or "", hasDisplay and displayName or "")
+    elseif opt == 4 then
+        return platformDisplayName
     end
     return ""
 end
@@ -5109,10 +5131,10 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
 
     -- Get current trades if UI is reloaded
     -- P51 GetTradeInviteInfo: characterName, millisecondsSinceRequest, crossplayDisplayName, platformDisplayName
-    local characterName, _, crossplayDisplayName = GetTradeInviteInfo()
+    local characterName, _, crossplayDisplayName, platformDisplayName = GetTradeInviteInfo()
 
     if characterName ~= "" and crossplayDisplayName ~= "" then
-        local tradeName = ChatAnnouncements.ResolveNameLink(characterName, crossplayDisplayName)
+        local tradeName = ChatAnnouncements.ResolveNameLink(characterName, crossplayDisplayName, platformDisplayName)
         S.g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", tradeName))
     end
 
@@ -5328,9 +5350,11 @@ function ChatAnnouncements.IndexGroupLoot()
     ZO_ClearTable(S.g_groupLootIndex)
     local groupSize = GetGroupSize()
     for i = 1, groupSize do
-        local characterName = GetUnitName("group" .. i)
-        local displayName = GetUnitDisplayName("group" .. i) or ""
-        local entry = { characterName = characterName, displayName = displayName }
+        local unitTag = "group" .. i
+        local characterName = GetUnitName(unitTag)
+        local displayName = GetUnitDisplayName(unitTag) or ""
+        local platformDisplayName = GetUnitPlatformDisplayName(unitTag) or ""
+        local entry = { characterName = characterName, displayName = displayName, platformDisplayName = platformDisplayName }
         S.g_groupLootIndex[characterName] = entry
         local formattedCharacterName = zo_strformat("<<C:1>>", characterName)
         if formattedCharacterName ~= characterName then
@@ -5340,7 +5364,7 @@ function ChatAnnouncements.IndexGroupLoot()
 end
 
 --- @param receivedBy string Character name from EVENT_LOOT_RECEIVED
---- @return table|nil entry with characterName and displayName
+--- @return table|nil entry with characterName, displayName, and platformDisplayName
 function ChatAnnouncements.GetGroupLootMemberEntry(receivedBy)
     if receivedBy == nil or receivedBy == "" then
         return nil
@@ -5355,7 +5379,7 @@ function ChatAnnouncements.GetGroupLootMemberEntry(receivedBy)
         local unitTag = "group" .. groupIndex
         local characterName = GetUnitName(unitTag)
         if characterName == receivedBy or characterName == formattedReceivedBy or zo_strformat("<<C:1>>", characterName) == formattedReceivedBy then
-            return { characterName = characterName, displayName = GetUnitDisplayName(unitTag) or "" }
+            return { characterName = characterName, displayName = GetUnitDisplayName(unitTag) or "", platformDisplayName = GetUnitPlatformDisplayName(unitTag) or "" }
         end
     end
     return nil
@@ -5367,11 +5391,13 @@ function ChatAnnouncements.FormatGroupLootRecipient(receivedBy)
     local entry = ChatAnnouncements.GetGroupLootMemberEntry(receivedBy)
     local characterName = zo_strformat("<<C:1>>", receivedBy)
     local displayName = ""
+    local platformDisplayName = ""
     if entry then
         characterName = entry.characterName
         displayName = entry.displayName or ""
+        platformDisplayName = entry.platformDisplayName or ""
     end
-    return ZO_SELECTED_TEXT:Colorize(ChatAnnouncements.ResolveNameLink(characterName, displayName))
+    return ZO_SELECTED_TEXT:Colorize(ChatAnnouncements.ResolveNameLink(characterName, displayName, platformDisplayName))
 end
 
 -- EVENT_GROUP_TYPE_CHANGED
@@ -5419,14 +5445,15 @@ function ChatAnnouncements.VoteNotify(eventId)
     if electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then -- Vote Kick
         local kickMemberName = GetUnitName(targetUnitTag)
         local kickMemberAccountName = GetUnitDisplayName(targetUnitTag)
+        local kickMemberPlatformDisplayName = GetUnitPlatformDisplayName(targetUnitTag)
 
         if ChatAnnouncements.SV.Group.GroupVoteCA then
-            local finalName = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName)
+            local finalName = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName, kickMemberPlatformDisplayName)
             local message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START), finalName)
             ChatOutput:Print(message, true)
         end
         if ChatAnnouncements.SV.Group.GroupVoteAlert then
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName, kickMemberPlatformDisplayName)
             local alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START), finalAlertName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
         end
