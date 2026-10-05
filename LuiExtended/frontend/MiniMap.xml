@@ -227,7 +227,7 @@
                  textureFile="EsoUI/Art/MapPins/UI-WorldMapPlayerCameraPip.dds"
                  alpha="1">
           <Anchor point="CENTER"
-                  relativeTo="$(parent)_Player"
+                  relativeTo="$(parent)_Scroll"
                   relativePoint="CENTER" />
         </Texture>
         <Control name="$(parent)_ZoomChromeHover"

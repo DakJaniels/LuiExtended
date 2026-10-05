@@ -39,12 +39,17 @@ end
 function MiniMapRuntime:UpdateCenterPlayerPipVisibility()
     local followPlayer = MiniMap.GetMapFollowsPlayer()
     local showPlayerPip = MiniMap.SV.showPlayerPip ~= false
-    local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
+    -- LUIE_MiniMap_Player is the character arrow (GetMapPlayerPosition heading).
+    -- LUIE_MiniMap_PlayerCam is the cone. Same parent and draw tier as the arrow, which already paints above the scroll.
     self.view.player:SetHidden((not followPlayer) or (not showPlayerPip))
-    if showPlayerPip and followPlayer and nativeHudMapAttached then
-        self.view.playerCam:SetHidden(true)
-    else
-        self.view.playerCam:SetHidden(not followPlayer)
+    self.view.playerCam:SetHidden(not followPlayer)
+    if followPlayer then
+        self.view.player:SetDrawLayer(DL_OVERLAY)
+        self.view.player:SetDrawTier(DT_HIGH)
+        self.view.player:SetDrawLevel(2)
+        self.view.playerCam:SetDrawLayer(DL_OVERLAY)
+        self.view.playerCam:SetDrawTier(DT_HIGH)
+        self.view.playerCam:SetDrawLevel(1)
     end
 end
 
@@ -143,7 +148,6 @@ function MiniMapRuntime:OnFollowTick()
     local mapContentWidth = self.mapController:GetMapContentWidth()
     local mapContentHeight = self.mapController:GetMapContentHeight()
     local followPlayer = MiniMap.GetMapFollowsPlayer()
-    local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
 
     if followPlayer then
         local horizontalScroll = (playerNormalizedX * mapContentWidth) - (scroll:GetWidth() / 2)
@@ -159,9 +163,7 @@ function MiniMapRuntime:OnFollowTick()
             self.lastPlayerHeading = playerHeading
         end
         if playerCameraHeading ~= self.lastCameraHeading then
-            if not nativeHudMapAttached then
-                self.view.playerCam:SetTextureRotation(playerCameraHeading)
-            end
+            self.view.playerCam:SetTextureRotation(playerCameraHeading)
             self.lastCameraHeading = playerCameraHeading
         end
         if MiniMap.ShouldRunThrottled("AutoZoomEdge", 600) then

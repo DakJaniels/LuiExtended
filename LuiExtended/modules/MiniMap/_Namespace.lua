@@ -208,6 +208,8 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field positionGridDivisor number
 --- @field showPlayerPip boolean
 --- @field playerPipColor { r: number, g: number, b: number, a: number }
+--- @field mapEdgeColorEnabled boolean
+--- @field mapEdgeColor { r: number, g: number, b: number, a: number }
 --- @field cameraWedgeColor { r: number, g: number, b: number, a: number }
 --- @field borderOpacity number
 --- @field pinMirrorStateMachineDebug boolean
@@ -302,6 +304,8 @@ MiniMap.Defaults =
     positionGridDivisor = 0,
     showPlayerPip = true,
     playerPipColor = { r = 1, g = 1, b = 1, a = 1 },
+    mapEdgeColorEnabled = false,
+    mapEdgeColor = { r = 0.72, g = 0.61, b = 0.45, a = 1 },
     cameraWedgeColor = { r = 1, g = 1, b = 1, a = 1 },
     borderOpacity = 1,
     pinMirrorStateMachineDebug = false,
@@ -474,13 +478,8 @@ function MiniMap.ApplyPlayerPipColors()
     local playerRed, playerGreen, playerBlue, playerAlpha = MiniMap.GetPlayerPipColor()
     local wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha = MiniMap.GetCameraWedgeColor()
     MiniMap.view.player:SetColor(playerRed, playerGreen, playerBlue, playerAlpha)
-    local followPlayer = MiniMap.GetMapFollowsPlayer()
-    local showPlayerPip = MiniMap.SV.showPlayerPip ~= false
-    local nativeHudMapAttached = MiniMap.IsNativeWorldMapContainerAttached()
-    if not (nativeHudMapAttached and followPlayer and showPlayerPip) then
-        MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
-    end
-    if nativeHudMapAttached then
+    MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
+    if MiniMap.IsNativeWorldMapContainerAttached() then
         MiniMap.ApplyNativeWorldMapPlayerPinColors()
     end
 end
@@ -497,6 +496,7 @@ function MiniMap.ApplyLiveSettings()
         MiniMap.ApplyNativeHudPlayerPinScale()
     end
     MiniMap.ApplyPlayerPipColors()
+    MiniMap.ApplyHudMapEdgeBackground()
     MiniMap.runtime:UpdateCenterPlayerPipVisibility()
     if MiniMap.IsNativeWorldMapContainerAttached() then
         MiniMap.TickHudMovingAndPlayerPins()

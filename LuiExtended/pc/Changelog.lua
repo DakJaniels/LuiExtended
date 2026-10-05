@@ -57,6 +57,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFZone Name Above Map|r places the zone name above the map without moving InfoPanel.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFShow Player Pip|r can be turned off. The camera direction cone stays while following.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFHarvestMap Pins (%)|r scales HarvestMap pins on the minimap. World map pin size is unchanged.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFColor Map Edge|r replaces the gray swirl outside the map edge with a flat color. PC and console.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Slash Commands: |cFFFFFFChoose Fence to Summon|r. /fence and /smuggler summon the fence you pick. PC and console.",
     "",
     -- Changes
@@ -76,6 +77,9 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: HarvestMap pins show on the minimap without opening the world map and zooming out.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: The player pip stays on the city map while you are in a submap, without opening the world map.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: LibMapPins pins (SkyShards, Quest Map, Lost Treasure, Destinations, and the same library) draw for the minimap sheet without opening the world map.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Turning |cFFFFFFShow Player Pip|r off keeps the camera direction cone while following.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Group pin size stays at the Group scale when a group member zones or joins.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Changing subzone keeps the current map until the new textures are ready.",
     "",
     -- Version Header 7.2.6.9
     "|cFFA500LuiExtended Version 7.2.6.9|r",
