@@ -46,8 +46,8 @@ local function loadQuestCounterFilterDialogs()
     end
 end
 
-local chatNameDisplayOptions = { "@UserID", "Character Name", "Character Name @UserID" }
-local chatNameDisplayOptionsKeys = { ["@UserID"] = 1, ["Character Name"] = 2, ["Character Name @UserID"] = 3 }
+local chatNameDisplayOptions = { "@UserID", "Character Name", "Character Name @UserID", "Platform Name" }
+local chatNameDisplayOptionsKeys = { ["@UserID"] = 1, ["Character Name"] = 2, ["Character Name @UserID"] = 3, ["Platform Name"] = 4 }
 local linkBracketDisplayOptions = { "No Brackets", "Display Brackets" }
 local linkBracketDisplayOptionsKeys = { ["No Brackets"] = 1, ["Display Brackets"] = 2 }
 local bracketOptions4 = { "[]", "()", "-", "No Brackets" }

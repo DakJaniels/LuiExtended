@@ -28,6 +28,23 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
     local moduleName = ctx.moduleName
     local FindCsaCallbackHandler = ctx.FindCsaCallbackHandler
 
+    local function GetGroupMemberPlatformDisplayName(characterName, displayName)
+        local groupSize = GetGroupSize()
+        for groupIndex = 1, groupSize do
+            local unitTag = GetGroupUnitTagByIndex(groupIndex)
+            if unitTag then
+                local unitCharacterName = GetUnitName(unitTag)
+                local unitDisplayName = GetUnitDisplayName(unitTag)
+                local characterMatches = characterName ~= nil and characterName ~= "" and unitCharacterName == characterName
+                local displayMatches = displayName ~= nil and displayName ~= "" and unitDisplayName == displayName
+                if characterMatches or displayMatches then
+                    return GetUnitPlatformDisplayName(unitTag)
+                end
+            end
+        end
+        return nil
+    end
+
     local function GroupInviteResponseAlert(characterName, response, displayName)
         local finalName
         local finalAlertName
@@ -261,8 +278,9 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         if isLocalPlayer then
             zo_callLater(ChatAnnouncements.CheckLFGStatusJoin, 100)
         else
-            local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+            local joinedPlatformDisplayName = GetGroupMemberPlatformDisplayName(characterName, displayName)
+            local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName, joinedPlatformDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName, joinedPlatformDisplayName)
             -- Set final messages to send
             local SendMessage = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalName))
             local SendAlert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalAlertName))
@@ -281,6 +299,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         local showAlert = leaderRawName ~= "" and (S.g_currentGroupLeaderRawName ~= "" and S.g_currentGroupLeaderRawName ~= nil)
         S.g_currentGroupLeaderRawName = leaderRawName
         S.g_currentGroupLeaderDisplayName = GetUnitDisplayName(leaderTag)
+        local leaderPlatformDisplayName = GetUnitPlatformDisplayName(leaderTag)
 
         -- If for some reason we don't have a valid leader name, bail out now.
         if S.g_currentGroupLeaderRawName == "" or S.g_currentGroupLeaderRawName == nil or S.g_currentGroupLeaderDisplayName == "" or S.g_currentGroupLeaderDisplayName == nil then
@@ -289,8 +308,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
 
         local displayString
         local alertString
-        local finalName = ChatAnnouncements.ResolveNameLink(S.g_currentGroupLeaderRawName, S.g_currentGroupLeaderDisplayName)
-        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(S.g_currentGroupLeaderRawName, S.g_currentGroupLeaderDisplayName)
+        local finalName = ChatAnnouncements.ResolveNameLink(S.g_currentGroupLeaderRawName, S.g_currentGroupLeaderDisplayName, leaderPlatformDisplayName)
+        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(S.g_currentGroupLeaderRawName, S.g_currentGroupLeaderDisplayName, leaderPlatformDisplayName)
 
         if LUIE.PlayerNameRaw ~= S.g_currentGroupLeaderRawName then -- If another player became the leader
             displayString = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED), finalName))
@@ -379,9 +398,10 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                     if resultType == GROUP_ELECTION_RESULT_ELECTION_LOST then
                         local kickMemberName = GetUnitName(targetUnitTag)
                         local kickMemberAccountName = GetUnitDisplayName(targetUnitTag)
+                        local kickMemberPlatformDisplayName = GetUnitPlatformDisplayName(targetUnitTag)
 
-                        local kickFinalName = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName)
-                        local kickfinalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName)
+                        local kickFinalName = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName, kickMemberPlatformDisplayName)
+                        local kickfinalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName, kickMemberPlatformDisplayName)
 
                         message = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_FAIL, kickFinalName)
                         alertText = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_FAIL, kickfinalAlertName)

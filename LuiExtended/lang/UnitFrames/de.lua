@@ -435,6 +435,7 @@ local strings =
     LUIE_STRING_LAM_UF_HIDE_PLAYER_FRAME_DEATH_TP = "Blendet das benutzerdefinierte Spieler-Einheitenfenster aus, solange du tot bist; es erscheint wieder, wenn du lebst.",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME = "Charaktername",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID = "Charaktername @UserID",
+    LUIE_STRING_LAM_UF_NAMEDISPLAY_PLATFORM = "Plattformname",
     LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID = "@UserID",
     LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION = "Nächste Roll-Ausweichung auf Ausdauerleiste anzeigen",
     LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_COLOR = "Farbe der nächsten Ausweich-Linie",
