@@ -17,7 +17,6 @@ local MiniMap = LUIE.MiniMap
 --- @field lastPlayerHeading number|nil
 --- @field lastCameraHeading number|nil
 --- @field mapFollowsPlayer boolean
---- @field lastFollowUpdateMs number|nil
 local MiniMapRuntime = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapRuntime = MiniMapRuntime
 
@@ -56,6 +55,9 @@ end
 --- @param followsPlayer boolean
 function MiniMapRuntime:SetMapFollowsPlayer(followsPlayer)
     self.mapFollowsPlayer = followsPlayer
+    if followsPlayer then
+        self:ClearFollowScrollCache()
+    end
     self:UpdateCenterPlayerPipVisibility()
     if MiniMap.IsNativeWorldMapContainerAttached() then
         MiniMap.ApplyNativeWorldMapPlayerPinVisibility()
@@ -73,18 +75,27 @@ end
 
 --- @param mapContentWidth number
 --- @param mapContentHeight number
-function MiniMapRuntime:ApplyScrollCenterOnPlayer(mapContentWidth, mapContentHeight)
+--- @param playerNormalizedX number|nil
+--- @param playerNormalizedY number|nil
+--- @param isShownInCurrentMap boolean|nil
+function MiniMapRuntime:ApplyScrollCenterOnPlayer(mapContentWidth, mapContentHeight, playerNormalizedX, playerNormalizedY, isShownInCurrentMap)
     local scroll = self.view.scroll
-    local playerNormalizedX, playerNormalizedY, _, isShownInCurrentMap = MiniMap.GetMapPlayerPositionForMirror("player")
+    if playerNormalizedX == nil or playerNormalizedY == nil then
+        playerNormalizedX, playerNormalizedY, _, isShownInCurrentMap = GetMapPlayerPosition("player")
+    end
     if not MiniMap.IsMapPlayerPositionShownOnHudMap(playerNormalizedX, playerNormalizedY, isShownInCurrentMap) then
         return
     end
     local horizontalScroll = (playerNormalizedX * mapContentWidth) - (scroll:GetWidth() / 2)
     local verticalScroll = (playerNormalizedY * mapContentHeight) - (scroll:GetHeight() / 2)
-    scroll:SetHorizontalScroll(horizontalScroll)
-    scroll:SetVerticalScroll(verticalScroll)
-    MiniMap.SV.panOffsetX = horizontalScroll
-    MiniMap.SV.panOffsetY = verticalScroll
+    -- Sub-pixel scroll writes do not move the map but still fire OnScrollOffsetChanged on both axes.
+    -- MiniMapInputController:OnScrollOffsetChanged stores panOffsetX / panOffsetY when a scroll really changes.
+    if zo_abs(horizontalScroll - scroll:GetHorizontalScroll()) >= 1 then
+        scroll:SetHorizontalScroll(horizontalScroll)
+    end
+    if zo_abs(verticalScroll - scroll:GetVerticalScroll()) >= 1 then
+        scroll:SetVerticalScroll(verticalScroll)
+    end
 end
 
 --- @param previousContentWidth number
@@ -137,28 +148,21 @@ function MiniMapRuntime:OnFollowTick()
         return
     end
 
-    MiniMap.SyncHudMapSheetToPlayerLocation()
-    MiniMap.SyncNativeHudMapGeometryToContent()
-
-    self:UpdateCenterPlayerPipVisibility()
-
-    local playerNormalizedX, playerNormalizedY, playerHeading, isShownInCurrentMap, isSymbolicLocation = MiniMap.GetMapPlayerPositionForMirror("player")
+    local playerNormalizedX, playerNormalizedY, playerHeading, isShownInCurrentMap, isSymbolicLocation = GetMapPlayerPosition("player")
     local playerCameraHeading = GetPlayerCameraHeading()
-    local scroll = self.view.scroll
-    local mapContentWidth = self.mapController:GetMapContentWidth()
-    local mapContentHeight = self.mapController:GetMapContentHeight()
     local followPlayer = MiniMap.GetMapFollowsPlayer()
 
     if followPlayer then
-        local horizontalScroll = (playerNormalizedX * mapContentWidth) - (scroll:GetWidth() / 2)
-        local verticalScroll = (playerNormalizedY * mapContentHeight) - (scroll:GetHeight() / 2)
-        if playerNormalizedX ~= self.lastPlayerNormX
-        or playerNormalizedY ~= self.lastPlayerNormY
-        or horizontalScroll ~= scroll:GetHorizontalScroll()
-        or verticalScroll ~= scroll:GetVerticalScroll() then
-            self:ApplyScrollCenterOnPlayer(mapContentWidth, mapContentHeight)
+        if playerNormalizedX ~= self.lastPlayerNormX or playerNormalizedY ~= self.lastPlayerNormY then
+            self:ApplyScrollCenterOnPlayer(
+                self.mapController:GetMapContentWidth(),
+                self.mapController:GetMapContentHeight(),
+                playerNormalizedX,
+                playerNormalizedY,
+                isShownInCurrentMap
+            )
         end
-        if playerHeading ~= self.lastPlayerHeading then
+        if playerHeading ~= nil and playerHeading ~= self.lastPlayerHeading then
             self.view.player:SetTextureRotation(playerHeading)
             self.lastPlayerHeading = playerHeading
         end
@@ -167,21 +171,16 @@ function MiniMapRuntime:OnFollowTick()
             self.lastCameraHeading = playerCameraHeading
         end
         if MiniMap.ShouldRunThrottled("AutoZoomEdge", 600) then
-            MiniMap.TryAutoZoomOutAtMapEdge(mapData)
+            MiniMap.TryAutoZoomOutAtMapEdge(mapData, playerNormalizedX, playerNormalizedY, isShownInCurrentMap)
         end
-    else
-        local panDragActive = MiniMap.inputController.panDragActive
-        if not panDragActive then
-            scroll:SetHorizontalScroll(MiniMap.SV.panOffsetX or 0)
-            scroll:SetVerticalScroll(MiniMap.SV.panOffsetY or 0)
-        end
-        self.pinController:SyncPlayerMapPin(mapData)
+    elseif not MiniMap.IsNativeWorldMapContainerAttached() then
+        self.pinController:SyncPlayerMapPin(mapData, playerNormalizedX, playerNormalizedY, playerHeading, isShownInCurrentMap)
     end
 
     self.lastPlayerNormX = playerNormalizedX
     self.lastPlayerNormY = playerNormalizedY
 
-    MiniMap.TickHudMovingAndPlayerPins(followPlayer, playerNormalizedX, playerNormalizedY, isShownInCurrentMap, isSymbolicLocation)
+    MiniMap.TickHudMovingAndPlayerPins(followPlayer, playerNormalizedX, playerNormalizedY, isShownInCurrentMap, isSymbolicLocation, playerCameraHeading)
 end
 
 function MiniMapRuntime:ApplyScrollFromPanOffsets()
@@ -204,19 +203,4 @@ function MiniMap.ShouldRunFollowUpdate()
         return false
     end
     return true
-end
-
-function MiniMap.OnRootUpdate(control, time)
-    if not MiniMap.ShouldRunFollowUpdate() then
-        return
-    end
-    -- MiniMap.UpdateHudMinimapPinMouseOverFromPointer()
-    local runtime = MiniMap.runtime
-    local now = GetFrameTimeMilliseconds()
-    local followRefreshMs = MiniMap.GetMovingPinRefreshMs()
-    if runtime.lastFollowUpdateMs and (now - runtime.lastFollowUpdateMs) < followRefreshMs then
-        return
-    end
-    runtime.lastFollowUpdateMs = now
-    runtime:OnFollowTick()
 end

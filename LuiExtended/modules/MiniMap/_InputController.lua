@@ -9,7 +9,8 @@ local LUIE = LUIE
 local MiniMap = LUIE.MiniMap
 
 local MINIMAP_WAYPOINT_DRAG_THRESHOLD = 8
-local MINIMAP_FRAME_CHROME_HIDE_DELAY_MS = 200
+--- Pointer-exit debounce (200ms) plus the idle hold (1250ms) the zoom buttons used to sit through.
+local MINIMAP_ZOOM_CHROME_EXIT_HOLD_MS = 1450
 
 --- @class MiniMapInputController : ZO_InitializingObject
 --- @field view MiniMapView
@@ -22,7 +23,6 @@ local MINIMAP_FRAME_CHROME_HIDE_DELAY_MS = 200
 --- @field panScrollStartX number
 --- @field panScrollStartY number
 --- @field pendingWaypointClick boolean
---- @field zoomChromeExitCallId integer|nil
 local MiniMapInputController = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapInputController = MiniMapInputController
 
@@ -36,7 +36,6 @@ function MiniMapInputController:Initialize(view, mapController, runtime)
     self.panDragActive = false
     self.panDragMoved = false
     self.pendingWaypointClick = false
-    self.zoomChromeExitCallId = nil
 end
 
 --- @param shift boolean
@@ -199,6 +198,23 @@ function MiniMapInputController:TryHandleMapPointerButtonUp(button, shift)
     end
 end
 
+--- WorldMap.lua sets ZO_WorldMapContainer OnUpdate only while the mouse is dragging, then clears it on mouse up.
+--- @param panDragUpdateEnabled boolean
+function MiniMapInputController:SetPanDragUpdateEnabled(panDragUpdateEnabled)
+    local mapControl = self.view.map
+    if not mapControl then
+        return
+    end
+    if panDragUpdateEnabled then
+        local inputController = self
+        mapControl:SetHandler("OnUpdate", function ()
+            inputController:OnPanDragTick()
+        end)
+    else
+        mapControl:SetHandler("OnUpdate", nil)
+    end
+end
+
 function MiniMapInputController:StartPanDrag(mouseX, mouseY)
     self.panDragActive = true
     self.panDragMoved = false
@@ -210,6 +226,7 @@ function MiniMapInputController:StartPanDrag(mouseX, mouseY)
     if MiniMap.SV.followPlayer == true and MiniMap.SV.zoneScrollLockEnabled ~= true then
         self.runtime:SetMapFollowsPlayer(false)
     end
+    self:SetPanDragUpdateEnabled(true)
 end
 
 function MiniMapInputController:CompletePanDragSession()
@@ -243,6 +260,7 @@ function MiniMapInputController:StopPanDrag(mouseX, mouseY, shift)
         return
     end
     self.panDragActive = false
+    self:SetPanDragUpdateEnabled(false)
 
     if not self.panDragMoved and mouseX and mouseY then
         self:TrySetWaypointFromClick(mouseX, mouseY, shift == true)
@@ -293,58 +311,24 @@ function MiniMapInputController:IsZoomButtonsFeatureEnabled()
     return self.view:IsZoomButtonsEnabled()
 end
 
-function MiniMapInputController:IsMouseOverZoomChromeRegion()
-    local view = self.view
-    if not view then
-        return false
-    end
-    local zoomChromeHover = view.zoomChromeHover
-    if zoomChromeHover and not zoomChromeHover:IsHidden() and MouseIsOver(zoomChromeHover) then
-        return true
-    end
-    local zoomIn = view.zoomIn
-    if zoomIn and not zoomIn:IsHidden() and MouseIsOver(zoomIn) then
-        return true
-    end
-    local zoomOut = view.zoomOut
-    if zoomOut and not zoomOut:IsHidden() and MouseIsOver(zoomOut) then
-        return true
-    end
-    return false
-end
-
-function MiniMapInputController:CancelZoomChromeExitDebounce()
-    if self.zoomChromeExitCallId then
-        zo_removeCallLater(self.zoomChromeExitCallId)
-        self.zoomChromeExitCallId = nil
-    end
-end
-
 function MiniMapInputController:OnZoomChromeHoverEnter()
     if not self:IsZoomButtonsFeatureEnabled() then
         return
     end
-    self:CancelZoomChromeExitDebounce()
     if self.view then
         self.view:RevealZoomButtonsTransient()
     end
 end
 
+--- Moving between the hover region and a zoom button fires exit then enter. The enter cancels this fade,
+--- which is what the old exit debounce was for, so no pointer-region re-check is needed.
 function MiniMapInputController:OnZoomChromeHoverExit()
     if not self:IsZoomButtonsFeatureEnabled() then
         return
     end
-    self:CancelZoomChromeExitDebounce()
-    local inputController = self
-    self.zoomChromeExitCallId = zo_callLater(function ()
-                                                 inputController.zoomChromeExitCallId = nil
-                                                 if inputController:IsMouseOverZoomChromeRegion() then
-                                                     return
-                                                 end
-                                                 if inputController.view then
-                                                     inputController.view:ScheduleZoomButtonsFadeAfterIdle()
-                                                 end
-                                             end, MINIMAP_FRAME_CHROME_HIDE_DELAY_MS)
+    if self.view then
+        self.view:ScheduleZoomButtonsFade(MINIMAP_ZOOM_CHROME_EXIT_HOLD_MS)
+    end
 end
 
 function MiniMapInputController:OnFramePositionLockClicked(lockButton)
@@ -446,13 +430,6 @@ end
 function MiniMap.OnMapMouseUp(control, button, upInside, ctrl, alt, shift, command)
     if MiniMap.inputController then
         MiniMap.inputController:OnMapMouseUp(button, shift)
-    end
-end
-
-function MiniMap.OnMapUpdate(control, time)
-    local inputController = MiniMap.inputController
-    if inputController and inputController.panDragActive then
-        inputController:OnPanDragTick()
     end
 end
 

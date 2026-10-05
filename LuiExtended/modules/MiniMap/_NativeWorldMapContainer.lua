@@ -11,8 +11,6 @@ local LUIE = LUIE
 --- @class (partial) LUIE.MiniMap
 local MiniMap = LUIE.MiniMap
 
-local eventManager = GetEventManager()
-
 local WORLD_MAP_CONTAINER_BACKGROUND_TEXTURE = "EsoUI/Art/WorldMap/worldmap_map_background_512tile.dds"
 local NATIVE_PLAYER_PIP_TEXTURE = "EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds"
 
@@ -22,6 +20,18 @@ local panAndZoom = ZO_WorldMap_GetPanAndZoom()
 local nativeWorldMapContainerAttached = false
 local nativeWorldMapContainerHiddenForReload = false
 local nativeWorldMapContainerStagedForTileLoad = false
+
+--- Last values written to the native player pin. The follow tick runs on an interval, so an unmoved
+--- player would otherwise redo SetLocation (ClearAnchors + SetAnchor) and SetRotation every tick.
+local lastPlayerPinNormalizedX
+local lastPlayerPinNormalizedY
+local lastPlayerPinIsSymbolicLocation
+local lastPlayerPinContainerWidth
+local lastPlayerPinContainerHeight
+local lastPlayerPinConstantWidth
+local lastPlayerPinConstantHeight
+local lastPlayerPinIsShownInCurrentMap
+local lastPlayerPinRotation
 --- When a map is already showing, a subzone reload keeps those tiles instead of the loading plate.
 MiniMap.keepPreviousHudMapTilesVisible = false
 
@@ -34,16 +44,6 @@ MiniMap.keepPreviousHudMapTilesVisible = false
 --- @field playerWorldPinWasHidden boolean|nil
 
 local nativeWorldMapContainerRestore --- @type MiniMapNativeWorldMapContainerRestore|nil
-local nativeHudMapOverlayLayoutReapplyScheduled = false
-local nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
-local NATIVE_HUD_MAP_OVERLAY_LAYOUT_REAPPLY_UPDATE_NAME = nil
-
-local function GetNativeHudMapOverlayLayoutReapplyUpdateName()
-    if not NATIVE_HUD_MAP_OVERLAY_LAYOUT_REAPPLY_UPDATE_NAME then
-        NATIVE_HUD_MAP_OVERLAY_LAYOUT_REAPPLY_UPDATE_NAME = MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply"
-    end
-    return NATIVE_HUD_MAP_OVERLAY_LAYOUT_REAPPLY_UPDATE_NAME
-end
 
 --- Hides reparented ZO_WorldMapContainer while ReloadWorldMap runs so ZO_WorldMap_UpdateMap cannot flash full-zone dimensions.
 --- A staged tile load stays shown at alpha 0. ZO_MapPanAndZoom:CanInitializeMap releases the texture unit when ZO_WorldMapContainer1 is hidden.
@@ -206,13 +206,6 @@ function MiniMap.ApplyNativeHudLayoutAfterWorldMapUpdateMap()
     end
 end
 
-function MiniMap.CancelNativeHudMapOverlayLayoutReapply()
-    nativeHudMapOverlayLayoutReapplyScheduled = false
-    nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
-    eventManager:UnregisterForUpdate(GetNativeHudMapOverlayLayoutReapplyUpdateName())
-    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2")
-end
-
 --- Runs ZOS g_mapRefresh:UpdateRefreshGroups via the world map OnUpdate handler (keep / link / location dirty groups).
 function MiniMap.FlushWorldMapPinRefreshGroups()
     local worldMapControl = WORLD_MAP_MANAGER.control
@@ -242,42 +235,8 @@ function MiniMap.ReapplyNativeHudMapOverlayLayout()
     MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
     MiniMap.ResetNativeHudWorldMapPanState()
     MiniMap.FlushWorldMapPinRefreshGroups()
-    MiniMap.ApplyNativeWorldMapContainerLayoutFromMapController(mapController)
-    MiniMap.ResetNativeHudWorldMapPanState()
     MiniMap.RefreshWorldMapSuggestionPinsForMirror()
     MiniMap.RefreshWorldMapPingsForMirror()
-end
-
-function MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
-    if not MiniMap.Enabled or not MiniMap.IsNativeWorldMapContainerAttached() then
-        return
-    end
-    if nativeHudMapOverlayLayoutReapplyScheduled then
-        return
-    end
-    nativeHudMapOverlayLayoutReapplyScheduled = true
-    local updateName = GetNativeHudMapOverlayLayoutReapplyUpdateName()
-    eventManager:RegisterForUpdate(updateName, 0, function ()
-                                       nativeHudMapOverlayLayoutReapplyScheduled = false
-                                       MiniMap.ReapplyNativeHudMapOverlayLayout()
-                                       MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
-                                   end, true)
-end
-
---- Second frame after ZOS g_mapRefresh:UpdateRefreshGroups (world map OnUpdate).
-function MiniMap.ScheduleNativeHudMapOverlayLayoutReapplySecondFrame()
-    if not MiniMap.Enabled or not MiniMap.IsNativeWorldMapContainerAttached() then
-        return
-    end
-    if nativeHudMapOverlayLayoutReapplySecondFrameScheduled then
-        return
-    end
-    nativeHudMapOverlayLayoutReapplySecondFrameScheduled = true
-    local secondFrameUpdateName = MiniMap.moduleName .. "NativeHudMapOverlayLayoutReapply2"
-    eventManager:RegisterForUpdate(secondFrameUpdateName, 0, function ()
-                                       nativeHudMapOverlayLayoutReapplySecondFrameScheduled = false
-                                       MiniMap.ReapplyNativeHudMapOverlayLayout()
-                                   end, true)
 end
 
 --- @return boolean
@@ -293,31 +252,76 @@ function MiniMap.HasNativeMovingPinTargets()
     return DoesUnitExist("companion")
 end
 
---- Native HUD player pin + group/companion moving pins. Called from OnFollowTick after its guards.
---- Player normalized position is the sample from GetMapPlayerPositionForMirror so a parent-zone map index cannot place the pip.
---- @param followPlayer boolean|nil
+--- Reused across ticks the way ZO_WorldMapPins_Manager:UpdateMovingPins reuses self.movingPins.
+local movingPinScratchArray = {}
+--- Last applied normalized position per moving pin, so an unmoved unit skips SetLocation.
+local lastMovingPinNormalizedPositions = {}
+local cachedCompanionPin
+
+--- Group and companion pin locations only. Player pin position is UpdateNativeHudPlayerMapPin.
+--- Matches the group and companion blocks in ZO_WorldMapPins_Manager:UpdateMovingPins (MapPin_Manager.lua).
+function MiniMap.UpdateNativeHudGroupAndCompanionPinLocations()
+    if not nativeWorldMapContainerAttached or not MiniMap.HasNativeMovingPinTargets() then
+        return
+    end
+    pinManager:AddPinsToArray(movingPinScratchArray, "group")
+    for groupPinIndex = 1, #movingPinScratchArray do
+        local groupPin = movingPinScratchArray[groupPinIndex]
+        local groupNormalizedX, groupNormalizedY = GetMapPlayerPosition(groupPin:GetUnitTag())
+        MiniMap.ApplyMovingPinLocationWhenChanged(groupPin, groupNormalizedX, groupNormalizedY)
+    end
+    ZO_ClearNumericallyIndexedTable(movingPinScratchArray)
+    if DoesUnitExist("companion") then
+        if not cachedCompanionPin then
+            cachedCompanionPin = pinManager:FindPin("companion")
+        end
+        if cachedCompanionPin then
+            local companionNormalizedX, companionNormalizedY = GetMapPlayerPosition(cachedCompanionPin:GetUnitTag())
+            MiniMap.ApplyMovingPinLocationWhenChanged(cachedCompanionPin, companionNormalizedX, companionNormalizedY)
+        end
+    else
+        cachedCompanionPin = nil
+    end
+end
+
+--- ZO_MapPin:SetLocation always runs UpdateLocation (ClearAnchors + SetAnchor), so an unmoved pin is skipped here.
+--- @param movingPin table
+--- @param normalizedX number|nil
+--- @param normalizedY number|nil
+function MiniMap.ApplyMovingPinLocationWhenChanged(movingPin, normalizedX, normalizedY)
+    local lastPosition = lastMovingPinNormalizedPositions[movingPin]
+    if lastPosition and lastPosition.normalizedX == normalizedX and lastPosition.normalizedY == normalizedY then
+        return
+    end
+    if not lastPosition then
+        lastPosition = {}
+        lastMovingPinNormalizedPositions[movingPin] = lastPosition
+    end
+    lastPosition.normalizedX = normalizedX
+    lastPosition.normalizedY = normalizedY
+    movingPin:SetLocation(normalizedX, normalizedY)
+end
+
+--- Dropped whenever a layout rewrites ZO_MAP_CONSTANTS, so the next tick re-places every moving pin.
+function MiniMap.ClearNativeHudMovingPinPositionCache()
+    ZO_ClearTable(lastMovingPinNormalizedPositions)
+    cachedCompanionPin = nil
+    MiniMap.ClearNativeHudPlayerPinPositionCache()
+end
+
+--- Native HUD player pin position plus group/companion locations. Called from OnFollowTick.
+--- @param followPlayer boolean|nil Unused. Callers pass follow state ahead of the position sample.
 --- @param normalizedX number|nil
 --- @param normalizedY number|nil
 --- @param isShownInCurrentMap boolean|nil
 --- @param isSymbolicLocation boolean|nil
-function MiniMap.TickHudMovingAndPlayerPins(followPlayer, normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation)
-    if followPlayer == nil then
-        followPlayer = MiniMap.GetMapFollowsPlayer()
-    end
+--- @param playerCameraHeading number|nil
+function MiniMap.TickHudMovingAndPlayerPins(followPlayer, normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation, playerCameraHeading)
     if not nativeWorldMapContainerAttached then
         return
     end
-    local hasGroupOrCompanionPins = MiniMap.HasNativeMovingPinTargets()
-    if followPlayer then
-        if hasGroupOrCompanionPins then
-            pinManager:UpdateMovingPins()
-        end
-    else
-        pinManager:UpdateMovingPins()
-    end
-    MiniMap.UpdateNativeHudPlayerMapPin(normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation)
-    MiniMap.ApplyNativeWorldMapPlayerPinColors()
-    MiniMap.ApplyNativeHudPlayerHeadingAppearance()
+    MiniMap.UpdateNativeHudPlayerMapPin(normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation, playerCameraHeading)
+    MiniMap.UpdateNativeHudGroupAndCompanionPinLocations()
 end
 
 --- ZOS UpdateMovingPins player block only (MapPin_Manager.lua) for solo follow pip sync.
@@ -325,36 +329,76 @@ end
 --- @param normalizedY number|nil
 --- @param isShownInCurrentMap boolean|nil
 --- @param isSymbolicLocation boolean|nil
-function MiniMap.UpdateNativeHudPlayerMapPin(normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation)
+--- @param playerCameraHeading number|nil
+function MiniMap.UpdateNativeHudPlayerMapPin(normalizedX, normalizedY, isShownInCurrentMap, isSymbolicLocation, playerCameraHeading)
     local playerMapPin = pinManager:GetPlayerPin()
     if not playerMapPin then
         return
     end
     local xLoc, yLoc = normalizedX, normalizedY
     if xLoc == nil or yLoc == nil then
-        xLoc, yLoc, _, isShownInCurrentMap, isSymbolicLocation = MiniMap.GetMapPlayerPositionForMirror("player")
+        xLoc, yLoc, _, isShownInCurrentMap, isSymbolicLocation = GetMapPlayerPosition("player")
     end
-    playerMapPin:SetOriginalPosition(xLoc, yLoc)
-    playerMapPin:SetIsSymbolicPosition(isSymbolicLocation)
-    playerMapPin:SetLocation(xLoc, yLoc)
     -- SetLocation anchors with ZO_MAP_CONSTANTS (WorldMap.lua ZO_MapPin:UpdateLocation).
     -- Those constants are the world-map window after SetMapWindowSize, while the city tiles stay on the minimap content size.
     -- Wayshrines keep the layout anchors; only this moving pin was rewritten every tick, so it sat in the lower part of the city.
     local containerWidth, containerHeight = ZO_WorldMapContainer:GetDimensions()
     local constantWidth, constantHeight = ZO_WorldMap_GetMapDimensions()
-    if containerWidth > 0 and containerHeight > 0
-    and (zo_abs(containerWidth - constantWidth) > 1 or zo_abs(containerHeight - constantHeight) > 1) then
-        local playerPinControl = playerMapPin:GetControl()
-        playerPinControl:ClearAnchors()
-        playerPinControl:SetAnchor(CENTER, playerPinControl:GetParent(), TOPLEFT, xLoc * containerWidth, yLoc * containerHeight)
+    local positionChanged = xLoc ~= lastPlayerPinNormalizedX
+        or yLoc ~= lastPlayerPinNormalizedY
+        or isSymbolicLocation ~= lastPlayerPinIsSymbolicLocation
+    local containerSizeChanged = containerWidth ~= lastPlayerPinContainerWidth
+        or containerHeight ~= lastPlayerPinContainerHeight
+        or constantWidth ~= lastPlayerPinConstantWidth
+        or constantHeight ~= lastPlayerPinConstantHeight
+
+    if positionChanged or containerSizeChanged then
+        playerMapPin:SetOriginalPosition(xLoc, yLoc)
+        playerMapPin:SetIsSymbolicPosition(isSymbolicLocation)
+        playerMapPin:SetLocation(xLoc, yLoc)
+        if containerWidth > 0 and containerHeight > 0
+        and (zo_abs(containerWidth - constantWidth) > 1 or zo_abs(containerHeight - constantHeight) > 1) then
+            local playerPinControl = playerMapPin:GetControl()
+            playerPinControl:ClearAnchors()
+            playerPinControl:SetAnchor(CENTER, playerPinControl:GetParent(), TOPLEFT, xLoc * containerWidth, yLoc * containerHeight)
+        end
+        lastPlayerPinNormalizedX = xLoc
+        lastPlayerPinNormalizedY = yLoc
+        lastPlayerPinIsSymbolicLocation = isSymbolicLocation
+        lastPlayerPinContainerWidth = containerWidth
+        lastPlayerPinContainerHeight = containerHeight
+        lastPlayerPinConstantWidth = constantWidth
+        lastPlayerPinConstantHeight = constantHeight
     end
+
     if isShownInCurrentMap then
-        playerMapPin:SetHidden(false)
-        local rotation = isSymbolicLocation and 0 or GetPlayerCameraHeading()
-        playerMapPin:SetRotation(rotation)
-    else
+        local rotation = 0
+        if not isSymbolicLocation then
+            rotation = playerCameraHeading or GetPlayerCameraHeading()
+        end
+        if lastPlayerPinIsShownInCurrentMap ~= true then
+            playerMapPin:SetHidden(false)
+        end
+        if rotation ~= lastPlayerPinRotation then
+            playerMapPin:SetRotation(rotation)
+            lastPlayerPinRotation = rotation
+        end
+    elseif lastPlayerPinIsShownInCurrentMap ~= false then
         playerMapPin:SetHidden(true)
     end
+    lastPlayerPinIsShownInCurrentMap = isShownInCurrentMap == true
+end
+
+function MiniMap.ClearNativeHudPlayerPinPositionCache()
+    lastPlayerPinNormalizedX = nil
+    lastPlayerPinNormalizedY = nil
+    lastPlayerPinIsSymbolicLocation = nil
+    lastPlayerPinContainerWidth = nil
+    lastPlayerPinContainerHeight = nil
+    lastPlayerPinConstantWidth = nil
+    lastPlayerPinConstantHeight = nil
+    lastPlayerPinIsShownInCurrentMap = nil
+    lastPlayerPinRotation = nil
 end
 
 --- MapPin_Manager.lua UpdateMovingPins and UpdateNativeHudPlayerMapPin rotate this pin with GetPlayerCameraHeading.
@@ -512,6 +556,8 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
     end
     MiniMap.RefreshCustomPinsForHud()
     MiniMap.ApplyHudMapEdgeBackground()
+    -- UpdateMovingPins above re-placed every moving pin against the new constants.
+    MiniMap.ClearNativeHudMovingPinPositionCache()
 end
 
 --- Stock swirl from WorldMap.xml. Called when the container returns to ZO_WorldMapScroll.
@@ -607,7 +653,6 @@ function MiniMap.TryAttachNativeWorldMapContainer()
         return
     end
     if nativeWorldMapContainerAttached then
-        MiniMap.ReapplyNativeHudMapOverlayLayout()
         return
     end
     if MiniMap.IsWorldMapBlockingMiniMapWork() then
@@ -643,7 +688,7 @@ function MiniMap.TryAttachNativeWorldMapContainer()
     nativeWorldMapContainerAttached = true
     ApplyNativeWorldMapHudDrawOrder(view)
     MiniMap.RefreshNativeWorldMapContainer()
-    MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
+    MiniMap.ReapplyNativeHudMapOverlayLayout()
 end
 
 function MiniMap.RestoreWorldMapContainerToWorldMap()
@@ -653,7 +698,6 @@ function MiniMap.RestoreWorldMapContainerToWorldMap()
     end
     nativeWorldMapContainerStagedForTileLoad = false
 
-    MiniMap.CancelNativeHudMapOverlayLayoutReapply()
     RestoreWorldMapPlayerPinVisibility()
     if MiniMap.pinController then
         MiniMap.pinController:ResetNativeWorldMapPinUserScale()
@@ -681,6 +725,7 @@ function MiniMap.RestoreWorldMapContainerToWorldMap()
 
     nativeWorldMapContainerAttached = false
     nativeWorldMapContainerRestore = nil
+    MiniMap.ClearNativeHudMovingPinPositionCache()
 
     if MiniMap.pinController then
         MiniMap.pinController:ApplyHarvestMapCompositeScale()

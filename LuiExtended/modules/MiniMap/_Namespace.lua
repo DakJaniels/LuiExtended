@@ -72,11 +72,11 @@ function MiniMap.CompletePostPlayerMapMirrorWork()
             end
         end
     end
-    MiniMap.ScheduleFollowRecoveryAfterWorldMap()
+    MiniMap.ApplyFollowRecoveryAfterWorldMap()
+    local nativeContainerWasAttached = MiniMap.IsNativeWorldMapContainerAttached()
     MiniMap.TryAttachNativeWorldMapContainer()
-    if MiniMap.IsNativeWorldMapContainerAttached() then
+    if nativeContainerWasAttached and MiniMap.IsNativeWorldMapContainerAttached() then
         MiniMap.ReapplyNativeHudMapOverlayLayout()
-        MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
     end
     local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
     if pinMirrorStateMachine.mapReloadCompletePendingAfterMirror then
@@ -97,14 +97,19 @@ function MiniMap.SchedulePostReloadUILayout(mapController, mapData)
     }
 end
 
+--- Runs on every follow tick, so this compares state objects instead of resolving state names.
 --- @return boolean
 function MiniMap.IsPinMirrorMachineBusy()
     local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
-    if not pinMirrorStateMachine or not pinMirrorStateMachine:HasCurrentState() then
+    if not pinMirrorStateMachine then
         return false
     end
-    return pinMirrorStateMachine:IsCurrentState("MapReloading")
-        or pinMirrorStateMachine:IsCurrentState("ZoneReset")
+    local currentState = pinMirrorStateMachine:GetCurrentState()
+    if not currentState then
+        return false
+    end
+    return currentState == pinMirrorStateMachine.mapReloadingState
+        or currentState == pinMirrorStateMachine.zoneResetState
 end
 
 --- Prefer tile reload over pin-only sync when map raw name changed while world map was blocking work.

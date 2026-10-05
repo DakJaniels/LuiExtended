@@ -18,48 +18,9 @@ local WORLD_MAP_SCENE_NAME_GAMEPAD = "gamepad_worldMap"
 --- ZOS has no public unregister for scene StateChange; avoid duplicate handlers on re-init.
 local miniMapWorldMapSceneGateRegistered = false
 local miniMapWorldMapWasOpen = false
-local MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES = 60
 
-local function GetWorldMapUnblockedUpdateName()
-    return MiniMap.moduleName .. "WorldMapUnblocked"
-end
-
-function MiniMap.CancelWorldMapUnblockedWait()
-    eventManager:UnregisterForUpdate(GetWorldMapUnblockedUpdateName())
-end
-
---- Runs callback once ZO_WorldMap_IsWorldMapShowing is false (manual block cleared at success).
---- @param onUnblocked function
-function MiniMap.RunWhenWorldMapUnblocked(onUnblocked)
-    local updateName = GetWorldMapUnblockedUpdateName()
-    MiniMap.CancelWorldMapUnblockedWait()
-    local frameCount = 0
-    eventManager:RegisterForUpdate(updateName, 0, function ()
-        frameCount = frameCount + 1
-        if not MiniMap.Enabled then
-            MiniMap.CancelWorldMapUnblockedWait()
-            return
-        end
-        if ZO_WorldMap_IsWorldMapShowing() then
-            if frameCount >= MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES then
-                MiniMap.CancelWorldMapUnblockedWait()
-                if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
-                    LUIE:Log("Debug", string.format("[MiniMap SM] WorldMap unblocked wait exceeded %d frames; running deferred work", MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES))
-                end
-                MiniMap.worldMapBlocksMiniMapWork = false
-                MiniMap.UpdateGameplayTickers()
-                onUnblocked()
-            end
-            return
-        end
-        MiniMap.CancelWorldMapUnblockedWait()
-        MiniMap.worldMapBlocksMiniMapWork = false
-        if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug and frameCount > 1 then
-            LUIE:Log("Debug", string.format("[MiniMap SM] WorldMap unblocked after %d frame(s)", frameCount))
-        end
-        MiniMap.UpdateGameplayTickers()
-        onUnblocked()
-    end)
+local function GetFollowPositionUpdateName()
+    return MiniMap.moduleName .. "FollowPosition"
 end
 
 --- @return boolean true when follow recovery ran or is no longer needed
@@ -88,35 +49,6 @@ function MiniMap.ApplyFollowRecoveryAfterWorldMap()
     return true
 end
 
-function MiniMap.ScheduleFollowRecoveryAfterWorldMap()
-    if not miniMapWorldMapWasOpen or not MiniMap.GetMapFollowsPlayer() then
-        return
-    end
-    if MiniMap.ApplyFollowRecoveryAfterWorldMap() then
-        return
-    end
-    local recoveryUpdateName = MiniMap.moduleName .. "WorldMapFollowRecovery"
-    eventManager:UnregisterForUpdate(recoveryUpdateName)
-    local frameCount = 0
-    eventManager:RegisterForUpdate(recoveryUpdateName, 0, function ()
-        frameCount = frameCount + 1
-        if not MiniMap.Enabled or not miniMapWorldMapWasOpen then
-            eventManager:UnregisterForUpdate(recoveryUpdateName)
-            return
-        end
-        if MiniMap.IsWorldMapBlockingMiniMapWork() then
-            eventManager:UnregisterForUpdate(recoveryUpdateName)
-            return
-        end
-        if MiniMap.ApplyFollowRecoveryAfterWorldMap() then
-            eventManager:UnregisterForUpdate(recoveryUpdateName)
-            return
-        end
-        if frameCount >= MINIMAP_WORLD_MAP_UNBLOCKED_MAX_FRAMES then
-            eventManager:UnregisterForUpdate(recoveryUpdateName)
-        end
-    end)
-end
 
 --- @class MiniMapHUDSceneFragment : ZO_HUDFadeSceneFragment
 --- @field SetHiddenForReason fun(self: MiniMapHUDSceneFragment, reason: string, hidden: boolean, customShowDuration?: number, customHideDuration?: number)
@@ -133,11 +65,11 @@ end
 
 function MiniMapHUDSceneFragment:OnShown()
     ZO_HUDFadeSceneFragment.OnShown(self)
-    MiniMap.ScheduleFollowRecoveryAfterWorldMap()
+    MiniMap.ApplyFollowRecoveryAfterWorldMap()
     MiniMap.TryAttachNativeWorldMapContainer()
     if MiniMap.mapController and MiniMap.mapController:IsReady() then
         MiniMap.RefreshNativeWorldMapContainer()
-        MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
+        MiniMap.ReapplyNativeHudMapOverlayLayout()
     end
     MiniMap.UpdateGameplayTickers()
 end
@@ -166,22 +98,21 @@ function MiniMap.IsWorldMapBlockingMiniMapWork()
 end
 
 function MiniMap.UpdateGameplayTickers()
+    local followPositionUpdateName = GetFollowPositionUpdateName()
+    eventManager:UnregisterForUpdate(followPositionUpdateName)
     local topLevel = LUIE_MiniMap
-    if not topLevel or not MiniMap.Enabled then
-        if topLevel then
-            topLevel:SetHandler("OnUpdate", nil)
-        end
-        return
-    end
-    local hudSceneFragment = MiniMap.hudSceneFragment
-    local shouldRunFollowOnUpdate = hudSceneFragment
-        and hudSceneFragment:IsShowing()
-        and not MiniMap.IsWorldMapBlockingMiniMapWork()
-    if shouldRunFollowOnUpdate then
-        topLevel:SetHandler("OnUpdate", MiniMap.OnRootUpdate)
-    else
+    if topLevel then
         topLevel:SetHandler("OnUpdate", nil)
     end
+    if not MiniMap.ShouldRunFollowUpdate() then
+        return
+    end
+    eventManager:RegisterForUpdate(followPositionUpdateName, MiniMap.GetMovingPinRefreshMs(), function ()
+        local runtime = MiniMap.runtime
+        if runtime then
+            runtime:OnFollowTick()
+        end
+    end)
 end
 
 function MiniMap.ApplyFragmentHiddenReasons()
@@ -218,9 +149,10 @@ end
 
 function MiniMap.OnWorldMapOpening(sceneName)
     miniMapWorldMapWasOpen = true
+    if MiniMap.runtime then
+        MiniMap.runtime:ClearFollowScrollCache()
+    end
     MiniMap.RestoreWorldMapContainerToWorldMap()
-    MiniMap.CancelWorldMapUnblockedWait()
-    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "WorldMapFollowRecovery")
     MiniMap.worldMapBlocksMiniMapWork = true
     local pinController = MiniMap.pinController
     if pinController then
@@ -246,7 +178,7 @@ function MiniMap.FlushWorldMapQueuedWork()
         pinMirrorStateMachine.pinSyncQueuedWhileWorldMap = false
         MiniMap.TryAttachNativeWorldMapContainer()
         MiniMap.RefreshNativeWorldMapContainer()
-        MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
+        MiniMap.ReapplyNativeHudMapOverlayLayout()
         MiniMap.FirePinResyncCallbacks()
         MiniMap.ApplyHudNativePinLayoutAfterRefresh()
     end
@@ -263,16 +195,15 @@ function MiniMap.OnWorldMapClosed()
     if not MiniMap.Enabled then
         return
     end
-    MiniMap.RunWhenWorldMapUnblocked(function ()
-        MiniMap.FlushWorldMapQueuedWork()
-        MiniMap.UpdateGameplayTickers()
-        MiniMap.TryAttachNativeWorldMapContainer()
-        if MiniMap.mapController and MiniMap.mapController:IsReady() then
-            MiniMap.RefreshNativeWorldMapContainer()
-            MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
-        end
-        MiniMap.ScheduleFollowRecoveryAfterWorldMap()
-    end)
+    MiniMap.worldMapBlocksMiniMapWork = false
+    MiniMap.FlushWorldMapQueuedWork()
+    MiniMap.UpdateGameplayTickers()
+    MiniMap.TryAttachNativeWorldMapContainer()
+    if MiniMap.mapController and MiniMap.mapController:IsReady() then
+        MiniMap.RefreshNativeWorldMapContainer()
+        MiniMap.ReapplyNativeHudMapOverlayLayout()
+    end
+    MiniMap.ApplyFollowRecoveryAfterWorldMap()
 end
 
 local function OnWorldMapSceneStateChange(sceneName, oldState, newState)
@@ -337,10 +268,11 @@ function MiniMap.UnregisterMiniMapSceneIntegration()
     miniMapWorldMapWasOpen = false
     MiniMap.SetConsoleLayoutPreviewActive(false)
     MiniMap.ShutdownNativeWorldMapContainer()
-    MiniMap.CancelWorldMapUnblockedWait()
-    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "WorldMapFollowRecovery")
     MiniMap.worldMapBlocksMiniMapWork = false
-    MiniMap.UpdateGameplayTickers()
+    eventManager:UnregisterForUpdate(GetFollowPositionUpdateName())
+    if LUIE_MiniMap then
+        LUIE_MiniMap:SetHandler("OnUpdate", nil)
+    end
 
     local hudSceneFragment = MiniMap.hudSceneFragment
     if not hudSceneFragment then

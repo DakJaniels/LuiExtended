@@ -10,7 +10,7 @@ local MiniMap = LUIE.MiniMap
 
 local eventManager = GetEventManager()
 
-local MINIMAP_MAP_NAME_FALLBACK_MS = 45000
+local hudMapIdentitySyncInProgress = false
 
 --- @class MiniMapMapEventController : ZO_InitializingCallbackObject
 --- @field mapController MiniMapMapController
@@ -25,6 +25,7 @@ local MINIMAP_MAP_NAME_FALLBACK_MS = 45000
 --- @field onWorldMapQuestBreadcrumbsQuestAvailable function|nil
 --- @field onAntiquitiesUpdated function|nil
 --- @field onSingleAntiquityDigSitesUpdated function|nil
+--- @field hudStartupApplied boolean
 local MiniMapMapEventController = ZO_InitializingCallbackObject:Subclass()
 MiniMap.MiniMapMapEventController = MiniMapMapEventController
 
@@ -87,6 +88,7 @@ function MiniMapMapEventController:Initialize(mapController, pinController, pinM
     self.eventAnchor = LUIE_MiniMap
     self.registeredEvents = {}
     self.companionPinSyncQueuedWhileWorldMap = false
+    self.hudStartupApplied = false
 end
 
 --- @param reason string
@@ -203,26 +205,34 @@ function MiniMapMapEventController:RequestQuestPinSyncLight(journalIndex, layout
     else
         questPinLightSyncPendingRefreshAll = true
     end
-    self:ScheduleQuestPinLightSync()
+    self:FlushQuestPinLightSync()
 end
 
-function MiniMapMapEventController:ScheduleQuestPinLightSync()
-    local mapEventController = self
-    local updateName = MiniMap.moduleName .. "QuestPinLightSync"
-    eventManager:RegisterForUpdate(updateName, 0, function ()
-                                       eventManager:UnregisterForUpdate(updateName)
-                                       local journalIndex = questPinLightSyncPendingJournalIndex
-                                       local refreshAll = questPinLightSyncPendingRefreshAll
-                                       local layoutOnly = questPinLightSyncPendingLayoutOnly
-                                       questPinLightSyncPendingJournalIndex = nil
-                                       questPinLightSyncPendingRefreshAll = false
-                                       questPinLightSyncPendingLayoutOnly = false
-                                       if layoutOnly and not journalIndex and not refreshAll then
-                                           MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
-                                           return
-                                       end
-                                       MiniMap.RunQuestPinLightSyncForMirror(journalIndex, refreshAll)
-                                   end, true)
+local questPinLightSyncFlushing = false
+
+function MiniMapMapEventController:FlushQuestPinLightSync()
+    if questPinLightSyncFlushing then
+        return
+    end
+    if not questPinLightSyncPendingJournalIndex and not questPinLightSyncPendingRefreshAll and not questPinLightSyncPendingLayoutOnly then
+        return
+    end
+    questPinLightSyncFlushing = true
+    local journalIndex = questPinLightSyncPendingJournalIndex
+    local refreshAll = questPinLightSyncPendingRefreshAll
+    local layoutOnly = questPinLightSyncPendingLayoutOnly
+    questPinLightSyncPendingJournalIndex = nil
+    questPinLightSyncPendingRefreshAll = false
+    questPinLightSyncPendingLayoutOnly = false
+    if layoutOnly and not journalIndex and not refreshAll then
+        MiniMap.ApplyNativeHudQuestPinLayoutAfterCMapHandlers()
+    else
+        MiniMap.RunQuestPinLightSyncForMirror(journalIndex, refreshAll)
+    end
+    questPinLightSyncFlushing = false
+    if questPinLightSyncPendingJournalIndex or questPinLightSyncPendingRefreshAll or questPinLightSyncPendingLayoutOnly then
+        self:FlushQuestPinLightSync()
+    end
 end
 
 function MiniMapMapEventController:RequestDigSitePinSync()
@@ -259,40 +269,48 @@ function MiniMapMapEventController:RequestBreadcrumbPinSync()
     self:RequestZoneStoryPinSync()
 end
 
---- After ZOS tracker updates `SetMapQuestPinsTrackingLevel`, mirror quest pins on the next frame (light).
---- @param journalIndex luaindex
-function MiniMapMapEventController:ScheduleDeferredQuestPinSyncLight(journalIndex)
-    local mapEventController = self
-    local questPinSyncUpdateName = MiniMap.moduleName .. "QuestTrackerPinSync"
-    eventManager:RegisterForUpdate(questPinSyncUpdateName, 0, function ()
-                                       mapEventController:RequestQuestPinSyncLight(journalIndex, false)
-                                   end, true)
-end
-
-function MiniMapMapEventController:ScheduleSubzoneHudRecovery()
-    local mapEventController = self
-    local updateName = MiniMap.moduleName .. "SubzoneHudRecovery"
-    eventManager:RegisterForUpdate(updateName, 0, function ()
-                                       eventManager:UnregisterForUpdate(updateName)
-                                       if MiniMap.IsMapReloadAffectingHudLayout() then
-                                           mapEventController:ScheduleSubzoneHudRecovery()
-                                           return
-                                       end
-                                       if MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
-                                           MiniMap.ApplyHudMirrorRecoveryAfterSubzoneTransition()
-                                           MiniMap.ApplyHudLocationLabelFromPlayerLocation()
-                                       else
-                                           mapEventController:RequestMapReload("EVENT_ZONE_CHANGED")
-                                       end
-                                   end, true)
+--- One SetMapToPlayerLocation per zone event. ProcessMapClick runs only when that call left the parent zone.
+--- The re-entry flag ignores EVENT_ZONE_CHANGED fired by our own ProcessMapClick.
+--- @param reason string
+function MiniMapMapEventController:SyncHudMapIdentityFromPlayerLocation(reason)
+    if hudMapIdentitySyncInProgress then
+        return
+    end
+    if not MiniMap.Enabled or MiniMap.fastTravel then
+        return
+    end
+    local pinMirrorStateMachine = self.pinMirrorStateMachine
+    if pinMirrorStateMachine and pinMirrorStateMachine.mapReloadAwaitingPlayerMapEvent then
+        pinMirrorStateMachine:RequestMapReload(reason)
+        return
+    end
+    if MiniMap.IsPinMirrorMachineBusy() or MiniMap.playerMapMirrorDepth > 0 then
+        if pinMirrorStateMachine then
+            pinMirrorStateMachine.hudMapIdentitySyncPendingAfterReload = true
+        end
+        return
+    end
+    if MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
+        return
+    end
+    if MiniMap.IsWorldMapBlockingMiniMapWork() then
+        self:RequestMapReload(reason)
+        return
+    end
+    hudMapIdentitySyncInProgress = true
+    local setMapResult = SetMapToPlayerLocation()
+    if setMapResult ~= SET_MAP_RESULT_MAP_CHANGED then
+        MiniMap.TryDrillHudMapIntoPlayerSubmap()
+    end
+    local shouldReloadMap = setMapResult == SET_MAP_RESULT_MAP_CHANGED or not MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap()
+    hudMapIdentitySyncInProgress = false
+    if shouldReloadMap then
+        self:RequestMapReload(reason)
+    end
 end
 
 function MiniMapMapEventController:OnCurrentSubzoneListChanged()
-    if MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
-        self:ScheduleSubzoneHudRecovery()
-        return
-    end
-    self:SchedulePinSync()
+    self:SyncHudMapIdentityFromPlayerLocation("EVENT_CURRENT_SUBZONE_LIST_CHANGED")
 end
 
 --- @param zoneName string
@@ -302,6 +320,9 @@ end
 --- @param subZoneId integer
 function MiniMapMapEventController:OnZoneChanged(zoneName, subZoneName, newSubzone, zoneId, subZoneId)
     MiniMap.ApplyHudLocationLabelFromZoneNames(zoneName, subZoneName)
+    if hudMapIdentitySyncInProgress then
+        return
+    end
     if MiniMap.SV and MiniMap.SV.pinMirrorStateMachineDebug then
         LUIE:Log("Debug", string.format(
             "[MiniMap] ZONE_CHANGED zone=%s sub=%s newSubzone=%s map=%s identityMatch=%s zoom=%.3f ctxZoom=%.3f tiles=%s locName=%s",
@@ -315,18 +336,39 @@ function MiniMapMapEventController:OnZoneChanged(zoneName, subZoneName, newSubzo
             tostring(select(1, GetMapNumTiles())),
             tostring(MiniMap.CollectHudPlayerLocationNameForDisplay())))
     end
-    self:ScheduleSubzoneHudRecovery()
+    self:SyncHudMapIdentityFromPlayerLocation("EVENT_ZONE_CHANGED")
+end
+
+--- First map load for this module session. EVENT_PLAYER_ACTIVATED is the point where the player map is readable.
+function MiniMapMapEventController:ApplyHudStartup()
+    if self.hudStartupApplied then
+        return false
+    end
+    self.hudStartupApplied = true
+    self:RequestMapReload("Initialize")
+    if not MiniMap.GetMapFollowsPlayer() and MiniMap.runtime then
+        MiniMap.runtime:ApplyScrollFromPanOffsets()
+    end
+    MiniMap.UpdateGameplayTickers()
+    return true
 end
 
 function MiniMapMapEventController:OnPlayerActivated()
+    if self:ApplyHudStartup() then
+        return
+    end
+    if self.pinMirrorStateMachine.mapReloadAwaitingPlayerMapEvent then
+        self:SyncHudMapIdentityFromPlayerLocation("EVENT_PLAYER_ACTIVATED")
+        return
+    end
     if not self.pinMirrorStateMachine:TryPinSyncOnlyOnPlayerActivated() then
-        self:RequestMapReload("EVENT_PLAYER_ACTIVATED")
+        self:SyncHudMapIdentityFromPlayerLocation("EVENT_PLAYER_ACTIVATED")
     end
 end
 
 function MiniMapMapEventController:OnPlayerZoneUpdate(_eventId, _unitTag, newZoneName)
     MiniMap.ApplyHudLocationLabelFromZoneUpdate(newZoneName)
-    self:ScheduleSubzoneHudRecovery()
+    self:SyncHudMapIdentityFromPlayerLocation("EVENT_ZONE_UPDATE")
 end
 
 function MiniMapMapEventController:OnFastTravelStart()
@@ -338,19 +380,6 @@ function MiniMapMapEventController:OnFastTravelEnd()
     MiniMap.fastTravel = false
     self.pinMirrorStateMachine:OnFastTravelEnd()
     self:RequestMapReload("FastTravelEnd")
-end
-
-function MiniMapMapEventController:OnMapNameFallbackTick()
-    if MiniMap.fastTravel or not self.mapController:IsReady() then
-        return
-    end
-    if not DoesCurrentMapMatchMapForPlayerLocation() then
-        return
-    end
-    local mapData = self.mapController:GetMapData()
-    if mapData and mapData.rawName ~= GetMapName() then
-        self:RequestMapReload("MapNameFallback")
-    end
 end
 
 --- @param eventId integer
@@ -408,13 +437,13 @@ function MiniMapMapEventController:Register()
     self:RegisterGameEvent(EVENT_COMPANION_DEACTIVATED, function () mapEventController:RequestCompanionPinSync() end)
     self.onQuestTrackerTrackingStateChanged = function (_questTracker, _tracked, trackType, arg1)
         if trackType == TRACK_TYPE_QUEST and arg1 then
-            mapEventController:ScheduleDeferredQuestPinSyncLight(arg1)
+            mapEventController:RequestQuestPinSyncLight(arg1, false)
         end
     end
     self.onQuestTrackerAssistStateChanged = function (unassistedData, assistedData)
         local journalIndex = unassistedData and unassistedData:GetJournalIndex() or assistedData and assistedData:GetJournalIndex()
         if journalIndex then
-            mapEventController:ScheduleDeferredQuestPinSyncLight(journalIndex)
+            mapEventController:RequestQuestPinSyncLight(journalIndex, false)
         end
     end
     FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerTrackingStateChanged", self.onQuestTrackerTrackingStateChanged)
@@ -439,9 +468,6 @@ function MiniMapMapEventController:Register()
     end
     ANTIQUITY_DATA_MANAGER:RegisterCallback("AntiquitiesUpdated", self.onAntiquitiesUpdated)
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", self.onSingleAntiquityDigSitesUpdated)
-    eventManager:RegisterForUpdate(MiniMap.moduleName .. "MapNameFallback", MINIMAP_MAP_NAME_FALLBACK_MS, function ()
-        mapEventController:OnMapNameFallbackTick()
-    end)
     self.pinMirrorStateMachine:Start()
     MiniMap.RegisterMiniMapSceneIntegration()
     MiniMap.RefreshSceneFragments()
@@ -458,10 +484,10 @@ function MiniMapMapEventController:Unregister()
         self.eventAnchor:UnregisterForEvent(eventId)
     end
     self.registeredEvents = {}
-    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "MapNameFallback")
     eventManager:UnregisterForUpdate(MiniMap.moduleName .. "QuestTrackerPinSync")
     eventManager:UnregisterForUpdate(MiniMap.moduleName .. "QuestPinLightSync")
     eventManager:UnregisterForUpdate(MiniMap.moduleName .. "SubzoneHudRecovery")
+    eventManager:UnregisterForUpdate(MiniMap.moduleName .. "MapNameFallback")
     if self.onQuestTrackerTrackingStateChanged then
         FOCUSED_QUEST_TRACKER:UnregisterCallback("QuestTrackerTrackingStateChanged", self.onQuestTrackerTrackingStateChanged)
         self.onQuestTrackerTrackingStateChanged = nil

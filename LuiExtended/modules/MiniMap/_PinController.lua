@@ -388,7 +388,11 @@ function MiniMapPinController:SyncPlayerWaypoint(mapData)
 end
 
 --- @param mapData MiniMapMapData
-function MiniMapPinController:SyncPlayerMapPin(mapData)
+--- @param playerNormalizedX number|nil
+--- @param playerNormalizedY number|nil
+--- @param playerHeading number|nil
+--- @param isShownInCurrentMap boolean|nil
+function MiniMapPinController:SyncPlayerMapPin(mapData, playerNormalizedX, playerNormalizedY, playerHeading, isShownInCurrentMap)
     if MiniMap.SV.showPlayerPip == false then
         self:ReleaseOverlayPin(PLAYER_MAP_PIN_CONTROL_NAME)
         if MiniMap.IsNativeWorldMapContainerAttached() then
@@ -410,7 +414,10 @@ function MiniMapPinController:SyncPlayerMapPin(mapData)
         return
     end
 
-    local normalizedX, normalizedY, playerHeading, isShownInCurrentMap = MiniMap.GetMapPlayerPositionForMirror("player")
+    local normalizedX, normalizedY = playerNormalizedX, playerNormalizedY
+    if normalizedX == nil or normalizedY == nil then
+        normalizedX, normalizedY, playerHeading, isShownInCurrentMap = GetMapPlayerPosition("player")
+    end
     if not MiniMap.IsMapPlayerPositionShownOnHudMap(normalizedX, normalizedY, isShownInCurrentMap) then
         self:ReleaseOverlayPin(PLAYER_MAP_PIN_CONTROL_NAME)
         return
@@ -443,7 +450,7 @@ end
 function MiniMapPinController:SyncLuiOverlays(mapData)
     MiniMap.TryAttachNativeWorldMapContainer()
     MiniMap.RefreshNativeWorldMapContainer()
-    MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
+    MiniMap.ReapplyNativeHudMapOverlayLayout()
     self:SyncPlayerWaypoint(mapData)
     self:SyncPlayerMapPin(mapData)
 end

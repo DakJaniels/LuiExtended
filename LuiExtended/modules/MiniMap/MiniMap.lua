@@ -39,6 +39,10 @@ function MiniMap.Initialize(enabled)
         if MiniMap.runtime then
             MiniMap.runtime:Stop()
         end
+        if MiniMap.inputController then
+            MiniMap.inputController.panDragActive = false
+            MiniMap.inputController:SetPanDragUpdateEnabled(false)
+        end
         MiniMap.ShutdownNativeWorldMapContainer()
         MiniMap.DisableHudMinimapWorldMapInputPreHooks()
         -- MiniMap.DisableHudMinimapPinInteractionPreHooks()
@@ -93,13 +97,11 @@ function MiniMap.Initialize(enabled)
         local mapData = mapController.map
         MiniMap.pinController:SyncLuiOverlays(mapData)
     end)
-    zo_callLater(function ()
-                     MiniMap.mapEventController:RequestMapReload("Initialize")
-                     if not MiniMap.GetMapFollowsPlayer() then
-                         MiniMap.runtime:ApplyScrollFromPanOffsets()
-                     end
-                     MiniMap.UpdateGameplayTickers()
-                 end, 1000)
+    -- Enabled mid-session: EVENT_PLAYER_ACTIVATED already fired, so run the startup load now.
+    -- On login and reload UI the event drives it (MiniMapMapEventController:OnPlayerActivated).
+    if IsPlayerActivated() then
+        MiniMap.mapEventController:ApplyHudStartup()
+    end
 end
 
 function MiniMap.ResetPosition()
