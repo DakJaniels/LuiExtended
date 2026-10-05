@@ -10,7 +10,6 @@ local MiniMap = LUIE.MiniMap
 
 local MINIMAP_ZOOM_MIN_FALLBACK = 0.35
 local MINIMAP_ZOOM_MAX = 1.8
-local MINIMAP_MAP_RELOAD_MAX_ATTEMPTS = 10
 
 --- @class MiniMapMapData
 --- @field rawName string
@@ -138,27 +137,95 @@ function MiniMapMapController:ClearPinControlsForOtherZones()
     end
 end
 
---- @param view MiniMapView
---- @param statusMessage string
---- @param retryReason string
---- @param reloadAttemptIndex number
-function MiniMapMapController:ScheduleWorldMapReloadRetryOrFail(view, statusMessage, retryReason, reloadAttemptIndex)
-    view.statusLabel:SetText(statusMessage)
-    if reloadAttemptIndex < MINIMAP_MAP_RELOAD_MAX_ATTEMPTS then
-        local mapController = self
-        zo_callLater(function ()
-                         mapController:ReloadWorldMap(retryReason, reloadAttemptIndex)
-                     end, 1000 * reloadAttemptIndex)
+function MiniMapMapController:ClearPendingTileTextureHandlers()
+    local pendingTileControls = self.pendingTileTextureControls
+    if not pendingTileControls then
         return
     end
-    view.statusLabel:SetText("Loading failed")
-    view:HideLoading()
-    MiniMap.keepPreviousHudMapTilesVisible = false
-    MiniMap.ReturnStagedWorldMapContainerToWorldMap()
-    MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
+    for tileIndex = 1, #pendingTileControls do
+        pendingTileControls[tileIndex]:SetHandler("OnTextureLoaded", nil)
+    end
+    self.pendingTileTextureControls = nil
+end
+
+--- Map info is not ready. Stay in MapReloading until EVENT_PLAYER_ACTIVATED or EVENT_ZONE_CHANGED.
+--- @param view MiniMapView
+--- @param statusMessage string
+function MiniMapMapController:DeferWorldMapReloadUntilPlayerMapEvent(view, statusMessage)
+    self:ClearPendingTileTextureHandlers()
+    view.statusLabel:SetText(statusMessage)
     local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
     if pinMirrorStateMachine then
-        pinMirrorStateMachine:NotifyMapReloadFailed()
+        pinMirrorStateMachine.mapReloadInProgress = false
+        pinMirrorStateMachine.mapReloadAwaitingPlayerMapEvent = true
+    end
+end
+
+--- @param reloadAttemptIndex number
+function MiniMapMapController:ResumeWorldMapReloadAfterTileReady(reloadAttemptIndex)
+    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
+    if not MiniMap.Enabled or not pinMirrorStateMachine then
+        return
+    end
+    if pinMirrorStateMachine.mapReloadInProgress or not pinMirrorStateMachine:IsCurrentState("MapReloading") then
+        return
+    end
+    self:ClearPendingTileTextureHandlers()
+    pinMirrorStateMachine.mapReloadAwaitingPlayerMapEvent = false
+    pinMirrorStateMachine.mapReloadCompletionHandled = false
+    pinMirrorStateMachine.mapReloadInProgress = true
+    self:ReloadWorldMap(pinMirrorStateMachine.pendingMapReloadReason or "TextureLoaded", reloadAttemptIndex or 0)
+end
+
+--- Unloaded tiles finish on OnTextureLoaded (ESOUIDocumentation.txt). Missing tile controls wait for a zone event.
+--- @param view MiniMapView
+--- @param statusMessage string
+--- @param reloadAttemptIndex number
+function MiniMapMapController:DeferWorldMapReloadForUnloadedTiles(view, statusMessage, reloadAttemptIndex)
+    self:ClearPendingTileTextureHandlers()
+    view.statusLabel:SetText(statusMessage)
+    local mapData = self.map
+    if not mapData or mapData.numTiles == 0 then
+        self:DeferWorldMapReloadUntilPlayerMapEvent(view, statusMessage)
+        return
+    end
+    local pendingTileControls = {}
+    for tileIndex = 1, mapData.numTiles do
+        local nativeTile = WORLD_MAP_TILES_MANAGER:GetActiveObject(tileIndex)
+        if not nativeTile then
+            self:DeferWorldMapReloadUntilPlayerMapEvent(view, statusMessage)
+            return
+        end
+        if not nativeTile:IsTextureLoaded() then
+            pendingTileControls[#pendingTileControls + 1] = nativeTile
+        end
+    end
+    if #pendingTileControls == 0 then
+        self:DeferWorldMapReloadUntilPlayerMapEvent(view, statusMessage)
+        return
+    end
+    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
+    if pinMirrorStateMachine then
+        pinMirrorStateMachine.mapReloadInProgress = false
+        pinMirrorStateMachine.mapReloadAwaitingPlayerMapEvent = true
+    end
+    self.pendingTileTextureControls = pendingTileControls
+    local mapController = self
+    local function OnHudMapTileTextureLoaded(tileControl)
+        tileControl:SetHandler("OnTextureLoaded", nil)
+        local registeredTiles = mapController.pendingTileTextureControls
+        if not registeredTiles then
+            return
+        end
+        for registeredTileIndex = 1, #registeredTiles do
+            if not registeredTiles[registeredTileIndex]:IsTextureLoaded() then
+                return
+            end
+        end
+        mapController:ResumeWorldMapReloadAfterTileReady(reloadAttemptIndex)
+    end
+    for pendingTileIndex = 1, #pendingTileControls do
+        pendingTileControls[pendingTileIndex]:SetHandler("OnTextureLoaded", OnHudMapTileTextureLoaded)
     end
 end
 
@@ -213,6 +280,8 @@ function MiniMapMapController:FinalizeWorldMapReloadFromMirror(mapData, logicalW
     MiniMap.keepPreviousHudMapTilesVisible = false
     MiniMap.SetAttachedNativeWorldMapContainerHiddenForReload(false)
     MiniMap.SchedulePostReloadUILayout(self, mapData)
+    self:ClearPendingTileTextureHandlers()
+    MiniMap.pinMirrorStateMachine.mapReloadAwaitingPlayerMapEvent = false
     MiniMap.pinMirrorStateMachine:ScheduleNotifyMapReloadCompleteAfterMirror()
 end
 
@@ -235,11 +304,7 @@ function MiniMapMapController:ReloadWorldMapInPlayerMapMirror(reloadAttemptIndex
     MiniMap.ApplyHudLocationLabelFromPlayerLocation()
 
     if mapData.numTiles == 0 then
-        self:ScheduleWorldMapReloadRetryOrFail(
-            view,
-            string.format("Loading map info [%d]", reloadAttemptIndex),
-            string.format("Map info reload [%d]", reloadAttemptIndex),
-            reloadAttemptIndex)
+        self:DeferWorldMapReloadUntilPlayerMapEvent(view, string.format("Loading map info [%d]", reloadAttemptIndex))
         return
     end
 
@@ -252,11 +317,7 @@ function MiniMapMapController:ReloadWorldMapInPlayerMapMirror(reloadAttemptIndex
         logicalHeight)
 
     if not self:LoadWorldMapReloadTextures(mapData, previousMapData, canReuseLoadedTiles) then
-        self:ScheduleWorldMapReloadRetryOrFail(
-            view,
-            string.format("Loading textures [%d]", reloadAttemptIndex),
-            string.format("Texture reload [%d]", reloadAttemptIndex),
-            reloadAttemptIndex)
+        self:DeferWorldMapReloadForUnloadedTiles(view, string.format("Loading textures [%d]", reloadAttemptIndex), reloadAttemptIndex)
         return
     end
 
@@ -267,6 +328,7 @@ end
 --- @param reloadAttemptIndex number
 --- @return boolean
 function MiniMapMapController:ReloadWorldMap(reason, reloadAttemptIndex)
+    self:ClearPendingTileTextureHandlers()
     if MiniMap.IsWorldMapBlockingMiniMapWork() then
         return self.ready
     end

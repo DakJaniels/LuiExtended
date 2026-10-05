@@ -38,11 +38,9 @@ local MINIMAP_ZOOM_BUTTON_MAX_ALPHA = 1
 --- @field frameChromeAttachSide string|nil
 --- @field framePositionLock ButtonControl|nil
 --- @field frameMoveGrip Control|nil
+--- @field zoomButtonsChromeStateMachine MiniMapZoomChromeStateMachine
+--- @field zoomLabelChromeStateMachine MiniMapZoomChromeStateMachine
 --- @field offsetSaveSuppressed boolean|nil
---- @field zoomLabelHideLaterId integer|nil
---- @field zoomLabelFadeUpdateActive boolean|nil
---- @field zoomButtonsHideLaterId integer|nil
---- @field zoomButtonsFadeUpdateActive boolean|nil
 local MiniMapView = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapView = MiniMapView
 
@@ -69,6 +67,57 @@ function MiniMapView:Initialize(rootControl)
     self.frameMoveGrip = self.frameChrome:GetNamedChild("_MoveGrip")
     self.zoomLabel:SetHidden(true)
     self.zoomLabel:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
+    self:CreateZoomChromeStateMachines()
+end
+
+--- Zoom buttons and zoom label both reveal, hold, then fade. Both run on MiniMapZoomChromeStateMachine.
+function MiniMapView:CreateZoomChromeStateMachines()
+    local view = self
+
+    local zoomButtonControls = {}
+    if self.zoomIn then
+        zoomButtonControls[#zoomButtonControls + 1] = self.zoomIn
+    end
+    if self.zoomOut then
+        zoomButtonControls[#zoomButtonControls + 1] = self.zoomOut
+    end
+    local zoomButtonsChromeStateMachine = MiniMap.MiniMapZoomChromeStateMachine:New(
+        "LUIE_MINIMAP_ZOOM_BUTTONS_CHROME",
+        zoomButtonControls,
+        MINIMAP_ZOOM_BUTTON_MAX_ALPHA,
+        MINIMAP_ZOOM_CHROME_FADE_OUT_MS
+    )
+    function zoomButtonsChromeStateMachine:ApplyRevealedChrome()
+        if view.zoomChromeHover then
+            view.zoomChromeHover:SetMouseEnabled(false)
+        end
+        for controlIndex = 1, #zoomButtonControls do
+            local zoomButton = zoomButtonControls[controlIndex]
+            zoomButton:SetHidden(false)
+            zoomButton:SetAlpha(MINIMAP_ZOOM_BUTTON_MAX_ALPHA)
+            zoomButton:SetMouseEnabled(true)
+        end
+    end
+    function zoomButtonsChromeStateMachine:ApplyIdleChrome()
+        view:SetZoomButtonsIdleChromeState()
+    end
+    self.zoomButtonsChromeStateMachine = zoomButtonsChromeStateMachine
+
+    local zoomLabelChromeStateMachine = MiniMap.MiniMapZoomChromeStateMachine:New(
+        "LUIE_MINIMAP_ZOOM_LABEL_CHROME",
+        { self.zoomLabel },
+        MINIMAP_ZOOM_LABEL_MAX_ALPHA,
+        MINIMAP_ZOOM_LABEL_FADE_OUT_MS
+    )
+    function zoomLabelChromeStateMachine:ApplyRevealedChrome()
+        view.zoomLabel:SetHidden(false)
+        view.zoomLabel:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
+    end
+    function zoomLabelChromeStateMachine:ApplyIdleChrome()
+        view.zoomLabel:SetHidden(true)
+        view.zoomLabel:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
+    end
+    self.zoomLabelChromeStateMachine = zoomLabelChromeStateMachine
 end
 
 --- @param settings MiniMapDefaults
@@ -352,7 +401,7 @@ end
 function MiniMapView:ApplyChromeVisibility(settings)
     self:ResolveChromeControls()
     local showZoom = self:GetSettingsBoolean(settings, "showZoomButtons", MiniMap.Defaults.showZoomButtons)
-    self:CancelZoomButtonsTransient()
+    self.zoomButtonsChromeStateMachine:Shutdown()
     if self.zoomChromeHover then
         self.zoomChromeHover:SetHidden(not showZoom)
         self.zoomChromeHover:SetMouseEnabled(showZoom)
@@ -379,131 +428,27 @@ function MiniMapView:HideLoading()
     self.statusOverlay:SetMouseEnabled(false)
 end
 
-function MiniMapView:ClearZoomLabelFadeUpdate()
-    local label = self.zoomLabel
-    if label and self.zoomLabelFadeUpdateActive then
-        label:SetHandler("OnUpdate", nil)
-        self.zoomLabelFadeUpdateActive = nil
-    end
-end
-
-function MiniMapView:CancelZoomLabelTransient()
-    if self.zoomLabelHideLaterId then
-        zo_removeCallLater(self.zoomLabelHideLaterId)
-        self.zoomLabelHideLaterId = nil
-    end
-    self:ClearZoomLabelFadeUpdate()
-end
-
-function MiniMapView:StartZoomLabelFadeOut()
-    local label = self.zoomLabel
-    if not label or label:IsHidden() then
-        return
-    end
-    self:ClearZoomLabelFadeUpdate()
-
-    local startAlpha = MINIMAP_ZOOM_LABEL_MAX_ALPHA
-    local fadeStartMs = GetFrameTimeMilliseconds()
-    local view = self
-    self.zoomLabelFadeUpdateActive = true
-    label:SetHandler("OnUpdate", function (control)
-        local elapsedMs = GetFrameTimeMilliseconds() - fadeStartMs
-        local progress = zo_clamp(elapsedMs / MINIMAP_ZOOM_LABEL_FADE_OUT_MS, 0, 1)
-        control:SetAlpha(startAlpha * (1 - progress))
-        if progress >= 1 then
-            view:ClearZoomLabelFadeUpdate()
-            control:SetHidden(true)
-            control:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
-        end
-    end)
-end
-
-function MiniMapView:ShutdownZoomLabelFade()
-    self:CancelZoomLabelTransient()
-    if self.zoomLabel then
-        self.zoomLabel:SetHidden(true)
-        self.zoomLabel:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
-    end
-end
-
-function MiniMapView:ClearZoomButtonsFadeUpdate()
-    local zoomIn = self.zoomIn
-    if zoomIn and self.zoomButtonsFadeUpdateActive then
-        zoomIn:SetHandler("OnUpdate", nil)
-        self.zoomButtonsFadeUpdateActive = nil
-    end
-end
-
-function MiniMapView:CancelZoomButtonsTransient()
-    if self.zoomButtonsHideLaterId then
-        zo_removeCallLater(self.zoomButtonsHideLaterId)
-        self.zoomButtonsHideLaterId = nil
-    end
-    self:ClearZoomButtonsFadeUpdate()
-end
-
 function MiniMapView:RevealZoomButtonsTransient()
     if not self:IsZoomButtonsEnabled() then
         return
     end
-    self:CancelZoomButtonsTransient()
-    if self.zoomChromeHover then
-        self.zoomChromeHover:SetMouseEnabled(false)
-    end
-    if self.zoomIn then
-        self.zoomIn:SetHidden(false)
-        self.zoomIn:SetAlpha(MINIMAP_ZOOM_BUTTON_MAX_ALPHA)
-        self.zoomIn:SetMouseEnabled(true)
-    end
-    if self.zoomOut then
-        self.zoomOut:SetHidden(false)
-        self.zoomOut:SetAlpha(MINIMAP_ZOOM_BUTTON_MAX_ALPHA)
-        self.zoomOut:SetMouseEnabled(true)
-    end
+    self.zoomButtonsChromeStateMachine:Reveal()
 end
 
-function MiniMapView:StartZoomButtonsFadeOut()
-    local zoomIn = self.zoomIn
-    local zoomOut = self.zoomOut
-    if not zoomIn or zoomIn:IsHidden() then
-        return
-    end
-    self:ClearZoomButtonsFadeUpdate()
-
-    local startAlpha = MINIMAP_ZOOM_BUTTON_MAX_ALPHA
-    local fadeStartMs = GetFrameTimeMilliseconds()
-    local view = self
-    self.zoomButtonsFadeUpdateActive = true
-    zoomIn:SetHandler("OnUpdate", function ()
-        local elapsedMs = GetFrameTimeMilliseconds() - fadeStartMs
-        local progress = zo_clamp(elapsedMs / MINIMAP_ZOOM_CHROME_FADE_OUT_MS, 0, 1)
-        local alpha = startAlpha * (1 - progress)
-        zoomIn:SetAlpha(alpha)
-        if zoomOut and not zoomOut:IsHidden() then
-            zoomOut:SetAlpha(alpha)
-        end
-        if progress >= 1 then
-            view:ClearZoomButtonsFadeUpdate()
-            view:SetZoomButtonsIdleChromeState()
-        end
-    end)
-end
-
-function MiniMapView:ScheduleZoomButtonsFadeAfterIdle()
+--- @param holdMilliseconds number
+function MiniMapView:ScheduleZoomButtonsFade(holdMilliseconds)
     if not self:IsZoomButtonsEnabled() then
         return
     end
-    self:CancelZoomButtonsTransient()
-    local view = self
-    self.zoomButtonsHideLaterId = zo_callLater(function ()
-                                                   view.zoomButtonsHideLaterId = nil
-                                                   view:StartZoomButtonsFadeOut()
-                                               end, MINIMAP_ZOOM_CHROME_HOLD_MS)
+    self.zoomButtonsChromeStateMachine:ScheduleFade(holdMilliseconds)
 end
 
 function MiniMapView:ShutdownZoomButtonsFade()
-    self:CancelZoomButtonsTransient()
-    self:SetZoomButtonsIdleChromeState()
+    self.zoomButtonsChromeStateMachine:Shutdown()
+end
+
+function MiniMapView:ShutdownZoomLabelFade()
+    self.zoomLabelChromeStateMachine:Shutdown()
 end
 
 --- @param zoom number
@@ -516,15 +461,7 @@ function MiniMapView:SetZoomLabel(zoom, revealTransient)
     if not revealTransient then
         return
     end
-    self:CancelZoomLabelTransient()
-    local label = self.zoomLabel
-    label:SetHidden(false)
-    label:SetAlpha(MINIMAP_ZOOM_LABEL_MAX_ALPHA)
-    local view = self
-    self.zoomLabelHideLaterId = zo_callLater(function ()
-                                                 view.zoomLabelHideLaterId = nil
-                                                 view:StartZoomLabelFadeOut()
-                                             end, MINIMAP_ZOOM_LABEL_HOLD_MS)
+    self.zoomLabelChromeStateMachine:RevealThenFade(MINIMAP_ZOOM_LABEL_HOLD_MS)
 end
 
 --- @param zoneName string

@@ -624,6 +624,7 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.GetMovingPinRefreshMs() end,
             setFunction = function (value)
                 MiniMap.SV.movingPinRefreshMs = zo_clamp(value, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
+                MiniMap.UpdateGameplayTickers()
             end,
             default = Defaults.movingPinRefreshMs,
             disable = disable,

@@ -10,59 +10,27 @@ local MiniMap = LUIE.MiniMap
 
 local MINIMAP_ZOOM_MIN_FALLBACK = 0.35
 local MINIMAP_ZOOM_MAX = 1.8
-local MINIMAP_MAP_RELOAD_MAX_ATTEMPTS = 10
-
---- World map open (ZO_MapPanAndZoom:OnWorldMapShowing) calls SetMapToPlayerLocation and leaves that map in place.
---- DoesCurrentMapMatchMapForPlayerLocation stays true on the parent zone while the minimap sheet is the city, so the follow tick never entered the mirror and kept writing zone coordinates onto the city tiles.
-function MiniMap.SyncHudMapSheetToPlayerLocation()
-    if MiniMap.playerMapMirrorDepth > 0 or MiniMap.IsPinMirrorMachineBusy() then
-        return
-    end
-    if MiniMap.IsWorldMapBlockingMiniMapWork() then
-        return
-    end
-    local mapController = MiniMap.mapController
-    if not mapController or not mapController.map then
-        return
-    end
-    local mapNameBefore = GetMapName()
-    if mapNameBefore == mapController.map.rawName then
-        return
-    end
-    SetMapToPlayerLocation()
-    if GetMapName() == mapNameBefore then
-        MiniMap.SetMapToPlayerLocationForHud()
-    end
-    local mapNameAfter = GetMapName()
-    if mapNameAfter == mapController.map.rawName then
-        if mapNameAfter ~= mapNameBefore then
-            MiniMap.RefreshCustomPinsForHud()
-        end
-        return
-    end
-    if mapNameAfter == mapNameBefore then
-        return
-    end
-    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
-    if pinMirrorStateMachine then
-        pinMirrorStateMachine:RequestMapReload("PlayerSubmap")
-    end
-end
 
 --- SetMapToPlayerLocation stays on the parent zone while the player is inside a clickable submap (Vivec City).
---- HarvestMap MapTools:SetMapToPlayerLocation drills in with WouldProcessMapClick / ProcessMapClick.
+--- Called once from the zone-event identity sync, never from the follow tick.
 --- MapZoomOut is intentionally not used here: it leaves the city and the pip is then placed with zone coordinates.
-function MiniMap.SetMapToPlayerLocationForHud()
-    SetMapToPlayerLocation()
+--- @return boolean true when ProcessMapClick ran
+function MiniMap.TryDrillHudMapIntoPlayerSubmap()
+    if MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
+        return false
+    end
     local normalizedX, normalizedY = GetMapPlayerPosition("player")
     if not normalizedX or not normalizedY then
-        return
+        return false
     end
-    local playerZoneIndex = GetUnitZoneIndex("player")
-    local mapZoneIndex = GetCurrentMapZoneIndex()
-    if WouldProcessMapClick(normalizedX, normalizedY) and playerZoneIndex == mapZoneIndex then
-        ProcessMapClick(normalizedX, normalizedY)
+    if GetUnitZoneIndex("player") ~= GetCurrentMapZoneIndex() then
+        return false
     end
+    if not WouldProcessMapClick(normalizedX, normalizedY) then
+        return false
+    end
+    ProcessMapClick(normalizedX, normalizedY)
+    return true
 end
 
 --- Save world-map list index, run mirror work on player map, then restore selection.
@@ -81,9 +49,9 @@ function MiniMap.RunWithPlayerMapForMirror(mirrorCallback)
         MiniMap.ClearPlayerMapMirrorZosTilesUpdatedState()
     end
     local savedMapIndex = GetCurrentMapIndex()
-    MiniMap.SetMapToPlayerLocationForHud()
+    local setMapResult = SetMapToPlayerLocation()
     local mapIndexAfterPlayerLocation = GetCurrentMapIndex()
-    local playerMapIndexChanged = savedMapIndex ~= mapIndexAfterPlayerLocation
+    local playerMapIndexChanged = setMapResult == SET_MAP_RESULT_MAP_CHANGED or savedMapIndex ~= mapIndexAfterPlayerLocation
     local tileLoadAlreadyRequested = MiniMap.IsNativeWorldMapContainerStagedForTileLoad()
         and MiniMap.playerMapMirrorZosTilesUpdated
         and not playerMapIndexChanged
@@ -120,10 +88,6 @@ function MiniMap.RunWithPlayerMapForMirror(mirrorCallback)
         return true
     end
     if MiniMap.playerMapMirrorDepth == 0 then
-        if MiniMap.IsNativeWorldMapContainerAttached() then
-            MiniMap.ReapplyNativeHudMapOverlayLayout()
-            MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
-        end
         MiniMap.CompletePostPlayerMapMirrorWork()
     end
     return true
@@ -346,43 +310,6 @@ end
 
 function MiniMap.ApplyHudLocationLabelFromPlayerLocation()
     MiniMap.ApplyHudLocationLabelFromZoneNames(nil, nil)
-end
-
---- Pin + layout recovery when zone label changes but map sheet identity is unchanged (no tile reload).
---- @return boolean
-function MiniMap.IsMapReloadAffectingHudLayout()
-    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
-    local mapController = MiniMap.mapController
-    if not pinMirrorStateMachine or not mapController then
-        return false
-    end
-    if pinMirrorStateMachine:IsCurrentState("ZoneReset") then
-        return true
-    end
-    if pinMirrorStateMachine:IsCurrentState("MapReloading") then
-        if pinMirrorStateMachine.mapReloadInProgress or not mapController:IsReady() then
-            return true
-        end
-    end
-    return false
-end
-
-function MiniMap.ApplyHudMirrorRecoveryAfterSubzoneTransition()
-    if not MiniMap.Enabled then
-        return
-    end
-    if MiniMap.IsWorldMapBlockingMiniMapWork() then
-        return
-    end
-    if MiniMap.playerMapMirrorDepth > 0 or MiniMap.IsPinMirrorMachineBusy() then
-        return
-    end
-    if not MiniMap.DoesHudMirrorMapIdentityMatchLoadedPlayerMap() then
-        return
-    end
-    MiniMap.TryAttachNativeWorldMapContainer()
-    MiniMap.RefreshNativeWorldMapContainer({ syncSubzoneMapGeometry = true, applyContextZoomIfChanged = true })
-    MiniMap.ScheduleNativeHudMapOverlayLayoutReapply()
 end
 
 function MiniMap.ClearPlayerMapMirrorZosTilesUpdatedState()

@@ -20,7 +20,6 @@
 ---@field public OnResizeStart fun(self: Control)
 ---@field public OnResizeStop fun(self: Control)
 ---@field public OnMouseWheel fun(self: Control, delta: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
----@field public OnUpdate fun(self: Control, time: number)
 ---@field public OnRectChanged fun(self: Control, newLeft: number, newTop: number, newRight: number, newBottom: number, oldLeft: number, oldTop: number, oldRight: number, oldBottom: number)
 LUIE_MiniMap = {}
 ---------- LVL: 03 ----------
@@ -149,7 +148,6 @@ LUIE_MiniMap_Zone_Divider = {}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 ---@field public OnMouseDown fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
 ---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
----@field public OnUpdate fun(self: Control, time: number)
 LUIE_MiniMap_Scroll_Map = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --

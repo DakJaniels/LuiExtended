@@ -80,7 +80,10 @@ function MiniMap.ApplyContextDefaultZoom()
 end
 
 --- @param mapData MiniMapMapData
-function MiniMap.TryAutoZoomOutAtMapEdge(mapData)
+--- @param normalizedX number|nil
+--- @param normalizedY number|nil
+--- @param isShownInCurrentMap boolean|nil
+function MiniMap.TryAutoZoomOutAtMapEdge(mapData, normalizedX, normalizedY, isShownInCurrentMap)
     local settings = MiniMap.SV
     if settings.autoZoomOutAtEdge ~= true or not MiniMap.mapController then
         return
@@ -88,7 +91,9 @@ function MiniMap.TryAutoZoomOutAtMapEdge(mapData)
     if not MiniMap.GetMapFollowsPlayer() then
         return
     end
-    local normalizedX, normalizedY, _, isShownInCurrentMap = MiniMap.GetMapPlayerPositionForMirror("player")
+    if normalizedX == nil or normalizedY == nil then
+        normalizedX, normalizedY, _, isShownInCurrentMap = GetMapPlayerPosition("player")
+    end
     if not MiniMap.IsMapPlayerPositionShownOnHudMap(normalizedX, normalizedY, isShownInCurrentMap) then
         return
     end

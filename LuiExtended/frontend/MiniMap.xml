@@ -31,9 +31,6 @@
       <OnMouseWheel>
         LUIE.MiniMap.OnRootMouseWheel(self, delta, ctrl, alt, shift, command)
       </OnMouseWheel>
-      <OnUpdate>
-        LUIE.MiniMap.OnRootUpdate(self, time)
-      </OnUpdate>
       <OnRectChanged>
         LUIE.MiniMap.OnRootRectChanged(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
       </OnRectChanged>
@@ -105,9 +102,6 @@
               <OnMouseUp>
                 LUIE.MiniMap.OnMapMouseUp(self, button, upInside, ctrl, alt, shift, command)
               </OnMouseUp>
-              <OnUpdate>
-                LUIE.MiniMap.OnMapUpdate(self, time)
-              </OnUpdate>
               <Controls>
                 <Control name="$(parent)_Pins"
                          layer="1">
