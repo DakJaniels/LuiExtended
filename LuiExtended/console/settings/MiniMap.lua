@@ -589,35 +589,6 @@ function MiniMap.CreateConsoleSettings()
         },
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_ENABLED_TP),
-            getFunction = function () return MiniMap.SV.mapEdgeColorEnabled == true end,
-            setFunction = function (value)
-                MiniMap.SV.mapEdgeColorEnabled = value
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.mapEdgeColorEnabled,
-            disable = disable,
-        },
-        {
-            type = LHAS.ST_COLOR,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_MAP_EDGE_COLOR_TP),
-            getFunction = function ()
-                local color = MiniMap.SV.mapEdgeColor or Defaults.mapEdgeColor
-                return color.r, color.g, color.b, color.a
-            end,
-            setFunction = function (red, green, blue, alpha)
-                MiniMap.SV.mapEdgeColor = { r = red, g = green, b = blue, a = alpha }
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.mapEdgeColor,
-            disable = function ()
-                return disable() or MiniMap.SV.mapEdgeColorEnabled ~= true
-            end,
-        },
-        {
-            type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP),
             getFunction = function () return MiniMap.SV.anchorInfoPanelToMiniMap == true end,

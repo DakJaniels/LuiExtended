@@ -14,7 +14,6 @@ local MiniMap = LUIE.MiniMap
 local eventManager = GetEventManager()
 
 local WORLD_MAP_CONTAINER_BACKGROUND_TEXTURE = "EsoUI/Art/WorldMap/worldmap_map_background_512tile.dds"
-local HUD_MAP_EDGE_FLAT_TEXTURE = "EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds"
 local NATIVE_PLAYER_PIP_TEXTURE = "EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds"
 
 local pinManager = ZO_WorldMap_GetPinManager()
@@ -515,7 +514,7 @@ function MiniMap.ApplyNativeWorldMapContainerLayout(mapContentWidth, mapContentH
     MiniMap.ApplyHudMapEdgeBackground()
 end
 
---- Flat color for the area outside the map tiles. Stock swirl stays on the world map.
+--- Stock swirl from WorldMap.xml. Called when the container returns to ZO_WorldMapScroll.
 function MiniMap.RestoreWorldMapContainerBackground()
     local background = ZO_WorldMapContainerBackground
     background:SetParent(ZO_WorldMapScroll)
@@ -530,12 +529,10 @@ function MiniMap.RestoreWorldMapContainerBackground()
     background:SetHidden(false)
 end
 
+--- WorldMap.xml swirl, kept on the minimap while ZO_WorldMapContainer is attached.
+--- SetMapWindowSize sizes this control to ZO_MAP_CONSTANTS times 2.
 function MiniMap.ApplyHudMapEdgeBackground()
     if not MiniMap.IsNativeWorldMapContainerAttached() then
-        return
-    end
-    if not MiniMap.SV or MiniMap.SV.mapEdgeColorEnabled ~= true then
-        MiniMap.RestoreWorldMapContainerBackground()
         return
     end
     local view = MiniMap.view
@@ -549,15 +546,10 @@ function MiniMap.ApplyHudMapEdgeBackground()
     background:ClearAnchors()
     background:SetAnchor(CENTER, ZO_WorldMapContainer, CENTER, 0, 0)
     background:SetDimensions(ZO_MAP_CONSTANTS.MAP_WIDTH * 2, ZO_MAP_CONSTANTS.MAP_HEIGHT * 2)
-    background:SetTexture(HUD_MAP_EDGE_FLAT_TEXTURE)
-    background:SetTextureCoords(0, 1, 0, 1)
-    background:SetAddressMode(TEX_MODE_CLAMP)
-    local savedColor = MiniMap.SV.mapEdgeColor or MiniMap.Defaults.mapEdgeColor
-    local alpha = savedColor.a
-    if alpha == nil then
-        alpha = 1
-    end
-    background:SetColor(savedColor.r, savedColor.g, savedColor.b, alpha)
+    background:SetTexture(WORLD_MAP_CONTAINER_BACKGROUND_TEXTURE)
+    background:SetTextureCoords(0, 4, 0, 4)
+    background:SetAddressMode(TEX_MODE_WRAP)
+    background:SetColor(1, 1, 1, 1)
     background:SetHidden(false)
     background:SetMouseEnabled(false)
 end
