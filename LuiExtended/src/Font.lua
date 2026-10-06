@@ -26,6 +26,7 @@ local LUIE = LUIE
 local LMP = LibMediaProvider
 
 local IsInGamepadPreferredMode = IsInGamepadPreferredMode
+local IsGameCoreUI = IsGameCoreUI
 local ZO_IsConsoleOrGameCoreUI = ZO_IsConsoleOrGameCoreUI
 local string_sub = string.sub
 
@@ -51,6 +52,17 @@ local GAMEPAD_ROLE_FONTS =
     default = GAMEPAD_DEFAULT_FONT,
     unitFrameBars = "ZoFontGamepad18",
 }
+
+-- Mouse tooltip / context menu fonts. Keyboard fontdefs are PC-only and do not render
+-- on GameCore (see EsoUI/FontDefs/Keyboard/DefaultFontDefs_Keyboard.xml), so GameCore
+-- swaps to the nearest ZoFontGamepad* token.
+local KEYBOARD_TOOLTIP_TITLE_FONT = "ZoFontHeader2"
+local KEYBOARD_TOOLTIP_DETAIL_FONT = "ZoFontWinT1"
+local KEYBOARD_TOOLTIP_BODY_FONT = ""
+local GAMECORE_TOOLTIP_TITLE_FONT = "ZoFontGamepadBold20"
+local GAMECORE_TOOLTIP_DETAIL_FONT = "ZoFontGamepadBold18"
+local GAMECORE_TOOLTIP_BODY_FONT = "ZoFontGamepad18"
+local GAMECORE_CONTEXT_MENU_FONT = "ZoFontGamepad22"
 
 local Font = {}
 LUIE.Font = Font
@@ -78,6 +90,34 @@ end
 function Font.GetPlatformRoleFont(role)
     local roleFonts = UseGamepadFonts() and GAMEPAD_ROLE_FONTS or KEYBOARD_ROLE_FONTS
     return roleFonts[role] or Font.GetDefaultFont()
+end
+
+--- Font for tooltip title lines (InformationTooltip:AddLine).
+--- @return string
+function Font.GetTooltipTitleFont()
+    return IsGameCoreUI() and GAMECORE_TOOLTIP_TITLE_FONT or KEYBOARD_TOOLTIP_TITLE_FONT
+end
+
+--- Font for tooltip detail rows (InformationTooltip:AddHeaderLine).
+--- @return string
+function Font.GetTooltipDetailFont()
+    return IsGameCoreUI() and GAMECORE_TOOLTIP_DETAIL_FONT or KEYBOARD_TOOLTIP_DETAIL_FONT
+end
+
+--- Font for tooltip body lines. "" on keyboard keeps the ZO_BaseTooltip default font.
+--- @return string
+function Font.GetTooltipBodyFont()
+    return IsGameCoreUI() and GAMECORE_TOOLTIP_BODY_FONT or KEYBOARD_TOOLTIP_BODY_FONT
+end
+
+--- Font for AddMenuItem labels. nil on keyboard keeps the ZO_ContextMenus default; GameCore
+--- can be mouse-driven outside gamepad preferred mode, where that default is ZoFontGame.
+--- @return string|nil
+function Font.GetContextMenuFont()
+    if IsGameCoreUI() then
+        return GAMECORE_CONTEXT_MENU_FONT
+    end
+    return nil
 end
 
 --- Fetch registered media data for a font key (LMP first, LuiMedia mirror fallback).
