@@ -19,6 +19,7 @@ local PLAYER_MAP_PIN_TEXTURE = "EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds"
 --- @field view MiniMapView
 --- @field mapController MiniMapMapController
 --- @field overlayPinPool ZO_ObjectPool
+--- @field harvestMapAddon table|nil
 local MiniMapPinController = ZO_InitializingObject:Subclass()
 MiniMap.MiniMapPinController = MiniMapPinController
 
@@ -27,6 +28,13 @@ MiniMap.MiniMapPinController = MiniMapPinController
 function MiniMapPinController:Initialize(view, mapController)
     self.view = view
     self.mapController = mapController
+    -- HarvestMap is an optional dependency; when installed it loads before LUIE.
+    -- The global is only read when the addon manager reports it enabled (Initialize_PC / Initialize_Console).
+    if LUIE.OtherAddonCompatability.isHarvestMapEnabled then
+        self.harvestMapAddon = Harvest
+    else
+        self.harvestMapAddon = nil
+    end
     self:CreateOverlayPinPool()
 end
 
@@ -177,7 +185,7 @@ end
 --- MAIN_MAP_MODE.Activate parents that container to ZO_WorldMapContainer (MapPinController.lua).
 --- PinTypeManager:UpdateSize sets dimensions from layout.size and does not reset control scale.
 function MiniMapPinController:ApplyHarvestMapCompositeScale()
-    local harvestMap = _G["Harvest"]
+    local harvestMap = self.harvestMapAddon
     if not harvestMap or not harvestMap.pinController then
         return
     end
@@ -205,7 +213,7 @@ end
 --- That Activate parents pinController.container the same way. OnMapSizeChange sets MAP_WIDTH.
 --- MapPins:RedrawPins is the ZO_WorldMap_UpdateMap prehook, which runs before the tile texture and size exist.
 function MiniMapPinController:RefreshHarvestMapPinsForHud()
-    local harvestMap = _G["Harvest"]
+    local harvestMap = self.harvestMapAddon
     if not harvestMap or not harvestMap.pinController or not harvestMap.mapPins then
         return
     end

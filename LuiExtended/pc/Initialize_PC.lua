@@ -101,6 +101,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
     LUIE.OtherAddonCompatability.isLibCombatEnabled = LUIE.IsItEnabled("LibCombat")
     LUIE.OtherAddonCompatability.isLibSlashCommanderEnabled = LUIE.IsItEnabled("LibSlashCommander")
+    LUIE.OtherAddonCompatability.isHarvestMapEnabled = LUIE.IsItEnabled("HarvestMap")
     -- -----------------------------------------------------------------------------
     -- Toggle Alert Frame Visibility if needed
     LUIE.SetupAlertFrameVisibility()
