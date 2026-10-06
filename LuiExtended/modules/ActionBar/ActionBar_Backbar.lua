@@ -336,7 +336,7 @@ function Backbar.SetupBackbarDragDropHandlers(button)
                         end
                     end
                     CallSecureProtected("ClearSlot", actionBarSlotIndex, hotbarCategory)
-                end)
+                end, MENU_ADD_OPTION_LABEL, LUIE.Font.GetContextMenuFont())
                 ShowMenu(control)
             end
         elseif mouseButton == MOUSE_BUTTON_INDEX_LEFT and GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then

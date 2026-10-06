@@ -1752,6 +1752,7 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
     if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
         ClearMenu()
         local id, name = self.effectId, self.effectName
+        local contextMenuFont = LUIE.Font.GetContextMenuFont()
 
         -- Blacklist
         local blacklist = SpellCastBuffs.SV.BlacklistTable
@@ -1764,7 +1765,7 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
                 SpellCastBuffs.AddToCustomList(blacklist, id)
                 SpellCastBuffs.AddToCustomList(blacklist, name)
             end
-        end)
+        end, MENU_ADD_OPTION_LABEL, contextMenuFont)
 
         -- Prominent Buffs
         -- prominentByIdOnly abilities (Crystal Weapon 46331 / 143808) share a display name, so the name must not be stored.
@@ -1781,7 +1782,7 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
                     SpellCastBuffs.AddToCustomList(promBuffs, name)
                 end
             end
-        end)
+        end, MENU_ADD_OPTION_LABEL, contextMenuFont)
 
         -- Prominent Debuffs
         local promDebuffs = SpellCastBuffs.SV.PromDebuffTable
@@ -1802,13 +1803,13 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
                     SpellCastBuffs.AddToCustomList(promDebuffs, name)
                 end
             end
-        end)
+        end, MENU_ADD_OPTION_LABEL, contextMenuFont)
 
         -- Cancel Buff (if possible)
         if self.buffSlot then
             AddMenuItem("Cancel Buff", function ()
                 CancelBuff(self.buffSlot)
-            end)
+            end, MENU_ADD_OPTION_LABEL, contextMenuFont)
         end
         ShowMenu(self)
     end
@@ -1872,7 +1873,7 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial, unit
     if SpellCastBuffs.SV.TooltipAbilityId or SpellCastBuffs.SV.TooltipBuffType or SpellCastBuffs.SV.TooltipDebugMeta then
         ZO_Tooltip_AddDivider(InformationTooltip)
         InformationTooltip:SetVerticalPadding(4)
-        InformationTooltip:AddLine("", "", ZO_NORMAL_TEXT:UnpackRGB())
+        InformationTooltip:AddLine("", LUIE.Font.GetTooltipBodyFont(), ZO_NORMAL_TEXT:UnpackRGB())
         -- Add Ability ID Line
         if SpellCastBuffs.SV.TooltipAbilityId then
             local labelAbilityId = control.effectId or "None"
@@ -1880,8 +1881,8 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial, unit
             if isArtificial then
                 labelAbilityId = "Artificial"
             end
-            InformationTooltip:AddHeaderLine("Ability ID", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-            InformationTooltip:AddHeaderLine(labelAbilityId, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+            InformationTooltip:AddHeaderLine("Ability ID", LUIE.Font.GetTooltipDetailFont(), detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddHeaderLine(labelAbilityId, LUIE.Font.GetTooltipDetailFont(), detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
             detailsLine = detailsLine + 1
         end
 
@@ -1912,8 +1913,8 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial, unit
                 end
             end
 
-            InformationTooltip:AddHeaderLine("Type", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-            InformationTooltip:AddHeaderLine(buffTypes[buffType], "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+            InformationTooltip:AddHeaderLine("Type", LUIE.Font.GetTooltipDetailFont(), detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddHeaderLine(buffTypes[buffType], LUIE.Font.GetTooltipDetailFont(), detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
             detailsLine = detailsLine + 1
         end
     end
@@ -1960,19 +1961,19 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
             artificialEffectId = control.effectId
         end
         tooltipText = GetArtificialEffectTooltipText(artificialEffectId)
-        InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+        InformationTooltip:AddLine(tooltipTitle, LUIE.Font.GetTooltipTitleFont(), 1, 1, 1, nil)
         detailsLine = 3
         if SpellCastBuffs.SV.TooltipEnable then
             InformationTooltip:SetVerticalPadding(1)
             ZO_Tooltip_AddDivider(InformationTooltip)
             InformationTooltip:SetVerticalPadding(5)
-            InformationTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
+            InformationTooltip:AddLine(tooltipText, LUIE.Font.GetTooltipBodyFont(), colorText:UnpackRGBA())
             detailsLine = 5
         end
         SpellCastBuffs.TooltipBottomLine(control, detailsLine, true, "player")
     else
         if not SpellCastBuffs.SV.TooltipEnable then
-            InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+            InformationTooltip:AddLine(tooltipTitle, LUIE.Font.GetTooltipTitleFont(), 1, 1, 1, nil)
             detailsLine = 3
             SpellCastBuffs.TooltipBottomLine(control, detailsLine, false, TooltipUnitTagFromBuffContainer(control.container))
             return
@@ -2098,12 +2099,12 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
         detailsLine = 5
 
-        InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+        InformationTooltip:AddLine(tooltipTitle, LUIE.Font.GetTooltipTitleFont(), 1, 1, 1, nil)
         if tooltipText ~= "" and tooltipText ~= nil then
             InformationTooltip:SetVerticalPadding(1)
             ZO_Tooltip_AddDivider(InformationTooltip)
             InformationTooltip:SetVerticalPadding(5)
-            InformationTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
+            InformationTooltip:AddLine(tooltipText, LUIE.Font.GetTooltipBodyFont(), colorText:UnpackRGBA())
         end
         if thirdLine ~= "" and thirdLine ~= nil then
             if tooltipText == "" or tooltipText == nil then
@@ -2112,7 +2113,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                 InformationTooltip:SetVerticalPadding(5)
             end
             detailsLine = 7
-            InformationTooltip:AddLine(thirdLine, "", ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddLine(thirdLine, LUIE.Font.GetTooltipBodyFont(), ZO_NORMAL_TEXT:UnpackRGB())
         end
 
         SpellCastBuffs.TooltipBottomLine(control, detailsLine, false, ttUnit)
@@ -2123,7 +2124,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         -- Debug show default Tooltip on my account
         -- if LUIE.PlayerDisplayName == "@ArtOfShred" or LUIE.PlayerDisplayName == "@ArtOfShredPTS" --[[or LUIE.PlayerDisplayName == '@dack_janiels']] then
         if SpellCastBuffs.devDebugEnabled then
-            InformationTooltip:AddLine("Default Tooltip Below:", "", colorText:UnpackRGBA())
+            InformationTooltip:AddLine("Default Tooltip Below:", LUIE.Font.GetTooltipBodyFont(), colorText:UnpackRGBA())
 
             local newtooltipText = GetAbilityEffectDescription(control.buffSlot)
             if not newtooltipText or newtooltipText == "" then
@@ -2137,7 +2138,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
             InformationTooltip:SetVerticalPadding(1)
             ZO_Tooltip_AddDivider(InformationTooltip)
             InformationTooltip:SetVerticalPadding(5)
-            InformationTooltip:AddLine(newtooltipText, "", colorText:UnpackRGBA())
+            InformationTooltip:AddLine(newtooltipText, LUIE.Font.GetTooltipBodyFont(), colorText:UnpackRGBA())
         end
     end
 end

@@ -277,8 +277,8 @@ local function ShowBuffTooltip(control, frameData)
     end
 
     if tooltipText and tooltipText ~= "" then
-        InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil, MODIFY_TEXT_TYPE_NONE)
-        InformationTooltip:AddLine(tooltipText, "", ZO_NORMAL_TEXT:UnpackRGBA())
+        InformationTooltip:AddLine(tooltipTitle, LUIE.Font.GetTooltipTitleFont(), 1, 1, 1, nil, MODIFY_TEXT_TYPE_NONE)
+        InformationTooltip:AddLine(tooltipText, LUIE.Font.GetTooltipBodyFont(), ZO_NORMAL_TEXT:UnpackRGBA())
     else
         InformationTooltip:SetAbilityId(abilityId)
     end

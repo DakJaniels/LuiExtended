@@ -949,7 +949,7 @@ local function GetDebugMetaRemainingValueLabelPool()
     if not debugMetaRemainingValueLabelPool then
         local pool = ZO_ControlPool:New("ZO_TooltipLabel", GuiRoot, "LUIE_SCB_DebugMetaRemaining")
         pool:SetCustomFactoryBehavior(function (label)
-            label:SetFont("ZoFontWinT1")
+            label:SetFont(LUIE.Font.GetTooltipDetailFont())
             label:SetColor(1, 1, 1, 1)
             label:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
             label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
@@ -979,7 +979,7 @@ end
 --- @param liveRemainingCtx SCBBuffDebugMetaLiveRemainingCtx|nil
 --- @return integer nextHeaderLineIndex
 local function appendDebugMetaLineToTooltip(tooltip, label, value, headerLineIndex, liveRemainingCtx)
-    tooltip:AddHeaderLine(label, "ZoFontWinT1", headerLineIndex, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+    tooltip:AddHeaderLine(label, LUIE.Font.GetTooltipDetailFont(), headerLineIndex, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
     local valueText = tostring(value)
     if label == "API Remaining" and liveRemainingCtx then
         local valueLabel, poolKey = acquireLiveRemainingValueLabel()
@@ -997,7 +997,7 @@ local function appendDebugMetaLineToTooltip(tooltip, label, value, headerLineInd
             valueLabelPoolKey = poolKey,
         }
     else
-        tooltip:AddHeaderLine(valueText, "ZoFontWinT1", headerLineIndex, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+        tooltip:AddHeaderLine(valueText, LUIE.Font.GetTooltipDetailFont(), headerLineIndex, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
     end
     return headerLineIndex + 1
 end
@@ -1226,7 +1226,7 @@ local function flushDebugMetaTooltips(debugLines, buffControl, detailsLine, live
     if overflow.ClearLines then
         overflow:ClearLines()
     end
-    overflow:AddLine("Debug meta (continued)", "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
+    overflow:AddLine("Debug meta (continued)", LUIE.Font.GetTooltipDetailFont(), ZO_NORMAL_TEXT:UnpackRGB())
     overflow:SetVerticalPadding(2)
 
     appendDebugMetaLineRangeToTooltip(overflow, debugLines, overflowLinesStart, numLines, 1, liveRemainingCtx)
