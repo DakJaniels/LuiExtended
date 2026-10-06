@@ -209,6 +209,7 @@ LUIE.OtherAddonCompatability =
     isWritCreatorEnabled = false,
     isLibCombatEnabled = false,
     isLibSlashCommanderEnabled = false,
+    isHarvestMapEnabled = false,
 }
 -- -----------------------------------------------------------------------------
 -- Default Settings
