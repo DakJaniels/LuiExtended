@@ -5526,6 +5526,327 @@ function ChatAnnouncements.CreateSettings()
         },
     }
 
+    -- Chat Announcements - Companion Announcements Options Submenu
+    optionsDataChatAnnouncements[#optionsDataChatAnnouncements + 1] =
+    {
+        type = "submenu",
+        name = GetString(LUIE_STRING_LAM_CA_COMPANION_HEADER),
+        controls =
+        {
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Companion.LevelUpCA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.LevelUpCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.LevelUpCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.Companion.LevelUpCSA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.LevelUpCSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.LevelUpCSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Companion.LevelUpAlert
+                end,
+                setFunc = function (value)
+                    Settings.Companion.LevelUpAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.LevelUpAlert,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL_ICON)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_COMPANION_LEVEL_ICON_TP),
+                getFunc = function ()
+                    return Settings.Companion.LevelUpIcon
+                end,
+                setFunc = function (value)
+                    Settings.Companion.LevelUpIcon = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not ((Settings.Companion.LevelUpCA or Settings.Companion.LevelUpCSA or Settings.Companion.LevelUpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Companion.LevelUpIcon,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_COMPANION_RAPPORT_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_RAPPORT), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_RAPPORT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Companion.RapportCA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.RapportCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.RapportCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_RAPPORT), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_RAPPORT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.Companion.RapportCSA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.RapportCSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.RapportCSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_RAPPORT), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_RAPPORT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Companion.RapportAlert
+                end,
+                setFunc = function (value)
+                    Settings.Companion.RapportAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.RapportAlert,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_LINE), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_LINE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Companion.SkillLineCA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillLineCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.SkillLineCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_LINE), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_LINE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.Companion.SkillLineCSA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillLineCSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.SkillLineCSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_LINE), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_LINE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Companion.SkillLineAlert
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillLineAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.SkillLineAlert,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_UNLOCK), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_UNLOCK_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Companion.SkillUnlockCA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillUnlockCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.SkillUnlockCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_UNLOCK), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_UNLOCK_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.Companion.SkillUnlockCSA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillUnlockCSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.SkillUnlockCSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_UNLOCK), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_UNLOCK_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Companion.SkillUnlockAlert
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillUnlockAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.SkillUnlockAlert,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.Companion.SkillXpCA
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillXpCA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.SkillXpCA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.Companion.SkillXpAlert
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillXpAlert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Companion.SkillXpAlert,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_ICON)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_ICON_TP),
+                getFunc = function ()
+                    return Settings.Companion.SkillXpIcon
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillXpIcon = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Companion.SkillXpCA and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Companion.SkillXpIcon,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_PROGRESS)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_PROGRESS_TP),
+                getFunc = function ()
+                    return Settings.Companion.SkillXpProgress
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillXpProgress = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not ((Settings.Companion.SkillXpCA or Settings.Companion.SkillXpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Companion.SkillXpProgress,
+            },
+            {
+                type = "slider",
+                name = GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_FILTER),
+                tooltip = GetString(LUIE_STRING_LAM_CA_COMPANION_SKILL_XP_FILTER_TP),
+                min = 0,
+                max = 5000,
+                step = 50,
+                getFunc = function ()
+                    return Settings.Companion.SkillXpFilter
+                end,
+                setFunc = function (value)
+                    Settings.Companion.SkillXpFilter = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not ((Settings.Companion.SkillXpCA or Settings.Companion.SkillXpAlert) and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Companion.SkillXpFilter,
+            },
+        },
+    }
+
     -- Chat Announcements - Collectible/Lorebooks Announcements Options Submenu
     optionsDataChatAnnouncements[#optionsDataChatAnnouncements + 1] =
     {

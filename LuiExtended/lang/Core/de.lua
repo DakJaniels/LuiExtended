@@ -131,6 +131,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_CA_CURRENCY = "Bekanntgaben bei Währungsänderungen.",
     LUIE_STRING_CONSOLE_SECTION_CA_LOOT = "Bekanntgaben für Beute und Gegenstände.",
     LUIE_STRING_CONSOLE_SECTION_CA_SHARED = "Gemeinsame Währungs- und Beute-Kontextmenü-Optionen.",
+    LUIE_STRING_CONSOLE_SECTION_CA_COMPANION = "Ankündigungen für Gefährten-Stufe, Beziehung und Fähigkeiten.",
     LUIE_STRING_CONSOLE_SECTION_CA_COLLECTIBLE = "Bekanntgaben für Sammlerstücke und Lorebooks.",
     LUIE_STRING_CONSOLE_SECTION_CA_ANTIQUITY = "Bekanntgaben für Antiquitäten und Wahrsagerei.",
     LUIE_STRING_CONSOLE_SECTION_CA_RUMOR = "Bekanntgaben für begonnene, untersuchte und fehlgeschlagene Gerüchte.",

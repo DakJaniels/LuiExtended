@@ -13,14 +13,14 @@ local ColorizeColors = ChatAnnouncements.Colors
 
 local MAX_INDIVIDUAL_CSAS = 4
 
-local function AnySkillLineUnlockEnabled()
-    local skills = ChatAnnouncements.SV.Skills
-    return skills.SkillLineUnlockCA or skills.SkillLineUnlockCSA or skills.SkillLineUnlockAlert
+local function AnyCompanionSkillLineEnabled()
+    local companionSettings = ChatAnnouncements.SV.Companion
+    return companionSettings and (companionSettings.SkillLineCA or companionSettings.SkillLineCSA or companionSettings.SkillLineAlert)
 end
 
-local function AnySkillAbilityEnabled()
-    local skills = ChatAnnouncements.SV.Skills
-    return skills.SkillAbilityCA or skills.SkillAbilityCSA or skills.SkillAbilityAlert
+local function AnyCompanionSkillUnlockEnabled()
+    local companionSettings = ChatAnnouncements.SV.Companion
+    return companionSettings and (companionSettings.SkillUnlockCA or companionSettings.SkillUnlockCSA or companionSettings.SkillUnlockAlert)
 end
 
 local function AnyAchievementAnnouncementEnabled()
@@ -41,21 +41,21 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
     local moduleName = ctx.moduleName
 
     PreHookCsaCallback(ctx, "SkillLineAdded", COMPANION_SKILLS_DATA_MANAGER, function (skillLineData)
-        if not skillLineData:IsAvailable() or not AnySkillLineUnlockEnabled() then
+        if not skillLineData:IsAvailable() or not AnyCompanionSkillLineEnabled() then
             return
         end
         local skillTypeData = skillLineData:GetSkillTypeData()
         local lineName = skillLineData:GetName()
         local icon = skillTypeData:GetAnnounceIcon()
 
-        if ChatAnnouncements.SV.Skills.SkillLineUnlockCA then
-            local formattedIcon = ChatAnnouncements.SV.Skills.SkillLineIcon and zo_strformat("<<1>> ", zo_iconFormatInheritColor(icon, 16, 16)) or ""
+        if ChatAnnouncements.SV.Companion.SkillLineCA then
+            local formattedIcon = zo_strformat("<<1>> ", zo_iconFormatInheritColor(icon, 16, 16))
             local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(LUIE_STRING_CA_SKILL_LINE_ADDED, formattedIcon, lineName))
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL GAIN" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
-        if ChatAnnouncements.SV.Skills.SkillLineUnlockCSA then
+        if ChatAnnouncements.SV.Companion.SkillLineCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
             local formattedIcon = zo_iconFormat(icon, 32, 32)
             if CENTER_SCREEN_ANNOUNCE_TYPE_COMPANION_SKILL_LINE_ADDED then
@@ -66,18 +66,18 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
             messageParams:SetText(zo_strformat(SI_COMPANION_SKILL_LINE_ADDED, formattedIcon, lineName))
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
-        if ChatAnnouncements.SV.Skills.SkillLineUnlockAlert then
+        if ChatAnnouncements.SV.Companion.SkillLineAlert then
             local text = zo_strformat(SI_COMPANION_SKILL_LINE_ADDED, "", lineName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
         end
-        if not ChatAnnouncements.SV.Skills.SkillLineUnlockCSA then
+        if not ChatAnnouncements.SV.Companion.SkillLineCSA then
             PlaySound(SOUNDS.SKILL_LINE_ADDED)
         end
         return true
     end)
 
     PreHookCsaCallback(ctx, "CompanionSkillUpdateStatusChanged", COMPANION_SKILLS_DATA_MANAGER, function (companionSkillData)
-        if not AnySkillAbilityEnabled() then
+        if not AnyCompanionSkillUnlockEnabled() then
             return
         end
         if not (companionSkillData:HasUpdatedStatus() and companionSkillData:IsPurchased() and companionSkillData:IsActive()) then
@@ -88,13 +88,13 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
         local secondaryText = progressionData:GetFormattedName()
         local formattedMessage = zo_strformat("<<1>>: <<2>>", primaryText, secondaryText)
 
-        if ChatAnnouncements.SV.Skills.SkillAbilityCA then
+        if ChatAnnouncements.SV.Companion.SkillUnlockCA then
             local formattedString = ColorizeColors.SkillLineColorize:Colorize(formattedMessage)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
-        if ChatAnnouncements.SV.Skills.SkillAbilityCSA then
+        if ChatAnnouncements.SV.Companion.SkillUnlockCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COMPANION_ACTIVE_SKILL_UNLOCKED)
             messageParams:SetText(primaryText, secondaryText)
             if CENTER_SCREEN_ANNOUNCE_TYPE_COMPANION_ACTIVE_SKILL_UNLOCKED then
@@ -103,10 +103,10 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
             messageParams:SetIconData(progressionData:GetIcon())
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
-        if ChatAnnouncements.SV.Skills.SkillAbilityAlert then
+        if ChatAnnouncements.SV.Companion.SkillUnlockAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedMessage)
         end
-        if not ChatAnnouncements.SV.Skills.SkillAbilityCSA then
+        if not ChatAnnouncements.SV.Companion.SkillUnlockCSA then
             PlaySound(SOUNDS.COMPANION_ACTIVE_SKILL_UNLOCKED)
         end
         return true

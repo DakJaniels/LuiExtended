@@ -131,6 +131,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_CA_CURRENCY = "Оповещения об изменении валюты.",
     LUIE_STRING_CONSOLE_SECTION_CA_LOOT = "Оповещения о добыче и предметах.",
     LUIE_STRING_CONSOLE_SECTION_CA_SHARED = "Общее контекстное меню валюты и добычи.",
+    LUIE_STRING_CONSOLE_SECTION_CA_COMPANION = "Оповещения об уровне, отношении и навыках спутника.",
     LUIE_STRING_CONSOLE_SECTION_CA_COLLECTIBLE = "Оповещения о коллекционных предметах и книгах знаний.",
     LUIE_STRING_CONSOLE_SECTION_CA_ANTIQUITY = "Оповещения об антиквариате и гадании.",
     LUIE_STRING_CONSOLE_SECTION_CA_RUMOR = "Оповещения о найденных, разведанных и не начатых слухах.",
