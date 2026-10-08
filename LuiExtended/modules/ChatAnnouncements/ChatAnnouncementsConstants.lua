@@ -989,6 +989,44 @@ ChatAnnouncements.ContextMessageDefaultStringIds =
     CurrencyMessageDisguiseDestroy = LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_DESTROY,
 }
 
+local displayAnnouncementZoneDefaults =
+{
+    "TrialHelRa",
+    "TrialAetherianArchive",
+    "TrialSanctumOphidia",
+    "TrialMawOfLorkhaj",
+    "TrialHallsOfFabrication",
+    "TrialSunspire",
+    "TrialRockgrove",
+    "TrialDreadsailReef",
+    "TrialSanitysEdge",
+    "TrialOsseinCage",
+    "DungeonVateshranHollows",
+    "DungeonBlackDrakeVilla",
+    "DungeonCoralAerie",
+    "DungeonShipwrightsRegret",
+    "DungeonEarthenRootEnclave",
+    "DungeonGravenDeep",
+    "DungeonBalSunnar",
+    "DungeonScrivenersHall",
+    "DungeonBedlamVeil",
+    "DungeonExiledRedoubt",
+    "CharacterSystems",
+    "TributeTutorial",
+    "InstrumentDisplayed",
+    "IndrikEvent",
+    "AntiquityDiscovery",
+}
+for displayAnnouncementIndex = 1, #displayAnnouncementZoneDefaults do
+    local settingsKey = displayAnnouncementZoneDefaults[displayAnnouncementIndex]
+    ChatAnnouncements.Defaults.DisplayAnnouncements[settingsKey] =
+    {
+        CA = false,
+        CSA = true,
+        Alert = false,
+    }
+end
+
 --- Pre–guild-name context strings still present in saved vars (treat as default, not custom).
 --- @type table<integer|string, string[]>
 ChatAnnouncements.ContextMessageLegacyFormatByStringId =
