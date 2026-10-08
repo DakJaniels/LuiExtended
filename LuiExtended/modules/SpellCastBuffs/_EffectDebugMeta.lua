@@ -1213,6 +1213,7 @@ local function flushDebugMetaTooltips(debugLines, buffControl, detailsLine, live
     local overflowKey = buildDebugMetaOverflowContentKey(debugLines)
     local overflowLinesStart = primaryCount + 1
 
+    SpellCastBuffs.RaiseBuffTooltipWindow(overflow)
     applyDebugOverflowTooltipWidth(overflow, InformationTooltip)
 
     if overflowKey == debugMetaOverflowContentKey and not overflow:IsHidden() then
