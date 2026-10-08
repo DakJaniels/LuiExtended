@@ -1933,6 +1933,19 @@ function SpellCastBuffs.TooltipUnitTagFromBuffContainer(container)
     return TooltipUnitTagFromBuffContainer(container)
 end
 
+--- Minimap HUD and its pin overlay use DL_OVERLAY. TooltipTopLevel is HIGH tier but a lower layer, so the map paints over the tooltip.
+--- @param tooltipControl TooltipControl
+function SpellCastBuffs.RaiseBuffTooltipWindow(tooltipControl)
+    local topLevelControl = tooltipControl:GetOwningWindow()
+    if not topLevelControl then
+        return
+    end
+    topLevelControl:SetDrawTier(DT_HIGH)
+    topLevelControl:SetDrawLayer(DL_OVERLAY)
+    topLevelControl:SetDrawLevel(ZO_HIGH_TIER_TOOLTIPS)
+    topLevelControl:BringWindowToTop()
+end
+
 -- OnMouseEnter for Buff Tooltips
 function SpellCastBuffs.Buff_OnMouseEnter(control)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
@@ -1950,6 +1963,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
     SpellCastBuffs.ClearDebugMetaOverflowTooltip()
     SpellCastBuffs.ClearDebugMetaTooltipLiveUpdate()
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5, TOP)
+    SpellCastBuffs.RaiseBuffTooltipWindow(InformationTooltip)
     -- Setup Text
     local tooltipText = ""
     local detailsLine
