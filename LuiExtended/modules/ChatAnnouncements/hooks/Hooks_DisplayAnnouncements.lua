@@ -119,6 +119,26 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
         [584] = "Imperial City",    -- Imperial City (Overland)
         [643] = "Imperial City",    -- Imperial City (Sewers)
         [635] = "Dragonstar Arena", -- Dragonstar Arena
+        [636] = "TrialHelRa",
+        [638] = "TrialAetherianArchive",
+        [639] = "TrialSanctumOphidia",
+        [725] = "TrialMawOfLorkhaj",
+        [975] = "TrialHallsOfFabrication",
+        [1121] = "TrialSunspire",
+        [1263] = "TrialRockgrove",
+        [1344] = "TrialDreadsailReef",
+        [1427] = "TrialSanitysEdge",
+        [1548] = "TrialOsseinCage",
+        [1227] = "DungeonVateshranHollows",
+        [1228] = "DungeonBlackDrakeVilla",
+        [1301] = "DungeonCoralAerie",
+        [1302] = "DungeonShipwrightsRegret",
+        [1360] = "DungeonEarthenRootEnclave",
+        [1361] = "DungeonGravenDeep",
+        [1389] = "DungeonBalSunnar",
+        [1390] = "DungeonScrivenersHall",
+        [1471] = "DungeonBedlamVeil",
+        [1496] = "DungeonExiledRedoubt",
     }
 
     local MapIds =
@@ -128,20 +148,40 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
         -- TODO - Need MapIds for Stage 3-9
     }
 
-    local function ResolveDisplayAnnouncementMessages(type)
-        local settings
-        if type == "Imperial City" then
-            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneIC
-        elseif type == "Craglorn" then
-            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneCraglorn
-        elseif type == "Maelstrom Arena" then
-            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ArenaMaelstrom
-        elseif type == "Dragonstar Arena" then
-            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ArenaDragonstar
-        elseif type == "Endless Archive" then
-            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.DungeonEndlessArchive
+    local DISPLAY_ANNOUNCEMENT_SETTINGS_KEYS =
+    {
+        ["Imperial City"] = "ZoneIC",
+        ["Craglorn"] = "ZoneCraglorn",
+        ["Maelstrom Arena"] = "ArenaMaelstrom",
+        ["Dragonstar Arena"] = "ArenaDragonstar",
+        ["Endless Archive"] = "DungeonEndlessArchive",
+        TrialHelRa = "TrialHelRa",
+        TrialAetherianArchive = "TrialAetherianArchive",
+        TrialSanctumOphidia = "TrialSanctumOphidia",
+        TrialMawOfLorkhaj = "TrialMawOfLorkhaj",
+        TrialHallsOfFabrication = "TrialHallsOfFabrication",
+        TrialSunspire = "TrialSunspire",
+        TrialRockgrove = "TrialRockgrove",
+        TrialDreadsailReef = "TrialDreadsailReef",
+        TrialSanitysEdge = "TrialSanitysEdge",
+        TrialOsseinCage = "TrialOsseinCage",
+        DungeonVateshranHollows = "DungeonVateshranHollows",
+        DungeonBlackDrakeVilla = "DungeonBlackDrakeVilla",
+        DungeonCoralAerie = "DungeonCoralAerie",
+        DungeonShipwrightsRegret = "DungeonShipwrightsRegret",
+        DungeonEarthenRootEnclave = "DungeonEarthenRootEnclave",
+        DungeonGravenDeep = "DungeonGravenDeep",
+        DungeonBalSunnar = "DungeonBalSunnar",
+        DungeonScrivenersHall = "DungeonScrivenersHall",
+        DungeonBedlamVeil = "DungeonBedlamVeil",
+        DungeonExiledRedoubt = "DungeonExiledRedoubt",
+    }
+
+    local function ResolveDisplayAnnouncementMessages(announcementType)
+        local settingsKey = DISPLAY_ANNOUNCEMENT_SETTINGS_KEYS[announcementType]
+        if settingsKey then
+            return LUIE.ChatAnnouncements.SV.DisplayAnnouncements[settingsKey]
         end
-        return settings
     end
 
     -- EVENT_DISPLAY_ANNOUNCEMENT (CSA Handler)
@@ -259,7 +299,11 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
         end
 
         if not settings then
-            if type then
+            local catalogSettings = ChatAnnouncements.ResolveCatalogDisplayAnnouncement(primaryText)
+            if catalogSettings then
+                settings = catalogSettings
+                debugDisable = true
+            elseif type then
                 settings = ResolveDisplayAnnouncementMessages(type)
                 debugDisable = true
             else
