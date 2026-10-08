@@ -11,6 +11,13 @@ local ChatAnnouncements = LUIE.ChatAnnouncements
 local ColorizeColors = ChatAnnouncements.Colors
 local COMPANION_NAME_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_UNIT_REACTION_COLOR, UNIT_REACTION_COLOR_COMPANION))
 
+local function GetFormattedCompanionName(companionId)
+    if not companionId or companionId == 0 then
+        return ""
+    end
+    return zo_strformat(SI_COMPANION_NAME_FORMATTER, GetCompanionName(companionId))
+end
+
 local function QueueCompanionChatAnnouncement(eventManager, moduleName, message, messageType)
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = messageType }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -95,12 +102,9 @@ function ChatAnnouncements.Hooks.RegisterCompanion(ctx)
             return
         end
 
-        local rapportFormatter = currentRapport > previousRapport and SI_LOOT_HISTORY_COMPANION_RAPPORT_GAIN_FORMATTER or SI_LOOT_HISTORY_COMPANION_RAPPORT_LOSS_FORMATTER
-        local rapportMessage = zo_strformat(rapportFormatter, COMPANION_NAME_COLOR:Colorize(GetCompanionName(companionId)))
-        local rapportLevelName = GetString("SI_COMPANIONRAPPORTLEVEL", GetActiveCompanionRapportLevel())
-        if rapportLevelName and rapportLevelName ~= "" then
-            rapportMessage = zo_strformat("<<1>> (<<2>>)", rapportMessage, rapportLevelName)
-        end
+        local rapportChange = currentRapport - previousRapport
+        local rapportArrow = currentRapport > previousRapport and "|c00FF00↑ +" or "|cFF0000↓ "
+        local rapportMessage = zo_strformat(LUIE_STRING_CA_COMPANION_RAPPORT_CHANGED, GetFormattedCompanionName(companionId), previousRapport, currentRapport, rapportArrow, rapportChange)
 
         if companionSettings.RapportCA then
             QueueCompanionChatAnnouncement(eventManager, moduleName, rapportMessage, "MESSAGE")
@@ -131,6 +135,11 @@ function ChatAnnouncements.Hooks.RegisterCompanion(ctx)
         end
 
         local lineName = zo_strformat("<<C:1>>", GetCompanionSkillLineNameById(skillLineId))
+        local companionName = GetFormattedCompanionName(GetActiveCompanionDefId())
+        local skillSubject = lineName
+        if companionName ~= "" then
+            skillSubject = zo_strformat(LUIE_STRING_CA_COMPANION_SKILL_XP_SUBJECT, companionName, lineName)
+        end
         local lastRankXP, nextRankXP, reportedCurrentXP = GetCompanionSkillLineXPInfo(skillLineId)
         local rankProgress = 0
         local rankXpWindow = 0
@@ -152,9 +161,9 @@ function ChatAnnouncements.Hooks.RegisterCompanion(ctx)
         local plainText
         if companionSettings.SkillXpProgress and rankXpWindow > 0 then
             local percentLeft = string.format("%.1f", ((rankXpWindow - rankProgress) / rankXpWindow) * 100)
-            plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN_PROGRESS, lineName, ZO_CommaDelimitDecimalNumber(experienceGained), ZO_CommaDelimitDecimalNumber(rankProgress), ZO_CommaDelimitDecimalNumber(rankXpWindow), percentLeft)
+            plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN_PROGRESS, skillSubject, ZO_CommaDelimitDecimalNumber(experienceGained), ZO_CommaDelimitDecimalNumber(rankProgress), ZO_CommaDelimitDecimalNumber(rankXpWindow), percentLeft)
         else
-            plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN, lineName, ZO_CommaDelimitDecimalNumber(experienceGained))
+            plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN, skillSubject, ZO_CommaDelimitDecimalNumber(experienceGained))
         end
 
         if companionSettings.SkillXpCA then
