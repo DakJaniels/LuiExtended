@@ -136,6 +136,7 @@ modules/ChatAnnouncements/hooks/Hooks_Achievement.lua
 modules/ChatAnnouncements/hooks/Hooks_Antiquities.lua
 modules/ChatAnnouncements/hooks/Hooks_Misc.lua
 modules/ChatAnnouncements/hooks/Hooks_Vengeance.lua
+modules/ChatAnnouncements/hooks/Hooks_Companion.lua
 modules/ChatAnnouncements/hooks/Hooks_CsaCallbacks.lua
 modules/ChatAnnouncements/ChatAnnouncementsHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsSocialRouter.lua

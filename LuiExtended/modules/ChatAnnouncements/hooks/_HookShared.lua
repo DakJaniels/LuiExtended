@@ -94,6 +94,7 @@ local REGISTER_ORDER =
     "RegisterAntiquities",
     "RegisterMisc",
     "RegisterVengeance",
+    "RegisterCompanion",
     "RegisterCsaCallbacks",
 }
 

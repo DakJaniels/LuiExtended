@@ -131,6 +131,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_CA_CURRENCY = "Annonces des changements de monnaie.",
     LUIE_STRING_CONSOLE_SECTION_CA_LOOT = "Annonces de butin et d'objets.",
     LUIE_STRING_CONSOLE_SECTION_CA_SHARED = "Menu contextuel partagé monnaie et butin.",
+    LUIE_STRING_CONSOLE_SECTION_CA_COMPANION = "Annonces de niveau, de relation et de compétences du compagnon.",
     LUIE_STRING_CONSOLE_SECTION_CA_COLLECTIBLE = "Annonces d'objets de collection et livres de lore.",
     LUIE_STRING_CONSOLE_SECTION_CA_ANTIQUITY = "Annonces d'antiquités et de divination.",
     LUIE_STRING_CONSOLE_SECTION_CA_RUMOR = "Annonces de rumeur commencée, enquête terminée et échec de démarrage.",

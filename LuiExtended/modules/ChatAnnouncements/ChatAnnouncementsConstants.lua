@@ -411,6 +411,33 @@ ChatAnnouncements.Defaults =
         ExperienceColorName = { 0.75, 0.75, 0.75, 1 },
     },
 
+    -- Companion
+    Companion =
+    {
+        LevelUpCA = false,
+        LevelUpCSA = false,
+        LevelUpAlert = false,
+        LevelUpIcon = true,
+
+        RapportCA = false,
+        RapportCSA = false,
+        RapportAlert = false,
+
+        SkillLineCA = false,
+        SkillLineCSA = false,
+        SkillLineAlert = false,
+
+        SkillUnlockCA = false,
+        SkillUnlockCSA = false,
+        SkillUnlockAlert = false,
+
+        SkillXpCA = false,
+        SkillXpAlert = false,
+        SkillXpIcon = false,
+        SkillXpProgress = false,
+        SkillXpFilter = 0,
+    },
+
     -- Skills
     Skills =
     {
