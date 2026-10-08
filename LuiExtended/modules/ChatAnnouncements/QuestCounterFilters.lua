@@ -574,12 +574,12 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
             tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_TP),
             items = modeItems,
             getFunction = function ()
-                return staging.mode
+                return settingsApi:LHASDropdownGetData(staging.mode)
             end,
-            setFunction = function (value)
-                staging.mode = value
+            setFunction = function (combobox, value, item)
+                staging.mode = item.data
             end,
-            default = ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_MILESTONES,
+            default = 0,
             disable = filterDisabled,
         }
         settings[#settings + 1] =
