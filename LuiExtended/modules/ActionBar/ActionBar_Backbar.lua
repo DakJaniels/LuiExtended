@@ -500,6 +500,9 @@ local function ApplyStyle(self, template)
 
     self:SetCooldownEdgeState(self.showingCooldown)
     self:UpdateUsable()
+    if ActionBar.SyncCooldownUpdateHandler then
+        ActionBar.SyncCooldownUpdateHandler(self)
+    end
 end
 
 -- Called on initialization and when swapping in and out of Gamepad mode
