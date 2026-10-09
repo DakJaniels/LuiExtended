@@ -15,13 +15,12 @@ local LHAS = LibHarvensAddonSettings
 
 local miniMapHudVisibilityOptions =
 {
-    { key = "allowOnGameplayHud",     name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,         tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP         },
-    { key = "allowDuringCombat",      name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,      tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP      },
-    { key = "allowOnLootScene",       name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,        tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP        },
-    { key = "allowOnDeathRecap",      name = LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP, tp = LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP },
-    { key = "allowWhileMounted",      name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP     },
-    { key = "allowInPlayerHousing",   name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP     },
-    { key = "preferElevatedDrawTier", name = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP,      tp = LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP      },
+    { key = "allowOnGameplayHud",   name = LUIE_STRING_LAM_MINIMAP_SHOW_HUD,         tp = LUIE_STRING_LAM_MINIMAP_SHOW_HUD_TP         },
+    { key = "allowDuringCombat",    name = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT,      tp = LUIE_STRING_LAM_MINIMAP_SHOW_COMBAT_TP      },
+    { key = "allowOnLootScene",     name = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT,        tp = LUIE_STRING_LAM_MINIMAP_SHOW_LOOT_TP        },
+    { key = "allowOnDeathRecap",    name = LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP, tp = LUIE_STRING_LAM_MINIMAP_SHOW_DEATH_RECAP_TP },
+    { key = "allowWhileMounted",    name = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_MOUNTED_TP     },
+    { key = "allowInPlayerHousing", name = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING,     tp = LUIE_STRING_LAM_MINIMAP_SHOW_HOUSING_TP     },
 }
 
 local miniMapRegionZoomSliders =
@@ -34,22 +33,13 @@ local miniMapRegionZoomSliders =
 
 local miniMapPinCategoryScales =
 {
-    { key = "pinScaleQuest",     name = LUIE_STRING_LAM_MINIMAP_PINSCALE_QUEST     },
-    { key = "pinScaleGroup",     name = LUIE_STRING_LAM_MINIMAP_PINSCALE_GROUP     },
-    { key = "pinScalePoi",       name = LUIE_STRING_LAM_MINIMAP_PINSCALE_POI       },
-    { key = "pinScaleWayshrine", name = LUIE_STRING_LAM_MINIMAP_PINSCALE_WAYSHRINE },
-    { key = "pinScaleOther",     name = LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER     },
+    { key = "pinScaleQuest",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_QUEST     },
+    { key = "pinScaleGroup",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_GROUP     },
+    { key = "pinScalePoi",        name = LUIE_STRING_LAM_MINIMAP_PINSCALE_POI       },
+    { key = "pinScaleWayshrine",  name = LUIE_STRING_LAM_MINIMAP_PINSCALE_WAYSHRINE },
+    { key = "pinScaleOther",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER     },
     { key = "pinScaleHarvestMap", name = LUIE_STRING_LAM_MINIMAP_PINSCALE_HARVESTMAP, tooltip = LUIE_STRING_LAM_MINIMAP_PINSCALE_HARVESTMAP_TP },
 }
-
-local function GetMiniMapCompassOverrideDropdownItems()
-    return
-    {
-        { name = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_DEFAULT), data = 0 },
-        { name = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_HIDE),    data = 1 },
-        { name = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_OVERRIDE_SHOW),    data = 2 },
-    }
-end
 
 --- @param allSettings table
 --- @param sectionLabel string
@@ -103,7 +93,7 @@ function MiniMap.CreateConsoleSettings()
         return disable() or not LUIE.SV.InfoPanel_Enabled
     end
 
-    local cameraWedgeSettingsDisabled = function ()
+    local playerCameraPipSettingsDisabled = function ()
         return disable() or not MiniMap.SV.followPlayer
     end
 
@@ -118,82 +108,10 @@ function MiniMap.CreateConsoleSettings()
     end
     table.sort(fontStyleItems, function (itemA, itemB) return itemA.name < itemB.name end)
 
-    local generalSectionRows =
+    -- Frame Layout -----------------------------------------------------------
+
+    local frameLayoutSectionRows =
     {
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_ZOOM),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ZOOM_TP),
-            min = 10,
-            max = 180,
-            step = 1,
-            format = "%.0f",
-            getFunction = function () return (MiniMap.SV.resetZoomLevel or Defaults.resetZoomLevel) * 100 end,
-            setFunction = function (value)
-                MiniMap.SV.resetZoomLevel = value / 100
-                MiniMap.ClampSavedDefaultZoom()
-                if MiniMap.mapController and MiniMap.mapController:IsReady() then
-                    MiniMap.mapController:ApplyZoom(0)
-                end
-            end,
-            default = Defaults.resetZoomLevel * 100,
-            disable = disable,
-        },
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_PINSCALE),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PINSCALE_TP),
-            min = 10,
-            max = 200,
-            step = 1,
-            format = "%.0f",
-            getFunction = function () return (MiniMap.SV.defaultPinScale or Defaults.defaultPinScale) * 100 end,
-            setFunction = function (value)
-                MiniMap.SV.defaultPinScale = value / 100
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.defaultPinScale * 100,
-            disable = disable,
-        },
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_PLAYERPINSCALE),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PLAYERPINSCALE_TP),
-            min = 50,
-            max = 200,
-            step = 5,
-            format = "%.0f",
-            getFunction = function () return (MiniMap.SV.playerPinScale or Defaults.playerPinScale) * 100 end,
-            setFunction = function (value)
-                MiniMap.SV.playerPinScale = value / 100
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.playerPinScale * 100,
-            disable = disable,
-        },
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_FOLLOW_PLAYER),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_FOLLOW_PLAYER_TP),
-            getFunction = function () return MiniMap.SV.followPlayer end,
-            setFunction = function (value)
-                MiniMap.SV.followPlayer = value
-                if MiniMap.runtime then
-                    MiniMap.runtime.mapFollowsPlayer = value
-                end
-                if value then
-                    MiniMap.RecenterFollow()
-                elseif MiniMap.view and MiniMap.runtime then
-                    local scroll = MiniMap.view.scroll
-                    MiniMap.SV.panOffsetX = scroll:GetHorizontalScroll()
-                    MiniMap.SV.panOffsetY = scroll:GetVerticalScroll()
-                    MiniMap.runtime:ApplyScrollFromPanOffsets()
-                end
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.followPlayer,
-            disable = disable,
-        },
         {
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_MINIMAP_LOCK_POSITION),
@@ -201,10 +119,8 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.SV.lockPosition end,
             setFunction = function (value)
                 MiniMap.SV.lockPosition = value
-                MiniMap.ApplyLiveSettings()
-                if MiniMap.frameChromeStateMachine then
-                    MiniMap.frameChromeStateMachine:NotifySettingsLockChanged()
-                end
+                MiniMap.ApplySettings()
+                MiniMap.NotifySettingsLockChanged()
             end,
             default = Defaults.lockPosition,
             disable = disable,
@@ -216,36 +132,11 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.SV.lockSize end,
             setFunction = function (value)
                 MiniMap.SV.lockSize = value
-                MiniMap.ApplyLiveSettings()
+                MiniMap.ApplySettings()
             end,
             default = Defaults.lockSize,
             disable = disable,
         },
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT_TP),
-            getFunction = function () return MiniMap.SV.waypointClickRequiresShift end,
-            setFunction = function (value) MiniMap.SV.waypointClickRequiresShift = value end,
-            default = Defaults.waypointClickRequiresShift,
-            disable = disable,
-        },
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP),
-            getFunction = function () return MiniMap.SV.showZoomButtons end,
-            setFunction = function (value)
-                MiniMap.SV.showZoomButtons = value
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.showZoomButtons,
-            disable = disable,
-        },
-    }
-
-    local layoutSectionRows =
-    {
         {
             type = LHAS.ST_BUTTON,
             label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW),
@@ -305,9 +196,6 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.SV.width or Defaults.width end,
             setFunction = function (value)
                 MiniMap.SV.width = value
-                if MiniMap.SV.keepSquareAspect == true then
-                    MiniMap.SV.height = value
-                end
                 MiniMap.ApplyFrameLayoutFromSavedSettings()
             end,
             default = Defaults.width,
@@ -324,73 +212,68 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.SV.height or Defaults.height end,
             setFunction = function (value)
                 MiniMap.SV.height = value
-                if MiniMap.SV.keepSquareAspect == true then
-                    MiniMap.SV.width = value
-                end
                 MiniMap.ApplyFrameLayoutFromSavedSettings()
             end,
             default = Defaults.height,
-            disable = function ()
-                return disable() or MiniMap.SV.keepSquareAspect == true
-            end,
+            disable = disable,
         },
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_KEEP_SQUARE),
-            getFunction = function () return MiniMap.SV.keepSquareAspect end,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ON_TOP_TP),
+            getFunction = function () return MiniMap.SV.preferElevatedDrawTier end,
             setFunction = function (value)
-                MiniMap.SV.keepSquareAspect = value
-                if value then
-                    MiniMap.ApplySquareAspect()
-                end
-                refreshPanelControls()
+                MiniMap.SV.preferElevatedDrawTier = value
+                MiniMap.ApplySettings()
             end,
-            default = Defaults.keepSquareAspect,
+            default = Defaults.preferElevatedDrawTier,
             disable = disable,
         },
         {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_POSITION_GRID),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_POSITION_GRID_TP),
-            min = 0,
-            max = 8,
-            step = 1,
-            format = "%.0f",
-            getFunction = function () return MiniMap.SV.positionGridDivisor or 0 end,
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP),
+            getFunction = function () return MiniMap.SV.anchorInfoPanelToMiniMap == true end,
             setFunction = function (value)
-                MiniMap.SV.positionGridDivisor = value
-                if value > 1 then
-                    MiniMap.ApplyPositionGridSnap(MiniMap.SV)
+                if value then
+                    MiniMap.SaveInfoPanelAnchor()
+                end
+                MiniMap.SV.anchorInfoPanelToMiniMap = value
+                MiniMap.ApplySettings()
+                if not value then
+                    MiniMap.RestoreInfoPanelAnchor()
                 end
             end,
-            default = Defaults.positionGridDivisor or 0,
-            disable = disable,
+            default = Defaults.anchorInfoPanelToMiniMap,
+            disable = infoPanelModuleDisabled,
         },
     }
 
-    local visibilitySectionRows = {}
-    for optionIndex = 1, #miniMapHudVisibilityOptions do
-        local option = miniMapHudVisibilityOptions[optionIndex]
-        local settingKey = option.key
-        visibilitySectionRows[#visibilitySectionRows + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(option.name),
-            tooltip = GetString(option.tp),
-            getFunction = function () return MiniMap.SV[settingKey] end,
-            setFunction = function (value)
-                MiniMap.SV[settingKey] = value
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults[settingKey],
-            disable = disable,
-        }
-    end
+    -- Zoom -------------------------------------------------------------------
 
-    local zoomContextSectionRows = {}
+    local zoomSectionRows =
+    {
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_ZOOM),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ZOOM_TP),
+            min = 10,
+            max = 180,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return (MiniMap.SV.resetZoomLevel or Defaults.resetZoomLevel) * 100 end,
+            setFunction = function (value)
+                MiniMap.SV.resetZoomLevel = value / 100
+                MiniMap.ClampSavedDefaultZoom()
+                MiniMap.ApplyZoom(0)
+            end,
+            default = Defaults.resetZoomLevel * 100,
+            disable = disable,
+        },
+    }
     for sliderIndex = 1, #miniMapRegionZoomSliders do
         local slider = miniMapRegionZoomSliders[sliderIndex]
-        zoomContextSectionRows[#zoomContextSectionRows + 1] =
+        zoomSectionRows[#zoomSectionRows + 1] =
         {
             type = LHAS.ST_SLIDER,
             label = GetString(slider.name),
@@ -405,15 +288,13 @@ function MiniMap.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 MiniMap.SV[slider.key] = value / 100
-                if MiniMap.mapController and MiniMap.mapController:IsReady() then
-                    MiniMap.ApplyContextDefaultZoom()
-                end
+                MiniMap.ApplyContextDefaultZoom()
             end,
             default = (Defaults[slider.key] or 0.5) * 100,
             disable = disable,
         }
     end
-    zoomContextSectionRows[#zoomContextSectionRows + 1] =
+    zoomSectionRows[#zoomSectionRows + 1] =
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_MINIMAP_AUTO_ZOOM_EDGE),
@@ -423,11 +304,70 @@ function MiniMap.CreateConsoleSettings()
         default = Defaults.autoZoomOutAtEdge,
         disable = disable,
     }
+    zoomSectionRows[#zoomSectionRows + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS),
+        tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ZOOM_BUTTONS_TP),
+        getFunction = function () return MiniMap.SV.showZoomButtons end,
+        setFunction = function (value)
+            MiniMap.SV.showZoomButtons = value
+            MiniMap.ApplySettings()
+        end,
+        default = Defaults.showZoomButtons,
+        disable = disable,
+    }
 
-    local pinCategorySectionRows = {}
+    -- Map --------------------------------------------------------------------
+
+    local mapSectionRows =
+    {
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_FOLLOW_PLAYER),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_FOLLOW_PLAYER_TP),
+            getFunction = function () return MiniMap.SV.followPlayer end,
+            setFunction = function (value)
+                MiniMap.SetFollowPlayer(value)
+            end,
+            default = Defaults.followPlayer,
+            disable = disable,
+        },
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_WAYPOINT_SHIFT_TP),
+            getFunction = function () return MiniMap.SV.waypointClickRequiresShift end,
+            setFunction = function (value) MiniMap.SV.waypointClickRequiresShift = value end,
+            default = Defaults.waypointClickRequiresShift,
+            disable = disable,
+        },
+    }
+
+    -- Pins -------------------------------------------------------------------
+
+    local pinSectionRows =
+    {
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_PINSCALE),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PINSCALE_TP),
+            min = 10,
+            max = 200,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return (MiniMap.SV.defaultPinScale or Defaults.defaultPinScale) * 100 end,
+            setFunction = function (value)
+                MiniMap.SV.defaultPinScale = value / 100
+                MiniMap.ApplySettings()
+            end,
+            default = Defaults.defaultPinScale * 100,
+            disable = disable,
+        },
+    }
     for categoryIndex = 1, #miniMapPinCategoryScales do
         local category = miniMapPinCategoryScales[categoryIndex]
-        pinCategorySectionRows[#pinCategorySectionRows + 1] =
+        pinSectionRows[#pinSectionRows + 1] =
         {
             type = LHAS.ST_SLIDER,
             label = GetString(category.name),
@@ -439,30 +379,98 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return (MiniMap.SV[category.key] or 1) * 100 end,
             setFunction = function (value)
                 MiniMap.SV[category.key] = value / 100
-                MiniMap.ApplyLiveSettings()
+                MiniMap.ApplySettings()
             end,
             default = 100,
             disable = disable,
         }
     end
+    pinSectionRows[#pinSectionRows + 1] =
+    {
+        type = LHAS.ST_SLIDER,
+        label = GetString(LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS),
+        tooltip = GetString(LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP),
+        min = MiniMap.MINIMAP_PIN_REFRESH_MS_MIN,
+        max = MiniMap.MINIMAP_PIN_REFRESH_MS_MAX,
+        step = 1,
+        format = "%.0f",
+        getFunction = function () return MiniMap.GetMovingPinRefreshMs() end,
+        setFunction = function (value)
+            MiniMap.SV.movingPinRefreshMs = zo_clamp(value, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
+            MiniMap.RefreshUpdateRegistration()
+        end,
+        default = Defaults.movingPinRefreshMs,
+        disable = disable,
+    }
 
-    local chromeSectionRows =
+    -- Player Pip -------------------------------------------------------------
+
+    local playerPipSectionRows =
     {
         {
-            type = LHAS.ST_DROPDOWN,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_COMPASS_MODE_TP),
-            items = GetMiniMapCompassOverrideDropdownItems(),
-            getFunction = function ()
-                return { data = MiniMap.SV.compassOverride or 0 }
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_PLAYER_PIP),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_PLAYER_PIP_TP),
+            getFunction = function () return MiniMap.SV.showPlayerPip ~= false end,
+            setFunction = function (value)
+                MiniMap.SV.showPlayerPip = value
+                MiniMap.ApplySettings()
             end,
-            setFunction = function (_combobox, _value, item)
-                MiniMap.SV.compassOverride = item.data
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.compassOverride or 0,
+            default = Defaults.showPlayerPip,
             disable = disable,
         },
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_PLAYERPINSCALE),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PLAYERPINSCALE_TP),
+            min = 50,
+            max = 200,
+            step = 5,
+            format = "%.0f",
+            getFunction = function () return (MiniMap.SV.playerPinScale or Defaults.playerPinScale) * 100 end,
+            setFunction = function (value)
+                MiniMap.SV.playerPinScale = value / 100
+                MiniMap.ApplySettings()
+            end,
+            default = Defaults.playerPinScale * 100,
+            disable = disable,
+        },
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP),
+            getFunction = function ()
+                local color = MiniMap.SV.playerPipColor or Defaults.playerPipColor
+                return color.r, color.g, color.b, color.a
+            end,
+            setFunction = function (red, green, blue, alpha)
+                MiniMap.SV.playerPipColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.ApplySettings()
+            end,
+            default = Defaults.playerPipColor,
+            disable = disable,
+        },
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP),
+            getFunction = function ()
+                local color = MiniMap.SV.cameraWedgeColor or Defaults.cameraWedgeColor
+                return color.r, color.g, color.b, color.a
+            end,
+            setFunction = function (red, green, blue, alpha)
+                MiniMap.SV.cameraWedgeColor = { r = red, g = green, b = blue, a = alpha }
+                MiniMap.ApplySettings()
+            end,
+            default = Defaults.cameraWedgeColor,
+            disable = playerCameraPipSettingsDisabled,
+        },
+    }
+
+    -- Zone Name --------------------------------------------------------------
+
+    local zoneNameSectionRows =
+    {
         {
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_ZONE_NAME),
@@ -470,7 +478,7 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.SV.showZoneName ~= false end,
             setFunction = function (value)
                 MiniMap.SV.showZoneName = value
-                MiniMap.ApplyLiveSettings()
+                MiniMap.ApplySettings()
                 refreshPanelControls()
             end,
             default = Defaults.showZoneName,
@@ -483,15 +491,10 @@ function MiniMap.CreateConsoleSettings()
             getFunction = function () return MiniMap.SV.zoneNameAboveMap == true end,
             setFunction = function (value)
                 MiniMap.SV.zoneNameAboveMap = value
-                MiniMap.ApplyLiveSettings()
+                MiniMap.ApplySettings()
             end,
             default = Defaults.zoneNameAboveMap,
             disable = zoneNameFontDisabled,
-        },
-        {
-            type = LHAS.ST_LABEL,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_FONT_HEADER),
-            canSelect = false,
         },
         {
             type = LHAS.ST_DROPDOWN,
@@ -545,106 +548,30 @@ function MiniMap.CreateConsoleSettings()
             default = Defaults.zoneNameFontStyle,
             disable = zoneNameFontDisabled,
         },
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_PLAYER_PIP),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_PLAYER_PIP_TP),
-            getFunction = function () return MiniMap.SV.showPlayerPip ~= false end,
-            setFunction = function (value)
-                MiniMap.SV.showPlayerPip = value
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.showPlayerPip,
-            disable = disable,
-        },
-        {
-            type = LHAS.ST_COLOR,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_COLOR_TP),
-            getFunction = function ()
-                local color = MiniMap.SV.playerPipColor or Defaults.playerPipColor
-                return color.r, color.g, color.b, color.a
-            end,
-            setFunction = function (red, green, blue, alpha)
-                MiniMap.SV.playerPipColor = { r = red, g = green, b = blue, a = alpha }
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.playerPipColor,
-            disable = disable,
-        },
-        {
-            type = LHAS.ST_COLOR,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CAMERA_WEDGE_COLOR_TP),
-            getFunction = function ()
-                local color = MiniMap.SV.cameraWedgeColor or Defaults.cameraWedgeColor
-                return color.r, color.g, color.b, color.a
-            end,
-            setFunction = function (red, green, blue, alpha)
-                MiniMap.SV.cameraWedgeColor = { r = red, g = green, b = blue, a = alpha }
-                MiniMap.ApplyLiveSettings()
-            end,
-            default = Defaults.cameraWedgeColor,
-            disable = cameraWedgeSettingsDisabled,
-        },
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ANCHOR_INFOPANEL_TP),
-            getFunction = function () return MiniMap.SV.anchorInfoPanelToMiniMap == true end,
-            setFunction = function (value)
-                if value then
-                    MiniMap.CaptureInfoPanelAnchorSnapshot()
-                end
-                MiniMap.SV.anchorInfoPanelToMiniMap = value
-                MiniMap.ApplyLiveSettings()
-                if not value then
-                    MiniMap.RestoreInfoPanelAnchor()
-                end
-            end,
-            default = Defaults.anchorInfoPanelToMiniMap,
-            disable = infoPanelModuleDisabled,
-        },
     }
 
-    local pinRefreshSectionRows =
-    {
+    -- Visibility -------------------------------------------------------------
+
+    local visibilitySectionRows = {}
+    for optionIndex = 1, #miniMapHudVisibilityOptions do
+        local option = miniMapHudVisibilityOptions[optionIndex]
+        local settingKey = option.key
+        visibilitySectionRows[#visibilitySectionRows + 1] =
         {
-            type = LHAS.ST_LABEL,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_DESC),
-        },
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS),
-            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_MOVING_PIN_REFRESH_MS_TP),
-            min = MiniMap.MINIMAP_PIN_REFRESH_MS_MIN,
-            max = MiniMap.MINIMAP_PIN_REFRESH_MS_MAX,
-            step = 1,
-            format = "%.0f",
-            getFunction = function () return MiniMap.GetMovingPinRefreshMs() end,
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(option.name),
+            tooltip = GetString(option.tp),
+            getFunction = function () return MiniMap.SV[settingKey] end,
             setFunction = function (value)
-                MiniMap.SV.movingPinRefreshMs = zo_clamp(value, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
-                MiniMap.UpdateGameplayTickers()
+                MiniMap.SV[settingKey] = value
+                MiniMap.ApplySettings()
             end,
-            default = Defaults.movingPinRefreshMs,
+            default = Defaults[settingKey],
             disable = disable,
-        },
-        -- {
-        --     type = LHAS.ST_SLIDER,
-        --     label = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS),
-        --     tooltip = GetString(LUIE_STRING_LAM_MINIMAP_PIN_MOUSEOVER_REFRESH_MS_TP),
-        --     min = MiniMap.MINIMAP_PIN_REFRESH_MS_MIN,
-        --     max = MiniMap.MINIMAP_PIN_REFRESH_MS_MAX,
-        --     step = 1,
-        --     format = "%.0f",
-        --     getFunction = function () return MiniMap.GetPinMouseOverRefreshMs() end,
-        --     setFunction = function (value)
-        --         MiniMap.SV.pinMouseOverRefreshMs = zo_clamp(value, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
-        --     end,
-        --     default = Defaults.pinMouseOverRefreshMs,
-        --     disable = disable,
-        -- },
-    }
+        }
+    end
+
+    -- Advanced (dev only) ----------------------------------------------------
 
     local devAdvancedSectionRows = nil
     if LUIE.IsDevDebugEnabled() then
@@ -661,9 +588,7 @@ function MiniMap.CreateConsoleSettings()
                 getFunction = function () return MiniMap.SV.pinMirrorStateMachineDebug end,
                 setFunction = function (value)
                     MiniMap.SV.pinMirrorStateMachineDebug = value
-                    if MiniMap.pinMirrorStateMachine then
-                        MiniMap.pinMirrorStateMachine:ApplyDebugLoggingFromSavedVars()
-                    end
+                    MiniMap.ApplyDebugLogging()
                 end,
                 default = Defaults.pinMirrorStateMachineDebug,
                 disable = disable,
@@ -689,13 +614,13 @@ function MiniMap.CreateConsoleSettings()
         end,
     }
 
-    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_CONSOLE_SECTION_GENERAL), generalSectionRows)
-    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_CONSOLE_LAYOUT_HEADER), layoutSectionRows)
+    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_CONSOLE_LAYOUT_HEADER), frameLayoutSectionRows)
+    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_ZOOM_CONTEXT_HEADER), zoomSectionRows)
+    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_CONSOLE_SECTION_GENERAL), mapSectionRows)
+    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_PIN_CATEGORY_HEADER), pinSectionRows)
+    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_PLAYER_PIP_HEADER), playerPipSectionRows)
+    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_HEADER), zoneNameSectionRows)
     appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_VISIBILITY_HEADER), visibilitySectionRows)
-    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_ZOOM_CONTEXT_HEADER), zoomContextSectionRows)
-    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_PIN_CATEGORY_HEADER), pinCategorySectionRows)
-    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_CHROME_HEADER), chromeSectionRows)
-    appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_PIN_REFRESH_HEADER), pinRefreshSectionRows)
     if devAdvancedSectionRows then
         appendSection(settingsData, GetString(LUIE_STRING_LAM_MINIMAP_ADVANCED_HEADER), devAdvancedSectionRows)
     end

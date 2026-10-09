@@ -2,6 +2,63 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
   <Controls>
+    <!-- Pool templates (MiniMap_TileLayer.lua / MiniMap_PinLayer.lua). Copies of the ZOS virtuals in
+         EsoUI/Ingame/Map/WorldMap.xml (ZO_MapTile, ZO_PinBlob, ZO_PinPolygonBlob, ZO_MapKeepLink) and
+         EsoUI/Ingame/Map/MapPin.xml (ZO_MapPin) without mouse handlers. -->
+    <Texture name="LUIE_MiniMap_Tile"
+             pixelRoundingEnabled="false"
+             textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"
+             virtual="true">
+      <Dimensions x="230"
+                  y="230" />
+    </Texture>
+    <Control name="LUIE_MiniMap_Pin"
+             tier="HIGH"
+             level="10"
+             hidden="true"
+             virtual="true">
+      <Dimensions x="22"
+                  y="22" />
+      <Controls>
+        <Texture name="$(parent)Highlight"
+                 textureFile="EsoUI/Art/MapPins/UI-WorldMapPinHighlight.dds"
+                 pixelRoundingEnabled="false"
+                 hidden="true">
+          <Anchor point="TOPLEFT"
+                  offsetX="-5"
+                  offsetY="-5" />
+          <Anchor point="BOTTOMRIGHT"
+                  offsetX="5"
+                  offsetY="5" />
+        </Texture>
+        <Texture name="$(parent)Background"
+                 pixelRoundingEnabled="false">
+          <AnchorFill />
+        </Texture>
+      </Controls>
+    </Control>
+    <Texture name="LUIE_MiniMap_AreaBlob"
+             tier="HIGH"
+             level="6"
+             pixelRoundingEnabled="false"
+             shaderEffectType="HALO"
+             virtual="true" />
+    <Polygon name="LUIE_MiniMap_PolygonBlob"
+             pointLayout="COUNTER_CLOCKWISE"
+             smoothingEnabled="true"
+             layer="BACKGROUND"
+             tier="HIGH"
+             level="6"
+             virtual="true">
+      <Border minThickness="3px"
+              maxThickness="3px"
+              textureFile="EsoUI/Art/MapPins/PolygonPinBorder.dds" />
+    </Polygon>
+    <Line name="LUIE_MiniMap_KeepLink"
+          level="1"
+          thickness="8"
+          virtual="true" />
+
     <TopLevelControl name="LUIE_MiniMap"
                      mouseEnabled="true"
                      movable="true"
@@ -72,6 +129,26 @@
                   offsetX="-3"
                   offsetY="-3" />
         </Backdrop>
+        <!-- Parchment matte between the ZO_FrameBackdrop edge and the map sheet (ZO_WorldMapContainerBackground
+             texture, WorldMap.xml:265). Declared after _Background so the anchor resolves; inset by the 4px
+             edge of ZO_FrameBackdrop (WindowTemplates.xml:96). Texture coords are set by MiniMap_Frame. -->
+        <Texture name="$(parent)_Parchment"
+                 textureFile="EsoUI/Art/WorldMap/worldmap_map_background_512tile.dds"
+                 addressMode="WRAP"
+                 autoAdjustTextureCoords="false"
+                 layer="BACKGROUND"
+                 level="1">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_Background"
+                  relativePoint="TOPLEFT"
+                  offsetX="4"
+                  offsetY="4" />
+          <Anchor point="BOTTOMRIGHT"
+                  relativeTo="$(parent)_Background"
+                  relativePoint="BOTTOMRIGHT"
+                  offsetX="-4"
+                  offsetY="-4" />
+        </Texture>
         <Scroll name="$(parent)_Scroll"
                 mouseEnabled="true">
           <Dimensions x="260"
@@ -89,6 +166,8 @@
             LUIE.MiniMap.OnScrollOffsetChanged(self, horizontal, vertical)
           </OnScrollOffsetChanged>
           <Controls>
+            <!-- Map sheet: sized to zoom * tile pixel size by MiniMap_PanAndZoom. Layers draw tiles, keep links,
+                 area/polygon blobs, then pins (tier/level come from the pool templates). -->
             <Control name="$(parent)_Map"
                      mouseEnabled="true"
                      hidden="false"
@@ -103,14 +182,24 @@
                 LUIE.MiniMap.OnMapMouseUp(self, button, upInside, ctrl, alt, shift, command)
               </OnMouseUp>
               <Controls>
-                <Control name="$(parent)_Pins"
-                         layer="1">
+                <Control name="$(parent)_Tiles">
+                  <AnchorFill />
+                </Control>
+                <Control name="$(parent)_Links">
+                  <AnchorFill />
+                </Control>
+                <Control name="$(parent)_Polygons">
+                  <AnchorFill />
+                </Control>
+                <Control name="$(parent)_Pins">
                   <AnchorFill />
                 </Control>
               </Controls>
             </Control>
             <StatusBar name="$(parent)_StatusOverlay"
                        layer="2"
+                       tier="HIGH"
+                       level="250"
                        color="ffffff"
                        alpha="0.8"
                        hidden="false">
@@ -119,7 +208,9 @@
                 <Label name="$(parent)_Label"
                        font="ZoFontAnnounceMedium"
                        layer="2"
-                       text="Loading ...">
+                       tier="HIGH"
+                       level="251"
+                       text="">
                   <Anchor point="CENTER"
                           relativeTo="$(parent)"
                           relativePoint="CENTER"
@@ -142,67 +233,124 @@
                   offsetX="-4"
                   offsetY="4" />
         </Label>
-        <Control name="$(parent)_FrameChromeHover"
+        <!-- Drag bar: the bar itself is the mouse-over region and the drag handle; the padlock is its only
+             mouse-enabled child. Mouse exit is checked with MouseIsOver on an update (EsoUI/Ingame/Contextual/Contextual.lua:137),
+             so crossing onto the padlock never counts as leaving. Size and anchors are applied from Lua. -->
+        <Control name="$(parent)_DragBar"
                  mouseEnabled="true"
                  layer="4"
                  tier="HIGH">
-          <Dimensions x="24"
-                      y="24" />
+          <Dimensions x="64"
+                      y="36" />
+          <OnInitialized>
+            LUIE.MiniMap.OnDragBarInitialized(self)
+          </OnInitialized>
           <OnMouseEnter>
-            LUIE.MiniMap.OnFrameChromeHotspotMouseEnter(self)
+            LUIE.MiniMap.OnDragBarMouseEnter(self)
           </OnMouseEnter>
           <OnMouseExit>
-            LUIE.MiniMap.OnFrameChromeHotspotMouseExit(self)
+            LUIE.MiniMap.OnDragBarMouseExit(self)
           </OnMouseExit>
+          <OnDragStart>
+            LUIE.MiniMap.OnDragBarDragStart(self, button)
+          </OnDragStart>
+          <OnMouseUp>
+            LUIE.MiniMap.OnDragBarMouseUp(self, button, upInside, ctrl, alt, shift, command)
+          </OnMouseUp>
           <Controls>
-            <Control name="$(parent)_FrameChrome"
-                     hidden="true"
-                     mouseEnabled="true">
-              <Dimensions x="44"
-                          y="20" />
+            <!-- ZO_DarkThinFrame textures (EsoUI/Libraries/ZO_Templates/WindowTemplates.xml:142-147), inset by the hit padding. -->
+            <Backdrop name="$(parent)_Backdrop"
+                      layer="4"
+                      tier="HIGH"
+                      alpha="0.9">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="TOPLEFT"
+                      offsetX="4"
+                      offsetY="4" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="BOTTOMRIGHT"
+                      offsetX="-4"
+                      offsetY="-4" />
+              <Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds"
+                    edgeFileWidth="64"
+                    edgeFileHeight="8" />
+              <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+            </Backdrop>
+            <Button name="$(parent)_PositionLock"
+                    inherits="ZO_ButtonBehaviorClickSound"
+                    mouseOverBlendMode="ADD"
+                    mouseEnabled="true"
+                    layer="4"
+                    tier="HIGH"
+                    level="1">
+              <Dimensions x="24"
+                          y="24" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_Backdrop"
+                      relativePoint="LEFT"
+                      offsetX="4"
+                      offsetY="0" />
+              <OnInitialized>
+                LUIE.MiniMap.OnPositionLockInitialized(self)
+              </OnInitialized>
+              <OnClicked>
+                LUIE.MiniMap.OnPositionLockClicked(self, button, ctrl, alt, shift, command)
+              </OnClicked>
               <OnMouseEnter>
-                LUIE.MiniMap.OnFrameChromeMouseEnter(self)
+                LUIE.MiniMap.OnPositionLockMouseEnter(self)
               </OnMouseEnter>
               <OnMouseExit>
-                LUIE.MiniMap.OnFrameChromeMouseExit(self)
+                LUIE.MiniMap.OnPositionLockMouseExit(self)
               </OnMouseExit>
+            </Button>
+            <!-- Decorative drag handle (three solid-colour lines); not mouse enabled so the bar receives the drag. -->
+            <Control name="$(parent)_DragHandle"
+                     layer="4"
+                     tier="HIGH"
+                     level="1">
+              <Dimensions x="20"
+                          y="24" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PositionLock"
+                      relativePoint="RIGHT"
+                      offsetX="0"
+                      offsetY="0" />
               <Controls>
-                <Button name="$(parent)_PositionLock"
-                        inherits="ZO_ButtonBehaviorClickSound"
-                        mouseOverBlendMode="ADD"
-                        mouseEnabled="true">
-                  <Dimensions x="20"
-                              y="20" />
-                  <OnInitialized>
-                    LUIE.MiniMap.OnFramePositionLockInitialized(self)
-                  </OnInitialized>
-                  <OnClicked>
-                    LUIE.MiniMap.OnFramePositionLockClicked(self, button, ctrl, alt, shift, command)
-                  </OnClicked>
-                </Button>
-                <Control name="$(parent)_MoveGrip"
-                         inherits="ZO_MouseTooltipBehavior"
-                         mouseEnabled="true">
-                  <Dimensions x="20"
-                              y="20" />
-                  <OnInitialized>
-                    LUIE.MiniMap.OnFrameMoveGripInitialized(self)
-                  </OnInitialized>
-                  <OnMouseDown>
-                    LUIE.MiniMap.OnFrameMoveGripMouseDown(self, button, ctrl, alt, shift, command)
-                  </OnMouseDown>
-                  <OnMouseUp>
-                    LUIE.MiniMap.OnFrameMoveGripMouseUp(self, button, upInside, ctrl, alt, shift, command)
-                  </OnMouseUp>
-                  <Controls>
-                    <Texture name="$(parent)Icon"
-                             resizeToFitFile="true"
-                             textureFile="EsoUI/Art/Minimap/minimap_button_over.dds"
-                             alpha="0.85">
-                      <Anchor point="CENTER" />
-                    </Texture>
-                  </Controls>
-                </Control>
+                <Texture name="$(parent)_Line1"
+                         color="C6C39C"
+                         alpha="0.8">
+                  <Dimensions x="12"
+                              y="2" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="0"
+                          offsetY="-5" />
+                </Texture>
+                <Texture name="$(parent)_Line2"
+                         color="C6C39C"
+                         alpha="0.8">
+                  <Dimensions x="12"
+                              y="2" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="0"
+                          offsetY="0" />
+                </Texture>
+                <Texture name="$(parent)_Line3"
+                         color="C6C39C"
+                         alpha="0.8">
+                  <Dimensions x="12"
+                              y="2" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="0"
+                          offsetY="5" />
+                </Texture>
               </Controls>
             </Control>
           </Controls>
@@ -224,7 +372,7 @@
                   relativeTo="$(parent)_Scroll"
                   relativePoint="CENTER" />
         </Texture>
-        <Control name="$(parent)_ZoomChromeHover"
+        <Control name="$(parent)_ZoomMouseOverArea"
                  mouseEnabled="true"
                  layer="2"
                  tier="HIGH">
@@ -236,10 +384,10 @@
                   offsetX="-54"
                   offsetY="0" />
           <OnMouseEnter>
-            LUIE.MiniMap.OnZoomChromeHoverMouseEnter(self)
+            LUIE.MiniMap.OnZoomMouseOverAreaMouseEnter(self)
           </OnMouseEnter>
           <OnMouseExit>
-            LUIE.MiniMap.OnZoomChromeHoverMouseExit(self)
+            LUIE.MiniMap.OnZoomMouseOverAreaMouseExit(self)
           </OnMouseExit>
         </Control>
         <Button name="$(parent)_ZoomIn"
@@ -264,10 +412,10 @@
             LUIE.MiniMap.OnZoomInClicked(self, button, ctrl, alt, shift, command)
           </OnClicked>
           <OnMouseEnter>
-            LUIE.MiniMap.OnZoomChromeHoverMouseEnter(self)
+            LUIE.MiniMap.OnZoomMouseOverAreaMouseEnter(self)
           </OnMouseEnter>
           <OnMouseExit>
-            LUIE.MiniMap.OnZoomChromeHoverMouseExit(self)
+            LUIE.MiniMap.OnZoomMouseOverAreaMouseExit(self)
           </OnMouseExit>
         </Button>
         <Button name="$(parent)_ZoomOut"
@@ -292,10 +440,10 @@
             LUIE.MiniMap.OnZoomOutClicked(self, button, ctrl, alt, shift, command)
           </OnClicked>
           <OnMouseEnter>
-            LUIE.MiniMap.OnZoomChromeHoverMouseEnter(self)
+            LUIE.MiniMap.OnZoomMouseOverAreaMouseEnter(self)
           </OnMouseEnter>
           <OnMouseExit>
-            LUIE.MiniMap.OnZoomChromeHoverMouseExit(self)
+            LUIE.MiniMap.OnZoomMouseOverAreaMouseExit(self)
           </OnMouseExit>
         </Button>
       </Controls>

@@ -1,4 +1,4 @@
-﻿## Title: Lui Extended
+## Title: Lui Extended
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101051 101052
@@ -202,26 +202,16 @@ modules/InfoPanel/InfoPanel.lua
 
 # Modules - MiniMap
 modules/MiniMap/_Namespace.lua
-modules/MiniMap/_FilterController.lua
-modules/MiniMap/_NativeWorldMapContainer.lua
-modules/MiniMap/_VisibilityController.lua
-modules/MiniMap/_ZoomContext.lua
-modules/MiniMap/_ChromeController.lua
-modules/MiniMap/_InfoPanelIntegration.lua
-modules/MiniMap/_PublicAPI.lua
-modules/MiniMap/_PinDimensions.lua
-modules/MiniMap/_HudScene.lua
-modules/MiniMap/_View.lua
-modules/MiniMap/_MapController.lua
-modules/MiniMap/_MiniMapMapController.lua
-modules/MiniMap/_PinController.lua
-modules/MiniMap/_PinMirrorStateMachine.lua
-modules/MiniMap/_MapEventController.lua
-modules/MiniMap/_FrameChromeStateMachine.lua
-modules/MiniMap/_ZoomChromeStateMachine.lua
-modules/MiniMap/_InputController.lua
-modules/MiniMap/_HudMapPinInteraction.lua
-modules/MiniMap/_Runtime.lua
+modules/MiniMap/MiniMap_PanAndZoom.lua
+modules/MiniMap/MiniMap_TileLayer.lua
+modules/MiniMap/MiniMap_PinLayer.lua
+modules/MiniMap/MiniMap_PlayerPip.lua
+modules/MiniMap/MiniMap_StateMachines.lua
+modules/MiniMap/MiniMap_Frame.lua
+modules/MiniMap/MiniMap_Input.lua
+modules/MiniMap/MiniMap_Visibility.lua
+modules/MiniMap/MiniMap_Integrations.lua
+modules/MiniMap/MiniMap_Manager.lua
 modules/MiniMap/MiniMap.lua
 frontend/MiniMap.xml
 
