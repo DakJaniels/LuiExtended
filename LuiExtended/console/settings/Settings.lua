@@ -806,7 +806,7 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_CHECKBOX,
         label = GetString(LUIE_STRING_LAM_MINIMAP_ENABLE),
-        tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ENABLE_TP),
+        tooltip = GetString(LUIE_STRING_LAM_MINIMAP_DESCRIPTION),
         getFunction = function () return Settings.MiniMap_Enabled end,
         setFunction = function (value) Settings.MiniMap_Enabled = value end,
         default = Defaults.MiniMap_Enabled

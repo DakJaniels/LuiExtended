@@ -812,7 +812,8 @@ function LUIE.CreateSettings()
         "half",
         nil,
         Defaults.ActionBar_Enabled,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     -- Action Bar Description
@@ -830,7 +831,8 @@ function LUIE.CreateSettings()
         "half",
         nil,
         Defaults.CombatInfo_Enabled,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     -- Combat Info Description
@@ -848,7 +850,8 @@ function LUIE.CreateSettings()
         "half",
         nil,
         Defaults.CombatText_Enabled,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     -- Combat Text Description
@@ -866,7 +869,8 @@ function LUIE.CreateSettings()
         "half",
         nil,
         Defaults.SpellCastBuff_Enable,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     -- Buffs & Debuffs Description
@@ -884,7 +888,8 @@ function LUIE.CreateSettings()
         "half",
         nil,
         Defaults.ChatAnnouncements_Enable,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     -- Chat Announcements Module Description
@@ -902,7 +907,8 @@ function LUIE.CreateSettings()
         "half",
         nil,
         Defaults.SlashCommands_Enable,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     -- Slash Commands Module Description
@@ -920,7 +926,8 @@ function LUIE.CreateSettings()
         "half",
         nil,
         Defaults.InfoPanel_Enabled,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     -- InfoPanel Module Description
@@ -932,13 +939,14 @@ function LUIE.CreateSettings()
     -- MiniMap Module
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_MINIMAP_ENABLE),
-        GetString(LUIE_STRING_LAM_MINIMAP_ENABLE_TP),
+        nil,
         function () return Settings.MiniMap_Enabled end,
         function (value) Settings.MiniMap_Enabled = value end,
         "half",
         nil,
         Defaults.MiniMap_Enabled,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     optionsData[#optionsData + 1] = SettingsAPI.CreateDescriptionOption(
@@ -955,7 +963,8 @@ function LUIE.CreateSettings()
         "half",
         nil,
         Defaults.UnitFrames_Enabled,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+        nil,
+        true
     )
 
     -- Unit Frames module description

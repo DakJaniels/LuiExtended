@@ -6,164 +6,50 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
+--- Facade for the HUD minimap. XML handlers, keybinds, settings and InfoPanel call into this table;
+--- the runtime lives in `LUIE_MiniMap_Manager` (modules/MiniMap/MiniMap_Manager.lua).
 --- @class (partial) LUIE.MiniMap : ZO_Object
 --- @field SV MiniMapDefaults
 --- @field Defaults MiniMapDefaults
 --- @field Enabled boolean
 --- @field moduleName string
---- @field zoom number
---- @field fastTravel boolean
---- @field resize boolean
---- @field resizeIsWidthDriven boolean|nil
---- @field view MiniMapView|nil
---- @field mapController MiniMapMapController|nil
---- @field pinController MiniMapPinController|nil
---- @field runtime MiniMapRuntime|nil
---- @field mapEventController MiniMapMapEventController|nil
---- @field pinMirrorStateMachine MiniMapPinMirrorStateMachine|nil
---- @field frameChromeStateMachine MiniMapFrameChromeStateMachine|nil
---- @field inputController MiniMapInputController|nil
---- @field hudSceneFragment MiniMapHUDSceneFragment|nil
---- @field worldMapBlocksMiniMapWork boolean
+--- @field manager LUIE_MiniMap_Manager|nil
 local MiniMap = ZO_Object:Subclass()
 LUIE.MiniMap = MiniMap
 
 MiniMap.moduleName = LUIE.name .. "MiniMap"
 MiniMap.Enabled = false
-MiniMap.zoom = 0.5
-MiniMap.fastTravel = false
-MiniMap.resize = false
-MiniMap.resizeIsWidthDriven = nil
-MiniMap.view = nil
-MiniMap.mapController = nil
-MiniMap.pinController = nil
-MiniMap.runtime = nil
-MiniMap.mapEventController = nil
-MiniMap.pinMirrorStateMachine = nil
-MiniMap.frameChromeStateMachine = nil
-MiniMap.inputController = nil
-MiniMap.hudSceneFragment = nil
-MiniMap.worldMapBlocksMiniMapWork = false
-MiniMap.playerMapMirrorDepth = 0
-MiniMap.playerMapMirrorPendingCallback = nil
-MiniMap.playerMapMirrorZosTilesUpdated = false
-MiniMap.playerMapMirrorZosTilesMapRawName = nil
-MiniMap.playerMapMirrorZosTilesHorizontal = nil
-MiniMap.playerMapMirrorZosTilesVertical = nil
-MiniMap.lastHudMapZoomContextSignature = nil
-MiniMap.pendingPostReloadUILayout = nil
+MiniMap.manager = nil
 
---- Runs after map index restore when the outermost RunWithPlayerMapForMirror finishes.
-function MiniMap.CompletePostPlayerMapMirrorWork()
-    local pendingLayout = MiniMap.pendingPostReloadUILayout
-    if pendingLayout then
-        MiniMap.pendingPostReloadUILayout = nil
-        local mapController = pendingLayout.mapController
-        local mapData = pendingLayout.mapData
-        if mapData and mapController then
-            if MiniMap.ApplyFixedMapScroll(mapData) then
-                -- fixed map position for this zone
-            elseif MiniMap.GetMapFollowsPlayer() and MiniMap.runtime then
-                MiniMap.runtime:ClearFollowScrollCache()
-                MiniMap.runtime:ApplyScrollCenterOnPlayer(
-                    mapController:GetMapContentWidth(),
-                    mapController:GetMapContentHeight()
-                )
-            end
-        end
-    end
-    MiniMap.ApplyFollowRecoveryAfterWorldMap()
-    local nativeContainerWasAttached = MiniMap.IsNativeWorldMapContainerAttached()
-    MiniMap.TryAttachNativeWorldMapContainer()
-    if nativeContainerWasAttached and MiniMap.IsNativeWorldMapContainerAttached() then
-        MiniMap.ReapplyNativeHudMapOverlayLayout()
-    end
-    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
-    if pinMirrorStateMachine.mapReloadCompletePendingAfterMirror then
-        pinMirrorStateMachine.mapReloadCompletePendingAfterMirror = false
-        if pinMirrorStateMachine:IsCurrentState("MapReloading") then
-            pinMirrorStateMachine:NotifyMapReloadComplete()
-        end
-    end
-end
-
---- @param mapController MiniMapMapController
---- @param mapData MiniMapMapData
-function MiniMap.SchedulePostReloadUILayout(mapController, mapData)
-    MiniMap.pendingPostReloadUILayout =
-    {
-        mapController = mapController,
-        mapData = mapData,
-    }
-end
-
---- Runs on every follow tick, so this compares state objects instead of resolving state names.
---- @return boolean
-function MiniMap.IsPinMirrorMachineBusy()
-    local pinMirrorStateMachine = MiniMap.pinMirrorStateMachine
-    if not pinMirrorStateMachine then
-        return false
-    end
-    local currentState = pinMirrorStateMachine:GetCurrentState()
-    if not currentState then
-        return false
-    end
-    return currentState == pinMirrorStateMachine.mapReloadingState
-        or currentState == pinMirrorStateMachine.zoneResetState
-end
-
---- Prefer tile reload over pin-only sync when map raw name changed while world map was blocking work.
---- @param pinMirrorStateMachine MiniMapPinMirrorStateMachine
-function MiniMap.QueuePinMirrorWorkWhileWorldMapBlocked(pinMirrorStateMachine)
-    local mapController = pinMirrorStateMachine.mapController
-    local lastLoadedMapRawName = mapController and mapController.lastLoadedMapRawName
-    if lastLoadedMapRawName and lastLoadedMapRawName ~= GetMapName() then
-        pinMirrorStateMachine.mapReloadQueuedWhileWorldMap = true
-        if not pinMirrorStateMachine.mapReloadQueuedReason then
-            pinMirrorStateMachine.mapReloadQueuedReason = "MapIdentityWhileWorldMap"
-        end
-    else
-        pinMirrorStateMachine.pinSyncQueuedWhileWorldMap = true
-    end
-end
-
---- LUIE waypoint / player overlays on view.pins after native g_mapPinManager refresh.
-function MiniMap.SyncHudOverlayPinsAfterNativeRefresh()
-    if not MiniMap.Enabled then
-        return
-    end
-    local mapController = MiniMap.mapController
-    local pinController = MiniMap.pinController
-    if not mapController or not mapController:IsReady() or not pinController then
-        return
-    end
-    local mapData = mapController:GetMapData()
-    if not mapData then
-        return
-    end
-    pinController:SyncPlayerWaypoint(mapData)
-    pinController:SyncPlayerMapPin(mapData)
-end
-
---- Flush ZOS g_mapRefresh groups and re-apply HUD minimap layout on reparented ZO_WorldMapContainer.
-function MiniMap.ApplyHudNativePinLayoutAfterRefresh()
-    if not MiniMap.Enabled or not MiniMap.IsNativeWorldMapContainerAttached() then
-        return
-    end
-    MiniMap.FlushWorldMapPinRefreshGroups()
-    MiniMap.ReapplyNativeHudMapOverlayLayout()
-end
+--- Exported map mode id for third-party integration (external addons compare against this constant).
+MiniMap.MAP_MODE_LUIE_MINIMAP = 42
 
 MiniMap.PLAYER_PIN_BASE_SIZE = 16
-MiniMap.ZONE_LABEL_CHROME_OFFSET = 4
-MiniMap.FRAME_CHROME_HOVER_SIZE = 24
-MiniMap.FRAME_CHROME_OUTSIDE_OFFSET_X = 2
-MiniMap.FRAME_CHROME_OUTSIDE_OFFSET_Y = 0
-MiniMap.FRAME_CHROME_LEFT_EDGE_MARGIN = 8
-MiniMap.FRAME_CHROME_CONTROL_GAP = 4
-MiniMap.FRAME_CHROME_BAR_WIDTH = 44
-MiniMap.FRAME_CHROME_BAR_HEIGHT = 20
+MiniMap.ZONE_LABEL_OFFSET = 4
+--- Drag bar (padlock + drag handle) sits inside the map's bottom-left corner; the zoom buttons own the bottom-right.
+--- The bar control is the hit region; its backdrop is inset by DRAG_BAR_HIT_PADDING so mouse-over has a few px of grace.
+MiniMap.DRAG_BAR_HIT_PADDING = 4
+MiniMap.DRAG_BAR_CORNER_INSET = 4
+MiniMap.DRAG_BAR_BAR_HEIGHT = 28
+MiniMap.DRAG_BAR_BAR_WIDTH_UNLOCKED = 56
+MiniMap.DRAG_BAR_BAR_WIDTH_LOCKED = 32
 MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
+
+MiniMap.MINIMAP_ZOOM_MIN_FALLBACK = 0.35
+MiniMap.MINIMAP_ZOOM_MAX = 1.8
+MiniMap.MINIMAP_ZOOM_STEP = 0.1
+
+--- Floor matches ZOS: ZO_WorldMap's Update only moves pins every CONSTANTS.PIN_UPDATE_DELAY = 0.04s
+--- (EsoUI/Ingame/Map/WorldMap.lua:55, 1681-1687), so updating or mirroring faster than 40ms re-reads identical data.
+--- Follow scroll and pip headings are per frame regardless (LUIE_MiniMap_Manager:OnFrameUpdate).
+MiniMap.MINIMAP_PIN_REFRESH_MS_MIN = 40
+MiniMap.MINIMAP_PIN_REFRESH_MS_MAX = 500
+
+-- EsoUI/Ingame/Map/MapPin.lua CONSTANTS (DEFAULT_PIN_SIZE = 20, MIN_PIN_SIZE = 18, MIN_PIN_SCALE = 0.6, MAX_PIN_SCALE = 1)
+MiniMap.MINIMAP_PIN_DEFAULT_SIZE = 20
+MiniMap.MINIMAP_PIN_MIN_SIZE = 18
+MiniMap.MINIMAP_PIN_MIN_SCALE = 0.6
+MiniMap.MINIMAP_PIN_MAX_SCALE = 1.0
 
 --- @class MiniMapInfoPanelRestoreAnchor
 --- @field point integer
@@ -199,7 +85,7 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field mountedZoomMultiplier number
 --- @field autoZoomOutAtEdge boolean
 --- @field zoneScrollLockEnabled boolean
---- @field zoneScrollLockByMapName table
+--- @field zoneScrollLockByMapName table<string, { x: number, y: number }>
 --- @field pinScaleQuest number
 --- @field pinScaleGroup number
 --- @field pinScalePoi number
@@ -207,10 +93,8 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field pinScaleDigSite number
 --- @field pinScaleOther number
 --- @field pinScaleHarvestMap number
---- @field pinTypeScales table
---- @field compassOverride number
---- @field keepSquareAspect boolean
---- @field positionGridDivisor number
+--- @field pinTypeScales table<integer, number>
+--- @field compassOverride number Legacy key kept for saved-variable compatibility; no longer read.
 --- @field showPlayerPip boolean
 --- @field playerPipColor { r: number, g: number, b: number, a: number }
 --- @field cameraWedgeColor { r: number, g: number, b: number, a: number }
@@ -224,44 +108,31 @@ MiniMap.PLAYER_CAMERA_PIP_SIZE_RATIO = 6
 --- @field zoneNameFontSize number
 --- @field zoneNameFontStyle number
 --- @field movingPinRefreshMs number
---- @field pinMouseOverRefreshMs number
+--- @field pinMouseOverRefreshMs number Legacy key kept for saved-variable compatibility; no longer read.
 
+--- World-map pin fields the pin layer reads (EsoUI/Ingame/Map/MapPin.lua).
 --- @class (partial) ZO_MapPin
---- @field polygonBlob ZO_PinPolygonBlob|nil
---- @field polygonBlobKey any
---- @field luiMiniMapPolygonOnMiniMap boolean|nil
---- @field luiMiniMapDigSiteZoneName string|nil
---- @field validLocation boolean|nil
+--- @field backgroundControl TextureControl
+--- @field highlightControl TextureControl
+--- @field pinBlob TextureControl|nil
+--- @field polygonBlob PolygonControl|nil
+--- @field radius number|nil
+--- @field borderInformation { borderPoints: { x: number, y: number }[], borderWidth: number, borderHeight: number }|nil
+--- @field m_PinType integer|nil
 
---- World-map pin host control carrying `m_Pin` (ZO map pin instance).
---- @class ZO_WorldMapPinHostControl : Control
---- @field m_Pin ZO_MapPin|nil
-
---- Minimap mirrored pin control (texture root or composite); `zoneName` when synced from world map.
---- @class MiniMapPinControl : Control, TextureControl, TextureCompositeControl
---- @field zoneName string|nil
---- @field luiMiniMapPinIsComposite boolean|nil
---- @field luiMiniMapPinBackground TextureControl|nil
---- @field luiMiniMapPinGlow TextureControl|nil
---- @field luiMiniMapPinTexture string|nil
---- @field luiMiniMapPinColor table|nil
---- @field luiMiniMapLastDrawWidth number|nil
---- @field luiMiniMapLastDrawHeight number|nil
---- @field luiMiniMapTextureAnimKey string|nil
---- @field luiMiniMapTextureAnimTimeline AnimationTimeline|nil
---- @field luiMiniMapCompositeSurfaceIndex number|nil
---- @field luiMiniMapNormalizedX number|nil
---- @field luiMiniMapNormalizedY number|nil
---- @field luiMiniMapPinWidth number|nil
---- @field luiMiniMapPinHeight number|nil
---- @field luiMiniMapPinScale number|nil
---- @field luiMiniMapPinType MapDisplayPinType|nil
---- @field SetTexture fun(self: MiniMapPinControl, texture: string)
---- @field SetColor fun(self: MiniMapPinControl, r: number, g: number, b: number, a?: number)
---- @field SetTextureCoords fun(self: MiniMapPinControl, left: number, right: number, top: number, bottom: number)
---- @field SetTextureRotation fun(self: MiniMapPinControl, radians: number, centerX?: number, centerY?: number)
---- @field ClearAllSurfaces fun(self: MiniMapPinControl)
---- @field AddSurface fun(self: MiniMapPinControl, left: number, right: number, top: number, bottom: number):surfaceIndex: luaindex
+--- Pin entry control (`LUIE_MiniMap_Pin` virtual template).
+--- @class LUIE_MiniMap_PinControl : Control
+--- @field background TextureControl
+--- @field highlight TextureControl
+--- @field worldMapPin ZO_MapPin|nil
+--- @field poolKey any
+--- @field isMoving boolean|nil
+--- @field lastTexture string|nil
+--- @field lastHighlightTexture string|nil
+--- @field lastSize number|nil
+--- @field lastOffsetX number|nil
+--- @field lastOffsetY number|nil
+--- @field lastRotation number|nil
 
 --- @type MiniMapDefaults
 MiniMap.Defaults =
@@ -303,8 +174,6 @@ MiniMap.Defaults =
     pinScaleHarvestMap = 1,
     pinTypeScales = {},
     compassOverride = 0,
-    keepSquareAspect = false,
-    positionGridDivisor = 0,
     showPlayerPip = true,
     playerPipColor = { r = 1, g = 1, b = 1, a = 1 },
     cameraWedgeColor = { r = 1, g = 1, b = 1, a = 1 },
@@ -323,115 +192,49 @@ MiniMap.Defaults =
 --- @type MiniMapDefaults
 MiniMap.SV = ...
 
+--- Dev debug output. Gated by `SV.pinMirrorStateMachineDebug` (toggled from the LAM/LibHarvens Advanced submenu).
+MiniMap.debugLoggingEnabled = false
+
+--- @param formatString string
+--- @param ... any
+function MiniMap.LogDebug(formatString, ...)
+    if not MiniMap.debugLoggingEnabled then
+        return
+    end
+    LUIE:Log("Debug", string.format("[MiniMap] " .. formatString, ...))
+end
+
+--- Re-reads the saved debug flag (settings setFunc) and forwards it to the manager state machine.
+function MiniMap.ApplyDebugLogging()
+    MiniMap.debugLoggingEnabled = MiniMap.SV ~= nil and MiniMap.SV.pinMirrorStateMachineDebug == true
+    local manager = MiniMap.manager
+    if manager and manager.mapStateMachine then
+        manager.mapStateMachine:SetDebugLoggingEnabled(MiniMap.debugLoggingEnabled)
+    end
+end
+
 --- @param mapName string
 --- @return string
 function MiniMap.StripMapNameFormatting(mapName)
     return (string.gsub(mapName, "%^(.+)", ""))
 end
 
-MiniMap.MINIMAP_PIN_REFRESH_MS_MIN = 16
-MiniMap.MINIMAP_PIN_REFRESH_MS_MAX = 500
-
 --- @return number
 function MiniMap.GetMovingPinRefreshMs()
-    local refreshMs = MiniMap.SV.movingPinRefreshMs
+    local refreshMs = MiniMap.SV.movingPinRefreshMs or MiniMap.Defaults.movingPinRefreshMs
     return zo_clamp(refreshMs, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
-end
-
---- @return number
-function MiniMap.GetPinMouseOverRefreshMs()
-    local refreshMs = MiniMap.SV.pinMouseOverRefreshMs
-    return zo_clamp(refreshMs, MiniMap.MINIMAP_PIN_REFRESH_MS_MIN, MiniMap.MINIMAP_PIN_REFRESH_MS_MAX)
-end
-
---- @param key string
---- @param bufferMs number
---- @return boolean
-function MiniMap.ShouldRunThrottled(key, bufferMs)
-    MiniMap.throttle = MiniMap.throttle or {}
-    local entry = MiniMap.throttle[key]
-    local now = GetFrameTimeMilliseconds()
-    if not entry then
-        MiniMap.throttle[key] = { last = now, buffer = bufferMs }
-        return true
-    end
-    if (now - entry.last) >= bufferMs then
-        entry.last = now
-        return true
-    end
-    return false
-end
-
---- @param delta number
-function MiniMap.Zoom(delta)
-    if not MiniMap.Enabled or not MiniMap.mapController then
-        return
-    end
-    MiniMap.mapController:ApplyZoom(delta)
-end
-
-function MiniMap.RecenterFollow()
-    if not MiniMap.Enabled then
-        return
-    end
-    MiniMap.SV.followPlayer = true
-    MiniMap.runtime:SetMapFollowsPlayer(true)
-    MiniMap.runtime:ClearFollowScrollCache()
-    if MiniMap.mapController and MiniMap.mapController:IsReady() then
-        MiniMap.runtime:ApplyScrollCenterOnPlayer(
-            MiniMap.mapController:GetMapContentWidth(),
-            MiniMap.mapController:GetMapContentHeight()
-        )
-    end
-end
-
---- @return boolean
-function MiniMap.GetMapFollowsPlayer()
-    if MiniMap.SV.zoneScrollLockEnabled == true then
-        return false
-    end
-    if MiniMap.runtime then
-        return MiniMap.runtime.mapFollowsPlayer
-    end
-    return MiniMap.SV.followPlayer
 end
 
 --- @return number
 function MiniMap.GetPlayerPinDrawSize()
-    local scale = MiniMap.SV.playerPinScale
+    local scale = MiniMap.SV.playerPinScale or MiniMap.Defaults.playerPinScale
     return zo_round(MiniMap.PLAYER_PIN_BASE_SIZE * scale)
-end
-
-function MiniMap.ClampSavedDefaultZoom()
-    local zoomMinimum = 0.35
-    if MiniMap.mapController then
-        zoomMinimum = MiniMap.mapController:GetMinimumZoom()
-    end
-    if MiniMap.SV.resetZoomLevel < zoomMinimum then
-        MiniMap.SV.resetZoomLevel = zoomMinimum
-    elseif MiniMap.SV.resetZoomLevel > 1.8 then
-        MiniMap.SV.resetZoomLevel = 1.8
-    end
-end
-
-function MiniMap.ApplyInteractionLocks()
-    if not MiniMap.view then
-        return
-    end
-    MiniMap.view:ApplyInteractionLocks(MiniMap.SV)
-end
-
-function MiniMap.ApplyChromeVisibility()
-    if not MiniMap.view then
-        return
-    end
-    MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
 end
 
 --- @param savedColor { r: number, g: number, b: number, a: number }|nil
 --- @param defaultColor { r: number, g: number, b: number, a: number }
---- @return number r, number g, number b, number a
-local function GetMiniMapSavedColorComponents(savedColor, defaultColor)
+--- @return number red, number green, number blue, number alpha
+local function GetSavedColorComponents(savedColor, defaultColor)
     if not savedColor then
         return defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a
     end
@@ -454,63 +257,12 @@ local function GetMiniMapSavedColorComponents(savedColor, defaultColor)
     return red, green, blue, alpha
 end
 
---- @return number r, number g, number b, number a
+--- @return number red, number green, number blue, number alpha
 function MiniMap.GetPlayerPipColor()
-    local defaults = MiniMap.Defaults
-    local settings = MiniMap.SV
-    local defaultColor = defaults.playerPipColor
-    local savedColor = settings.playerPipColor
-    return GetMiniMapSavedColorComponents(savedColor, defaultColor)
+    return GetSavedColorComponents(MiniMap.SV.playerPipColor, MiniMap.Defaults.playerPipColor)
 end
 
---- @return number r, number g, number b, number a
-function MiniMap.GetCameraWedgeColor()
-    local defaults = MiniMap.Defaults
-    local settings = MiniMap.SV
-    local defaultColor = defaults.cameraWedgeColor
-    local savedColor = settings.cameraWedgeColor
-    return GetMiniMapSavedColorComponents(savedColor, defaultColor)
-end
-
-function MiniMap.ApplyPlayerPipColors()
-    if not MiniMap.view then
-        return
-    end
-    local playerRed, playerGreen, playerBlue, playerAlpha = MiniMap.GetPlayerPipColor()
-    local wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha = MiniMap.GetCameraWedgeColor()
-    MiniMap.view.player:SetColor(playerRed, playerGreen, playerBlue, playerAlpha)
-    MiniMap.view.playerCam:SetColor(wedgeRed, wedgeGreen, wedgeBlue, wedgeAlpha)
-    if MiniMap.IsNativeWorldMapContainerAttached() then
-        MiniMap.ApplyNativeWorldMapPlayerPinColors()
-    end
-end
-
-function MiniMap.ApplyLiveSettings()
-    if not MiniMap.Enabled or not MiniMap.view then
-        return
-    end
-    MiniMap.view:ApplyInteractionLocks(MiniMap.SV)
-    MiniMap.view:ApplyChromeVisibility(MiniMap.SV)
-    MiniMap.ApplyZoneNameFont()
-    MiniMap.view:ApplyPlayerIconDimensions()
-    if MiniMap.IsNativeWorldMapContainerAttached() then
-        MiniMap.ApplyNativeHudPlayerPinScale()
-    end
-    MiniMap.ApplyPlayerPipColors()
-    MiniMap.ApplyHudMapEdgeBackground()
-    MiniMap.runtime:UpdateCenterPlayerPipVisibility()
-    if MiniMap.IsNativeWorldMapContainerAttached() then
-        MiniMap.TickHudMovingAndPlayerPins()
-    end
-    MiniMap.inputController:ApplyFrameDragMouseEnabled()
-    MiniMap.ApplyChromeFromSettings()
-    MiniMap.ApplyChromeStacking()
-    MiniMap.RefreshSceneFragments()
-    MiniMap.UpdateConditionalVisibility()
-    if MiniMap.pinController and MiniMap.mapController and MiniMap.mapController:IsReady() then
-        local mapData = MiniMap.mapController:GetMapData()
-        if mapData then
-            MiniMap.pinController:RelayoutActivePinsForUserPinScale(mapData)
-        end
-    end
+--- @return number red, number green, number blue, number alpha
+function MiniMap.GetPlayerCameraPipColor()
+    return GetSavedColorComponents(MiniMap.SV.cameraWedgeColor, MiniMap.Defaults.cameraWedgeColor)
 end
