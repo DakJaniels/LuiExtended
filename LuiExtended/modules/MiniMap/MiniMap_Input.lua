@@ -292,6 +292,23 @@ function LUIE_MiniMap_Input:StopDragBarMouseOverUpdate()
     EVENT_MANAGER:UnregisterForUpdate(MINIMAP_DRAG_BAR_MOUSE_OVER_UPDATE_NAME)
 end
 
+--- Same flow as ZO_MouseTooltipBehavior_OnMouseEnter (EsoUI/Libraries/ZO_Templates/ControlTemplates.lua:24-36), but
+--- SetTooltipText (EsoUI/Libraries/ZO_Templates/Tooltip.lua:57) adds the line with font "" = the ZO_BaseTooltip keyboard
+--- default, which does not render on GameCore where a mouse is still usable. Add the line with the platform body font
+--- (LUIE.Font.GetTooltipBodyFont: "" on keyboard, ZoFontGamepad18 on GameCore) instead.
+--- @param control Control
+local function ShowMouseTooltip(control)
+    local tooltipString = control:GetTooltipString()
+    if not tooltipString or tooltipString == "" then
+        return
+    end
+    local tooltipControl = InformationTooltip
+    control.activeMouseTooltipControl = tooltipControl
+    InitializeTooltip(tooltipControl)
+    ZO_Tooltips_SetupDynamicTooltipAnchors(tooltipControl, control)
+    tooltipControl:AddLine(tooltipString, LUIE.Font.GetTooltipBodyFont(), ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+end
+
 --- Bar body: pan cursor + "drag to move" tooltip while unlocked (chat tabs do this, EsoUI/Ingame/ChatSystem/SharedChatSystem.xml:57-65).
 --- @param barControl Control
 function LUIE_MiniMap_Input:OnDragBarMouseEnter(barControl)
@@ -300,7 +317,7 @@ function LUIE_MiniMap_Input:OnDragBarMouseEnter(barControl)
         return
     end
     WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PAN)
-    ZO_MouseTooltipBehavior_OnMouseEnter(barControl)
+    ShowMouseTooltip(barControl)
 end
 
 --- @param barControl Control
@@ -312,7 +329,7 @@ end
 --- @param lockButton ButtonControl
 function LUIE_MiniMap_Input:OnPositionLockMouseEnter(lockButton)
     self:StartDragBarMouseOverUpdate()
-    ZO_MouseTooltipBehavior_OnMouseEnter(lockButton)
+    ShowMouseTooltip(lockButton)
 end
 
 --- @param lockButton ButtonControl
