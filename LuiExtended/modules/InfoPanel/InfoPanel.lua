@@ -1026,7 +1026,7 @@ function InfoPanel.ApplyTransparency()
         return
     end
 
-    local alpha = InfoPanel.SV.transparency / 100
+    local alpha = InfoPanel.SV.transparency * 0.01
     uiPanel:SetAlpha(alpha)
 end
 
@@ -1078,7 +1078,7 @@ function InfoPanel.CancelCombatHideAndShow()
         return
     end
     panelHiddenByCombat = false
-    local targetAlpha = (InfoPanel.SV.transparency and InfoPanel.SV.transparency / 100) or 1
+    local targetAlpha = (InfoPanel.SV.transparency and InfoPanel.SV.transparency * 0.01) or 1
     uiPanel:SetHidden(false)
     uiPanel:SetAlpha(0)
     if infoPanelRefreshGroup then
@@ -1090,7 +1090,7 @@ function InfoPanel.CancelCombatHideAndShow()
             eventManager:UnregisterForUpdate(combatFadeUpdateName)
             return
         end
-        local elapsed = (GetFrameTimeMilliseconds() - startTime) / 1000
+        local elapsed = (GetFrameTimeMilliseconds() - startTime) * 0.001
         if elapsed >= COMBAT_FADE_DURATION then
             eventManager:UnregisterForUpdate(combatFadeUpdateName)
             uiPanel:SetAlpha(targetAlpha)
@@ -1125,7 +1125,7 @@ function InfoPanel.OnPlayerCombatState(inCombat)
                 eventManager:UnregisterForUpdate(combatFadeUpdateName)
                 return
             end
-            local elapsed = (GetFrameTimeMilliseconds() - startTime) / 1000
+            local elapsed = (GetFrameTimeMilliseconds() - startTime) * 0.001
             if elapsed >= COMBAT_FADE_DURATION then
                 eventManager:UnregisterForUpdate(combatFadeUpdateName)
                 uiPanel:SetAlpha(0)

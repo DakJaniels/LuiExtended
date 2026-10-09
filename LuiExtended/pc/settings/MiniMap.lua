@@ -269,7 +269,7 @@ function MiniMap.CreateSettings()
             step = 1,
             getFunc = function () return (MiniMap.SV.resetZoomLevel or Defaults.resetZoomLevel) * 100 end,
             setFunc = function (value)
-                MiniMap.SV.resetZoomLevel = value / 100
+                MiniMap.SV.resetZoomLevel = value * 0.01
                 MiniMap.ClampSavedDefaultZoom()
                 MiniMap.ApplyZoom(0)
             end,
@@ -293,7 +293,7 @@ function MiniMap.CreateSettings()
                 return value * 100
             end,
             setFunc = function (value)
-                MiniMap.SV[slider.key] = value / 100
+                MiniMap.SV[slider.key] = value * 0.01
                 MiniMap.ApplyContextDefaultZoom()
             end,
             width = "full",
@@ -384,7 +384,7 @@ function MiniMap.CreateSettings()
             step = 1,
             getFunc = function () return (MiniMap.SV.defaultPinScale or Defaults.defaultPinScale) * 100 end,
             setFunc = function (value)
-                MiniMap.SV.defaultPinScale = value / 100
+                MiniMap.SV.defaultPinScale = value * 0.01
                 MiniMap.ApplySettings()
             end,
             width = "full",
@@ -403,7 +403,7 @@ function MiniMap.CreateSettings()
             step = 5,
             getFunc = function () return (MiniMap.SV[category.key] or 1) * 100 end,
             setFunc = function (value)
-                MiniMap.SV[category.key] = value / 100
+                MiniMap.SV[category.key] = value * 0.01
                 MiniMap.ApplySettings()
             end,
             width = "half",
@@ -464,7 +464,7 @@ function MiniMap.CreateSettings()
             step = 5,
             getFunc = function () return (MiniMap.SV.playerPinScale or Defaults.playerPinScale) * 100 end,
             setFunc = function (value)
-                MiniMap.SV.playerPinScale = value / 100
+                MiniMap.SV.playerPinScale = value * 0.01
                 MiniMap.ApplySettings()
             end,
             width = "full",

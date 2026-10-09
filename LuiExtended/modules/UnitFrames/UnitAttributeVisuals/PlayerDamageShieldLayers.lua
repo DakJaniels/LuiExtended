@@ -213,9 +213,9 @@ end
 --- @return number
 local function GetPlayerShieldFillAlpha()
     if UnitFrames.SV.CustomShieldBarSeparate then
-        return UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100) or 1
+        return UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha * 0.01) or 1
     end
-    return UnitFrames.SV.ShieldAlpha / 100
+    return UnitFrames.SV.ShieldAlpha * 0.01
 end
 
 --- @return number red, number green, number blue, number fullAlpha

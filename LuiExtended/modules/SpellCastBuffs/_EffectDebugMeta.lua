@@ -876,7 +876,7 @@ local function addUnitBuffTimingLines(meta, control, unitTag, addLine)
     end
 
     if control.duration and control.duration > 0 then
-        addLine("LUIE Duration (internal)", formatSeconds(control.duration / 1000))
+        addLine("LUIE Duration (internal)", formatSeconds(control.duration * 0.001))
     end
 
     if meta and meta.buffListIndex and isMundusStoneBuffIndex(unitTag, meta.buffListIndex) then
@@ -911,7 +911,7 @@ local function addBuffAbilityApiDebugLines(abilityId, unitTag, addLine)
 
     local durationMs = GetAbilityDuration(abilityId, nil, unitTag)
     if durationMs and durationMs > 0 then
-        addLine("GetAbilityDuration (def)", string.format("%s ms (%.2fs)", tostring(durationMs), durationMs / 1000))
+        addLine("GetAbilityDuration (def)", string.format("%s ms (%.2fs)", tostring(durationMs), durationMs * 0.001))
     end
 
     local cooldownMs = GetAbilityCooldown(abilityId, unitTag)
@@ -1119,8 +1119,8 @@ local function calculateBuffIconQuadrant(control)
     local middleX = (left + right) / (2 * scale)
     local middleY = (top + bottom) / (2 * scale)
     local screenWidth, screenHeight = GuiRoot:GetDimensions()
-    local screenMidX = screenWidth / 2
-    local screenMidY = screenHeight / 2
+    local screenMidX = screenWidth * 0.5
+    local screenMidY = screenHeight * 0.5
 
     if middleX >= screenMidX and middleY < screenMidY then
         return QUAD_TOPRIGHT

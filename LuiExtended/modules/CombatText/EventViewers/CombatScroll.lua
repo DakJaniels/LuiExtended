@@ -124,7 +124,7 @@ function CombatTextCombatScrollEventViewer:View(combatType, powerType, value, ab
     end
 
     local w, h = panel:GetDimensions()
-    local radiusW, radiusH = w / 2, h / 2
+    local radiusW, radiusH = w * 0.5, h * 0.5
     local offsetX, offsetY = 0, 0
 
     if (point == TOP) then

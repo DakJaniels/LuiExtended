@@ -278,7 +278,7 @@ LUIE.Defaults =
         ChatTab = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true },
         TimeStamp = false,
         TimeStampFormat = "HH:m:s",
-        TimeStampColor = { 143 / 255, 143 / 255, 143 / 255 },
+        TimeStampColor = { 0.56, 0.56, 0.56 },
         LcmUseLuiExtendedTimestampFormat = true,
         Social =
         {

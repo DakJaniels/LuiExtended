@@ -237,8 +237,8 @@ function LUIE_PlayerDodgePrediction:PositionMarkers(bar, predicted, effectiveMax
         ApplyMarkerColor(lineLeft, canAfford)
         ApplyMarkerColor(lineRight, canAfford)
         local percent = zo_clamp(predicted / effectiveMax, 0, 1)
-        local halfSpan = zo_min((barWidth * percent) / 2, zo_max(0, (barWidth / 2) - MARKER_WIDTH))
-        local centerX = barWidth / 2
+        local halfSpan = zo_min((barWidth * percent) * 0.5, zo_max(0, (barWidth * 0.5) - MARKER_WIDTH))
+        local centerX = barWidth * 0.5
         local leftX = zo_floor(centerX - halfSpan - MARKER_WIDTH)
         local rightX = zo_floor(centerX + halfSpan)
         lineLeft:ClearAnchors()

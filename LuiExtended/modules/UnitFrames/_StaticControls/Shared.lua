@@ -732,7 +732,7 @@ function FrameObject:UpdateStaticControlDeadAndGroupAlpha()
         end
     end
     if self.unitTag and "group" == (zo_strsub(self.unitTag, 0, 5)) and self.control then
-        self.control:SetAlpha(IsUnitInGroupSupportRange(self.unitTag) and (UnitFrames.SV.GroupAlpha * 0.01) or (UnitFrames.SV.GroupAlpha * 0.01) / 2)
+        self.control:SetAlpha(IsUnitInGroupSupportRange(self.unitTag) and (UnitFrames.SV.GroupAlpha * 0.01) or (UnitFrames.SV.GroupAlpha * 0.01) * 0.5)
     end
 end
 

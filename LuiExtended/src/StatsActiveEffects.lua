@@ -36,7 +36,7 @@ local function NormalizeScbTimeToSeconds(endsMsOrSec)
         return nil
     end
     if endsMsOrSec > 1000000 then
-        return endsMsOrSec / 1000
+        return endsMsOrSec * 0.001
     end
     return endsMsOrSec
 end
@@ -307,11 +307,11 @@ function LUIE.ResolveStatsActiveEffectTooltipValues(abilityId, startTime, endTim
         elseif effectOverride.tooltipValue2Mod then
             value2 = zo_floor(timer + effectOverride.tooltipValue2Mod + 0.5)
         elseif effectOverride.tooltipValue2Id then
-            value2 = zo_floor((GetAbilityDuration(effectOverride.tooltipValue2Id) or 0) + 0.5) / 1000
+            value2 = zo_floor((GetAbilityDuration(effectOverride.tooltipValue2Id) or 0) + 0.5) * 0.001
         end
         value3 = effectOverride.tooltipValue3 or 0
     end
-    timer = zo_floor((timer * 10) + 0.5) / 10
+    timer = zo_floor((timer * 10) + 0.5) * 0.1
     return timer, value2, value3
 end
 

@@ -322,7 +322,7 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
                 local abilityDurationMs = GetAbilityDuration(abilityId, nil, unitTag)
                 if abilityDurationMs and abilityDurationMs > 0 then
                     beginTime = GetGameTimeSeconds()
-                    duration = abilityDurationMs / 1000
+                    duration = abilityDurationMs * 0.001
                     endTime = beginTime + duration
                 end
             end
@@ -332,7 +332,7 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
         if effectOverride and effectOverride.falloffDuration and effectOverride.falloffDuration > 0 then
             if endTime == 0 or duration <= 0 then
                 beginTime = GetGameTimeSeconds()
-                duration = effectOverride.falloffDuration / 1000
+                duration = effectOverride.falloffDuration * 0.001
                 endTime = beginTime + duration
             end
         end

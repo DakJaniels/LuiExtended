@@ -61,7 +61,7 @@ end
 --- @param number number The raw coordinate value
 --- @return string Formatted coordinate string
 local function FormatCoords(number)
-    return ("%05.02f"):format(FormatGPSCoords(number) / 100)
+    return ("%05.02f"):format(FormatGPSCoords(number) * 0.01)
 end
 
 -- Account specific DEBUG for ArtOfShred (These are only registered to give me some additional debug options)

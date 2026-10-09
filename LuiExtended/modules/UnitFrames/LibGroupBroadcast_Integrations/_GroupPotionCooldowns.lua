@@ -211,7 +211,7 @@ local function UpdatePotionCooldownDisplay(unitTag, potionData)
 
         -- Show remaining time if enabled
         if Settings.showRemainingTime and label then
-            local seconds = zo_ceil(remainingMS / 1000)
+            local seconds = zo_ceil(remainingMS * 0.001)
             label:SetText(string.format("|cFF6666%ds|r", seconds))
             label:SetHidden(false)
         elseif label then

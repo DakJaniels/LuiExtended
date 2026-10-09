@@ -109,7 +109,7 @@ end
 --- @param remain integer
 --- @return string
 local function FormatDurationSeconds(remain)
-    return string_format((ActionBar.SV.BarMillis and ((remain < ActionBar.SV.BarMillisThreshold * 1000) or ActionBar.SV.BarMillisAboveTen)) and "%.1f" or "%.1d", remain / 1000)
+    return string_format((ActionBar.SV.BarMillis and ((remain < ActionBar.SV.BarMillisThreshold * 1000) or ActionBar.SV.BarMillisAboveTen)) and "%.1f" or "%.1d", remain * 0.001)
 end
 
 --- Forward declarations (OnAbilityUsed is defined above these helpers).
@@ -1521,7 +1521,7 @@ function ActionBar.OnUpdate(currentTimeMS)
                 text = zo_floor(remain / 60000) .. "m"
             elseif remain > 60000 then
                 local minutesPart = zo_floor(remain / 60000)
-                local secondsPart = remain / 1000 - 60 * minutesPart
+                local secondsPart = remain * 0.001 - 60 * minutesPart
                 text = minutesPart .. ":" .. string_format("%.2d", secondsPart)
             else
                 text = string_format(ActionBar.SV.PotionTimerMillis and "%.1f" or "%.1d", 0.001 * remain)
@@ -1974,7 +1974,7 @@ function ActionBar.BarHighlightSwap(abilityId)
     if duration > 0 then
         local fakeDuration = GetUpdatedAbilityDuration(duration) - GetUpdatedAbilityDuration(durationMod)
         local timeStarted = GetGameTimeSeconds()
-        local timeEnding = timeStarted + (fakeDuration / 1000)
+        local timeEnding = timeStarted + (fakeDuration * 0.001)
         ActionBar.OnEffectChanged(EFFECT_RESULT_GAINED, nil, nil, unitTag, timeStarted, timeEnding, 0, nil, nil, 1, ABILITY_TYPE_BONUS, 0, nil, nil, abilityId, 1, true, nil)
         return
     end

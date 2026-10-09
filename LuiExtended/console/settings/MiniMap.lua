@@ -263,7 +263,7 @@ function MiniMap.CreateConsoleSettings()
             format = "%.0f",
             getFunction = function () return (MiniMap.SV.resetZoomLevel or Defaults.resetZoomLevel) * 100 end,
             setFunction = function (value)
-                MiniMap.SV.resetZoomLevel = value / 100
+                MiniMap.SV.resetZoomLevel = value * 0.01
                 MiniMap.ClampSavedDefaultZoom()
                 MiniMap.ApplyZoom(0)
             end,
@@ -287,7 +287,7 @@ function MiniMap.CreateConsoleSettings()
                 return value * 100
             end,
             setFunction = function (value)
-                MiniMap.SV[slider.key] = value / 100
+                MiniMap.SV[slider.key] = value * 0.01
                 MiniMap.ApplyContextDefaultZoom()
             end,
             default = (Defaults[slider.key] or 0.5) * 100,
@@ -358,7 +358,7 @@ function MiniMap.CreateConsoleSettings()
             format = "%.0f",
             getFunction = function () return (MiniMap.SV.defaultPinScale or Defaults.defaultPinScale) * 100 end,
             setFunction = function (value)
-                MiniMap.SV.defaultPinScale = value / 100
+                MiniMap.SV.defaultPinScale = value * 0.01
                 MiniMap.ApplySettings()
             end,
             default = Defaults.defaultPinScale * 100,
@@ -378,7 +378,7 @@ function MiniMap.CreateConsoleSettings()
             format = "%.0f",
             getFunction = function () return (MiniMap.SV[category.key] or 1) * 100 end,
             setFunction = function (value)
-                MiniMap.SV[category.key] = value / 100
+                MiniMap.SV[category.key] = value * 0.01
                 MiniMap.ApplySettings()
             end,
             default = 100,
@@ -429,7 +429,7 @@ function MiniMap.CreateConsoleSettings()
             format = "%.0f",
             getFunction = function () return (MiniMap.SV.playerPinScale or Defaults.playerPinScale) * 100 end,
             setFunction = function (value)
-                MiniMap.SV.playerPinScale = value / 100
+                MiniMap.SV.playerPinScale = value * 0.01
                 MiniMap.ApplySettings()
             end,
             default = Defaults.playerPinScale * 100,

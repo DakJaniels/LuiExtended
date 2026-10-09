@@ -2193,7 +2193,7 @@ function CombatInfo.CreateSettings()
                     return tonumber(string_format("%.0f", 100 * Settings.cct.controlScale))
                 end,
                 setFunc = function (newValue)
-                    Settings.cct.controlScale = newValue / 100
+                    Settings.cct.controlScale = newValue * 0.01
                     CrowdControlTracker:InitControls()
                 end,
             },

@@ -124,8 +124,8 @@ local function ApplyAbilityFrameTextureCoords(texture, iconSize)
     if IsInGamepadPreferredMode() then
         texture:SetTextureCoords(0.1094, 0.8906, 0.1094, 0.8906)
     else
-        local inset = (64 - iconSize) / 2 / 64
-        local outer = (64 + iconSize) / 2 / 64
+        local inset = (64 - iconSize) * 0.5 / 64
+        local outer = (64 + iconSize) * 0.5 / 64
         texture:SetTextureCoords(inset, outer, inset, outer)
     end
 end
@@ -546,7 +546,7 @@ function AbilityAlerts.AlertUpdate(currentTime)
             --
 
             if alert.data.showDuration then
-                alert.timer:SetText(alert.data.showDuration and string_format(" %.1f", remain / 1000) or "")
+                alert.timer:SetText(alert.data.showDuration and string_format(" %.1f", remain * 0.001) or "")
                 alert.timer:SetColor(unpack(CombatInfo.SV.alerts.colors.alertTimer))
             end
             if postCast <= -1000 then
@@ -769,7 +769,7 @@ function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier
     alert.modifier:SetText(alert.data.textModifier)
     alert.modifier:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
     alert.mitigation:SetText(textMitigation)
-    alert.timer:SetText(alert.data.showDuration and string_format(" %.1f", remain / 1000) or "")
+    alert.timer:SetText(alert.data.showDuration and string_format(" %.1f", remain * 0.001) or "")
     alert.timer:SetColor(unpack(CombatInfo.SV.alerts.colors.alertTimer))
     alert.icon:SetHidden(false)
     alert:SetHidden(false)

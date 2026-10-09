@@ -1148,7 +1148,7 @@ end
 -- Runs on the EVENT_GROUP_SUPPORT_RANGE_UPDATE listener.
 function UnitFrames.OnGroupSupportRangeUpdate(eventCode, unitTag, status)
     if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].control then
-        UnitFrames.CustomFrames[unitTag].control:SetAlpha(status and (UnitFrames.SV.GroupAlpha * 0.01) or (UnitFrames.SV.GroupAlpha * 0.01) / 2)
+        UnitFrames.CustomFrames[unitTag].control:SetAlpha(status and (UnitFrames.SV.GroupAlpha * 0.01) or (UnitFrames.SV.GroupAlpha * 0.01) * 0.5)
     end
 end
 
@@ -2516,7 +2516,7 @@ local function calculateFramePosition(index, itemsPerColumn, spacerHeight, resou
 
     -- Add extra spacers if enabled (every 4 members)
     if UnitFrames.SV.RaidSpacers then
-        local spacersInCurrentColumn = zo_floor((row - 1) / 4)
+        local spacersInCurrentColumn = zo_floor((row - 1) * 0.25)
         yOffset = yOffset + (spacerHeight * spacersInCurrentColumn)
     end
 
@@ -2659,8 +2659,8 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
     local totalHeight = (totalFrameHeight + frameSpacing) * rows - frameSpacing -- Subtract last spacing
 
     if UnitFrames.SV.RaidSpacers then
-        totalWidth = totalWidth + (spacerHeight * (rows / 4))
-        totalHeight = totalHeight + (spacerHeight * zo_floor((rows - 1) / 4))
+        totalWidth = totalWidth + (spacerHeight * (rows * 0.25))
+        totalHeight = totalHeight + (spacerHeight * zo_floor((rows - 1) * 0.25))
     end
 
     raid:SetDimensions(totalWidth, totalHeight)
@@ -3008,7 +3008,7 @@ end
 
 function UnitFrames.CustomFramesGroupAlpha()
     local alphaGroup = 0.01 * UnitFrames.SV.GroupAlpha
-    local alphaGroupOutOfRange = alphaGroup / 2
+    local alphaGroupOutOfRange = alphaGroup * 0.5
     for i = 1, 4 do
         CustomFramesSetGroupMemberAlpha("SmallGroup" .. i, alphaGroup, alphaGroupOutOfRange)
     end

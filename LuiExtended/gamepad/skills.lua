@@ -287,7 +287,7 @@ LUIE.HookGamePadStats = function ()
         local contentDuration = contentEndTime - contentStartTime
         if contentDuration > 0 then
             local function OnTimerUpdate()
-                local timeLeft = contentEndTime - (GetFrameTimeMilliseconds() / 1000.0)
+                local timeLeft = contentEndTime - (GetFrameTimeMilliseconds() * 0.001)
 
                 local timeLeftText = ZO_FormatTime(timeLeft, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
 

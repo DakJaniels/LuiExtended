@@ -303,7 +303,7 @@ function LUIE_CompanionAbilitySlot:ApplyEffectVisual(settings, effectRemainingMs
 
     if self.durationLabel then
         if settings.showEffectTimer and effectRemainingMs and effectRemainingMs > 0 then
-            local labelSeconds = zo_ceil(effectRemainingMs / 1000)
+            local labelSeconds = zo_ceil(effectRemainingMs * 0.001)
             if labelSeconds > 0 then
                 self.durationLabel:SetText(tostring(labelSeconds))
                 self.durationLabel:SetHidden(false)

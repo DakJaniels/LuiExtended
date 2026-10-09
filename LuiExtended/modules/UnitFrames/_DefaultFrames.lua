@@ -352,7 +352,7 @@ local function ApplyPyramidPlayerFrameLayout(verticalAdjust)
         local buttonCenterX = ActionButton5:GetCenter()
         local buttonTop = ActionButton5:GetTop()
         local healthBottom = buttonTop - PYRAMID_HEALTH_BUTTON_GAP - verticalAdjust
-        local healthCenterY = healthBottom - (healthControl:GetHeight() / 2)
+        local healthCenterY = healthBottom - (healthControl:GetHeight() * 0.5)
         local desiredOffsetX, desiredOffsetY = GetGuiRootOffsetForAnchorPoint(healthElement.primaryAnchorPoint, buttonCenterX, healthCenterY)
         ApplyHudElementGuiRootOffset(healthElement, desiredOffsetX, desiredOffsetY)
     end
@@ -364,7 +364,7 @@ local function ApplyPyramidPlayerFrameLayout(verticalAdjust)
     if magickaElement then
         local magickaControl = magickaElement:GetControl()
         local anchorScreenX = healthCenterX + PYRAMID_MAGICKA_OFFSET_X
-        local anchorScreenY = healthBottom + PYRAMID_MAGICKA_OFFSET_Y + (magickaControl:GetHeight() / 2)
+        local anchorScreenY = healthBottom + PYRAMID_MAGICKA_OFFSET_Y + (magickaControl:GetHeight() * 0.5)
         local desiredOffsetX, desiredOffsetY = GetGuiRootOffsetForAnchorPoint(magickaElement.primaryAnchorPoint, anchorScreenX, anchorScreenY)
         ApplyHudElementGuiRootOffset(magickaElement, desiredOffsetX, desiredOffsetY)
     end
@@ -372,7 +372,7 @@ local function ApplyPyramidPlayerFrameLayout(verticalAdjust)
     if staminaElement then
         local staminaControl = staminaElement:GetControl()
         local anchorScreenX = healthCenterX + PYRAMID_STAMINA_OFFSET_X
-        local anchorScreenY = healthBottom + PYRAMID_STAMINA_OFFSET_Y + (staminaControl:GetHeight() / 2)
+        local anchorScreenY = healthBottom + PYRAMID_STAMINA_OFFSET_Y + (staminaControl:GetHeight() * 0.5)
         local desiredOffsetX, desiredOffsetY = GetGuiRootOffsetForAnchorPoint(staminaElement.primaryAnchorPoint, anchorScreenX, anchorScreenY)
         ApplyHudElementGuiRootOffset(staminaElement, desiredOffsetX, desiredOffsetY)
     end
@@ -570,8 +570,8 @@ function UnitFrames.SetDefaultFramesTransparency(min_pct_value, max_pct_value)
         UnitFrames.SV.DefaultIncTransparency = max_pct_value
     end
 
-    local min_value = UnitFrames.SV.DefaultOocTransparency / 100
-    local max_value = UnitFrames.SV.DefaultIncTransparency / 100
+    local min_value = UnitFrames.SV.DefaultOocTransparency * 0.01
+    local max_value = UnitFrames.SV.DefaultIncTransparency * 0.01
 
     local animationIndex = 1
     --- @type ZO_PlayerAttributeBarControl

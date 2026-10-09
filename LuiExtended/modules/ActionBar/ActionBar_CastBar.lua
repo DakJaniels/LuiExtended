@@ -229,7 +229,7 @@ end
 --- Input lag for cast/weave display (PerfectWeave: zo_min(GetLatency() / 2 - 1, 48)).
 --- @return integer
 function CastBar.GetCastBarInputLagMs()
-    return zo_min(zo_max(GetLatency() / 2 - 1, 0), 48)
+    return zo_min(zo_max(GetLatency() * 0.5 - 1, 0), 48)
 end
 
 --- @return integer remainMs
@@ -247,7 +247,7 @@ CastBar.TIMER_FORMAT_SEC_THOUSANDTHS = 3
 --- @return string
 function CastBar.FormatCastBarTimerText(remainingCastMs)
     local format = ActionBar.SV.CastBarTimerFormat or CastBar.TIMER_FORMAT_MS
-    local remainingSec = remainingCastMs / 1000
+    local remainingSec = remainingCastMs * 0.001
     if format == CastBar.TIMER_FORMAT_SEC_HUNDREDTHS then
         return string_format("%.2f", remainingSec)
     end
@@ -1020,8 +1020,8 @@ function CastBar.CreateCastBar()
     g_castBarState.bar.backdrop:SetDrawLevel(g_castBarState:GetDrawLevel() + 1)
     g_castBarState.bar.bar:SetMinMax(0, 1)
     g_castBarState.bar.backdrop:SetCenterColor((0.1 * 0.50), (0.1 * 0.50), (0.1 * 0.50), 0.75)
-    local gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha = 0, 47 / 255, 130 / 255, 1
-    local gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha = 82 / 255, 215 / 255, 1, 1
+    local gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha = 0, 0.18, 0.51, 1
+    local gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha = 0.32, 0.84, 1, 1
     g_castBarState.bar.bar:SetGradientColors(gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha, gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha)
     g_castBarState.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75)
     gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha = ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], ActionBar.SV.CastBarGradientC1[4]
