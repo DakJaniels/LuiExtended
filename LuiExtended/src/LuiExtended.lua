@@ -12,7 +12,7 @@
 --- @field SpellCastBuffs LUIE.SpellCastBuffs
 --- @field name string The addon name
 --- @field log_to_chat boolean Whether to output logs to chat
---- @field logger LibDebugLogger The logger instance
+--- @field logger LDL_Logger The logger instance from `LibDebugLogger.Create`
 --- @field author string The addon author
 --- @field version string The addon version
 --- @field SVName string SavedVariables name
