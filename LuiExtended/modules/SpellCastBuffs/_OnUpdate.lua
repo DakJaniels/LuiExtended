@@ -359,10 +359,10 @@ local function FormatRemainLabelText(remain, container)
         return string_format("%dm", zo_floor(remain / 60000))
     elseif remain > 60000 or container == "player_long" then
         local m = zo_floor(remain / 60000)
-        local s = remain / 1000 - 60 * m
+        local s = remain * 0.001 - 60 * m
         return string_format("%d:%.2d", m, s)
     end
-    return string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000)
+    return string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain * 0.001)
 end
 
 --- Countdown only while remain is positive. Nil/expired/fakeDuration use T, G, or empty

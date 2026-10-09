@@ -233,7 +233,7 @@ local function CustomFramesApplyColorsInternal(sections)
         UnitFrames.SV.CustomColourTank[3],
         UnitFrames.SV.CustomColourTank[4],
     }
-    local invalid = { 75 / 255, 75 / 255, 75 / 255, 0.9 }
+    local invalid = { 0.29, 0.29, 0.29, 0.9 }
 
     local class1 =
     {
@@ -445,9 +445,9 @@ local function CustomFramesApplyColorsInternal(sections)
             and baseName ~= "boss"
             and baseName ~= "RaidGroup"
         if separateAlpha then
-            return UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100) or 1
+            return UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha * 0.01) or 1
         end
-        return UnitFrames.SV.ShieldAlpha / 100
+        return UnitFrames.SV.ShieldAlpha * 0.01
     end
 
     if applyHealthFamily then

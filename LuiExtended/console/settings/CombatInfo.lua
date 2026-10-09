@@ -2259,7 +2259,7 @@ function CombatInfo.CreateConsoleSettings()
                 return tonumber(string_format("%.0f", 100 * Settings.cct.controlScale))
             end,
             setFunction = function (v)
-                Settings.cct.controlScale = v / 100
+                Settings.cct.controlScale = v * 0.01
                 CrowdControlTracker:InitControls()
             end,
             disable = function ()

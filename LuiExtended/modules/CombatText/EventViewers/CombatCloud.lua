@@ -83,7 +83,7 @@ function CombatTextCombatCloudEventViewer:View(combatType, powerType, value, abi
         panel = LUIE_CombatText_Outgoing
     end
     local w, h = panel:GetDimensions()
-    local radiusW, radiusH = w / 2, h * 2
+    local radiusW, radiusH = w * 0.5, h * 2
     local offsetX, offsetY = nil, nil
 
     if isDamageCritical or isHealingCritical or isDotCritical or isHotCritical then

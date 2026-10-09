@@ -126,7 +126,7 @@ function CombatTextCombatHybridEventViewer:View(combatType, powerType, value, ab
     end
 
     local w, h = panel:GetDimensions()
-    local radiusW, radiusH = w / 4, h / 4
+    local radiusW, radiusH = w * 0.25, h * 0.25
     local offsetX, offsetY = 0, 0
 
     if isDamageCritical or isHealingCritical or isDotCritical or isHotCritical then

@@ -217,7 +217,7 @@ end
 --- @return number
 function LUIE.SnapToGrid(position, gridSize)
     position = zo_floor(position)
-    if (position % gridSize >= gridSize / 2) then
+    if (position % gridSize >= gridSize * 0.5) then
         return position + (gridSize - (position % gridSize))
     end
     return position - (position % gridSize)
@@ -283,13 +283,13 @@ function LUIE.AbbreviateNumber(number, shorten, comma)
         local value
         local suffix
         if number >= 1000000000 then
-            value = number / 1000000000
+            value = number * 1e-009
             suffix = "G"
         elseif number >= 1000000 then
-            value = number / 1000000
+            value = number * 1e-006
             suffix = "M"
         elseif number >= 1000 then
-            value = number / 1000
+            value = number * 0.001
             suffix = "k"
         else
             value = number
@@ -939,7 +939,7 @@ do
             if ov[valueKey] ~= nil then
                 values[index] = ov[valueKey]
             elseif ov[idKey] then
-                values[index] = zo_floor((GetAbilityDuration(ov[idKey], nil, unitTag) or 0) + 0.5) / 1000
+                values[index] = zo_floor((GetAbilityDuration(ov[idKey], nil, unitTag) or 0) + 0.5) * 0.001
             elseif index == 1 then
                 values[index] = durationSec
             end
@@ -1021,7 +1021,7 @@ do
             elseif ov[valueKey] ~= nil then
                 values[index] = ov[valueKey]
             elseif ov[idKey] then
-                values[index] = zo_floor((GetAbilityDuration(ov[idKey], nil, unitTag) or 0) + 0.5) / 1000
+                values[index] = zo_floor((GetAbilityDuration(ov[idKey], nil, unitTag) or 0) + 0.5) * 0.001
             end
         end
         if ov.tooltipSetAbilityId then
@@ -1085,7 +1085,7 @@ do
             end
 
             local finalSpeed = 100 - speed
-            local roundedMitigation = zo_floor(mitigation * 100 + 0.5) / 100
+            local roundedMitigation = zo_floor(mitigation * 100 + 0.5) * 0.01
             return zo_strformat(GetString(LUIE_STRING_SKILL_BRACE_TP), roundedMitigation, finalSpeed, cost, getResourceType())
         end,
 
@@ -1106,9 +1106,9 @@ do
 
         -- Unchained
         [98316] = function ()
-            local duration = (GetAbilityDuration(98316) or 0) / 1000
+            local duration = (GetAbilityDuration(98316) or 0) * 0.001
             local pointsSpent = GetNumPointsSpentOnChampionSkill(64) * 1.1
-            local adjustPoints = pointsSpent == 0 and 55 or zo_floor(pointsSpent * 100 + 0.5) / 100
+            local adjustPoints = pointsSpent == 0 and 55 or zo_floor(pointsSpent * 100 + 0.5) * 0.01
             return zo_strformat(GetString(LUIE_STRING_SKILL_UNCHAINED_TP), duration, adjustPoints)
         end,
 
@@ -1121,14 +1121,14 @@ do
         -- Unstoppable Brute
         [126582] = function ()
             local counter = GetEquippedArmorPieces(ARMORTYPE_HEAVY) * 5
-            local duration = (GetAbilityDuration(126582) or 0) / 1000
+            local duration = (GetAbilityDuration(126582) or 0) * 0.001
             return zo_strformat(GetString(LUIE_STRING_SKILL_UNSTOPPABLE_BRUTE), duration, counter)
         end,
 
         -- Immovable
         [126583] = function ()
             local counter = GetEquippedArmorPieces(ARMORTYPE_HEAVY) * 5
-            local duration = (GetAbilityDuration(126583) or 0) / 1000
+            local duration = (GetAbilityDuration(126583) or 0) * 0.001
             return zo_strformat(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
         end,
 

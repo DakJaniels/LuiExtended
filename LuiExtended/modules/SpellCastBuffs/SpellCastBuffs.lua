@@ -646,7 +646,7 @@ function SpellCastBuffs.Initialize(enabled)
     -- Register event to update icons/names/tooltips for some abilities where we pull information from the currently learned morph
     eventManager:RegisterForEvent(moduleName, EVENT_SKILLS_FULL_UPDATE, function (eventId)
         -- Mages Guild
-        Effects.EffectOverride[40465].tooltip = zo_strformat(GetString(LUIE_STRING_SKILL_SCALDING_RUNE_TP), ((GetAbilityDuration(40468) or 0) / 1000) + GetNumPassiveSkillRanks(GetSkillLineIndicesFromSkillLineId(44), select(2, GetSkillLineIndicesFromSkillLineId(44)), 8))
+        Effects.EffectOverride[40465].tooltip = zo_strformat(GetString(LUIE_STRING_SKILL_SCALDING_RUNE_TP), ((GetAbilityDuration(40468) or 0) * 0.001) + GetNumPassiveSkillRanks(GetSkillLineIndicesFromSkillLineId(44), select(2, GetSkillLineIndicesFromSkillLineId(44)), 8))
     end)
 
     -- Werewolf
@@ -1336,10 +1336,10 @@ function SpellCastBuffs.ApplyIconFlexMargin(container, buff)
     local isRow = (flexDir == FLEX_DIRECTION_ROW or flexDir == FLEX_DIRECTION_ROW_REVERSE)
     local isWrapReverse = (flexWrap == FLEX_WRAP_WRAP_REVERSE)
     local gap = (not isWrap and not isRow)
-        and zo_floor(SpellCastBuffs.SV.IconSize / 10)
+        and zo_floor(SpellCastBuffs.SV.IconSize * 0.1)
         or SpellCastBuffs.padding
 
-    local gapStart = zo_floor(gap / 2)
+    local gapStart = zo_floor(gap * 0.5)
     local gapEnd = gap - gapStart
 
     local left, top, right, bottom = 0, 0, 0, 0
@@ -1551,8 +1551,8 @@ function SpellCastBuffs.ApplyAbilityFrameTextureCoords(texture, iconSize)
     if IsInGamepadPreferredMode() then
         texture:SetTextureCoords(0.1094, 0.8906, 0.1094, 0.8906)
     else
-        local inset = (64 - iconSize) / 2 / 64
-        local outer = (64 + iconSize) / 2 / 64
+        local inset = (64 - iconSize) * 0.5 / 64
+        local outer = (64 + iconSize) * 0.5 / 64
         texture:SetTextureCoords(inset, outer, inset, outer)
     end
 end
@@ -2000,7 +2000,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         else
             local duration = 0
             if type(control.effectId) == "number" then
-                duration = zo_floor((control.duration / 1000 * 10) + 0.5) / 10
+                duration = zo_floor((control.duration * 0.001 * 10) + 0.5) * 0.1
                 local ov = Effects.EffectOverride[control.effectId]
 
                 local formatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit)
@@ -2090,7 +2090,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         end
 
         local thirdLine
-        local duration = control.duration / 1000
+        local duration = control.duration * 0.001
 
         if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].duration then
             duration = duration + Effects.EffectOverride[control.effectId].duration

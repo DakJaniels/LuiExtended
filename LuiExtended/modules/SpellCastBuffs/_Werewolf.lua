@@ -38,7 +38,7 @@ function SpellCastBuffs.DisplayWerewolfIcon()
         forced = "short",
         restart = true,
         iconNum = 0,
-        werewolf = power / 1000,
+        werewolf = power * 0.001,
     }
 end
 

@@ -190,7 +190,7 @@ local function HideBottomThresholdLabel(label, animateOut)
     StopBottomThresholdLabelFade(label, true)
     if animateOut and not label:IsHidden() then
         local fadeAnimation = GetBottomThresholdLabelFadeAnim(label)
-        fadeAnimation:FadeOut(0, BOSS_THRESHOLD_MECHANIC_FADE_MS / 1000, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA, function (control)
+        fadeAnimation:FadeOut(0, BOSS_THRESHOLD_MECHANIC_FADE_MS * 0.001, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA, function (control)
             control:SetHidden(true)
             control:SetAlpha(1)
         end)
@@ -402,13 +402,13 @@ local function PlayBottomMechanicLabelFadeIn(bottomLabel, durationMs, fromAlpha)
     if fromAlpha then
         fadeAnimation:SetMinMaxAlpha(fromAlpha, 1)
         bottomLabel:SetAlpha(fromAlpha)
-        fadeAnimation:FadeIn(0, durationMs / 1000, ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA, function (control)
+        fadeAnimation:FadeIn(0, durationMs * 0.001, ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA, function (control)
                                  control:SetAlpha(1)
                                  fadeAnimation:SetMinMaxAlpha(0, 1)
                              end, ZO_ALPHA_ANIMATION_OPTION_FORCE_SHOWN)
     else
         fadeAnimation:SetMinMaxAlpha(0, 1)
-        fadeAnimation:FadeIn(0, durationMs / 1000, ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA, nil, ZO_ALPHA_ANIMATION_OPTION_FORCE_SHOWN)
+        fadeAnimation:FadeIn(0, durationMs * 0.001, ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA, nil, ZO_ALPHA_ANIMATION_OPTION_FORCE_SHOWN)
     end
 end
 
@@ -644,9 +644,9 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
 
         local stage = columnStages[columnIndex]
 
-        local normalizedPercent = zo_clamp(thresholdColumn.percent / 100, 0, 1)
-        local lineX = zo_clamp(originX + normalizedPercent * barWidth - BOSS_THRESHOLD_MARKER_WIDTH / 2, originX, maxLineStart)
-        local markerCenterX = lineX + BOSS_THRESHOLD_MARKER_WIDTH / 2 + labelOffsetX
+        local normalizedPercent = zo_clamp(thresholdColumn.percent * 0.01, 0, 1)
+        local lineX = zo_clamp(originX + normalizedPercent * barWidth - BOSS_THRESHOLD_MARKER_WIDTH * 0.5, originX, maxLineStart)
+        local markerCenterX = lineX + BOSS_THRESHOLD_MARKER_WIDTH * 0.5 + labelOffsetX
 
         topLabel:ClearAnchors()
         topLabel:SetDimensions(BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS[2])
@@ -726,7 +726,7 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
                     bossBarWidth = UnitFrames.SV.BossBarWidth or 0
                 end
                 local bossBarMaxLineStart = zo_max(0, bossBarWidth - BOSS_THRESHOLD_MARKER_WIDTH)
-                local multiBossLineX = zo_clamp(normalizedPercent * bossBarWidth - BOSS_THRESHOLD_MARKER_WIDTH / 2, 0, bossBarMaxLineStart)
+                local multiBossLineX = zo_clamp(normalizedPercent * bossBarWidth - BOSS_THRESHOLD_MARKER_WIDTH * 0.5, 0, bossBarMaxLineStart)
                 if bossBarHeight > 0 then
                     ApplyMultiLineToFrame(bossHealthFrame, multiBossLineX, bossBarHeight, stage)
                 end
@@ -855,7 +855,7 @@ function UnitFrames.SetBossThresholdDebugPreviewHealth(percentRounded)
     local percent = zo_clamp(zo_round(percentRounded or 0), 0, 100)
     local unitTag = "boss1"
     local powerMax = 1000000
-    local powerValue = zo_floor(powerMax * percent / 100)
+    local powerValue = zo_floor(powerMax * percent * 0.01)
 
     UnitFrames.savedHealth[unitTag] = { powerValue, powerMax, powerMax, 0, 0 }
     UnitFrames.bossThresholdStageState = {}

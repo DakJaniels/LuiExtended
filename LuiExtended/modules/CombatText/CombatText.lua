@@ -82,10 +82,10 @@ function CombatText.OnPanelDragStop(panel)
     local parent = LUIE_CombatText
     local pl, pt = parent:GetLeft(), parent:GetTop()
     local pw, ph = parent:GetDimensions()
-    local pcx, pcy = pl + pw / 2, pt + ph / 2
+    local pcx, pcy = pl + pw * 0.5, pt + ph * 0.5
     local w, h = panel:GetDimensions()
-    local offsetX = left + w / 2 - pcx
-    local offsetY = top + h / 2 - pcy
+    local offsetX = left + w * 0.5 - pcx
+    local offsetY = top + h * 0.5 - pcy
 
     panel:ClearAnchors()
     panel:SetAnchor(CENTER, parent, CENTER, offsetX, offsetY)
@@ -115,10 +115,10 @@ function CombatText.MigratePanelSaveToCenter(panelKey)
     local parent = LUIE_CombatText
     local pl, pt = parent:GetLeft(), parent:GetTop()
     local pw, ph = parent:GetDimensions()
-    local pcx, pcy = pl + pw / 2, pt + ph / 2
+    local pcx, pcy = pl + pw * 0.5, pt + ph * 0.5
     local left, top = s.offsetX, s.offsetY
-    s.offsetX = left + w / 2 - pcx
-    s.offsetY = top + h / 2 - pcy
+    s.offsetX = left + w * 0.5 - pcx
+    s.offsetY = top + h * 0.5 - pcy
     s.point = CENTER
     s.relativePoint = CENTER
     s.x = nil
@@ -271,7 +271,7 @@ function CombatText.GetTextAlpha()
     local oocAlpha = common.oocAlpha or common.transparencyValue or 100
     local incAlpha = common.incAlpha or common.transparencyValue or 100
     local percent = IsUnitInCombat("player") and incAlpha or oocAlpha
-    return percent / 100
+    return percent * 0.01
 end
 
 function CombatText.ApplyFont()

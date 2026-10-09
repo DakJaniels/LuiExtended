@@ -281,8 +281,8 @@ function LUIE_MiniMap_PanAndZoom:CenterOnPlayer(normalizedX, normalizedY, isShow
         return
     end
     local scroll = self.scroll
-    local horizontalScroll = (normalizedX * self:GetContentWidth()) - (scroll:GetWidth() / 2)
-    local verticalScroll = (normalizedY * self:GetContentHeight()) - (scroll:GetHeight() / 2)
+    local horizontalScroll = (normalizedX * self:GetContentWidth()) - (scroll:GetWidth() * 0.5)
+    local verticalScroll = (normalizedY * self:GetContentHeight()) - (scroll:GetHeight() * 0.5)
     -- Sub-pixel scroll writes do not move the map but still fire OnScrollOffsetChanged on both axes.
     if zo_abs(horizontalScroll - scroll:GetHorizontalScroll()) >= 1 then
         scroll:SetHorizontalScroll(horizontalScroll)
@@ -318,10 +318,10 @@ function LUIE_MiniMap_PanAndZoom:ApplyScrollAfterZoom(previousContentWidth, prev
     local scroll = self.scroll
     local scrollWidth = scroll:GetWidth()
     local scrollHeight = scroll:GetHeight()
-    local normalizedFocusX = (scroll:GetHorizontalScroll() + scrollWidth / 2) / previousContentWidth
-    local normalizedFocusY = (scroll:GetVerticalScroll() + scrollHeight / 2) / previousContentHeight
-    local newScrollX = normalizedFocusX * self:GetContentWidth() - scrollWidth / 2
-    local newScrollY = normalizedFocusY * self:GetContentHeight() - scrollHeight / 2
+    local normalizedFocusX = (scroll:GetHorizontalScroll() + scrollWidth * 0.5) / previousContentWidth
+    local normalizedFocusY = (scroll:GetVerticalScroll() + scrollHeight * 0.5) / previousContentHeight
+    local newScrollX = normalizedFocusX * self:GetContentWidth() - scrollWidth * 0.5
+    local newScrollY = normalizedFocusY * self:GetContentHeight() - scrollHeight * 0.5
     scroll:SetHorizontalScroll(newScrollX)
     scroll:SetVerticalScroll(newScrollY)
     MiniMap.SV.panOffsetX = newScrollX
@@ -357,8 +357,8 @@ function LUIE_MiniMap_PanAndZoom:ApplyFixedMapScroll(mapName)
         return false
     end
     local scroll = self.scroll
-    local scrollX = fixedEntry.x * self:GetContentWidth() - scroll:GetWidth() / 2
-    local scrollY = fixedEntry.y * self:GetContentHeight() - scroll:GetHeight() / 2
+    local scrollX = fixedEntry.x * self:GetContentWidth() - scroll:GetWidth() * 0.5
+    local scrollY = fixedEntry.y * self:GetContentHeight() - scroll:GetHeight() * 0.5
     scroll:SetHorizontalScroll(scrollX)
     scroll:SetVerticalScroll(scrollY)
     MiniMap.SV.panOffsetX = scrollX
@@ -376,8 +376,8 @@ function LUIE_MiniMap_PanAndZoom:ToggleFixedMapPosition(mapName)
     if MiniMap.SV.zoneScrollLockEnabled then
         if self:HasMap() then
             local scroll = self.scroll
-            local focusX = (scroll:GetHorizontalScroll() + scroll:GetWidth() / 2) / self:GetContentWidth()
-            local focusY = (scroll:GetVerticalScroll() + scroll:GetHeight() / 2) / self:GetContentHeight()
+            local focusX = (scroll:GetHorizontalScroll() + scroll:GetWidth() * 0.5) / self:GetContentWidth()
+            local focusY = (scroll:GetVerticalScroll() + scroll:GetHeight() * 0.5) / self:GetContentHeight()
             MiniMap.SV.zoneScrollLockByMapName[mapName] = { x = focusX, y = focusY }
         end
         self:SetFollowsPlayer(false)

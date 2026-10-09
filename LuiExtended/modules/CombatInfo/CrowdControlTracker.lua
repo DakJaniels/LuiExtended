@@ -306,8 +306,8 @@ end
 
 function CrowdControlTracker:SavePosition()
     local coordX, coordY = LUIE_CCTracker:GetCenter()
-    CombatInfo.SV.cct.offsetX = coordX - (GuiRoot:GetWidth() / 2)
-    CombatInfo.SV.cct.offsetY = coordY - (GuiRoot:GetHeight() / 2)
+    CombatInfo.SV.cct.offsetX = coordX - (GuiRoot:GetWidth() * 0.5)
+    CombatInfo.SV.cct.offsetY = coordY - (GuiRoot:GetHeight() * 0.5)
     LUIE_CCTracker:ClearAnchors()
     LUIE_CCTracker:SetAnchor(CENTER, GuiRoot, CENTER, CombatInfo.SV.cct.offsetX, CombatInfo.SV.cct.offsetY)
 end
@@ -348,7 +348,7 @@ function CrowdControlTracker:OnProc(ccDuration, interval)
         end
     end
 
-    self.Timer = GetFrameTimeSeconds() + (interval / 1000)
+    self.Timer = GetFrameTimeSeconds() + (interval * 0.001)
 
     local remaining, duration, global = GetSlotCooldownInfo(1, nil)
     if remaining > 0 then

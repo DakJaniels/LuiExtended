@@ -222,8 +222,8 @@ function CombatText.CreateConsoleSettings()
             local defDim = Defaults.panels[ck].dimensions
             local cw = (dim and dim[1]) or defDim[1]
             local ch = (dim and dim[2]) or defDim[2]
-            local cmaxX = zo_max(0, (gw - cw) / 2)
-            local cmaxY = zo_max(0, (gh - ch) / 2)
+            local cmaxX = zo_max(0, (gw - cw) * 0.5)
+            local cmaxY = zo_max(0, (gh - ch) * 0.5)
             if Settings.panels[ck] then
                 local ox = zo_clamp(Settings.panels[ck].offsetX, -cmaxX, cmaxX)
                 local oy = zo_clamp(Settings.panels[ck].offsetY, -cmaxY, cmaxY)
@@ -246,8 +246,8 @@ function CombatText.CreateConsoleSettings()
             local defDim = Defaults.panels[panelKey].dimensions
             local pw = (dim and dim[1]) or defDim[1]
             local ph = (dim and dim[2]) or defDim[2]
-            local maxOffsetX = zo_max(0, (gw - pw) / 2)
-            local maxOffsetY = zo_max(0, (gh - ph) / 2)
+            local maxOffsetX = zo_max(0, (gw - pw) * 0.5)
+            local maxOffsetY = zo_max(0, (gh - ph) * 0.5)
 
             settings[#settings + 1] =
             {

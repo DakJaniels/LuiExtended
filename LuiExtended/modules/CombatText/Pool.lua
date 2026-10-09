@@ -176,7 +176,7 @@ function CombatTextPool:Initialize(poolType)
     local function CreateAnimation()
         local anim = LUIE.CombatTextAnimation:New()
         local Settings = LUIE.CombatText.SV
-        local speed = 1 / (Settings.animation.animationDuration / 100)
+        local speed = 1 / (Settings.animation.animationDuration * 0.01)
         BuildAnimation(anim, poolType, speed)
         return anim
     end
