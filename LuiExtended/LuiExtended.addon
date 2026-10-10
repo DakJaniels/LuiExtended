@@ -332,7 +332,6 @@ console/dialogs/BlacklistDialog.xml
 console/dialogs/BlacklistDialog.lua
 
 # Changelog - PC only
-pc/frontend/ChangelogTemplates.xml
 pc/frontend/Changelog.xml
 pc/Changelog.lua
 

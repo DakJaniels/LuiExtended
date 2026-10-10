@@ -17,33 +17,22 @@ local CHANGELOG_THEME =
     surface = { 0.05, 0.05, 0.07, 0.92 },
     surfaceAlt = { 0.12, 0.11, 0.14, 0.95 },
     border = { 0.35, 0.32, 0.28, 1 },
-    spacing =
-    {
-        sm = 8,
-        md = 12,
-    },
-    fontTitle = "ZoFontWinH2",
-    fontSection = "ZoFontWinH4",
     fontBody = "ZoFontGame",
-    sectionHeaderHeight = 40,
     sectionBodyPadding = 8,
 }
 local CHANGELOG_CONTENT_WIDTH = 830
-local CHANGELOG_TREE_INSET_X = 8
+local CHANGELOG_CONTENT_INSET_X = 8
 local CHANGELOG_SCROLL_THUMB_WIDTH = 8
 local CHANGELOG_SCROLLBAR_GUTTER_FALLBACK = CHANGELOG_SCROLL_THUMB_WIDTH + 8
-local CHANGELOG_SECTION_BODY_TREE_INDENT = CHANGELOG_THEME.spacing.md
-local CHANGELOG_SECTION_BODY_LABEL_PAD_X = 16
-local CHANGELOG_SECTION_BODY_HEIGHT_SLACK = 6
+local CHANGELOG_BODY_INDENT_X = 12
+local CHANGELOG_BODY_LABEL_PAD_X = 16
+local CHANGELOG_BODY_HEIGHT_SLACK = 6
 local CHANGELOG_VERSION_HEADER_MATCH = "|cFFA500LuiExtended Version "
 local CHANGELOG_SCROLL_THUMB = "EsoUI/Art/Miscellaneous/scrollbox_elevator.dds"
 local CHANGELOG_SCROLL_THUMB_DISABLED = "EsoUI/Art/Miscellaneous/scrollbox_elevator_disabled.dds"
 local CHANGELOG_SCROLL_TRACK = "EsoUI/Art/Miscellaneous/scrollbox_track.dds"
 local CHANGELOG_SCROLL_THUMB_HEIGHT = 32
-
-local CHANGELOG_SECTION_HEADER_TEMPLATE = "LUIE_Changelog_SectionHeader_Template"
-local CHANGELOG_SECTION_BODY_TEMPLATE = "LUIE_Changelog_SectionBody_Template"
-local CHANGELOG_LAYOUT_UPDATE_NAME = "LUIE_ChangelogLayoutFinalize"
+local CHANGELOG_NEWEST_SECTION_INDEX = 1
 local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 
 -- -----------------------------------------------------------------------------
@@ -1410,7 +1399,7 @@ local function ApplyChangelogScrollTheme()
 
     if scrollContainer then
         ZO_Scroll_SetUseFadeGradient(scrollContainer, false)
-        -- Keep scrollbar lane width when content is short so note wrap width does not change on expand/collapse.
+        -- Keep the scrollbar lane when a short version is selected so wrap width stays the same.
         ZO_Scroll_SetHideScrollbarOnDisable(scrollContainer, false)
     end
 
@@ -1449,7 +1438,7 @@ local function ApplyChangelogWindowTheme()
 end
 
 -- -----------------------------------------------------------------------------
--- Changelog UI manager (ZO_DeferredInitializingObject + tree/scroll layout).
+-- Changelog UI manager (ZO_DeferredInitializingObject + version dropdown).
 -- -----------------------------------------------------------------------------
 
 --- @class LUIE_Changelog_Manager : ZO_DeferredInitializingObject
@@ -1460,20 +1449,20 @@ function LUIE_Changelog_Manager:Initialize()
     self.fragment = ZO_SimpleSceneFragment:New(self.control)
     self.scene = ZO_Scene:New(LUIE_CHANGELOG_SCENE_NAME, SCENE_MANAGER)
     self.scene:AddFragment(self.fragment)
-    self.tree = nil
-    self.controls = {}
-    self.headerPool = nil
-    self.bodyPool = nil
-    self.layoutEventManager = GetEventManager()
+    self.versionSections = nil
+    self.selectedSectionIndex = nil
     self.contentWidth = CHANGELOG_CONTENT_WIDTH
-    self.sectionBodyWidth = CHANGELOG_CONTENT_WIDTH - CHANGELOG_SECTION_BODY_TREE_INDENT
-    self.sectionBodyLabelWidth = self.sectionBodyWidth - CHANGELOG_SECTION_BODY_LABEL_PAD_X
+    self.bodyLabelWidth = CHANGELOG_CONTENT_WIDTH - CHANGELOG_BODY_INDENT_X - CHANGELOG_BODY_LABEL_PAD_X
     self.contentWidthLocked = false
     ZO_DeferredInitializingObject.Initialize(self, self.scene)
 end
 
 function LUIE_Changelog_Manager:GetScrollChild()
     return LUIE_Changelog_ContainerScrollChild
+end
+
+function LUIE_Changelog_Manager:GetBodyLabel()
+    return LUIE_Changelog_ContainerScrollChildText
 end
 
 function LUIE_Changelog_Manager:GetScrollbarGutter()
@@ -1487,8 +1476,8 @@ function LUIE_Changelog_Manager:GetScrollbarGutter()
     return CHANGELOG_SCROLLBAR_GUTTER_FALLBACK
 end
 
-function LUIE_Changelog_Manager:ApplyContentMetrics(force)
-    if self.contentWidthLocked and not force then
+function LUIE_Changelog_Manager:ApplyContentMetrics()
+    if self.contentWidthLocked then
         return
     end
     local scrollChild = self:GetScrollChild()
@@ -1497,81 +1486,18 @@ function LUIE_Changelog_Manager:ApplyContentMetrics(force)
     end
     local scroll = LUIE_Changelog_Container and LUIE_Changelog_Container.scroll
     local baseWidth = scroll and scroll:GetWidth() or scrollChild:GetWidth()
-    if baseWidth <= CHANGELOG_TREE_INSET_X then
+    if baseWidth <= CHANGELOG_CONTENT_INSET_X then
         self.contentWidth = CHANGELOG_CONTENT_WIDTH
     else
-        self.contentWidth = zo_max(400, baseWidth - self:GetScrollbarGutter() - CHANGELOG_TREE_INSET_X)
+        self.contentWidth = zo_max(400, baseWidth - self:GetScrollbarGutter() - CHANGELOG_CONTENT_INSET_X)
+        self.contentWidthLocked = true
     end
-    self.sectionBodyWidth = self.contentWidth - CHANGELOG_SECTION_BODY_TREE_INDENT
-    self.sectionBodyLabelWidth = self.sectionBodyWidth - CHANGELOG_SECTION_BODY_LABEL_PAD_X
-    self.contentWidthLocked = true
+    self.bodyLabelWidth = self.contentWidth - CHANGELOG_BODY_INDENT_X - CHANGELOG_BODY_LABEL_PAD_X
 end
 
-function LUIE_Changelog_Manager:IsSectionBodyControl(control)
-    return control:GetNamedChild("Text") ~= nil and control:GetNamedChild("Title") == nil
-end
-
-function LUIE_Changelog_Manager:GetSectionControlWidth(control)
-    if self:IsSectionBodyControl(control) then
-        return self.sectionBodyWidth
-    end
-    return self.contentWidth
-end
-
-function LUIE_Changelog_Manager:ApplyControlWidths()
-    for controlIndex = 1, #self.controls do
-        local control = self.controls[controlIndex]
-        local targetWidth = self:GetSectionControlWidth(control)
-        if control:GetWidth() ~= targetWidth then
-            control:SetWidth(targetWidth)
-        end
-    end
-end
-
-function LUIE_Changelog_Manager:ApplyBodyLabelAnchors(label)
-    label:ClearAnchors()
-    label:SetAnchor(TOPLEFT, nil, TOPLEFT, CHANGELOG_THEME.sectionBodyPadding, CHANGELOG_THEME.sectionBodyPadding)
-end
-
-function LUIE_Changelog_Manager:SetupSectionPools(scrollChild)
-    if not self.headerPool then
-        self.headerPool = ZO_ControlPool:New(CHANGELOG_SECTION_HEADER_TEMPLATE, scrollChild, "SecHdr")
-        self.headerPool:SetCustomResetBehavior(function (header)
-            header.treeNode = nil
-            header.treeView = nil
-            header.titleLabel = nil
-            header.toggleBtn = nil
-            header.sectionLines = nil
-            header.bodyWrap = nil
-            header.bodyPoolKey = nil
-            header.bodyNode = nil
-        end)
-    end
-    if not self.bodyPool then
-        self.bodyPool = ZO_ControlPool:New(CHANGELOG_SECTION_BODY_TEMPLATE, scrollChild, "SecBody")
-        self.bodyPool:SetCustomResetBehavior(function (wrap)
-            wrap.bodyLabel = nil
-        end)
-    end
-end
-
-function LUIE_Changelog_Manager:SetupSectionHeader(header, title, expanded)
-    header:SetWidth(self.contentWidth)
-    ApplyChangelogBackdrop(header:GetNamedChild("Bg"), "surfaceAlt")
-
-    local titleLabel = header:GetNamedChild("Title")
-    titleLabel:SetText(title)
-    local accentR, accentG, accentB, accentA = ZO_SELECTED_TEXT:UnpackRGBA()
-    titleLabel:SetColor(accentR, accentG, accentB, accentA)
-
-    local toggleBtn = header:GetNamedChild("Toggle")
-    toggleBtn:SetText(expanded and "-" or "+")
-
-    header.titleLabel = titleLabel
-    header.toggleBtn = toggleBtn
-end
-
-function LUIE_Changelog_Manager:MeasureSectionBodyTextHeight(label)
+--- @param label LabelControl
+--- @return number
+function LUIE_Changelog_Manager:MeasureBodyTextHeight(label)
     local fontHeight = label:GetFontHeight()
     local _, measuredHeight = label:GetTextDimensions()
     local numLines = label:GetNumLines()
@@ -1579,289 +1505,70 @@ function LUIE_Changelog_Manager:MeasureSectionBodyTextHeight(label)
         measuredHeight = zo_max(measuredHeight, numLines * fontHeight)
     end
     local bodyText = label:GetText()
-    local _, utilHeight = ZO_LabelUtils_GetTextDimensions(bodyText, CHANGELOG_THEME.fontBody, self.sectionBodyLabelWidth)
-    return zo_max(measuredHeight, utilHeight, fontHeight) + CHANGELOG_SECTION_BODY_HEIGHT_SLACK
+    local _, utilHeight = ZO_LabelUtils_GetTextDimensions(bodyText, CHANGELOG_THEME.fontBody, self.bodyLabelWidth)
+    return zo_max(measuredHeight, utilHeight, fontHeight) + CHANGELOG_BODY_HEIGHT_SLACK
 end
 
---- Re-measure wrapped section body after the control is in the tree (first expand needs this).
---- @param wrap Control
-function LUIE_Changelog_Manager:RefreshSectionBodyLayout(wrap)
-    local label = wrap:GetNamedChild("Text")
-    local bodyBg = wrap:GetNamedChild("Bg")
-    if not label or not bodyBg then
+--- @param sectionIndex number
+function LUIE_Changelog_Manager:ShowVersion(sectionIndex)
+    local section = self.versionSections and self.versionSections[sectionIndex]
+    local label = self:GetBodyLabel()
+    local scrollChild = self:GetScrollChild()
+    if not section or not label or not scrollChild then
         return
     end
+
+    self.selectedSectionIndex = sectionIndex
+    self:ApplyContentMetrics()
+
     local pad = CHANGELOG_THEME.sectionBodyPadding
     if label.Clean then
         label:Clean()
     end
-    self:ApplyBodyLabelAnchors(label)
+    label:ClearAnchors()
+    label:SetAnchor(TOPLEFT, scrollChild, TOPLEFT, pad, pad)
     label:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
     label:SetMaxLineCount(0)
-    label:SetWidth(self.sectionBodyLabelWidth)
-    local textHeight = self:MeasureSectionBodyTextHeight(label)
-    local wrapHeight = textHeight + pad * 2
-    label:SetHeight(textHeight)
-    wrap:SetHeight(wrapHeight)
-    bodyBg:SetHeight(wrapHeight)
-end
-
-function LUIE_Changelog_Manager:SetupSectionBody(wrap, lines)
-    local bodyText = FormatChangelogSectionBody(lines)
-
-    wrap:SetWidth(self.sectionBodyWidth)
-
-    local bodyBg = wrap:GetNamedChild("Bg")
-    ApplyChangelogBackdrop(bodyBg, "surface")
-
-    local label = wrap:GetNamedChild("Text")
-    label:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
-    label:SetMaxLineCount(0)
-    label:SetWidth(self.sectionBodyLabelWidth)
-    label:SetText(bodyText)
+    label:SetWidth(self.bodyLabelWidth)
+    label:SetText(FormatChangelogSectionBody(section.lines))
     local bodyR, bodyG, bodyB, bodyA = ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA()
     label:SetColor(bodyR, bodyG, bodyB, bodyA)
 
-    wrap.bodyLabel = label
-    self:RefreshSectionBodyLayout(wrap)
-end
+    local textHeight = self:MeasureBodyTextHeight(label)
+    label:SetHeight(textHeight)
+    scrollChild:SetHeight(textHeight + pad * 2)
 
-function LUIE_Changelog_Manager:RefreshAllSectionBodies()
-    for controlIndex = 1, #self.controls do
-        local control = self.controls[controlIndex]
-        if control.bodyWrap then
-            self:RefreshSectionBodyLayout(control.bodyWrap)
-        elseif control:GetNamedChild("Text") and control:GetNamedChild("Bg") then
-            self:RefreshSectionBodyLayout(control)
-        end
-    end
-end
-
-function LUIE_Changelog_Manager:SetSectionExpanded(header, expanded)
-    if header.toggleBtn then
-        header.toggleBtn:SetText(expanded and "-" or "+")
-    end
-end
-
-function LUIE_Changelog_Manager:RemoveControlFromList(control)
-    for controlIndex = #self.controls, 1, -1 do
-        if self.controls[controlIndex] == control then
-            table.remove(self.controls, controlIndex)
-            return
-        end
-    end
-end
-
-function LUIE_Changelog_Manager:GetControlSubtreeBottom(control, maxBottom)
-    if not control:IsHidden() then
-        maxBottom = zo_max(maxBottom, control:GetTop() + control:GetHeight())
-    end
-    for childIndex = 1, control:GetNumChildren() do
-        local child = control:GetChild(childIndex)
-        if child then
-            maxBottom = self:GetControlSubtreeBottom(child, maxBottom)
-        end
-    end
-    return maxBottom
-end
-
-function LUIE_Changelog_Manager:UpdateScrollChildHeight(scrollChild)
-    local childTop = scrollChild:GetTop()
-    local maxBottom = self:GetControlSubtreeBottom(scrollChild, childTop)
-    scrollChild:SetHeight(zo_max(400, maxBottom - childTop + 12))
-end
-
-function LUIE_Changelog_Manager:FinalizeLayout()
-    local scrollChild = self:GetScrollChild()
-    if not scrollChild or not self.tree then
-        return
-    end
-    self:ApplyContentMetrics()
-    self:ApplyControlWidths()
-    self.tree:Update()
-    self:RefreshAllSectionBodies()
-    self.tree:Update()
-    self:UpdateScrollChildHeight(scrollChild)
     if LUIE_Changelog_Container then
+        ZO_Scroll_ResetToTop(LUIE_Changelog_Container)
         ZO_Scroll_UpdateScrollBar(LUIE_Changelog_Container, true)
     end
 end
 
-function LUIE_Changelog_Manager:UpdateTreeLayoutAfterToggle(sectionHeader, expanded)
-    local scrollChild = self:GetScrollChild()
-    if not scrollChild or not self.tree then
+function LUIE_Changelog_Manager:SetupVersionDropdown()
+    local versionControl = LUIE_Changelog_Version
+    if not versionControl then
         return
     end
-    if expanded and sectionHeader.bodyWrap then
-        if sectionHeader.bodyWrap:GetWidth() ~= self.sectionBodyWidth then
-            sectionHeader.bodyWrap:SetWidth(self.sectionBodyWidth)
-        end
-    end
-    self.tree:Update()
-    if expanded and sectionHeader.bodyWrap then
-        self:RefreshSectionBodyLayout(sectionHeader.bodyWrap)
-        self.tree:Update()
-    end
-    self:UpdateScrollChildHeight(scrollChild)
-    if LUIE_Changelog_Container then
-        ZO_Scroll_UpdateScrollBar(LUIE_Changelog_Container, true)
-    end
-end
 
-function LUIE_Changelog_Manager:ScheduleLayoutFinalize()
+    local comboBox = ZO_ComboBox_ObjectFromContainer(versionControl)
+    comboBox:SetSortsItems(false)
+    self.versionSections = ParseChangelogVersionSections(changelogMessages)
+
     local manager = self
-    self.layoutEventManager:UnregisterForUpdate(CHANGELOG_LAYOUT_UPDATE_NAME)
-    self.layoutEventManager:RegisterForUpdate(CHANGELOG_LAYOUT_UPDATE_NAME, 0, function ()
-        manager.layoutEventManager:UnregisterForUpdate(CHANGELOG_LAYOUT_UPDATE_NAME)
-        manager:FinalizeLayout()
-    end)
-end
-
-function LUIE_Changelog_Manager:RequestLayoutRefresh()
-    local scrollChild = self:GetScrollChild()
-    if scrollChild and #self.controls > 0 and self.tree then
-        self:FinalizeLayout()
-        self:ScheduleLayoutFinalize()
-    end
-end
-
-function LUIE_Changelog_Manager:AttachSectionBody(header, headerNode, tree)
-    if header.bodyNode or not header.sectionLines then
-        return
-    end
-
-    local bodyWrap, poolKey = self.bodyPool:AcquireObject()
-    header.bodyWrap = bodyWrap
-    header.bodyPoolKey = poolKey
-    header.bodyNode = tree:AddChild(headerNode, bodyWrap, CHANGELOG_THEME.spacing.md)
-    self.controls[#self.controls + 1] = bodyWrap
-    self:SetupSectionBody(bodyWrap, header.sectionLines)
-end
-
-function LUIE_Changelog_Manager:DetachSectionBody(header, tree)
-    if not header.bodyNode then
-        return
-    end
-
-    tree:RemoveNode(header.bodyNode)
-    if header.bodyWrap then
-        self:RemoveControlFromList(header.bodyWrap)
-    end
-    if header.bodyPoolKey then
-        self.bodyPool:ReleaseObject(header.bodyPoolKey)
-    end
-    header.bodyWrap = nil
-    header.bodyPoolKey = nil
-    header.bodyNode = nil
-end
-
-function LUIE_Changelog_Manager:ReleaseTreeUI()
-    self.layoutEventManager:UnregisterForUpdate(CHANGELOG_LAYOUT_UPDATE_NAME)
-    if self.tree then
-        self.tree:Clear()
-    end
-    if self.headerPool then
-        self.headerPool:ReleaseAllObjects()
-    end
-    if self.bodyPool then
-        self.bodyPool:ReleaseAllObjects()
-    end
-    self.controls = {}
-    self.contentWidthLocked = false
-end
-
-function LUIE_Changelog_Manager:OnSectionExpanded(node, expanded)
-    local sectionHeader = node:GetControl()
-    self:SetSectionExpanded(sectionHeader, expanded)
-    if expanded then
-        self:AttachSectionBody(sectionHeader, node, self.tree)
-    else
-        self:DetachSectionBody(sectionHeader, self.tree)
-    end
-    self:UpdateTreeLayoutAfterToggle(sectionHeader, expanded)
-end
-
-function LUIE_Changelog_Manager:BuildTreeUI()
-    local scrollChild = self:GetScrollChild()
-    if not scrollChild then
-        return
-    end
-
-    self:ReleaseTreeUI()
-    self:ApplyContentMetrics()
-
-    local sections = ParseChangelogVersionSections(changelogMessages)
-    if #sections == 0 then
-        return
-    end
-
-    self:SetupSectionPools(scrollChild)
-
-    local treeAnchor = ZO_Anchor:New(TOPLEFT, scrollChild, TOPLEFT, 4, 4)
-    local tree = ZO_TreeControl:New(treeAnchor, 14, 8)
-    tree:SetRelativePoint(BOTTOMLEFT)
-    self.tree = tree
-
-    local lastHeaderNode
-    self.controls = {}
-    local manager = self
-
-    for sectionIndex = 1, #sections do
-        local section = sections[sectionIndex]
-        local openByDefault = sectionIndex == 1
+    for sectionIndex = 1, #self.versionSections do
+        local section = self.versionSections[sectionIndex]
         local displayTitle = GetChangelogVersionDisplayTitle(section.title)
-
-        local header = self.headerPool:AcquireObject(sectionIndex)
-        self:SetupSectionHeader(header, displayTitle, openByDefault)
-
-        local headerNode
-        if lastHeaderNode == nil then
-            headerNode = tree:AddChild(nil, header)
-        else
-            headerNode = tree:AddSibling(lastHeaderNode, header)
-        end
-        lastHeaderNode = headerNode
-
-        header.treeNode = headerNode
-        header.treeView = tree
-        header.sectionLines = section.lines
-
-        if not openByDefault then
-            headerNode:ToggleExpanded(false)
-        end
-        self:SetSectionExpanded(header, openByDefault)
-
-        local function toggleSection()
-            if header.treeNode then
-                header.treeNode:ToggleExpanded()
-            end
-        end
-
-        headerNode:SetExpandedCallback(function (node, expanded)
-            manager:OnSectionExpanded(node, expanded)
+        local selectedSectionIndex = sectionIndex
+        local itemEntry = comboBox:CreateItemEntry(displayTitle, function ()
+            manager:ShowVersion(selectedSectionIndex)
         end)
-
-        header:SetHandler("OnMouseUp", function (_, button, upInside)
-            if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
-                toggleSection()
-            end
-        end)
-
-        header.toggleBtn:SetHandler("OnMouseUp", function (_, button, upInside)
-            if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
-                toggleSection()
-            end
-        end)
-
-        self.controls[#self.controls + 1] = header
-
-        if openByDefault then
-            self:AttachSectionBody(header, headerNode, tree)
-        end
+        comboBox:AddItem(itemEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
+    comboBox:UpdateItems()
 
-    self:FinalizeLayout()
-    self:ScheduleLayoutFinalize()
+    if #self.versionSections > 0 then
+        comboBox:SelectItemByIndex(CHANGELOG_NEWEST_SECTION_INDEX)
+    end
 end
 
 function LUIE_Changelog_Manager:OnDeferredInitialize()
@@ -1869,7 +1576,7 @@ function LUIE_Changelog_Manager:OnDeferredInitialize()
     LUIE_Changelog_Title:SetText(LUIE.FormatChangelogWindowTitle())
     LUIE_Changelog_About:SetText(zo_strformat(GetString(LUIE_STRING_CORE_CHANGELOG_ABOUT_LINE), LUIE.version, LUIE.author))
 
-    local scrollChild = LUIE_Changelog_ContainerScrollChild
+    local scrollChild = self:GetScrollChild()
     if scrollChild then
         scrollChild:SetHandler("OnRectHeightChanged", function ()
             if LUIE_Changelog_Container then
@@ -1877,16 +1584,14 @@ function LUIE_Changelog_Manager:OnDeferredInitialize()
             end
         end)
     end
-end
 
-function LUIE_Changelog_Manager:OnShowing()
-    if #self.controls == 0 then
-        self:BuildTreeUI()
-    end
+    self:SetupVersionDropdown()
 end
 
 function LUIE_Changelog_Manager:OnShown()
-    self:RequestLayoutRefresh()
+    if not self.contentWidthLocked and self.selectedSectionIndex then
+        self:ShowVersion(self.selectedSectionIndex)
+    end
 end
 
 function LUIE_Changelog_Manager:OnHidden()
