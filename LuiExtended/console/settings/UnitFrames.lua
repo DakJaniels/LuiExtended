@@ -3430,6 +3430,30 @@ function UnitFrames.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY_TP),
+            items =
+            {
+                { name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY_NONE),   data = UnitFrames.RAID_LEVEL_DISPLAY_NONE   },
+                { name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY_NUMBER), data = UnitFrames.RAID_LEVEL_DISPLAY_NUMBER },
+                { name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY_ICON),   data = UnitFrames.RAID_LEVEL_DISPLAY_ICON   },
+            },
+            getFunction = function ()
+                return SettingsAPI:LHASDropdownGetData(Settings.RaidLevelDisplay)
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.RaidLevelDisplay = item.data
+                UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+            end,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.RaidLevelDisplay),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+            end,
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESR_VETERANCY_RANK),
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_VETERANCY_RANK_TP),

@@ -1453,6 +1453,7 @@ function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
             unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].name:SetHidden(newValue ~= nil)
         end
     end
+    UnitFrames.RefreshCompactNameClip(unitFrame)
 end
 
 local function CustomFramesHideDefaultGroupFrames(groupSize)
@@ -2554,12 +2555,88 @@ local function ApplyClippedNameWidth(nameLabel, computedWidth, height)
 end
 UnitFrames.ApplyClippedNameWidth = ApplyClippedNameWidth
 
+local RAID_NAME_ICON_INSET = 22
+local COMPACT_NAME_LEFT_INSET = 5
+local COMPACT_NAME_RIGHT_ANCHOR_INSET = 5
+local COMPACT_NAME_TEXT_GAP = 4
+
+--- Pixels kept to the right of a name that shares the health bar.
+--- minimumGutter is the slider (0 when the frame has no clip slider).
+--- A visible health or dead/offline string wider than that gutter wins, plus the
+--- health label's right anchor and a small gap so the name stops before the text.
+--- @param unitFrame LUIE_CustomFrameObject
+--- @param minimumGutter number
+--- @return number
+local function GetCompactNameRightReserve(unitFrame, minimumGutter)
+    local textWidth = 0
+    local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    local healthLabel = healthEntry and healthEntry.label
+    if healthLabel and not healthLabel:IsHidden() then
+        textWidth = healthLabel:GetTextWidth() or 0
+    end
+    if unitFrame.dead and not unitFrame.dead:IsHidden() then
+        textWidth = zo_max(textWidth, unitFrame.dead:GetTextWidth() or 0)
+    end
+    return zo_max(minimumGutter or 0, textWidth) + COMPACT_NAME_RIGHT_ANCHOR_INSET + COMPACT_NAME_TEXT_GAP
+end
+
+--- Size and anchor a compact name so extra bar width goes to the name, not into the health text.
+--- @param unitFrame LUIE_CustomFrameObject
+--- @param captionCategory string
+--- @param barWidth number
+--- @param barHeight number
+--- @param minimumGutter number
+--- @param leftInset number|nil Omitted calls keep the inset from the last layout.
+function UnitFrames.ApplyCompactNameClip(unitFrame, captionCategory, barWidth, barHeight, minimumGutter, leftInset)
+    if not unitFrame or not unitFrame.name then
+        return
+    end
+    if leftInset == nil then
+        leftInset = unitFrame.compactNameLeftInset or COMPACT_NAME_LEFT_INSET
+    else
+        unitFrame.compactNameLeftInset = leftInset
+    end
+    local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    local healthBackdrop = healthEntry and healthEntry.backdrop
+    if not healthBackdrop then
+        return
+    end
+    local nameHeight = resolveCompactNameHeight(captionCategory, barHeight)
+    local nameWidth = zo_max(0, barWidth - leftInset - GetCompactNameRightReserve(unitFrame, minimumGutter))
+    unitFrame.name:ClearAnchors()
+    unitFrame.name:SetAnchor(LEFT, healthBackdrop, LEFT, leftInset, 0)
+    ApplyClippedNameWidth(unitFrame.name, nameWidth, nameHeight)
+end
+
+--- @param unitFrame LUIE_CustomFrameObject
+--- @param leftInset number|nil 22 with an icon, 5 without. Omitted calls keep the inset from the last layout.
+function UnitFrames.ApplyRaidNameClip(unitFrame, leftInset)
+    local sv = UnitFrames.SV
+    UnitFrames.ApplyCompactNameClip(unitFrame, "raid", sv.RaidBarWidth, sv.RaidBarHeight, sv.RaidNameClip or 0, leftInset)
+end
+
+--- Re-apply the compact name clip after health or status text changes.
+--- Player, target, small group, and AvA names sit on the row above the bar.
+--- @param unitFrame LUIE_CustomFrameObject|nil
+function UnitFrames.RefreshCompactNameClip(unitFrame)
+    if not unitFrame then
+        return
+    end
+    local sv = UnitFrames.SV
+    local category = unitFrame.frameCategory
+    if category == "raid" then
+        UnitFrames.ApplyRaidNameClip(unitFrame)
+    elseif category == "boss" then
+        UnitFrames.ApplyCompactNameClip(unitFrame, "boss", sv.BossBarWidth, sv.BossBarHeight, 0, nil)
+    elseif category == "pet" then
+        UnitFrames.ApplyCompactNameClip(unitFrame, "pet", sv.PetWidth, sv.PetHeight, sv.PetNameClip or 0, nil)
+    elseif category == "companion" then
+        UnitFrames.ApplyCompactNameClip(unitFrame, "companion", sv.CompanionWidth, sv.CompanionHeight, sv.CompanionNameClip or 0, nil)
+    end
+end
+
 -- Determines which icon to show and configures name positioning accordingly
-local function applyIconSettings(unitFrame, unitTag, role, healthBackdrop)
-    -- Clamp to >= 0 so extreme RaidNameClip values produce a 0-wide (invisible)
-    -- name label instead of a negative SetDimensions arg that ESO silently ignores.
-    local nameWidth = zo_max(0, UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 27)
-    local nameHeight = resolveCompactNameHeight("raid", UnitFrames.SV.RaidBarHeight)
+local function applyIconSettings(unitFrame, unitTag, role)
     local iconOption = UnitFrames.SV.RaidIconOptions or 1
 
     -- Determine which icon to show (if any)
@@ -2590,16 +2667,14 @@ local function applyIconSettings(unitFrame, unitTag, role, healthBackdrop)
 
     -- Apply settings based on what we're showing
     if showRoleIcon or showClassIcon then
-        ApplyClippedNameWidth(unitFrame.name, nameWidth, nameHeight)
-        unitFrame.name:SetAnchor(LEFT, healthBackdrop, LEFT, 22, 0)
         unitFrame.roleIcon:SetHidden(not showRoleIcon)
         unitFrame.classIcon:SetHidden(not showClassIcon)
+        UnitFrames.ApplyRaidNameClip(unitFrame, RAID_NAME_ICON_INSET)
     else
         -- No icon shown
-        ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 10), nameHeight)
-        unitFrame.name:SetAnchor(LEFT, healthBackdrop, LEFT, 5, 0)
         unitFrame.roleIcon:SetHidden(true)
         unitFrame.classIcon:SetHidden(true)
+        UnitFrames.ApplyRaidNameClip(unitFrame, COMPACT_NAME_LEFT_INSET)
     end
 end
 
@@ -2706,8 +2781,6 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
 
         local unitFrame = UnitFrames.CustomFrames["RaidGroup" .. index]
         if unitFrame then
-            local rhb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
-
             -- Calculate position and set frame dimensions
             local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight, resourceBarsHeight, totalFrameWidth, frameSpacing)
             unitFrame.control:ClearAnchors()
@@ -2716,17 +2789,14 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
 
             -- Apply icon settings (uses RaidIconOptions, not unitTag-specific for iconOpt=2/3)
             local role = unitTag and GetGroupMemberSelectedRole(unitTag) or nil
-            applyIconSettings(unitFrame, unitTag, role, rhb)
-
-            local raidNameHeight = resolveCompactNameHeight("raid", UnitFrames.SV.RaidBarHeight)
+            applyIconSettings(unitFrame, unitTag, role)
 
             -- Override for group leader (only when slot has a real, leadered member)
             if unitTag and IsUnitGroupLeader(unitTag) then
-                ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 27), raidNameHeight)
-                unitFrame.name:SetAnchor(LEFT, rhb, LEFT, 22, 0)
                 unitFrame.roleIcon:SetHidden(true)
                 unitFrame.classIcon:SetHidden(true)
                 unitFrame.leader:SetTexture(leaderIcons[1])
+                UnitFrames.ApplyRaidNameClip(unitFrame, RAID_NAME_ICON_INSET)
             else
                 unitFrame.leader:SetTexture(leaderIcons[0])
             end
@@ -2737,9 +2807,8 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
 
             -- Override for offline players (only meaningful when slot has a real member)
             if unitTag and not IsUnitOnline(unitTag) then
-                ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip), raidNameHeight)
-                unitFrame.name:SetAnchor(LEFT, rhb, LEFT, 5, 0)
                 unitFrame.classIcon:SetHidden(true)
+                UnitFrames.ApplyRaidNameClip(unitFrame, COMPACT_NAME_LEFT_INSET)
             end
         end
     end
@@ -2778,9 +2847,8 @@ function UnitFrames.CustomFramesApplyLayoutCompanion(unhide)
     healthBackdrop:SetDimensions(barWidth, barHeight)
     CustomFramesLayoutSetupShieldBackdrop(chb.shieldbackdrop, healthBackdrop, barWidth)
 
-    local companionNameHeight = resolveCompactNameHeight("companion", barHeight)
-    ApplyClippedNameWidth(unitFrame.name, zo_max(0, barWidth - UnitFrames.SV.CompanionNameClip - 10), companionNameHeight)
     unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(barWidth - 50, barHeight - 2)
+    UnitFrames.ApplyCompactNameClip(unitFrame, "companion", barWidth, barHeight, UnitFrames.SV.CompanionNameClip or 0, COMPACT_NAME_LEFT_INSET)
 
     if UnitFrames.companionAbilityTrack then
         UnitFrames.companionAbilityTrack:ApplyLayout()
@@ -2798,14 +2866,13 @@ function UnitFrames.CustomFramesApplyLayoutPet(unhide)
     local pet = UnitFrames.CustomFrames["PetGroup1"].tlw
     pet:SetDimensions(UnitFrames.SV.PetWidth, UnitFrames.SV.PetHeight * 7 + 21)
 
-    local petNameHeight = resolveCompactNameHeight("pet", UnitFrames.SV.PetHeight)
     for i = 1, 7 do
         local unitFrame = UnitFrames.CustomFrames["PetGroup" .. i]
         unitFrame.control:ClearAnchors()
         unitFrame.control:SetAnchor(TOPLEFT, pet, TOPLEFT, 0, (UnitFrames.SV.PetHeight + 3) * (i - 1))
         unitFrame.control:SetDimensions(UnitFrames.SV.PetWidth, UnitFrames.SV.PetHeight)
-        ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.PetWidth - UnitFrames.SV.PetNameClip - 10), petNameHeight)
         unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.PetWidth - 50, UnitFrames.SV.PetHeight - 2)
+        UnitFrames.ApplyCompactNameClip(unitFrame, "pet", UnitFrames.SV.PetWidth, UnitFrames.SV.PetHeight, UnitFrames.SV.PetNameClip or 0, COMPACT_NAME_LEFT_INSET)
     end
 
     UnitFrames.CustomFramesTryUnhideTlw("PetGroup1", unhide)
@@ -2825,14 +2892,13 @@ function UnitFrames.CustomFramesApplyLayoutBosses(requestedUnhide)
     local bossesTotalHeight = barHeight * bossSlotCount + spacing * zo_max(0, bossSlotCount - 1) + (UnitFrames.bossThresholdMechanicPadding or 0)
     bosses:SetDimensions(UnitFrames.SV.BossBarWidth, bossesTotalHeight)
 
-    local bossNameHeight = resolveCompactNameHeight("boss", UnitFrames.SV.BossBarHeight)
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitFrame = UnitFrames.CustomFrames["boss" .. i]
         unitFrame.control:ClearAnchors()
         unitFrame.control:SetAnchor(TOPLEFT, bosses, TOPLEFT, 0, (barHeight + spacing) * (i - BOSS_RANK_ITERATION_BEGIN))
         unitFrame.control:SetDimensions(UnitFrames.SV.BossBarWidth, UnitFrames.SV.BossBarHeight)
-        unitFrame.name:SetDimensions(UnitFrames.SV.BossBarWidth - 50, bossNameHeight)
         unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)
+        UnitFrames.ApplyCompactNameClip(unitFrame, "boss", UnitFrames.SV.BossBarWidth, UnitFrames.SV.BossBarHeight, 0, COMPACT_NAME_LEFT_INSET)
     end
 
     UnitFrames.ApplyBossThresholdMarkersFromCache()

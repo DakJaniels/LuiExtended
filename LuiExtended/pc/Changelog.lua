@@ -43,6 +43,7 @@ local changelogMessages =
     "",
     -- New
     "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom raid frames can prefix each member's level or Champion Points on the name. |cFFFFFFRaid - Level / Champion Points|r is off by default. Choices are number, or icon and number. In a Veterancy zone, Display Veterancy Rank still replaces it. PC and console.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames and Chat Announcements: |cFFFFFFPlatform Name|r under |cFFFFFFPlayer Name Display Method|r. Shows the Gamertag or Online ID, and @UserID if that name is empty.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Companion level up, rapport changes, skill unlocks, and skill experience. Chat, center screen, and alert toggles, off by default. PC and console.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: More center-screen messages now have their own chat, center-screen, and alert toggles.",
@@ -62,6 +63,7 @@ local changelogMessages =
     "",
     -- Fix
     "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Raid, boss, pet, and companion names stop before the health or status text. Widening the bar gives that space to the name. Name Clip Location is the minimum space kept on the right, and a longer health value reserves more. Boss frames follow the health text, since they have no clip slider.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: On console, the cast bar was showing the wrong ability names and icons.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info: Crowd control tracker text on console and gamepad now uses the gamepad fonts.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Alert text lines up with the gamepad alert frame.",
