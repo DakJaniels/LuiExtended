@@ -4,28 +4,36 @@
 
 ### New
 
-- MiniMap: **Zone Name Above Map** places the zone name above the map without moving InfoPanel.
-- MiniMap: **Show Player Pip** can be turned off. The camera direction cone stays while following.
-- MiniMap: **HarvestMap Pins (%)** scales HarvestMap pins on the minimap. World map pin size is unchanged.
-- Slash Commands: **Choose Fence to Summon**. /fence and /smuggler summon the fence you pick. PC and console.
+- Unit Frames and Chat Announcements: **Platform Name** under **Player Name Display Method**. Shows the Gamertag or Online ID, and @UserID if that name is empty.
+- Chat Announcements: Companion level up, rapport changes, skill unlocks, and skill experience. Chat, center screen, and alert toggles, off by default. PC and console.
+- Chat Announcements: More center-screen messages now have their own chat, center-screen, and alert toggles.
+- MiniMap: **Zone Name Above Map** puts the zone name over the map. InfoPanel stays where it is.
+- MiniMap: **Show Player Pip** can be turned off. The camera cone still draws while you are following.
+- MiniMap: **HarvestMap Pins (%)** changes HarvestMap pin size on the minimap. World map pins stay the same size.
+- MiniMap: The gap around the map uses the world map background. The world map itself is left alone.
+- Slash Commands: **Choose Fence to Summon**. /fence and /smuggler call the fence you pick. PC and console.
 
 ### Changes
 
-- Skill tooltips match current text for Earthspike Mantle, Earthshield Mantle, Shatterspike Mantle, Crystal Weapon, Fetcher Infection, Rally, Healing Springs, Mist Form, Blood Mist, Propelling Shield, the Blackrose destruction staff, Minor and Major Savagery, Minor and Major Force, Gallop, Minor and Major Heroism, Minor Magickasteal, Minor Lifesteal, Minor Timidity, and Empower.
-- Combat Text shared labels updated in German, French, Russian, and Chinese.
+- Skill tooltips brought up to the current text for Earthspike Mantle, Earthshield Mantle, Shatterspike Mantle, Crystal Weapon, Fetcher Infection, Rally, Healing Springs, Mist Form, Blood Mist, Propelling Shield, the Blackrose destruction staff, Minor and Major Savagery, Minor and Major Force, Gallop, Minor and Major Heroism, Minor Magickasteal, Minor Lifesteal, Minor Timidity, and Empower. German, French, Russian, and Chinese have the same tooltip text.
+- Combat Text result labels updated in German, French, Russian, and Chinese. French and Chinese tooltips that were still in English are translated too.
 - Assistant names updated in English, French, Russian, and Chinese.
+- Companion and display announcement strings added in English, German, French, Russian, and Chinese.
+- MiniMap is out of beta, so the settings label dropped (BETA). **Compass**, **Keep Square Aspect**, and **Position Grid Snap** are gone.
 
 ### Fixed
 
-- Action Bar: On console, the cast bar uses the console combat library for ability names and icons.
-- Combat Info: Crowd control tracker text on console and gamepad uses the gamepad fonts.
-- Console: Alert text alignment uses the gamepad alert frame.
-- MiniMap: The frame can sit flush with the screen edge. Resizing it into a corner keeps that position after reload.
-- MiniMap: The corner padlock shows locked and unlocked, and hides after you lock the frame. The move grip stays inside the frame so the map can sit flush with the screen.
-- MiniMap: Map tiles load on login and reload without opening the world map and zooming all the way out.
-- MiniMap: HarvestMap pins show on the minimap without opening the world map and zooming out.
-- MiniMap: The player pip stays on the city map while you are in a submap, without opening the world map.
-- MiniMap: LibMapPins pins (SkyShards, Quest Map, Lost Treasure, Destinations, and the same library) draw for the minimap sheet without opening the world map.
+- Action Bar: On console, the cast bar was showing the wrong ability names and icons.
+- Combat Info: Crowd control tracker text on console and gamepad now uses the gamepad fonts.
+- Console: Alert text lines up with the gamepad alert frame.
+- MiniMap: The frame can sit flush with the screen edge, and a corner resize keeps that spot after reload. The padlock shows locked and unlocked, then hides once you lock it. The move grip stays inside the frame.
+- MiniMap: Tiles, HarvestMap pins, LibMapPins (SkyShards, Quest Map, Lost Treasure, Destinations), and your pip on the city map while you are in a submap, load without opening the world map and zooming out.
+- MiniMap: Group pins keep the Group scale when someone zones or joins.
+- MiniMap: Changing subzone holds the map you already had until the new one is ready.
+- SpellCastBuffs: Buff tooltips no longer sit under the minimap.
+- MiniMap: On Xbox Play Anywhere, the move and lock tooltips were blank when using a mouse.
+- Action Bar: A real backbar cooldown no longer gets covered by the global cooldown.
+- Console: The quest counter filter dropdown in Chat Announcements settings no longer errors.
 
 ## Version 7.2.6.9
 
