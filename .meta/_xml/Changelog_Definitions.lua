@@ -50,8 +50,14 @@ LUIE_Changelog_TitleBar = {}
 LUIE_Changelog_About = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
+---@class LUIE_Changelog_Version : Control
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetY: layout_measurement}
+LUIE_Changelog_Version = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
 ---@class LUIE_Changelog_Container : Control
----@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetY: layout_measurement}
 ---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field public OnInitialized fun(self: Control)
 LUIE_Changelog_Container = {}
@@ -84,5 +90,14 @@ LUIE_Changelog_Title = {}
 ---@field Anchor {point: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field public OnClicked fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
 LUIE_Changelog_Close = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_Changelog_ContainerScrollChildText : LabelControl
+---@field public font string
+---@field public wrapMode TextWrapMode
+---@field public horizontalAlignment TextAlignment
+---@field public verticalAlignment TextAlignment
+---@field Anchor {point: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_Changelog_ContainerScrollChildText = {}
 ---------- LVL: 07 ----------
 -- ////// END   : GENERATED FROM LuiExtended/pc/frontend/Changelog.xml
