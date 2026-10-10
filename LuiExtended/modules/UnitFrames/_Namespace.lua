@@ -106,6 +106,9 @@ UnitFrames.debugBossThresholdPreviewActive = nil
 UnitFrames.targetUnitFrame = nil -- Reference to default UI target unit frame
 UnitFrames.playerDisplayName = GetUnitDisplayName("player")
 UnitFrames.Enabled = false
+UnitFrames.RAID_LEVEL_DISPLAY_NONE = 1
+UnitFrames.RAID_LEVEL_DISPLAY_NUMBER = 2
+UnitFrames.RAID_LEVEL_DISPLAY_ICON = 3
 UnitFrames.Defaults =
 {
     QuickHideDead = false,
@@ -303,6 +306,7 @@ UnitFrames.Defaults =
     GroupShowOverlandDifficulty = false,
     RaidShowVeterancyRank = false,
     RaidShowOverlandDifficulty = false,
+    RaidLevelDisplay = UnitFrames.RAID_LEVEL_DISPLAY_NONE,
     CustomFramesGroup = true,
     GroupExcludePlayer = false,
     GroupBarWidth = 260,

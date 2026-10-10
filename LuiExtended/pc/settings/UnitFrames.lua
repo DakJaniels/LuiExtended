@@ -105,6 +105,19 @@ local raidLayoutChoices =
 }
 local raidLayoutValues = { "1 x 12", "2 x 6", "3 x 4", "6 x 2" }
 
+local raidLevelDisplayChoices =
+{
+    GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY_NONE),
+    GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY_NUMBER),
+    GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY_ICON),
+}
+local raidLevelDisplayValues =
+{
+    UnitFrames.RAID_LEVEL_DISPLAY_NONE,
+    UnitFrames.RAID_LEVEL_DISPLAY_NUMBER,
+    UnitFrames.RAID_LEVEL_DISPLAY_ICON,
+}
+
 local formatOptionChoices, formatOptionValues = UnitFrames.GetFormatOptionMenus()
 
 local Whitelist, WhitelistValues = {}, {}
@@ -3497,6 +3510,25 @@ function UnitFrames.CreateSettings()
                 end,
                 width = "full",
                 default = raidIconOptions[Defaults.RaidIconOptions],
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+                end,
+            },
+            {
+                type = "dropdown",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LEVEL_DISPLAY_TP),
+                choices = raidLevelDisplayChoices,
+                choicesValues = raidLevelDisplayValues,
+                getFunc = function ()
+                    return Settings.RaidLevelDisplay
+                end,
+                setFunc = function (value)
+                    Settings.RaidLevelDisplay = value
+                    UnitFrames.RefreshVeterancyOverlandFrameStaticControls()
+                end,
+                width = "full",
+                default = Defaults.RaidLevelDisplay,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
                 end,

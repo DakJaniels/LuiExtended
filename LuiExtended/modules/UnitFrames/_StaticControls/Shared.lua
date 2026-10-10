@@ -288,6 +288,55 @@ function FrameObject:ApplyVeterancyRankNameIconForRaid(nameText)
     return zo_iconFormat(iconPath, COMPACT_NAME_ICON_SIZE, COMPACT_NAME_ICON_SIZE) .. " " .. tostring(veterancyRank) .. " " .. nameText
 end
 
+--- Prefix level or champion points on a raid name. Veterancy rank replaces this prefix.
+--- @param nameText string
+--- @return string
+function FrameObject:ApplyLevelOrChampionPointsNameForRaid(nameText)
+    if nameText == nil or nameText == "" then
+        return nameText
+    end
+    local displayMode = UnitFrames.SV.RaidLevelDisplay
+    if displayMode ~= UnitFrames.RAID_LEVEL_DISPLAY_NUMBER and displayMode ~= UnitFrames.RAID_LEVEL_DISPLAY_ICON then
+        return nameText
+    end
+    if FrameObject.ShouldShowVeterancyRankOnFrame(self) then
+        return nameText
+    end
+    if not self.isPlayer or not self.unitTag or not IsUnitOnline(self.unitTag) then
+        return nameText
+    end
+    local level = GetUnitLevel(self.unitTag)
+    local championPoints = 0
+    if self.isChampion then
+        championPoints = GetUnitChampionPoints(self.unitTag)
+    end
+    local levelString
+    if displayMode == UnitFrames.RAID_LEVEL_DISPLAY_ICON then
+        if self.isChampion and championPoints > 0 then
+            levelString = ZO_GetLevelOrChampionPointsString(level, championPoints, COMPACT_NAME_ICON_SIZE)
+        else
+            levelString = ZO_GetLevelOrChampionPointsStringNoIcon(level, championPoints)
+            if levelString ~= "" then
+                local iconPath
+                if IsInGamepadPreferredMode() then
+                    iconPath = ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
+                else
+                    iconPath = ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
+                end
+                if iconPath then
+                    levelString = zo_iconFormat(iconPath, COMPACT_NAME_ICON_SIZE, COMPACT_NAME_ICON_SIZE) .. levelString
+                end
+            end
+        end
+    else
+        levelString = ZO_GetLevelOrChampionPointsStringNoIcon(level, championPoints)
+    end
+    if levelString == nil or levelString == "" then
+        return nameText
+    end
+    return levelString .. " " .. nameText
+end
+
 function UnitFrames.ScheduleReticleoverOverlandStaticRefresh()
     if not UnitFrames.SV.TargetShowOverlandDifficulty or not UnitFrames.CustomFrames["reticleover"] then
         return
@@ -746,6 +795,7 @@ function FrameObject:UpdateStaticControlNameLabel(frameCategory)
     nameText = FrameObject.ApplyStaticControlTargetMarkerToName(self, nameText, frameCategory)
     if frameCategory == "raid" then
         nameText = FrameObject.ApplyVeterancyRankNameIconForRaid(self, nameText)
+        nameText = FrameObject.ApplyLevelOrChampionPointsNameForRaid(self, nameText)
         nameText = FrameObject.ApplyStaticControlOverlandToName(self, nameText, frameCategory)
     else
         nameText = FrameObject.ApplyStaticControlOverlandToName(self, nameText, frameCategory)

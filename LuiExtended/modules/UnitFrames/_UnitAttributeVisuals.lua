@@ -411,6 +411,13 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
         end
     end
 
+    if powerType == COMBAT_MECHANIC_FLAGS_HEALTH and UnitFrames.CustomFrames then
+        local customFrame = UnitFrames.CustomFrames[unitTag]
+        if customFrame and attributeFrame == customFrame[COMBAT_MECHANIC_FLAGS_HEALTH] then
+            UnitFrames.RefreshCompactNameClip(customFrame)
+        end
+    end
+
     -- Update status bar
     if attributeFrame.bar then
         local dodgePrediction = UnitFrames.dodgePrediction

@@ -599,35 +599,38 @@ local function geometrySVForCategory(category)
     if not sv then return nil end
     if category == "raid" then
         local iconOption = sv.RaidIconOptions or 1
-        -- Mirrors applyIconSettings: iconOption == 1 means no icon (offset 10),
-        -- otherwise role/class icon is shown and the name is inset further (offset 27).
-        local offset = (iconOption == 1) and 10 or 27
+        -- Minimum gutter only. A wider health or dead label reserves more at runtime.
+        -- Inset 5 with no icon, 22 with a class/role/leader icon, plus the 5px right anchor and 4px gap.
+        local leftInset = (iconOption == 1) and 5 or 22
+        local minimumReserve = (sv.RaidNameClip or 0) + 5 + 4
         return
         {
             barWidth = sv.RaidBarWidth,
             clip = sv.RaidNameClip,
             iconOption = iconOption,
-            expectedNameWidth = zo_max(0, sv.RaidBarWidth - sv.RaidNameClip - offset),
+            expectedNameWidth = zo_max(0, sv.RaidBarWidth - leftInset - minimumReserve),
         }
     elseif category == "pet" then
+        local minimumReserve = (sv.PetNameClip or 0) + 5 + 4
         return
         {
             barWidth = sv.PetWidth,
             clip = sv.PetNameClip,
-            expectedNameWidth = zo_max(0, sv.PetWidth - sv.PetNameClip - 10),
+            expectedNameWidth = zo_max(0, sv.PetWidth - 5 - minimumReserve),
         }
     elseif category == "companion" then
+        local minimumReserve = (sv.CompanionNameClip or 0) + 5 + 4
         return
         {
             barWidth = sv.CompanionWidth,
             clip = sv.CompanionNameClip,
-            expectedNameWidth = zo_max(0, sv.CompanionWidth - sv.CompanionNameClip - 10),
+            expectedNameWidth = zo_max(0, sv.CompanionWidth - 5 - minimumReserve),
         }
     elseif category == "boss" then
         return
         {
             barWidth = sv.BossBarWidth,
-            expectedNameWidth = zo_max(0, sv.BossBarWidth - 50),
+            expectedNameWidth = zo_max(0, sv.BossBarWidth - 5 - 9),
         }
     end
     return nil
