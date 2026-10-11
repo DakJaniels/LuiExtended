@@ -1,5 +1,5 @@
 local NAME = "AntiClankerAddonConsortiumUpdateChecker"
-local VERSION = 25
+local VERSION = 33
 
 if type(_G[NAME]) == "number" and _G[NAME] >= VERSION then return end
 _G[NAME] = VERSION
@@ -7,7 +7,7 @@ _G[NAME] = VERSION
 local KNOWN_VERSIONS = {
     -- Kyzeragon
     ["CrutchAlerts"]          = 22700,
-    ["KyzderpsDerps"]         = 1540,
+    ["KyzderpsDerps"]         = 1550,
 
     -- code65536
     ["CharacterKnowledge"]    = 301030,
@@ -15,17 +15,17 @@ local KNOWN_VERSIONS = {
     ["CombatAlerts"]          = 206070,
     ["GroupBuffPanels"]       = 203030,
     ["ItemBrowser"]           = 407010,
-    ["LootLog"]               = 410010,
-    ["Raidificator"]          = 407030,
+    ["LootLog"]               = 410050,
+    ["Raidificator"]          = 408010,
 
     -- M0R_Gaming
     ["M0RMarkers"]            = 223,
 
     -- DakJaniels
-    ["LuiExtended"]           = 7269,
+    ["LuiExtended"]           = 7270,
 
     -- m00nyONE
-    ["LibGroupCombatStats"]   = 20260726,
+    ["LibGroupCombatStats"]   = 20261004,
 }
 
 local MESSAGE = {
