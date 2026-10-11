@@ -61,4 +61,5 @@ Effects.IsFoodBuff =
     [127596] = true, -- Bewitched Sugar Skulls
     [127619] = true, -- Increase Health (but descriptions says max magicka)
     [127736] = true, -- Increase Health (but descriptions says max magicka)
+    [267468] = true, -- Granny's Eel Pie
 }

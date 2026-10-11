@@ -994,6 +994,8 @@ local debugAuras =
     [107794] = true, -- Unique Food: Max H/M, Fish Lur
     [107748] = true, -- Lure Allure
     [107749] = true, -- Increase Magicka
+    [267467] = true, -- Granny's Eel Pie (item use)
+    [267468] = true, -- Granny's Eel Pie
 
     -- Crafted Drink
     [61365] = true,  -- Drink: H, Flagon
