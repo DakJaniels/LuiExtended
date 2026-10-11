@@ -542,7 +542,7 @@ local barHighlightOverride =
     [16825] = { newId = 38814, duration = 2000, combatTrack = true, noRemove = true },   -- Off Balance Exploit stun (re-hit on OB; log 17:44)
     [137807] = { newId = 38814, duration = 2000, combatTrack = true, noRemove = true },  -- OB immune snare fallback (log IMMUNE + 137807 2s)
     [38788] = { newId = 99789, showFakeAura = true, duration = 18000, noRemove = true }, -- Stampede --> Merciless Charge (vMA); Stampede track via ExtraId 126475
-    [38745] = { newId = 159728, showFakeAura = true, duration = 6000 },                  -- Carve --> damage shield (target bleed 38747)
+    [38745] = { newId = 38747 },                                                         -- Carve --> target bleed (API stacks + remain on reticle; shield 159728 not tracked)
     [38754] = { newId = 38763, showFakeAura = true, duration = 6000 },                   -- Brawler --> damage shield
 
     [28448] = { newId = 99789, showFakeAura = true, duration = 18000, noRemove = true }, -- Critical Charge --> Merciless Charge
