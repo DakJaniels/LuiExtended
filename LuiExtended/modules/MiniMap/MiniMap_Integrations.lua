@@ -28,7 +28,7 @@ local function ApplyInfoPanelDefaultXmlAnchor(infoPanelControl)
     infoPanelControl:SetAnchor(TOPRIGHT, GuiRoot, TOPRIGHT, INFO_PANEL_DEFAULT_OFFSET_X, INFO_PANEL_DEFAULT_OFFSET_Y)
 end
 
---- Optional InfoPanel stack (below the map, in the zone-label slot) and the HarvestMap minimap mode.
+--- Optional InfoPanel stack (below the map, in the zone-label slot) and the HarvestMap / LoreLibrary minimap modes.
 --- @class LUIE_MiniMap_Integrations : ZO_InitializingObject
 --- @field manager LUIE_MiniMap_Manager
 --- @field harvestMap table|nil The `Harvest` global when HarvestMap is enabled.
@@ -36,6 +36,10 @@ end
 --- @field harvestMapOriginalCheckMapMode fun(controller: table)|nil
 --- @field harvestMapOriginalIsInMinimapMode fun(mapMode: table): boolean|nil
 --- @field harvestMapActive boolean
+--- @field loreLibrary table|nil The `LoreLibrary` global when LoreLibrary is enabled.
+--- @field loreLibraryMode table|nil LUIE mode table handed to LoreLibrary's PinController:SetMode.
+--- @field loreLibraryOriginalCheckMapMode fun(controller: table)|nil
+--- @field loreLibraryActive boolean
 LUIE_MiniMap_Integrations = ZO_InitializingObject:Subclass()
 
 --- @param manager LUIE_MiniMap_Manager
@@ -46,6 +50,12 @@ function LUIE_MiniMap_Integrations:Initialize(manager)
     self.harvestMapActive = false
     if LUIE.OtherAddonCompatability.isHarvestMapEnabled and Harvest and Harvest.pinController and Harvest.mapMode and Harvest.mapPins then
         self.harvestMap = Harvest
+    end
+    self.loreLibrary = nil
+    self.loreLibraryMode = nil
+    self.loreLibraryActive = false
+    if LUIE.OtherAddonCompatability.isLoreLibraryEnabled and LoreLibrary and LoreLibrary.pinController and LoreLibrary.mapPins then
+        self.loreLibrary = LoreLibrary
     end
 end
 
@@ -233,4 +243,118 @@ function LUIE_MiniMap_Integrations:OnHarvestMapMapChanged()
     if DoesCurrentMapMatchMapForPlayerLocation() then
         self.harvestMap.mapPins:RedrawPins()
     end
+end
+
+-- LoreLibrary ----------------------------------------------------------------
+-- LoreLibrary/Pins/MapPinController.lua (adapted from HarvestMap's controller): Initialize (24) parents LL_Container
+-- to LL_Scroll anchored to ZO_WorldMapContainer; SetMode(mode) (398) calls mode:Activate(); CheckMapMode() (406)
+-- picks MAIN/NO/FYR/AUI/VOTAN modes; OnMapSizeChange(width, height) (431) sets MAP_WIDTH/HEIGHT, re-checks the mode
+-- and relays out every pin (PinTypeManager:UpdateLocationOfPinWithIndex scales by MAP_WIDTH, 540). Mode tables
+-- (634-738) expose Activate(self) / GetDimensions(self). pinTypeManagers is keyed [pinTypeId][cacheSlot] (17).
+-- MapPins:RedrawPins (68) has no minimap gate, so only CheckMapMode needs a wrapper. The tracked-book marker
+-- (Pins/MarkerPin.lua) is a ZO_WorldMapPins_Manager custom pin and is mirrored by the pin layer already.
+
+--- @return boolean
+function LUIE_MiniMap_Integrations:IsLoreLibraryMinimapModeActive()
+    return self.loreLibraryActive and not ZO_WorldMap_IsWorldMapShowing()
+end
+
+function LUIE_MiniMap_Integrations:SetupLoreLibraryMode()
+    local loreLibrary = self.loreLibrary
+    if not loreLibrary or self.loreLibraryMode then
+        return
+    end
+    local pinController = loreLibrary.pinController
+    local pinsLayer = self.manager.frame.pinsLayer
+    local panAndZoom = self.manager.panAndZoom
+
+    self.loreLibraryMode =
+    {
+        Activate = function (mode)
+            local container = pinController.container
+            container:ClearAnchors()
+            container:SetAnchor(TOPLEFT, pinsLayer, TOPLEFT, 0, 0)
+            container:SetParent(pinsLayer)
+        end,
+        GetDimensions = function (mode)
+            return panAndZoom:GetContentWidth(), panAndZoom:GetContentHeight()
+        end,
+    }
+
+    self.loreLibraryOriginalCheckMapMode = pinController.CheckMapMode
+    local originalCheckMapMode = self.loreLibraryOriginalCheckMapMode
+    pinController.CheckMapMode = function (controller)
+        if self:IsLoreLibraryMinimapModeActive() then
+            controller:SetMode(self.loreLibraryMode)
+            return
+        end
+        originalCheckMapMode(controller)
+    end
+end
+
+function LUIE_MiniMap_Integrations:ActivateLoreLibrary()
+    if not self.loreLibrary then
+        return
+    end
+    self:SetupLoreLibraryMode()
+    self.loreLibraryActive = true
+end
+
+--- Hands LL_Container back to LoreLibrary's own scroll and restores the original mode selection.
+function LUIE_MiniMap_Integrations:DeactivateLoreLibrary()
+    if not self.loreLibrary or not self.loreLibraryActive then
+        return
+    end
+    self.loreLibraryActive = false
+    local pinController = self.loreLibrary.pinController
+    self:ApplyLoreLibraryPinScale()
+    local container = pinController.container
+    container:SetParent(pinController.scroll)
+    container:ClearAnchors()
+    container:SetAnchor(TOPLEFT, ZO_WorldMapContainer, TOPLEFT, 0, 0)
+    pinController:OnMapSizeChange(ZO_WorldMapContainer:GetDimensions())
+end
+
+--- LoreLibrary book pins are CT_TEXTURECOMPOSITE controls sized from layout.size (PinTypeManager:UpdateSize, 546);
+--- the user multiplier is applied as a composite scale. They have no category slider of their own and follow
+--- Default Pin Scale x Other Pins, the same fallback MiniMap.GetPinTypeScaleMultiplier uses for uncategorised pins.
+function LUIE_MiniMap_Integrations:ApplyLoreLibraryPinScale()
+    if not self.loreLibrary then
+        return
+    end
+    local pinTypeManagers = self.loreLibrary.pinController.pinTypeManagers
+    if not pinTypeManagers then
+        return
+    end
+    local compositeScale = 1
+    if self:IsLoreLibraryMinimapModeActive() then
+        compositeScale = (MiniMap.SV.defaultPinScale or 1) * (MiniMap.SV.pinScaleOther or 1)
+    end
+    for _, managersByCacheSlot in pairs(pinTypeManagers) do
+        for _, pinTypeManager in pairs(managersByCacheSlot) do
+            local composite = pinTypeManager.composite
+            if composite then
+                composite:SetScale(compositeScale)
+            end
+        end
+    end
+end
+
+--- Content size changed (zoom / new map): relayout LoreLibrary pins to the minimap sheet.
+function LUIE_MiniMap_Integrations:OnLoreLibraryContentSizeChanged()
+    if not self:IsLoreLibraryMinimapModeActive() or not self.manager.panAndZoom:HasMap() then
+        return
+    end
+    local panAndZoom = self.manager.panAndZoom
+    self.loreLibrary.pinController:OnMapSizeChange(panAndZoom:GetContentWidth(), panAndZoom:GetContentHeight())
+    self:ApplyLoreLibraryPinScale()
+end
+
+--- New map sheet: size first, then a redraw for the viewed / player zone caches.
+function LUIE_MiniMap_Integrations:OnLoreLibraryMapChanged()
+    if not self:IsLoreLibraryMinimapModeActive() or not self.manager.panAndZoom:HasMap() then
+        return
+    end
+    self:OnLoreLibraryContentSizeChanged()
+    self.loreLibrary.mapPins:RedrawPins()
 end

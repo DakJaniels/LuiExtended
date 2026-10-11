@@ -274,6 +274,8 @@ function LUIE_MiniMap_Manager:OnMapReady()
     self.playerPip:ApplyVisibility()
     self.integrations:ActivateHarvestMap()
     self.integrations:OnHarvestMapMapChanged()
+    self.integrations:ActivateLoreLibrary()
+    self.integrations:OnLoreLibraryMapChanged()
     self:UpdateLocationLabel()
     MiniMap.LogDebug("Map ready: %s zoom %.2f content %dx%d", mapName, panAndZoom:GetZoom(), panAndZoom:GetContentWidth(), panAndZoom:GetContentHeight())
 
@@ -513,6 +515,7 @@ function LUIE_MiniMap_Manager:OnContentSizeChanged()
     self.tileLayer:LayoutTiles()
     self.pinLayer:RelayoutAll()
     self.integrations:OnHarvestMapContentSizeChanged()
+    self.integrations:OnLoreLibraryContentSizeChanged()
 end
 
 -- Location label -------------------------------------------------------------
@@ -624,6 +627,7 @@ function LUIE_MiniMap_Manager:ApplySettings()
     if self:IsIdle() then
         self.pinLayer:RelayoutAll()
         self.integrations:ApplyHarvestMapPinScale()
+        self.integrations:ApplyLoreLibraryPinScale()
     end
     self:RefreshUpdateRegistration()
 end
@@ -689,6 +693,7 @@ function LUIE_MiniMap_Manager:Stop()
     self.visibility:Unregister()
     self:UnregisterEvents()
     self.integrations:DeactivateHarvestMap()
+    self.integrations:DeactivateLoreLibrary()
     self.input:StopDragBarMouseOverUpdate()
     self.frame:ShutdownFadeStateMachines()
     self.pauseReasons = {}
