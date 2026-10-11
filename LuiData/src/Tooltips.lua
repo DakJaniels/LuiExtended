@@ -419,6 +419,7 @@ local tooltips =
     Food_Crafted_Clockwork_Citrus_Filet = GetItemLinkOnUseAbilityDescription("|H1:item:133556:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Food_Crafted_Artaeum_Takeaway_Broth = GetItemLinkOnUseAbilityDescription("|H1:item:139018:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Food_Crafted_Artaeum_Pickled_Fish_Bowl = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:139016:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_ARTAEUM_BOWL), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_ARTAEUM_BOWL)),
+    Food_Crafted_Grannys_Eel_Pie = GetItemLinkOnUseAbilityDescription("|H1:item:225205:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Food_Crafted_Candied_Jesters_Coins = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120762:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
     Food_Crafted_Lava_Foot_Soup = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112425:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
     Food_Crafted_Alcaire_Festival_Sword_Pie = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112439:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
