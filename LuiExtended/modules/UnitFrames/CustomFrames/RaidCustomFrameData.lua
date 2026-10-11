@@ -13,11 +13,67 @@ local ApplyStackedMemberAnchors = Shared.ApplyStackedMemberAnchors
 local CreateMemberRangeFromVirtual = Shared.CreateMemberRangeFromVirtual
 local CreateCombatGlowBorder = Shared.CreateCombatGlowBorder
 
+local RAID_MEMBER_TEMPLATE_COMPACT = "LUIE_UF_RaidGroupMember_Template"
+local RAID_MEMBER_TEMPLATE_EXPANDED = "LUIE_UF_RaidGroupMemberExpanded_Template"
+
+--- Compact template: name/icons/status share the health bar; LibGroup container and resource bars are siblings of _Health.
+--- @param control Control
+--- @param rhb Control
+--- @return table frameFields
+local function CollectCompactRaidMemberControls(control, rhb)
+    local magBackdrop = control:GetNamedChild("_ResourceMagicka")
+    local stamBackdrop = control:GetNamedChild("_ResourceStamina")
+    return
+    {
+        ["label"] = rhb:GetNamedChild("_Label"),
+        ["name"] = rhb:GetNamedChild("_Name"),
+        ["roleIcon"] = rhb:GetNamedChild("_RoleIcon"),
+        ["classIcon"] = rhb:GetNamedChild("_ClassIcon"),
+        ["dead"] = rhb:GetNamedChild("_Dead"),
+        ["leader"] = rhb:GetNamedChild("_Leader"),
+        ["libGroupContainer"] = control:GetNamedChild("_LibGroupContainer"),
+        ["magBackdrop"] = magBackdrop,
+        ["stamBackdrop"] = stamBackdrop,
+    }
+end
+
+--- Expanded template (see RaidFrames.xml): _Frame is the padded container, _TopRow / _BottomRow sit on it and
+--- _Health is the health band between them. Row children are named $(grandparent)_* so they resolve from the
+--- member control; the health text (_Label / _Dead) stays on the health band like the compact template.
+--- @param control Control
+--- @param rhb Control
+--- @return table frameFields
+local function CollectExpandedRaidMemberControls(control, rhb)
+    local topRow = control:GetNamedChild("_TopRow")
+    local bottomRow = control:GetNamedChild("_BottomRow")
+    return
+    {
+        ["label"] = rhb:GetNamedChild("_Label"),
+        ["name"] = control:GetNamedChild("_Name"),
+        ["roleIcon"] = control:GetNamedChild("_RoleIcon"),
+        ["classIcon"] = control:GetNamedChild("_ClassIcon"),
+        ["dead"] = rhb:GetNamedChild("_Dead"),
+        ["leader"] = control:GetNamedChild("_Leader"),
+        ["libGroupContainer"] = control:GetNamedChild("_LibGroupContainer"),
+        ["magBackdrop"] = control:GetNamedChild("_ResourceMagicka"),
+        ["stamBackdrop"] = control:GetNamedChild("_ResourceStamina"),
+        ["frameBackdrop"] = control:GetNamedChild("_Frame"),
+        ["topRow"] = topRow,
+        ["bottomRow"] = bottomRow,
+        ["resourceContainer"] = bottomRow:GetNamedChild("_ResourceContainer"),
+        ["statsBorder"] = bottomRow:GetNamedChild("_StatsBorder"),
+        ["statsLabel"] = control:GetNamedChild("_StatsLabel"),
+    }
+end
+
 function LUIE.CustomFramesBuildRaidGroup()
     if UnitFrames.SV.CustomFramesRaid then
+        local useExpandedTemplate = UnitFrames.IsRaidExpandedTemplate()
+        local memberTemplateName = useExpandedTemplate and RAID_MEMBER_TEMPLATE_EXPANDED or RAID_MEMBER_TEMPLATE_COMPACT
+
         -- Get references to XML-created controls
         local raid = CreateLUIETopLevel("LUIE_CustomRaidGroupFrame", "LUIE_UF_RaidGroupFrame_Template")
-        CreateMemberRangeFromVirtual(raid, raid:GetName() .. "_RaidGroup", "LUIE_UF_RaidGroupMember_Template", 1, 12)
+        CreateMemberRangeFromVirtual(raid, raid:GetName() .. "_RaidGroup", memberTemplateName, 1, 12)
         ApplyStackedMemberAnchors(raid, "RaidGroup", 12)
         raid.customPositionAttr = "CustomFramesRaidFramePos"
         raid.preview = raid:GetNamedChild("_Preview")
@@ -28,15 +84,15 @@ function LUIE.CustomFramesBuildRaidGroup()
             local control = raid:GetNamedChild("_" .. unitTag)
             local rhb = control:GetNamedChild("_Health")
 
-            -- Create container for LibGroupBroadcast integrations (positioned to right of health bar)
-            local libGroupContainer = control:GetNamedChild("_LibGroupContainer")
+            local memberControls
+            if useExpandedTemplate then
+                memberControls = CollectExpandedRaidMemberControls(control, rhb)
+            else
+                memberControls = CollectCompactRaidMemberControls(control, rhb)
+            end
 
-            -- Get resource bars from XML for LibGroupBroadcast integration
-            local magBackdrop = control:GetNamedChild("_ResourceMagicka")
-            local stamBackdrop = control:GetNamedChild("_ResourceStamina")
-
-            -- Create combat glow animation
-            local combatGlow = CreateCombatGlowBorder(rhb)
+            -- Create combat glow animation (expanded: around the whole frame container, not just the health band)
+            local combatGlow = CreateCombatGlowBorder(memberControls.frameBackdrop or rhb)
 
             UnitFrames.CustomFrames[unitTag] =
             {
@@ -45,7 +101,7 @@ function LUIE.CustomFramesBuildRaidGroup()
                 [COMBAT_MECHANIC_FLAGS_HEALTH] =
                 {
                     ["backdrop"] = rhb,
-                    ["label"] = rhb:GetNamedChild("_Label"),
+                    ["label"] = memberControls.label,
                     ["trauma"] = rhb:GetNamedChild("_Trauma"),
                     ["bar"] = rhb:GetNamedChild("_Bar"),
                     ["shield"] = rhb:GetNamedChild("_Shield"),
@@ -54,23 +110,35 @@ function LUIE.CustomFramesBuildRaidGroup()
                     ["possessionOverlay"] = rhb:GetNamedChild("_PossessionOverlay"),
                     ["combatGlow"] = combatGlow,
                 },
-                ["name"] = rhb:GetNamedChild("_Name"),
-                ["roleIcon"] = rhb:GetNamedChild("_RoleIcon"),
-                ["classIcon"] = rhb:GetNamedChild("_ClassIcon"),
-                ["dead"] = rhb:GetNamedChild("_Dead"),
-                ["leader"] = rhb:GetNamedChild("_Leader"),
-                ["libGroupContainer"] = libGroupContainer,
+                ["name"] = memberControls.name,
+                ["roleIcon"] = memberControls.roleIcon,
+                ["classIcon"] = memberControls.classIcon,
+                ["dead"] = memberControls.dead,
+                ["leader"] = memberControls.leader,
+                ["libGroupContainer"] = memberControls.libGroupContainer,
                 ["resourceMagicka"] =
                 {
-                    ["backdrop"] = magBackdrop,
-                    ["bar"] = magBackdrop:GetNamedChild("_Bar"),
+                    ["backdrop"] = memberControls.magBackdrop,
+                    ["bar"] = memberControls.magBackdrop:GetNamedChild("_Bar"),
                 },
                 ["resourceStamina"] =
                 {
-                    ["backdrop"] = stamBackdrop,
-                    ["bar"] = stamBackdrop:GetNamedChild("_Bar"),
+                    ["backdrop"] = memberControls.stamBackdrop,
+                    ["bar"] = memberControls.stamBackdrop:GetNamedChild("_Bar"),
                 },
             }
+
+            if useExpandedTemplate then
+                local frameData = UnitFrames.CustomFrames[unitTag]
+                frameData.raidTemplate = UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED
+                frameData.frameBackdrop = memberControls.frameBackdrop
+                frameData.topRow = memberControls.topRow
+                frameData.bottomRow = memberControls.bottomRow
+                frameData.resourceContainer = memberControls.resourceContainer
+                frameData.statsBorder = memberControls.statsBorder
+                frameData.statsLabel = memberControls.statsLabel
+            end
+
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
 
             control.defaultUnitTag = GetGroupUnitTagByIndex(i)

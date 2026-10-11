@@ -57,6 +57,9 @@ UnitFrames.AvaCustFrames = {}
 --- @class UnitFrames.RegenStripControl : TextureControl
 --- @field animation AnimationObjectTranslate
 --- @field timeline AnimationTimeline
+--- @field regenDistanceMult number translate distance as a fraction of the bar width (Shared.ResizeRegenAnimation)
+--- @field regenOffsetXMult number translate start X as a fraction of the bar width (Shared.ResizeRegenAnimation)
+--- @field regenOffsetY number anchor Y offset reused when the translate offsets are recomputed
 
 --- Default frame power entry (label + color, optional threshold for target).
 --- @class UnitFrames.DefaultFramePowerEntry
@@ -109,6 +112,22 @@ UnitFrames.Enabled = false
 UnitFrames.RAID_LEVEL_DISPLAY_NONE = 1
 UnitFrames.RAID_LEVEL_DISPLAY_NUMBER = 2
 UnitFrames.RAID_LEVEL_DISPLAY_ICON = 3
+-- Raid member XML template (chosen at build time in LUIE.CustomFramesBuildRaidGroup; requires /reloadui to switch).
+UnitFrames.RAID_FRAME_TEMPLATE_COMPACT = "Compact"
+UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED = "Expanded"
+-- RaidLayoutBattleground shapes (Big Team Battles 6v6v6 / 9v9): the slot count N follows GetBattlegroundTeamSize,
+-- so one setting gives 1x9 / 3x3 / 9x1 in a 9v9 and 1x6 / 3x2 / 6x1 in a 6v6v6 (UnitFrames.GetActiveRaidLayout).
+UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN = "column" -- 1 x N
+UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID = "grid"     -- 3 x ceil(N / 3)
+UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW = "row"       -- N x 1
+
+--- True when the raid frames use the expanded (two-row) member template.
+--- @return boolean
+function UnitFrames.IsRaidExpandedTemplate()
+    local sv = UnitFrames.SV
+    return sv ~= nil and sv.RaidFrameTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED
+end
+
 UnitFrames.Defaults =
 {
     QuickHideDead = false,
@@ -317,6 +336,10 @@ UnitFrames.Defaults =
     RaidBarWidth = 220,
     RaidBarHeight = 30,
     RaidLayout = "1 x 12",
+    -- Used instead of RaidLayout while in a Big Team Battles battleground (6v6v6 / 9v9); a RAID_LAYOUT_BATTLEGROUND_*
+    -- shape. Pre-U51 "1 x 9" / "3 x 3" / "9 x 1" values are migrated by UnitFrames.GetBattlegroundRaidLayoutShape.
+    RaidLayoutBattleground = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID,
+    RaidFrameTemplate = UnitFrames.RAID_FRAME_TEMPLATE_COMPACT,
     RoleIconSmallGroup = true,
     ColorRoleGroup = true,
     ColorRoleRaid = true,
@@ -418,6 +441,7 @@ UnitFrames.Defaults =
     GroupResources =
     {
         enabled = false,
+        showOnRaidFrames = true, -- false keeps the bars on the 4 player group frames only (compact and Expanded raid frames)
         staminaFirst = false,
         hideResourceBarsToggle = true,
         hideResourceBarsTimeout = 120,
@@ -445,6 +469,7 @@ UnitFrames.Defaults =
     GroupCombatStats =
     {
         enabled = false,
+        showOnRaidFrames = true, -- false keeps ultimates / DPS / HPS on the 4 player group frames only
         showUltimate = true,
         showDPS = true,
         showHPS = true,
@@ -452,8 +477,8 @@ UnitFrames.Defaults =
         ultIconGroupSize = 28,
         ultIconGroupOffsetX = 4,
         ultIconGroupOffsetY = 0,
-        -- Raid (12 player) settings
-        ultIconRaidSize = 22,
+        -- Raid (12 player) settings (only used by the Expanded raid frame template)
+        ultIconRaidSize = 16,
         ultIconRaidOffsetX = 3,
         ultIconRaidOffsetY = 0,
     },
@@ -462,13 +487,14 @@ UnitFrames.Defaults =
     GroupPotionCooldowns =
     {
         enabled = false,
+        showOnRaidFrames = true, -- false keeps the potion slot on the 4 player group frames only
         showRemainingTime = true,
         -- Group (4 player) settings
         potionIconGroupSize = 24,
         potionIconGroupOffsetX = 4,
         potionIconGroupOffsetY = 0,
-        -- Raid (12 player) settings
-        potionIconRaidSize = 20,
+        -- Raid (12 player) settings (only used by the Expanded raid frame template)
+        potionIconRaidSize = 16,
         potionIconRaidOffsetX = 3,
         potionIconRaidOffsetY = 0,
     },
@@ -477,12 +503,14 @@ UnitFrames.Defaults =
     GroupFoodDrinkBuff =
     {
         enabled = false,
+        showOnRaidFrames = true, -- false keeps the food/drink slot on the 4 player group frames only
         showNoBuff = false,
         showRemainingTime = true,
         useCustomIcons = false,
         iconSizeGroup = 24,
         iconOffsetXGroup = 4,
         iconOffsetYGroup = 0,
+        iconSizeRaid = 16, -- Expanded raid template bottom-row slot (matches ultIconRaidSize / potionIconRaidSize)
     },
 }
 

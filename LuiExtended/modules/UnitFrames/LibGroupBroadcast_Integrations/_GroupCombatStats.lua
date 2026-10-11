@@ -36,11 +36,13 @@ local hpsUpdateCallback
 local function AddCombatStatsToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
 
-    -- Only create for SmallGroup frames, not RaidGroup
-    if isRaid then return end
-
     local Settings = Shared.GetCombatStatsSettings()
     if not Settings or not Settings.enabled then return end
+
+    -- Only create for SmallGroup frames and the Expanded raid template (compact raid frames have no slots),
+    -- and only on raid frames when the user wants them there ("Show on Raid Frames").
+    local isExpandedRaidFrame = frameData.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED
+    if isRaid and (not isExpandedRaidFrame or not Settings.showOnRaidFrames) then return end
 
     local backdrop = Shared.GetHealthBackdrop(frameData)
     if not backdrop then return end
@@ -67,10 +69,13 @@ local function AddCombatStatsToFrame(frameData, isRaid)
                 end
             end
 
-            -- Anchor container to health bar if not already anchored
-            local numAnchors = container:GetNumAnchors()
-            if numAnchors == 0 then
-                container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
+            -- Anchor container to health bar if not already anchored.
+            -- Expanded raid frames anchor the container inside the bottom row (UnitFrames.ApplyRaidExpandedMemberLayout).
+            if not isExpandedRaidFrame then
+                local numAnchors = container:GetNumAnchors()
+                if numAnchors == 0 then
+                    container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
+                end
             end
 
             -- Get ult controls from XML
@@ -91,16 +96,20 @@ local function AddCombatStatsToFrame(frameData, isRaid)
             frameData.combatStats.ult2Backdrop:SetDimensions(iconSize, iconSize)
             frameData.combatStats.ult2Icon:SetDimensions(iconSize - 2, iconSize - 2)
 
-            -- Anchor within container (order: food/drink -> ult1 -> ult2)
-            frameData.combatStats.ult1Backdrop:ClearAnchors()
-            if frameData.foodDrinkBuff and frameData.foodDrinkBuff.backdrop then
-                frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, frameData.foodDrinkBuff.backdrop, RIGHT, 3, 0)
-            else
-                frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
-            end
+            -- Anchor within container (order: food/drink -> ult1 -> ult2).
+            -- Expanded raid frames: the layout chains every slot (UnitFrames.ApplyRaidExpandedMemberLayout, run by
+            -- Shared.SetupIntegrationFrames right after this), so no anchoring here.
+            if not isExpandedRaidFrame then
+                frameData.combatStats.ult1Backdrop:ClearAnchors()
+                if frameData.foodDrinkBuff and frameData.foodDrinkBuff.backdrop then
+                    frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, frameData.foodDrinkBuff.backdrop, RIGHT, 3, 0)
+                else
+                    frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
+                end
 
-            frameData.combatStats.ult2Backdrop:ClearAnchors()
-            frameData.combatStats.ult2Backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 3, 0)
+                frameData.combatStats.ult2Backdrop:ClearAnchors()
+                frameData.combatStats.ult2Backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 3, 0)
+            end
 
             -- Set draw properties
             frameData.combatStats.ult1Backdrop:SetDrawLayer(DL_BACKGROUND)
@@ -112,12 +121,13 @@ local function AddCombatStatsToFrame(frameData, isRaid)
             frameData.combatStats.ult2Icon:SetDrawLevel(15)
         end
 
-        -- Get DPS/HPS text label from XML (SmallGroup only)
+        -- Get DPS/HPS text label from XML (SmallGroup health backdrop, or the expanded raid stats box)
         if Settings.showDPS or Settings.showHPS then
-            local fontSize = 14
+            -- Expanded raid: 12pt fits the 16px-tall stats box (UnitFrames.lua RAID_EXPANDED_STATS_HEIGHT)
+            local fontSize = isExpandedRaidFrame and 12 or 14
 
-            -- Get from health backdrop
-            frameData.combatStats.statsLabel = backdrop:GetNamedChild("_StatsLabel")
+            -- Expanded raid frames resolve the label at build time (RaidCustomFrameData.lua); SmallGroup reads it from the health backdrop
+            frameData.combatStats.statsLabel = frameData.statsLabel or backdrop:GetNamedChild("_StatsLabel")
             if not frameData.combatStats.statsLabel then
                 return -- Can't proceed without stats label
             end
@@ -127,7 +137,7 @@ local function AddCombatStatsToFrame(frameData, isRaid)
             frameData.combatStats.statsLabel:SetDrawLevel(15)
 
             -- Apply font
-            local appearance = UnitFrames.GetCustomFrameAppearance("group")
+            local appearance = UnitFrames.GetCustomFrameAppearance(isExpandedRaidFrame and "raid" or "group")
             frameData.combatStats.statsLabel:SetFont(LUIE.Font.Resolve(appearance.fontFace, fontSize, appearance.fontStyle))
         end
     end

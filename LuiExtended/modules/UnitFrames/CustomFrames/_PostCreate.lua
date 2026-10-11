@@ -164,7 +164,8 @@ function UnitFrames.CreateCustomFrames()
             enableFlag = "RaidEnableRegen",
             widthSV = "RaidBarWidth",
             heightSV = "RaidBarHeight",
-            heightMultiplier = 0.3
+            -- The raid layout re-fits these strips to the actual health band (UnitFrames.lua FitRaidHealthBandVisuals).
+            heightMultiplier = UnitFrames.RAID_REGEN_STRIP_HEIGHT_MULTIPLIER
         },
         {
             prefix = "boss",

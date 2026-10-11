@@ -97,11 +97,13 @@ end
 local function AddPotionCooldownToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
 
-    -- Only create for SmallGroup frames, not RaidGroup
-    if isRaid then return end
-
     local Settings = Shared.GetPotionCooldownSettings()
     if not Settings or not Settings.enabled then return end
+
+    -- Only create for SmallGroup frames and the Expanded raid template (compact raid frames have no slots),
+    -- and only on raid frames when the user wants it there ("Show on Raid Frames").
+    local isExpandedRaidFrame = frameData.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED
+    if isRaid and (not isExpandedRaidFrame or not Settings.showOnRaidFrames) then return end
 
     local backdrop = Shared.GetHealthBackdrop(frameData)
     if not backdrop then return end
@@ -110,10 +112,12 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
     if not frameData.potionCooldown then
         frameData.potionCooldown = {}
 
-        -- If ultimate icons are enabled, match their size for visual consistency
+        -- If ultimate icons are enabled (on this frame type), match their size for visual consistency
         local iconSize
         local combatStatsSettings = Shared.GetCombatStatsSettings()
-        if combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate then
+        local ultimateIconsShownHere = combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate
+            and (not isRaid or combatStatsSettings.showOnRaidFrames)
+        if ultimateIconsShownHere then
             iconSize = isRaid and combatStatsSettings.ultIconRaidSize or combatStatsSettings.ultIconGroupSize
         else
             iconSize = isRaid and Settings.potionIconRaidSize or Settings.potionIconGroupSize
@@ -135,11 +139,14 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
             end
         end
 
-        -- Anchor container to health bar if not already anchored
-        local numAnchors = container:GetNumAnchors()
-        if numAnchors == 0 then
-            local healthBackdrop = Shared.GetHealthBackdrop(frameData)
-            container:SetAnchor(LEFT, healthBackdrop, RIGHT, offsetX, offsetY)
+        -- Anchor container to health bar if not already anchored.
+        -- Expanded raid frames anchor the container inside the bottom row (UnitFrames.ApplyRaidExpandedMemberLayout).
+        if not isExpandedRaidFrame then
+            local numAnchors = container:GetNumAnchors()
+            if numAnchors == 0 then
+                local healthBackdrop = Shared.GetHealthBackdrop(frameData)
+                container:SetAnchor(LEFT, healthBackdrop, RIGHT, offsetX, offsetY)
+            end
         end
 
         -- Get potion controls from XML
@@ -159,16 +166,20 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
         frameData.potionCooldown.backdrop:SetDimensions(iconSize, iconSize)
         frameData.potionCooldown.icon:SetDimensions(iconSize - 2, iconSize - 2)
 
-        -- Anchor within container (order: food/drink -> ult1 -> ult2 -> potion)
-        frameData.potionCooldown.backdrop:ClearAnchors()
-        if frameData.combatStats and frameData.combatStats.ult2Backdrop then
-            frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult2Backdrop, RIGHT, 3, 0)
-        elseif frameData.combatStats and frameData.combatStats.ult1Backdrop then
-            frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 3, 0)
-        elseif frameData.foodDrinkBuff and frameData.foodDrinkBuff.backdrop then
-            frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.foodDrinkBuff.backdrop, RIGHT, 3, 0)
-        else
-            frameData.potionCooldown.backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
+        -- Anchor within container (order: food/drink -> ult1 -> ult2 -> potion).
+        -- Expanded raid frames: the layout chains every slot (UnitFrames.ApplyRaidExpandedMemberLayout, run by
+        -- Shared.SetupIntegrationFrames right after this), so no anchoring here.
+        if not isExpandedRaidFrame then
+            frameData.potionCooldown.backdrop:ClearAnchors()
+            if frameData.combatStats and frameData.combatStats.ult2Backdrop then
+                frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult2Backdrop, RIGHT, 3, 0)
+            elseif frameData.combatStats and frameData.combatStats.ult1Backdrop then
+                frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 3, 0)
+            elseif frameData.foodDrinkBuff and frameData.foodDrinkBuff.backdrop then
+                frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.foodDrinkBuff.backdrop, RIGHT, 3, 0)
+            else
+                frameData.potionCooldown.backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
+            end
         end
 
         -- Set draw properties
@@ -182,6 +193,9 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
             local fontSize = isRaid and 10 or 12
             local appearance = UnitFrames.GetCustomFrameAppearance(isRaid and "raid" or "group")
             frameData.potionCooldown.label:SetFont(LUIE.Font.Resolve(appearance.fontFace, fontSize, appearance.fontStyle))
+            -- Above the slot icon (15) and the frame's combat glow border (LUIE_CombatGlowBorder level 3), same as the food/drink timer
+            frameData.potionCooldown.label:SetDrawLayer(DL_OVERLAY)
+            frameData.potionCooldown.label:SetDrawLevel(16)
         end
     end
 end

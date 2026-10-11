@@ -3242,6 +3242,30 @@ function UnitFrames.CreateConsoleSettings()
             default = Defaults.CustomFramesRaid,
         }
 
+        -- Raid Frame Template (Compact / Expanded) - chosen at build time, requires reload
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESR_TEMPLATE),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_TEMPLATE_TP),
+            items =
+            {
+                { name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_TEMPLATE_COMPACT),  data = UnitFrames.RAID_FRAME_TEMPLATE_COMPACT },
+                { name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_TEMPLATE_EXPANDED), data = UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED },
+            },
+            getFunction = function ()
+                return { data = Settings.RaidFrameTemplate }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.RaidFrameTemplate = item.data or value
+            end,
+            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+            default = SettingsAPI:LHASDropdownGetData(Defaults.RaidFrameTemplate),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+            end,
+        }
+
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
@@ -3365,6 +3389,33 @@ function UnitFrames.CreateConsoleSettings()
                 UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             default = SettingsAPI:LHASDropdownGetData(Defaults.RaidLayout),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+            end,
+        }
+
+        -- Battleground (Big Team Battles 6v6v6 / 9v9) layout shape, used automatically while UnitFrames.IsBattlegroundRaidLayoutActive();
+        -- the slot count follows the match's team size (UnitFrames.GetActiveRaidLayout)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LAYOUT_BG),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LAYOUT_BG_TP),
+            items =
+            {
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_COLUMN), data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN },
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_GRID), data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID },
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_ROW), data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW }
+            },
+            getFunction = function ()
+                -- Migrates pre-U51 "1 x 9" / "3 x 3" / "9 x 1" values to a shape
+                return { data = UnitFrames.GetBattlegroundRaidLayoutShape() }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.RaidLayoutBattleground = item.data or item.name or value
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
+            end,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.RaidLayoutBattleground),
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
             end,
@@ -3789,6 +3840,25 @@ function UnitFrames.CreateConsoleSettings()
             default = Defaults.GroupResources.groupBarHeight,
         }
 
+        -- Show on Raid Frames (compact inset bars and the Expanded bottom-row bars)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_INTEGRATION_SHOW_RAID),
+            tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_INTEGRATION_SHOW_RAID_TP),
+            getFunction = function ()
+                return Settings.GroupResources.showOnRaidFrames
+            end,
+            setFunction = function (value)
+                Settings.GroupResources.showOnRaidFrames = value
+            end,
+            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+            end,
+            default = Defaults.GroupResources.showOnRaidFrames,
+        }
+
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
@@ -3807,7 +3877,7 @@ function UnitFrames.CreateConsoleSettings()
                 end
             end,
             disable = function ()
-                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled and Settings.GroupResources.showOnRaidFrames)
             end,
             default = Defaults.GroupResources.raidBarWidth,
         }
@@ -3830,7 +3900,7 @@ function UnitFrames.CreateConsoleSettings()
                 end
             end,
             disable = function ()
-                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled and Settings.GroupResources.showOnRaidFrames)
             end,
             default = Defaults.GroupResources.raidBarHeight,
         }
@@ -4080,6 +4150,53 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.GroupCombatStats.ultIconGroupOffsetY,
         }
+
+        -- Raid (12 player) settings - slots only exist on the Expanded raid frame template
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_UF_RAID_FRAMES_12P),
+        }
+
+        -- Show on Raid Frames (ultimates, DPS and HPS; Expanded raid template only)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_INTEGRATION_SHOW_RAID),
+            tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_INTEGRATION_SHOW_RAID_TP),
+            getFunction = function ()
+                return Settings.GroupCombatStats.showOnRaidFrames
+            end,
+            setFunction = function (value)
+                Settings.GroupCombatStats.showOnRaidFrames = value
+            end,
+            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled)
+            end,
+            default = Defaults.GroupCombatStats.showOnRaidFrames,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "    Ultimate Icon Size",
+            tooltip = GetString(LUIE_STRING_LAM_UF_RAID_ULT_ICON_SIZE_TP),
+            min = 12,
+            max = 24,
+            step = 2,
+            getFunction = function ()
+                return Settings.GroupCombatStats.ultIconRaidSize
+            end,
+            setFunction = function (value)
+                Settings.GroupCombatStats.ultIconRaidSize = value
+            end,
+            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showOnRaidFrames and Settings.GroupCombatStats.showUltimate and Settings.CustomFramesRaid and UnitFrames.IsRaidExpandedTemplate())
+            end,
+            default = Defaults.GroupCombatStats.ultIconRaidSize,
+        }
     end)
 
     -- Build Group Potion Cooldowns Options Section
@@ -4204,6 +4321,53 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.GroupPotionCooldowns.potionIconGroupOffsetY,
         }
+
+        -- Raid (12 player) settings - slot only exists on the Expanded raid frame template
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_UF_RAID_FRAMES_12P),
+        }
+
+        -- Show on Raid Frames (Expanded raid template only)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_INTEGRATION_SHOW_RAID),
+            tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_INTEGRATION_SHOW_RAID_TP),
+            getFunction = function ()
+                return Settings.GroupPotionCooldowns.showOnRaidFrames
+            end,
+            setFunction = function (value)
+                Settings.GroupPotionCooldowns.showOnRaidFrames = value
+            end,
+            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+            end,
+            default = Defaults.GroupPotionCooldowns.showOnRaidFrames,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "    Potion Icon Size",
+            tooltip = SettingsAPI:ConsoleTooltip(LUIE_STRING_LAM_UF_RAID_POTION_ICON_SIZE_TP),
+            min = 12,
+            max = 24,
+            step = 2,
+            getFunction = function ()
+                return Settings.GroupPotionCooldowns.potionIconRaidSize
+            end,
+            setFunction = function (value)
+                Settings.GroupPotionCooldowns.potionIconRaidSize = value
+            end,
+            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled and Settings.GroupPotionCooldowns.showOnRaidFrames and Settings.CustomFramesRaid and UnitFrames.IsRaidExpandedTemplate())
+            end,
+            default = Defaults.GroupPotionCooldowns.potionIconRaidSize,
+        }
     end)
 
     -- Build Group Food & Drink Buffs Options Section
@@ -4245,7 +4409,26 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Food/drink buff icons are only displayed on group frames (4-player groups). Raid frames do not have space for these icons.",
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_RAID_NOTE_DESC),
+        }
+
+        -- Show on Raid Frames (Expanded raid template only)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_INTEGRATION_SHOW_RAID),
+            tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_INTEGRATION_SHOW_RAID_TP),
+            getFunction = function ()
+                return Settings.GroupFoodDrinkBuff.showOnRaidFrames
+            end,
+            setFunction = function (value)
+                Settings.GroupFoodDrinkBuff.showOnRaidFrames = value
+            end,
+            warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+            end,
+            default = Defaults.GroupFoodDrinkBuff.showOnRaidFrames,
         }
 
         settings[#settings + 1] =
@@ -4328,6 +4511,31 @@ function UnitFrames.CreateConsoleSettings()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
             end,
             default = Defaults.GroupFoodDrinkBuff.iconSizeGroup,
+        }
+
+        -- Raid Frame Icon Size (Expanded raid template bottom-row slot; same range as the raid ultimate / potion sliders)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_ICON_SIZE_RAID),
+            tooltip = GetString(LUIE_STRING_LAM_UF_GROUP_FOODDRINK_ICON_SIZE_RAID_TP),
+            min = 12,
+            max = 24,
+            step = 2,
+            getFunction = function ()
+                return Settings.GroupFoodDrinkBuff.iconSizeRaid
+            end,
+            setFunction = function (value)
+                Settings.GroupFoodDrinkBuff.iconSizeRaid = value
+                if UnitFrames.GroupFoodDrinkBuff then
+                    UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                end
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled and Settings.GroupFoodDrinkBuff.showOnRaidFrames)
+            end,
+            default = Defaults.GroupFoodDrinkBuff.iconSizeRaid,
         }
 
         settings[#settings + 1] =

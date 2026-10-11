@@ -210,6 +210,7 @@ LUIE.OtherAddonCompatability =
     isLibCombatEnabled = false,
     isLibSlashCommanderEnabled = false,
     isHarvestMapEnabled = false,
+    isLoreLibraryEnabled = false,
 }
 -- -----------------------------------------------------------------------------
 -- Default Settings

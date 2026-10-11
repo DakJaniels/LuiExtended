@@ -268,7 +268,12 @@ function UnitFrames.CustomFramesApplyFontRaid()
         local unitFrame = UnitFrames.CustomFrames["RaidGroup" .. i]
         if unitFrame then
             ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
-            ApplyCompactNameLabelHeight(unitFrame, sizeCaption)
+            if unitFrame.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED then
+                -- Expanded template: the name height is bounded by the 20px top row, not the compact 2x rule.
+                UnitFrames.ApplyRaidExpandedMemberLayout(unitFrame)
+            else
+                ApplyCompactNameLabelHeight(unitFrame, sizeCaption)
+            end
         end
     end
 end

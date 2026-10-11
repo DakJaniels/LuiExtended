@@ -102,6 +102,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.OtherAddonCompatability.isLibCombatEnabled = LUIE.IsItEnabled("LibCombat")
     LUIE.OtherAddonCompatability.isLibSlashCommanderEnabled = LUIE.IsItEnabled("LibSlashCommander")
     LUIE.OtherAddonCompatability.isHarvestMapEnabled = LUIE.IsItEnabled("HarvestMap")
+    LUIE.OtherAddonCompatability.isLoreLibraryEnabled = LUIE.IsItEnabled("LoreLibrary")
     -- -----------------------------------------------------------------------------
     -- Toggle Alert Frame Visibility if needed
     LUIE.SetupAlertFrameVisibility()

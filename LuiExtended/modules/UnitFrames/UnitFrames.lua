@@ -1597,6 +1597,10 @@ function UnitFrames.CustomFramesGroupUpdate()
         UnitFrames.GroupResources.SetupFrames()
         -- Resource bars will be updated by LibGroupBroadcast callbacks
     end
+    if UnitFrames.GroupFoodDrinkBuff then
+        -- Creates the slot on the new frame type right away (SmallGroup <-> expanded RaidGroup); refreshes icons itself
+        UnitFrames.GroupFoodDrinkBuff.SetupFrames()
+    end
 
     UnitFrames.OnLeaderUpdate(nil, nil)
 end
@@ -1614,7 +1618,9 @@ function UnitFrames.CustomFramesUnreferenceGroupControl(groupType, first)
         local frame = UnitFrames.CustomFrames[unitTag]
         if frame then
             -- Hide LibGroupBroadcast integration elements when unreferencing SmallGroup frames
-            if groupType == "SmallGroup" then
+            -- (and expanded RaidGroup frames, which carry the same integration slots).
+            local hasIntegrationSlots = groupType == "SmallGroup" or frame.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED
+            if hasIntegrationSlots then
                 -- Hide combat stats (ultimates, DPS/HPS)
                 if UnitFrames.GroupCombatStats then
                     UnitFrames.GroupCombatStats.HideStats(unitTag)
@@ -1635,6 +1641,13 @@ function UnitFrames.CustomFramesUnreferenceGroupControl(groupType, first)
                     if frame.potionCooldown.backdrop then frame.potionCooldown.backdrop:SetHidden(true) end
                     if frame.potionCooldown.icon then frame.potionCooldown.icon:SetHidden(true) end
                     if frame.potionCooldown.label then frame.potionCooldown.label:SetHidden(true) end
+                end
+
+                -- Hide food/drink buff
+                if frame.foodDrinkBuff then
+                    if frame.foodDrinkBuff.backdrop then frame.foodDrinkBuff.backdrop:SetHidden(true) end
+                    if frame.foodDrinkBuff.icon then frame.foodDrinkBuff.icon:SetHidden(true) end
+                    if frame.foodDrinkBuff.label then frame.foodDrinkBuff.label:SetHidden(true) end
                 end
 
                 -- Hide container
@@ -1721,7 +1734,7 @@ function UnitFrames.CustomFramesSetPositions()
         reticleover = { width = UnitFrames.SV.TargetBarWidth, height = UnitFrames.SV.TargetBarHeight },
         companion = { width = UnitFrames.SV.CompanionWidth, height = UnitFrames.SV.CompanionHeight },
         SmallGroup1 = { width = UnitFrames.SV.GroupBarWidth, height = UnitFrames.SV.GroupBarHeight },
-        RaidGroup1 = { width = UnitFrames.SV.RaidBarWidth, height = UnitFrames.SV.RaidBarHeight },
+        RaidGroup1 = { width = UnitFrames.SV.RaidBarWidth, height = UnitFrames.GetRaidMemberBarHeight() },
         PetGroup1 = { width = UnitFrames.SV.PetWidth, height = UnitFrames.SV.PetHeight },
         boss1 = { width = UnitFrames.SV.BossBarWidth, height = UnitFrames.SV.BossBarHeight },
         AvaPlayerTarget = { width = UnitFrames.SV.AvaTargetBarWidth, height = UnitFrames.SV.AvaTargetBarHeight },
@@ -2500,24 +2513,137 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     UnitFrames.RefreshCustomFrameShields()
 end
 
+-- Raid layouts (12 player content): RaidLayout SV value -> { columns, rows }.
+local RAID_LAYOUT_DIMENSIONS =
+{
+    ["1 x 12"] = { 1, 12 },
+    ["2 x 6"] = { 2, 6 },
+    ["3 x 4"] = { 3, 4 },
+    ["6 x 2"] = { 6, 2 },
+}
+local RAID_LAYOUT_DEFAULT = "1 x 12"
+-- Battleground layouts (Big Team Battles: 6v6v6 and 9v9) are shapes (UnitFrames.RAID_LAYOUT_BATTLEGROUND_* in
+-- _Namespace.lua), not fixed grids: the slot count follows the match's team size (GetBattlegroundTeamSize) so the same
+-- setting yields 1x9 / 3x3 / 9x1 or 1x6 / 3x2 / 6x1.
+local RAID_LAYOUT_BATTLEGROUND_DEFAULT = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID
+local RAID_LAYOUT_BATTLEGROUND_GRID_COLUMNS = 3
+-- Pre-U51 saved values (fixed 9 slot grids) -> shape.
+local RAID_LAYOUT_BATTLEGROUND_LEGACY =
+{
+    ["1 x 9"] = UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN,
+    ["3 x 3"] = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID,
+    ["9 x 1"] = UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW,
+}
+local RAID_LAYOUT_BATTLEGROUND_SHAPES =
+{
+    [UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN] = true,
+    [UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID] = true,
+    [UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW] = true,
+}
+-- Raid frames exist for RaidGroup1-12 (RaidCustomFrameData.lua), a battleground team can never use more.
+local RAID_SLOT_COUNT = 12
+-- RaidSpacers: 12 player content splits into groups of 4 (default subgroup size); battleground teams split into threes.
+local RAID_SPACER_GROUP_SIZE = 4
+local RAID_SPACER_GROUP_SIZE_BATTLEGROUND = 3
+
+--- Debug preview only (/luiufraid 6 | 9): pretend to be in a battleground with this team size so the battleground
+--- layouts can be checked outside a match. nil = use the live game state.
+--- @type number|nil
+UnitFrames.debugBattlegroundTeamSizeOverride = nil
+
+--- Team size of the battleground the player is currently in, or nil when not in a battleground.
+--- Mirrors ZOS BattlegroundScoreboard.lua: GetBattlegroundTeamSize(GetCurrentBattlegroundId()).
+--- @return number|nil
+function UnitFrames.GetBattlegroundRaidTeamSize()
+    if UnitFrames.debugBattlegroundTeamSizeOverride then
+        return UnitFrames.debugBattlegroundTeamSizeOverride
+    end
+    if not IsActiveWorldBattleground() then
+        return nil
+    end
+    local battlegroundId = GetCurrentBattlegroundId()
+    if not battlegroundId or battlegroundId == 0 then
+        return nil
+    end
+    local teamSize = GetBattlegroundTeamSize(battlegroundId)
+    if not teamSize or teamSize <= 0 then
+        return nil
+    end
+    return zo_min(teamSize, RAID_SLOT_COUNT)
+end
+
+--- True while the player is in a battleground whose team is larger than a small group (Big Team Battles 6v6v6 / 9v9;
+--- the competitive 4v4 queue stays on the SmallGroup frames), i.e. when the raid frames should use
+--- RaidLayoutBattleground instead of RaidLayout.
+--- @return boolean
+function UnitFrames.IsBattlegroundRaidLayoutActive()
+    local teamSize = UnitFrames.GetBattlegroundRaidTeamSize()
+    return teamSize ~= nil and teamSize > STANDARD_GROUP_SIZE_THRESHOLD
+end
+
+--- RaidLayoutBattleground shape from SavedVariables, migrating the pre-U51 fixed grid values in place.
+--- @return string shape one of UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN / _GRID / _ROW
+function UnitFrames.GetBattlegroundRaidLayoutShape()
+    local shape = UnitFrames.SV.RaidLayoutBattleground
+    local migratedShape = RAID_LAYOUT_BATTLEGROUND_LEGACY[shape]
+    if migratedShape then
+        UnitFrames.SV.RaidLayoutBattleground = migratedShape
+        shape = migratedShape
+    end
+    if not RAID_LAYOUT_BATTLEGROUND_SHAPES[shape] then
+        shape = RAID_LAYOUT_BATTLEGROUND_DEFAULT
+    end
+    return shape
+end
+
+--- Grid for a battleground shape and team size (column: 1 x N, row: N x 1, grid: 3 x ceil(N / 3)).
+--- @param shape string
+--- @param teamSize number
+--- @return number columns
+--- @return number rows
+local function GetBattlegroundRaidLayoutDimensions(shape, teamSize)
+    if shape == UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN then
+        return 1, teamSize
+    elseif shape == UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW then
+        return teamSize, 1
+    end
+    return RAID_LAYOUT_BATTLEGROUND_GRID_COLUMNS, zo_ceil(teamSize / RAID_LAYOUT_BATTLEGROUND_GRID_COLUMNS)
+end
+
+--- Resolve the raid layout that applies right now (battleground or regular).
+--- @return number columns
+--- @return number rows
+--- @return number membersPerSpacerGroup members between RaidSpacers gaps
+--- @return boolean isBattlegroundLayout
+--- @return number layoutSlotCount slots actually used by the layout (12, or the battleground team size)
+function UnitFrames.GetActiveRaidLayout()
+    local teamSize = UnitFrames.GetBattlegroundRaidTeamSize()
+    if teamSize ~= nil and teamSize > STANDARD_GROUP_SIZE_THRESHOLD then
+        local columns, rows = GetBattlegroundRaidLayoutDimensions(UnitFrames.GetBattlegroundRaidLayoutShape(), teamSize)
+        return columns, rows, RAID_SPACER_GROUP_SIZE_BATTLEGROUND, true, teamSize
+    end
+    local dimensions = RAID_LAYOUT_DIMENSIONS[UnitFrames.SV.RaidLayout] or RAID_LAYOUT_DIMENSIONS[RAID_LAYOUT_DEFAULT]
+    return dimensions[1], dimensions[2], RAID_SPACER_GROUP_SIZE, false, RAID_SLOT_COUNT
+end
+
 --- @param index number
 --- @param itemsPerColumn number
 --- @param spacerHeight number
---- @param resourceBarsHeight number
+--- @param totalFrameHeight number Total height of one member frame (bar height plus any external resource bar rows)
 --- @param frameWidth number Total width of frame (including integration icons)
 --- @param frameSpacing number Vertical spacing between each frame
+--- @param membersPerSpacerGroup number RaidSpacers gap after every N members in a column
 --- @return number xOffset
 --- @return number yOffset
-local function calculateFramePosition(index, itemsPerColumn, spacerHeight, resourceBarsHeight, frameWidth, frameSpacing)
+local function calculateFramePosition(index, itemsPerColumn, spacerHeight, totalFrameHeight, frameWidth, frameSpacing, membersPerSpacerGroup)
     local column = zo_floor((index - 1) / itemsPerColumn)
     local row = (index - 1) % itemsPerColumn + 1
     local xOffset = frameWidth * column
-    local totalFrameHeight = UnitFrames.SV.RaidBarHeight + resourceBarsHeight
     local yOffset = (totalFrameHeight + frameSpacing) * (row - 1)
 
-    -- Add extra spacers if enabled (every 4 members)
+    -- Add extra spacers if enabled (every membersPerSpacerGroup members)
     if UnitFrames.SV.RaidSpacers then
-        local spacersInCurrentColumn = zo_floor((row - 1) * 0.25)
+        local spacersInCurrentColumn = zo_floor((row - 1) / membersPerSpacerGroup)
         yOffset = yOffset + (spacerHeight * spacersInCurrentColumn)
     end
 
@@ -2611,8 +2737,454 @@ end
 --- @param unitFrame LUIE_CustomFrameObject
 --- @param leftInset number|nil 22 with an icon, 5 without. Omitted calls keep the inset from the last layout.
 function UnitFrames.ApplyRaidNameClip(unitFrame, leftInset)
+    -- Expanded template: the name lives in the top row, not on the health text row.
+    if unitFrame and unitFrame.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED then
+        return
+    end
     local sv = UnitFrames.SV
     UnitFrames.ApplyCompactNameClip(unitFrame, "raid", sv.RaidBarWidth, sv.RaidBarHeight, sv.RaidNameClip or 0, leftInset)
+end
+
+-- ---------------------------------------------------------------------------
+-- Expanded raid member template (RaidFrames.xml LUIE_UF_RaidGroupMemberExpanded_Template)
+-- Anchor-based geometry: padding 2 | top row 20 | gap 2 | health band (grows, min 16) | gap 2 | bottom row 16.
+-- Static anchors (rows, health band, health text) live in the XML; settings-dependent chains are built here.
+-- ---------------------------------------------------------------------------
+local RAID_EXPANDED_PADDING = 2
+local RAID_EXPANDED_TOP_ROW_HEIGHT = 20
+local RAID_EXPANDED_ROW_GAP = 2
+local RAID_EXPANDED_HEALTH_MIN_HEIGHT = 16
+local RAID_EXPANDED_BOTTOM_ROW_HEIGHT = 16
+-- 2 + 20 + 2 + 16 + 2 + 16 + 2 = 60 is the design's frame height; GetRaidMemberBarHeight derives the live minimum
+-- (the bottom row grows with its icons and collapses to 0 when no bottom-row feature is enabled).
+local RAID_EXPANDED_FRAME_SPACING = 2
+local RAID_EXPANDED_NAME_HEIGHT = 14
+local RAID_EXPANDED_NAME_ICON_GAP = 4 -- role icon marginLeft 4
+local RAID_EXPANDED_TOP_ICON_GAP = 1 -- class icon marginLeft 1
+local RAID_EXPANDED_ROLE_ICON_SIZE = 16
+local RAID_EXPANDED_CLASS_ICON_SIZE = 20
+local RAID_EXPANDED_LEADER_ICON_SIZE = 20
+local RAID_EXPANDED_SLOT_ICON_SIZE = 16 -- fallback when the integration setting is missing
+local RAID_EXPANDED_SLOT_GAP = 3 -- ult1 / ult2 / potion marginRight 3 (anchored by the integrations)
+local RAID_EXPANDED_RESOURCE_MARGIN = 4 -- gap between the resource bars and the slot container / stats box (one slot gap)
+local RAID_EXPANDED_RESOURCE_BAR_GAP = 1 -- gap between the stacked magicka / stamina bars
+-- The two stacked bars fill the bottom row: barHeight = floor((rowHeight - gap) / 2), so a 16px row gets 7 + 1 + 7.
+--- @param bottomRowHeight number
+--- @return number barHeight
+local function GetRaidExpandedResourceBarHeight(bottomRowHeight)
+    return zo_max(1, zo_floor((bottomRowHeight - RAID_EXPANDED_RESOURCE_BAR_GAP) / 2))
+end
+-- DPS / HPS box: full bottom-row height, measured from the label's font so "999.9k 999.9k" (or a single "999.9k") always
+-- fits (_GroupCombatStats.lua UpdateCombatStatsText formats "%.1fk" values). The minimum covers the XML default font
+-- before GroupCombatStats applies the 12pt raid font (SetupIntegrationFrames re-runs the layout afterwards).
+local RAID_EXPANDED_STATS_MIN_WIDTH = 66
+local RAID_EXPANDED_STATS_TEXT_PADDING = 6
+local RAID_EXPANDED_STATS_SAMPLE_BOTH = "999.9k 999.9k"
+local RAID_EXPANDED_STATS_SAMPLE_SINGLE = "999.9k"
+--- @param statsLabel LabelControl
+--- @param combatStatsSettings table|nil GroupCombatStats settings (showDPS / showHPS)
+--- @return number width
+local function GetRaidExpandedStatsWidth(statsLabel, combatStatsSettings)
+    local showBoth = combatStatsSettings ~= nil and combatStatsSettings.showDPS == true and combatStatsSettings.showHPS == true
+    local sampleText = showBoth and RAID_EXPANDED_STATS_SAMPLE_BOTH or RAID_EXPANDED_STATS_SAMPLE_SINGLE
+    local measuredWidth = statsLabel:GetStringWidth(sampleText) or 0
+    return zo_max(RAID_EXPANDED_STATS_MIN_WIDTH, zo_ceil(measuredWidth) + RAID_EXPANDED_STATS_TEXT_PADDING)
+end
+-- Debug preview slots have no LibGroupBroadcast data; they show the missing-icon texture (same as the other LUIE previews).
+local RAID_EXPANDED_PREVIEW_SLOT_ICON = "/esoui/art/icons/icon_missing.dds"
+-- Regen / degen strip usable height = band height - band height * this (raid entry of _PostCreate.lua regenConfigs,
+-- consumed by _Base.lua ApplyRegenStrips and by FitRaidHealthBandVisuals below).
+UnitFrames.RAID_REGEN_STRIP_HEIGHT_MULTIPLIER = 0.3
+local RAID_REGEN_STRIP_HEIGHT_MULTIPLIER = UnitFrames.RAID_REGEN_STRIP_HEIGHT_MULTIPLIER
+
+--- Which bottom-row slots the settings enable, and their icon sizes (potion and food/drink match the ultimate size
+--- when ultimates are shown, same rule as _GroupPotionCooldowns.lua AddPotionCooldownToFrame / _GroupFoodDrinkBuff.lua GetIconSize).
+--- @return table slotSettings { showFoodDrinkSlot, showUltimateSlots, showPotionSlot, showStatsBox, showResourceBars, hasAnyBottomRowContent, foodDrinkIconSize, ultIconSize, potionIconSize }
+local function ResolveRaidExpandedSlotSettings()
+    local sv = UnitFrames.SV
+    local combatStatsSettings = sv.GroupCombatStats
+    local potionSettings = sv.GroupPotionCooldowns
+    local resourceSettings = sv.GroupResources
+    local foodDrinkSettings = sv.GroupFoodDrinkBuff
+    -- Each integration is enabled AND allowed on raid frames (per-integration "Show on Raid Frames" / showOnRaidFrames,
+    -- the same gate the integrations' create callbacks use).
+    local combatStatsEnabled = UnitFrames.GroupCombatStats ~= nil and combatStatsSettings ~= nil and combatStatsSettings.enabled
+        and combatStatsSettings.showOnRaidFrames == true
+    local showFoodDrinkSlot = UnitFrames.GroupFoodDrinkBuff ~= nil and foodDrinkSettings ~= nil and foodDrinkSettings.enabled == true
+        and foodDrinkSettings.showOnRaidFrames == true
+    local showUltimateSlots = combatStatsEnabled and combatStatsSettings.showUltimate == true
+    local showPotionSlot = UnitFrames.GroupPotionCooldowns ~= nil and potionSettings ~= nil and potionSettings.enabled == true
+        and potionSettings.showOnRaidFrames == true
+    local showStatsBox = combatStatsEnabled and (combatStatsSettings.showDPS or combatStatsSettings.showHPS) == true
+    local showResourceBars = UnitFrames.GroupResources ~= nil and resourceSettings ~= nil and resourceSettings.enabled == true
+        and resourceSettings.showOnRaidFrames == true
+    local ultIconSize = (combatStatsSettings and combatStatsSettings.ultIconRaidSize) or RAID_EXPANDED_SLOT_ICON_SIZE
+    local potionIconSize = (potionSettings and potionSettings.potionIconRaidSize) or RAID_EXPANDED_SLOT_ICON_SIZE
+    local foodDrinkIconSize = (foodDrinkSettings and foodDrinkSettings.iconSizeRaid) or RAID_EXPANDED_SLOT_ICON_SIZE
+    if showUltimateSlots then
+        potionIconSize = ultIconSize
+        foodDrinkIconSize = ultIconSize
+    end
+    return
+    {
+        showFoodDrinkSlot = showFoodDrinkSlot,
+        showUltimateSlots = showUltimateSlots,
+        showPotionSlot = showPotionSlot,
+        showStatsBox = showStatsBox,
+        showResourceBars = showResourceBars,
+        -- When nothing is enabled the bottom row collapses (height 0, no gap) and the health band grows into it.
+        hasAnyBottomRowContent = showFoodDrinkSlot or showUltimateSlots or showPotionSlot or showStatsBox or showResourceBars,
+        foodDrinkIconSize = foodDrinkIconSize,
+        ultIconSize = ultIconSize,
+        potionIconSize = potionIconSize,
+    }
+end
+
+--- Bottom row height: the design's 16px, grown to the largest enabled slot icon so icons never draw outside the frame.
+--- 0 when no bottom-row feature is enabled (the row is collapsed).
+--- @return number
+function UnitFrames.GetRaidExpandedBottomRowHeight()
+    local slotSettings = ResolveRaidExpandedSlotSettings()
+    if not slotSettings.hasAnyBottomRowContent then
+        return 0
+    end
+    local rowHeight = RAID_EXPANDED_BOTTOM_ROW_HEIGHT
+    if slotSettings.showFoodDrinkSlot then
+        rowHeight = zo_max(rowHeight, slotSettings.foodDrinkIconSize)
+    end
+    if slotSettings.showUltimateSlots then
+        rowHeight = zo_max(rowHeight, slotSettings.ultIconSize)
+    end
+    if slotSettings.showPotionSlot then
+        rowHeight = zo_max(rowHeight, slotSettings.potionIconSize)
+    end
+    return rowHeight
+end
+
+--- Gap between the health band and the bottom row: the design's 2px, or 0 when the row is collapsed.
+--- @return number
+local function GetRaidExpandedBottomRowGap()
+    if UnitFrames.GetRaidExpandedBottomRowHeight() == 0 then
+        return 0
+    end
+    return RAID_EXPANDED_ROW_GAP
+end
+
+--- Raid member bar height: SV value, raised to the expanded template minimum when that template is active.
+--- The minimum follows the bottom row (padding 2 | top 20 | gap 2 | health 16 | bottom gap | bottom row | padding 2);
+--- with the row collapsed this is 2 + 20 + 2 + 16 + 2 = 42.
+--- @return number
+function UnitFrames.GetRaidMemberBarHeight()
+    local barHeight = UnitFrames.SV.RaidBarHeight
+    if UnitFrames.IsRaidExpandedTemplate() then
+        local minHeight = RAID_EXPANDED_PADDING * 2 + RAID_EXPANDED_TOP_ROW_HEIGHT + RAID_EXPANDED_ROW_GAP + RAID_EXPANDED_HEALTH_MIN_HEIGHT
+            + GetRaidExpandedBottomRowGap() + UnitFrames.GetRaidExpandedBottomRowHeight()
+        return zo_max(barHeight, minHeight)
+    end
+    return barHeight
+end
+
+--- Health band height of one raid member frame for the given total frame height.
+--- Compact template: the whole frame is the health backdrop. Expanded template: the band sits between the rows
+--- (padding 2 | top 20 | gap 2 | health | bottom gap | bottom row | padding 2), see ApplyRaidExpandedMemberLayout.
+--- @param totalFrameHeight number
+--- @return number
+local function GetRaidHealthBandHeight(totalFrameHeight)
+    if not UnitFrames.IsRaidExpandedTemplate() then
+        return totalFrameHeight
+    end
+    local rowsHeight = RAID_EXPANDED_PADDING * 2 + RAID_EXPANDED_TOP_ROW_HEIGHT + RAID_EXPANDED_ROW_GAP
+        + GetRaidExpandedBottomRowGap() + UnitFrames.GetRaidExpandedBottomRowHeight()
+    return zo_max(totalFrameHeight - rowsHeight, RAID_EXPANDED_HEALTH_MIN_HEIGHT)
+end
+
+--- Fit the health attribute visuals (regen / degen strips, decreased armor overlay) to the member's health band.
+--- These are created once from RaidBarWidth / RaidBarHeight (_Base.lua ApplyRegenStrips / ApplyArmorAndPowerOverlays),
+--- which is wrong for the expanded template whose band is only ~16px, and stale after the bar size sliders change.
+--- @param unitFrame table RaidGroupN custom frame
+--- @param bandWidth number health backdrop width
+--- @param bandHeight number health backdrop height
+local function FitRaidHealthBandVisuals(unitFrame, bandWidth, bandHeight)
+    local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    if not healthEntry then
+        return
+    end
+    local customFramesShared = LUIE.CustomFramesShared
+
+    -- Same formula as ApplyRegenStrips' raid config (widthSV - 4, heightSV - heightSV * 0.3), using the band instead of the SV.
+    local regenDims = { bandWidth - 4, bandHeight - bandHeight * RAID_REGEN_STRIP_HEIGHT_MULTIPLIER }
+    customFramesShared.ResizeRegenAnimation(healthEntry.regen1, regenDims)
+    customFramesShared.ResizeRegenAnimation(healthEntry.regen2, regenDims)
+    customFramesShared.ResizeRegenAnimation(healthEntry.degen1, regenDims)
+    customFramesShared.ResizeRegenAnimation(healthEntry.degen2, regenDims)
+
+    -- Decreased armor overlay: crop to the inside of the 1px backdrop edge instead of the fixed 512x32 template size.
+    local armorStat = healthEntry.stat and healthEntry.stat[STAT_ARMOR_RATING]
+    if armorStat and armorStat.dec then
+        customFramesShared.FitDecreasedArmorOverlay(armorStat.dec, bandWidth - 2, bandHeight - 2)
+    end
+end
+
+--- Chain one top-row icon right-to-left. Visible icons anchor their RIGHT to the current neighbor; hidden icons
+--- are skipped so they collapse to zero width / zero margin and the name grows into the space.
+--- @param icon Control|nil
+--- @param size number
+--- @param visible boolean
+--- @param rightNeighbor Control current right neighbor (row or previous icon)
+--- @param rightNeighborPoint number anchor point on the neighbor (RIGHT for the row, LEFT for an icon)
+--- @param gap number horizontal gap to the neighbor
+--- @return Control nextNeighbor
+--- @return number nextNeighborPoint
+--- @return number nextGap
+local function AnchorRaidExpandedTopRowIcon(icon, size, visible, rightNeighbor, rightNeighborPoint, gap)
+    if not icon then
+        return rightNeighbor, rightNeighborPoint, gap
+    end
+    icon:SetHidden(not visible)
+    if not visible then
+        return rightNeighbor, rightNeighborPoint, gap
+    end
+    icon:ClearAnchors()
+    icon:SetDimensions(size, size)
+    icon:SetAnchor(RIGHT, rightNeighbor, rightNeighborPoint, -gap, 0)
+    return icon, LEFT, RAID_EXPANDED_TOP_ICON_GAP
+end
+
+--- Slot visibility for a settings-driven control: disabled slots are hidden; enabled slots are left to their
+--- integration, except in placeholder (preview) mode where the empty slot is shown so the layout is visible.
+--- @param control Control|nil
+--- @param enabled boolean
+--- @param showPlaceholders boolean
+local function ApplyRaidExpandedSlotVisibility(control, enabled, showPlaceholders)
+    if not control then
+        return
+    end
+    if not enabled then
+        control:SetHidden(true)
+    elseif showPlaceholders then
+        control:SetHidden(false)
+    end
+end
+
+--- Size one bottom-row slot backdrop and its _Icon child (icon = backdrop - 2, like the integrations).
+--- @param backdrop Control
+--- @param iconSize number
+local function SizeRaidExpandedSlot(backdrop, iconSize)
+    backdrop:SetDimensions(iconSize, iconSize)
+    local icon = backdrop:GetNamedChild("_Icon")
+    if icon then
+        icon:SetDimensions(iconSize - 2, iconSize - 2)
+    end
+end
+
+--- Debug preview slot: show the missing-icon texture in the _Icon child (no live member / library data).
+--- The integrations overwrite texture / visibility as soon as a live member is set up.
+--- @param backdrop Control
+local function ApplyRaidExpandedPreviewSlot(backdrop)
+    local icon = backdrop:GetNamedChild("_Icon")
+    if icon then
+        icon:SetTexture(RAID_EXPANDED_PREVIEW_SLOT_ICON)
+        icon:SetHidden(false)
+    end
+end
+
+--- Chain one enabled bottom-row slot after the previous one (first slot -> container LEFT, then RIGHT + 3).
+--- The slot backdrops carry no XML anchors and the integrations do not anchor them on this template, so the layout
+--- owns the chain regardless of the order the integrations were set up in.
+--- @param backdrop Control|nil
+--- @param enabled boolean
+--- @param iconSize number
+--- @param slotContainer Control
+--- @param previousSlot Control|nil
+--- @param showPlaceholders boolean
+--- @return Control|nil nextPreviousSlot
+local function ChainRaidExpandedSlot(backdrop, enabled, iconSize, slotContainer, previousSlot, showPlaceholders)
+    ApplyRaidExpandedSlotVisibility(backdrop, enabled, showPlaceholders)
+    if not backdrop or not enabled then
+        return previousSlot
+    end
+    backdrop:ClearAnchors()
+    if previousSlot then
+        backdrop:SetAnchor(LEFT, previousSlot, RIGHT, RAID_EXPANDED_SLOT_GAP, 0)
+    else
+        backdrop:SetAnchor(LEFT, slotContainer, LEFT, 0, 0)
+    end
+    SizeRaidExpandedSlot(backdrop, iconSize)
+    if showPlaceholders then
+        ApplyRaidExpandedPreviewSlot(backdrop)
+    end
+    return backdrop
+end
+
+--- Lay out one expanded raid member (anchor chains from the design):
+---   top row    : name LEFT -> row LEFT, RIGHT -> first visible icon LEFT (-4) or row RIGHT; icons chained right-to-left
+---   bottom row : slot container LEFT -> row LEFT | resource container between container (+8) and stats label (-8) | stats RIGHT -> row RIGHT
+---   resources  : two full-width 4px bars stacked in the container (1px gap), staminaFirst picks the top bar
+--- Safe to call repeatedly (layout pass, fonts, static controls, integration setup). No-op for Compact frames.
+--- @param unitFrame LUIE_CustomFrameObject
+--- @param showPlaceholders boolean|nil true for the debug raid preview: show empty slot / resource backdrops for enabled integrations
+function UnitFrames.ApplyRaidExpandedMemberLayout(unitFrame, showPlaceholders)
+    if not unitFrame or unitFrame.raidTemplate ~= UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED then
+        return
+    end
+    local topRow = unitFrame.topRow
+    local bottomRow = unitFrame.bottomRow
+    if not topRow or not bottomRow then
+        return
+    end
+    local sv = UnitFrames.SV
+
+    -- Top row ---------------------------------------------------------------
+    local showLeader = unitFrame.raidExpandedShowLeader == true
+    local roleVisible = not showLeader and unitFrame.roleIcon ~= nil and not unitFrame.roleIcon:IsHidden()
+    local classVisible = not showLeader and unitFrame.classIcon ~= nil and not unitFrame.classIcon:IsHidden()
+
+    local rightNeighbor, rightNeighborPoint, nextGap = topRow, RIGHT, 0
+    rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.classIcon, RAID_EXPANDED_CLASS_ICON_SIZE, classVisible, rightNeighbor, rightNeighborPoint, nextGap)
+    rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.roleIcon, RAID_EXPANDED_ROLE_ICON_SIZE, roleVisible, rightNeighbor, rightNeighborPoint, nextGap)
+    rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.leader, RAID_EXPANDED_LEADER_ICON_SIZE, showLeader, rightNeighbor, rightNeighborPoint, nextGap)
+
+    if unitFrame.name then
+        local nameHeight = resolveCompactNameHeight("raid", RAID_EXPANDED_NAME_HEIGHT + 2)
+        nameHeight = zo_min(zo_max(nameHeight, RAID_EXPANDED_NAME_HEIGHT), RAID_EXPANDED_TOP_ROW_HEIGHT)
+        local nameRightGap = (rightNeighbor == topRow) and 0 or RAID_EXPANDED_NAME_ICON_GAP
+        unitFrame.name:ClearAnchors()
+        unitFrame.name:SetAnchor(LEFT, topRow, LEFT, 0, 0)
+        unitFrame.name:SetAnchor(RIGHT, rightNeighbor, rightNeighborPoint, -nameRightGap, 0)
+        unitFrame.name:SetHeight(nameHeight)
+    end
+
+    -- Bottom row: which slots are enabled -----------------------------------
+    local slotSettings = ResolveRaidExpandedSlotSettings()
+    local showFoodDrinkSlot = slotSettings.showFoodDrinkSlot
+    local showUltimateSlots = slotSettings.showUltimateSlots
+    local showPotionSlot = slotSettings.showPotionSlot
+    local showStatsBox = slotSettings.showStatsBox
+    local showResourceBars = slotSettings.showResourceBars
+    local foodDrinkIconSize = slotSettings.foodDrinkIconSize
+    local ultIconSize = slotSettings.ultIconSize
+    local potionIconSize = slotSettings.potionIconSize
+    local resourceSettings = sv.GroupResources
+
+    -- The row grows with the largest enabled slot icon (GetRaidMemberBarHeight grows the frame to match) and
+    -- collapses to 0 when nothing is enabled; the health band then runs down to the bottom padding.
+    local bottomRowHeight = UnitFrames.GetRaidExpandedBottomRowHeight()
+    local bottomRowGap = GetRaidExpandedBottomRowGap()
+    bottomRow:SetHeight(bottomRowHeight)
+    bottomRow:SetHidden(bottomRowHeight == 0)
+
+    local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    local healthBackdrop = healthEntry and healthEntry.backdrop
+    if healthBackdrop then
+        -- Same anchors as RaidFrames.xml `_Health` (TOPLEFT -> _TopRow BOTTOMLEFT +2 / BOTTOMRIGHT -> _BottomRow TOPRIGHT -2),
+        -- re-applied here so the bottom gap can follow the collapsed row.
+        healthBackdrop:ClearAnchors()
+        healthBackdrop:SetAnchor(TOPLEFT, topRow, BOTTOMLEFT, 0, RAID_EXPANDED_ROW_GAP)
+        healthBackdrop:SetAnchor(BOTTOMRIGHT, bottomRow, TOPRIGHT, 0, -bottomRowGap)
+    end
+
+    -- Slot container width: enabled slots left to right (food/drink -> ult1 -> ult2 -> potion) with 3px gaps
+    local slotCount = 0
+    local slotContainerWidth = 0
+    local function AddSlotWidth(iconSize, count)
+        for _ = 1, count do
+            if slotCount > 0 then
+                slotContainerWidth = slotContainerWidth + RAID_EXPANDED_SLOT_GAP
+            end
+            slotCount = slotCount + 1
+            slotContainerWidth = slotContainerWidth + iconSize
+        end
+    end
+    if showFoodDrinkSlot then
+        AddSlotWidth(foodDrinkIconSize, 1)
+    end
+    if showUltimateSlots then
+        AddSlotWidth(ultIconSize, 2)
+    end
+    if showPotionSlot then
+        AddSlotWidth(potionIconSize, 1)
+    end
+
+    local slotContainer = unitFrame.libGroupContainer
+    if slotContainer then
+        slotContainer:ClearAnchors()
+        slotContainer:SetAnchor(LEFT, bottomRow, LEFT, 0, 0)
+        slotContainer:SetDimensions(slotContainerWidth, bottomRowHeight)
+        slotContainer:SetHidden(slotCount == 0)
+        -- Chain the enabled slots. Visible state of an enabled slot stays with its module (food/drink hides when the
+        -- member has no buff, LibGroupBroadcast integrations show on data); the preview shows the empty slot with the
+        -- missing-icon texture, otherwise an unanchored control would render at the screen's top-left.
+        local previousSlot = nil
+        previousSlot = ChainRaidExpandedSlot(slotContainer:GetNamedChild("_FoodDrinkBackdrop"), showFoodDrinkSlot, foodDrinkIconSize, slotContainer, previousSlot, showPlaceholders)
+        previousSlot = ChainRaidExpandedSlot(slotContainer:GetNamedChild("_Ult1Backdrop"), showUltimateSlots, ultIconSize, slotContainer, previousSlot, showPlaceholders)
+        previousSlot = ChainRaidExpandedSlot(slotContainer:GetNamedChild("_Ult2Backdrop"), showUltimateSlots, ultIconSize, slotContainer, previousSlot, showPlaceholders)
+        ChainRaidExpandedSlot(slotContainer:GetNamedChild("_PotionBackdrop"), showPotionSlot, potionIconSize, slotContainer, previousSlot, showPlaceholders)
+    end
+
+    -- Stats box (DPS / HPS) -------------------------------------------------
+    local statsLabel = unitFrame.statsLabel
+    if statsLabel then
+        statsLabel:ClearAnchors()
+        statsLabel:SetAnchor(RIGHT, bottomRow, RIGHT, 0, 0)
+        statsLabel:SetDimensions(GetRaidExpandedStatsWidth(statsLabel, sv.GroupCombatStats), bottomRowHeight)
+        if not showStatsBox then
+            -- Visible state while enabled is owned by GroupCombatStats (combat recap timing).
+            statsLabel:SetHidden(true)
+        end
+    end
+    if unitFrame.statsBorder then
+        unitFrame.statsBorder:SetHidden(not showStatsBox)
+    end
+
+    -- Resource container + stacked bars -------------------------------------
+    local resourceContainer = unitFrame.resourceContainer
+    if resourceContainer then
+        resourceContainer:ClearAnchors()
+        if slotCount > 0 and slotContainer then
+            resourceContainer:SetAnchor(LEFT, slotContainer, RIGHT, RAID_EXPANDED_RESOURCE_MARGIN, 0)
+        else
+            resourceContainer:SetAnchor(LEFT, bottomRow, LEFT, 0, 0)
+        end
+        if showStatsBox and statsLabel then
+            resourceContainer:SetAnchor(RIGHT, statsLabel, LEFT, -RAID_EXPANDED_RESOURCE_MARGIN, 0)
+        else
+            resourceContainer:SetAnchor(RIGHT, bottomRow, RIGHT, 0, 0)
+        end
+        -- Two full-width bars stacked with a 1px gap, filling the row height (same stacking as the small-group branch of
+        -- _GroupResources.lua); vertically centered by the LEFT / RIGHT anchors.
+        local resourceBarHeight = GetRaidExpandedResourceBarHeight(bottomRowHeight)
+        resourceContainer:SetHeight(resourceBarHeight * 2 + RAID_EXPANDED_RESOURCE_BAR_GAP)
+        resourceContainer:SetHidden(not showResourceBars)
+
+        local staminaFirst = resourceSettings ~= nil and resourceSettings.staminaFirst == true
+        local topEntry = staminaFirst and unitFrame.resourceStamina or unitFrame.resourceMagicka
+        local bottomEntry = staminaFirst and unitFrame.resourceMagicka or unitFrame.resourceStamina
+        local topBackdrop = topEntry and topEntry.backdrop
+        local bottomBackdrop = bottomEntry and bottomEntry.backdrop
+        if topBackdrop then
+            topBackdrop:ClearAnchors()
+            topBackdrop:SetAnchor(TOPLEFT, resourceContainer, TOPLEFT, 0, 0)
+            topBackdrop:SetAnchor(TOPRIGHT, resourceContainer, TOPRIGHT, 0, 0)
+            topBackdrop:SetHeight(resourceBarHeight)
+        end
+        if bottomBackdrop then
+            bottomBackdrop:ClearAnchors()
+            bottomBackdrop:SetAnchor(BOTTOMLEFT, resourceContainer, BOTTOMLEFT, 0, 0)
+            bottomBackdrop:SetAnchor(BOTTOMRIGHT, resourceContainer, BOTTOMRIGHT, 0, 0)
+            bottomBackdrop:SetHeight(resourceBarHeight)
+        end
+        -- Bar fills are owned by GroupResources (shown on data, hidden on timeout); only the backdrops are placeholder-aware.
+        ApplyRaidExpandedSlotVisibility(topBackdrop, showResourceBars, showPlaceholders)
+        ApplyRaidExpandedSlotVisibility(bottomBackdrop, showResourceBars, showPlaceholders)
+        if not showResourceBars then
+            if topEntry and topEntry.bar then
+                topEntry.bar:SetHidden(true)
+            end
+            if bottomEntry and bottomEntry.bar then
+                bottomEntry.bar:SetHidden(true)
+            end
+        end
+    end
 end
 
 --- Re-apply the compact name clip after health or status text changes.
@@ -2686,12 +3258,13 @@ local function GetRaidIntegrationWidth()
 end
 
 --- @param unhide boolean When true, unhides the raid TLW after layout.
---- @param layoutAllRaidSlots boolean? When true, lay out all 12 raid slots using SavedVariables (RaidLayout, spacers, bar sizes) even if the group has fewer members (UnitFrames slash debug preview). Uses unitTag `player` for role / leader / online checks so RaidIconOptions behave consistently.
+--- @param layoutAllRaidSlots boolean? When true, lay out all raid slots of the active layout (12, or the team size in a battleground) using SavedVariables (RaidLayout / RaidLayoutBattleground, spacers, bar sizes) even if the group has fewer members (UnitFrames slash debug preview). Uses unitTag `player` for role / leader / online checks so RaidIconOptions behave consistently.
 function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
     if not UnitFrames.CustomFrames["RaidGroup1"] or not UnitFrames.CustomFrames["RaidGroup1"].tlw then
         return
     end
 
+    local useExpandedTemplate = UnitFrames.IsRaidExpandedTemplate()
     local spacerHeight = 3
     -- Add extra height for resource bars if enabled
     local resourceBarsHeight = 0
@@ -2703,7 +3276,10 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
 
     -- Vertical spacing between each frame. Only add the larger gap when resource sharing is active.
     local frameSpacing = 0
-    if resourceBarsAreEnabled then
+    if useExpandedTemplate then
+        -- Expanded template keeps the resource bars inside the frame; use a fixed gap between members.
+        frameSpacing = RAID_EXPANDED_FRAME_SPACING
+    elseif resourceBarsAreEnabled then
         local raidResourceSettings = UnitFrames.SV.GroupResources
         local raidBarHeight = raidResourceSettings and raidResourceSettings.raidBarHeight or 0
         frameSpacing = 1 + raidBarHeight
@@ -2712,30 +3288,26 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
     -- Add extra width for integration icons if enabled
     local integrationWidth = GetRaidIntegrationWidth()
 
-    -- Determine layout dimensions
-    local columns, rows
-    if UnitFrames.SV.RaidLayout == "6 x 2" then
-        columns, rows = 6, 2
-    elseif UnitFrames.SV.RaidLayout == "3 x 4" then
-        columns, rows = 3, 4
-    elseif UnitFrames.SV.RaidLayout == "2 x 6" then
-        columns, rows = 2, 6
-    else
-        columns, rows = 1, 12
-    end
+    -- Determine layout dimensions (RaidLayout, or the RaidLayoutBattleground shape sized to the team while in a
+    -- Big Team Battles battleground). Slots above layoutSlotCount (e.g. RaidGroup7-12 in a 6v6v6 match) are hidden below.
+    local columns, rows, membersPerSpacerGroup, _, layoutSlotCount = UnitFrames.GetActiveRaidLayout()
 
     local itemsPerColumn = rows
     local raid = UnitFrames.CustomFrames["RaidGroup1"].tlw
-    local totalFrameHeight = UnitFrames.SV.RaidBarHeight + resourceBarsHeight
+    local totalFrameHeight = UnitFrames.GetRaidMemberBarHeight() + resourceBarsHeight
     local totalFrameWidth = UnitFrames.SV.RaidBarWidth + integrationWidth
+
+    -- Health backdrop size: compact = the whole member frame; expanded = the band between the rows, inset by the 2px padding.
+    local healthBandHeight = GetRaidHealthBandHeight(UnitFrames.GetRaidMemberBarHeight())
+    local healthBandWidth = useExpandedTemplate and (totalFrameWidth - RAID_EXPANDED_PADDING * 2) or totalFrameWidth
 
     -- Calculate dimensions (add spacing between frames)
     local totalWidth = totalFrameWidth * columns
     local totalHeight = (totalFrameHeight + frameSpacing) * rows - frameSpacing -- Subtract last spacing
 
     if UnitFrames.SV.RaidSpacers then
-        totalWidth = totalWidth + (spacerHeight * (rows * 0.25))
-        totalHeight = totalHeight + (spacerHeight * zo_floor((rows - 1) * 0.25))
+        totalWidth = totalWidth + (spacerHeight * (rows / membersPerSpacerGroup))
+        totalHeight = totalHeight + (spacerHeight * zo_floor((rows - 1) / membersPerSpacerGroup))
     end
 
     raid:SetDimensions(totalWidth, totalHeight)
@@ -2782,17 +3354,24 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
         local unitFrame = UnitFrames.CustomFrames["RaidGroup" .. index]
         if unitFrame then
             -- Calculate position and set frame dimensions
-            local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight, resourceBarsHeight, totalFrameWidth, frameSpacing)
+            local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight, totalFrameHeight, totalFrameWidth, frameSpacing, membersPerSpacerGroup)
             unitFrame.control:ClearAnchors()
             unitFrame.control:SetAnchor(TOPLEFT, raid, TOPLEFT, xOffset, yOffset)
             unitFrame.control:SetDimensions(totalFrameWidth, totalFrameHeight)
+            if i > layoutSlotCount then
+                -- Battleground layouts only have teamSize grid slots (6 or 9); the team can never fill the rest, keep
+                -- them hidden (also covers the debug preview, which otherwise shows every slot).
+                unitFrame.control:SetHidden(true)
+            end
 
             -- Apply icon settings (uses RaidIconOptions, not unitTag-specific for iconOpt=2/3)
             local role = unitTag and GetGroupMemberSelectedRole(unitTag) or nil
             applyIconSettings(unitFrame, unitTag, role)
 
             -- Override for group leader (only when slot has a real, leadered member)
-            if unitTag and IsUnitGroupLeader(unitTag) then
+            local isGroupLeader = unitTag ~= nil and IsUnitGroupLeader(unitTag)
+            unitFrame.raidExpandedShowLeader = isGroupLeader
+            if isGroupLeader then
                 unitFrame.roleIcon:SetHidden(true)
                 unitFrame.classIcon:SetHidden(true)
                 unitFrame.leader:SetTexture(leaderIcons[1])
@@ -2801,15 +3380,24 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
                 unitFrame.leader:SetTexture(leaderIcons[0])
             end
 
-            -- Set label dimensions (always - driven purely by SV geometry)
-            unitFrame.dead:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
-            unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
-
             -- Override for offline players (only meaningful when slot has a real member)
             if unitTag and not IsUnitOnline(unitTag) then
                 unitFrame.classIcon:SetHidden(true)
                 UnitFrames.ApplyRaidNameClip(unitFrame, COMPACT_NAME_LEFT_INSET)
             end
+
+            if useExpandedTemplate then
+                -- Expanded template: the row anchors own the name / status geometry.
+                -- The debug preview (layoutAllRaidSlots) shows empty slot / resource backdrops for enabled integrations.
+                UnitFrames.ApplyRaidExpandedMemberLayout(unitFrame, layoutAllRaidSlots == true)
+            else
+                -- Set label dimensions (always - driven purely by SV geometry)
+                unitFrame.dead:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
+                unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
+            end
+
+            -- Regen strips / decreased armor overlay follow the health band, not the RaidBarHeight they were created from.
+            FitRaidHealthBandVisuals(unitFrame, healthBandWidth, healthBandHeight)
         end
     end
 

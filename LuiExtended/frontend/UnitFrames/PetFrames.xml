@@ -53,6 +53,9 @@
                   <Anchor point="TOPLEFT"
                           relativeTo="$(parent)"
                           relativePoint="TOPLEFT" />
+                  <Anchor point="BOTTOMLEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="BOTTOMLEFT" />
                   <TextureCoords left="0.390625"
                                  right="0.46875"
                                  top="0.359375"
@@ -66,6 +69,9 @@
                   <Anchor point="TOPRIGHT"
                           relativeTo="$(parent)"
                           relativePoint="TOPRIGHT" />
+                  <Anchor point="BOTTOMRIGHT"
+                          relativeTo="$(parent)"
+                          relativePoint="BOTTOMRIGHT" />
                   <TextureCoords left="0.46875"
                                  right="0.390625"
                                  top="0.359375"
@@ -80,7 +86,7 @@
                           relativePoint="TOPRIGHT" />
                   <Anchor point="BOTTOMRIGHT"
                           relativeTo="$(parent)_GlowRight"
-                          relativePoint="TOPLEFT" />
+                          relativePoint="BOTTOMLEFT" />
                   <TextureCoords left="0.46875"
                                  right="0.5234375"
                                  top="0.359375"
