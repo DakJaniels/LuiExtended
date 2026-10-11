@@ -4,6 +4,7 @@
 
 ### New
 
+- Unit Frames: Custom raid frames can prefix each member's level or Champion Points on the name. **Raid - Level / Champion Points** is off by default. Choices are number, or icon and number. In a Veterancy zone, Display Veterancy Rank still replaces it. PC and console.
 - Unit Frames and Chat Announcements: **Platform Name** under **Player Name Display Method**. Shows the Gamertag or Online ID, and @UserID if that name is empty.
 - Chat Announcements: Companion level up, rapport changes, skill unlocks, and skill experience. Chat, center screen, and alert toggles, off by default. PC and console.
 - Chat Announcements: More center-screen messages now have their own chat, center-screen, and alert toggles.
@@ -12,6 +13,11 @@
 - MiniMap: **HarvestMap Pins (%)** changes HarvestMap pin size on the minimap. World map pins stay the same size.
 - MiniMap: The gap around the map uses the world map background. The world map itself is left alone.
 - Slash Commands: **Choose Fence to Summon**. /fence and /smuggler call the fence you pick. PC and console.
+- Unit Frames: **Raid Frame Template**. Compact is the single-row health bar. Expanded is taller: name, role, and class on top, health in the middle, and a bottom row for ultimate and potion icons, food and drink, magicka and stamina, and DPS / HPS. The bottom row only shows what is turned on, and it collapses when nothing is on. Switching templates needs a reload. PC and console.
+- Unit Frames: Food and drink buffs show on Expanded raid frames, with **Raid Frame Icon Size**. Compact raid frames still have no slot for them.
+- Unit Frames: **Show on Raid Frames** on Group Resources, Combat Stats, Potion Cooldowns, and Food and Drink. On by default. Combat Stats, potions, and food and drink only have a slot on the Expanded template. Group Resources also covers the bars on Compact raid frames. Uncheck to keep that feature on the 4 player group frames only. Needs a reload.
+- Unit Frames: **Battleground Raid Layout (Big Team Battles)** for 6v6v6 and 9v9. Single column, rows of 3, or a single row. Slot count follows the team (1 x 9 / 3 x 3 / 9 x 1, or 1 x 6 / 3 x 2 / 6 x 1). Spacers stay every 3 members. Competitive 4v4 keeps the group frames.
+- MiniMap: LoreLibrary book pins show on the minimap when LoreLibrary is enabled. They follow Default Pin Scale and Other Pins. The world map is left alone.
 
 ### Changes
 
@@ -20,9 +26,16 @@
 - Assistant names updated in English, French, Russian, and Chinese.
 - Companion and display announcement strings added in English, German, French, Russian, and Chinese.
 - MiniMap is out of beta, so the settings label dropped (BETA). **Compass**, **Keep Square Aspect**, and **Position Grid Snap** are gone.
+- Action Bar: **Carve** bar highlight shows the bleed stacks and remaining time on your reticle target instead of the damage shield. Cleave and Brawler still track the shield.
+- SpellCastBuffs: Granny's Eel Pie is tracked as a food buff, with the food tooltip and the long-duration container.
+- Unit Frames: On the Expanded raid frame, the magicka and stamina bars fill the bottom row, and the DPS / HPS box widens to fit 999.9k / 999.9k.
 
 ### Fixed
 
+- Unit Frames: Raid, boss, pet, and companion names stop before the health or status text. Widening the bar gives that space to the name. Name Clip Location is the minimum space kept on the right, and a longer health value reserves more. Boss frames follow the health text, since they have no clip slider.
+- Unit Frames: Regen and decreased-armor overlays on raid frames follow the health bar instead of drawing too tall.
+- Unit Frames: The possession glow on custom frames stays on the health bar.
+- Unit Frames: The combat glow no longer covers the food, drink, and potion timers on Expanded raid frames.
 - Action Bar: On console, the cast bar was showing the wrong ability names and icons.
 - Combat Info: Crowd control tracker text on console and gamepad now uses the gamepad fonts.
 - Console: Alert text lines up with the gamepad alert frame.
