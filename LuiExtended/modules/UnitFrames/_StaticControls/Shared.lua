@@ -270,18 +270,34 @@ function FrameObject:ShouldShowVeterancyRankOnFrame()
     return false
 end
 
+--- Veterancy rank icon for a unit's rank. Ranks past the season's rank count (repeatable ranks) have no icon of
+--- their own, so the rank is clamped to the last rank the same way ZOS does (EsoUI UnitFrames.lua
+--- ZO_UnitFrame:UpdateLevel: `if unitLevel >= ZO_VETERANCY_MANAGER:GetNumRanks() then ... New(GetNumRanks())`).
+--- @param veterancyRank integer
+--- @return string|nil iconPath
+function FrameObject.GetVeterancyRankIconPath(veterancyRank)
+    if not GetVeterancyRankIcon or veterancyRank == nil then
+        return nil
+    end
+    local rankForIcon = veterancyRank
+    if ZO_VETERANCY_MANAGER and ZO_VETERANCY_MANAGER.GetNumRanks then
+        local numRanks = ZO_VETERANCY_MANAGER:GetNumRanks()
+        if numRanks and numRanks > 0 and rankForIcon > numRanks then
+            rankForIcon = numRanks
+        end
+    end
+    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
+    return GetVeterancyRankIcon(rankForIcon, seasonId)
+end
+
 --- @param nameText string
 --- @return string
 function FrameObject:ApplyVeterancyRankNameIconForRaid(nameText)
     if nameText == nil or nameText == "" or not FrameObject.ShouldShowVeterancyRankOnFrame(self) then
         return nameText
     end
-    if not GetVeterancyRankIcon then
-        return nameText
-    end
     local veterancyRank = GetUnitVeterancyRank(self.unitTag)
-    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
-    local iconPath = GetVeterancyRankIcon(veterancyRank, seasonId)
+    local iconPath = FrameObject.GetVeterancyRankIconPath(veterancyRank)
     if not iconPath then
         return nameText
     end
@@ -634,10 +650,7 @@ function FrameObject:UpdateStaticControlLevelRow()
             else
                 levelText = tostring(veterancyRank)
             end
-            if GetVeterancyRankIcon then
-                local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
-                iconPath = GetVeterancyRankIcon(veterancyRank, seasonId)
-            end
+            iconPath = FrameObject.GetVeterancyRankIconPath(veterancyRank)
         elseif self.isChampion then
             if IsInGamepadPreferredMode() then
                 iconPath = ZO_GetGamepadChampionPointsIcon()

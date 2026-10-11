@@ -24,6 +24,8 @@ local LUIE = LUIE
 --- @field RegisterCustomFrameHudFragment fun(tlw: LUIE_PositionableTopLevelWindow): ZO_HUDFadeSceneFragment
 --- @field IsCustomFrameHudScene fun(scene: ZO_Scene|nil): boolean
 --- @field CreateRegenAnimation fun(parent: Control, anchors: table|nil, dims: table|nil, alpha: number|nil, number: string): UnitFrames.RegenStripControl|nil
+--- @field ResizeRegenAnimation fun(control: UnitFrames.RegenStripControl|nil, dims: table)
+--- @field FitDecreasedArmorOverlay fun(control: Control|nil, usableWidth: number, usableHeight: number)
 --- @field SetHealthBarAbovePowerHalo fun(backdrop: Control, bar: StatusBarControl)
 --- @field CreateHealthBarPowerHaloTrack fun(backdrop: Control, bar: StatusBarControl): StatusBarControl|nil
 --- @field CreateBarBackgroundHalo fun(backdrop: Control, bar: StatusBarControl, controlNameSuffix: string, zoTextureVirtual: string, animationTimelineVirtual: string): Control|nil
@@ -151,26 +153,25 @@ function Shared.CreateRegenAnimation(parent, anchors, dims, alpha, number)
         dims = { parent:GetDimensions() }
     end
 
-    local updateDims = { dims[2] * 1.9, dims[2] * 0.85 }
     local control = parent:CreateControl("$(parent)_RegenAnim_" .. number, CT_TEXTURE) --- @type UnitFrames.RegenStripControl
     if anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         control:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
-    control:SetDimensions(updateDims[1], updateDims[2])
     control:SetTexture(config.texture)
     control:SetDrawLayer(DL_OVERLAY)
     control:SetDrawLevel(parent:GetDrawLevel() + 1)
     control:SetHidden(true)
     control:SetAlpha(alpha or 0)
-    local distance = dims[1] * config.distanceMult
-    local offsetX = dims[1] * config.offsetXMult
+    control.regenDistanceMult = config.distanceMult
+    control.regenOffsetXMult = config.offsetXMult
 
     for i = 0, MAX_ANCHORS - 1 do
         local isValid, _, _, _, _, offsetY = control:GetAnchor(i)
         if isValid then
+            control.regenOffsetY = offsetY
             control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_RegenAnimationTemplate", control)
             control.animation = control.timeline:GetAnimation(1) --- @type AnimationObjectTranslate
-            control.animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
+            Shared.ResizeRegenAnimation(control, dims)
             return control
         end
     end
@@ -179,6 +180,25 @@ function Shared.CreateRegenAnimation(parent, anchors, dims, alpha, number)
         LUIE:Log("Error", "[LUIE] CreateRegenAnimation: No valid anchors found for animation.")
     end
     return nil
+end
+
+--- Size one regen/degen strip for a bar of the given dimensions and recompute its translate offsets.
+--- dims[1] is the usable bar width, dims[2] the usable bar height; the strip (regenleft/right.dds, 64x32) is drawn
+--- 1.9 x / 0.85 x the usable height so its aspect stays close to the file's 2:1 and never exceeds the bar.
+--- Called from CreateRegenAnimation and again from the raid layout whenever the health band height changes
+--- (the expanded raid template's health band is far shorter than RaidBarHeight).
+--- @param control UnitFrames.RegenStripControl|nil
+--- @param dims table { usableWidth, usableHeight }
+function Shared.ResizeRegenAnimation(control, dims)
+    if not control or not control.animation or dims == nil or #dims ~= 2 then
+        return
+    end
+
+    control:SetDimensions(dims[2] * 1.9, dims[2] * 0.85)
+    local distance = dims[1] * control.regenDistanceMult
+    local offsetX = dims[1] * control.regenOffsetXMult
+    local offsetY = control.regenOffsetY or 0
+    control.animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
 end
 
 function Shared.SetHealthBarAbovePowerHalo(backdrop, bar)
@@ -299,4 +319,40 @@ function Shared.CreateDecreasedArmorOverlay(parent, small)
     end
 
     return control
+end
+
+-- attributebar_dynamic_decreasedarmor_small/standard.dds file size (matches the 512x32 LUIE_DecreasedArmorOverlay template).
+local DECREASED_ARMOR_TEXTURE_WIDTH = 512
+local DECREASED_ARMOR_TEXTURE_HEIGHT = 32
+
+--- Crop one decreased-armor texture to the given size at native pixel scale.
+--- Uses TextureControl:SetTextureCoords(left, right, top, bottom) to sample only the centered region instead of
+--- squashing the 512x32 file, so the overlay never draws outside a bar that is shorter or narrower than the file.
+--- @param texture TextureControl|nil
+--- @param width number
+--- @param height number
+local function CropDecreasedArmorTexture(texture, width, height)
+    if not texture then
+        return
+    end
+    local horizontalSpan = width / DECREASED_ARMOR_TEXTURE_WIDTH
+    local verticalSpan = height / DECREASED_ARMOR_TEXTURE_HEIGHT
+    texture:SetDimensions(width, height)
+    texture:SetTextureCoords(0.5 - horizontalSpan * 0.5, 0.5 + horizontalSpan * 0.5, 0.5 - verticalSpan * 0.5, 0.5 + verticalSpan * 0.5)
+end
+
+--- Fit a decreased-armor overlay (CreateDecreasedArmorOverlay) inside a bar of the given usable size.
+--- Both the container and its textures are clamped to the file size and cropped, never stretched.
+--- @param control Control|nil overlay container with smallTex / normalTex
+--- @param usableWidth number
+--- @param usableHeight number
+function Shared.FitDecreasedArmorOverlay(control, usableWidth, usableHeight)
+    if not control then
+        return
+    end
+    local width = zo_min(zo_max(usableWidth, 1), DECREASED_ARMOR_TEXTURE_WIDTH)
+    local height = zo_min(zo_max(usableHeight, 1), DECREASED_ARMOR_TEXTURE_HEIGHT)
+    control:SetDimensions(width, height)
+    CropDecreasedArmorTexture(control.smallTex, width, height)
+    CropDecreasedArmorTexture(control.normalTex, width, height)
 end

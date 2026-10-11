@@ -189,12 +189,18 @@ function Shared.SetupIntegrationFrames(componentName, createCallback, unhideCall
         if unitTag then
             local frameData = Shared.GetFrameData(unitTag)
             if frameData then
+                -- Expanded raid frames carry the same slot controls as SmallGroup frames
+                local isExpandedRaidFrame = frameData.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED
                 if not frameData[componentName] then
                     -- Create components if they don't exist
                     createCallback(frameData, useRaidFrames)
-                elseif not useRaidFrames and frameData[componentName] and unhideCallback then
-                    -- Unhide existing SmallGroup components that may have been hidden during frame transitions
+                elseif (not useRaidFrames or isExpandedRaidFrame) and frameData[componentName] and unhideCallback then
+                    -- Unhide existing components that may have been hidden during frame transitions
                     unhideCallback(frameData)
+                end
+                if isExpandedRaidFrame then
+                    -- Re-chain the bottom row anchors / draw order now that the integration controls exist
+                    UnitFrames.ApplyRaidExpandedMemberLayout(frameData)
                 end
             end
         end

@@ -392,11 +392,23 @@ local function DebugGroup()
     UnitFrames.OnLeaderUpdate(nil, "SmallGroup1")
 end
 
-local function DebugRaid()
+--- /luiufraid [6|9]: with a team size argument the raid preview pretends to be in a Big Team Battles battleground of
+--- that size (UnitFrames.GetBattlegroundRaidTeamSize honours debugBattlegroundTeamSizeOverride), so the
+--- RaidLayoutBattleground shapes can be checked outside a match. No argument = regular 12 player layout.
+--- @param arg string|nil
+local function DebugRaid(arg)
     local first = UnitFrames.CustomFrames["RaidGroup1"]
     if not first then
         NotifyMissing("RaidGroup")
         return
+    end
+    local trimmedArg = (type(arg) == "string" and arg:match("^%s*(.-)%s*$")) or ""
+    local battlegroundTeamSize = tonumber(trimmedArg)
+    if battlegroundTeamSize and battlegroundTeamSize > STANDARD_GROUP_SIZE_THRESHOLD and battlegroundTeamSize <= 12 then
+        UnitFrames.debugBattlegroundTeamSizeOverride = battlegroundTeamSize
+        LUIE.ChatOutput:AddSystemMessage(string.format("[LUIE] Raid preview: battleground layout for a %d player team. Run /luiufraid without a number to go back to the 12 player layout.", battlegroundTeamSize))
+    else
+        UnitFrames.debugBattlegroundTeamSizeOverride = nil
     end
     ApplyPositions()
     UnitFrames.CustomFramesApplyLayoutRaid(false, true)
@@ -533,6 +545,8 @@ local function DisableAllPreviews()
         UnitFrames.CustomPetUpdate()
     end
 
+    -- Drop any /luiufraid 6|9 battleground team size override before the live group state is restored
+    UnitFrames.debugBattlegroundTeamSizeOverride = nil
     if (UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"]) and UnitFrames.CustomFramesGroupUpdate then
         UnitFrames.CustomFramesGroupUpdate()
     end

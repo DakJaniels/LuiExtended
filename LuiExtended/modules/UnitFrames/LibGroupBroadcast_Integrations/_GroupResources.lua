@@ -41,6 +41,19 @@ local isInitialized = false
 local magickaChangeCallback
 local staminaChangeCallback
 
+--- "Show on Raid Frames": the raid frame bars (compact inset bars and the Expanded bottom-row bars) are pre-created in
+--- RaidFrames.xml and only ever shown by UpdateResourceBar, so the raid gate lives in the update / layout paths.
+--- @param Settings table GroupResources settings
+--- @param isRaid boolean
+--- @return boolean
+local function ShouldShowOnFrameType(Settings, isRaid)
+    if not Settings or not Settings.enabled then return false end
+    if isRaid then
+        return Settings.showOnRaidFrames == true
+    end
+    return true
+end
+
 -- Add resource bars to a custom frame (only needed for SmallGroup frames - RaidGroup frames have them pre-created)
 local function AddResourceBarsToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
@@ -72,12 +85,19 @@ local function UpdateResourceBarLayout(frameData, isRaid)
     local stamBar = frameData.resourceStamina.bar
 
     local healthBackdrop = Shared.GetHealthBackdrop(frameData)
+    local isExpandedRaidFrame = frameData.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED
 
-    -- Position backdrops
-    magBackdrop:ClearAnchors()
-    stamBackdrop:ClearAnchors()
+    if not isExpandedRaidFrame then
+        -- Position backdrops (expanded raid bars are anchored by the raid layout below)
+        magBackdrop:ClearAnchors()
+        stamBackdrop:ClearAnchors()
+    end
 
-    if isRaid then
+    if isExpandedRaidFrame then
+        -- Expanded raid template: two stacked 4px bars inside the bottom row resource container; anchors/order come
+        -- from UnitFrames.ApplyRaidExpandedMemberLayout (staminaFirst aware). Only textures and colors are applied below.
+        UnitFrames.ApplyRaidExpandedMemberLayout(frameData)
+    elseif isRaid then
         local gapBetweenBars = 1
         local healthWidth = healthBackdrop and healthBackdrop:GetWidth() or UnitFrames.SV.RaidBarWidth
         if healthWidth <= 0 then
@@ -186,7 +206,8 @@ local function UpdateResourceBar(unitTag, current, maximum, percentage, powerTyp
     end
 
     local Settings = Shared.GetResourceSettings()
-    if not Settings or not Settings.enabled then return end
+    local useRaidFrames = Shared.DetermineFrameType()
+    if not ShouldShowOnFrameType(Settings, useRaidFrames) then return end
 
     local resourceKey = (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA) and "resourceMagicka" or "resourceStamina"
     local resourceData = frameData[resourceKey]
@@ -348,22 +369,34 @@ function GroupResourcesManager.SetupFrames()
     if not Settings or not Settings.enabled then return end
 
     local useRaidFrames = Shared.DetermineFrameType()
+    local showOnThisFrameType = ShouldShowOnFrameType(Settings, useRaidFrames)
 
     -- Iterate over active group members
     Shared.ForEachActiveGroupMember(function (unitTag, frameData)
-        AddResourceBarsToFrame(frameData, useRaidFrames)
-        UpdateResourceBarLayout(frameData, useRaidFrames)
+        if showOnThisFrameType then
+            AddResourceBarsToFrame(frameData, useRaidFrames)
+            UpdateResourceBarLayout(frameData, useRaidFrames)
+        else
+            -- "Show on Raid Frames" is off: keep the pre-created raid bars hidden
+            HideResourceBars(unitTag)
+        end
     end)
     RefreshResourceBarValuesFromCache()
 end
 
 -- Update all resource bar layouts (called from menu)
 function GroupResourcesManager.UpdateAllLayouts()
+    local Settings = Shared.GetResourceSettings()
     local useRaidFrames = Shared.DetermineFrameType()
+    local showOnThisFrameType = ShouldShowOnFrameType(Settings, useRaidFrames)
 
     -- Iterate over active group members
     Shared.ForEachActiveGroupMember(function (unitTag, frameData)
-        UpdateResourceBarLayout(frameData, useRaidFrames)
+        if showOnThisFrameType then
+            UpdateResourceBarLayout(frameData, useRaidFrames)
+        else
+            HideResourceBars(unitTag)
+        end
     end)
     RefreshResourceBarValuesFromCache()
 end
@@ -376,11 +409,15 @@ end
 -- Calculate extra height needed for resource bars
 function GroupResourcesManager.GetResourceBarsHeight(isRaid)
     local Settings = Shared.GetResourceSettings()
-    if not Settings or not Settings.enabled then
+    if not ShouldShowOnFrameType(Settings, isRaid) then
         return 0
     end
 
     if isRaid then
+        -- Expanded raid template: bars live inside the member frame's bottom row, no extra height.
+        if UnitFrames.IsRaidExpandedTemplate() then
+            return 0
+        end
         -- Raid: inset bars don't add extra height (they're inside the health frame)
         return 2
     else

@@ -92,8 +92,24 @@ local function IsModuleEnabled()
     return settings and settings.enabled
 end
 
-local function ShouldShowOnFrame(isRaid)
-    if isRaid then return false end
+--- Expanded raid frames carry the same bottom-row slot controls as SmallGroup frames (RaidFrames.xml _FoodDrinkBackdrop).
+--- @param frameData table
+--- @return boolean
+local function IsExpandedRaidFrame(frameData)
+    return frameData ~= nil and frameData.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED
+end
+
+--- SmallGroup frames always; raid frames only on the Expanded template (compact raid frames have no slot) and only
+--- when "Show on Raid Frames" is on. Same gate as _GroupCombatStats.lua AddCombatStatsToFrame /
+--- _GroupPotionCooldowns.lua AddPotionCooldownToFrame.
+--- @param frameData table
+--- @param isRaid boolean
+--- @return boolean
+local function ShouldShowOnFrame(frameData, isRaid)
+    if isRaid then
+        local settings = GetSettings()
+        return IsExpandedRaidFrame(frameData) and settings ~= nil and settings.showOnRaidFrames == true
+    end
     return true
 end
 
@@ -161,14 +177,20 @@ local function GetIconForBuffType(buffType, isDrink)
     return iconMap[quality]
 end
 
-local function GetIconSize()
+--- Icon size: matches the ultimate icons when they are shown (same rule as _GroupPotionCooldowns.lua), otherwise the
+--- module's own group / raid size setting.
+--- @param isRaid boolean
+--- @return number
+local function GetIconSize(isRaid)
     local settings = GetSettings()
     local combatStatsSettings = Shared.GetCombatStatsSettings()
 
-    if combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate then
-        return combatStatsSettings.ultIconGroupSize
+    local ultimateIconsShownHere = combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate
+        and (not isRaid or combatStatsSettings.showOnRaidFrames)
+    if ultimateIconsShownHere then
+        return isRaid and combatStatsSettings.ultIconRaidSize or combatStatsSettings.ultIconGroupSize
     else
-        return settings.iconSizeGroup
+        return isRaid and settings.iconSizeRaid or settings.iconSizeGroup
     end
 end
 
@@ -292,10 +314,13 @@ end
 -- UI CREATION
 -- =====================================================================================================================
 
-local function CreateFoodDrinkBuffUI(frameData)
+--- @param frameData table
+--- @param isRaid boolean
+local function CreateFoodDrinkBuffUI(frameData, isRaid)
     if frameData.foodDrinkBuff then return end
 
-    local iconSize = GetIconSize()
+    local isExpandedRaidFrame = IsExpandedRaidFrame(frameData)
+    local iconSize = GetIconSize(isRaid)
     local offsetX, offsetY = GetIconOffset()
     local anchorControl, anchorPoint, anchorRelPoint, customOffsetX = DetermineAnchorPoint(frameData)
 
@@ -307,27 +332,35 @@ local function CreateFoodDrinkBuffUI(frameData)
 
     -- Get the container (already exists in XML)
     local container = frameData.libGroupContainer
-
-    -- Anchor container to health bar if not already anchored
-    local numAnchors = container:GetNumAnchors()
-    if numAnchors == 0 then
-        container:SetAnchor(anchorPoint, anchorControl, anchorRelPoint, offsetX, offsetY)
-    end
-
-    frameData.foodDrinkBuff = {}
+    if not container then return end
 
     -- Get food/drink controls from XML
     local backdrop = container:GetNamedChild("_FoodDrinkBackdrop")
+    if not backdrop then return end
     local icon = backdrop:GetNamedChild("_Icon")
     local label = backdrop:GetNamedChild("_Label")
+
+    -- Anchor container to health bar if not already anchored.
+    -- Expanded raid frames: the container and every slot are anchored by UnitFrames.ApplyRaidExpandedMemberLayout
+    -- (food -> ult1 -> ult2 -> potion inside the bottom row), so no anchoring is done here.
+    if not isExpandedRaidFrame then
+        local numAnchors = container:GetNumAnchors()
+        if numAnchors == 0 then
+            container:SetAnchor(anchorPoint, anchorControl, anchorRelPoint, offsetX, offsetY)
+        end
+    end
+
+    frameData.foodDrinkBuff = {}
 
     -- Set dimensions based on settings
     backdrop:SetDimensions(iconSize, iconSize)
     icon:SetDimensions(iconSize - ICON_BORDER_SIZE, iconSize - ICON_BORDER_SIZE)
 
-    -- Anchor food/drink first in container
-    backdrop:ClearAnchors()
-    backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
+    if not isExpandedRaidFrame then
+        -- Anchor food/drink first in container
+        backdrop:ClearAnchors()
+        backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
+    end
 
     -- Set draw properties
     backdrop:SetDrawLayer(DL_BACKGROUND)
@@ -338,25 +371,27 @@ local function CreateFoodDrinkBuffUI(frameData)
     end)
     backdrop:SetHandler("OnMouseExit", HideBuffTooltip)
 
-    -- Reposition ult/potion icons to come after food/drink
-    if frameData.combatStats and frameData.combatStats.ult1Backdrop then
-        frameData.combatStats.ult1Backdrop:ClearAnchors()
-        frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, backdrop, RIGHT, 3, 0)
+    -- Reposition ult/potion icons to come after food/drink (SmallGroup only; the expanded raid layout owns its chain)
+    if not isExpandedRaidFrame then
+        if frameData.combatStats and frameData.combatStats.ult1Backdrop then
+            frameData.combatStats.ult1Backdrop:ClearAnchors()
+            frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, backdrop, RIGHT, ICON_SPACING, 0)
 
-        if frameData.combatStats.ult2Backdrop then
-            frameData.combatStats.ult2Backdrop:ClearAnchors()
-            frameData.combatStats.ult2Backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 3, 0)
+            if frameData.combatStats.ult2Backdrop then
+                frameData.combatStats.ult2Backdrop:ClearAnchors()
+                frameData.combatStats.ult2Backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, ICON_SPACING, 0)
+            end
         end
-    end
 
-    if frameData.potionCooldown and frameData.potionCooldown.backdrop then
-        frameData.potionCooldown.backdrop:ClearAnchors()
-        if frameData.combatStats and frameData.combatStats.ult2Backdrop then
-            frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult2Backdrop, RIGHT, 3, 0)
-        elseif frameData.combatStats and frameData.combatStats.ult1Backdrop then
-            frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 3, 0)
-        else
-            frameData.potionCooldown.backdrop:SetAnchor(LEFT, backdrop, RIGHT, 3, 0)
+        if frameData.potionCooldown and frameData.potionCooldown.backdrop then
+            frameData.potionCooldown.backdrop:ClearAnchors()
+            if frameData.combatStats and frameData.combatStats.ult2Backdrop then
+                frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult2Backdrop, RIGHT, ICON_SPACING, 0)
+            elseif frameData.combatStats and frameData.combatStats.ult1Backdrop then
+                frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, ICON_SPACING, 0)
+            else
+                frameData.potionCooldown.backdrop:SetAnchor(LEFT, backdrop, RIGHT, ICON_SPACING, 0)
+            end
         end
     end
 
@@ -365,10 +400,11 @@ local function CreateFoodDrinkBuffUI(frameData)
     -- Apply font to label if showRemainingTime is enabled
     local settings = GetSettings()
     if settings and settings.showRemainingTime then
-        local fontSize = 12
+        -- Expanded raid: 10pt fits the 16px slot (same as the potion cooldown label on raid frames)
+        local fontSize = isExpandedRaidFrame and 10 or 12
         label:SetDrawLayer(DL_OVERLAY)
         label:SetDrawLevel(16)
-        local appearance = UnitFrames.GetCustomFrameAppearance("group")
+        local appearance = UnitFrames.GetCustomFrameAppearance(isExpandedRaidFrame and "raid" or "group")
         label:SetFont(LUIE.Font.Resolve(appearance.fontFace, fontSize, appearance.fontStyle))
         frameData.foodDrinkBuff.label = label
     end
@@ -509,9 +545,9 @@ end
 local function AddFoodDrinkIconToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
     if not IsModuleEnabled() then return end
-    if not ShouldShowOnFrame(isRaid) then return end
+    if not ShouldShowOnFrame(frameData, isRaid) then return end
 
-    CreateFoodDrinkBuffUI(frameData)
+    CreateFoodDrinkBuffUI(frameData, isRaid)
 end
 
 local function ShowFoodDrinkFrame(frameData)
@@ -688,5 +724,12 @@ function GroupFoodDrinkBuffManager.RefreshFrames()
     if not isInitialized then return end
 
     ClearFoodDrinkFrames()
+    SetupFoodDrinkFrames()
+end
+
+--- Create / unhide the icons on the frames of the current group (called from UnitFrames.CustomFramesGroupUpdate on
+--- SmallGroup <-> RaidGroup transitions, like the other integrations' SetupFrames).
+function GroupFoodDrinkBuffManager.SetupFrames()
+    if not isInitialized then return end
     SetupFoodDrinkFrames()
 end
