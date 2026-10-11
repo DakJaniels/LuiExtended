@@ -60,6 +60,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Assistant names updated in English, French, Russian, and Chinese.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Companion and display announcement strings added in English, German, French, Russian, and Chinese.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap is out of beta, so the settings label dropped (BETA). |cFFFFFFCompass|r, |cFFFFFFKeep Square Aspect|r, and |cFFFFFFPosition Grid Snap|r are gone.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: |cFFFFFFCarve|r bar highlight shows the bleed stacks and remaining time on your reticle target instead of the damage shield. Cleave and Brawler still track the shield.",
     "",
     -- Fix
     "|cFFFF00Fix:|r",
