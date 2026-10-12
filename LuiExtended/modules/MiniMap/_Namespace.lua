@@ -103,6 +103,7 @@ MiniMap.MINIMAP_PIN_MAX_SCALE = 1.0
 --- @field anchorInfoPanelToMiniMap boolean
 --- @field infoPanelRestoreAnchor MiniMapInfoPanelRestoreAnchor|nil
 --- @field showZoneName boolean
+--- @field showSubzoneName boolean
 --- @field zoneNameAboveMap boolean
 --- @field zoneNameFontFace string
 --- @field zoneNameFontSize number
@@ -181,6 +182,7 @@ MiniMap.Defaults =
     pinMirrorStateMachineDebug = false,
     anchorInfoPanelToMiniMap = false,
     showZoneName = true,
+    showSubzoneName = false,
     zoneNameAboveMap = false,
     zoneNameFontFace = "LUIE Default Font",
     zoneNameFontSize = 18,
