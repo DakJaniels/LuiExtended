@@ -350,11 +350,8 @@ function LUIE_MiniMap_Integrations:OnLoreLibraryContentSizeChanged()
     self:ApplyLoreLibraryPinScale()
 end
 
---- New map sheet: size first, then a redraw for the viewed / player zone caches.
+--- New map sheet: relayout only. LoreLibrary already rebuilds pins from its own
+--- ZO_PreHook on ZO_WorldMap_UpdateMap (Pins/MapPins.lua:52), which runs inside the same OnWorldMapChanged.
 function LUIE_MiniMap_Integrations:OnLoreLibraryMapChanged()
-    if not self:IsLoreLibraryMinimapModeActive() or not self.manager.panAndZoom:HasMap() then
-        return
-    end
     self:OnLoreLibraryContentSizeChanged()
-    self.loreLibrary.mapPins:RedrawPins()
 end

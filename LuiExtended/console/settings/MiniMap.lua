@@ -486,6 +486,18 @@ function MiniMap.CreateConsoleSettings()
         },
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_SUBZONE),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_SUBZONE_TP),
+            getFunction = function () return MiniMap.SV.showSubzoneName == true end,
+            setFunction = function (value)
+                MiniMap.SV.showSubzoneName = value
+                MiniMap.ApplySettings()
+            end,
+            default = Defaults.showSubzoneName,
+            disable = zoneNameFontDisabled,
+        },
+        {
+            type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_ABOVE),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_ABOVE_TP),
             getFunction = function () return MiniMap.SV.zoneNameAboveMap == true end,

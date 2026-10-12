@@ -48,6 +48,7 @@ local MAP_CLICK_REVERT_WINDOW_MS = 3000
 --- @field pauseReasons table<string, boolean>
 --- @field mapIdentityDirty boolean
 --- @field currentMapName string|nil
+--- @field playerLocationMapName string|nil Map name last cached while the viewed map matched the player.
 --- @field zoneName string|nil
 --- @field subZoneName string|nil
 --- @field displayedLocationName string|nil
@@ -69,6 +70,7 @@ function LUIE_MiniMap_Manager:Initialize(rootControl)
     self.pauseReasons = {}
     self.mapIdentityDirty = false
     self.currentMapName = nil
+    self.playerLocationMapName = nil
     self.zoneName = nil
     self.subZoneName = nil
     self.displayedLocationName = nil
@@ -213,6 +215,9 @@ end
 function LUIE_MiniMap_Manager:BeginTileLoad()
     self.mapIdentityDirty = false
     self.currentMapName = GetMapName()
+    if DoesCurrentMapMatchMapForPlayerLocation() then
+        self.playerLocationMapName = self.currentMapName
+    end
     self.tileLayer:UpdateTextures()
     MiniMap.LogDebug("Loading tiles for %s (%d tiles)", self.currentMapName, self.tileLayer.totalTiles or 0)
 end
@@ -520,9 +525,44 @@ end
 
 -- Location label -------------------------------------------------------------
 
+--- Location name, then the EVENT_ZONE_CHANGED zone, then the viewed map name.
+--- @return string
+function LUIE_MiniMap_Manager:GetZoneLabelName()
+    local locationName = GetPlayerLocationName()
+    if locationName and locationName ~= "" then
+        return locationName
+    end
+    if self.zoneName and self.zoneName ~= "" then
+        return self.zoneName
+    end
+    return GetMapName()
+end
+
+--- Player's map name, kept when the minimap is showing a parent sheet.
+--- @return string
+function LUIE_MiniMap_Manager:GetPlayerLocationMapName()
+    local playerMapName = self.playerLocationMapName
+    if playerMapName and playerMapName ~= "" then
+        return playerMapName
+    end
+    if DoesCurrentMapMatchMapForPlayerLocation() then
+        return GetMapName()
+    end
+    return ""
+end
+
 --- Sub-zone, zone (EVENT_ZONE_CHANGED args), GetPlayerLocationName, then GetMapName.
+--- With Show Subzone, the location name and the player's map name are joined when they differ.
 --- @return string
 function LUIE_MiniMap_Manager:GetLocationDisplayName()
+    if MiniMap.SV.showSubzoneName == true then
+        local zoneLabelName = self:GetZoneLabelName()
+        local playerMapName = self:GetPlayerLocationMapName()
+        if playerMapName ~= "" and MiniMap.StripMapNameFormatting(zoneLabelName) ~= MiniMap.StripMapNameFormatting(playerMapName) then
+            return zo_strformat(GetString(LUIE_STRING_MINIMAP_ZONE_SUBZONE_FORMAT), MiniMap.StripMapNameFormatting(zoneLabelName), MiniMap.StripMapNameFormatting(playerMapName))
+        end
+        return zoneLabelName
+    end
     if self.subZoneName and self.subZoneName ~= "" then
         return self.subZoneName
     end
@@ -552,6 +592,7 @@ function LUIE_MiniMap_Manager:RegisterEvents()
     root:RegisterForEvent(EVENT_ZONE_CHANGED, function (eventId, zoneName, subZoneName)
         self.zoneName = zoneName
         self.subZoneName = subZoneName
+        self.playerLocationMapName = nil
         self.mapClickSuppressedMapNames = {}
         self:UpdateLocationLabel()
         self:SyncMapToPlayerLocation()
@@ -559,6 +600,7 @@ function LUIE_MiniMap_Manager:RegisterEvents()
     root:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function ()
         self.zoneName = nil
         self.subZoneName = nil
+        self.playerLocationMapName = nil
         self:SyncMapToPlayerLocation()
         self:UpdateLocationLabel()
     end)
@@ -630,6 +672,7 @@ function LUIE_MiniMap_Manager:ApplySettings()
         self.integrations:ApplyLoreLibraryPinScale()
     end
     self:RefreshUpdateRegistration()
+    self:UpdateLocationLabel()
 end
 
 function LUIE_MiniMap_Manager:RefreshFrameAttachments()
