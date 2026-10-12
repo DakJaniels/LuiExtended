@@ -17,66 +17,51 @@ local eventManager = GetEventManager()
 
 -- -----------------------------------------------------------------------------
 -- Platform / saved vars
--- Optional dependencies that are enabled load before LuiExtended, so this
--- snapshot is valid for the session. pChat.db fields stay live reads.
+-- pChat.db fields stay live reads. Addon enablement is cached in LUIE.IsItEnabled.
 -- -----------------------------------------------------------------------------
 
-local externalChatAvailabilityCached = false
-local pChatAvailable = false
-local rChatAvailable = false
-local libChatMessageAvailable = false
-local externalFormatSysMessage = nil
-
-local function GetExternalChatAvailability()
-    if externalChatAvailabilityCached then
-        return
-    end
-    externalChatAvailabilityCached = true
-
-    local isConsoleOrGameCoreUi = ZO_IsConsoleOrGameCoreUI()
-    pChatAvailable = not isConsoleOrGameCoreUi and LUIE.IsItEnabled("pChat") and pChat ~= nil
-    rChatAvailable = not isConsoleOrGameCoreUi and LUIE.IsItEnabled("rChat") and rChat ~= nil
-    libChatMessageAvailable = LUIE.IsItEnabled("LibChatMessage") and LibChatMessage ~= nil
-
-    if pChatAvailable then
-        local pChatFormatSysMessage = _G["pChat_FormatSysMessage"] or pChat.formatSysMessage
-        if pChatFormatSysMessage then
-            externalFormatSysMessage = pChatFormatSysMessage
-            return
-        end
-    end
-
-    if rChatAvailable then
-        local rChatFormatSysMessage = _G["rChat_FormatSysMessage"] or rChat.formatSysMessage
-        if rChatFormatSysMessage then
-            externalFormatSysMessage = rChatFormatSysMessage
-            return
-        end
-        if rChat_ZOS and type(rChat_ZOS.FormatSysMessage) == "function" then
-            externalFormatSysMessage = rChat_ZOS.FormatSysMessage
-        end
-    end
-end
-
 local function IsPChatAvailable()
-    GetExternalChatAvailability()
-    return pChatAvailable
+    if ZO_IsConsoleOrGameCoreUI() or not LUIE.IsItEnabled("pChat") then
+        return false
+    end
+    return pChat ~= nil
 end
 
 local function IsRChatAvailable()
-    GetExternalChatAvailability()
-    return rChatAvailable
+    if ZO_IsConsoleOrGameCoreUI() or not LUIE.IsItEnabled("rChat") then
+        return false
+    end
+    return rChat ~= nil
 end
 
 local function IsLibChatMessageAvailable()
-    GetExternalChatAvailability()
-    return libChatMessageAvailable
+    if not LUIE.IsItEnabled("LibChatMessage") then
+        return false
+    end
+    return LibChatMessage ~= nil
 end
 
 --- @return function|nil
 local function GetExternalFormatSysMessage()
-    GetExternalChatAvailability()
-    return externalFormatSysMessage
+    if IsPChatAvailable() then
+        local formatSysMessage = _G["pChat_FormatSysMessage"] or pChat.formatSysMessage
+        if formatSysMessage then
+            return formatSysMessage
+        end
+    end
+
+    if IsRChatAvailable() then
+        local formatSysMessage = _G["rChat_FormatSysMessage"] or rChat.formatSysMessage
+        if formatSysMessage then
+            return formatSysMessage
+        end
+    end
+
+    if IsRChatAvailable() and rChat_ZOS and type(rChat_ZOS.FormatSysMessage) == "function" then
+        return rChat_ZOS.FormatSysMessage
+    end
+
+    return nil
 end
 
 --- @param self LUIE_ChatOutput

@@ -188,22 +188,30 @@ end
 do
     local addonManager = GetAddOnManager()
     local numAddOns = addonManager:GetNumAddOns()
+    -- Load state cannot change until ReloadUI. Store false so a missing or disabled addon is not scanned again.
+    local enabledByAddOnName = {}
 
     --- @param addOnName string
     --- @return boolean
     local function is_it_enabled(addOnName)
-        if not addonManager:WasAddOnDetected(addOnName) then
-            return false
+        local cachedEnabled = enabledByAddOnName[addOnName]
+        if cachedEnabled ~= nil then
+            return cachedEnabled
         end
-        for i = 1, numAddOns do
-            local name, _, _, _, _, state, _, _ = addonManager:GetAddOnInfo(i)
 
-            if name == addOnName and state == ADDON_STATE_ENABLED then
-                return true
+        local enabled = false
+        if addonManager:WasAddOnDetected(addOnName) then
+            for addOnIndex = 1, numAddOns do
+                local name, _, _, _, _, state = addonManager:GetAddOnInfo(addOnIndex)
+                if name == addOnName and state == ADDON_STATE_ENABLED then
+                    enabled = true
+                    break
+                end
             end
         end
 
-        return false
+        enabledByAddOnName[addOnName] = enabled
+        return enabled
     end
 
     LUIE.IsItEnabled = is_it_enabled
