@@ -109,6 +109,20 @@ local NOWHERE_VAULT_STRING_IDS =
     LUIE_STRING_CA_DISPLAY_NV_ARTISTS_TOUCH_ACQUIRED,
     LUIE_STRING_CA_DISPLAY_NV_CONNOISSEUR_VISION_ACQUIRED,
     LUIE_STRING_CA_DISPLAY_NV_ECLIPSED_HALL_RESETS,
+    LUIE_STRING_CA_DISPLAY_NV_CURIOS_TAKE_MERCY,
+    LUIE_STRING_CA_DISPLAY_NV_GOLDEN_CRYSTAL_ACTIVE,
+    LUIE_STRING_CA_DISPLAY_NV_BLUE_CRYSTAL_ACTIVE,
+    LUIE_STRING_CA_DISPLAY_NV_CRIMSON_CRYSTAL_ACTIVE,
+    LUIE_STRING_CA_DISPLAY_NV_GOLDEN_CRYSTAL_DESTROYED,
+    LUIE_STRING_CA_DISPLAY_NV_BLUE_CRYSTAL_DESTROYED,
+    LUIE_STRING_CA_DISPLAY_NV_CRIMSON_CRYSTAL_DESTROYED,
+    LUIE_STRING_CA_DISPLAY_NV_ALL_CRYSTALS_DESTROYED,
+    LUIE_STRING_CA_DISPLAY_NV_RAIN_TOTEMS_REPAIRED_1,
+    LUIE_STRING_CA_DISPLAY_NV_RAIN_TOTEMS_REPAIRED_2,
+    LUIE_STRING_CA_DISPLAY_NV_RAIN_TOTEMS_REPAIRED_3,
+    LUIE_STRING_CA_DISPLAY_NV_GOLDEN_CRYSTAL_REFORMING,
+    LUIE_STRING_CA_DISPLAY_NV_BLUE_CRYSTAL_REFORMING,
+    LUIE_STRING_CA_DISPLAY_NV_CRIMSON_CRYSTAL_REFORMING,
 }
 
 -- GetRawZoneName: 1533 and 1583 are both "The Nowhere Vault".
@@ -140,7 +154,18 @@ function ChatAnnouncements.ResolveDynamicEncounterDisplayAnnouncement(primaryTex
         return nil
     end
 
+    local function ResolveNowhereVaultSettings()
+        local zoneId = GetZoneId(GetCurrentMapZoneIndex())
+        if NOWHERE_VAULT_ZONE_IDS[zoneId] then
+            return display.ZoneDynamicEncounterNowhereVault
+        end
+        return NOWHERE_VAULT_SUPPRESSED_SETTINGS
+    end
+
     if not primaryText then
+        if secondaryText and nowhereVaultLookup[secondaryText] then
+            return ResolveNowhereVaultSettings()
+        end
         return nil
     end
 
@@ -154,11 +179,7 @@ function ChatAnnouncements.ResolveDynamicEncounterDisplayAnnouncement(primaryTex
         return display.ZoneDynamicEncounterBilsaDelivery
     end
     if nowhereVaultLookup[primaryText] then
-        local zoneId = GetZoneId(GetCurrentMapZoneIndex())
-        if NOWHERE_VAULT_ZONE_IDS[zoneId] then
-            return display.ZoneDynamicEncounterNowhereVault
-        end
-        return NOWHERE_VAULT_SUPPRESSED_SETTINGS
+        return ResolveNowhereVaultSettings()
     end
     if miscLookup[primaryText] then
         return display.ZoneDynamicEncounterMisc
