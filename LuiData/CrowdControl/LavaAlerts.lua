@@ -17,6 +17,7 @@ local lavaAlerts =
 
     -- Consumables
     [68565] = true, -- Stun (Potion of Stun),
+    [272717] = true, -- Bridge Switch (Moonlit Isles),
 
     -- World
     [95841] = true, -- Static Charge (Dark Anchor),
@@ -30,6 +31,8 @@ local lavaAlerts =
     [19224] = true, -- In Lava (Halls of Torment),
     [44034] = true, -- Slaughterfish Attack (Stirk),
     [56277] = true, -- Lava (City of Ash II),
+    [270287] = true, -- Lava (Fungal Chasm),
+    [261919] = true, -- Strangler Gas (Murky Grotto),
     [113082] = true, -- Slaughterfish Attack (Cyrodiil),
 
     [17314] = true, -- Fire Trap (Player),

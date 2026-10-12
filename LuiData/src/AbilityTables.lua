@@ -923,6 +923,8 @@ local abilityTables =
     Trap_Sigil_of_Frost = zo_strformat("<<C:1>>", GetAbilityName(20258)),
 
     Trap_Lava_Trap = GetString(LUIE_STRING_SKILL_LAVA_TRAP),
+    Bridge_Switch = GetString(LUIE_STRING_SKILL_BRIDGE_SWITCH),
+    Checkpoint = GetString(LUIE_STRING_SKILL_CHECKPOINT),
     Trap_Lightning_Trap = GetString(LUIE_STRING_SKILL_LIGHTNING_TRAP),
     Trap_Blade_Trap = zo_strformat("<<C:1>>", GetAbilityName(66793)),
 
