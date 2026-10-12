@@ -544,6 +544,19 @@ function MiniMap.CreateSettings()
         },
         {
             type = "checkbox",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_SUBZONE),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_SUBZONE_TP),
+            getFunc = function () return MiniMap.SV.showSubzoneName == true end,
+            setFunc = function (value)
+                MiniMap.SV.showSubzoneName = value
+                MiniMap.ApplySettings()
+            end,
+            width = "full",
+            default = Defaults.showSubzoneName,
+            disabled = zoneNameFontDisabled,
+        },
+        {
+            type = "checkbox",
             name = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_ABOVE),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_ZONE_NAME_ABOVE_TP),
             getFunc = function () return MiniMap.SV.zoneNameAboveMap == true end,
