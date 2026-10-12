@@ -75,6 +75,7 @@ ActionBar.Defaults =
     ShowToggled = true,
     ShowToggledUltimate = true,
     BarShowLabel = true,
+    BarGameFallbackTimers = false,
     BarLabelPosition = -20,
     BarFontFace = "LUIE Default Font",
     BarFontStyle = FONT_STYLE_OUTLINE,

@@ -282,6 +282,27 @@ end
 
 -- -----------------------------------------------------------------------------
 
+-- Game slot-effect fallback. Assigned after the remain tables exist. Callers close over these.
+local UpdateGameFallbackTimers
+local UpdateGameFallbackSlot
+local ClearAllGameFallbackSlots
+local HideGameFallbackSlot
+local DropGameFallbackIfAbilityChanged
+local InstallNativeActionButtonTimerHooks
+local OnGameFallbackEffectUpdated
+--- @type table<integer, boolean>
+local g_gameFallbackVisible = {}
+--- @type table<integer, integer>
+local g_gameFallbackAbilityId = {}
+--- Captured once, same as ActionButton:SetTimer endTimeMS and FancyActionBar+ parentEndTime.
+--- Counting this down avoids re-reading GetActionSlotEffectTimeRemaining, which does not tick every update.
+--- @type table<integer, integer>
+local g_gameFallbackEndTimeMs = {}
+--- @type table<integer, integer>
+local g_gameFallbackStackCount = {}
+--- @type table<integer, integer>
+local g_gameFallbackSnapshotAbilityId = {}
+
 local slotsUpdated = {}
 
 ---
@@ -304,6 +325,7 @@ local function OnSwapAnimationHalfDone(animation, button, isBackBarSlot)
             slotsUpdated[i] = true
         end
     end
+    UpdateGameFallbackTimers(GetGameTimeMilliseconds(), true)
 end
 
 ---
@@ -583,6 +605,7 @@ function ActionBar.Initialize(enabled)
     Backbar.CreateUI()
     Backbar.RegisterPlatformStyle()
     ActionBar.RegisterEvents()
+    InstallNativeActionButtonTimerHooks()
 
     -- -----------------------------------------------------------------------------
     if ActionBar.SV.GlobalShowGCD then
@@ -1113,6 +1136,8 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "CompanionState", EVENT_ACTIVE_COMPANION_STATE_CHANGED)
     eventManager:UnregisterForEvent(moduleName .. "CompanionAnchorsWpn", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
     eventManager:UnregisterForEvent(moduleName .. "GamepadMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED)
+    eventManager:UnregisterForEvent(moduleName .. "GameFallbackEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED)
+    eventManager:UnregisterForEvent(moduleName .. "GameFallbackEffectUpdated", EVENT_ACTION_SLOT_EFFECT_UPDATE)
 
 
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
@@ -1243,6 +1268,15 @@ function ActionBar.RegisterEvents()
 
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, function (eventId, hidden)
         ActionBar.OnReticleHiddenUpdate(hidden)
+    end)
+
+    -- ZOS clears slot timers and stack counts here (EsoUI/Ingame/ActionBar/ActionBar.lua OnActionSlotEffectsCleared).
+    eventManager:RegisterForEvent(moduleName .. "GameFallbackEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED, function (eventId)
+        ClearAllGameFallbackSlots()
+    end)
+    -- ZOS OnActionSlotEffectUpdated -> SetTimer. Capture the end time here instead of waiting for the 100ms poll.
+    eventManager:RegisterForEvent(moduleName .. "GameFallbackEffectUpdated", EVENT_ACTION_SLOT_EFFECT_UPDATE, function (_, hotbarCategory, actionSlotIndex)
+        OnGameFallbackEffectUpdated(hotbarCategory, actionSlotIndex)
     end)
 end
 
@@ -1377,6 +1411,7 @@ function ActionBar.OnPlayerActivated()
     Backbar.OnPlayerActivatedScan()
 
     ActionBar.ApplyDisplayAlpha()
+    UpdateGameFallbackTimers(GetGameTimeMilliseconds(), true)
 end
 
 -- -----------------------------------------------------------------------------
@@ -1404,6 +1439,399 @@ local function SetBarRemainLabel(remain, abilityId)
     end
 
     return FormatDurationSeconds(remain)
+end
+
+-- -----------------------------------------------------------------------------
+-- Game action-slot timer fallback.
+-- ZOS: EsoUI/Ingame/ActionBar/ActionBar.lua MINIMUM_ACTION_BAR_TIMER_DISPLAYED_TIME_MS.
+-- Shown only while this slot has no live LUIE remain (g_toggledSlotsRemain / g_triggeredSlotsRemain).
+local GAME_FALLBACK_MIN_REMAIN_MS = 1000
+
+--- @param slotByAbilityId table<integer, integer>
+--- @param remainByAbilityId table<integer, integer>
+--- @param luiSlotNum integer
+--- @param currentTimeMS integer
+--- @return boolean
+local function MappedSlotRemainIsLive(slotByAbilityId, remainByAbilityId, luiSlotNum, currentTimeMS)
+    for abilityId, mappedSlotNum in pairs(slotByAbilityId) do
+        if mappedSlotNum == luiSlotNum then
+            local effectEndTimeMs = remainByAbilityId[abilityId]
+            if effectEndTimeMs and effectEndTimeMs > currentTimeMS then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+--- @param luiSlotNum integer
+--- @param currentTimeMS integer
+--- @return boolean
+local function SlotHasLiveLuiRemain(luiSlotNum, currentTimeMS)
+    if MappedSlotRemainIsLive(g_toggledSlotsFront, g_toggledSlotsRemain, luiSlotNum, currentTimeMS) then
+        return true
+    end
+    if MappedSlotRemainIsLive(g_toggledSlotsBack, g_toggledSlotsRemain, luiSlotNum, currentTimeMS) then
+        return true
+    end
+    if MappedSlotRemainIsLive(g_triggeredSlotsFront, g_triggeredSlotsRemain, luiSlotNum, currentTimeMS) then
+        return true
+    end
+    return MappedSlotRemainIsLive(g_triggeredSlotsBack, g_triggeredSlotsRemain, luiSlotNum, currentTimeMS)
+end
+
+--- @return boolean
+local function GameFallbackTimersAreEnabled()
+    if isFancyActionBarEnabled then
+        return false
+    end
+    if not ActionBar.SV.BarGameFallbackTimers or not ActionBar.SV.ShowToggled or not ActionBar.SV.BarShowLabel then
+        return false
+    end
+    return true
+end
+
+--- @param luiSlotNum integer
+--- @return integer physicalSlotNum
+--- @return HotBarCategory hotbarCategory
+local function GetGameFallbackSlotBinding(luiSlotNum)
+    if luiSlotNum > BACKBAR_INDEX_OFFSET then
+        local physicalSlotNum = luiSlotNum - BACKBAR_INDEX_OFFSET
+        local hotbarCategory = GetInactiveHotbarCategory(ActionBar.GetHotbarCategory())
+        return physicalSlotNum, hotbarCategory
+    end
+    return luiSlotNum, ActionBar.GetHotbarCategory()
+end
+
+--- Matches BarSlotUpdate: back-bar destruction staff morph rewrite, then the slotted ability id.
+--- @param luiSlotNum integer
+--- @param physicalSlotNum integer
+--- @param hotbarCategory HotBarCategory
+--- @return integer abilityId
+local function GetGameFallbackAbilityId(luiSlotNum, physicalSlotNum, hotbarCategory)
+    local abilityId = GetSlotTrueBoundId(physicalSlotNum, hotbarCategory)
+    if luiSlotNum <= BACKBAR_INDEX_OFFSET then
+        return abilityId
+    end
+    local weaponSlot = hotbarCategory == HOTBAR_CATEGORY_BACKUP and EQUIP_SLOT_BACKUP_MAIN or EQUIP_SLOT_MAIN_HAND
+    local weaponType = GetItemWeaponType(BAG_WORN, weaponSlot)
+    if weaponType == WEAPONTYPE_FIRE_STAFF or weaponType == WEAPONTYPE_FROST_STAFF or weaponType == WEAPONTYPE_LIGHTNING_STAFF or weaponType == WEAPONTYPE_NONE then
+        local destroFix = Effects.BarHighlightDestroFix[abilityId]
+        if destroFix and destroFix[weaponType] then
+            abilityId = destroFix[weaponType]
+        end
+    end
+    return abilityId
+end
+
+--- @param abilityId integer
+--- @return boolean
+local function ShouldSkipGameFallback(abilityId)
+    if not abilityId or abilityId == 0 then
+        return true
+    end
+    local overrideRow = Effects.BarHighlightOverride[abilityId]
+    if overrideRow and overrideRow.hide then
+        return true
+    end
+    return ShouldHideBarDurationLabel(abilityId)
+end
+
+--- Drops fallback bookkeeping. Hides the toggle only when LUIE does not own the slot.
+--- @param luiSlotNum integer
+--- @param abilityId integer|nil
+HideGameFallbackSlot = function (luiSlotNum, abilityId)
+    if not g_gameFallbackVisible[luiSlotNum] then
+        return
+    end
+    g_gameFallbackVisible[luiSlotNum] = nil
+    g_gameFallbackAbilityId[luiSlotNum] = nil
+    if SlotHasLiveLuiRemain(luiSlotNum, GetGameTimeMilliseconds()) then
+        return
+    end
+    local customToggleControl = GetCustomToggleControl(luiSlotNum)
+    if customToggleControl and customToggleControl.stack then
+        customToggleControl.stack:SetText("")
+    end
+    ActionBar.HideSlot(luiSlotNum, abilityId or 0)
+end
+
+--- @param luiSlotNum integer
+local function ClearGameFallbackSnapshot(luiSlotNum)
+    g_gameFallbackEndTimeMs[luiSlotNum] = nil
+    g_gameFallbackStackCount[luiSlotNum] = nil
+    g_gameFallbackSnapshotAbilityId[luiSlotNum] = nil
+end
+
+--- @param luiSlotNum integer
+--- @param abilityId integer
+DropGameFallbackIfAbilityChanged = function (luiSlotNum, abilityId)
+    if g_gameFallbackSnapshotAbilityId[luiSlotNum] and g_gameFallbackSnapshotAbilityId[luiSlotNum] ~= abilityId then
+        ClearGameFallbackSnapshot(luiSlotNum)
+    end
+    if g_gameFallbackVisible[luiSlotNum] and g_gameFallbackAbilityId[luiSlotNum] ~= abilityId then
+        HideGameFallbackSlot(luiSlotNum, g_gameFallbackAbilityId[luiSlotNum])
+    end
+end
+
+ClearAllGameFallbackSlots = function ()
+    local slotsToHide = {}
+    for luiSlotNum, _ in pairs(g_gameFallbackVisible) do
+        slotsToHide[#slotsToHide + 1] = luiSlotNum
+    end
+    for luiSlotNum, _ in pairs(g_gameFallbackEndTimeMs) do
+        if not g_gameFallbackVisible[luiSlotNum] then
+            slotsToHide[#slotsToHide + 1] = luiSlotNum
+        end
+    end
+    for slotIndex = 1, #slotsToHide do
+        local luiSlotNum = slotsToHide[slotIndex]
+        ClearGameFallbackSnapshot(luiSlotNum)
+        HideGameFallbackSlot(luiSlotNum, g_gameFallbackAbilityId[luiSlotNum])
+    end
+end
+
+--- @param luiSlotNum integer
+--- @param abilityId integer
+--- @param remainMs integer
+--- @param stackCount integer
+local function ShowGameFallbackSlot(luiSlotNum, abilityId, remainMs, stackCount)
+    ActionBar.ShowCustomToggle(luiSlotNum)
+    if luiSlotNum > BACKBAR_INDEX_OFFSET then
+        if luiSlotNum ~= BAR_INDEX_END + BACKBAR_INDEX_OFFSET then
+            Backbar.BackbarShowSlot(luiSlotNum)
+            Backbar.ToggleBackbarSaturation(luiSlotNum, false)
+        end
+    end
+    if luiSlotNum == g_ultimateSlot and ActionBar.SV.UltimatePctEnabled then
+        uiUltimate.LabelPct:SetHidden(true)
+    end
+    local customToggleControl = GetCustomToggleControl(luiSlotNum)
+    if not customToggleControl then
+        return
+    end
+    customToggleControl.label:SetText(SetBarRemainLabel(remainMs, abilityId))
+    if stackCount > 0 then
+        customToggleControl.stack:SetText(stackCount)
+    else
+        customToggleControl.stack:SetText("")
+    end
+    g_gameFallbackVisible[luiSlotNum] = true
+    g_gameFallbackAbilityId[luiSlotNum] = abilityId
+end
+
+--- ZOS ActionButton:SetTimer stores endTimeMS = GetFrameTimeMilliseconds() + durationMS and counts down locally.
+--- FancyActionBar+ OnActionSlotEffectUpdated stores parentEndTime = GetGameTimeSeconds() + remain the same way.
+--- @param luiSlotNum integer
+--- @param frameTimeMs integer
+local function CaptureGameFallbackEndTime(luiSlotNum, frameTimeMs)
+    local physicalSlotNum, hotbarCategory = GetGameFallbackSlotBinding(luiSlotNum)
+    local abilityId = GetGameFallbackAbilityId(luiSlotNum, physicalSlotNum, hotbarCategory)
+    local remainMs = GetActionSlotEffectTimeRemaining(physicalSlotNum, hotbarCategory) or 0
+    if remainMs <= GAME_FALLBACK_MIN_REMAIN_MS or ShouldSkipGameFallback(abilityId) then
+        ClearGameFallbackSnapshot(luiSlotNum)
+        return
+    end
+    g_gameFallbackEndTimeMs[luiSlotNum] = frameTimeMs + remainMs
+    g_gameFallbackStackCount[luiSlotNum] = GetActionSlotEffectStackCount(physicalSlotNum, hotbarCategory) or 0
+    g_gameFallbackSnapshotAbilityId[luiSlotNum] = abilityId
+end
+
+--- @param hotbarCategory HotBarCategory
+--- @param actionSlotIndex integer
+--- @return integer|nil luiSlotNum
+local function GetGameFallbackLuiSlotFromEvent(hotbarCategory, actionSlotIndex)
+    if actionSlotIndex < BAR_INDEX_START or actionSlotIndex > BAR_INDEX_END then
+        return nil
+    end
+    local activeHotbarCategory = ActionBar.GetHotbarCategory()
+    if hotbarCategory == activeHotbarCategory then
+        if actionSlotIndex == BAR_INDEX_END and not ActionBar.SV.ShowToggledUltimate then
+            return nil
+        end
+        return actionSlotIndex
+    end
+    if not ActionBar.SV.BarShowBack then
+        return nil
+    end
+    if hotbarCategory ~= GetInactiveHotbarCategory(activeHotbarCategory) then
+        return nil
+    end
+    if actionSlotIndex > BACKBAR_INDEX_END then
+        return nil
+    end
+    return actionSlotIndex + BACKBAR_INDEX_OFFSET
+end
+
+--- @param hotbarCategory HotBarCategory
+--- @param actionSlotIndex integer
+OnGameFallbackEffectUpdated = function (hotbarCategory, actionSlotIndex)
+    if not GameFallbackTimersAreEnabled() then
+        return
+    end
+    local luiSlotNum = GetGameFallbackLuiSlotFromEvent(hotbarCategory, actionSlotIndex)
+    if not luiSlotNum then
+        return
+    end
+    CaptureGameFallbackEndTime(luiSlotNum, GetFrameTimeMilliseconds())
+    UpdateGameFallbackSlot(luiSlotNum, GetGameTimeMilliseconds(), false)
+end
+
+--- @param luiSlotNum integer
+--- @param currentTimeMS integer
+--- @param resnapshotFromApi boolean
+UpdateGameFallbackSlot = function (luiSlotNum, currentTimeMS, resnapshotFromApi)
+    if SlotHasLiveLuiRemain(luiSlotNum, currentTimeMS) then
+        HideGameFallbackSlot(luiSlotNum, g_gameFallbackAbilityId[luiSlotNum])
+        return
+    end
+
+    local physicalSlotNum, hotbarCategory = GetGameFallbackSlotBinding(luiSlotNum)
+    local slotType = GetSlotType(physicalSlotNum, hotbarCategory)
+    if slotType ~= ACTION_TYPE_ABILITY and slotType ~= ACTION_TYPE_CRAFTED_ABILITY then
+        ClearGameFallbackSnapshot(luiSlotNum)
+        HideGameFallbackSlot(luiSlotNum, g_gameFallbackAbilityId[luiSlotNum])
+        return
+    end
+
+    local abilityId = GetGameFallbackAbilityId(luiSlotNum, physicalSlotNum, hotbarCategory)
+    if ShouldSkipGameFallback(abilityId) then
+        ClearGameFallbackSnapshot(luiSlotNum)
+        HideGameFallbackSlot(luiSlotNum, abilityId)
+        return
+    end
+
+    if resnapshotFromApi or (g_gameFallbackSnapshotAbilityId[luiSlotNum] and g_gameFallbackSnapshotAbilityId[luiSlotNum] ~= abilityId) then
+        CaptureGameFallbackEndTime(luiSlotNum, GetFrameTimeMilliseconds())
+    end
+
+    local endTimeMs = g_gameFallbackEndTimeMs[luiSlotNum]
+    if not endTimeMs then
+        HideGameFallbackSlot(luiSlotNum, abilityId)
+        return
+    end
+
+    local remainMs = endTimeMs - GetFrameTimeMilliseconds()
+    if remainMs <= GAME_FALLBACK_MIN_REMAIN_MS then
+        ClearGameFallbackSnapshot(luiSlotNum)
+        HideGameFallbackSlot(luiSlotNum, abilityId)
+        return
+    end
+
+    local stackCount = g_gameFallbackStackCount[luiSlotNum] or 0
+    ShowGameFallbackSlot(luiSlotNum, abilityId, remainMs, stackCount)
+end
+
+--- @param slotCallback fun(luiSlotNum: integer)
+local function ForEachGameFallbackSlot(slotCallback)
+    local lastFrontSlot = ActionBar.SV.ShowToggledUltimate and BAR_INDEX_END or (BAR_INDEX_END - 1)
+    for luiSlotNum = BAR_INDEX_START, lastFrontSlot do
+        slotCallback(luiSlotNum)
+    end
+    if ActionBar.SV.BarShowBack then
+        local backSlotStart = BAR_INDEX_START + BACKBAR_INDEX_OFFSET
+        local backSlotEnd = BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET
+        for luiSlotNum = backSlotStart, backSlotEnd do
+            slotCallback(luiSlotNum)
+        end
+    end
+end
+
+--- FancyActionBar+ syncActionButton: ZOS still paints TimerText, StackCountText, and TimerOverlay on the slot.
+--- SetTimer unhides TimerText even when the countdown label is ours, so showTimer has to stay false.
+--- @param actionButton ActionButton|nil
+local function HideNativeActionButtonTimer(actionButton)
+    if not actionButton then
+        return
+    end
+    actionButton.showTimer = false
+    if actionButton.stackCountText then
+        actionButton.stackCountText:SetHidden(true)
+    end
+    if actionButton.timerText then
+        actionButton.timerText:SetHidden(true)
+    end
+    if actionButton.timerOverlay then
+        actionButton.timerOverlay:SetHidden(true)
+    end
+end
+
+--- @param actionButton ActionButton|nil
+local function RestoreNativeActionButtonTimer(actionButton)
+    if not actionButton or not actionButton.timerText then
+        return
+    end
+    actionButton.showTimer = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)
+end
+
+--- @param buttonCallback fun(actionButton: ActionButton|nil)
+local function ForEachNativeActionButton(buttonCallback)
+    for slotNum = BAR_INDEX_START, BAR_INDEX_END do
+        buttonCallback(ZO_ActionBar_GetButton(slotNum))
+    end
+    local backbarButtons = Backbar.GetButtons()
+    if backbarButtons then
+        for _, actionButton in pairs(backbarButtons) do
+            buttonCallback(actionButton)
+        end
+    end
+end
+
+local function ApplyNativeActionButtonTimerVisibility()
+    local applyFunction = GameFallbackTimersAreEnabled() and HideNativeActionButtonTimer or RestoreNativeActionButtonTimer
+    ForEachNativeActionButton(applyFunction)
+end
+
+local g_nativeActionButtonTimerHooksReady = false
+
+--- SetTimer, SetStackCount, and the timer setting all turn the native widgets back on. Keep them off while fallback is on.
+--- Called from ActionBar.Initialize after the module is enabled.
+InstallNativeActionButtonTimerHooks = function ()
+    if g_nativeActionButtonTimerHooksReady then
+        return
+    end
+    g_nativeActionButtonTimerHooksReady = true
+    local function suppressNativeTimer(actionButton)
+        if GameFallbackTimersAreEnabled() then
+            HideNativeActionButtonTimer(actionButton)
+        end
+    end
+    ZO_PostHook(ActionButton, "SetTimer", suppressNativeTimer)
+    ZO_PostHook(ActionButton, "SetStackCount", suppressNativeTimer)
+    ZO_PostHook(ActionButton, "UpdateTimer", suppressNativeTimer)
+    ZO_PostHook(ActionButton, "OnInterfaceSettingChanged", suppressNativeTimer)
+end
+
+--- @param currentTimeMS integer
+--- @param resnapshotFromApi boolean|nil True on hotbar rebuilds. FancyActionBar+ OnAllHotbarsUpdated ticks overlays immediately; ZOS UpdateAllSlots calls SetTimer again.
+UpdateGameFallbackTimers = function (currentTimeMS, resnapshotFromApi)
+    ApplyNativeActionButtonTimerVisibility()
+    if not GameFallbackTimersAreEnabled() then
+        ClearAllGameFallbackSlots()
+        return
+    end
+
+    local refreshedSlots = {}
+    ForEachGameFallbackSlot(function (luiSlotNum)
+        refreshedSlots[luiSlotNum] = true
+        UpdateGameFallbackSlot(luiSlotNum, currentTimeMS, resnapshotFromApi)
+    end)
+
+    local staleSlots = {}
+    for luiSlotNum, _ in pairs(g_gameFallbackVisible) do
+        if not refreshedSlots[luiSlotNum] then
+            staleSlots[#staleSlots + 1] = luiSlotNum
+        end
+    end
+    for slotIndex = 1, #staleSlots do
+        local luiSlotNum = staleSlots[slotIndex]
+        HideGameFallbackSlot(luiSlotNum, g_gameFallbackAbilityId[luiSlotNum])
+    end
+end
+
+--- Settings and other callers re-read the game remain once, then the update loop counts down from that end time.
+function ActionBar.UpdateGameFallbackTimers(currentTimeMS)
+    UpdateGameFallbackTimers(currentTimeMS, true)
 end
 
 -- -----------------------------------------------------------------------------
@@ -1490,6 +1918,8 @@ function ActionBar.OnUpdate(currentTimeMS)
             end
         end
     end
+
+    UpdateGameFallbackTimers(currentTimeMS)
 
     -- Quickslot cooldown
     if ActionBar.SV.PotionTimerShow then
@@ -3250,6 +3680,8 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
 
     -- Bail out if slot is not used and we're not referencing a fake backbar slot.
     if GetSlotType(physicalSlotNum, hotbarCategory) == ACTION_TYPE_NOTHING then
+        ClearGameFallbackSnapshot(slotNum)
+        HideGameFallbackSlot(slotNum, g_gameFallbackAbilityId[slotNum])
         return
     end
 
@@ -3267,6 +3699,8 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
             end
         end
     end
+
+    DropGameFallbackIfAbilityChanged(slotNum, abilityId)
 
     if onlyProc == false then
         TrySyncSkullChargeFromSlottedBound(abilityId)
@@ -3449,6 +3883,7 @@ function ActionBar.OnActiveHotbarUpdate(didActiveHotbarChange, shouldUpdateAbili
         g_activeWeaponSwapInProgress = false
         Backbar.RefreshAllActivationHighlights()
     end
+    UpdateGameFallbackTimers(GetGameTimeMilliseconds(), true)
 end
 
 --- - **EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED**
@@ -3474,6 +3909,7 @@ function ActionBar.OnSlotsFullUpdate()
         Backbar.SetupBackBarIcons(button, nil)
         ActionBar.BarSlotUpdate(i, true, false)
     end
+    UpdateGameFallbackTimers(GetGameTimeMilliseconds(), true)
 end
 
 --- Play proc/ready animation for an action slot<br>

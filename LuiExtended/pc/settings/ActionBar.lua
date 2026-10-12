@@ -595,6 +595,19 @@ function ActionBar.CreateSettings()
                 default = Defaults.BarShowLabel,
             },
             {
+                type = "checkbox",
+                name = AddIndent(GetString(LUIE_STRING_LAM_AB_BAR_GAME_FALLBACK), 2),
+                tooltip = GetString(LUIE_STRING_LAM_AB_BAR_GAME_FALLBACK_TP),
+                getFunc = function () return Settings.BarGameFallbackTimers end,
+                setFunc = function (value)
+                    Settings.BarGameFallbackTimers = value
+                    ActionBar.UpdateGameFallbackTimers(GetGameTimeMilliseconds())
+                end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.ShowToggled and Settings.BarShowLabel) end,
+                default = Defaults.BarGameFallbackTimers,
+            },
+            {
                 type = "slider",
                 name = AddIndent(GetString(LUIE_STRING_LAM_AB_SHARED_POSITION), 2),
                 tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),

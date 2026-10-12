@@ -654,6 +654,20 @@ function ActionBar.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_BAR_GAME_FALLBACK),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BAR_GAME_FALLBACK_TP),
+            getFunction = function () return Settings.BarGameFallbackTimers end,
+            setFunction = function (value)
+                Settings.BarGameFallbackTimers = value
+                ActionBar.UpdateGameFallbackTimers(GetGameTimeMilliseconds())
+            end,
+            default = Defaults.BarGameFallbackTimers,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.ShowToggled and Settings.BarShowLabel) end
+        }
+
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_SLIDER,
             label = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
