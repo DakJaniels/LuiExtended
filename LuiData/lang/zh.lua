@@ -56,6 +56,8 @@ local strings =
     LUIE_STRING_SKILL_PROPELLING_SHIELD_TP = "使攻城器械伤害降低|cFFFFFF50|r%，并使射程大于|cFFFFFF28|r米的技能射程提高|cFFFFFF7|r米。\n\n不影响跳跃、位移和拉拽技能。",
     LUIE_STRING_SKILL_PROPELLING_SHIELD_GROUND_TP = "防护球体使你和盟友在|cFFFFFF10|r米内受到的攻城器械伤害降低|cFFFFFF50|r%。\n\n球体内射程大于|cFFFFFF28|r米的技能射程提高|cFFFFFF7|r米。\n\n不影响跳跃、位移和拉拽技能。",
     LUIE_STRING_SKILL_SET_BLACKROSE_DESTRO_TP = "Impulse的伤害为每个不同的燃烧、震击和冰冻层数提高|cFFFFFF10|r%。",
+    LUIE_STRING_SKILL_BRIDGE_SWITCH = "Bridge Switch",
+    LUIE_STRING_SKILL_CHECKPOINT = "Checkpoint",
 }
 
 for stringId, stringValue in pairs(strings) do

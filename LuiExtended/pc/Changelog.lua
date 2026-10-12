@@ -38,6 +38,14 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.7.1
+    "|cFFA500LuiExtended Version 7.2.7.1|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: |cFFFFFFUse Game Timers as Fallback|r. When LuiExtended has no active timer on a slot, the slot shows the remaining time and stack count from the game. Off by default. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFShow Subzone|r adds the current map name after the zone name when they differ. Example: The Nowhere Vault - Sinking Courtyard. Off by default. PC and console.",
+    "",
     -- Version Header 7.2.7.0
     "|cFFA500LuiExtended Version 7.2.7.0|r",
     "",

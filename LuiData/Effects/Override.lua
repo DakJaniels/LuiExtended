@@ -281,6 +281,7 @@ local effectOverride =
     -- Crouch / Sneak (skill sheet id); live player sneak buff reports 20309
     [20299] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_HIDDEN_DDS, dynamicTooltip = true },                                                                                                                          -- Sneak
     [20309] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_INVISIBLE_DDS, dynamicTooltip = true },                                                                                                                       -- Sneak buff / shadow stealth (tooltip by stealth state)
+    [64420] = { hide = true },                                                                                                                                                                                                                -- Hidden (player self STUN, duration 0)
     [26245] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BLOCK_STUN_DDS, name = zo_strformat("<<1>> <<2>>", Abilities.Innate_Sneak, Abilities.Innate_Stun), tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Slam Stun (Stun from crouch attack)
 
     -- Mount
@@ -1934,10 +1935,10 @@ local effectOverride =
     [44996] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 2)
     [29474] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS, hide = true }, -- Blessing at the Peak (passive POWER clutter; table 198758357)
     [45005] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS },              -- Mountain's Blessing (Mountain's Blessing - Rank 2)
-    [29475] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Helping Hands (Helping Hands - Rank 1)
-    [29476] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Helping Hands (Helping Hands - Rank 1)
-    [45009] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Helping Hands (Helping Hands - Rank 2)
-    [45010] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Helping Hands (Helping Hands - Rank 2)
+    [29475] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Mountain Giant (Mountain Giant - Rank 1)
+    [29476] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Mountain Giant (Mountain Giant - Rank 1)
+    [45009] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Mountain Giant (Mountain Giant - Rank 2)
+    [45010] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Mountain Giant (Mountain Giant - Rank 2)
 
     ----------------------------------------------------------------
     -- DRAGONKNIGHT ACTIVE ABILITIES -------------------------------
@@ -7061,6 +7062,21 @@ local effectOverride =
     [53167] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_TRAP_SPIKE_TRAP_DDS, name = Abilities.Trap_Spike_Trap, type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Skill_Spike_Trap },                                                     -- Spike Trap Snare (Spike Trap)
     [53168] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_TRAP_SPIKE_TRAP_DDS, name = Abilities.Trap_Spike_Trap, type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Skill_Spike_Trap, hideReduce = true },                                  -- Trap Sprung (Spike Trap)
     [53172] = { hide = true },                                                                                                                                                                                                                               -- Spike Trap (Spike Trap)
+    -- Vault spike trap (object pulse 268276 is NIL/1000ms; player hit is 268279 DMG 2000ms, snare 268277 5000ms, root 268278 750ms)
+    [268276] = { hide = true },                                                                                                                                                                                                                              -- Spike Trap (Spike Trap) -- Vault
+    [268279] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_TRAP_SPIKE_TRAP_DDS, hide = true },                                                                                                                                                               -- Spike Trap (Spike Trap) -- Vault
+    [268277] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_TRAP_SPIKE_TRAP_DDS, name = Abilities.Trap_Spike_Trap, type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Skill_Spike_Trap },                                                     -- Spike Trap Snare (Spike Trap) -- Vault
+    [268278] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_TRAP_SPIKE_TRAP_DDS, name = Abilities.Trap_Spike_Trap, type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Skill_Spike_Trap, hideReduce = true },                                  -- Trap Sprung! (Spike Trap) -- Vault
+    [273654] = { hide = true },                                                                                                                                                                                                                              -- Vault Chest Tracker A
+    [75841] = { hide = true },                                                                                                                                                                                                                               -- Yokudan Axe Trap (damage)
+    [75840] = { icon = "/esoui/art/icons/gear_yokudan_1haxe_b.dds", type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN },                                                                  -- Yokudan Axe Trap -- stun 2000ms, source Axe Trap
+    [75831] = { hide = true },                                                                                                                                                                                                                               -- Yokudan Spike Trap (damage)
+    [75830] = { icon = "/esoui/art/icons/ava_siege_ammo_006.dds", type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN },                                                                    -- Yokudan Spike Trap -- stun 2000ms, source Spike Trap
+    [268313] = { hide = true },                                                                                                                                                                                                                              -- Fire Trap (damage tick) -- Gallery
+    [268312] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_TRAP_FIRE_TRAP_DDS, type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Burn, tooltipValue2 = 0.75 },                                                                                     -- Fire Trap -- burn 1500ms, tick ~750ms, source Player
+    [268314] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_TRAP_FIRE_TRAP_DDS, type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE },                                                                                                                    -- Fire Trap -- snare 2000ms, refreshed on each tick, source Player
+    [168487] = { hide = true },                                                                                                                                                                                                                              -- Grasping Void (damage) -- Ghostly Grip, 500ms
+    [168489] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN },                                                                                                                 -- Grasping Void -- stun 4067ms, source Ghostly Grip
     [20482] = { hide = true },                                                                                                                                                                                                                               -- Mistwatch Collapse (Cave-In)
     [20483] = { icon = "/esoui/art/icons/ability_wrothgar_avalanche.dds" },                                                                                                                                                                                  -- Falling Rocks (Cave-In)
     [29602] = { icon = "/esoui/art/icons/ability_wrothgar_avalanche.dds", tooltip = Tooltips.Generic_Stun },                                                                                                                                                 -- Falling Rocks (Cave-In)
@@ -9879,6 +9895,64 @@ local effectOverride =
     [83454] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_ICY_CONJUROR_DDS },                                                                                                                                     -- Skeletal Smash (Ice Wraith)
     [83453] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_ICY_CONJUROR_DDS, tooltip = Tooltips.Generic_Knockback },                                                                                               -- Skeletal Smash (Ice Wraith)
     [116683] = { hide = true },                                                                                                                                                                                       -- U23-DUN1 B N Intro (Skeevaton)
+
+    -- Gallery of Curios
+    [111827] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Formless Horror (The Vengeful Spirit) -- player stun, effect 2000ms
+    [268971] = { hide = true }, -- CL Ghost Statue Possession
+    [268001] = { hide = true }, -- CL Ghost Statue Possession -- cast 2000ms, aura 2000ms, no player hit
+    [122547] = { hide = true }, -- NCL-FP-R1 Magma Skin
+    [262800] = { hide = true }, -- Artist's Lens (self GAIN, effect duration 0)
+    [273331] = { icon = "/esoui/art/icons/u51_sagevault_artistslens.dds", type = BUFF_EFFECT_TYPE_BUFF }, -- Artist's Lens -- player buff 10000ms
+    [190558] = { type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE }, -- Apocrypha Wave Snare (Seeker) -- 3000ms
+    [189603] = { type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE }, -- Apocrypha Wave Snare (Seeker) -- 3000ms
+    [189597] = { type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE }, -- Apocrypha Wave Snare (Seeker) -- 3000ms
+    [189370] = { type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE }, -- Powerful Barrage Snare (Seeker) -- 1000ms
+    [172019] = { type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE }, -- Cleave Snare (Soulrazer Knight Duelist) -- 1000ms
+    [172126] = { type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE }, -- Blade Storm Snare (Soulrazer Knight Duelist) -- 1100ms, refreshed each tick
+    [172280] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Shield Throw Stun (Soulrazer Knight Sentinel) -- 3000ms
+    [172382] = { groundLabel = true }, -- Exploding Charge (Soulrazer Knight Sentinel) -- ground, gained 750ms then refresh 1500ms
+    [172548] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stagger, cc = LUIE_CC_TYPE_STAGGER }, -- Exploding Charge Stagger -- 500ms, still applies on block
+    [172549] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Exploding Charge Stun -- 4000ms
+    [172550] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Knockback, cc = LUIE_CC_TYPE_KNOCKBACK }, -- Exploding Charge Knockup -- 4000ms, IMMUNE on block
+    [270528] = { type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE }, -- In Quicksand -- SNARE, API 1000ms, no effect row
+    [270529] = { type = BUFF_EFFECT_TYPE_DEBUFF }, -- Quick Sand -- player debuff 1600ms, refreshed about every 660ms
+    [270530] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Q6254 Pull Down -- stun held 2000ms
+    [265946] = { hide = true }, -- Whirling Sandstorm -- damage tick, source Whirling Sandstorm
+    [265945] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Whirling Sandstorm -- stun held 1900ms
+    [265948] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Knockback, cc = LUIE_CC_TYPE_KNOCKBACK }, -- Whirling Sandstorm -- knockback held 1900ms, later hits IMMUNE
+    [270660] = { hide = true }, -- Stormlands Whirlwind -- damage, source Whirling Sandstorm
+    [270659] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- DL-Wild Tornado Stun -- API 2500ms, faded at 1106ms
+    [270661] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Knockback, cc = LUIE_CC_TYPE_KNOCKBACK }, -- CON_Knockback -- knockback result, duration 0
+    -- Haunted Undercroft, Stew Slime
+    [110493] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Colonist Conservation -- stun held about 1560ms, sourceless
+    [110494] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Knockback, cc = LUIE_CC_TYPE_KNOCKBACK }, -- Colonist Conservation -- knockback held about 1560ms, sourceless
+    [267076] = { type = BUFF_EFFECT_TYPE_DEBUFF, cc = LUIE_CC_TYPE_SNARE }, -- Discharged Snare -- 10000ms, refreshed while standing in the cloud
+    [267073] = { type = BUFF_EFFECT_TYPE_DEBUFF }, -- Discharge -- damage debuff 1200ms
+    [262243] = { type = BUFF_EFFECT_TYPE_DEBUFF }, -- Putrid Stew Meat -- damage debuff 1000ms
+    [262911] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Stun Self -- throw stun held 900ms, source Player
+    [112678] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Colony Collapse -- stun API 15000ms, faded at 451ms then 1130ms
+    [267273] = { type = BUFF_EFFECT_TYPE_DEBUFF }, -- Poison -- Rancid Stew Puddle damage debuff 8000ms
+    -- Fungal Chasm, Bubbling Lava. No effect row in the log.
+    [273320] = { icon = "/esoui/art/icons/ability_u45_dun1_b3_fireeffect.dds" }, -- Bubbling Lava
+    [273325] = { icon = "/esoui/art/icons/ability_u45_dun1_b3_fireeffect.dds" }, -- Bubbling Lava
+    [273326] = { icon = "/esoui/art/icons/ability_u45_dun1_b3_fireeffect.dds" }, -- Bubbling Lava
+    [273327] = { icon = "/esoui/art/icons/ability_u45_dun1_b3_fireeffect.dds" }, -- Bubbling Lava
+    [270286] = { icon = "/esoui/art/icons/ability_u45_dun1_b3_fireeffect.dds", type = BUFF_EFFECT_TYPE_DEBUFF }, -- Lava - Big Damage -- ENVIRONMENT debuff, API duration 0, held about 1517ms
+    [273309] = { type = BUFF_EFFECT_TYPE_DEBUFF }, -- Sweltering Heat -- Geyser debuff 5000ms, ability type bonus, no crowd control
+    -- Hunt of the Watchers. Stuns are not unbreakable.
+    [267504] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- The Unblinking Eye -- stun held 3005ms
+    [265979] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Doom-Truth's Gaze -- stun held about 1010ms
+    [267547] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Gaze -- STUN result, duration 1800, no effect row
+    [272971] = { type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Shrill Whistle (Runic Prison) -- stun held about 807ms, no effect row
+    [272717] = { type = BUFF_EFFECT_TYPE_DEBUFF, name = Abilities.Bridge_Switch, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Bridge Switch -- self stun held about 1013ms, no effect row
+    [262848] = { name = Abilities.Checkpoint }, -- Checkpoint (Moonlit Isles)
+    [268871] = { name = Abilities.Checkpoint }, -- Checkpoint (Moonlit Isles)
+    [266955] = { name = Abilities.Checkpoint }, -- Checkpoint (Fungal Chasm)
+    [266877] = { name = Abilities.Checkpoint }, -- Checkpoint (Fungal Chasm)
+    [266956] = { name = Abilities.Checkpoint }, -- Checkpoint (Fungal Chasm)
+    [269341] = { name = Abilities.Checkpoint }, -- Checkpoint (Fungal Chasm)
+    -- Murky Grotto. Strangler Gas stays visible. Effect duration 0, ability type damage, no crowd control.
+    [261919] = { type = BUFF_EFFECT_TYPE_DEBUFF }, -- Strangler Gas
 }
 
 --- @class EffectOverrideData

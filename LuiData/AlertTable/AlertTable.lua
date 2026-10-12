@@ -87,6 +87,7 @@ local LUIE_CC_TYPE_UNBREAKABLE = LUIE_CC_TYPE_UNBREAKABLE
     - neverShowInterrupt: boolean -- Disables the display of interrupt events
     - effectOnlyInterrupt: boolean -- Show interrupt only when an effect ends early
     - alwaysShowInterrupt: boolean -- Always show interrupt even in absence of a duration
+    - clearOnFade: boolean   -- Remove the alert when this ability sends a combat fade
     - noSelf: boolean        -- Do not show this alert if you are the source/target
     - durationOnlyIfTarget: boolean -- Only show a duration timer if the player is the target
     - hideIfNoSource: boolean -- Hide the alert if no source name is provided
@@ -121,6 +122,7 @@ local LUIE_CC_TYPE_UNBREAKABLE = LUIE_CC_TYPE_UNBREAKABLE
 --- @field neverShowInterrupt? boolean -- (Other Modifiers) Do not display interrupt alerts
 --- @field effectOnlyInterrupt? boolean -- (Other Modifiers) Only display interrupts on early effect fade
 --- @field alwaysShowInterrupt? boolean -- (Other Modifiers) Always display interrupts even without duration
+--- @field clearOnFade? boolean       -- (Other Modifiers) Remove the alert when this ability fades
 --- @field noSelf? boolean             -- (Other Modifiers) Suppress alerts for self-generated events
 --- @field durationOnlyIfTarget? boolean -- (Other Modifiers) Show duration timer only if the player is the target
 --- @field hideIfNoSource? boolean     -- (Other Modifiers) Hide alerts when source name is missing
@@ -1438,6 +1440,71 @@ local alertTable =
     [109837] = { priority = 1, result = ACTION_RESULT_BEGIN, interrupt = true, eventdetect = true }, -- Frenzied Pummeling (Icestalker)
     [109806] = { priority = 1, result = ACTION_RESULT_BEGIN, block = true, eventdetect = true }, -- Frozen Aura (Icestalker)
     [83430] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, bs = true, dodge = true }, -- Skeletal Smash (Ice Wraith)
+
+    -- Gallery of Curios
+    -- Formless Horror: BEGIN cast 2000ms from The Vengeful Spirit, then ground 111818 for 3500ms, hit 111826 DMG, stun 111827. Second cast interrupted (157421 Bash).
+    [111818] = { priority = 2, result = ACTION_RESULT_BEGIN, dodge = true, interrupt = true, cc = LUIE_CC_TYPE_STUN, duration = 2000, postCast = 3500, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- Formless Horror (The Vengeful Spirit)
+    -- Apocrypha Wave: sourceless BEGIN 189534 cast 600ms, then lobes 189598 / 190559 / 189647. Hits are 190562+190558, 189605+189603, and 189600+189597 (snare 3000ms). Seeker stun 189535 is not on the player.
+    [189534] = { priority = 3, result = ACTION_RESULT_BEGIN, avoid = true, eventdetect = true, cc = LUIE_CC_TYPE_SNARE, duration = 600, postCast = 2000, sound = LUIE_ALERT_SOUND_TYPE_GROUND }, -- Apocrypha Wave (Seeker)
+    -- Powerful Barrage: Seeker channel 2267ms (189359). Ticks 189360, 190045, 199529, 189361. Last tick snares 189370 for 1000ms. No interrupt in the log.
+    [189359] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, dodge = true, cc = LUIE_CC_TYPE_SNARE, duration = 2267, sound = LUIE_ALERT_SOUND_TYPE_AOE }, -- Powerful Barrage (Seeker)
+    -- Cleave: Soulrazer Knight Duelist BEGIN cast 900ms, then DMG on you and Zerith-var plus 172019 snare 1000ms.
+    [172018] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, dodge = true, cc = LUIE_CC_TYPE_SNARE, duration = 900, sound = LUIE_ALERT_SOUND_TYPE_AOE }, -- Cleave (Soulrazer Knight Duelist)
+    -- Blade Storm: sourceless BEGIN channel 9000ms. Second BEGIN ~1.1s later. Ticks 172078 refresh snare 172126 (1100ms). 172104 is ON CD. Fade removes the alert, including when the duelist dies.
+    [172059] = { priority = 3, result = ACTION_RESULT_BEGIN, avoid = true, eventdetect = true, cc = LUIE_CC_TYPE_SNARE, duration = 9000, refire = 2000, clearOnFade = true, sound = LUIE_ALERT_SOUND_TYPE_GROUND }, -- Blade Storm (Soulrazer Knight Duelist)
+    -- Dual Strike: cast 2000ms. Companion block was BLOCK DMG and 171982 Staggered was IMMUNE.
+    [171981] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, dodge = true, cc = LUIE_CC_TYPE_STAGGER, duration = 2000, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- Dual Strike (Soulrazer Knight Duelist)
+    -- Heavy Attack: cast 1500ms. Block is BLOCK DMG and 171997 Heavy Attack Stagger is IMMUNE.
+    [171996] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, dodge = true, cc = LUIE_CC_TYPE_STAGGER, duration = 1500, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- Heavy Attack (Soulrazer Knight Sentinel)
+    -- Shield Throw: 175724 cast 1500ms, hit 175723 plus stun 172280 (3000ms). Bounce ids return on 172278 and can stun again.
+    [175724] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, dodge = true, cc = LUIE_CC_TYPE_STUN, duration = 1500, postCast = 1200, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- Shield Throw (Soulrazer Knight Sentinel)
+    -- Exploding Charge: cast 1000ms, impact 172381, ground 172382 (~750 then refresh 1500). Explosion 172437. Block: knockup 172550 IMMUNE, stagger 172548 still applies 500ms. Unblocked: knockback and stun 172549, both 4000ms.
+    [172379] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, bs = true, dodge = true, cc = LUIE_CC_TYPE_KNOCKBACK, duration = 1000, postCast = 2500, sound = LUIE_ALERT_SOUND_TYPE_AOE_CC }, -- Exploding Charge (Soulrazer Knight Sentinel)
+    -- Flame Retch: Flame Hound channel 1133ms. BEGIN target is Zerith-var, so the player filter misses it. Second BEGIN at +673ms. Pulses 153254. Damage 153255 hits you and Zerith-var; last tick is ~613ms after the channel fade.
+    [153243] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, dodge = true, eventdetect = true, duration = 1133, refire = 1000, postCast = 1400, sound = LUIE_ALERT_SOUND_TYPE_AOE }, -- Flame Retch (Flame Hound)
+    -- Lacerate: The Smoldering Gargoyle cast 2100ms. Every hit in the log was BLOCK DMG. Some casts target Zerith-var.
+    [268888] = { priority = 2, result = ACTION_RESULT_BEGIN, block = true, eventdetect = true, duration = 2100, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Lacerate (The Smoldering Gargoyle)
+    -- Spit Fire: cast 150ms on you, then ground. 268893 shows 1000ms then refreshes to 8000ms. Damage ground 268894 lasts 8000ms. Ticks 268891 are DMG every ~500ms. Pool faded about 9s after the cast, not the 15000ms on 268890.
+    [268890] = { priority = 2, result = ACTION_RESULT_BEGIN, avoid = true, duration = 150, postCast = 9300, sound = LUIE_ALERT_SOUND_TYPE_GROUND }, -- Spit Fire (The Smoldering Gargoyle)
+    -- Flame Wing: sourceless BEGIN cast 500ms. Delay 268914 is 667ms on the gargoyle, then a second wave of grounds. Wing pieces last 2000ms. Hits 268917 were BLOCK DMG.
+    [268907] = { priority = 2, result = ACTION_RESULT_BEGIN, block = true, avoid = true, eventdetect = true, duration = 500, postCast = 2800, sound = LUIE_ALERT_SOUND_TYPE_AOE }, -- Flame Wing (The Smoldering Gargoyle)
+    -- Quick Sand: player GAIN 270529, debuff 1600ms, refreshed about every 660ms. Pull Down stun 270530 lands about 2.7s after the first gain. Refire covers the refresh spam.
+    [270529] = { priority = 3, result = ACTION_RESULT_EFFECT_GAINED, avoid = true, cc = LUIE_CC_TYPE_STUN, duration = 2700, refire = 5000, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- Quick Sand (Gallery of Curios)
+    -- Haunted Undercroft, Stew Slime. Colonist Conservation: cast 667ms on you, then damage. Stun 110493 and knockback 110494 each held about 1560ms. Dodge was not in the log.
+    [110486] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, cc = LUIE_CC_TYPE_STUN, duration = 667, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- Colonist Conservation (Stew Slime)
+    -- Colonizing Quills: sourceless BEGIN cast 600ms, damage 110461 about 730ms later on you and the companion.
+    [110460] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, eventdetect = true, duration = 600, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Colonizing Quills (Stew Slime)
+    -- Discharge bolt: cast 600ms. Some begins target you, some target Zerith-var, some are out of line of sight.
+    [267070] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, duration = 600, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Discharge (Mini Stew Slime)
+    -- Discharge cloud: sourceless cast 600ms on the slime, then ground. Snare 267076 lasts 10000ms. Ground 267072 shows about 450ms, then refreshes to 10000ms.
+    [267071] = { priority = 3, result = ACTION_RESULT_BEGIN, avoid = true, eventdetect = true, cc = LUIE_CC_TYPE_SNARE, duration = 600, refire = 2000, sound = LUIE_ALERT_SOUND_TYPE_GROUND }, -- Discharge (Mini Stew Slime)
+    -- Haunted Undercroft, Tainted Sewer Skeever. Pestilent Pus gains on you, then damage about 750ms later. Two gains land 1ms apart. Dodge was on 263852. The 3500ms debuff is 263853.
+    [263852] = { priority = 3, result = ACTION_RESULT_EFFECT_GAINED, dodge = true, duration = 750, refire = 1000, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Pestilent Pus (Tainted Sewer Skeever)
+    -- Cleaving Eviction: sourceless BEGIN cast 700ms, damage 110423 from Stew Slime about 790ms later. Dodge was not in the log.
+    [110411] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, eventdetect = true, duration = 700, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Cleaving Eviction (Stew Slime)
+    -- Colony Collapse: sourceless channel, API 15000ms. This one faded at about 1090ms. Pulses hit Zerith-var at about 520ms and 1020ms. Stun 112678 is API 15000ms and faded at 451ms, then 1130ms. Dodge was not in the log. The player was not the target.
+    [110580] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, eventdetect = true, cc = LUIE_CC_TYPE_STUN, duration = 1100, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- Colony Collapse (Stew Slime)
+    -- Spore Cloud: sourceless BEGIN cast 500ms. Ground 267282 lasts 5000ms. Damage 267285 from Vault of Sage Voernet ticks about every 500ms. Dodge and block were not in the log.
+    [267282] = { priority = 2, result = ACTION_RESULT_BEGIN, avoid = true, eventdetect = true, duration = 500, postCast = 5000, sound = LUIE_ALERT_SOUND_TYPE_GROUND }, -- Spore Cloud (Vault of Sage Voernet)
+    -- Hunt of the Watchers. Gaze cast 433ms. Player hits land about 440ms to 540ms later. Dodge and block were not in the log.
+    [267247] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, duration = 500, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Gaze (Watcher)
+    -- The Unblinking Eye channel is 7767ms and held about 7787ms. Damage starts about 2100ms in. Block on 267506 made the stun IMMUNE. Dodge was not in the log.
+    [267499] = { priority = 3, result = ACTION_RESULT_BEGIN, block = true, cc = LUIE_CC_TYPE_STUN, duration = 7800, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- The Unblinking Eye (Watcher)
+    -- Doom-Truth's Gaze channel is API 8500ms and faded at about 1570ms. Damage ticks continue for about 6000ms. Dodge and block were not in the log.
+    [265961] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, cc = LUIE_CC_TYPE_STUN, duration = 1600, postCast = 6000, sound = LUIE_ALERT_SOUND_TYPE_ST_CC }, -- Doom-Truth's Gaze (Watcher)
+    -- Murky Grotto, Death Hopper. Poison Spit cast 300ms. Hits on you land about 690ms to 1010ms later. One was IMMUNE during Cleansing Bubble, and one was out of line of sight. Dodge and block were not in the log.
+    [151924] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, duration = 700, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Poison Spit (Death Hopper)
+    -- Bite cast 330ms. Damage landed about 380ms later on Zerith-var. You were not the target. Dodge and block were not in the log.
+    [151921] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, duration = 400, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Bite (Death Hopper)
+    -- Eclipsed Hall, Bent Cat. Rending Slash cast 650ms. Hits on you land about 730ms to 765ms later. One was out of range. Dodge and block were not in the log. Sourceless begins will not announce.
+    [73656] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, duration = 750, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Rending Slash (Bent Cat)
+    -- Slash cast 367ms. Hits land about 380ms later. The follow-up cast is 267ms. Dodge and block were not in the log. One Slash was out of range.
+    [73657] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, duration = 450, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Slash (Bent Cat)
+    [73658] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, duration = 300, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Slash (Bent Cat)
+    -- Flurry is sourceless. Ticks start about 1100ms after the begin. The channel is 1332ms and held about 1350ms. One faded at about 684ms. Dodge and block were not in the log.
+    [73654] = { priority = 3, result = ACTION_RESULT_BEGIN, dodge = true, eventdetect = true, duration = 1100, postCast = 1400, sound = LUIE_ALERT_SOUND_TYPE_ST }, -- Flurry (Bent Cat)
+    -- Twilight Maze, Canopic Jar. Sourceless cast 1000ms. Damage starts about 1070ms later and the jar effect holds 3000ms. Dodge and block were not in the log.
+    [262814] = { priority = 3, result = ACTION_RESULT_BEGIN, avoid = true, eventdetect = true, duration = 1000, postCast = 3000, sound = LUIE_ALERT_SOUND_TYPE_GROUND }, -- Canopic Jar
 }
 
 --- @class (partial) AlertTable

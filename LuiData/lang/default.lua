@@ -879,6 +879,8 @@ local strings =
     ----------------------------------------------------------------
 
     LUIE_STRING_SKILL_LAVA_TRAP = "Lava Trap",
+    LUIE_STRING_SKILL_BRIDGE_SWITCH = "Bridge Switch",
+    LUIE_STRING_SKILL_CHECKPOINT = "Checkpoint",
     LUIE_STRING_SKILL_LIGHTNING_TRAP = "Lightning Trap",
     LUIE_STRING_SKILL_SPIKE_TRAP_TP = "Movement Speed reduced by |cFFFFFF25|r% for |cFFFFFF5|r seconds.\n\nImmobilized for |cFFFFFF0.8|r seconds.",
     LUIE_STRING_SKILL_SPIKE_TRAP_AURIDON_TP = "Movement Speed reduced by |cFFFFFF25|r% for |cFFFFFF10|r seconds.\n\nThis effect stacks up to |cFFFFFF3|r times, to a maximum of |cFFFFFF75|r% Movement Speed reduction.\n\nStunned for |cFFFFFF1|r second.",
