@@ -45,6 +45,14 @@ local changelogMessages =
     "|cFFFF00New:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: |cFFFFFFUse Game Timers as Fallback|r. When LuiExtended has no active timer on a slot, the slot shows the remaining time and stack count from the game. Off by default. PC and console.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFShow Subzone|r adds the current map name after the zone name when they differ. Example: The Nowhere Vault - Sinking Courtyard. Off by default. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Nowhere Vault center-screen announcements now also include crystal active, destroyed, and reforming lines, Rain Totems repaired (1/3, 2/3, 3/3), and The Curios Take Mercy. They still use the Nowhere Vault toggles and only appear in The Nowhere Vault. A line that arrives as the secondary message still uses those toggles.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info: Ability alerts for The Nowhere Vault. Gallery of Curios: Formless Horror, Apocrypha Wave, Powerful Barrage, Cleave, Blade Storm, Dual Strike, Heavy Attack, Shield Throw, Exploding Charge, Flame Retch, Lacerate, Spit Fire, Flame Wing, and Quick Sand. Haunted Undercroft: Colonist Conservation, Colonizing Quills, Discharge, Pestilent Pus, Cleaving Eviction, and Colony Collapse. Vault of Sage Voernet: Spore Cloud. Hunt of the Watchers: Gaze, The Unblinking Eye, and Doom-Truth's Gaze. Murky Grotto: Poison Spit and Bite. Eclipsed Hall: Rending Slash, Slash, and Flurry. Twilight Maze: Canopic Jar.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info: Crowd control and ground hazards in The Nowhere Vault: Fungal Chasm lava and lava eruptions, Spore Cloud, Strangler Gas in Murky Grotto, Canopic Jar and Poisoned Darts in Twilight Maze, Vault spike traps, Yokudan axe and spike traps, the Gallery fire trap, Grasping Void, Whirling Sandstorm, Stormlands Whirlwind, and Haunted Undercroft Discharge, Malfunction, and the Rancid Stew poison pool. Bridge Switch on Moonlit Isles is tracked as a stun named Bridge Switch. Checkpoint effects in Moonlit Isles and Fungal Chasm show as Checkpoint.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info: The Blade Storm alert goes away when the effect fades, including when the Soulrazer Knight Duelist dies.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat: Whether another chat addon is enabled is checked once per session.",
     "",
     -- Version Header 7.2.7.0
     "|cFFA500LuiExtended Version 7.2.7.0|r",
