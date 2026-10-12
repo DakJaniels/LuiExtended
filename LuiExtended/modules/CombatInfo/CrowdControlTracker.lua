@@ -394,6 +394,10 @@ end
 local function ResolveAbilityName(abilityId, sourceName)
     local abilityName = GetAbilityName(abilityId)
 
+    if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].name then
+        abilityName = Effects.EffectOverride[abilityId].name
+    end
+
     if Effects.EffectOverrideByName[abilityId] then
         sourceName = zo_strformat("<<C:1>>", sourceName)
         if Effects.EffectOverrideByName[abilityId][sourceName] then
