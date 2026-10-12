@@ -75,6 +75,21 @@ function AbilityAlerts.CompleteAlertFadeOut(poolKey)
     AbilityAlerts.RepositionAlerts()
 end
 
+function AbilityAlerts.ClearActiveAlertsForAbility(abilityId)
+    if not alertPool then
+        return
+    end
+    local alertKeys = {}
+    for poolKey, alert in pairs(alertPool:GetActiveObjects()) do
+        if alert.data and alert.data.id == abilityId and alert.data.duration then
+            alertKeys[#alertKeys + 1] = poolKey
+        end
+    end
+    for alertIndex = 1, #alertKeys do
+        AbilityAlerts.CompleteAlertFadeOut(alertKeys[alertIndex])
+    end
+end
+
 function AbilityAlerts.StartAlertFadeOut(poolKey, alert)
     if alert.data.fadeOutStarted then
         return
@@ -1354,6 +1369,12 @@ function AbilityAlerts.OnCombatIn(eventCode, result, isError, abilityName, abili
 end
 
 function AbilityAlerts.OnCombatAlert(eventCode, resultType, isError, abilityName, abilityGraphic, abilityAction_slotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+    local alertEntry = Alerts[abilityId]
+    if alertEntry and alertEntry.clearOnFade and resultType == ACTION_RESULT_EFFECT_FADED then
+        AbilityAlerts.ClearActiveAlertsForAbility(abilityId)
+        return
+    end
+
     -- Bail out if we're not in combat (reduce spam for nearby)
     if not IsUnitInCombat("player") then
         return
