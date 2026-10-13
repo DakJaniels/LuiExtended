@@ -2,7 +2,7 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## Version: 7.1.3.4
-## APIVersion: 101050 101051
+## APIVersion: 101051 101052
 ## AddOnVersion: 7134
 ## Description: Provides custom media (fonts, sounds, textures) for LuiExtended.
 ## DependsOn: LibMediaProvider>=38
