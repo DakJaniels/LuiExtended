@@ -15,7 +15,6 @@ local string_format = string.format
 local LuiData = LuiData
 local Castbar = LuiData.Data.CastBarTable
 
-local OtherAddonCompatability = LUIE.OtherAddonCompatability
 local Private = CastBar.Private
 
 local SKILL_SLOT_LIGHT_ATTACK = 1
@@ -140,7 +139,7 @@ end
 
 function CastBar.UnregisterLibCombatEvents()
     local libCombat = CastBar.GetLibCombat()
-    if OtherAddonCompatability.isLibCombatEnabled and libCombat and libCombat.UnregisterForCombatEvent then
+    if CastBar.IsLibCombatAddOnEnabled() and libCombat and libCombat.UnregisterForCombatEvent then
         if ZO_IsConsoleOrGameCoreUI() then
             libCombat.UnregisterForCombatEvent(Private.moduleName, libCombatSkillTimingsEventType())
         else
@@ -156,7 +155,7 @@ end
 
 --- Call `CastBar.UnregisterLibCombatEvents()` first (e.g. via `CastBar.RegisterEvents` / `UnregisterEvents`).
 function CastBar.RegisterLibCombatEvents()
-    if not OtherAddonCompatability.isLibCombatEnabled then
+    if not CastBar.IsLibCombatAddOnEnabled() then
         CastBar.UnregisterLibCombatEvents()
         -- logCastBarLibCombat("Register skipped: LibCombat addon not enabled")
         return
@@ -197,7 +196,7 @@ function CastBar.OnWeaveHelperSettingChanged()
         -- logCastBarLibCombat("Weave helper disabled")
         return
     end
-    if not ActionBar.SV.CastBarEnable or not OtherAddonCompatability.isLibCombatEnabled then
+    if not ActionBar.SV.CastBarEnable or not CastBar.IsLibCombatAddOnEnabled() then
         return
     end
     CastBar.RegisterLibCombatEvents()

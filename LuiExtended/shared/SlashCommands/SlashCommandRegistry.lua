@@ -11,8 +11,6 @@ local SlashCommandRegistry = {}
 --- @class (partial) LUIE.SlashCommandRegistry
 LUIE.SlashCommandRegistry = SlashCommandRegistry
 
-local OtherAddonCompatability = LUIE.OtherAddonCompatability
-
 SlashCommandRegistry.RegistrationNamespace =
 {
     SlashCommands = "slashcmds",
@@ -82,7 +80,7 @@ end
 
 function SlashCommandRegistry.IsAvailable()
     return IsKeyboardUISupported()
-        and OtherAddonCompatability.isLibSlashCommanderEnabled
+        and LUIE.IsItEnabled("LibSlashCommander")
         and LibSlashCommander ~= nil
 end
 
@@ -91,7 +89,7 @@ function SlashCommandRegistry.UnregisterAll(namespace)
     if not registrationRecord then
         return
     end
-    if OtherAddonCompatability.isLibSlashCommanderEnabled and LibSlashCommander then
+    if LUIE.IsItEnabled("LibSlashCommander") and LibSlashCommander then
         for commandIndex = 1, #registrationRecord.libSlashCommanderCommandObjects do
             LibSlashCommander:Unregister(registrationRecord.libSlashCommanderCommandObjects[commandIndex])
         end

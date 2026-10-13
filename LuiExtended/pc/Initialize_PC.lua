@@ -92,17 +92,6 @@ local function OnAddOnLoaded(eventId, addonName)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks
     LUIE:InitializeHooks()
-    --
-    LUIE.OtherAddonCompatability.isCombatMetricsEnabled = LUIE.IsItEnabled("CombatMetrics")
-    LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
-    LUIE.OtherAddonCompatability.isCrutchAlertsEnabled = LUIE.IsItEnabled("CrutchAlerts")
-    LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
-    LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
-    LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
-    LUIE.OtherAddonCompatability.isLibCombatEnabled = LUIE.IsItEnabled("LibCombat")
-    LUIE.OtherAddonCompatability.isLibSlashCommanderEnabled = LUIE.IsItEnabled("LibSlashCommander")
-    LUIE.OtherAddonCompatability.isHarvestMapEnabled = LUIE.IsItEnabled("HarvestMap")
-    LUIE.OtherAddonCompatability.isLoreLibraryEnabled = LUIE.IsItEnabled("LoreLibrary")
     -- -----------------------------------------------------------------------------
     -- Toggle Alert Frame Visibility if needed
     LUIE.SetupAlertFrameVisibility()

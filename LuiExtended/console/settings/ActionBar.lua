@@ -1348,7 +1348,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.CastBarWeaveHelper,
             disable = function ()
-                return castBarOptionDisabled() or not LUIE.OtherAddonCompatability.isLibCombatEnabled
+                return castBarOptionDisabled() or not LUIE.IsItEnabled("LibCombat2")
             end,
         }
 
@@ -1364,7 +1364,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value) Settings.CastBarWeaveThresholdMs = value end,
             default = Defaults.CastBarWeaveThresholdMs,
             disable = function ()
-                return castBarOptionDisabled() or not Settings.CastBarWeaveHelper or not LUIE.OtherAddonCompatability.isLibCombatEnabled
+                return castBarOptionDisabled() or not Settings.CastBarWeaveHelper or not LUIE.IsItEnabled("LibCombat2")
             end,
         }
 

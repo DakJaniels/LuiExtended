@@ -16,10 +16,15 @@ local Effects = Data.Effects
 local Abilities = Data.Abilities
 local Castbar = Data.CastBarTable
 
-local OtherAddonCompatability = LUIE.OtherAddonCompatability
+function CastBar.IsLibCombatAddOnEnabled()
+    if ZO_IsConsoleOrGameCoreUI() then
+        return LUIE.IsItEnabled("LibCombat2")
+    end
+    return LUIE.IsItEnabled("LibCombat")
+end
 
 function CastBar.GetLibCombat()
-    if not OtherAddonCompatability.isLibCombatEnabled then
+    if not CastBar.IsLibCombatAddOnEnabled() then
         return nil
     end
     if ZO_IsConsoleOrGameCoreUI() then
@@ -483,7 +488,7 @@ function CastBar.GetCastDisplayNameAndIcon(abilityId)
     if override and (override.icon or override.name) then
         icon = override.icon or GetAbilityIcon(abilityId)
         name = override.name or zo_strformat("<<C:1>>", GetAbilityName(abilityId))
-    elseif OtherAddonCompatability.isLibCombatEnabled then
+    elseif CastBar.IsLibCombatAddOnEnabled() then
         local libCombat = CastBar.GetLibCombat()
         if libCombat then
             icon = libCombat.GetFormattedAbilityIcon(abilityId)

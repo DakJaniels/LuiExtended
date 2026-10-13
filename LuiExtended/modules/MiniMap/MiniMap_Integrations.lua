@@ -48,13 +48,13 @@ function LUIE_MiniMap_Integrations:Initialize(manager)
     self.harvestMap = nil
     self.harvestMapMode = nil
     self.harvestMapActive = false
-    if LUIE.OtherAddonCompatability.isHarvestMapEnabled and Harvest and Harvest.pinController and Harvest.mapMode and Harvest.mapPins then
+    if LUIE.IsItEnabled("HarvestMap") and Harvest and Harvest.pinController and Harvest.mapMode and Harvest.mapPins then
         self.harvestMap = Harvest
     end
     self.loreLibrary = nil
     self.loreLibraryMode = nil
     self.loreLibraryActive = false
-    if LUIE.OtherAddonCompatability.isLoreLibraryEnabled and LoreLibrary and LoreLibrary.pinController and LoreLibrary.mapPins then
+    if LUIE.IsItEnabled("LoreLibrary") and LoreLibrary and LoreLibrary.pinController and LoreLibrary.mapPins then
         self.loreLibrary = LoreLibrary
     end
 end

@@ -72,7 +72,7 @@ UnitFrames.bossThresholdMechanicPadding = 0
 --- Each column is { percent, mechanic, scope = "common"|"multi", bossIndex? }.
 --- Returns nil when no usable thresholds (so the default-percents fallback runs).
 local function FetchCrutchBossThresholds()
-    if not LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
+    if not LUIE.IsItEnabled("CrutchAlerts") then
         return nil
     end
 
@@ -901,7 +901,7 @@ end
 
 --- Cache CrutchAlerts BossHealthBar handles/options once (optional dependency).
 function UnitFrames.InitializeBossThresholdCrutchCache()
-    if LUIE.OtherAddonCompatability and LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
+    if LUIE.IsItEnabled("CrutchAlerts") then
         -- NOTE: CrutchAlerts is an optional dependency; when installed it loads before LUIE.
         -- This branch only runs when the addon manager confirms it is enabled.
         local crutchAlertsAddon = CrutchAlerts
@@ -919,7 +919,7 @@ end
 
 --- Subscribe to CrutchAlerts threshold-change notifications (custom boss frames block).
 function UnitFrames.RegisterBossThresholdCrutchListener()
-    if not LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
+    if not LUIE.IsItEnabled("CrutchAlerts") then
         return
     end
     -- See CrutchAlerts/bosshealthbar/BossHealthBarAPI.lua:117-135.
