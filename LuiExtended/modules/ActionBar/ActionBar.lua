@@ -1775,9 +1775,24 @@ local function ForEachNativeActionButton(buttonCallback)
     end
 end
 
+--- True only after this session hid the native widgets. Fallback off must not write showTimer every update.
+--- FancyActionBar+ syncActionButton keeps showTimer false; restoring it turns the game timer back on.
+local g_nativeActionButtonTimersHidden = false
+
 local function ApplyNativeActionButtonTimerVisibility()
-    local applyFunction = GameFallbackTimersAreEnabled() and HideNativeActionButtonTimer or RestoreNativeActionButtonTimer
-    ForEachNativeActionButton(applyFunction)
+    if isFancyActionBarEnabled then
+        return
+    end
+    if GameFallbackTimersAreEnabled() then
+        ForEachNativeActionButton(HideNativeActionButtonTimer)
+        g_nativeActionButtonTimersHidden = true
+        return
+    end
+    if not g_nativeActionButtonTimersHidden then
+        return
+    end
+    g_nativeActionButtonTimersHidden = false
+    ForEachNativeActionButton(RestoreNativeActionButtonTimer)
 end
 
 local g_nativeActionButtonTimerHooksReady = false
