@@ -15,8 +15,6 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 local Abilities = Data.Abilities
 local Castbar = Data.CastBarTable
-local OtherAddonCompatability = LUIE.OtherAddonCompatability
-
 local pairs = pairs
 local ChatOutput = LUIE.ChatOutput
 local GetSlotTrueBoundId = LUIE.GetSlotTrueBoundId
@@ -56,7 +54,7 @@ local PROC_SOUND_THRESHOLDS = ActionBar.PROC_SOUND_THRESHOLDS
 local ACTION_BUTTON_BORDERS = ActionBar.ACTION_BUTTON_BORDERS
 local BOUNCE_DURATION_MS = ActionBar.BOUNCE_DURATION_MS
 
-local isFancyActionBarEnabled = OtherAddonCompatability.isFancyActionBarPlusEnabled or LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
+local isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
 
 local g_ultimateCost = 0    -- Cost of ultimate Ability in Slot
 local g_ultimateCurrent = 0 -- Current ultimate value

@@ -1134,7 +1134,7 @@ function ActionBar.CreateSettings()
                     end
                 end,
                 width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and LUIE.OtherAddonCompatability.isLibCombatEnabled) end,
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and LUIE.IsItEnabled("LibCombat")) end,
                 default = Defaults.CastBarWeaveHelper,
             },
             {
@@ -1147,7 +1147,7 @@ function ActionBar.CreateSettings()
                 getFunc = function () return Settings.CastBarWeaveThresholdMs end,
                 setFunc = function (value) Settings.CastBarWeaveThresholdMs = value end,
                 width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and Settings.CastBarWeaveHelper and LUIE.OtherAddonCompatability.isLibCombatEnabled) end,
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and Settings.CastBarWeaveHelper and LUIE.IsItEnabled("LibCombat")) end,
                 default = Defaults.CastBarWeaveThresholdMs,
             },
             {
