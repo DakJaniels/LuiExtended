@@ -38,6 +38,14 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.7.2
+    "|cFFA500LuiExtended Version 7.2.7.2|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Other addons: LUIE now caches addon-enabled state for the entire session, even if the addon is missing or later disabled. All internal checks use this cached result. This performance optimization is now applied across LUIE, not just ChatOutput (commit 4134daf)."
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiMedia: Custom fonts are now smaller file size on console.",
+    "",
     -- Version Header 7.2.7.1
     "|cFFA500LuiExtended Version 7.2.7.1|r",
     "",
