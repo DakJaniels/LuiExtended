@@ -29,6 +29,15 @@ LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
 LUIE.version = "7.2.7.3"
 LUIE.addonVersion = 7273
+
+local platform = GetUIPlatform()
+if platform == UI_PLATFORM_XBOX or IsGameCoreUI() then
+    LUIE.author = "Dack5855"
+else
+    LUIE.author = "@dack_janiels[PC]"
+end
+
+
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"
