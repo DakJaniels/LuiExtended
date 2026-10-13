@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.3
+
+### Fixed
+
+- ActionBar: fallback timers were not detecting if fab/fab+ was also installed, resulting in duplicate timers.
+
 ## Version 7.2.7.2
 
 ### Changes
