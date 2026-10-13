@@ -1,5 +1,12 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.2
+
+### Changes
+
+- Other addons: LUIE now caches addon-enabled state for the entire session, even if the addon is missing or later disabled. All internal checks use this cached result. This performance optimization is now applied across LUIE, not just ChatOutput (commit 4134daf).
+- LuiMedia: Custom fonts are now smaller file size on console.
+
 ## Version 7.2.7.1
 
 ### New
