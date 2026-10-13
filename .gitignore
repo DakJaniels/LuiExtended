@@ -25,3 +25,5 @@ tools/*
 LuiExtended2/*
 LuiMiniMap/*
 LuiDevTool/*
+
+*.zip
