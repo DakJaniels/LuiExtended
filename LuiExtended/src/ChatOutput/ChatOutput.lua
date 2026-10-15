@@ -776,6 +776,9 @@ end
 
 --- @param isSystem boolean|nil
 function LUIE_ChatOutput:MaybeWarnNoDeliverableTab(isSystem)
+    if ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
     if self.noDeliverableTabWarningShown then
         return
     end
