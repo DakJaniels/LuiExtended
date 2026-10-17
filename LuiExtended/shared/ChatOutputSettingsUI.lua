@@ -1097,7 +1097,7 @@ local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
                         return
                     end
                     SetChatTabCheckboxValue(tabIndexCapture, value)
-                    if value and chatOutput then
+                    if value and chatOutput and not chatOutput:IsGamepadMiniChatTabsManagingFilters() then
                         chatOutput:SetSystemCategoryEnabledOnTabForSettings(tabIndexCapture, true)
                     end
                     control:RefreshChatTabRoutingRow()
