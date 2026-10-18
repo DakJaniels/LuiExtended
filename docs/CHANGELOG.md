@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.5
+
+### Changes
+
+- MiniMap: Cleanup some circle mode changes. Should align better now.
+
 ## Version 7.2.7.4
 
 ### New
