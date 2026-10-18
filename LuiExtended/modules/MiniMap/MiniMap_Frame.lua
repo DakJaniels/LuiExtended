@@ -21,12 +21,13 @@ local MINIMAP_ZOOM_LABEL_MAX_ALPHA = 0.4
 local MINIMAP_ZOOM_REVEAL_HOLD_MS = 1250
 local MINIMAP_ZOOM_FADE_OUT_MS = 200
 local MINIMAP_ZOOM_BUTTON_MAX_ALPHA = 1
---- Ring centerline in the tiled frame. minimap_frame_topleft.dds holds most of the circle;
---- the right and bottom arcs leave that 256 file and continue through the 64px slices.
---- Center and radius are in that tile's pixel space (top-left file origin).
-local MINIMAP_CIRCULAR_RING_CENTER_X = 154
-local MINIMAP_CIRCULAR_RING_CENTER_Y = 151
-local MINIMAP_CIRCULAR_RING_RADIUS = 109
+--- Ring centerline in the tiled frame, in top-left-file pixel space.
+--- minimap_frame_topleft holds the circle except the right cap (minimap_frame_topright)
+--- and the bottom cap (minimap_frame_bottomleft). minimap_frame_bottomright is empty.
+--- The stroke is bright on the top and dark on the bottom; that shading is in the art.
+local MINIMAP_CIRCULAR_RING_CENTER_X = 154.57
+local MINIMAP_CIRCULAR_RING_CENTER_Y = 152.39
+local MINIMAP_CIRCULAR_RING_RADIUS = 107.57
 
 --- Root control, layout, loading overlay, zone/zoom labels and the drag bar / zoom controls (LUIE_MiniMap in frontend/MiniMap.xml).
 --- @class LUIE_MiniMap_Frame : ZO_InitializingObject
