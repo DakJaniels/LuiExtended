@@ -207,6 +207,19 @@ function MiniMap.CreateSettings()
             disabled = disabled,
         },
         {
+            type = "checkbox",
+            name = GetString(LUIE_STRING_LAM_MINIMAP_CIRCULAR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CIRCULAR_TP),
+            getFunc = function () return MiniMap.SV.circularMap == true end,
+            setFunc = function (value)
+                MiniMap.SV.circularMap = value
+                MiniMap.ApplySettings()
+            end,
+            width = "full",
+            default = Defaults.circularMap,
+            disabled = disabled,
+        },
+        {
             type = "button",
             name = GetString(LUIE_STRING_LAM_RESETPOSITION),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_RESETPOSITION_TP),

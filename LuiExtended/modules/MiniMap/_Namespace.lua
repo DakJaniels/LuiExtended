@@ -102,6 +102,7 @@ MiniMap.MINIMAP_PIN_MAX_SCALE = 1.0
 --- @field pinMirrorStateMachineDebug boolean
 --- @field anchorInfoPanelToMiniMap boolean
 --- @field infoPanelRestoreAnchor MiniMapInfoPanelRestoreAnchor|nil
+--- @field circularMap boolean
 --- @field showZoneName boolean
 --- @field showSubzoneName boolean
 --- @field zoneNameAboveMap boolean
@@ -149,6 +150,7 @@ MiniMap.Defaults =
     panOffsetX = 0,
     panOffsetY = 0,
     lockPosition = false,
+    circularMap = false,
     lockSize = false,
     waypointClickRequiresShift = true,
     showZoomButtons = false,
