@@ -12,6 +12,8 @@ local DEFAULT_RESIZE_HANDLE_SIZE = 8
 local MINIMAP_FRAME_BACKDROP_PAD = 3
 --- Parchment matte between the ZO_FrameBackdrop inner edge and the map sheet.
 local MINIMAP_PARCHMENT_MARGIN = .01
+--- ZO_FrameBackdrop center inset (WindowTemplates.xml:96). Parchment sits inside that edge.
+local MINIMAP_PARCHMENT_BACKDROP_INSET = 4
 --- worldmap_map_background_512tile.dds repeats every 512px (ZO_WorldMapContainerBackground uses coords 0-4 over MAP_WIDTH * 2).
 local MINIMAP_PARCHMENT_TILE_PIXELS = 512
 local MINIMAP_MIN_FRAME_SIZE = 100
@@ -461,17 +463,34 @@ function LUIE_MiniMap_Frame:ApplyCircularMap()
     local scrollHeight = scrollBottom - scrollTop
     local diameter = zo_min(scrollWidth, scrollHeight)
     local radius = diameter * 0.5
+    local parchment = self.parchment
     if circularMap and radius > 0 then
         local centerX, centerY = scroll:GetCenter()
         scroll:SetCircularClip(centerX, centerY, radius)
         scroll:SetShapeType(SHAPE_CIRCLE)
         self.background:SetHidden(true)
-        self.parchment:SetHidden(true)
+        -- worldmap_map_background_512tile.dds (ZO_WorldMapContainerBackground, WorldMap.xml:265).
+        -- It stays visible past the map tiles and uses the same circle as the scroll.
+        parchment:SetHidden(false)
+        parchment:ClearAnchors()
+        parchment:SetAnchor(TOPLEFT, scroll, TOPLEFT, 0, 0)
+        parchment:SetAnchor(BOTTOMRIGHT, scroll, BOTTOMRIGHT, 0, 0)
+        parchment:SetTextureCoords(0, scrollWidth / MINIMAP_PARCHMENT_TILE_PIXELS, 0, scrollHeight / MINIMAP_PARCHMENT_TILE_PIXELS)
+        parchment:SetCircularClip(centerX, centerY, radius)
     else
         scroll:ClearCircularClip()
         scroll:SetShapeType(SHAPE_BOX)
         self.background:SetHidden(false)
-        self.parchment:SetHidden(false)
+        parchment:SetHidden(false)
+        parchment:ClearCircularClip()
+        parchment:ClearAnchors()
+        parchment:SetAnchor(TOPLEFT, self.background, TOPLEFT, MINIMAP_PARCHMENT_BACKDROP_INSET, MINIMAP_PARCHMENT_BACKDROP_INSET)
+        parchment:SetAnchor(BOTTOMRIGHT, self.background, BOTTOMRIGHT, -MINIMAP_PARCHMENT_BACKDROP_INSET, -MINIMAP_PARCHMENT_BACKDROP_INSET)
+        local parchmentWidth = self.background:GetWidth() - MINIMAP_PARCHMENT_BACKDROP_INSET * 2
+        local parchmentHeight = self.background:GetHeight() - MINIMAP_PARCHMENT_BACKDROP_INSET * 2
+        if parchmentWidth > 0 and parchmentHeight > 0 then
+            parchment:SetTextureCoords(0, parchmentWidth / MINIMAP_PARCHMENT_TILE_PIXELS, 0, parchmentHeight / MINIMAP_PARCHMENT_TILE_PIXELS)
+        end
     end
 
     local topLeftTexture = self.circularFrameTextures[1]
