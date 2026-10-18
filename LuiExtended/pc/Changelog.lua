@@ -38,6 +38,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.7.5
+    "|cFFA500LuiExtended Version 7.2.7.5|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: Cleanup some circle mode changes. Should align better now.",
+    "",
     -- Version Header 7.2.7.4
     "|cFFA500LuiExtended Version 7.2.7.4|r",
     "",
