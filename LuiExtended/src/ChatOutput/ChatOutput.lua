@@ -34,6 +34,15 @@ local function IsRChatAvailable()
     return rChat ~= nil
 end
 
+--- Gamepad Mini Chat Tabs owns per-tab channel filters on the gamepad chat container.
+--- @return boolean
+function LUIE_ChatOutput:IsGamepadMiniChatTabsManagingFilters()
+    if ZO_ChatSystem_ShouldUseKeyboardChatSystem() then
+        return false
+    end
+    return LUIE.IsItEnabled("GamepadMiniChatTabs")
+end
+
 local function IsLibChatMessageAvailable()
     if not LUIE.IsItEnabled("LibChatMessage") then
         return false
@@ -665,7 +674,8 @@ function LUIE_ChatOutput:PrintWhenReady(messageText, isSystem)
     self:DeliverToSelectedChatTabs(messageText, isSystem)
 end
 
---- When ChatMethod is Print to All Tabs, enable LUIE routing and System filter on every active primary tab.
+--- When ChatMethod is Print to All Tabs, enable LUIE routing on every active primary tab.
+--- System stays under Gamepad Mini Chat Tabs when that addon is managing gamepad chat filters.
 function LUIE_ChatOutput:SyncChatTabRoutingForAllTabsMethod()
     if not self:UsesPrintToAllTabsMethod() then
         return
@@ -681,11 +691,14 @@ function LUIE_ChatOutput:SyncChatTabRoutingForAllTabsMethod()
     if not chatOutputSettings.ChatTab then
         chatOutputSettings.ChatTab = {}
     end
+    local gamepadMiniChatTabsOwnsChannelFilters = self:IsGamepadMiniChatTabsManagingFilters()
     local maxTabIndex = self:GetMaxChatTabIndex()
     for tabIndex = 1, maxTabIndex do
         if self:IsChatTabIndexActiveForSettings(tabIndex) then
             chatOutputSettings.ChatTab[tabIndex] = true
-            self:SetSystemCategoryEnabledOnTabForSettings(tabIndex, true)
+            if not gamepadMiniChatTabsOwnsChannelFilters then
+                self:SetSystemCategoryEnabledOnTabForSettings(tabIndex, true)
+            end
         end
     end
 end
@@ -776,6 +789,9 @@ end
 
 --- @param isSystem boolean|nil
 function LUIE_ChatOutput:MaybeWarnNoDeliverableTab(isSystem)
+    if ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
     if self.noDeliverableTabWarningShown then
         return
     end

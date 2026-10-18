@@ -19,6 +19,12 @@ local MINIMAP_ZOOM_LABEL_MAX_ALPHA = 0.4
 local MINIMAP_ZOOM_REVEAL_HOLD_MS = 1250
 local MINIMAP_ZOOM_FADE_OUT_MS = 200
 local MINIMAP_ZOOM_BUTTON_MAX_ALPHA = 1
+--- Ring centerline in the tiled frame. minimap_frame_topleft.dds holds most of the circle;
+--- the right and bottom arcs leave that 256 file and continue through the 64px slices.
+--- Center and radius are in that tile's pixel space (top-left file origin).
+local MINIMAP_CIRCULAR_RING_CENTER_X = 154
+local MINIMAP_CIRCULAR_RING_CENTER_Y = 151
+local MINIMAP_CIRCULAR_RING_RADIUS = 109
 
 --- Root control, layout, loading overlay, zone/zoom labels and the drag bar / zoom controls (LUIE_MiniMap in frontend/MiniMap.xml).
 --- @class LUIE_MiniMap_Frame : ZO_InitializingObject
@@ -26,6 +32,7 @@ local MINIMAP_ZOOM_BUTTON_MAX_ALPHA = 1
 --- @field root TopLevelWindow
 --- @field background BackdropControl
 --- @field parchment TextureControl
+--- @field circularFrameTextures TextureControl[] TopLeft, TopRight, BottomLeft, BottomRight.
 --- @field scroll ScrollControl
 --- @field map Control
 --- @field tilesLayer Control
@@ -60,6 +67,13 @@ function LUIE_MiniMap_Frame:Initialize(manager, rootControl)
     self.root = rootControl
     self.background = rootControl:GetNamedChild("_Background")
     self.parchment = rootControl:GetNamedChild("_Parchment")
+    self.circularFrameTextures =
+    {
+        rootControl:GetNamedChild("_FrameTopLeft"),
+        rootControl:GetNamedChild("_FrameTopRight"),
+        rootControl:GetNamedChild("_FrameBottomLeft"),
+        rootControl:GetNamedChild("_FrameBottomRight"),
+    }
     self.scroll = rootControl:GetNamedChild("_Scroll")
     self.map = self.scroll:GetNamedChild("_Map")
     self.tilesLayer = self.map:GetNamedChild("_Tiles")
@@ -89,6 +103,11 @@ function LUIE_MiniMap_Frame:Initialize(manager, rootControl)
     self.statusLabel:SetText(GetString(LUIE_STRING_MINIMAP_LOADING))
     self.background:SetMouseEnabled(false)
     self.parchment:SetMouseEnabled(false)
+    for textureIndex = 1, #self.circularFrameTextures do
+        local frameTexture = self.circularFrameTextures[textureIndex]
+        frameTexture:SetMouseEnabled(false)
+        frameTexture:SetResizeToFitFile(false)
+    end
     self.zone:SetMouseEnabled(false)
 
     self:CreateZoomFadeStateMachines()
@@ -248,6 +267,7 @@ function LUIE_MiniMap_Frame:ApplyRootLayout(settings)
     -- Parchment is anchored to the backdrop in XML; keep the 512px tile at 1:1 scale.
     self.parchment:SetTextureCoords(0, backgroundWidth / MINIMAP_PARCHMENT_TILE_PIXELS, 0, backgroundHeight / MINIMAP_PARCHMENT_TILE_PIXELS)
     self:ApplyDragBarPlacement()
+    self:ApplyCircularMap()
 end
 
 --- @param settings MiniMapDefaults
@@ -425,6 +445,69 @@ end
 function LUIE_MiniMap_Frame:ApplyAppearanceFromSettings()
     self:ApplyDrawLayerPreference()
     self.background:SetAlpha(MiniMap.SV.borderOpacity)
+    self:ApplyCircularMap()
+end
+
+--- Scroll rect in screen space (ZO_RevealingControl.lua:14-20). The four frame files tile from GetTextureFileDimensions.
+--- The ring centerline is MINIMAP_CIRCULAR_RING_* inside that tile, not the top-left file's own center.
+function LUIE_MiniMap_Frame:ApplyCircularMap()
+    local scroll = self.scroll
+    local circularMap = MiniMap.SV.circularMap == true
+    local scrollLeft = scroll:GetLeft()
+    local scrollTop = scroll:GetTop()
+    local scrollRight = scroll:GetRight()
+    local scrollBottom = scroll:GetBottom()
+    local scrollWidth = scrollRight - scrollLeft
+    local scrollHeight = scrollBottom - scrollTop
+    local diameter = zo_min(scrollWidth, scrollHeight)
+    local radius = diameter * 0.5
+    if circularMap and radius > 0 then
+        local centerX, centerY = scroll:GetCenter()
+        scroll:SetCircularClip(centerX, centerY, radius)
+        scroll:SetShapeType(SHAPE_CIRCLE)
+        self.background:SetHidden(true)
+        self.parchment:SetHidden(true)
+    else
+        scroll:ClearCircularClip()
+        scroll:SetShapeType(SHAPE_BOX)
+        self.background:SetHidden(false)
+        self.parchment:SetHidden(false)
+    end
+
+    local topLeftTexture = self.circularFrameTextures[1]
+    local topRightTexture = self.circularFrameTextures[2]
+    local bottomLeftTexture = self.circularFrameTextures[3]
+    local bottomRightTexture = self.circularFrameTextures[4]
+    local topLeftWidth, topLeftHeight = topLeftTexture:GetTextureFileDimensions()
+    local topRightWidth, topRightHeight = topRightTexture:GetTextureFileDimensions()
+    local bottomLeftWidth, bottomLeftHeight = bottomLeftTexture:GetTextureFileDimensions()
+    local bottomRightWidth, bottomRightHeight = bottomRightTexture:GetTextureFileDimensions()
+    local frameScale = 0
+    if radius > 0 then
+        frameScale = radius / MINIMAP_CIRCULAR_RING_RADIUS
+    end
+    local frameCenterX = MINIMAP_CIRCULAR_RING_CENTER_X
+    local frameCenterY = MINIMAP_CIRCULAR_RING_CENTER_Y
+    local placedTextures =
+    {
+        { control = topLeftTexture, width = topLeftWidth, height = topLeftHeight, originX = 0, originY = 0 },
+        { control = topRightTexture, width = topRightWidth, height = topRightHeight, originX = topLeftWidth, originY = 0 },
+        { control = bottomLeftTexture, width = bottomLeftWidth, height = bottomLeftHeight, originX = 0, originY = topLeftHeight },
+        { control = bottomRightTexture, width = bottomRightWidth, height = bottomRightHeight, originX = bottomLeftWidth, originY = topLeftHeight },
+    }
+    for textureIndex = 1, #placedTextures do
+        local placedTexture = placedTextures[textureIndex]
+        local frameTexture = placedTexture.control
+        frameTexture:SetHidden(not circularMap)
+        if circularMap and frameScale > 0 then
+            frameTexture:SetDrawTier(DT_MEDIUM)
+            frameTexture:ClearAnchors()
+            frameTexture:SetDimensions(placedTexture.width * frameScale, placedTexture.height * frameScale)
+            frameTexture:SetAnchor(TOPLEFT, scroll, CENTER,
+                (placedTexture.originX - frameCenterX) * frameScale,
+                (placedTexture.originY - frameCenterY) * frameScale)
+        end
+    end
 end
 
 function LUIE_MiniMap_Frame:ApplyResizedDimensions()
@@ -473,6 +556,7 @@ function LUIE_MiniMap_Frame:OnRootResizeStop(control)
 end
 
 function LUIE_MiniMap_Frame:OnRootRectChanged()
+    self:ApplyCircularMap()
     if not self.resizing then
         return
     end

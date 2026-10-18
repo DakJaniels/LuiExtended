@@ -133,6 +133,9 @@ function LUIE_MiniMap_Integrations:IsHarvestMapMinimapModeActive()
 end
 
 function LUIE_MiniMap_Integrations:SetupHarvestMapMode()
+    -- HarvestMap owns LUIE_MODE (Pins/MapPinController.lua, Pins/MapMode.lua) via MiniMap.MAP_MODE_LUIE_MINIMAP.
+    -- The mode table, CheckMapMode wrapper, and IsInMinimapMode wrapper stayed off so that path is the one that runs.
+    --[[
     local harvestMap = self.harvestMap
     if not harvestMap or self.harvestMapMode then
         return
@@ -173,13 +176,13 @@ function LUIE_MiniMap_Integrations:SetupHarvestMapMode()
         end
         return originalIsInMinimapMode(modeObject)
     end
+    ]]
 end
 
 function LUIE_MiniMap_Integrations:ActivateHarvestMap()
     if not self.harvestMap then
         return
     end
-    self:SetupHarvestMapMode()
     self.harvestMapActive = true
 end
 
@@ -190,13 +193,17 @@ function LUIE_MiniMap_Integrations:DeactivateHarvestMap()
         return
     end
     self.harvestMapActive = false
-    local pinController = self.harvestMap.pinController
     self:ApplyHarvestMapPinScale()
+    -- Reparent stays off. HarvestMap's LUIE_MODE owns QP_Container; putting it back on ZO_WorldMapContainer
+    -- here would fight that mode when the minimap stops.
+    --[[
+    local pinController = self.harvestMap.pinController
     local container = pinController.container
     container:SetParent(pinController.scroll)
     container:ClearAnchors()
     container:SetAnchor(TOPLEFT, ZO_WorldMapContainer, TOPLEFT, 0, 0)
     pinController:OnMapSizeChange(ZO_WorldMapContainer:GetDimensions())
+    ]]
 end
 
 --- HarvestMap resource pins are CT_TEXTURECOMPOSITE controls; PinTypeManager:UpdateSize sets dimensions from
@@ -226,23 +233,13 @@ end
 
 --- Content size changed (zoom / new map): relayout HarvestMap pins to the minimap sheet.
 function LUIE_MiniMap_Integrations:OnHarvestMapContentSizeChanged()
-    if not self:IsHarvestMapMinimapModeActive() or not self.manager.panAndZoom:HasMap() then
-        return
-    end
-    local panAndZoom = self.manager.panAndZoom
-    self.harvestMap.pinController:OnMapSizeChange(panAndZoom:GetContentWidth(), panAndZoom:GetContentHeight())
+    -- Size comes from HarvestMap's HookMinimap on LUIE_MiniMap_Scroll_Map:SetDimensions.
     self:ApplyHarvestMapPinScale()
 end
 
---- New map sheet: size first, then a redraw against the player's map data.
+--- New map sheet: HarvestMap redraws from its own ZO_WorldMap_UpdateMap hook once IsInMinimapMode knows LUIE.
 function LUIE_MiniMap_Integrations:OnHarvestMapMapChanged()
-    if not self:IsHarvestMapMinimapModeActive() or not self.manager.panAndZoom:HasMap() then
-        return
-    end
-    self:OnHarvestMapContentSizeChanged()
-    if DoesCurrentMapMatchMapForPlayerLocation() then
-        self.harvestMap.mapPins:RedrawPins()
-    end
+    self:ApplyHarvestMapPinScale()
 end
 
 -- LoreLibrary ----------------------------------------------------------------
@@ -260,6 +257,8 @@ function LUIE_MiniMap_Integrations:IsLoreLibraryMinimapModeActive()
 end
 
 function LUIE_MiniMap_Integrations:SetupLoreLibraryMode()
+    -- LoreLibrary owns LUIE_MODE (Pins/MapPinController.lua) via MiniMap.MAP_MODE_LUIE_MINIMAP.
+    --[[
     local loreLibrary = self.loreLibrary
     if not loreLibrary or self.loreLibraryMode then
         return
@@ -290,13 +289,13 @@ function LUIE_MiniMap_Integrations:SetupLoreLibraryMode()
         end
         originalCheckMapMode(controller)
     end
+    ]]
 end
 
 function LUIE_MiniMap_Integrations:ActivateLoreLibrary()
     if not self.loreLibrary then
         return
     end
-    self:SetupLoreLibraryMode()
     self.loreLibraryActive = true
 end
 
@@ -306,13 +305,16 @@ function LUIE_MiniMap_Integrations:DeactivateLoreLibrary()
         return
     end
     self.loreLibraryActive = false
-    local pinController = self.loreLibrary.pinController
     self:ApplyLoreLibraryPinScale()
+    -- Reparent stays off. LoreLibrary's LUIE_MODE owns LL_Container.
+    --[[
+    local pinController = self.loreLibrary.pinController
     local container = pinController.container
     container:SetParent(pinController.scroll)
     container:ClearAnchors()
     container:SetAnchor(TOPLEFT, ZO_WorldMapContainer, TOPLEFT, 0, 0)
     pinController:OnMapSizeChange(ZO_WorldMapContainer:GetDimensions())
+    ]]
 end
 
 --- LoreLibrary book pins are CT_TEXTURECOMPOSITE controls sized from layout.size (PinTypeManager:UpdateSize, 546);
@@ -342,16 +344,11 @@ end
 
 --- Content size changed (zoom / new map): relayout LoreLibrary pins to the minimap sheet.
 function LUIE_MiniMap_Integrations:OnLoreLibraryContentSizeChanged()
-    if not self:IsLoreLibraryMinimapModeActive() or not self.manager.panAndZoom:HasMap() then
-        return
-    end
-    local panAndZoom = self.manager.panAndZoom
-    self.loreLibrary.pinController:OnMapSizeChange(panAndZoom:GetContentWidth(), panAndZoom:GetContentHeight())
+    -- Size comes from LoreLibrary's HookMinimap on LUIE_MiniMap_Scroll_Map:SetDimensions.
     self:ApplyLoreLibraryPinScale()
 end
 
---- New map sheet: relayout only. LoreLibrary already rebuilds pins from its own
---- ZO_PreHook on ZO_WorldMap_UpdateMap (Pins/MapPins.lua:52), which runs inside the same OnWorldMapChanged.
+--- New map sheet: LoreLibrary already rebuilds pins from its ZO_PreHook on ZO_WorldMap_UpdateMap.
 function LUIE_MiniMap_Integrations:OnLoreLibraryMapChanged()
-    self:OnLoreLibraryContentSizeChanged()
+    self:ApplyLoreLibraryPinScale()
 end

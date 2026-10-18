@@ -138,6 +138,18 @@ function MiniMap.CreateConsoleSettings()
             disable = disable,
         },
         {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_MINIMAP_CIRCULAR),
+            tooltip = GetString(LUIE_STRING_LAM_MINIMAP_CIRCULAR_TP),
+            getFunction = function () return MiniMap.SV.circularMap == true end,
+            setFunction = function (value)
+                MiniMap.SV.circularMap = value
+                MiniMap.ApplySettings()
+            end,
+            default = Defaults.circularMap,
+            disable = disable,
+        },
+        {
             type = LHAS.ST_BUTTON,
             label = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW),
             tooltip = GetString(LUIE_STRING_LAM_MINIMAP_SHOW_MAP_NOW_TP),

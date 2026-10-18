@@ -38,6 +38,21 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.7.4
+    "|cFFA500LuiExtended Version 7.2.7.4|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t MiniMap: |cFFFFFFCircular Map|r clips the map to a circle and uses the round frame. Off by default. PC and console.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat: On console and Xbox Play Anywhere, while Gamepad Mini Chat Tabs is managing the gamepad chat filters, LuiExtended no longer turns the System channel on for those tabs. |cFFFFFFPrint to All Tabs|r still sends LuiExtended messages to every active tab.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat: On console and Xbox Play Anywhere, the warning that no chat tab is set to receive announcements no longer appears. Announcements still go to the chat tab.",
+    "",
     -- Version Header 7.2.7.3
     "|cFFA500LuiExtended Version 7.2.7.3|r",
     "",

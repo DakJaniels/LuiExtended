@@ -220,6 +220,55 @@
             </StatusBar>
           </Controls>
         </Scroll>
+        <!-- Tiled from GetTextureFileDimensions in MiniMap_Frame. Tier MEDIUM keeps the ring under the HIGH drag bar and zoom buttons. -->
+        <Texture name="$(parent)_FrameTopLeft"
+                 textureFile="EsoUI/Art/Minimap/minimap_frame_topleft.dds"
+                 mouseEnabled="false"
+                 hidden="true"
+                 layer="4"
+                 tier="MEDIUM">
+          <Dimensions x="256"
+                      y="256" />
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_Scroll"
+                  relativePoint="CENTER" />
+        </Texture>
+        <Texture name="$(parent)_FrameTopRight"
+                 textureFile="EsoUI/Art/Minimap/minimap_frame_topright.dds"
+                 mouseEnabled="false"
+                 hidden="true"
+                 layer="4"
+                 tier="MEDIUM">
+          <Dimensions x="64"
+                      y="256" />
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_Scroll"
+                  relativePoint="CENTER" />
+        </Texture>
+        <Texture name="$(parent)_FrameBottomLeft"
+                 textureFile="EsoUI/Art/Minimap/minimap_frame_bottomleft.dds"
+                 mouseEnabled="false"
+                 hidden="true"
+                 layer="4"
+                 tier="MEDIUM">
+          <Dimensions x="256"
+                      y="64" />
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_Scroll"
+                  relativePoint="CENTER" />
+        </Texture>
+        <Texture name="$(parent)_FrameBottomRight"
+                 textureFile="EsoUI/Art/Minimap/minimap_frame_bottomright.dds"
+                 mouseEnabled="false"
+                 hidden="true"
+                 layer="4"
+                 tier="MEDIUM">
+          <Dimensions x="64"
+                      y="64" />
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_Scroll"
+                  relativePoint="CENTER" />
+        </Texture>
         <Label name="$(parent)_ZoomLabel"
                font="ZoFontGame"
                alpha="0.4"
