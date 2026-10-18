@@ -17,6 +17,12 @@ local MINIMAP_PARCHMENT_BACKDROP_INSET = 4
 --- worldmap_map_background_512tile.dds repeats every 512px (ZO_WorldMapContainerBackground uses coords 0-4 over MAP_WIDTH * 2).
 local MINIMAP_PARCHMENT_TILE_PIXELS = 512
 local MINIMAP_MIN_FRAME_SIZE = 100
+--- Chrome sits this far inside the ring. The square corners are outside the inscribed circle.
+local MINIMAP_CIRCULAR_CHROME_INSET = 8
+--- 1 / sqrt(2). A corner offset of innerRadius * this lands on the ring.
+local MINIMAP_CIRCULAR_DIAGONAL = 0.70710678
+local MINIMAP_ZOOM_BUTTON_SIZE = 24
+local MINIMAP_ZOOM_BUTTON_GAP = 2
 local MINIMAP_ZOOM_LABEL_MAX_ALPHA = 0.4
 local MINIMAP_ZOOM_REVEAL_HOLD_MS = 1250
 local MINIMAP_ZOOM_FADE_OUT_MS = 200
@@ -318,7 +324,15 @@ function LUIE_MiniMap_Frame:ApplyDragBarPlacement()
     local dragBar = self.dragBar
     dragBar:ClearAnchors()
     dragBar:SetDimensions(visibleWidth + 2 * hitPadding, MiniMap.DRAG_BAR_BAR_HEIGHT + 2 * hitPadding)
-    dragBar:SetAnchor(BOTTOMLEFT, self.scroll, BOTTOMLEFT, cornerOffset, -cornerOffset)
+    local scroll = self.scroll
+    local diameter = zo_min(scroll:GetWidth(), scroll:GetHeight())
+    local innerRadius = diameter * 0.5 - MINIMAP_CIRCULAR_CHROME_INSET
+    if MiniMap.SV.circularMap == true and innerRadius > 0 then
+        local circleCornerOffset = innerRadius * MINIMAP_CIRCULAR_DIAGONAL
+        dragBar:SetAnchor(BOTTOMLEFT, scroll, CENTER, -circleCornerOffset, circleCornerOffset)
+    else
+        dragBar:SetAnchor(BOTTOMLEFT, scroll, BOTTOMLEFT, cornerOffset, -cornerOffset)
+    end
 end
 
 --- @param settings MiniMapDefaults
@@ -451,9 +465,61 @@ function LUIE_MiniMap_Frame:ApplyAppearanceFromSettings()
     self:ApplyCircularMap()
 end
 
+--- While circular, the window is the circle's square. A wider rect leaves the resize edge and the corner chrome far outside the ring.
+--- @return boolean true when the root was resized and layout was reapplied
+function LUIE_MiniMap_Frame:ApplySquareCircularBounds()
+    if MiniMap.SV.circularMap ~= true or self.resizing or self.circularBoundsApplying then
+        return false
+    end
+    local root = self.root
+    local side = zo_max(zo_min(root:GetWidth(), root:GetHeight()), MINIMAP_MIN_FRAME_SIZE)
+    if math.abs(root:GetWidth() - side) < 0.5 and math.abs(root:GetHeight() - side) < 0.5 then
+        return false
+    end
+    self.circularBoundsApplying = true
+    MiniMap.SV.width = side
+    MiniMap.SV.height = side
+    root:SetDimensions(side, side)
+    self:ApplyRootLayout(MiniMap.SV)
+    self.circularBoundsApplying = false
+    return true
+end
+
+--- Zoom label, zoom buttons and their hover target. Square mode uses the scroll corners (MiniMap.xml).
+--- Circular mode puts them inside the ring: the label at the top, the buttons at the lower right.
+function LUIE_MiniMap_Frame:ApplyZoomChromePlacement(radius)
+    local scroll = self.scroll
+    local zoomLabel = self.zoomLabel
+    local zoomIn = self.zoomIn
+    local zoomOut = self.zoomOut
+    local zoomMouseOverArea = self.zoomMouseOverArea
+    zoomLabel:ClearAnchors()
+    zoomIn:ClearAnchors()
+    zoomOut:ClearAnchors()
+    zoomMouseOverArea:ClearAnchors()
+    if MiniMap.SV.circularMap == true and radius > MINIMAP_CIRCULAR_CHROME_INSET then
+        local innerRadius = radius - MINIMAP_CIRCULAR_CHROME_INSET
+        local circleCornerOffset = innerRadius * MINIMAP_CIRCULAR_DIAGONAL
+        zoomLabel:SetAnchor(TOP, scroll, CENTER, 0, -(innerRadius))
+        zoomIn:SetAnchor(BOTTOMRIGHT, scroll, CENTER, circleCornerOffset, circleCornerOffset)
+        zoomOut:SetAnchor(BOTTOMRIGHT, zoomIn, BOTTOMLEFT, -MINIMAP_ZOOM_BUTTON_GAP, 0)
+        zoomMouseOverArea:SetDimensions(MINIMAP_ZOOM_BUTTON_SIZE * 2 + MINIMAP_ZOOM_BUTTON_GAP + 8, MINIMAP_ZOOM_BUTTON_SIZE + 8)
+        zoomMouseOverArea:SetAnchor(BOTTOMRIGHT, scroll, CENTER, circleCornerOffset, circleCornerOffset)
+    else
+        zoomLabel:SetAnchor(TOPRIGHT, scroll, TOPRIGHT, -4, 4)
+        zoomIn:SetAnchor(BOTTOMRIGHT, scroll, BOTTOMRIGHT, -4, -4)
+        zoomOut:SetAnchor(BOTTOMRIGHT, zoomIn, BOTTOMLEFT, -MINIMAP_ZOOM_BUTTON_GAP, 0)
+        zoomMouseOverArea:SetDimensions(32, 56)
+        zoomMouseOverArea:SetAnchor(BOTTOMRIGHT, scroll, BOTTOMRIGHT, -54, 0)
+    end
+end
+
 --- Scroll rect in screen space (ZO_RevealingControl.lua:14-20). The four frame files tile from GetTextureFileDimensions.
 --- The ring centerline is MINIMAP_CIRCULAR_RING_* inside that tile, not the top-left file's own center.
 function LUIE_MiniMap_Frame:ApplyCircularMap()
+    if self:ApplySquareCircularBounds() then
+        return
+    end
     local scroll = self.scroll
     local circularMap = MiniMap.SV.circularMap == true
     local scrollLeft = scroll:GetLeft()
@@ -528,14 +594,28 @@ function LUIE_MiniMap_Frame:ApplyCircularMap()
                 (placedTexture.originY - frameCenterY) * frameScale)
         end
     end
+
+    self:ApplyZoomChromePlacement(radius)
+    self:ApplyDragBarPlacement()
 end
 
 function LUIE_MiniMap_Frame:ApplyResizedDimensions()
-    local width = self.root:GetWidth()
-    local height = self.root:GetHeight()
-    MiniMap.SV.width = zo_max(width, MINIMAP_MIN_FRAME_SIZE)
-    MiniMap.SV.height = zo_max(height, MINIMAP_MIN_FRAME_SIZE)
-    self.root:SetDimensions(MiniMap.SV.width, MiniMap.SV.height)
+    local width = zo_max(self.root:GetWidth(), MINIMAP_MIN_FRAME_SIZE)
+    local height = zo_max(self.root:GetHeight(), MINIMAP_MIN_FRAME_SIZE)
+    if MiniMap.SV.circularMap == true then
+        local savedWidth = MiniMap.SV.width or width
+        local savedHeight = MiniMap.SV.height or height
+        local side = width
+        if math.abs(height - savedHeight) > math.abs(width - savedWidth) then
+            side = height
+        end
+        side = zo_max(side, MINIMAP_MIN_FRAME_SIZE)
+        width = side
+        height = side
+    end
+    MiniMap.SV.width = width
+    MiniMap.SV.height = height
+    self.root:SetDimensions(width, height)
     self:ApplyRootLayout(MiniMap.SV)
 end
 
