@@ -1,5 +1,19 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.4
+
+### New
+
+- MiniMap: **Circular Map** clips the map to a circle and uses the round frame. Off by default. PC and console.
+
+### Changes
+
+- Chat: On console and Xbox Play Anywhere, while Gamepad Mini Chat Tabs is managing the gamepad chat filters, LuiExtended no longer turns the System channel on for those tabs. **Print to All Tabs** still sends LuiExtended messages to every active tab.
+
+### Fixed
+
+- Chat: On console and Xbox Play Anywhere, the warning that no chat tab is set to receive announcements no longer appears. Announcements still go to the chat tab.
+
 ## Version 7.2.7.3
 
 ### Fixed
