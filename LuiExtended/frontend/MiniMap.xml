@@ -4,7 +4,9 @@
   <Controls>
     <!-- Pool templates (MiniMap_TileLayer.lua / MiniMap_PinLayer.lua). Copies of the ZOS virtuals in
          EsoUI/Ingame/Map/WorldMap.xml (ZO_MapTile, ZO_PinBlob, ZO_PinPolygonBlob, ZO_MapKeepLink) and
-         EsoUI/Ingame/Map/MapPin.xml (ZO_MapPin) without mouse handlers. -->
+         EsoUI/Ingame/Map/MapPin.xml (ZO_MapPin) without mouse handlers.
+         Pin, area, and polygon tier is MEDIUM, matching ZO_WorldMapContainer (WorldMap.xml) and the
+         scroll. Draw level still puts the pin icon (10) above the blobs (6). -->
     <Texture name="LUIE_MiniMap_Tile"
              pixelRoundingEnabled="false"
              textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"
@@ -13,7 +15,7 @@
                   y="230" />
     </Texture>
     <Control name="LUIE_MiniMap_Pin"
-             tier="HIGH"
+             tier="MEDIUM"
              level="10"
              hidden="true"
              virtual="true">
@@ -38,7 +40,7 @@
       </Controls>
     </Control>
     <Texture name="LUIE_MiniMap_AreaBlob"
-             tier="HIGH"
+             tier="MEDIUM"
              level="6"
              pixelRoundingEnabled="false"
              shaderEffectType="HALO"
@@ -47,7 +49,7 @@
              pointLayout="COUNTER_CLOCKWISE"
              smoothingEnabled="true"
              layer="BACKGROUND"
-             tier="HIGH"
+             tier="MEDIUM"
              level="6"
              virtual="true">
       <Border minThickness="3px"
