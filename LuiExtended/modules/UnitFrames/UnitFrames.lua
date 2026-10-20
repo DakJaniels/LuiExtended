@@ -37,6 +37,9 @@ local moduleName = UnitFrames.moduleName
 -- local unitTag
 -- local playerTlw
 
+-- OnUnitCreated / OnUnitDestroyed only act on group members (groupN, groupNcompanion) and player pets.
+local UNIT_LIFETIME_EVENT_TAG_PREFIXES = { "group", "playerpet" }
+
 local g_PendingUpdate =
 {
     Group = { flag = false, delay = 200, name = moduleName .. "PendingGroupUpdate" },
@@ -264,7 +267,12 @@ function UnitFrames.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, UnitFrames.OnReticleTargetChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_PLAYER_CHANGED, UnitFrames.OnReticleTargetPlayerChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_DISPOSITION_UPDATE, UnitFrames.OnDispositionUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_UNIT_CREATED, UnitFrames.OnUnitCreated)
+    eventManager:AddFilterForEvent(moduleName, EVENT_DISPOSITION_UPDATE, REGISTER_FILTER_UNIT_TAG, "reticleover")
+    for _, unitTagPrefix in ipairs(UNIT_LIFETIME_EVENT_TAG_PREFIXES) do
+        local namespace = moduleName .. "_UnitCreated_" .. unitTagPrefix
+        eventManager:RegisterForEvent(namespace, EVENT_UNIT_CREATED, UnitFrames.OnUnitCreated)
+        eventManager:AddFilterForEvent(namespace, EVENT_UNIT_CREATED, REGISTER_FILTER_UNIT_TAG_PREFIX, unitTagPrefix)
+    end
     eventManager:RegisterForEvent(moduleName, EVENT_LEVEL_UPDATE, UnitFrames.OnLevelUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_CHAMPION_POINT_UPDATE, UnitFrames.OnLevelUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_TITLE_UPDATE, UnitFrames.TitleUpdate)
@@ -277,8 +285,13 @@ function UnitFrames.Initialize(enabled)
         eventManager:RegisterForEvent(moduleName, EVENT_COMBAT_EVENT, UnitFrames.OnCombatEvent)
         eventManager:AddFilterForEvent(moduleName, EVENT_COMBAT_EVENT, REGISTER_FILTER_IS_ERROR, true)
 
-        eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DESTROYED, UnitFrames.OnUnitDestroyed)
+        for _, unitTagPrefix in ipairs(UNIT_LIFETIME_EVENT_TAG_PREFIXES) do
+            local namespace = moduleName .. "_UnitDestroyed_" .. unitTagPrefix
+            eventManager:RegisterForEvent(namespace, EVENT_UNIT_DESTROYED, UnitFrames.OnUnitDestroyed)
+            eventManager:AddFilterForEvent(namespace, EVENT_UNIT_DESTROYED, REGISTER_FILTER_UNIT_TAG_PREFIX, unitTagPrefix)
+        end
         eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_COMPANION_STATE_CHANGED, UnitFrames.ActiveCompanionStateChanged)
+        eventManager:RegisterForEvent(moduleName, EVENT_COLLECTIBLE_UPDATED, UnitFrames.OnCollectibleUpdated)
         eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_ADDED, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_REMOVED, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_IGNORE_ADDED, UnitFrames.SocialUpdateFrames)
@@ -492,6 +505,45 @@ function UnitFrames.CompanionUpdate()
     end
 end
 
+-- Assistant units linger (DoesUnitExist stays true) for a few seconds after the collectible is dismissed, until
+-- EVENT_UNIT_DESTROYED. The dismissed assistant's short name hides its pet frame immediately.
+local dismissedAssistantCollectibleId = nil
+local dismissedAssistantShortName = nil
+
+--- @param unitName string
+--- @return boolean
+local function IsDismissedAssistantUnitName(unitName)
+    if dismissedAssistantShortName == nil then
+        return false
+    end
+    local formattedName = zo_strformat("<<1>>", unitName)
+    if formattedName == dismissedAssistantShortName then
+        return true
+    end
+    local prefix = zo_strsub(formattedName, 1, #dismissedAssistantShortName + 1)
+    return prefix == dismissedAssistantShortName .. " " or prefix == dismissedAssistantShortName .. ","
+end
+
+-- Runs on the EVENT_COLLECTIBLE_UPDATED listener (fires when a collectible is set active / inactive,
+-- CollectibleDataManager.lua).
+--- @param eventId integer
+--- @param collectibleId integer
+function UnitFrames.OnCollectibleUpdated(eventId, collectibleId)
+    if GetCollectibleCategoryType(collectibleId) ~= COLLECTIBLE_CATEGORY_TYPE_ASSISTANT then
+        return
+    end
+    if IsCollectibleActive(collectibleId, GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+        if dismissedAssistantCollectibleId == collectibleId then
+            dismissedAssistantCollectibleId = nil
+            dismissedAssistantShortName = nil
+        end
+        return
+    end
+    dismissedAssistantCollectibleId = collectibleId
+    dismissedAssistantShortName = LuiData.Data.CollectibleTables.All[collectibleId]
+    UnitFrames.CustomPetUpdate()
+end
+
 function UnitFrames.CustomPetUpdate()
     if UnitFrames.CustomFrames["PetGroup1"] == nil then
         return
@@ -505,9 +557,14 @@ function UnitFrames.CustomPetUpdate()
 
     -- First we query all pet unitTag for existence and save them to local list
     local n = 1 -- counter used to reference custom frames. it always continuous while games unitTag could have gaps
+    local isDismissedAssistantPresent = false
     for i = 1, 7 do
         local unitTag = "playerpet" .. i
-        if DoesUnitExist(unitTag) then
+        local isDismissedAssistant = DoesUnitExist(unitTag) and IsDismissedAssistantUnitName(GetUnitName(unitTag))
+        if isDismissedAssistant then
+            isDismissedAssistantPresent = true
+            UnitFrames.CustomFrames[unitTag] = nil
+        elseif DoesUnitExist(unitTag) then
             -- Compare whitelist entries and only add this pet to the list if it is whitelisted.
             local unitName = GetUnitName(unitTag)
             local compareWhitelist = zo_strlower(unitName)
@@ -527,6 +584,12 @@ function UnitFrames.CustomPetUpdate()
             -- For non-existing unitTags we will remove reference from CustomFrames table
             UnitFrames.CustomFrames[unitTag] = nil
         end
+    end
+
+    -- The lingering unit is gone (EVENT_UNIT_DESTROYED); stop filtering by that name.
+    if not isDismissedAssistantPresent then
+        dismissedAssistantCollectibleId = nil
+        dismissedAssistantShortName = nil
     end
 
     UnitFrames.CustomFramesUnreferencePetControl(n)
