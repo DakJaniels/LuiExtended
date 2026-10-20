@@ -259,6 +259,9 @@ end
 local INFO_PANEL_LABEL_PADDING = 6
 local INFO_PANEL_CLOCK_LABEL_MIN_WIDTH = 60
 
+--- Proportional digits change width every tick (clock seconds, FPS, latency). While the character count is
+--- unchanged the label only grows, so it settles at the widest value seen instead of reflowing each tick;
+--- a character count change re-fits it exactly.
 --- @param label LabelControl
 --- @param text string
 --- @param minWidth number|nil
@@ -267,8 +270,13 @@ local function FitInfoPanelLabelToText(label, text, minWidth)
     if not label then
         return false
     end
-    local labelWidth = LUIE.GetLabelStringWidthUI(label, text) + INFO_PANEL_LABEL_PADDING
+    local labelWidth = zo_ceil(LUIE.GetLabelStringWidthUI(label, text)) + INFO_PANEL_LABEL_PADDING
     labelWidth = zo_max(minWidth or 0, labelWidth)
+    local textLength = #text
+    if label.infoPanelLayoutTextLength == textLength and label.infoPanelLayoutWidth and labelWidth < label.infoPanelLayoutWidth then
+        labelWidth = label.infoPanelLayoutWidth
+    end
+    label.infoPanelLayoutTextLength = textLength
     if label.infoPanelLayoutWidth ~= labelWidth then
         label.infoPanelLayoutWidth = labelWidth
         label:SetWidth(labelWidth)
@@ -308,6 +316,7 @@ local function ClearInfoPanelLayoutWidth(control, label)
     end
     if label then
         label.infoPanelLayoutWidth = nil
+        label.infoPanelLayoutTextLength = nil
     end
 end
 
