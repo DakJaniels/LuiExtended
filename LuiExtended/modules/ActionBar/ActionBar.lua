@@ -300,6 +300,8 @@ local g_gameFallbackEndTimeMs = {}
 local g_gameFallbackStackCount = {}
 --- @type table<integer, integer>
 local g_gameFallbackSnapshotAbilityId = {}
+--- Set when the hotbar swap flip starts; g_hotbarCategory is already the new bar but the icons have not flipped yet.
+local g_gameFallbackSwapPending = false
 
 local slotsUpdated = {}
 
@@ -323,13 +325,20 @@ local function OnSwapAnimationHalfDone(animation, button, isBackBarSlot)
             slotsUpdated[i] = true
         end
     end
-    UpdateGameFallbackTimers(GetGameTimeMilliseconds(), true)
+    if g_gameFallbackSwapPending then
+        g_gameFallbackSwapPending = false
+        UpdateGameFallbackTimers(GetGameTimeMilliseconds(), true)
+    end
 end
 
 ---
 --- @param animation AnimationTimeline
 --- @param button ActionButton
 local function OnSwapAnimationDone(animation, button)
+    if g_gameFallbackSwapPending then
+        g_gameFallbackSwapPending = false
+        UpdateGameFallbackTimers(GetGameTimeMilliseconds(), true)
+    end
     button.noUpdates = false
     if button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
         g_activeWeaponSwapInProgress = false
@@ -1394,6 +1403,7 @@ end
 function ActionBar.OnPlayerActivated()
     -- Manually trigger event to update stats
     g_hotbarCategory = GetActiveHotbarCategory()
+    g_gameFallbackSwapPending = false
     ActionBar.CreateCompanionUltimateLabels()
     RefreshCompanionQuickslotAnchors()
     ActionBar.OnSlotsFullUpdate()
@@ -1664,7 +1674,7 @@ end
 --- @param hotbarCategory HotBarCategory
 --- @param actionSlotIndex integer
 OnGameFallbackEffectUpdated = function (hotbarCategory, actionSlotIndex)
-    if not GameFallbackTimersAreEnabled() then
+    if g_gameFallbackSwapPending or not GameFallbackTimersAreEnabled() then
         return
     end
     local luiSlotNum = GetGameFallbackLuiSlotFromEvent(hotbarCategory, actionSlotIndex)
@@ -1821,6 +1831,9 @@ UpdateGameFallbackTimers = function (currentTimeMS, resnapshotFromApi)
     ApplyNativeActionButtonTimerVisibility()
     if not GameFallbackTimersAreEnabled() then
         ClearAllGameFallbackSlots()
+        return
+    end
+    if g_gameFallbackSwapPending then
         return
     end
 
@@ -3883,6 +3896,28 @@ end
 --- Handles EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED: updates hotbar category, backbar icons, ultimate.
 --- @param didActiveHotbarChange boolean
 --- @param shouldUpdateAbilityAssignments boolean
+--- Mirrors ZOS UpdateAllSlotsForActiveHotbar timerSwapAnimation / stackCountSwapAnimation on LUIE bar labels.
+local function PlaySwapLabelFadeAnimations()
+    for _, customToggleControl in pairs(g_uiCustomToggle) do
+        if customToggleControl ~= true then
+            if customToggleControl.labelSwapAnimation then
+                customToggleControl.labelSwapAnimation:PlayFromStart()
+            end
+            if customToggleControl.stackSwapAnimation then
+                customToggleControl.stackSwapAnimation:PlayFromStart()
+            end
+        end
+    end
+    for _, procAnimation in pairs(g_uiProcAnimation) do
+        if procAnimation ~= true then
+            local procLoopTexture = procAnimation.procLoopTexture
+            if procLoopTexture and procLoopTexture.labelSwapAnimation then
+                procLoopTexture.labelSwapAnimation:PlayFromStart()
+            end
+        end
+    end
+end
+
 --- @param activeHotbarCategory HotBarCategory
 function ActionBar.OnActiveHotbarUpdate(didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
     if didActiveHotbarChange == true or shouldUpdateAbilityAssignments == true then
@@ -3892,10 +3927,13 @@ function ActionBar.OnActiveHotbarUpdate(didActiveHotbarChange, shouldUpdateAbili
                 physicalSlot.hotbarSwapAnimation:PlayFromStart()
             end
         end
-    else
-        g_activeWeaponSwapInProgress = false
-        Backbar.RefreshAllActivationHighlights()
+        PlaySwapLabelFadeAnimations()
+        -- Fallback re-reads the new bar in OnSwapAnimationHalfDone, same moment as BarSlotUpdate.
+        g_gameFallbackSwapPending = true
+        return
     end
+    g_activeWeaponSwapInProgress = false
+    Backbar.RefreshAllActivationHighlights()
     UpdateGameFallbackTimers(GetGameTimeMilliseconds(), true)
 end
 
@@ -3906,6 +3944,7 @@ function ActionBar.OnSlotsFullUpdate()
     if g_potionUsed == true then
         return
     end
+    g_gameFallbackSwapPending = false
 
     -- Handle ultimate label first
     ActionBar.UpdateUltimateLabel()
@@ -3972,6 +4011,7 @@ function ActionBar.PlayProcAnimations(slotNum)
     label:SetColor(1, 1, 1, 1)
     label:SetHidden(false)
     procLoopTexture.label = label
+    procLoopTexture.labelSwapAnimation = animationManager:CreateTimelineFromVirtual("TimerSwapAnimation", label)
 
     -- Create timeline animation
     local procLoopTimeline = animationManager:CreateTimelineFromVirtual("UltimateReadyLoop", procLoopTexture)
@@ -4088,6 +4128,9 @@ function ActionBar.ShowCustomToggle(slotNum)
     stack:SetColor(1, 1, 1, 1)
     stack:SetHidden(false)
     toggleFrame.stack = stack
+    -- Labels anchor to the slot, not FlipCard, so they do not squash with the swap flip. Fade like ZOS timerText.
+    toggleFrame.labelSwapAnimation = animationManager:CreateTimelineFromVirtual("TimerSwapAnimation", label)
+    toggleFrame.stackSwapAnimation = animationManager:CreateTimelineFromVirtual("TimerSwapAnimation", stack)
 
     -- Replace placeholder with actual frame and show it
     g_uiCustomToggle[slotNum] = toggleFrame
