@@ -247,9 +247,6 @@ function LUIE.GetLabelStringWidthUI(label, text)
         return 0
     end
     local widthNative = label:GetStringWidth(text)
-    if not widthNative or widthNative <= 0 then
-        return 0
-    end
     return widthNative / GetUIGlobalScale()
 end
 
