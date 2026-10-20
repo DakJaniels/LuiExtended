@@ -267,7 +267,7 @@ local function FitInfoPanelLabelToText(label, text, minWidth)
     if not label then
         return false
     end
-    local labelWidth = label:GetStringWidth(text) + INFO_PANEL_LABEL_PADDING
+    local labelWidth = LUIE.GetLabelStringWidthUI(label, text) + INFO_PANEL_LABEL_PADDING
     labelWidth = zo_max(minWidth or 0, labelWidth)
     if label.infoPanelLayoutWidth ~= labelWidth then
         label.infoPanelLayoutWidth = labelWidth
@@ -1286,6 +1286,12 @@ function InfoPanel.Initialize(enabled)
     -- * EVENT_RIDING_SKILL_IMPROVEMENT (*[RidingTrainType|#RidingTrainType]* _ridingSkillType_, *integer* _previous_, *integer* _current_, *[RidingTrainSource|#RidingTrainSource]* _source_)
     eventManager:RegisterForEvent(moduleName, EVENT_RIDING_SKILL_IMPROVEMENT, InfoPanel.UpdateMountFeedTimer)
     InfoPanel.RegisterAllMeterUpdates()
+
+    -- Label widths are cached in UI units measured at the current UI scale; re-measure when the canvas changes.
+    LUIE.RegisterForUiCanvasChange(moduleName .. "_UiCanvas", function ()
+        InfoPanel.ClearAllLayoutWidths()
+        InfoPanel.RearrangePanel(true)
+    end)
 
     -- Combat state: always register so enabling HideInCombat in settings later works. Handler checks HideInCombat.
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_COMBAT_STATE, function (eventId, inCombat)

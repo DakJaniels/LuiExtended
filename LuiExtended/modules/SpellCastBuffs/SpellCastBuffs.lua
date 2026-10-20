@@ -32,11 +32,7 @@ local ABILITY_ID_LABEL_FIT_MARGIN = 0.92
 --- @return number
 local function GetAbilityIdStringWidthUI(label, idText)
     label:Clean()
-    local widthNative = label:GetStringWidth(idText)
-    if not widthNative or widthNative <= 0 then
-        return 0
-    end
-    return widthNative / GetUIGlobalScale()
+    return LUIE.GetLabelStringWidthUI(label, idText)
 end
 local g_scbDisplayAlpha -- Last alpha for buff containers (HUD fade can reset to 1 on reload)
 

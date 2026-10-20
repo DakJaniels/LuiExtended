@@ -309,12 +309,10 @@ function UnitFrames.Initialize(enabled)
         -- Group Election Info
         UnitFrames.RegisterForGroupElectionEvents()
 
-        -- Register for screen resolution changes to recalculate positioning
-        eventManager:RegisterForEvent(moduleName, EVENT_SCREEN_RESIZED, function (eventId, pixelWidth, pixelHeight)
-            -- if LUIE.IsDevDebugEnabled() then
-            --     LUIE:Log("Debug", "Unit Frames: Screen resolution changed to " .. pixelWidth .. LUIE_TINY_X_FORMATTER .. pixelHeight .. " pixels, recalculating positions")
-            -- end
+        -- Resolution or custom UI scale changes: reposition, then re-measure text-fitted layouts (TopInfo, title, raid stats).
+        LUIE.RegisterForUiCanvasChange(moduleName .. "_UiCanvas", function ()
             UnitFrames.CustomFramesSetPositions()
+            UnitFrames.CustomFramesApplyAllLayouts({ unhide = false, group = false, includeRaid = true, raid = false })
         end)
 
         if UnitFrames.CustomFrames["companion"] then
@@ -2787,7 +2785,7 @@ local RAID_EXPANDED_STATS_SAMPLE_SINGLE = "999.9k"
 local function GetRaidExpandedStatsWidth(statsLabel, combatStatsSettings)
     local showBoth = combatStatsSettings ~= nil and combatStatsSettings.showDPS == true and combatStatsSettings.showHPS == true
     local sampleText = showBoth and RAID_EXPANDED_STATS_SAMPLE_BOTH or RAID_EXPANDED_STATS_SAMPLE_SINGLE
-    local measuredWidth = statsLabel:GetStringWidth(sampleText) or 0
+    local measuredWidth = LUIE.GetLabelStringWidthUI(statsLabel, sampleText)
     return zo_max(RAID_EXPANDED_STATS_MIN_WIDTH, zo_ceil(measuredWidth) + RAID_EXPANDED_STATS_TEXT_PADDING)
 end
 -- Debug preview slots have no LibGroupBroadcast data; they show the missing-icon texture (same as the other LUIE previews).

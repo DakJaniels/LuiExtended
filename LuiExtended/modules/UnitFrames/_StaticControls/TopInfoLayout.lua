@@ -271,7 +271,7 @@ local function GetTopInfoNameRowUsedWidth(label, maxWidth)
     if plainText == "" then
         return 0
     end
-    local stringWidth = label:GetStringWidth(plainText)
+    local stringWidth = LUIE.GetLabelStringWidthUI(label, plainText)
     if maxWidth and maxWidth > 0 then
         return zo_min(stringWidth, maxWidth)
     end
@@ -310,7 +310,7 @@ local function GetTopInfoLevelClusterRequiredWidth(self, showLevelRow)
     local plainText = StripMarkupForStringWidth(self.level:GetText())
     local textWidth = 0
     if plainText ~= "" then
-        textWidth = self.level:GetStringWidth(plainText)
+        textWidth = LUIE.GetLabelStringWidthUI(self.level, plainText)
     end
     if textWidth <= 0 then
         textWidth = TOPINFO_LEVEL_TEXT_FALLBACK_WIDTH
@@ -392,7 +392,7 @@ local function LayoutTopInfoLevelCluster(self, rowOffsetY, rowStartX, showLevelR
             local needed = available
             local plainText = StripMarkupForStringWidth(self.level:GetText())
             if plainText ~= "" then
-                needed = self.level:GetStringWidth(plainText)
+                needed = LUIE.GetLabelStringWidthUI(self.level, plainText)
             end
             self.level:SetWidth(zo_min(needed, available)+10)
         end

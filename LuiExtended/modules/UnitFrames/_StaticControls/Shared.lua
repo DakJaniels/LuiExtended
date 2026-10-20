@@ -719,7 +719,7 @@ function FrameObject:UpdateStaticControlTitleAndAva()
         end
         local titletext = StringOnlyGSUB(title, "%^%a+", "")
         self.title:SetText(titletext)
-        self.title:SetWidth(self.title:GetStringWidth(titletext))
+        self.title:SetWidth(LUIE.GetLabelStringWidthUI(self.title, titletext))
         if self.unitTag == "reticleover" then
             local showTitleLabel
             if self.isPlayer then
