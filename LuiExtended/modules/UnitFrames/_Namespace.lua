@@ -166,6 +166,7 @@ UnitFrames.Defaults =
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 20,
+            nameMinFont = 14,
             texture = "Minimalistic",
         },
         target =
@@ -174,6 +175,7 @@ UnitFrames.Defaults =
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 20,
+            nameMinFont = 14,
             texture = "Minimalistic",
         },
         group =
@@ -182,6 +184,7 @@ UnitFrames.Defaults =
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 20,
+            nameMinFont = 14,
             texture = "Minimalistic",
         },
         raid =
@@ -190,6 +193,7 @@ UnitFrames.Defaults =
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 16,
+            nameMinFont = 10,
             texture = "Minimalistic",
         },
         companion =
@@ -198,6 +202,7 @@ UnitFrames.Defaults =
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 16,
+            nameMinFont = 10,
             texture = "Minimalistic",
         },
         pet =
@@ -206,6 +211,7 @@ UnitFrames.Defaults =
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 16,
+            nameMinFont = 10,
             texture = "Minimalistic",
         },
         boss =
@@ -214,6 +220,7 @@ UnitFrames.Defaults =
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 16,
+            nameMinFont = 10,
             texture = "Minimalistic",
         },
         ava =
@@ -222,6 +229,7 @@ UnitFrames.Defaults =
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
             fontOther = 20,
+            nameMinFont = 14,
             texture = "Minimalistic",
         },
     },

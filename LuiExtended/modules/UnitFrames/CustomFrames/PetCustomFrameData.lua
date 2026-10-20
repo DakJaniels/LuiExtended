@@ -49,6 +49,7 @@ function LUIE.CustomFramesBuildPet()
                 ["name"] = shb:GetNamedChild("_Name"),
             }
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
+            UnitFrames.CustomFrames[unitTag].name:SetMaxLineCount(1)
             UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Current (Percentage%)"
             UnitFrames.CustomFramesManager:CreateFrame(unitTag, UnitFrames.CustomFrames[unitTag], "pet", LUIE_CustomFrameVisualizers.SetupPetFrame)
         end

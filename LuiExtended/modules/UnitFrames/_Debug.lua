@@ -730,6 +730,77 @@ function UnitFrames.DumpFontDiagnostics()
     end
 end
 
+--- Prints the measurements the compact name clip / shrink-to-fit uses for one frame.
+--- "/luiufnamefit list" prints every visible custom frame key.
+--- @param frameKey string|nil UnitFrames.CustomFrames key or "list", defaults to "companion"
+function UnitFrames.DumpNameFitDiagnostics(frameKey)
+    if frameKey == nil or frameKey == "" then
+        frameKey = "companion"
+    end
+    if frameKey == "list" then
+        LUIE.ChatOutput:AddSystemMessage("[LUIE] namefit list: visible custom frames")
+        for registryKey, listedFrame in pairs(UnitFrames.CustomFrames) do
+            if type(listedFrame) == "table" and listedFrame.control and listedFrame.name and not listedFrame.control:IsControlHidden() then
+                LUIE.ChatOutput:AddSystemMessage(string.format("  %s (category=%s unitTag=%s) name='%s'",
+                    tostring(registryKey), tostring(listedFrame.frameCategory), tostring(listedFrame.unitTag),
+                    tostring(listedFrame.name:GetText())))
+            end
+        end
+        return
+    end
+    local output = LUIE.ChatOutput
+    local frame = UnitFrames.CustomFrames[frameKey]
+    if frame == nil or frame.name == nil then
+        output:AddSystemMessage(string.format("[LUIE] namefit: no frame/name for '%s'", frameKey))
+        return
+    end
+    local uiGlobalScale = GetUIGlobalScale()
+    output:AddSystemMessage(string.format("[LUIE] namefit %s: category=%s uiScale=%s controlHidden=%s",
+        frameKey, tostring(frame.frameCategory), formatNumber(uiGlobalScale),
+        tostring(frame.control and frame.control:IsControlHidden())))
+
+    local function describeLabel(labelName, label)
+        if label == nil then
+            output:AddSystemMessage(string.format("  %s: nil", labelName))
+            return
+        end
+        local text = label:GetText() or ""
+        output:AddSystemMessage(string.format("  %s: hidden=%s text='%s' stringWidthRaw=%s stringWidthUI=%s textWidth=%s width=%s fontHeight=%s",
+            labelName, tostring(label:IsHidden()), text,
+            formatNumber(label:GetStringWidth(text)),
+            formatNumber(LUIE.GetLabelStringWidthUI(label, text)),
+            formatNumber(label:GetTextWidth()),
+            formatNumber(label:GetWidth()),
+            formatNumber(label:GetFontHeight())))
+    end
+
+    local healthEntry = frame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    describeLabel("health", healthEntry and healthEntry.label)
+    describeLabel("dead", frame.dead)
+    describeLabel("name", frame.name)
+
+    local name = frame.name
+    output:AddSystemMessage(string.format("  name markupWidthUI=%s leftInset=%s fit{text='%s' maxW=%s size=%s min=%s shrunk=%s}",
+        formatNumber(LUIE.GetLabelMarkupTextWidthUI(name, name:GetText())),
+        formatNumber(frame.compactNameLeftInset),
+        tostring(name.nameFitText),
+        formatNumber(name.nameFitMaxWidth),
+        formatNumber(name.nameFitFontSize),
+        formatNumber(name.nameFitMinFontSize),
+        tostring(name.nameFitWasShrunk)))
+
+    local appearanceCategory = frame.frameCategory
+    if appearanceCategory == "smallGroup" then
+        appearanceCategory = "group"
+    elseif appearanceCategory == "avaTarget" then
+        appearanceCategory = "ava"
+    end
+    local appearance, canShrink = UnitFrames.GetNameFontInfo(appearanceCategory)
+    output:AddSystemMessage(string.format("  appearance %s: face=%s fontOther=%s nameMinFont=%s canShrink=%s",
+        appearanceCategory, tostring(appearance.fontFace), formatNumber(appearance.fontOther),
+        formatNumber(appearance.nameMinFont), tostring(canShrink)))
+end
+
 -- -----------------------------------------------------------------------------
 -- Slash command registration
 -- -----------------------------------------------------------------------------
@@ -746,6 +817,7 @@ local DEBUG_COMMANDS =
     ["/luiufcomp"]      = DebugCompanion,
     ["/luiufall"]       = DebugAll,
     ["/luiufdumpfonts"] = UnitFrames.DumpFontDiagnostics,
+    ["/luiufnamefit"]   = UnitFrames.DumpNameFitDiagnostics,
 }
 
 SLASH_COMMANDS["/luieufdebug"] = function (arg)

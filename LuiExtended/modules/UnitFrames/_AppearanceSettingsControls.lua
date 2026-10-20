@@ -101,6 +101,25 @@ local function AppendLAMFontSizeControls(controls, category, settings, defaults,
         controls[#controls + 1] =
         {
             type = "slider",
+            name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_NAME_MIN),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_NAME_MIN_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunc = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).nameMinFont
+            end,
+            setFunc = function (value)
+                GetAppearanceEntry(settings, category).nameMinFont = value
+                applyFont()
+            end,
+            width = "half",
+            disabled = disabledFunc,
+            default = defaultEntry.nameMinFont,
+        }
+        controls[#controls + 1] =
+        {
+            type = "slider",
             name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS),
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS_TP),
             min = FONT_SIZE_MIN,
@@ -137,6 +156,25 @@ local function AppendLAMFontSizeControls(controls, category, settings, defaults,
             disabled = disabledFunc,
             default = defaultEntry.fontBars,
         }
+        controls[#controls + 1] =
+        {
+            type = "slider",
+            name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_NAME_MIN),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_NAME_MIN_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunc = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).nameMinFont
+            end,
+            setFunc = function (value)
+                GetAppearanceEntry(settings, category).nameMinFont = value
+                applyFont()
+            end,
+            width = "full",
+            disabled = disabledFunc,
+            default = defaultEntry.nameMinFont,
+        }
     end
 end
 
@@ -168,6 +206,24 @@ local function AppendLHASFontSizeRows(rows, category, settings, defaults, defaul
             end,
             disable = disabledFunc,
             default = defaultEntry.fontOther,
+        }
+        rows[#rows + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_NAME_MIN),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_NAME_MIN_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunction = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).nameMinFont
+            end,
+            setFunction = function (value)
+                GetAppearanceEntry(settings, category).nameMinFont = value
+                markFontDeferred()
+            end,
+            disable = disabledFunc,
+            default = defaultEntry.nameMinFont,
         }
         rows[#rows + 1] =
         {
@@ -205,6 +261,24 @@ local function AppendLHASFontSizeRows(rows, category, settings, defaults, defaul
             end,
             disable = disabledFunc,
             default = defaultEntry.fontBars,
+        }
+        rows[#rows + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_NAME_MIN),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_NAME_MIN_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunction = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).nameMinFont
+            end,
+            setFunction = function (value)
+                GetAppearanceEntry(settings, category).nameMinFont = value
+                markFontDeferred()
+            end,
+            disable = disabledFunc,
+            default = defaultEntry.nameMinFont,
         }
     end
 end

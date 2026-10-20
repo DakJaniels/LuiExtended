@@ -250,6 +250,34 @@ function LUIE.GetLabelStringWidthUI(label, text)
     return widthNative / GetUIGlobalScale()
 end
 
+--- String width in UI units for text with markup. GetStringWidth does not handle markup
+--- (SmithingCreation_Shared.lua), so |t icons are summed from their markup width
+--- (a number, or N% of the font height) and color / gender markup is removed.
+--- @param label LabelControl
+--- @param text string|nil
+--- @return number
+function LUIE.GetLabelMarkupTextWidthUI(label, text)
+    if label == nil or text == nil or text == "" then
+        return 0
+    end
+    local iconWidthTotal = 0
+    local fontHeight
+    local plainText = zo_strgsub(text, "|t([^:|]+):[^|]*|t", function (iconWidthText)
+        local percentText = zo_strmatch(iconWidthText, "^(%d+)%%$")
+        if percentText then
+            fontHeight = fontHeight or label:GetFontHeight()
+            iconWidthTotal = iconWidthTotal + fontHeight * tonumber(percentText) / 100
+        else
+            iconWidthTotal = iconWidthTotal + (tonumber(iconWidthText) or 0)
+        end
+        return ""
+    end)
+    plainText = zo_strgsub(plainText, "|c%x%x%x%x%x%x", "")
+    plainText = zo_strgsub(plainText, "|r", "")
+    plainText = zo_strgsub(plainText, "%^%a+", "")
+    return LUIE.GetLabelStringWidthUI(label, plainText) + iconWidthTotal
+end
+
 -- GuiRoot dimensions settle after the custom UI scale setting event, so canvas callbacks run deferred.
 local UI_CANVAS_CHANGE_DELAY_MS = 50
 --- @type table<string, integer>

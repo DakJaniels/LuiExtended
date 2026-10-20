@@ -65,6 +65,104 @@ local function CustomFramesMakeFont(fontKey, fontStyle, size)
     return LUIE.Font.Resolve(fontKey, size, fontStyle)
 end
 
+--- TopInfo frameCategory (Shared.lua HasCustomTopInfoFrameCategory) -> appearance category.
+UnitFrames.TOPINFO_FRAME_CATEGORY_TO_APPEARANCE =
+{
+    player = "player",
+    target = "target",
+    smallGroup = "group",
+    avaTarget = "ava",
+}
+
+--- Name font settings for an appearance category. canShrink is false for named fonts (fixed-size tokens).
+--- @param appearanceCategory string
+--- @return table appearance GetCustomFrameAppearance result (fontFace, fontStyle, fontOther, nameMinFont)
+--- @return boolean canShrink
+function UnitFrames.GetNameFontInfo(appearanceCategory)
+    local appearance = UnitFrames.GetCustomFrameAppearance(appearanceCategory)
+    return appearance, LUIE.Font.IsDynamicFaceMedia(appearance.fontFace)
+end
+
+--- Caption font settings for a TopInfo name label.
+--- @param frameCategory string
+--- @return table|nil appearance
+--- @return boolean canShrink
+function UnitFrames.GetTopInfoNameFontInfo(frameCategory)
+    local appearanceCategory = UnitFrames.TOPINFO_FRAME_CATEGORY_TO_APPEARANCE[frameCategory]
+    if appearanceCategory == nil then
+        return nil, false
+    end
+    return UnitFrames.GetNameFontInfo(appearanceCategory)
+end
+
+--- @param appearance table GetNameFontInfo appearance
+--- @param size number
+--- @return string
+function UnitFrames.CreateNameLabelFont(appearance, size)
+    return CustomFramesMakeFont(appearance.fontFace, appearance.fontStyle, size)
+end
+
+--- Forget the cached fit so the next FitNameLabelFont re-measures (font was set elsewhere).
+--- @param label LabelControl|nil
+function UnitFrames.ClearNameLabelFit(label)
+    if label == nil then
+        return
+    end
+    label.nameFitText = nil
+    label.nameFitMaxWidth = nil
+    label.nameFitFontFace = nil
+    label.nameFitFontStyle = nil
+    label.nameFitFontSize = nil
+    label.nameFitMinFontSize = nil
+    label.nameFitWasShrunk = nil
+end
+
+--- Steps the name font down one point at a time until it fits maxWidth or reaches nameMinFont
+--- (ZO_FontAdjustingWrapLabel pattern, LabelTemplates_Shared.lua). Ellipsis / truncation covers anything
+--- still too wide. Compact frames re-run this on every health tick, so an unchanged text / width / font
+--- returns the cached result without touching the font.
+--- @param label LabelControl|nil
+--- @param appearance table|nil
+--- @param canShrink boolean
+--- @param maxWidth number
+--- @return boolean wasShrunk
+function UnitFrames.FitNameLabelFont(label, appearance, canShrink, maxWidth)
+    if label == nil or appearance == nil or not canShrink then
+        return false
+    end
+    local text = label:GetText()
+    local fitMaxWidth = zo_ceil(maxWidth)
+    if label.nameFitText == text
+    and label.nameFitMaxWidth == fitMaxWidth
+    and label.nameFitFontFace == appearance.fontFace
+    and label.nameFitFontStyle == appearance.fontStyle
+    and label.nameFitFontSize == appearance.fontOther
+    and label.nameFitMinFontSize == appearance.nameMinFont then
+        return label.nameFitWasShrunk == true
+    end
+
+    local fontSize = appearance.fontOther
+    label:SetFont(CustomFramesMakeFont(appearance.fontFace, appearance.fontStyle, fontSize))
+    if fitMaxWidth > 0 and text ~= nil and text ~= "" then
+        local nameWidth = LUIE.GetLabelMarkupTextWidthUI(label, text)
+        while nameWidth > fitMaxWidth and fontSize > appearance.nameMinFont do
+            fontSize = fontSize - 1
+            label:SetFont(CustomFramesMakeFont(appearance.fontFace, appearance.fontStyle, fontSize))
+            nameWidth = LUIE.GetLabelMarkupTextWidthUI(label, text)
+        end
+    end
+
+    local wasShrunk = fontSize < appearance.fontOther
+    label.nameFitText = text
+    label.nameFitMaxWidth = fitMaxWidth
+    label.nameFitFontFace = appearance.fontFace
+    label.nameFitFontStyle = appearance.fontStyle
+    label.nameFitFontSize = appearance.fontOther
+    label.nameFitMinFontSize = appearance.nameMinFont
+    label.nameFitWasShrunk = wasShrunk
+    return wasShrunk
+end
+
 local function ResolveCustomFrameFont(appearance)
     local fontKey = appearance.fontFace
     local fontStyle = appearance.fontStyle
@@ -76,6 +174,7 @@ end
 local function ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
     if unitFrame.name then
         unitFrame.name:SetFont(fontCaption)
+        UnitFrames.ClearNameLabelFit(unitFrame.name)
     end
     if unitFrame.level then
         unitFrame.level:SetFont(fontCaption)
@@ -203,6 +302,7 @@ local function ApplyCompactNameLabelHeight(unitFrame, sizeCaption)
     if needed > (unitFrame.name:GetHeight() or 0) then
         unitFrame.name:SetHeight(needed)
     end
+    UnitFrames.RefreshCompactNameClip(unitFrame)
 end
 
 function UnitFrames.CustomFramesApplyFontPlayer()

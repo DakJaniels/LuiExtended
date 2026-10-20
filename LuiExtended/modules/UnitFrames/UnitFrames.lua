@@ -1394,6 +1394,7 @@ end
 
 -- Helper function to update visibility of 'death/offline' label and hide bars and bar labels
 function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
+    unitFrame.deadLabelText = newValue
     unitFrame.dead:SetHidden(newValue == nil)
     if newValue ~= nil then
         unitFrame.dead:SetText(newValue)
@@ -2692,14 +2693,17 @@ local COMPACT_NAME_TEXT_GAP = 4
 --- @param minimumGutter number
 --- @return number
 local function GetCompactNameRightReserve(unitFrame, minimumGutter)
+    -- Which text sits on the right comes from CustomFramesSetDeadLabel state, not IsHidden(): label IsHidden()
+    -- still reports true while the frame is being re-shown (pet re-summon, HUD return), which dropped the reserve.
     local textWidth = 0
-    local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
-    local healthLabel = healthEntry and healthEntry.label
-    if healthLabel and not healthLabel:IsHidden() then
-        textWidth = healthLabel:GetTextWidth() or 0
-    end
-    if unitFrame.dead and not unitFrame.dead:IsHidden() then
-        textWidth = zo_max(textWidth, unitFrame.dead:GetTextWidth() or 0)
+    if unitFrame.deadLabelText ~= nil and unitFrame.dead then
+        textWidth = LUIE.GetLabelStringWidthUI(unitFrame.dead, unitFrame.dead:GetText())
+    else
+        local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
+        local healthLabel = healthEntry and healthEntry.label
+        if healthLabel then
+            textWidth = LUIE.GetLabelStringWidthUI(healthLabel, healthLabel:GetText())
+        end
     end
     return zo_max(minimumGutter or 0, textWidth) + COMPACT_NAME_RIGHT_ANCHOR_INSET + COMPACT_NAME_TEXT_GAP
 end
@@ -2730,13 +2734,22 @@ function UnitFrames.ApplyCompactNameClip(unitFrame, captionCategory, barWidth, b
     unitFrame.name:ClearAnchors()
     unitFrame.name:SetAnchor(LEFT, healthBackdrop, LEFT, leftInset, 0)
     ApplyClippedNameWidth(unitFrame.name, nameWidth, nameHeight)
+    if nameWidth > 0 then
+        local appearance, canShrink = UnitFrames.GetNameFontInfo(captionCategory)
+        UnitFrames.FitNameLabelFont(unitFrame.name, appearance, canShrink, nameWidth)
+    end
 end
 
 --- @param unitFrame LUIE_CustomFrameObject
 --- @param leftInset number|nil 22 with an icon, 5 without. Omitted calls keep the inset from the last layout.
 function UnitFrames.ApplyRaidNameClip(unitFrame, leftInset)
-    -- Expanded template: the name lives in the top row, not on the health text row.
+    -- Expanded template: the name lives in the top row, not on the health text row; only refit the font to the
+    -- width from the last ApplyRaidExpandedMemberLayout.
     if unitFrame and unitFrame.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED then
+        if unitFrame.name and unitFrame.raidExpandedNameMaxWidth then
+            local appearance, canShrink = UnitFrames.GetNameFontInfo("raid")
+            UnitFrames.FitNameLabelFont(unitFrame.name, appearance, canShrink, unitFrame.raidExpandedNameMaxWidth)
+        end
         return
     end
     local sv = UnitFrames.SV
@@ -3050,6 +3063,29 @@ function UnitFrames.ApplyRaidExpandedMemberLayout(unitFrame, showPlaceholders)
         unitFrame.name:SetAnchor(LEFT, topRow, LEFT, 0, 0)
         unitFrame.name:SetAnchor(RIGHT, rightNeighbor, rightNeighborPoint, -nameRightGap, 0)
         unitFrame.name:SetHeight(nameHeight)
+
+        local topRowIconsWidth = nameRightGap
+        local visibleIconCount = 0
+        if classVisible and unitFrame.classIcon then
+            topRowIconsWidth = topRowIconsWidth + RAID_EXPANDED_CLASS_ICON_SIZE
+            visibleIconCount = visibleIconCount + 1
+        end
+        if roleVisible and unitFrame.roleIcon then
+            topRowIconsWidth = topRowIconsWidth + RAID_EXPANDED_ROLE_ICON_SIZE
+            visibleIconCount = visibleIconCount + 1
+        end
+        if showLeader and unitFrame.leader then
+            topRowIconsWidth = topRowIconsWidth + RAID_EXPANDED_LEADER_ICON_SIZE
+            visibleIconCount = visibleIconCount + 1
+        end
+        if visibleIconCount > 1 then
+            topRowIconsWidth = topRowIconsWidth + (visibleIconCount - 1) * RAID_EXPANDED_TOP_ICON_GAP
+        end
+        -- The member control has explicit dimensions; the anchored top row's width can lag behind a resize.
+        local topRowWidth = (unitFrame.control:GetWidth() or 0) - 2 * RAID_EXPANDED_PADDING
+        unitFrame.raidExpandedNameMaxWidth = zo_max(0, topRowWidth - topRowIconsWidth)
+        local appearance, canShrink = UnitFrames.GetNameFontInfo("raid")
+        UnitFrames.FitNameLabelFont(unitFrame.name, appearance, canShrink, unitFrame.raidExpandedNameMaxWidth)
     end
 
     -- Bottom row: which slots are enabled -----------------------------------

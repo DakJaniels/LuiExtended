@@ -814,4 +814,6 @@ function FrameObject:UpdateStaticControlNameLabel(frameCategory)
         nameText = FrameObject.ApplyStaticControlOverlandToName(self, nameText, frameCategory)
     end
     self.name:SetText(nameText)
+    -- Compact names (raid / boss / pet / companion) refit their shrink-to-fit font to the new text.
+    UnitFrames.RefreshCompactNameClip(self)
 end
