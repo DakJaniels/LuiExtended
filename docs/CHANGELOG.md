@@ -1,5 +1,20 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.6
+
+### New
+
+- Unit Frames: **Name Minimum Font Size**. Long names shrink down to this size to stay fully visible beside icons and health text. Default is 14 on player, target, group, and AvA frames, and 10 on raid, companion, pet, and boss frames. Set it equal to the frame's font size to turn it off. Only fonts with adjustable size can shrink. PC and console.
+
+### Fixed
+
+- Unit Frames: Dismissing an assistant hides its pet frame right away instead of a few seconds later.
+- Action Bar: On a weapon swap, timer and stack labels fade with the bar. With **Use Game Timers as Fallback** on, those timers update when the icons flip, so the old bar's time no longer shows on the new bar during the swap.
+- MiniMap: **Circular Map** waits for the round frame to finish loading before placing it. Resizing the window or changing UI scale updates the circle and the screen-edge position.
+- MiniMap: Pins and area highlights draw with the map, the same way the world map does.
+- Info Panel: The clock, FPS, and latency no longer change width every tick. Each one grows to its widest value and only re-fits when the number of characters changes.
+- Unit Frames, Info Panel, and SpellCastBuffs: Text widths follow UI scale, so names, titles, and values line up when custom UI scale is not 100%.
+
 ## Version 7.2.7.5
 
 ### Changes
