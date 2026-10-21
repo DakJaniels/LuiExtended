@@ -25,6 +25,7 @@ local PAUSE_REASON_FAST_TRAVEL = "FastTravel"
 --- A map click that ZOS immediately undoes (SetMapToPlayerLocation pops back to the parent map) is a ping-pong;
 --- the parent map is then left alone until the next zone change.
 local MAP_CLICK_REVERT_WINDOW_MS = 3000
+local MINIMAP_UI_CANVAS_NAMESPACE = "LUIE_MiniMap_UiCanvas"
 
 --- Owns every minimap object and the single map state machine (Disabled / LoadingTiles / Idle / Paused).
 --- The world map stays untouched: the manager updates the hidden ZO_WorldMap OnUpdate handler so ZOS refreshes its
@@ -623,6 +624,10 @@ function LUIE_MiniMap_Manager:RegisterEvents()
     root:RegisterForEvent(EVENT_END_FAST_TRAVEL_KEEP_INTERACTION, function ()
         self:OnFastTravelEnd()
     end)
+    -- The circular clip and screen-edge clamp insets are screen-space; recompute them when the canvas changes.
+    LUIE.RegisterForUiCanvasChange(MINIMAP_UI_CANVAS_NAMESPACE, function ()
+        self.frame:ApplyLayoutFromSavedSettings()
+    end)
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", self.onWorldMapChangedCallback)
 end
 
@@ -636,6 +641,7 @@ function LUIE_MiniMap_Manager:UnregisterEvents()
     root:UnregisterForEvent(EVENT_START_FAST_TRAVEL_KEEP_INTERACTION)
     root:UnregisterForEvent(EVENT_END_FAST_TRAVEL_INTERACTION)
     root:UnregisterForEvent(EVENT_END_FAST_TRAVEL_KEEP_INTERACTION)
+    LUIE.UnregisterForUiCanvasChange(MINIMAP_UI_CANVAS_NAMESPACE)
     CALLBACK_MANAGER:UnregisterCallback("OnWorldMapChanged", self.onWorldMapChangedCallback)
 end
 

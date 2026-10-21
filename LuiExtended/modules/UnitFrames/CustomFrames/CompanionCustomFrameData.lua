@@ -46,6 +46,7 @@ function LUIE.CustomFramesBuildCompanion()
             ["name"] = shb:GetNamedChild("_Name"),
         }
         UnitFrames.CustomFrames["companion"].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
+        UnitFrames.CustomFrames["companion"].name:SetMaxLineCount(1)
         UnitFrames.CustomFrames["companion"][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Current (Percentage%)"
 
         if UnitFrames.companionAbilityTrack then

@@ -116,6 +116,12 @@ function LUIE_MiniMap_Frame:Initialize(manager, rootControl)
         local frameTexture = self.circularFrameTextures[textureIndex]
         frameTexture:SetMouseEnabled(false)
         frameTexture:SetResizeToFitFile(false)
+        -- GetTextureFileDimensions is 0 until the file is resident, so the ring tiles are placed once all four load.
+        frameTexture:SetHandler("OnTextureLoaded", function ()
+            if self:AreCircularFrameTexturesLoaded() then
+                self:ApplyCircularMap()
+            end
+        end)
     end
     self.zone:SetMouseEnabled(false)
 
@@ -514,6 +520,16 @@ function LUIE_MiniMap_Frame:ApplyZoomChromePlacement(radius)
     end
 end
 
+--- @return boolean
+function LUIE_MiniMap_Frame:AreCircularFrameTexturesLoaded()
+    for textureIndex = 1, #self.circularFrameTextures do
+        if not self.circularFrameTextures[textureIndex]:IsTextureLoaded() then
+            return false
+        end
+    end
+    return true
+end
+
 --- Scroll rect in screen space (ZO_RevealingControl.lua:14-20). The four frame files tile from GetTextureFileDimensions.
 --- The ring centerline is MINIMAP_CIRCULAR_RING_* inside that tile, not the top-left file's own center.
 function LUIE_MiniMap_Frame:ApplyCircularMap()
@@ -569,7 +585,7 @@ function LUIE_MiniMap_Frame:ApplyCircularMap()
     local bottomLeftWidth, bottomLeftHeight = bottomLeftTexture:GetTextureFileDimensions()
     local bottomRightWidth, bottomRightHeight = bottomRightTexture:GetTextureFileDimensions()
     local frameScale = 0
-    if radius > 0 then
+    if radius > 0 and self:AreCircularFrameTexturesLoaded() then
         frameScale = radius / MINIMAP_CIRCULAR_RING_RADIUS
     end
     local frameCenterX = MINIMAP_CIRCULAR_RING_CENTER_X

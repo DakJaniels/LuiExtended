@@ -58,6 +58,8 @@ local BUFF_TYPE_REGEN_HEALTH = 8
 local BUFF_TYPE_REGEN_MAGICKA = 16
 local BUFF_TYPE_REGEN_STAMINA = 32
 
+local EFFECT_CHANGED_NAMESPACE = "LUIE_GroupFoodDrinkBuff_Effect"
+
 -- Local API references
 local GetNumBuffs = GetNumBuffs
 local GetUnitBuffInfo = GetUnitBuffInfo
@@ -654,7 +656,9 @@ function GroupFoodDrinkBuffManager.Initialize()
     if isInitialized then return end
     if not IsModuleEnabled() then return end
 
-    EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_EFFECT_CHANGED, OnEffectChanged)
+    -- Food/drink icons only exist on group/raid frames (groupN tags); other units' effects can never update one.
+    EVENT_MANAGER:RegisterForEvent(EFFECT_CHANGED_NAMESPACE, EVENT_EFFECT_CHANGED, OnEffectChanged)
+    EVENT_MANAGER:AddFilterForEvent(EFFECT_CHANGED_NAMESPACE, EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG_PREFIX, "group")
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_UPDATE, OnGroupUpdate)
@@ -688,7 +692,7 @@ end
 function GroupFoodDrinkBuffManager.Uninitialize()
     if not isInitialized then return end
 
-    EVENT_MANAGER:UnregisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_EFFECT_CHANGED)
+    EVENT_MANAGER:UnregisterForEvent(EFFECT_CHANGED_NAMESPACE, EVENT_EFFECT_CHANGED)
     EVENT_MANAGER:UnregisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_MEMBER_JOINED)
     EVENT_MANAGER:UnregisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_MEMBER_LEFT)
     EVENT_MANAGER:UnregisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_UPDATE)

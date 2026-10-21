@@ -37,6 +37,9 @@ local moduleName = UnitFrames.moduleName
 -- local unitTag
 -- local playerTlw
 
+-- OnUnitCreated / OnUnitDestroyed only act on group members (groupN, groupNcompanion) and player pets.
+local UNIT_LIFETIME_EVENT_TAG_PREFIXES = { "group", "playerpet" }
+
 local g_PendingUpdate =
 {
     Group = { flag = false, delay = 200, name = moduleName .. "PendingGroupUpdate" },
@@ -264,7 +267,12 @@ function UnitFrames.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, UnitFrames.OnReticleTargetChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_PLAYER_CHANGED, UnitFrames.OnReticleTargetPlayerChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_DISPOSITION_UPDATE, UnitFrames.OnDispositionUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_UNIT_CREATED, UnitFrames.OnUnitCreated)
+    eventManager:AddFilterForEvent(moduleName, EVENT_DISPOSITION_UPDATE, REGISTER_FILTER_UNIT_TAG, "reticleover")
+    for _, unitTagPrefix in ipairs(UNIT_LIFETIME_EVENT_TAG_PREFIXES) do
+        local namespace = moduleName .. "_UnitCreated_" .. unitTagPrefix
+        eventManager:RegisterForEvent(namespace, EVENT_UNIT_CREATED, UnitFrames.OnUnitCreated)
+        eventManager:AddFilterForEvent(namespace, EVENT_UNIT_CREATED, REGISTER_FILTER_UNIT_TAG_PREFIX, unitTagPrefix)
+    end
     eventManager:RegisterForEvent(moduleName, EVENT_LEVEL_UPDATE, UnitFrames.OnLevelUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_CHAMPION_POINT_UPDATE, UnitFrames.OnLevelUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_TITLE_UPDATE, UnitFrames.TitleUpdate)
@@ -277,8 +285,13 @@ function UnitFrames.Initialize(enabled)
         eventManager:RegisterForEvent(moduleName, EVENT_COMBAT_EVENT, UnitFrames.OnCombatEvent)
         eventManager:AddFilterForEvent(moduleName, EVENT_COMBAT_EVENT, REGISTER_FILTER_IS_ERROR, true)
 
-        eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DESTROYED, UnitFrames.OnUnitDestroyed)
+        for _, unitTagPrefix in ipairs(UNIT_LIFETIME_EVENT_TAG_PREFIXES) do
+            local namespace = moduleName .. "_UnitDestroyed_" .. unitTagPrefix
+            eventManager:RegisterForEvent(namespace, EVENT_UNIT_DESTROYED, UnitFrames.OnUnitDestroyed)
+            eventManager:AddFilterForEvent(namespace, EVENT_UNIT_DESTROYED, REGISTER_FILTER_UNIT_TAG_PREFIX, unitTagPrefix)
+        end
         eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_COMPANION_STATE_CHANGED, UnitFrames.ActiveCompanionStateChanged)
+        eventManager:RegisterForEvent(moduleName, EVENT_COLLECTIBLE_UPDATED, UnitFrames.OnCollectibleUpdated)
         eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_ADDED, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_FRIEND_REMOVED, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_IGNORE_ADDED, UnitFrames.SocialUpdateFrames)
@@ -309,12 +322,10 @@ function UnitFrames.Initialize(enabled)
         -- Group Election Info
         UnitFrames.RegisterForGroupElectionEvents()
 
-        -- Register for screen resolution changes to recalculate positioning
-        eventManager:RegisterForEvent(moduleName, EVENT_SCREEN_RESIZED, function (eventId, pixelWidth, pixelHeight)
-            -- if LUIE.IsDevDebugEnabled() then
-            --     LUIE:Log("Debug", "Unit Frames: Screen resolution changed to " .. pixelWidth .. LUIE_TINY_X_FORMATTER .. pixelHeight .. " pixels, recalculating positions")
-            -- end
+        -- Resolution or custom UI scale changes: reposition, then re-measure text-fitted layouts (TopInfo, title, raid stats).
+        LUIE.RegisterForUiCanvasChange(moduleName .. "_UiCanvas", function ()
             UnitFrames.CustomFramesSetPositions()
+            UnitFrames.CustomFramesApplyAllLayouts({ unhide = false, group = false, includeRaid = true, raid = false })
         end)
 
         if UnitFrames.CustomFrames["companion"] then
@@ -494,6 +505,45 @@ function UnitFrames.CompanionUpdate()
     end
 end
 
+-- Assistant units linger (DoesUnitExist stays true) for a few seconds after the collectible is dismissed, until
+-- EVENT_UNIT_DESTROYED. The dismissed assistant's short name hides its pet frame immediately.
+local dismissedAssistantCollectibleId = nil
+local dismissedAssistantShortName = nil
+
+--- @param unitName string
+--- @return boolean
+local function IsDismissedAssistantUnitName(unitName)
+    if dismissedAssistantShortName == nil then
+        return false
+    end
+    local formattedName = zo_strformat("<<1>>", unitName)
+    if formattedName == dismissedAssistantShortName then
+        return true
+    end
+    local prefix = zo_strsub(formattedName, 1, #dismissedAssistantShortName + 1)
+    return prefix == dismissedAssistantShortName .. " " or prefix == dismissedAssistantShortName .. ","
+end
+
+-- Runs on the EVENT_COLLECTIBLE_UPDATED listener (fires when a collectible is set active / inactive,
+-- CollectibleDataManager.lua).
+--- @param eventId integer
+--- @param collectibleId integer
+function UnitFrames.OnCollectibleUpdated(eventId, collectibleId)
+    if GetCollectibleCategoryType(collectibleId) ~= COLLECTIBLE_CATEGORY_TYPE_ASSISTANT then
+        return
+    end
+    if IsCollectibleActive(collectibleId, GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+        if dismissedAssistantCollectibleId == collectibleId then
+            dismissedAssistantCollectibleId = nil
+            dismissedAssistantShortName = nil
+        end
+        return
+    end
+    dismissedAssistantCollectibleId = collectibleId
+    dismissedAssistantShortName = LuiData.Data.CollectibleTables.All[collectibleId]
+    UnitFrames.CustomPetUpdate()
+end
+
 function UnitFrames.CustomPetUpdate()
     if UnitFrames.CustomFrames["PetGroup1"] == nil then
         return
@@ -507,9 +557,14 @@ function UnitFrames.CustomPetUpdate()
 
     -- First we query all pet unitTag for existence and save them to local list
     local n = 1 -- counter used to reference custom frames. it always continuous while games unitTag could have gaps
+    local isDismissedAssistantPresent = false
     for i = 1, 7 do
         local unitTag = "playerpet" .. i
-        if DoesUnitExist(unitTag) then
+        local isDismissedAssistant = DoesUnitExist(unitTag) and IsDismissedAssistantUnitName(GetUnitName(unitTag))
+        if isDismissedAssistant then
+            isDismissedAssistantPresent = true
+            UnitFrames.CustomFrames[unitTag] = nil
+        elseif DoesUnitExist(unitTag) then
             -- Compare whitelist entries and only add this pet to the list if it is whitelisted.
             local unitName = GetUnitName(unitTag)
             local compareWhitelist = zo_strlower(unitName)
@@ -529,6 +584,12 @@ function UnitFrames.CustomPetUpdate()
             -- For non-existing unitTags we will remove reference from CustomFrames table
             UnitFrames.CustomFrames[unitTag] = nil
         end
+    end
+
+    -- The lingering unit is gone (EVENT_UNIT_DESTROYED); stop filtering by that name.
+    if not isDismissedAssistantPresent then
+        dismissedAssistantCollectibleId = nil
+        dismissedAssistantShortName = nil
     end
 
     UnitFrames.CustomFramesUnreferencePetControl(n)
@@ -1396,6 +1457,7 @@ end
 
 -- Helper function to update visibility of 'death/offline' label and hide bars and bar labels
 function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
+    unitFrame.deadLabelText = newValue
     unitFrame.dead:SetHidden(newValue == nil)
     if newValue ~= nil then
         unitFrame.dead:SetText(newValue)
@@ -2694,14 +2756,17 @@ local COMPACT_NAME_TEXT_GAP = 4
 --- @param minimumGutter number
 --- @return number
 local function GetCompactNameRightReserve(unitFrame, minimumGutter)
+    -- Which text sits on the right comes from CustomFramesSetDeadLabel state, not IsHidden(): label IsHidden()
+    -- still reports true while the frame is being re-shown (pet re-summon, HUD return), which dropped the reserve.
     local textWidth = 0
-    local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
-    local healthLabel = healthEntry and healthEntry.label
-    if healthLabel and not healthLabel:IsHidden() then
-        textWidth = healthLabel:GetTextWidth() or 0
-    end
-    if unitFrame.dead and not unitFrame.dead:IsHidden() then
-        textWidth = zo_max(textWidth, unitFrame.dead:GetTextWidth() or 0)
+    if unitFrame.deadLabelText ~= nil and unitFrame.dead then
+        textWidth = LUIE.GetLabelStringWidthUI(unitFrame.dead, unitFrame.dead:GetText())
+    else
+        local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
+        local healthLabel = healthEntry and healthEntry.label
+        if healthLabel then
+            textWidth = LUIE.GetLabelStringWidthUI(healthLabel, healthLabel:GetText())
+        end
     end
     return zo_max(minimumGutter or 0, textWidth) + COMPACT_NAME_RIGHT_ANCHOR_INSET + COMPACT_NAME_TEXT_GAP
 end
@@ -2732,13 +2797,22 @@ function UnitFrames.ApplyCompactNameClip(unitFrame, captionCategory, barWidth, b
     unitFrame.name:ClearAnchors()
     unitFrame.name:SetAnchor(LEFT, healthBackdrop, LEFT, leftInset, 0)
     ApplyClippedNameWidth(unitFrame.name, nameWidth, nameHeight)
+    if nameWidth > 0 then
+        local appearance, canShrink = UnitFrames.GetNameFontInfo(captionCategory)
+        UnitFrames.FitNameLabelFont(unitFrame.name, appearance, canShrink, nameWidth)
+    end
 end
 
 --- @param unitFrame LUIE_CustomFrameObject
 --- @param leftInset number|nil 22 with an icon, 5 without. Omitted calls keep the inset from the last layout.
 function UnitFrames.ApplyRaidNameClip(unitFrame, leftInset)
-    -- Expanded template: the name lives in the top row, not on the health text row.
+    -- Expanded template: the name lives in the top row, not on the health text row; only refit the font to the
+    -- width from the last ApplyRaidExpandedMemberLayout.
     if unitFrame and unitFrame.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED then
+        if unitFrame.name and unitFrame.raidExpandedNameMaxWidth then
+            local appearance, canShrink = UnitFrames.GetNameFontInfo("raid")
+            UnitFrames.FitNameLabelFont(unitFrame.name, appearance, canShrink, unitFrame.raidExpandedNameMaxWidth)
+        end
         return
     end
     local sv = UnitFrames.SV
@@ -2787,7 +2861,7 @@ local RAID_EXPANDED_STATS_SAMPLE_SINGLE = "999.9k"
 local function GetRaidExpandedStatsWidth(statsLabel, combatStatsSettings)
     local showBoth = combatStatsSettings ~= nil and combatStatsSettings.showDPS == true and combatStatsSettings.showHPS == true
     local sampleText = showBoth and RAID_EXPANDED_STATS_SAMPLE_BOTH or RAID_EXPANDED_STATS_SAMPLE_SINGLE
-    local measuredWidth = statsLabel:GetStringWidth(sampleText) or 0
+    local measuredWidth = LUIE.GetLabelStringWidthUI(statsLabel, sampleText)
     return zo_max(RAID_EXPANDED_STATS_MIN_WIDTH, zo_ceil(measuredWidth) + RAID_EXPANDED_STATS_TEXT_PADDING)
 end
 -- Debug preview slots have no LibGroupBroadcast data; they show the missing-icon texture (same as the other LUIE previews).
@@ -3052,6 +3126,29 @@ function UnitFrames.ApplyRaidExpandedMemberLayout(unitFrame, showPlaceholders)
         unitFrame.name:SetAnchor(LEFT, topRow, LEFT, 0, 0)
         unitFrame.name:SetAnchor(RIGHT, rightNeighbor, rightNeighborPoint, -nameRightGap, 0)
         unitFrame.name:SetHeight(nameHeight)
+
+        local topRowIconsWidth = nameRightGap
+        local visibleIconCount = 0
+        if classVisible and unitFrame.classIcon then
+            topRowIconsWidth = topRowIconsWidth + RAID_EXPANDED_CLASS_ICON_SIZE
+            visibleIconCount = visibleIconCount + 1
+        end
+        if roleVisible and unitFrame.roleIcon then
+            topRowIconsWidth = topRowIconsWidth + RAID_EXPANDED_ROLE_ICON_SIZE
+            visibleIconCount = visibleIconCount + 1
+        end
+        if showLeader and unitFrame.leader then
+            topRowIconsWidth = topRowIconsWidth + RAID_EXPANDED_LEADER_ICON_SIZE
+            visibleIconCount = visibleIconCount + 1
+        end
+        if visibleIconCount > 1 then
+            topRowIconsWidth = topRowIconsWidth + (visibleIconCount - 1) * RAID_EXPANDED_TOP_ICON_GAP
+        end
+        -- The member control has explicit dimensions; the anchored top row's width can lag behind a resize.
+        local topRowWidth = (unitFrame.control:GetWidth() or 0) - 2 * RAID_EXPANDED_PADDING
+        unitFrame.raidExpandedNameMaxWidth = zo_max(0, topRowWidth - topRowIconsWidth)
+        local appearance, canShrink = UnitFrames.GetNameFontInfo("raid")
+        UnitFrames.FitNameLabelFont(unitFrame.name, appearance, canShrink, unitFrame.raidExpandedNameMaxWidth)
     end
 
     -- Bottom row: which slots are enabled -----------------------------------

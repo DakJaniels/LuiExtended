@@ -54,6 +54,7 @@ local function NormalizeAppearanceEntry(entry, fallback)
         fontStyle = entry.fontStyle or fallback.fontStyle,
         fontBars = (entry.fontBars and entry.fontBars > 0) and entry.fontBars or fallback.fontBars,
         fontOther = (entry.fontOther and entry.fontOther > 0) and entry.fontOther or fallback.fontOther,
+        nameMinFont = (entry.nameMinFont and entry.nameMinFont > 0) and entry.nameMinFont or fallback.nameMinFont,
         texture = entry.texture or fallback.texture,
     }
 end
@@ -69,6 +70,7 @@ end
 ---    fontBars: integer,
 ---    fontFace: string,
 ---    fontOther: integer,
+---    nameMinFont: integer,
 ---    fontStyle: integer,
 ---    texture: string,
 --- }
@@ -98,6 +100,11 @@ function UnitFrames.GetCustomFrameAppearance(category)
     if not UnitFrames.APPEARANCE_SEPARATE_CAPTION_FONT_CATEGORIES[category] then
         normalized.fontOther = normalized.fontBars
     end
+    -- Name never shrinks below this; equal to fontOther disables shrinking.
+    if not normalized.nameMinFont or normalized.nameMinFont <= 0 then
+        normalized.nameMinFont = normalized.fontOther
+    end
+    normalized.nameMinFont = zo_min(normalized.nameMinFont, normalized.fontOther)
     return normalized
 end
 

@@ -260,22 +260,28 @@ local function GetTopInfoNameRowUsedWidth(label, maxWidth)
     if label == nil then
         return 0
     end
-    local textWidth = label:GetTextWidth()
-    if textWidth and textWidth > 0 then
-        if maxWidth and maxWidth > 0 then
-            return zo_min(textWidth, maxWidth)
-        end
-        return textWidth
+    -- String measurement reflects a font set this pass; GetTextWidth can lag behind a SetFont.
+    local usedWidth = LUIE.GetLabelMarkupTextWidthUI(label, label:GetText())
+    if usedWidth <= 0 then
+        usedWidth = label:GetTextWidth() or 0
     end
-    local plainText = StripMarkupForStringWidth(label:GetText())
-    if plainText == "" then
-        return 0
-    end
-    local stringWidth = label:GetStringWidth(plainText)
     if maxWidth and maxWidth > 0 then
-        return zo_min(stringWidth, maxWidth)
+        return zo_min(usedWidth, maxWidth)
     end
-    return stringWidth
+    return usedWidth
+end
+
+--- Restores the full caption font on the name so row height is measured from the configured size.
+--- @param self LUIE_CustomFrameObject
+--- @return table|nil appearance
+--- @return boolean canShrink
+local function ApplyTopInfoNameFullFont(self)
+    local appearance, canShrink = UnitFrames.GetTopInfoNameFontInfo(self.frameCategory)
+    if appearance and canShrink then
+        self.name:SetFont(UnitFrames.CreateNameLabelFont(appearance, appearance.fontOther))
+        UnitFrames.ClearNameLabelFit(self.name)
+    end
+    return appearance, canShrink
 end
 
 --- @param self LUIE_CustomFrameObject
@@ -310,7 +316,7 @@ local function GetTopInfoLevelClusterRequiredWidth(self, showLevelRow)
     local plainText = StripMarkupForStringWidth(self.level:GetText())
     local textWidth = 0
     if plainText ~= "" then
-        textWidth = self.level:GetStringWidth(plainText)
+        textWidth = LUIE.GetLabelStringWidthUI(self.level, plainText)
     end
     if textWidth <= 0 then
         textWidth = TOPINFO_LEVEL_TEXT_FALLBACK_WIDTH
@@ -392,7 +398,7 @@ local function LayoutTopInfoLevelCluster(self, rowOffsetY, rowStartX, showLevelR
             local needed = available
             local plainText = StripMarkupForStringWidth(self.level:GetText())
             if plainText ~= "" then
-                needed = self.level:GetStringWidth(plainText)
+                needed = LUIE.GetLabelStringWidthUI(self.level, plainText)
             end
             self.level:SetWidth(zo_min(needed, available)+10)
         end
@@ -475,6 +481,7 @@ local function LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, rightReserve
     self.name:ClearAnchors()
     self.name:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, rowStartX, rowOffsetY)
     ApplyTopInfoSingleLineLabel(self.name)
+    local nameAppearance, nameCanShrink = ApplyTopInfoNameFullFont(self)
 
     -- Scale the level / veterancy icons to the caption height before measuring the block.
     ApplyTopInfoRowHeight(self, rowOffsetY)
@@ -489,6 +496,10 @@ local function LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, rightReserve
         nameMaxWidth = 0
     end
     self.name:SetWidth(nameMaxWidth)
+    if UnitFrames.FitNameLabelFont(self.name, nameAppearance, nameCanShrink, nameMaxWidth) then
+        -- Smaller glyphs sit centered in the full-size row so they line up with the level digits.
+        self.name:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+    end
 
     if not showLevelRow or levelBlockWidth == 0 then
         LayoutTopInfoLevelCluster(self, rowOffsetY, rowStartX, showLevelRow, rightReserved)

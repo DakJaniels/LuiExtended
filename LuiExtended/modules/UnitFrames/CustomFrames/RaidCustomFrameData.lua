@@ -140,6 +140,7 @@ function LUIE.CustomFramesBuildRaidGroup()
             end
 
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
+            UnitFrames.CustomFrames[unitTag].name:SetMaxLineCount(1)
 
             control.defaultUnitTag = GetGroupUnitTagByIndex(i)
             control:SetMouseEnabled(true)

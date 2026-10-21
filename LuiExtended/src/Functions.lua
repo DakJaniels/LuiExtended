@@ -238,6 +238,85 @@ function LUIE.FormatUiLayoutMeasurement(layoutValue)
     return string_format("%dui", zo_round(layoutValue))
 end
 
+--- String width in UI units. LabelControl:GetStringWidth is layout-native (pixels), SetWidth takes UI units.
+--- @param label LabelControl
+--- @param text string|nil
+--- @return number
+function LUIE.GetLabelStringWidthUI(label, text)
+    if label == nil or text == nil or text == "" then
+        return 0
+    end
+    local widthNative = label:GetStringWidth(text)
+    return widthNative / GetUIGlobalScale()
+end
+
+--- String width in UI units for text with markup. GetStringWidth does not handle markup
+--- (SmithingCreation_Shared.lua), so |t icons are summed from their markup width
+--- (a number, or N% of the font height) and color / gender markup is removed.
+--- @param label LabelControl
+--- @param text string|nil
+--- @return number
+function LUIE.GetLabelMarkupTextWidthUI(label, text)
+    if label == nil or text == nil or text == "" then
+        return 0
+    end
+    local iconWidthTotal = 0
+    local fontHeight
+    local plainText = zo_strgsub(text, "|t([^:|]+):[^|]*|t", function (iconWidthText)
+        local percentText = zo_strmatch(iconWidthText, "^(%d+)%%$")
+        if percentText then
+            fontHeight = fontHeight or label:GetFontHeight()
+            iconWidthTotal = iconWidthTotal + fontHeight * tonumber(percentText) / 100
+        else
+            iconWidthTotal = iconWidthTotal + (tonumber(iconWidthText) or 0)
+        end
+        return ""
+    end)
+    plainText = zo_strgsub(plainText, "|c%x%x%x%x%x%x", "")
+    plainText = zo_strgsub(plainText, "|r", "")
+    plainText = zo_strgsub(plainText, "%^%a+", "")
+    return LUIE.GetLabelStringWidthUI(label, plainText) + iconWidthTotal
+end
+
+-- GuiRoot dimensions settle after the custom UI scale setting event, so canvas callbacks run deferred.
+local UI_CANVAS_CHANGE_DELAY_MS = 50
+--- @type table<string, integer>
+local uiCanvasChangeGenerations = {}
+
+--- Calls callback (deferred and coalesced) when the UI canvas changes: resolution / window resize or custom UI scale.
+--- @param namespace string
+--- @param callback fun()
+function LUIE.RegisterForUiCanvasChange(namespace, callback)
+    uiCanvasChangeGenerations[namespace] = 0
+    local function ScheduleCanvasChangeCallback()
+        local scheduledGeneration = (uiCanvasChangeGenerations[namespace] or 0) + 1
+        uiCanvasChangeGenerations[namespace] = scheduledGeneration
+        zo_callLater(function ()
+            if uiCanvasChangeGenerations[namespace] ~= scheduledGeneration then
+                return
+            end
+            callback()
+        end, UI_CANVAS_CHANGE_DELAY_MS)
+    end
+    eventManager:RegisterForEvent(namespace, EVENT_SCREEN_RESIZED, ScheduleCanvasChangeCallback)
+    eventManager:RegisterForEvent(namespace, EVENT_INTERFACE_SETTING_CHANGED, function (_, settingSystemType, settingId)
+        if settingSystemType ~= SETTING_TYPE_UI then
+            return
+        end
+        if settingId == UI_SETTING_USE_CUSTOM_SCALE or settingId == UI_SETTING_CUSTOM_SCALE then
+            ScheduleCanvasChangeCallback()
+        end
+    end)
+end
+
+--- @param namespace string
+function LUIE.UnregisterForUiCanvasChange(namespace)
+    -- Invalidates any pending deferred callback for this namespace.
+    uiCanvasChangeGenerations[namespace] = nil
+    eventManager:UnregisterForEvent(namespace, EVENT_SCREEN_RESIZED)
+    eventManager:UnregisterForEvent(namespace, EVENT_INTERFACE_SETTING_CHANGED)
+end
+
 --- Apply grid snapping to coordinates when the matching snapToGrid_* SV is enabled.
 --- @param left number
 --- @param top number
