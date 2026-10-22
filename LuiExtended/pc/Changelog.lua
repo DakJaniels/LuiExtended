@@ -38,6 +38,18 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.7.7
+    "|cFFA500LuiExtended Version 7.2.7.7|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Undaunted Crests (Solo Dungeon Currency) print when gained or spent, with the same toggle, color, name, and total options as Undaunted Keys. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: March of Sacrifices and Moon Hunter Keep center-screen announcements, including the solo versions, can be shown in chat, on the center screen, or as alerts. PC and console.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: |cFFFFFFCompanion Ability Track|r timers on the companion frame count down and clear when the effect ends, instead of freezing on the icon.",
+    "",
     -- Version Header 7.2.7.6
     "|cFFA500LuiExtended Version 7.2.7.6|r",
     "",
