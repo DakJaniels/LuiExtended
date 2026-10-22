@@ -1016,6 +1016,8 @@ local displayAnnouncementZoneDefaults =
     "DungeonScrivenersHall",
     "DungeonBedlamVeil",
     "DungeonExiledRedoubt",
+    "DungeonMarchOfSacrifices",
+    "DungeonMoonHunterKeep",
     "CharacterSystems",
     "TributeTutorial",
     "InstrumentDisplayed",

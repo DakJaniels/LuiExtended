@@ -9553,6 +9553,8 @@ function ChatAnnouncements.CreateConsoleSettings()
             { svKey = "DungeonScrivenersHall",      label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL,      tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL_TP },
             { svKey = "DungeonBedlamVeil",          label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL_TP },
             { svKey = "DungeonExiledRedoubt",       label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT_TP },
+            { svKey = "DungeonMarchOfSacrifices",   label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES,  tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES_TP },
+            { svKey = "DungeonMoonHunterKeep",      label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP,     tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP_TP },
         }
         for sectionIndex, section in ipairs(dungeonDisplaySections) do
             AddDisplayAnnouncementCheckbox(section.svKey, section.label, section.tooltip, "CA")

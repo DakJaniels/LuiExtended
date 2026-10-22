@@ -139,6 +139,10 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
         [1390] = "DungeonScrivenersHall",
         [1471] = "DungeonBedlamVeil",
         [1496] = "DungeonExiledRedoubt",
+        [1055] = "DungeonMarchOfSacrifices",
+        [1592] = "DungeonMarchOfSacrifices", -- Solo
+        [1052] = "DungeonMoonHunterKeep",
+        [1593] = "DungeonMoonHunterKeep",    -- Solo
     }
 
     local MapIds =
@@ -175,6 +179,8 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
         DungeonScrivenersHall = "DungeonScrivenersHall",
         DungeonBedlamVeil = "DungeonBedlamVeil",
         DungeonExiledRedoubt = "DungeonExiledRedoubt",
+        DungeonMarchOfSacrifices = "DungeonMarchOfSacrifices",
+        DungeonMoonHunterKeep = "DungeonMoonHunterKeep",
     }
 
     local function ResolveDisplayAnnouncementMessages(announcementType)
