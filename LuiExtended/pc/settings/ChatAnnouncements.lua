@@ -813,6 +813,96 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.Currency.CurrencyMessageTotalUndaunted,
             },
             {
+                -- Show Undaunted Crests
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTS_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyUndauntedCrestsChange
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyUndauntedCrestsChange = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Currency.CurrencyUndauntedCrestsChange,
+            },
+            {
+                -- Show Undaunted Crests Color
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSCOLOR)),
+                getFunc = function ()
+                    return unpack(Settings.Currency.CurrencyUndauntedCrestsColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.Currency.CurrencyUndauntedCrestsColor = { r, g, b, a }
+                    ChatAnnouncements.RegisterColorEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyUndauntedCrestsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default =
+                {
+                    r = Defaults.Currency.CurrencyUndauntedCrestsColor[1],
+                    g = Defaults.Currency.CurrencyUndauntedCrestsColor[2],
+                    b = Defaults.Currency.CurrencyUndauntedCrestsColor[3],
+                },
+            },
+            {
+                -- Show Undaunted Crests Name
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSNAME_TP),
+                getFunc = function ()
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyUndauntedCrestsName")
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyUndauntedCrestsName = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyUndauntedCrestsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyUndauntedCrestsName,
+            },
+            {
+                -- Show Undaunted Crests Total
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSTOTAL_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyUndauntedCrestsShowTotal
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyUndauntedCrestsShowTotal = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyUndauntedCrestsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyUndauntedCrestsShowTotal,
+            },
+            {
+                -- Total Currency Message (Undaunted Crests)
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDCRESTSTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDCRESTSTOTAL_MSG_TP),
+                getFunc = function ()
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalUndauntedCrests")
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyMessageTotalUndauntedCrests = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyUndauntedCrestsChange and Settings.Currency.CurrencyUndauntedCrestsShowTotal)
+                end,
+                default = Defaults.Currency.CurrencyMessageTotalUndauntedCrests,
+            },
+            {
                 -- Show Endless Keys
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESS),
@@ -10343,6 +10433,8 @@ function ChatAnnouncements.CreateSettings()
         { svKey = "DungeonScrivenersHall",     label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL,      tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL_TP },
         { svKey = "DungeonBedlamVeil",         label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL_TP },
         { svKey = "DungeonExiledRedoubt",      label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT_TP },
+        { svKey = "DungeonMarchOfSacrifices",  label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES,  tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES_TP },
+        { svKey = "DungeonMoonHunterKeep",     label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP,     tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP_TP },
     }
     for sectionIndex, section in ipairs(dungeonDisplaySections) do
         AppendDisplayAnnouncementSection(section.svKey, section.label, section.tooltip)

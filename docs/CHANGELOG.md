@@ -1,5 +1,16 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.7
+
+### New
+
+- Chat Announcements: Undaunted Crests (Solo Dungeon Currency) print when gained or spent, with the same toggle, color, name, and total options as Undaunted Keys. PC and console.
+- Chat Announcements: March of Sacrifices and Moon Hunter Keep center-screen announcements, including the solo versions, can be shown in chat, on the center screen, or as alerts. PC and console.
+
+### Fixed
+
+- Unit Frames: **Companion Ability Track** timers on the companion frame count down and clear when the effect ends, instead of freezing on the icon.
+
 ## Version 7.2.7.6
 
 ### New

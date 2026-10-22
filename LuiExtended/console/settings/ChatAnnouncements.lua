@@ -771,6 +771,92 @@ function ChatAnnouncements.CreateConsoleSettings()
             end
         }
 
+        -- Undaunted Crests
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTS_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyUndauntedCrestsChange
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyUndauntedCrestsChange = value
+            end,
+            default = Defaults.Currency.CurrencyUndauntedCrestsChange,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSCOLOR),
+            getFunction = function ()
+                return Settings.Currency.CurrencyUndauntedCrestsColor[1], Settings.Currency.CurrencyUndauntedCrestsColor[2], Settings.Currency.CurrencyUndauntedCrestsColor[3], Settings.Currency.CurrencyUndauntedCrestsColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.Currency.CurrencyUndauntedCrestsColor = { r, g, b, a }
+                ChatAnnouncements.RegisterColorEvents()
+            end,
+            default = Defaults.Currency.CurrencyUndauntedCrestsColor,
+            disable = function ()
+                return not (Settings.Currency.CurrencyUndauntedCrestsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSNAME_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyUndauntedCrestsName
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyUndauntedCrestsName = value
+            end,
+            default = Defaults.Currency.CurrencyUndauntedCrestsName,
+            disable = function ()
+                return not (Settings.Currency.CurrencyUndauntedCrestsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCRESTSTOTAL_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyUndauntedCrestsShowTotal
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyUndauntedCrestsShowTotal = value
+            end,
+            default = Defaults.Currency.CurrencyUndauntedCrestsShowTotal,
+            disable = function ()
+                return not (Settings.Currency.CurrencyUndauntedCrestsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDCRESTSTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDCRESTSTOTAL_MSG_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyMessageTotalUndauntedCrests
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyMessageTotalUndauntedCrests = value
+            end,
+            default = Defaults.Currency.CurrencyMessageTotalUndauntedCrests,
+            disable = function ()
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyUndauntedCrestsChange and Settings.Currency.CurrencyUndauntedCrestsShowTotal)
+            end
+        }
+
         -- Endless Keys
         settings[#settings + 1] =
         {
@@ -9467,6 +9553,8 @@ function ChatAnnouncements.CreateConsoleSettings()
             { svKey = "DungeonScrivenersHall",      label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL,      tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL_TP },
             { svKey = "DungeonBedlamVeil",          label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL_TP },
             { svKey = "DungeonExiledRedoubt",       label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT_TP },
+            { svKey = "DungeonMarchOfSacrifices",   label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES,  tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES_TP },
+            { svKey = "DungeonMoonHunterKeep",      label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP,     tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP_TP },
         }
         for sectionIndex, section in ipairs(dungeonDisplaySections) do
             AddDisplayAnnouncementCheckbox(section.svKey, section.label, section.tooltip, "CA")

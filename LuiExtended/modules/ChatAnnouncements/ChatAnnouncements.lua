@@ -557,6 +557,7 @@ function ChatAnnouncements.RegisterColorEvents()
     ColorizeColors.CurrencyWVColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyWVColor))
     ColorizeColors.CurrencyOutfitTokenColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyOutfitTokenColor))
     ColorizeColors.CurrencyUndauntedColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyUndauntedColor))
+    ColorizeColors.CurrencyUndauntedCrestsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyUndauntedCrestsColor))
     ColorizeColors.CurrencyTransmuteColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTransmuteColor))
     ColorizeColors.CurrencyCrownsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyCrownsColor))
     ColorizeColors.CurrencyCrownGemsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyCrownGemsColor))
@@ -1642,6 +1643,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURT_STYLE_STONES]           = { "CurrencyOutfitTokenChange", "CurrencyOutfitTokenColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_STYLE_STONES), "CurrencyOutfitTokenName", "CurrencyOutfitTokenShowTotal", "CurrencyMessageTotalOutfitToken" },
         [CURT_TRANSMUTE_CRYSTALS]     = { "CurrencyTransmuteChange", "CurrencyTransmuteColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TRANSMUTE_CRYSTALS), "CurrencyTransmuteName", "CurrencyTransmuteShowTotal", "CurrencyMessageTotalTransmute" },
         [CURT_UNDAUNTED_KEYS]         = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_UNDAUNTED_KEYS), "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
+        [CURT_UNDAUNTED_CRESTS]       = { "CurrencyUndauntedCrestsChange", "CurrencyUndauntedCrestsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_UNDAUNTED_CRESTS), "CurrencyUndauntedCrestsName", "CurrencyUndauntedCrestsShowTotal", "CurrencyMessageTotalUndauntedCrests" },
         [CURT_CROWNS]                 = { "CurrencyCrownsChange", "CurrencyCrownsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS), "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
         [CURT_CROWN_GEMS]             = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
         [CURT_ARCHIVAL_FORTUNES]      = { "CurrencyEndlessChange", "CurrencyEndlessColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_ARCHIVAL_FORTUNES), "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
@@ -3815,6 +3817,7 @@ local PROMOTIONAL_EVENT_CURRENCY_CHANGE_ENABLED_KEYS =
     [CURT_STYLE_STONES] = "CurrencyOutfitTokenChange",
     [CURT_TRANSMUTE_CRYSTALS] = "CurrencyTransmuteChange",
     [CURT_UNDAUNTED_KEYS] = "CurrencyUndauntedChange",
+    [CURT_UNDAUNTED_CRESTS] = "CurrencyUndauntedCrestsChange",
     [CURT_CROWNS] = "CurrencyCrownsChange",
     [CURT_CROWN_GEMS] = "CurrencyCrownGemsChange",
     [CURT_ARCHIVAL_FORTUNES] = "CurrencyEndlessChange",
