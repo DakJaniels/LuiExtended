@@ -33,6 +33,7 @@ ChatAnnouncements.CurrencyMessageFormatStringIds =
     CurrencyMessageTotalTomeChallengeRerolls = LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALTOMECHALLENGEREROLLS,
     CurrencyMessageTotalOutfitToken = LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALOUTFITTOKENS,
     CurrencyMessageTotalUndaunted = LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALUNDAUNTED,
+    CurrencyMessageTotalUndauntedCrests = LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALUNDAUNTEDCRESTS,
     CurrencyMessageTotalEndless = LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALENDLESS,
 }
 
@@ -55,6 +56,7 @@ ChatAnnouncements.CurrencyDisplayNameStringIds =
     CurrencyTomeChallengeRerollsName = LUIE_STRING_CA_CURRENCY_TOME_CHALLENGE_REROLLS,
     CurrencyOutfitTokenName = LUIE_STRING_CA_CURRENCY_OUTFIT_TOKENS,
     CurrencyUndauntedName = LUIE_STRING_CA_CURRENCY_UNDAUNTED,
+    CurrencyUndauntedCrestsName = LUIE_STRING_CA_CURRENCY_UNDAUNTED_CRESTS,
     CurrencyEndlessName = LUIE_STRING_CA_CURRENCY_ENDLESS,
 }
 
