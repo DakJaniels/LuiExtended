@@ -65,6 +65,7 @@ function LUIE.CustomFramesBuildSmallGroup()
                 ["overlandDifficultyIcon"] = topInfo:GetNamedChild("_OverlandDifficultyIcon"),
                 ["level"] = topInfo:GetNamedChild("_Level"),
                 ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
+                ["customIcon"] = topInfo:GetNamedChild("_CustomIcon"),
                 ["friendIcon"] = topInfo:GetNamedChild("_FriendIcon"),
                 ["roleIcon"] = ghb:GetNamedChild("_RoleIcon"),
                 ["dead"] = ghb:GetNamedChild("_Dead"),

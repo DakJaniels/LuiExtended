@@ -52,6 +52,7 @@ function LUIE.CustomFramesBuildAvaTarget()
             ["topInfo"] = topInfo,
             ["name"] = topInfo:GetNamedChild("_Name"),
             ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
+            ["customIcon"] = topInfo:GetNamedChild("_CustomIcon"),
             ["levelIcon"] = topInfo:GetNamedChild("_LevelIcon"),
             ["veterancyRankIcon"] = topInfo:GetNamedChild("_VeterancyRankIcon"),
             ["overlandDifficultyIcon"] = topInfo:GetNamedChild("_OverlandDifficultyIcon"),

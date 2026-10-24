@@ -276,6 +276,18 @@
                           relativePoint="RIGHT"
                           offsetX="-1" />
                 </Texture>
+                <Texture name="$(parent)_CustomIcon"
+                         textureFile=""
+                         layer="OVERLAY"
+                         tier="LOW"
+                         hidden="true">
+                  <Dimensions x="22"
+                              y="22" />
+                  <Anchor point="RIGHT"
+                          relativeTo="$(parent)_ClassIcon"
+                          relativePoint="LEFT"
+                          offsetX="-2" />
+                </Texture>
                 <Label name="$(parent)_ClassName"
                        text="Class"
                        font="ZoFontGameSmall"

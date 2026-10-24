@@ -1515,6 +1515,14 @@ function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
             unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].name:SetHidden(newValue ~= nil)
         end
     end
+    if unitFrame.customIcon ~= nil then
+        if newValue == "Offline" or newValue == strOffline then
+            UnitFrames.HideCustomPlayerIcon(unitFrame)
+        else
+            UnitFrames.ApplyCustomPlayerIcon(unitFrame)
+        end
+        UnitFrames.RelayoutCustomPlayerIcon(unitFrame)
+    end
     UnitFrames.RefreshCompactNameClip(unitFrame)
 end
 
@@ -1719,6 +1727,7 @@ function UnitFrames.CustomFramesUnreferenceGroupControl(groupType, first)
             end
 
             frame.unitTag = nil
+            UnitFrames.HideCustomPlayerIcon(frame)
             if frame.SyncAttributeVisualizerUnitTag then
                 frame:SyncAttributeVisualizerUnitTag()
             end
@@ -2073,6 +2082,8 @@ local function CustomFramesLayoutSetupPlayerCommon(player, buffsWidth)
         player.veterancyRankIcon:SetHidden(not showName)
     end
     player.classIcon:SetHidden(not showName)
+    player.customPortraitHiddenClassIcon = nil
+    UnitFrames.ApplyCustomPlayerIcon(player)
     if player.frameCategory == "player" then
         FrameObject.LayoutTopInfoPlayer(player)
     end
@@ -2745,6 +2756,12 @@ UnitFrames.ApplyClippedNameWidth = ApplyClippedNameWidth
 
 local RAID_NAME_ICON_INSET = 22
 local COMPACT_NAME_LEFT_INSET = 5
+local COMPACT_RAID_CUSTOM_ICON_GAP = 1
+local COMPACT_RAID_CUSTOM_ICON_SIZE = 20
+-- Compact raid XML anchors (RaidFrames.xml): class offset 1, role offset 4, leader offset -2.
+local COMPACT_RAID_CLASS_ICON_LEFT = 1
+local COMPACT_RAID_ROLE_ICON_LEFT = 4
+local COMPACT_RAID_LEADER_ICON_LEFT = -2
 local COMPACT_NAME_RIGHT_ANCHOR_INSET = 5
 local COMPACT_NAME_TEXT_GAP = 4
 
@@ -2801,6 +2818,102 @@ function UnitFrames.ApplyCompactNameClip(unitFrame, captionCategory, barWidth, b
         local appearance, canShrink = UnitFrames.GetNameFontInfo(captionCategory)
         UnitFrames.FitNameLabelFont(unitFrame.name, appearance, canShrink, nameWidth)
     end
+end
+
+--- Beside class: portrait sits just to the right of the class/role/leader slot and the name inset grows.
+--- Left of name: portrait is the leftmost icon, then that slot, then the name.
+--- Replace class: portrait takes the class slot and the name inset stays at compactRaidBaseNameInset.
+--- When the portrait is hidden, the name inset stays at that base (22 with a left icon, 5 without).
+--- @param unitFrame LUIE_CustomFrameObject|nil
+function UnitFrames.LayoutCompactRaidCustomIcon(unitFrame)
+    if not unitFrame or unitFrame.raidTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED then
+        return
+    end
+    local baseInset = unitFrame.compactRaidBaseNameInset
+    if baseInset == nil then
+        local classVisible = unitFrame.classIcon and not unitFrame.classIcon:IsHidden()
+        local roleVisible = unitFrame.roleIcon and not unitFrame.roleIcon:IsHidden()
+        baseInset = (classVisible or roleVisible) and RAID_NAME_ICON_INSET or COMPACT_NAME_LEFT_INSET
+    end
+    local healthEntry = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    local healthBackdrop = healthEntry and healthEntry.backdrop
+    if healthBackdrop then
+        if unitFrame.classIcon then
+            unitFrame.classIcon:ClearAnchors()
+            unitFrame.classIcon:SetAnchor(LEFT, healthBackdrop, LEFT, COMPACT_RAID_CLASS_ICON_LEFT, 0)
+        end
+        if unitFrame.roleIcon then
+            unitFrame.roleIcon:ClearAnchors()
+            unitFrame.roleIcon:SetAnchor(LEFT, healthBackdrop, LEFT, COMPACT_RAID_ROLE_ICON_LEFT, 0)
+        end
+        if unitFrame.leader then
+            unitFrame.leader:ClearAnchors()
+            unitFrame.leader:SetAnchor(LEFT, healthBackdrop, LEFT, COMPACT_RAID_LEADER_ICON_LEFT, 0)
+        end
+    end
+    local customIcon = unitFrame.customIcon
+    local portraitVisible = customIcon and not customIcon:IsHidden()
+    local customIconPosition = UnitFrames.SV.CustomIconPosition
+    if customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS and portraitVisible and unitFrame.classIcon and not unitFrame.classIcon:IsHidden() then
+        unitFrame.customPortraitHiddenClassIcon = true
+        unitFrame.classIcon:SetHidden(true)
+    elseif unitFrame.customPortraitHiddenClassIcon and unitFrame.classIcon and not (customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS and portraitVisible) then
+        unitFrame.customPortraitHiddenClassIcon = nil
+        unitFrame.classIcon:SetHidden(false)
+    end
+    if not portraitVisible then
+        UnitFrames.ApplyRaidNameClip(unitFrame, baseInset)
+        return
+    end
+    local iconSize = customIcon:GetWidth()
+    if iconSize <= 0 then
+        iconSize = COMPACT_RAID_CUSTOM_ICON_SIZE
+    end
+    if customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS and unitFrame.customPortraitHiddenClassIcon then
+        if healthBackdrop then
+            customIcon:ClearAnchors()
+            customIcon:SetAnchor(LEFT, healthBackdrop, LEFT, COMPACT_RAID_CLASS_ICON_LEFT, 0)
+            customIcon:SetDimensions(iconSize, iconSize)
+        end
+        UnitFrames.ApplyRaidNameClip(unitFrame, baseInset)
+        return
+    end
+    if customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME and healthBackdrop then
+        customIcon:ClearAnchors()
+        customIcon:SetAnchor(LEFT, healthBackdrop, LEFT, COMPACT_RAID_CLASS_ICON_LEFT, 0)
+        customIcon:SetDimensions(iconSize, iconSize)
+        local slotLeft = COMPACT_RAID_CLASS_ICON_LEFT + iconSize + COMPACT_RAID_CUSTOM_ICON_GAP
+        local shiftedIcon = nil
+        local originalLeft = COMPACT_RAID_CLASS_ICON_LEFT
+        if unitFrame.classIcon and not unitFrame.classIcon:IsHidden() then
+            shiftedIcon = unitFrame.classIcon
+            originalLeft = COMPACT_RAID_CLASS_ICON_LEFT
+        elseif unitFrame.roleIcon and not unitFrame.roleIcon:IsHidden() then
+            shiftedIcon = unitFrame.roleIcon
+            originalLeft = COMPACT_RAID_ROLE_ICON_LEFT
+        elseif unitFrame.leader and unitFrame.unitTag and IsUnitGroupLeader(unitFrame.unitTag) then
+            shiftedIcon = unitFrame.leader
+            originalLeft = COMPACT_RAID_LEADER_ICON_LEFT
+        end
+        local nameInset = slotLeft
+        if shiftedIcon then
+            shiftedIcon:ClearAnchors()
+            shiftedIcon:SetAnchor(LEFT, healthBackdrop, LEFT, slotLeft, 0)
+            local slotWidth = baseInset - originalLeft
+            if slotWidth < 0 then
+                slotWidth = 0
+            end
+            nameInset = slotLeft + slotWidth
+        end
+        UnitFrames.ApplyRaidNameClip(unitFrame, nameInset)
+        return
+    end
+    if healthBackdrop then
+        customIcon:ClearAnchors()
+        customIcon:SetAnchor(LEFT, healthBackdrop, LEFT, baseInset, 0)
+        customIcon:SetDimensions(iconSize, iconSize)
+    end
+    UnitFrames.ApplyRaidNameClip(unitFrame, baseInset + iconSize + COMPACT_RAID_CUSTOM_ICON_GAP)
 end
 
 --- @param unitFrame LUIE_CustomFrameObject
@@ -3109,27 +3222,60 @@ function UnitFrames.ApplyRaidExpandedMemberLayout(unitFrame, showPlaceholders)
     local sv = UnitFrames.SV
 
     -- Top row ---------------------------------------------------------------
+    local customIconPosition = UnitFrames.SV.CustomIconPosition
     local showLeader = unitFrame.raidExpandedShowLeader == true
     local roleVisible = not showLeader and unitFrame.roleIcon ~= nil and not unitFrame.roleIcon:IsHidden()
     local classVisible = not showLeader and unitFrame.classIcon ~= nil and not unitFrame.classIcon:IsHidden()
+    local customVisible = unitFrame.customIcon ~= nil and not unitFrame.customIcon:IsHidden()
+    if customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS and customVisible and classVisible then
+        unitFrame.customPortraitHiddenClassIcon = true
+        unitFrame.classIcon:SetHidden(true)
+        classVisible = false
+    elseif unitFrame.customPortraitHiddenClassIcon and unitFrame.classIcon and not (customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS and customVisible) then
+        unitFrame.customPortraitHiddenClassIcon = nil
+        unitFrame.classIcon:SetHidden(false)
+        classVisible = not showLeader and not unitFrame.classIcon:IsHidden()
+    end
+    local portraitOnLeft = customVisible and customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME
+    local portraitReplacesClass = customVisible and customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS and unitFrame.customPortraitHiddenClassIcon
 
     local rightNeighbor, rightNeighborPoint, nextGap = topRow, RIGHT, 0
-    rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.classIcon, RAID_EXPANDED_CLASS_ICON_SIZE, classVisible, rightNeighbor, rightNeighborPoint, nextGap)
+    if portraitReplacesClass then
+        rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.customIcon, RAID_EXPANDED_CLASS_ICON_SIZE, true, rightNeighbor, rightNeighborPoint, nextGap)
+        rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.classIcon, RAID_EXPANDED_CLASS_ICON_SIZE, false, rightNeighbor, rightNeighborPoint, nextGap)
+    else
+        rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.classIcon, RAID_EXPANDED_CLASS_ICON_SIZE, classVisible, rightNeighbor, rightNeighborPoint, nextGap)
+        if customVisible and not portraitOnLeft then
+            rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.customIcon, RAID_EXPANDED_CLASS_ICON_SIZE, true, rightNeighbor, rightNeighborPoint, nextGap)
+        end
+    end
     rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.roleIcon, RAID_EXPANDED_ROLE_ICON_SIZE, roleVisible, rightNeighbor, rightNeighborPoint, nextGap)
     rightNeighbor, rightNeighborPoint, nextGap = AnchorRaidExpandedTopRowIcon(unitFrame.leader, RAID_EXPANDED_LEADER_ICON_SIZE, showLeader, rightNeighbor, rightNeighborPoint, nextGap)
+
+    local nameLeft = 0
+    if portraitOnLeft and unitFrame.customIcon then
+        unitFrame.customIcon:ClearAnchors()
+        unitFrame.customIcon:SetDimensions(RAID_EXPANDED_CLASS_ICON_SIZE, RAID_EXPANDED_CLASS_ICON_SIZE)
+        unitFrame.customIcon:SetAnchor(LEFT, topRow, LEFT, 0, 0)
+        nameLeft = RAID_EXPANDED_CLASS_ICON_SIZE + RAID_EXPANDED_TOP_ICON_GAP
+    end
 
     if unitFrame.name then
         local nameHeight = resolveCompactNameHeight("raid", RAID_EXPANDED_NAME_HEIGHT + 2)
         nameHeight = zo_min(zo_max(nameHeight, RAID_EXPANDED_NAME_HEIGHT), RAID_EXPANDED_TOP_ROW_HEIGHT)
         local nameRightGap = (rightNeighbor == topRow) and 0 or RAID_EXPANDED_NAME_ICON_GAP
         unitFrame.name:ClearAnchors()
-        unitFrame.name:SetAnchor(LEFT, topRow, LEFT, 0, 0)
+        unitFrame.name:SetAnchor(LEFT, topRow, LEFT, nameLeft, 0)
         unitFrame.name:SetAnchor(RIGHT, rightNeighbor, rightNeighborPoint, -nameRightGap, 0)
         unitFrame.name:SetHeight(nameHeight)
 
         local topRowIconsWidth = nameRightGap
         local visibleIconCount = 0
         if classVisible and unitFrame.classIcon then
+            topRowIconsWidth = topRowIconsWidth + RAID_EXPANDED_CLASS_ICON_SIZE
+            visibleIconCount = visibleIconCount + 1
+        end
+        if customVisible and not portraitOnLeft and unitFrame.customIcon then
             topRowIconsWidth = topRowIconsWidth + RAID_EXPANDED_CLASS_ICON_SIZE
             visibleIconCount = visibleIconCount + 1
         end
@@ -3143,6 +3289,9 @@ function UnitFrames.ApplyRaidExpandedMemberLayout(unitFrame, showPlaceholders)
         end
         if visibleIconCount > 1 then
             topRowIconsWidth = topRowIconsWidth + (visibleIconCount - 1) * RAID_EXPANDED_TOP_ICON_GAP
+        end
+        if portraitOnLeft then
+            topRowIconsWidth = topRowIconsWidth + nameLeft
         end
         -- The member control has explicit dimensions; the anchored top row's width can lag behind a resize.
         local topRowWidth = (unitFrame.control:GetWidth() or 0) - 2 * RAID_EXPANDED_PADDING
@@ -3334,17 +3483,20 @@ local function applyIconSettings(unitFrame, unitTag, role)
         end
     end
 
-    -- Apply settings based on what we're showing
+    -- Apply settings based on what we're showing. compactRaidBaseNameInset is the name start before a custom portrait.
     if showRoleIcon or showClassIcon then
         unitFrame.roleIcon:SetHidden(not showRoleIcon)
         unitFrame.classIcon:SetHidden(not showClassIcon)
+        unitFrame.compactRaidBaseNameInset = RAID_NAME_ICON_INSET
         UnitFrames.ApplyRaidNameClip(unitFrame, RAID_NAME_ICON_INSET)
     else
         -- No icon shown
         unitFrame.roleIcon:SetHidden(true)
         unitFrame.classIcon:SetHidden(true)
+        unitFrame.compactRaidBaseNameInset = COMPACT_NAME_LEFT_INSET
         UnitFrames.ApplyRaidNameClip(unitFrame, COMPACT_NAME_LEFT_INSET)
     end
+    unitFrame.customPortraitHiddenClassIcon = nil
 end
 
 -- Calculate additional width needed for LibGroupBroadcast integration icons (raid frames)
@@ -3471,7 +3623,9 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
             if isGroupLeader then
                 unitFrame.roleIcon:SetHidden(true)
                 unitFrame.classIcon:SetHidden(true)
+                unitFrame.customPortraitHiddenClassIcon = nil
                 unitFrame.leader:SetTexture(leaderIcons[1])
+                unitFrame.compactRaidBaseNameInset = RAID_NAME_ICON_INSET
                 UnitFrames.ApplyRaidNameClip(unitFrame, RAID_NAME_ICON_INSET)
             else
                 unitFrame.leader:SetTexture(leaderIcons[0])
@@ -3480,8 +3634,12 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
             -- Override for offline players (only meaningful when slot has a real member)
             if unitTag and not IsUnitOnline(unitTag) then
                 unitFrame.classIcon:SetHidden(true)
+                unitFrame.customPortraitHiddenClassIcon = nil
+                unitFrame.compactRaidBaseNameInset = COMPACT_NAME_LEFT_INSET
                 UnitFrames.ApplyRaidNameClip(unitFrame, COMPACT_NAME_LEFT_INSET)
             end
+
+            UnitFrames.ApplyCustomPlayerIcon(unitFrame)
 
             if useExpandedTemplate then
                 -- Expanded template: the row anchors own the name / status geometry.
@@ -3491,6 +3649,7 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
                 -- Set label dimensions (always - driven purely by SV geometry)
                 unitFrame.dead:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
                 unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
+                UnitFrames.LayoutCompactRaidCustomIcon(unitFrame)
             end
 
             -- Regen strips / decreased armor overlay follow the health band, not the RaidBarHeight they were created from.

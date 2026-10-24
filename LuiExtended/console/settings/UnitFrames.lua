@@ -5720,6 +5720,105 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CUSTOM_NAMES),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_NAMES_TP),
+            getFunction = function ()
+                return Settings.CustomNames
+            end,
+            setFunction = function (value)
+                Settings.CustomNames = value
+                UnitFrames.RefreshCustomIdentityFrames()
+            end,
+            warning = GetString(LUIE_STRING_LAM_UF_REQUIRES_LIBCUSTOMNAMES),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and LibCustomNames)
+            end,
+            default = Defaults.CustomNames,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CUSTOM_NAME_OUTLINE),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_NAME_OUTLINE_TP),
+            getFunction = function ()
+                return Settings.CustomNameOutline
+            end,
+            setFunction = function (value)
+                Settings.CustomNameOutline = value
+                UnitFrames.RefreshCustomIdentityFrames()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomNames and LibCustomNames)
+            end,
+            default = Defaults.CustomNameOutline,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICONS),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICONS_TP),
+            getFunction = function ()
+                return Settings.CustomIcons
+            end,
+            setFunction = function (value)
+                Settings.CustomIcons = value
+                UnitFrames.RefreshCustomIdentityFrames()
+            end,
+            warning = GetString(LUIE_STRING_LAM_UF_REQUIRES_LIBCUSTOMICONS),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and LibCustomIcons)
+            end,
+            default = Defaults.CustomIcons,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_ANIMATIONS),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_ANIMATIONS_TP),
+            getFunction = function ()
+                return Settings.CustomIconAnimations
+            end,
+            setFunction = function (value)
+                Settings.CustomIconAnimations = value
+                UnitFrames.RefreshCustomIdentityFrames()
+            end,
+            warning = GetString(LUIE_STRING_LAM_UF_REQUIRES_LIBCUSTOMICONS),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomIcons and LibCustomIcons)
+            end,
+            default = Defaults.CustomIconAnimations,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_TP),
+            items =
+            {
+                { name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_BESIDE_CLASS), data = UnitFrames.CUSTOM_ICON_POSITION_BESIDE_CLASS },
+                { name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_LEFT_OF_NAME), data = UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME },
+                { name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_REPLACE_CLASS), data = UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS },
+            },
+            getFunction = function ()
+                return SettingsAPI:LHASDropdownGetData(Settings.CustomIconPosition)
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.CustomIconPosition = item.data
+                UnitFrames.RefreshCustomIdentityFrames()
+            end,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.CustomIconPosition),
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomIcons)
+            end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_UF_SHORTNUMBERS),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHORTNUMBERS_TP),
             getFunction = function ()

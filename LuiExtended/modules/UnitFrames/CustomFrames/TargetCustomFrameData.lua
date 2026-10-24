@@ -65,6 +65,7 @@ function LUIE.CustomFramesBuildTarget()
             ["overlandDifficultyIcon"] = topInfo:GetNamedChild("_OverlandDifficultyIcon"),
             ["level"] = topInfo:GetNamedChild("_Level"),
             ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
+            ["customIcon"] = topInfo:GetNamedChild("_CustomIcon"),
             ["className"] = topInfo:GetNamedChild("_ClassName"),
             ["friendIcon"] = topInfo:GetNamedChild("_FriendIcon"),
             ["star1"] = topInfo:GetNamedChild("_Star1"),
