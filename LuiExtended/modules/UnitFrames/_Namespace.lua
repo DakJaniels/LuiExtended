@@ -112,6 +112,10 @@ UnitFrames.Enabled = false
 UnitFrames.RAID_LEVEL_DISPLAY_NONE = 1
 UnitFrames.RAID_LEVEL_DISPLAY_NUMBER = 2
 UnitFrames.RAID_LEVEL_DISPLAY_ICON = 3
+-- LibCustomIcons portrait placement. Beside the class icon is the default so an existing layout does not move.
+UnitFrames.CUSTOM_ICON_POSITION_BESIDE_CLASS = 1
+UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME = 2
+UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS = 3
 -- Raid member XML template (chosen at build time in LUIE.CustomFramesBuildRaidGroup; requires /reloadui to switch).
 UnitFrames.RAID_FRAME_TEMPLATE_COMPACT = "Compact"
 UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED = "Expanded"
@@ -371,6 +375,11 @@ UnitFrames.Defaults =
     DisplayOptionsPlayer = 2,
     DisplayOptionsTarget = 2,
     DisplayOptionsGroupRaid = 2,
+    CustomNames = false,
+    CustomNameOutline = false,
+    CustomIcons = false,
+    CustomIconAnimations = false,
+    CustomIconPosition = UnitFrames.CUSTOM_ICON_POSITION_BESIDE_CLASS,
     ExecutePercentage = 20,
     RaidIconOptions = 2,
     RepositionFramesAdjust = 0,
@@ -577,6 +586,9 @@ UnitFrames.SV = {}
 
 --- Per-unit custom frame root (TLW, buff anchors, and numeric COMBAT_MECHANIC_FLAGS_* power rows).
 --- @class UnitFrames.CustomFrameUnitEntry : LUIE_CustomFrameObject
+--- @field __index table|nil
+--- @field __parentClasses table[]|nil
+--- @field __isAbstractClass boolean|nil
 --- @field unitTag string|nil
 --- @field attributeVisualizer LUIE_UnitAttributeVisualizer|nil
 --- @field hudSceneFragment ZO_HUDFadeSceneFragment|nil

@@ -140,6 +140,19 @@ local raidLevelDisplayValues =
     UnitFrames.RAID_LEVEL_DISPLAY_ICON,
 }
 
+local customIconPositionChoices =
+{
+    GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_BESIDE_CLASS),
+    GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_LEFT_OF_NAME),
+    GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_REPLACE_CLASS),
+}
+local customIconPositionValues =
+{
+    UnitFrames.CUSTOM_ICON_POSITION_BESIDE_CLASS,
+    UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME,
+    UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS,
+}
+
 local formatOptionChoices, formatOptionValues = UnitFrames.GetFormatOptionMenus()
 
 local Whitelist, WhitelistValues = {}, {}
@@ -5813,6 +5826,99 @@ function UnitFrames.CreateSettings()
         name = GetString(LUIE_STRING_LAM_UF_COMMON_HEADER),
         controls =
         {
+            {
+                -- Custom names (LibCustomNames)
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CUSTOM_NAMES),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_NAMES_TP),
+                getFunc = function ()
+                    return Settings.CustomNames
+                end,
+                setFunc = function (value)
+                    Settings.CustomNames = value
+                    UnitFrames.RefreshCustomIdentityFrames()
+                end,
+                width = "full",
+                default = Defaults.CustomNames,
+                warning = GetString(LUIE_STRING_LAM_UF_REQUIRES_LIBCUSTOMNAMES),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and LibCustomNames)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CUSTOM_NAME_OUTLINE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_NAME_OUTLINE_TP),
+                getFunc = function ()
+                    return Settings.CustomNameOutline
+                end,
+                setFunc = function (value)
+                    Settings.CustomNameOutline = value
+                    UnitFrames.RefreshCustomIdentityFrames()
+                end,
+                width = "full",
+                default = Defaults.CustomNameOutline,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomNames and LibCustomNames)
+                end,
+            },
+            {
+                -- Custom icons (LibCustomIcons)
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICONS),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICONS_TP),
+                getFunc = function ()
+                    return Settings.CustomIcons
+                end,
+                setFunc = function (value)
+                    Settings.CustomIcons = value
+                    UnitFrames.RefreshCustomIdentityFrames()
+                end,
+                width = "full",
+                default = Defaults.CustomIcons,
+                warning = GetString(LUIE_STRING_LAM_UF_REQUIRES_LIBCUSTOMICONS),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and LibCustomIcons)
+                end,
+            },
+            {
+                -- Animated custom icons
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_ANIMATIONS),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_ANIMATIONS_TP),
+                getFunc = function ()
+                    return Settings.CustomIconAnimations
+                end,
+                setFunc = function (value)
+                    Settings.CustomIconAnimations = value
+                    UnitFrames.RefreshCustomIdentityFrames()
+                end,
+                width = "full",
+                default = Defaults.CustomIconAnimations,
+                warning = GetString(LUIE_STRING_LAM_UF_REQUIRES_LIBCUSTOMICONS),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomIcons and LibCustomIcons)
+                end,
+            },
+            {
+                type = "dropdown",
+                name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_TP),
+                choices = customIconPositionChoices,
+                choicesValues = customIconPositionValues,
+                getFunc = function ()
+                    return Settings.CustomIconPosition
+                end,
+                setFunc = function (value)
+                    Settings.CustomIconPosition = value
+                    UnitFrames.RefreshCustomIdentityFrames()
+                end,
+                width = "full",
+                default = Defaults.CustomIconPosition,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomIcons)
+                end,
+            },
             {
                 -- Shorten numbers
                 type = "checkbox",

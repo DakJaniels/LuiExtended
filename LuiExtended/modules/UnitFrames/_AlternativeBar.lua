@@ -245,7 +245,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         positionMode = "recenter"
 
         CustomFramesClearAltBarReferences(player)
-        player.ChampionXP = alt --[[@as LUIE_Player_Health|LUIE_Player_Resource]]
+        player.ChampionXP = alt
 
         UnitFrames.OnChampionPointGained()
 
@@ -272,7 +272,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         positionMode = "recenter"
 
         CustomFramesClearAltBarReferences(player)
-        player.Experience = alt --[[@as LUIE_Player_Health|LUIE_Player_Resource]]
+        player.Experience = alt
 
         local championXP = GetNumChampionXPInChampionPoint(GetPlayerChampionPointsEarned()) or GetPlayerChampionXP()
         player.Experience.bar:SetMinMax(0, player.isChampion and championXP or GetUnitXPMax("player"))

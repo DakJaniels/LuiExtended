@@ -74,6 +74,21 @@ function FrameObject.RefreshTopInfoForLayout(self)
     end
     FrameObject.UpdateTopInfoOverlandIcon(self)
     FrameObject.UpdateTopInfoLevelRow(self)
+    if not self.classIcon then
+        return
+    end
+    if UnitFrames.SV.CustomIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS
+        and self.customIcon and not self.customIcon:IsControlHidden() then
+        if not self.classIcon:IsControlHidden() then
+            self.customPortraitHiddenClassIcon = true
+            self.classIcon:SetHidden(true)
+        end
+        return
+    end
+    if self.customPortraitHiddenClassIcon then
+        self.customPortraitHiddenClassIcon = nil
+        self.classIcon:SetHidden(false)
+    end
 end
 
 --- @param self LUIE_CustomFrameObject
@@ -96,6 +111,14 @@ end
 --- @return number overlandWidth
 local function GetTopInfoLeftRowStartX(self, rowOffsetY, baseStartX)
     baseStartX = baseStartX or 0
+    -- AvA places its own left-side class and portrait. Everywhere else, left-of-name is the first icon in this row.
+    if self.frameCategory ~= "avaTarget"
+        and UnitFrames.SV.CustomIconPosition == UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME
+        and self.customIcon and not self.customIcon:IsControlHidden() then
+        self.customIcon:ClearAnchors()
+        self.customIcon:SetAnchor(LEFT, self.topInfo, LEFT, baseStartX, 0)
+        baseStartX = baseStartX + self.customIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
+    end
     local overlandWidth = 0
     local rowStartX = baseStartX
     local overlandIcon = self.overlandDifficultyIcon
@@ -278,7 +301,7 @@ end
 local function ApplyTopInfoNameFullFont(self)
     local appearance, canShrink = UnitFrames.GetTopInfoNameFontInfo(self.frameCategory)
     if appearance and canShrink then
-        self.name:SetFont(UnitFrames.CreateNameLabelFont(appearance, appearance.fontOther))
+        self.name:SetFont(UnitFrames.CreateNameLabelFont(appearance, appearance.fontOther, self.name.customNameOutlineFontStyle))
         UnitFrames.ClearNameLabelFit(self.name)
     end
     return appearance, canShrink
@@ -411,13 +434,63 @@ end
 -- -----------------------------------------------------------------------------
 
 --- @param self LUIE_CustomFrameObject
+--- @param rightReserved number
+--- @return number
+local function AddCustomIconRightReserved(self, rightReserved)
+    if UnitFrames.SV.CustomIconPosition == UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME then
+        return rightReserved
+    end
+    if self.customIcon and not self.customIcon:IsControlHidden() then
+        return rightReserved + self.customIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
+    end
+    return rightReserved
+end
+
+--- Class icon stays on the right edge. Beside-class puts the portrait on its inner side.
+--- Replace-class puts the portrait in the class slot. Left-of-name was already anchored from the left.
+--- @param self LUIE_CustomFrameObject
+local function AnchorTopInfoClassAndCustomIcon(self)
+    if self.classIcon then
+        self.classIcon:ClearAnchors()
+        self.classIcon:SetAnchor(RIGHT, self.topInfo, RIGHT, -1, 0)
+    end
+    if not self.customIcon or self.customIcon:IsControlHidden() then
+        return
+    end
+    local customIconPosition = UnitFrames.SV.CustomIconPosition
+    if customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME then
+        return
+    end
+    self.customIcon:ClearAnchors()
+    if customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS or not (self.classIcon and not self.classIcon:IsControlHidden()) then
+        self.customIcon:SetAnchor(RIGHT, self.topInfo, RIGHT, -1, 0)
+    else
+        self.customIcon:SetAnchor(RIGHT, self.classIcon, LEFT, -TOPINFO_ROW_ICON_GAP, 0)
+    end
+end
+
+--- Friend icon and difficulty stars chain off the inner right icon. A left-of-name portrait is not that icon.
+--- @param self LUIE_CustomFrameObject
+--- @return Control
+local function GetTopInfoInnerRightAnchor(self)
+    if UnitFrames.SV.CustomIconPosition ~= UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME
+        and self.customIcon and not self.customIcon:IsControlHidden() then
+        return self.customIcon
+    end
+    if self.classIcon and not self.classIcon:IsControlHidden() then
+        return self.classIcon
+    end
+    return self.topInfo
+end
+
+--- @param self LUIE_CustomFrameObject
 --- @return number
 local function ComputeTopInfoPlayerRightReserved(self)
     local rightReserved = 0
     if self.classIcon and not self.classIcon:IsControlHidden() then
         rightReserved = rightReserved + self.classIcon:GetWidth() + 1
     end
-    return rightReserved
+    return AddCustomIconRightReserved(self, rightReserved)
 end
 
 --- @param self LUIE_CustomFrameObject
@@ -439,7 +512,7 @@ local function ComputeTopInfoTargetRightReserved(self)
     if self.friendIcon and not self.friendIcon:IsControlHidden() then
         rightReserved = rightReserved + self.friendIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
     end
-    return rightReserved
+    return AddCustomIconRightReserved(self, rightReserved)
 end
 
 --- @param self LUIE_CustomFrameObject
@@ -452,7 +525,7 @@ local function ComputeTopInfoSmallGroupRightReserved(self)
     if self.friendIcon and not self.friendIcon:IsControlHidden() then
         rightReserved = rightReserved + self.friendIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
     end
-    return rightReserved
+    return AddCustomIconRightReserved(self, rightReserved)
 end
 
 --- @param self LUIE_CustomFrameObject
@@ -536,14 +609,10 @@ function FrameObject.LayoutTopInfoSmallGroup(self)
     local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, leaderNameOffset)
     LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoSmallGroupRightReserved(self), showLevelRow)
 
-    if self.classIcon then
-        self.classIcon:ClearAnchors()
-        self.classIcon:SetAnchor(RIGHT, self.topInfo, RIGHT, -1, 0)
-    end
+    AnchorTopInfoClassAndCustomIcon(self)
     if self.friendIcon and not self.friendIcon:IsControlHidden() then
         self.friendIcon:ClearAnchors()
-        local friendAnchor = self.classIcon or self.topInfo
-        self.friendIcon:SetAnchor(RIGHT, friendAnchor, LEFT, -TOPINFO_ROW_ICON_GAP, 0)
+        self.friendIcon:SetAnchor(RIGHT, GetTopInfoInnerRightAnchor(self), LEFT, -TOPINFO_ROW_ICON_GAP, 0)
     end
 end
 
@@ -562,6 +631,7 @@ function FrameObject.LayoutTopInfoPlayer(self)
 
     local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, 0)
     LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoPlayerRightReserved(self), showLevelRow)
+    AnchorTopInfoClassAndCustomIcon(self)
 end
 
 --- @param self LUIE_CustomFrameObject
@@ -584,23 +654,22 @@ function FrameObject.LayoutTopInfoTarget(self)
     local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, 0)
     LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoTargetRightReserved(self), showLevelRow)
 
-    -- Right-edge chrome: class icon, then friend icon, then difficulty stars (right to left).
+    -- Right-edge chrome: class icon, custom portrait, friend icon, then difficulty stars (right to left).
     -- Anchored RIGHT/LEFT (vertically centered) to match the static XML grouping so the
     -- icons stay tight and never drift to the top edge on a re-layout.
-    if self.classIcon then
-        self.classIcon:ClearAnchors()
-        self.classIcon:SetAnchor(RIGHT, self.topInfo, RIGHT, -1, 0)
-    end
+    AnchorTopInfoClassAndCustomIcon(self)
     if self.friendIcon and not self.friendIcon:IsControlHidden() then
         self.friendIcon:ClearAnchors()
-        local friendAnchor = self.classIcon or self.topInfo
-        self.friendIcon:SetAnchor(RIGHT, friendAnchor, LEFT, -TOPINFO_ROW_ICON_GAP, 0)
+        self.friendIcon:SetAnchor(RIGHT, GetTopInfoInnerRightAnchor(self), LEFT, -TOPINFO_ROW_ICON_GAP, 0)
     end
     local starAnchor = self.topInfo
     if self.friendIcon and not self.friendIcon:IsControlHidden() then
         starAnchor = self.friendIcon
-    elseif self.classIcon and not self.classIcon:IsControlHidden() then
-        starAnchor = self.classIcon
+    else
+        local innerRightAnchor = GetTopInfoInnerRightAnchor(self)
+        if innerRightAnchor ~= self.topInfo then
+            starAnchor = innerRightAnchor
+        end
     end
     if self.star1 and not self.star1:IsControlHidden() then
         self.star1:ClearAnchors()
@@ -631,15 +700,28 @@ function FrameObject.LayoutTopInfoAvaTarget(self)
         HideTopInfoLevelClusterWhenInactive(self)
     end
 
-    -- AvA target keeps the class icon on the LEFT, before overland + name.
-    local classWidth = 0
+    -- AvA keeps class and portrait on the LEFT, before overland and the name.
+    -- Beside class: class, then portrait. Left of name: portrait, then class. Replace class: portrait only.
+    local customIconPosition = UnitFrames.SV.CustomIconPosition
+    local portraitVisible = self.customIcon and not self.customIcon:IsControlHidden()
+    local leftOffset = 0
+    if customIconPosition == UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME and portraitVisible then
+        self.customIcon:ClearAnchors()
+        self.customIcon:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, leftOffset, rowOffsetY)
+        leftOffset = leftOffset + self.customIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
+    end
     if self.classIcon and not self.classIcon:IsControlHidden() then
         self.classIcon:ClearAnchors()
-        self.classIcon:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, 0, rowOffsetY)
-        classWidth = self.classIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
+        self.classIcon:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, leftOffset, rowOffsetY)
+        leftOffset = leftOffset + self.classIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
+    end
+    if portraitVisible and customIconPosition ~= UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME then
+        self.customIcon:ClearAnchors()
+        self.customIcon:SetAnchor(TOPLEFT, self.topInfo, TOPLEFT, leftOffset, rowOffsetY)
+        leftOffset = leftOffset + self.customIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
     end
 
-    local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, classWidth)
+    local rowStartX = GetTopInfoLeftRowStartX(self, rowOffsetY, leftOffset)
     LayoutTopInfoCaptionRow(self, rowOffsetY, rowStartX, ComputeTopInfoAvaTargetRightReserved(self), showLevelRow)
 
     if self.avaRankIcon and not self.avaRankIcon:IsControlHidden() then

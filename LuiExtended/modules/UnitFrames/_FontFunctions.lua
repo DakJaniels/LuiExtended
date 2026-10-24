@@ -97,9 +97,10 @@ end
 
 --- @param appearance table GetNameFontInfo appearance
 --- @param size number
+--- @param fontStyle number|nil Replaces appearance.fontStyle when a custom name uses an outline.
 --- @return string
-function UnitFrames.CreateNameLabelFont(appearance, size)
-    return CustomFramesMakeFont(appearance.fontFace, appearance.fontStyle, size)
+function UnitFrames.CreateNameLabelFont(appearance, size, fontStyle)
+    return CustomFramesMakeFont(appearance.fontFace, fontStyle or appearance.fontStyle, size)
 end
 
 --- Forget the cached fit so the next FitNameLabelFont re-measures (font was set elsewhere).
@@ -132,22 +133,23 @@ function UnitFrames.FitNameLabelFont(label, appearance, canShrink, maxWidth)
     end
     local text = label:GetText()
     local fitMaxWidth = zo_ceil(maxWidth)
+    local fontStyle = label.customNameOutlineFontStyle or appearance.fontStyle
     if label.nameFitText == text
     and label.nameFitMaxWidth == fitMaxWidth
     and label.nameFitFontFace == appearance.fontFace
-    and label.nameFitFontStyle == appearance.fontStyle
+    and label.nameFitFontStyle == fontStyle
     and label.nameFitFontSize == appearance.fontOther
     and label.nameFitMinFontSize == appearance.nameMinFont then
         return label.nameFitWasShrunk == true
     end
 
     local fontSize = appearance.fontOther
-    label:SetFont(CustomFramesMakeFont(appearance.fontFace, appearance.fontStyle, fontSize))
+    label:SetFont(CustomFramesMakeFont(appearance.fontFace, fontStyle, fontSize))
     if fitMaxWidth > 0 and text ~= nil and text ~= "" then
         local nameWidth = LUIE.GetLabelMarkupTextWidthUI(label, text)
         while nameWidth > fitMaxWidth and fontSize > appearance.nameMinFont do
             fontSize = fontSize - 1
-            label:SetFont(CustomFramesMakeFont(appearance.fontFace, appearance.fontStyle, fontSize))
+            label:SetFont(CustomFramesMakeFont(appearance.fontFace, fontStyle, fontSize))
             nameWidth = LUIE.GetLabelMarkupTextWidthUI(label, text)
         end
     end
@@ -156,7 +158,7 @@ function UnitFrames.FitNameLabelFont(label, appearance, canShrink, maxWidth)
     label.nameFitText = text
     label.nameFitMaxWidth = fitMaxWidth
     label.nameFitFontFace = appearance.fontFace
-    label.nameFitFontStyle = appearance.fontStyle
+    label.nameFitFontStyle = fontStyle
     label.nameFitFontSize = appearance.fontOther
     label.nameFitMinFontSize = appearance.nameMinFont
     label.nameFitWasShrunk = wasShrunk
@@ -173,7 +175,20 @@ end
 
 local function ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
     if unitFrame.name then
-        unitFrame.name:SetFont(fontCaption)
+        local nameFont = fontCaption
+        local outlineStyle = unitFrame.name.customNameOutlineFontStyle
+        if outlineStyle then
+            local appearanceCategory = unitFrame.frameCategory
+            local mappedCategory = appearanceCategory and UnitFrames.TOPINFO_FRAME_CATEGORY_TO_APPEARANCE[appearanceCategory]
+            if mappedCategory then
+                appearanceCategory = mappedCategory
+            end
+            if appearanceCategory then
+                local appearance = UnitFrames.GetCustomFrameAppearance(appearanceCategory)
+                nameFont = UnitFrames.CreateNameLabelFont(appearance, UnitFrames.GetCustomFrameCaptionSize(appearanceCategory), outlineStyle)
+            end
+        end
+        unitFrame.name:SetFont(nameFont)
         UnitFrames.ClearNameLabelFit(unitFrame.name)
     end
     if unitFrame.level then
@@ -244,6 +259,9 @@ local function ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
         unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
     end
     unitFrame.classIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
+    if unitFrame.customIcon then
+        unitFrame.customIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
+    end
     if unitFrame.friendIcon and not usesTopInfoLayout then
         unitFrame.friendIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
         unitFrame.friendIcon:ClearAnchors()

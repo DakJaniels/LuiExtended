@@ -286,6 +286,10 @@ function UnitFrames.UpdateCustomFramePower(unitTag, powerType, powerValue, power
 end
 
 --- @class LUIE_CustomFrameData_Base : LUIE_PooledCustomFrameDataObject
+--- Class-table fields set by ZO_Object:Subclass. Built frame tables do not store them; WrapBuiltTable puts the class on the metatable.
+--- @field __index table|nil
+--- @field __parentClasses table[]|nil
+--- @field __isAbstractClass boolean|nil
 --- @field unitTag string|nil
 --- @field frameRegistryKey string|nil
 --- @field frameCategory string|nil
@@ -304,6 +308,9 @@ LUIE_CustomFrameData_Base:IGNORE_UNIMPLEMENTED()
 
 --- ZOS-style custom unit frame object (alias for frame data base metatable).
 --- @class LUIE_CustomFrameObject : LUIE_CustomFrameData_Base
+--- @field __index table|nil
+--- @field __parentClasses table[]|nil
+--- @field __isAbstractClass boolean|nil
 LUIE_CustomFrameObject = LUIE_CustomFrameData_Base
 
 --- Promote a built frame table to ZOS-style frame object semantics (backward-compatible field access).

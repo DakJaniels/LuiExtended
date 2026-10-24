@@ -388,12 +388,17 @@ end
 
 --- Player name for a display-method index. 1 = @UserID, 2 = character name, 3 = both, 4 = platform name.
 --- Empty platform names fall back to the crossplay @UserID, matching ZO_TryGetPlatformDisplayNameForUnitTag.
+--- When CustomNames is on, a LibCustomNames colored name replaces the whole label.
 --- @param unitTag string
 --- @param displayOption integer
 --- @return string
 function UnitFrames.GetPlayerDisplayNameText(unitTag, displayOption)
     if not IsUnitPlayer(unitTag) then
         return GetUnitName(unitTag)
+    end
+    local customName = UnitFrames.GetCustomPlayerName(unitTag)
+    if customName ~= nil then
+        return customName
     end
     if displayOption == 3 then
         return GetUnitName(unitTag) .. " " .. GetUnitDisplayName(unitTag)
@@ -483,6 +488,7 @@ end
 
 function FrameObject:UpdateStaticControlClassIcon()
     if self.classIcon == nil then
+        UnitFrames.ApplyCustomPlayerIcon(self)
         return
     end
     local unitDifficulty = GetUnitDifficulty(self.unitTag)
@@ -508,6 +514,8 @@ function FrameObject:UpdateStaticControlClassIcon()
     else
         self.classIcon:SetHidden(not showClass)
     end
+    self.customPortraitHiddenClassIcon = nil
+    UnitFrames.ApplyCustomPlayerIcon(self)
 end
 
 function FrameObject:UpdateStaticControlClassName()
@@ -812,6 +820,11 @@ function FrameObject:UpdateStaticControlNameLabel(frameCategory)
         nameText = FrameObject.ApplyStaticControlOverlandToName(self, nameText, frameCategory)
     else
         nameText = FrameObject.ApplyStaticControlOverlandToName(self, nameText, frameCategory)
+    end
+    if UnitFrames.SV.CustomNameOutline and UnitFrames.GetCustomPlayerName(self.unitTag) then
+        self.name.customNameOutlineFontStyle = FONT_STYLE_OUTLINE_SHADOW
+    else
+        self.name.customNameOutlineFontStyle = nil
     end
     self.name:SetText(nameText)
     -- Compact names (raid / boss / pet / companion) refit their shrink-to-fit font to the new text.

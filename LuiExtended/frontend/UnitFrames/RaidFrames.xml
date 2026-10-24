@@ -143,6 +143,18 @@
                       relativePoint="LEFT"
                       offsetX="1" />
             </Texture>
+            <Texture name="$(parent)_CustomIcon"
+                     textureFile=""
+                     layer="OVERLAY"
+                     tier="LOW"
+                     hidden="true">
+              <Dimensions x="20"
+                          y="20" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_ClassIcon"
+                      relativePoint="RIGHT"
+                      offsetX="1" />
+            </Texture>
             <Label name="$(parent)_Dead"
                    text="Status"
                    font="ZoFontGameSmall"
@@ -209,7 +221,7 @@
       Expanded raid member template (selected via UnitFrames.SV.RaidFrameTemplate == "Expanded").
       Mirrors the design: a padded column container with a top row, a health band that grows, and a bottom row.
         _Frame     : outer backdrop (the "rhb" column container of the design), padding 2
-        _TopRow    : TOPLEFT(2,2) / TOPRIGHT(-2,2), h20   | $(grandparent)_Name | _RoleIcon 16 | _ClassIcon 20 | _Leader 20
+        _TopRow    : TOPLEFT(2,2) / TOPRIGHT(-2,2), h20   | $(grandparent)_Name | _Leader 20 | _RoleIcon 16 | _CustomIcon 20 | _ClassIcon 20
         _Health    : the health band between the rows (2px gap each side); _Bar/_Shield/_Trauma/overlays and the
                      health text (_Label / _Dead, right aligned) live here exactly like the compact template
         _BottomRow : BOTTOMLEFT(2,-2) / BOTTOMRIGHT(-2,-2), h16 | _ResourceContainer (2 stacked bars filling the row height, sized in Lua) | $(grandparent)_StatsLabel 66x16 + _StatsBorder
@@ -276,6 +288,18 @@
               <Anchor point="RIGHT"
                       relativeTo="$(parent)"
                       relativePoint="RIGHT" />
+            </Texture>
+            <Texture name="$(grandparent)_CustomIcon"
+                     textureFile=""
+                     layer="OVERLAY"
+                     tier="LOW"
+                     hidden="true">
+              <Dimensions x="20"
+                          y="20" />
+              <Anchor point="RIGHT"
+                      relativeTo="$(grandparent)_ClassIcon"
+                      relativePoint="LEFT"
+                      offsetX="-1" />
             </Texture>
             <Texture name="$(grandparent)_RoleIcon"
                      textureFile=""

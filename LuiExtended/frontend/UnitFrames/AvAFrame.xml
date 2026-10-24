@@ -207,6 +207,18 @@
                           relativeTo="$(parent)"
                           relativePoint="LEFT" />
                 </Texture>
+                <Texture name="$(parent)_CustomIcon"
+                         textureFile=""
+                         layer="OVERLAY"
+                         tier="LOW"
+                         hidden="true">
+                  <Dimensions x="20"
+                              y="20" />
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_ClassIcon"
+                          relativePoint="RIGHT"
+                          offsetX="2" />
+                </Texture>
                 <Texture name="$(parent)_OverlandDifficultyIcon"
                          textureFile=""
                          hidden="true">
