@@ -77,8 +77,8 @@ function FrameObject.RefreshTopInfoForLayout(self)
     if not self.classIcon then
         return
     end
-    if UnitFrames.SV.CustomIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS
-        and self.customIcon and not self.customIcon:IsControlHidden() then
+    if  UnitFrames.SV.CustomIconPosition == UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS
+    and self.customIcon and not self.customIcon:IsControlHidden() then
         if not self.classIcon:IsControlHidden() then
             self.customPortraitHiddenClassIcon = true
             self.classIcon:SetHidden(true)
@@ -112,9 +112,9 @@ end
 local function GetTopInfoLeftRowStartX(self, rowOffsetY, baseStartX)
     baseStartX = baseStartX or 0
     -- AvA places its own left-side class and portrait. Everywhere else, left-of-name is the first icon in this row.
-    if self.frameCategory ~= "avaTarget"
-        and UnitFrames.SV.CustomIconPosition == UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME
-        and self.customIcon and not self.customIcon:IsControlHidden() then
+    if  self.frameCategory ~= "avaTarget"
+    and UnitFrames.SV.CustomIconPosition == UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME
+    and self.customIcon and not self.customIcon:IsControlHidden() then
         self.customIcon:ClearAnchors()
         self.customIcon:SetAnchor(LEFT, self.topInfo, LEFT, baseStartX, 0)
         baseStartX = baseStartX + self.customIcon:GetWidth() + TOPINFO_ROW_ICON_GAP
@@ -423,7 +423,7 @@ local function LayoutTopInfoLevelCluster(self, rowOffsetY, rowStartX, showLevelR
             if plainText ~= "" then
                 needed = LUIE.GetLabelStringWidthUI(self.level, plainText)
             end
-            self.level:SetWidth(zo_min(needed, available)+10)
+            self.level:SetWidth(zo_min(needed, available) + 10)
         end
     end
 end
@@ -473,8 +473,8 @@ end
 --- @param self LUIE_CustomFrameObject
 --- @return Control
 local function GetTopInfoInnerRightAnchor(self)
-    if UnitFrames.SV.CustomIconPosition ~= UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME
-        and self.customIcon and not self.customIcon:IsControlHidden() then
+    if  UnitFrames.SV.CustomIconPosition ~= UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME
+    and self.customIcon and not self.customIcon:IsControlHidden() then
         return self.customIcon
     end
     if self.classIcon and not self.classIcon:IsControlHidden() then

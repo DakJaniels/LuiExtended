@@ -74,7 +74,7 @@ function LUIE_UnitAttributeVisualizer:RegisterAttributeVisualEvents()
     end)
     eventManager:AddFilterForEvent(eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_UPDATED, REGISTER_FILTER_UNIT_TAG, unitTagS)
 
-    eventManager:RegisterForEvent(eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED, function(eventId, unitTag, unitAttributeVisual, statType, attributeType, powerType, value, maxValue, sequenceId)
+    eventManager:RegisterForEvent(eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED, function (eventId, unitTag, unitAttributeVisual, statType, attributeType, powerType, value, maxValue, sequenceId)
         self:OnUnitAttributeVisualRemoved(unitTag, unitAttributeVisual, statType, attributeType, powerType, value, maxValue, sequenceId)
     end)
     eventManager:AddFilterForEvent(eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED, REGISTER_FILTER_UNIT_TAG, unitTagS)

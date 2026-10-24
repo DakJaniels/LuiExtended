@@ -40,7 +40,7 @@ function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName,
 
     -- Self-buff duration gain restarts hit-counted charges (Crystal Weapon 46331, hit value 6000).
     -- This event is filtered to the player as target, and the ability is not a fake aura, so it must run before the fake-aura return.
-    if not isError
+    if  not isError
     and result == ACTION_RESULT_EFFECT_GAINED_DURATION
     and sourceType == COMBAT_UNIT_TYPE_PLAYER
     and targetType == COMBAT_UNIT_TYPE_PLAYER

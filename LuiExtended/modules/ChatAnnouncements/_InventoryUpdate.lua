@@ -242,7 +242,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                 -- Gem Extraction converts any item type into Crown Gems; do not use consume/use/learn/destroy wording.
                 if I.IsGemExtractionActive() then
                     ChatAnnouncements.SaveGemExtractItem(removedIcon, change, removedItemType, removedItemId, removedItemLink)
-                -- Check Destroyed first
+                    -- Check Destroyed first
                 elseif S.g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageDestroy")

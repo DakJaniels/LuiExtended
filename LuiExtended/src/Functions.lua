@@ -292,11 +292,11 @@ function LUIE.RegisterForUiCanvasChange(namespace, callback)
         local scheduledGeneration = (uiCanvasChangeGenerations[namespace] or 0) + 1
         uiCanvasChangeGenerations[namespace] = scheduledGeneration
         zo_callLater(function ()
-            if uiCanvasChangeGenerations[namespace] ~= scheduledGeneration then
-                return
-            end
-            callback()
-        end, UI_CANVAS_CHANGE_DELAY_MS)
+                         if uiCanvasChangeGenerations[namespace] ~= scheduledGeneration then
+                             return
+                         end
+                         callback()
+                     end, UI_CANVAS_CHANGE_DELAY_MS)
     end
     eventManager:RegisterForEvent(namespace, EVENT_SCREEN_RESIZED, ScheduleCanvasChangeCallback)
     eventManager:RegisterForEvent(namespace, EVENT_INTERFACE_SETTING_CHANGED, function (_, settingSystemType, settingId)

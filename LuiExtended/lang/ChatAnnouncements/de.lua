@@ -7,7 +7,7 @@
 -- Translation locale: de
 local strings =
 {
-    LUIE_STRING_CA_CURRENCY_GOLD = " <<1[Gold/Gold]>>",                                                                       -- Have to create singular strings here to use to prevent plural quantities from being double s
+    LUIE_STRING_CA_CURRENCY_GOLD = " <<1[Gold/Gold]>>",                                                                      -- Have to create singular strings here to use to prevent plural quantities from being double s
     LUIE_STRING_CA_CURRENCY_ALLIANCE_POINT = " <<1[Allianzpunkt/Allianzpunkte]>>",                                           -- Have to create singular strings here to use to prevent plural quantities from being double s
     LUIE_STRING_CA_CURRENCY_TELVAR_STONE = " <<1[Tel Var Stein/Tel Var Steine]>>",                                           -- Have to create singular strings here to use to prevent plural quantities from being double s
     LUIE_STRING_CA_CURRENCY_WRIT_VOUCHER = " <<1[Handwerksschrieb/Handwerksschriebe]>>",                                     -- Have to create singular strings here to use to prevent plural quantities from being double s
@@ -23,7 +23,7 @@ local strings =
     LUIE_STRING_CA_CURRENCY_OUTFIT_TOKENS = " <<1[Monturmarke/Monturmarken]>>",                                              -- Have to create singular strings here to use to prevent plural quantities from being double s
     LUIE_STRING_CA_CURRENCY_UNDAUNTED = " <<1[Schlüssel der Unerschrockenen/Schlüssel der Unerschrockenen]>>",               -- Have to create singular strings here to use to prevent plural quantities from being double s
     LUIE_STRING_CA_CURRENCY_UNDAUNTED_CRESTS = " <<1[Wappen der Unerschrockenen/Wappen der Unerschrockenen]>>",              -- P51
-    LUIE_STRING_CA_CURRENCY_ENDLESS = " <<1[Archival Fortune/Archival Fortunes]>>",                                           -- Have to create singular strings here to use to prevent plural quantities from being double s
+    LUIE_STRING_CA_CURRENCY_ENDLESS = " <<1[Archival Fortune/Archival Fortunes]>>",                                          -- Have to create singular strings here to use to prevent plural quantities from being double s
     LUIE_STRING_CA_DEBUG_MSG_CURRENCY = "Currency Change Reason <<1>> ausgelöst - Bitte poste in den LuiExtended Kommentaren auf ESOUI.com eine Beschreibung, was diesen Fehler ausgelöst hat. Danke!",
     LUIE_STRING_CA_DUEL_INVITE_ACCEPTED = "Duell-Herausforderung akzeptiert.",
     LUIE_STRING_CA_DUEL_INVITE_CANCELED = "Duell-Herausforderung zurückgezogen.",

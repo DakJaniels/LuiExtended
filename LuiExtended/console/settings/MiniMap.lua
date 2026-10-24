@@ -33,11 +33,11 @@ local miniMapRegionZoomSliders =
 
 local miniMapPinCategoryScales =
 {
-    { key = "pinScaleQuest",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_QUEST     },
-    { key = "pinScaleGroup",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_GROUP     },
-    { key = "pinScalePoi",        name = LUIE_STRING_LAM_MINIMAP_PINSCALE_POI       },
-    { key = "pinScaleWayshrine",  name = LUIE_STRING_LAM_MINIMAP_PINSCALE_WAYSHRINE },
-    { key = "pinScaleOther",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER     },
+    { key = "pinScaleQuest",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_QUEST                                                                },
+    { key = "pinScaleGroup",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_GROUP                                                                },
+    { key = "pinScalePoi",        name = LUIE_STRING_LAM_MINIMAP_PINSCALE_POI                                                                  },
+    { key = "pinScaleWayshrine",  name = LUIE_STRING_LAM_MINIMAP_PINSCALE_WAYSHRINE                                                            },
+    { key = "pinScaleOther",      name = LUIE_STRING_LAM_MINIMAP_PINSCALE_OTHER                                                                },
     { key = "pinScaleHarvestMap", name = LUIE_STRING_LAM_MINIMAP_PINSCALE_HARVESTMAP, tooltip = LUIE_STRING_LAM_MINIMAP_PINSCALE_HARVESTMAP_TP },
 }
 

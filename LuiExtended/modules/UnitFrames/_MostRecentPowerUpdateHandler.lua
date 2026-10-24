@@ -15,12 +15,12 @@ local moduleName = UnitFrames.moduleName
 -- ZO_MostRecentEventHandler owns a single namespace / filter set (ZOS BossBar.lua pattern).
 local POWER_UPDATE_UNIT_TAG_FILTERS =
 {
-    { filterType = REGISTER_FILTER_UNIT_TAG_PREFIX, filterValue = "player" }, -- player + playerpetN
-    { filterType = REGISTER_FILTER_UNIT_TAG, filterValue = "reticleover" },
-    { filterType = REGISTER_FILTER_UNIT_TAG_PREFIX, filterValue = "group" },  -- groupN + groupNcompanion
-    { filterType = REGISTER_FILTER_UNIT_TAG_PREFIX, filterValue = "boss" },
-    { filterType = REGISTER_FILTER_UNIT_TAG, filterValue = "companion" },
-    { filterType = REGISTER_FILTER_UNIT_TAG, filterValue = "controlledsiege" },
+    { filterType = REGISTER_FILTER_UNIT_TAG_PREFIX, filterValue = "player"          }, -- player + playerpetN
+    { filterType = REGISTER_FILTER_UNIT_TAG,        filterValue = "reticleover"     },
+    { filterType = REGISTER_FILTER_UNIT_TAG_PREFIX, filterValue = "group"           }, -- groupN + groupNcompanion
+    { filterType = REGISTER_FILTER_UNIT_TAG_PREFIX, filterValue = "boss"            },
+    { filterType = REGISTER_FILTER_UNIT_TAG,        filterValue = "companion"       },
+    { filterType = REGISTER_FILTER_UNIT_TAG,        filterValue = "controlledsiege" },
 }
 
 --- Registers coalesced EVENT_POWER_UPDATE handling (separate namespaces from vanilla UnitFrames).

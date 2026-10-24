@@ -48,7 +48,7 @@ function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName
 
     -- Player damage spends one hit-counted charge (Crystal Weapon first hit 143804, later hits 181056).
     -- These ids are not fake auras, so this runs before that return. A critical hit is still a spent charge.
-    if not isError
+    if  not isError
     and sourceType == COMBAT_UNIT_TYPE_PLAYER
     and (result == ACTION_RESULT_DAMAGE or result == ACTION_RESULT_CRITICAL_DAMAGE) then
         SpellCastBuffs.SpendChargeStackOnDamage(abilityId)

@@ -544,7 +544,7 @@ function CastBar.ComputeCastDurationMs(abilityId, result, hitValue, channeled, c
         durationMs = Castbar.CastDurationFix[abilityId] or (result == ACTION_RESULT_EFFECT_GAINED_DURATION and hitValue or 0)
     else
         durationMs = Castbar.CastDurationFix[abilityId] or castTime
-        if (not durationMs or durationMs <= 0)
+        if  (not durationMs or durationMs <= 0)
         and result == ACTION_RESULT_BEGIN
         and hitValue
         and hitValue > 0 then
@@ -1022,13 +1022,13 @@ function CastBar.CreateCastBar()
     g_castBarState.icon:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT, -iconArtInset, -iconArtInset)
     CastBar.ApplyCastBarIconFrameVisual()
 
-    local barBackdrop = g_castBarState:GetNamedChild("_BarBackdrop") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop
-    local castBarFill = barBackdrop:GetNamedChild("_Bar") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Bar
-    local castBarName = barBackdrop:GetNamedChild("_Name") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Name
-    local castBarTimer = barBackdrop:GetNamedChild("_Timer") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Timer
+    local barBackdrop = g_castBarState:GetNamedChild("_BarBackdrop")    --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop
+    local castBarFill = barBackdrop:GetNamedChild("_Bar")               --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Bar
+    local castBarName = barBackdrop:GetNamedChild("_Name")              --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Name
+    local castBarTimer = barBackdrop:GetNamedChild("_Timer")            --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Timer
     local castBarLineLightAttack = barBackdrop:GetNamedChild("_LineLA") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineLA
-    local castBarLineSkill = barBackdrop:GetNamedChild("_LineSkill") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineSkill
-    local castBarLineDelay = barBackdrop:GetNamedChild("_LineDelay") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineDelay
+    local castBarLineSkill = barBackdrop:GetNamedChild("_LineSkill")    --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineSkill
+    local castBarLineDelay = barBackdrop:GetNamedChild("_LineDelay")    --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineDelay
     --- @type LUIE_CastBarParts
     g_castBarState.bar =
     {

@@ -592,9 +592,9 @@ function LUIE_MiniMap_Frame:ApplyCircularMap()
     local frameCenterY = MINIMAP_CIRCULAR_RING_CENTER_Y
     local placedTextures =
     {
-        { control = topLeftTexture, width = topLeftWidth, height = topLeftHeight, originX = 0, originY = 0 },
-        { control = topRightTexture, width = topRightWidth, height = topRightHeight, originX = topLeftWidth, originY = 0 },
-        { control = bottomLeftTexture, width = bottomLeftWidth, height = bottomLeftHeight, originX = 0, originY = topLeftHeight },
+        { control = topLeftTexture,     width = topLeftWidth,     height = topLeftHeight,     originX = 0,               originY = 0             },
+        { control = topRightTexture,    width = topRightWidth,    height = topRightHeight,    originX = topLeftWidth,    originY = 0             },
+        { control = bottomLeftTexture,  width = bottomLeftWidth,  height = bottomLeftHeight,  originX = 0,               originY = topLeftHeight },
         { control = bottomRightTexture, width = bottomRightWidth, height = bottomRightHeight, originX = bottomLeftWidth, originY = topLeftHeight },
     }
     for textureIndex = 1, #placedTextures do
@@ -606,8 +606,8 @@ function LUIE_MiniMap_Frame:ApplyCircularMap()
             frameTexture:ClearAnchors()
             frameTexture:SetDimensions(placedTexture.width * frameScale, placedTexture.height * frameScale)
             frameTexture:SetAnchor(TOPLEFT, scroll, CENTER,
-                (placedTexture.originX - frameCenterX) * frameScale,
-                (placedTexture.originY - frameCenterY) * frameScale)
+                                   (placedTexture.originX - frameCenterX) * frameScale,
+                                   (placedTexture.originY - frameCenterY) * frameScale)
         end
     end
 

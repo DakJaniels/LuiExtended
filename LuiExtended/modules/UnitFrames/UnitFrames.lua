@@ -2947,13 +2947,13 @@ local RAID_EXPANDED_BOTTOM_ROW_HEIGHT = 16
 local RAID_EXPANDED_FRAME_SPACING = 2
 local RAID_EXPANDED_NAME_HEIGHT = 14
 local RAID_EXPANDED_NAME_ICON_GAP = 4 -- role icon marginLeft 4
-local RAID_EXPANDED_TOP_ICON_GAP = 1 -- class icon marginLeft 1
+local RAID_EXPANDED_TOP_ICON_GAP = 1  -- class icon marginLeft 1
 local RAID_EXPANDED_ROLE_ICON_SIZE = 16
 local RAID_EXPANDED_CLASS_ICON_SIZE = 20
 local RAID_EXPANDED_LEADER_ICON_SIZE = 20
-local RAID_EXPANDED_SLOT_ICON_SIZE = 16 -- fallback when the integration setting is missing
-local RAID_EXPANDED_SLOT_GAP = 3 -- ult1 / ult2 / potion marginRight 3 (anchored by the integrations)
-local RAID_EXPANDED_RESOURCE_MARGIN = 4 -- gap between the resource bars and the slot container / stats box (one slot gap)
+local RAID_EXPANDED_SLOT_ICON_SIZE = 16  -- fallback when the integration setting is missing
+local RAID_EXPANDED_SLOT_GAP = 3         -- ult1 / ult2 / potion marginRight 3 (anchored by the integrations)
+local RAID_EXPANDED_RESOURCE_MARGIN = 4  -- gap between the resource bars and the slot container / stats box (one slot gap)
 local RAID_EXPANDED_RESOURCE_BAR_GAP = 1 -- gap between the stacked magicka / stamina bars
 -- The two stacked bars fill the bottom row: barHeight = floor((rowHeight - gap) / 2), so a 16px row gets 7 + 1 + 7.
 --- @param bottomRowHeight number

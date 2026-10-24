@@ -3250,7 +3250,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_TEMPLATE_TP),
             items =
             {
-                { name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_TEMPLATE_COMPACT),  data = UnitFrames.RAID_FRAME_TEMPLATE_COMPACT },
+                { name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_TEMPLATE_COMPACT),  data = UnitFrames.RAID_FRAME_TEMPLATE_COMPACT  },
                 { name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_TEMPLATE_EXPANDED), data = UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED },
             },
             getFunction = function ()
@@ -3404,8 +3404,8 @@ function UnitFrames.CreateConsoleSettings()
             items =
             {
                 { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_COLUMN), data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN },
-                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_GRID), data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID },
-                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_ROW), data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW }
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_GRID),   data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID   },
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_ROW),    data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW    }
             },
             getFunction = function ()
                 -- Migrates pre-U51 "1 x 9" / "3 x 3" / "9 x 1" values to a shape
@@ -5799,8 +5799,8 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_TP),
             items =
             {
-                { name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_BESIDE_CLASS), data = UnitFrames.CUSTOM_ICON_POSITION_BESIDE_CLASS },
-                { name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_LEFT_OF_NAME), data = UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME },
+                { name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_BESIDE_CLASS),  data = UnitFrames.CUSTOM_ICON_POSITION_BESIDE_CLASS  },
+                { name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_LEFT_OF_NAME),  data = UnitFrames.CUSTOM_ICON_POSITION_LEFT_OF_NAME  },
                 { name = GetString(LUIE_STRING_LAM_UF_CUSTOM_ICON_POSITION_REPLACE_CLASS), data = UnitFrames.CUSTOM_ICON_POSITION_REPLACE_CLASS },
             },
             getFunction = function ()

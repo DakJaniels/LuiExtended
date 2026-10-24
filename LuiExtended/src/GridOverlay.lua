@@ -320,10 +320,10 @@ local cachedCanvasHeight = 0
 
 local BUFF_PREVIEW_OFFSET_KEYS =
 {
-    { "playerbOffsetX", "playerbOffsetY" },
-    { "playerdOffsetX", "playerdOffsetY" },
-    { "targetbOffsetX", "targetbOffsetY" },
-    { "targetdOffsetX", "targetdOffsetY" },
+    { "playerbOffsetX",     "playerbOffsetY"     },
+    { "playerdOffsetX",     "playerdOffsetY"     },
+    { "targetbOffsetX",     "targetbOffsetY"     },
+    { "targetdOffsetX",     "targetdOffsetY"     },
     { "player_longOffsetX", "player_longOffsetY" },
     { "prominentbVOffsetX", "prominentbVOffsetY" },
     { "prominentbHOffsetX", "prominentbHOffsetY" },
@@ -417,11 +417,11 @@ local function ScheduleTranslatePreviewPositionsForCanvasChange()
     uiScaleRefreshGeneration = uiScaleRefreshGeneration + 1
     local scheduledGeneration = uiScaleRefreshGeneration
     zo_callLater(function ()
-        if scheduledGeneration ~= uiScaleRefreshGeneration then
-            return
-        end
-        TranslatePreviewPositionsForCanvasChange()
-    end, UI_SCALE_REFRESH_DELAY_MS)
+                     if scheduledGeneration ~= uiScaleRefreshGeneration then
+                         return
+                     end
+                     TranslatePreviewPositionsForCanvasChange()
+                 end, UI_SCALE_REFRESH_DELAY_MS)
 end
 
 local GRID_OVERLAY_UI_SCALE_EVENT = "LUIE_GridOverlay_UIScale"

@@ -521,11 +521,11 @@ function CombatTextEventViewer:GetCombatTextIconFrameColor(iconTexturePath, abil
     return COMBAT_TEXT_ICON_CHROME_WHITE
 end
 
----@class iconHostFrameControl : Control
----@field iconHost TextureControl
----@field iconFrame TextureControl
----@field icon TextureControl
----@field label LabelControl
+--- @class iconHostFrameControl : Control
+--- @field iconHost TextureControl
+--- @field iconFrame TextureControl
+--- @field icon TextureControl
+--- @field label LabelControl
 
 --- @param control iconHostFrameControl
 --- @param abilityId integer|nil
