@@ -90,6 +90,10 @@ local uiLatency =
         [3] = { color = colors.RED },
     },
 }
+local latencyMillisecondsFormat = GetString(LUIE_STRING_PNL_LATENCY_MS_FORMAT)
+local framesPerSecondFormat = GetString(LUIE_STRING_PNL_FPS_FORMAT)
+local mountFeedMaxedText = GetString(LUIE_STRING_PNL_MAXED)
+local mountFeedTrainNowText = GetString(LUIE_STRING_PNL_TRAINNOW)
 
 local uiFps =
 {
@@ -417,7 +421,7 @@ function FpsMeter:Update(nowMs)
             end
         end
     end
-    local fpsText = zo_strformat(GetString(LUIE_STRING_PNL_FPS_FORMAT), fps)
+    local fpsText = zo_strformat(framesPerSecondFormat, fps)
     uiFps.label:SetText(fpsText)
     uiFps.label:SetColor(color.r, color.g, color.b, 1)
     if FitInfoPanelLabelToText(uiFps.label, fpsText, 48) then
@@ -493,7 +497,7 @@ function LatencyMeter:Update(nowMs)
             end
         end
     end
-    local latText = zo_strformat(GetString(LUIE_STRING_PNL_LATENCY_MS_FORMAT), lat)
+    local latText = zo_strformat(latencyMillisecondsFormat, lat)
     uiLatency.label:SetText(latText)
     uiLatency.label:SetColor(color.r, color.g, color.b, 1)
     if FitInfoPanelIconLabelRow(uiLatency.control, uiLatency.icon, uiLatency.label, latText, 44, 0) then
@@ -721,7 +725,7 @@ function MountFeedMeter:UpdateFromEvent(eventId, ridingSkillType, previous, curr
         local inventoryBonus, maxInventoryBonus, staminaBonus, maxStaminaBonus, speedBonus, maxSpeedBonus = GetRidingStats()
         local isFullyTrained = (inventoryBonus == maxInventoryBonus and staminaBonus == maxStaminaBonus and speedBonus == maxSpeedBonus)
         if isFullyTrained then
-            self:ApplyFeedTimerLabel(GetString(LUIE_STRING_PNL_MAXED))
+            self:ApplyFeedTimerLabel(mountFeedMaxedText)
             self:SetHiddenLocally(true)
             return
         else
@@ -731,7 +735,7 @@ function MountFeedMeter:UpdateFromEvent(eventId, ridingSkillType, previous, curr
                 local minutes = zo_floor((mountFeedTimer - (hours * ZO_ONE_HOUR_IN_MILLISECONDS)) / ZO_ONE_MINUTE_IN_MILLISECONDS)
                 self:ApplyFeedTimerLabel(string_format("%dh %dm", hours, minutes))
             else
-                self:ApplyFeedTimerLabel(GetString(LUIE_STRING_PNL_TRAINNOW))
+                self:ApplyFeedTimerLabel(mountFeedTrainNowText)
             end
             return
         end
@@ -746,13 +750,13 @@ function MountFeedMeter:Update(nowMs)
     end
 
     local mountFeedTimer = GetTimeUntilCanBeTrained()
-    local mountFeedMessage = GetString(LUIE_STRING_PNL_MAXED)
+    local mountFeedMessage = mountFeedMaxedText
 
     if mountFeedTimer ~= nil then
         if mountFeedTimer == 0 then
             local inventoryBonus, maxInventoryBonus, staminaBonus, maxStaminaBonus, speedBonus, maxSpeedBonus = GetRidingStats()
             if inventoryBonus ~= maxInventoryBonus or staminaBonus ~= maxStaminaBonus or speedBonus ~= maxSpeedBonus then
-                mountFeedMessage = GetString(LUIE_STRING_PNL_TRAINNOW)
+                mountFeedMessage = mountFeedTrainNowText
             else
                 self:SetHiddenLocally(true)
                 return
