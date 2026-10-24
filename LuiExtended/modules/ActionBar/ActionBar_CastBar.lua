@@ -75,7 +75,31 @@ local topLevelWindows = CastBar.topLevelWindows
 CastBar.g_castCombatEventNames = {}
 CastBar.usesLibCombatSkillTimings = false
 local g_castCombatEventNames = CastBar.g_castCombatEventNames
-local g_castBarState = {}
+--- Fill, labels, and weave lines built from the cast bar backdrop.
+--- @class LUIE_CastBarParts
+--- @field backdrop LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop
+--- @field bar LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Bar
+--- @field name LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Name
+--- @field timer LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Timer
+--- @field lineLA LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineLA
+--- @field lineSkill LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineSkill
+--- @field lineDelay LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineDelay
+
+--- Cast bar icon control plus the fields stored on it at runtime. The fill is a status bar, not a texture.
+--- @class LUIE_CastBarState : Control
+--- @field back LUIE_ACTIONBAR_CASTBAR_TLC_Icon_Back|nil
+--- @field iconbg LUIE_ACTIONBAR_CASTBAR_TLC_Icon_IconBg|nil
+--- @field icon LUIE_ACTIONBAR_CASTBAR_TLC_Icon_Icon|nil
+--- @field bar LUIE_CastBarParts|nil
+--- @field id integer|nil
+--- @field starts number|nil
+--- @field ends number|nil
+--- @field remain number|nil
+--- @field type integer|nil
+--- @field weaveDelayRel number|nil
+--- @field weaveGapEdge number|nil
+
+local g_castBarState = {} --- @type LUIE_CastBarState
 local g_casting = false
 local g_castbarWorldMapFix = false
 local g_castbarFont
@@ -982,7 +1006,7 @@ function CastBar.CreateCastBar()
     sceneManager:GetScene("siegeBar"):AddFragment(fragment)
     sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
 
-    g_castBarState = topLevelWindows.castBar:GetNamedChild("_Icon")
+    g_castBarState = topLevelWindows.castBar:GetNamedChild("_Icon") --- @type LUIE_CastBarState
     g_castBarState.starts = 0
     g_castBarState.ends = 0
     g_castBarState.remain = 0
@@ -998,16 +1022,23 @@ function CastBar.CreateCastBar()
     g_castBarState.icon:SetAnchor(BOTTOMRIGHT, g_castBarState, BOTTOMRIGHT, -iconArtInset, -iconArtInset)
     CastBar.ApplyCastBarIconFrameVisual()
 
-    local barBackdrop = g_castBarState:GetNamedChild("_BarBackdrop")
+    local barBackdrop = g_castBarState:GetNamedChild("_BarBackdrop") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop
+    local castBarFill = barBackdrop:GetNamedChild("_Bar") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Bar
+    local castBarName = barBackdrop:GetNamedChild("_Name") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Name
+    local castBarTimer = barBackdrop:GetNamedChild("_Timer") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_Timer
+    local castBarLineLightAttack = barBackdrop:GetNamedChild("_LineLA") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineLA
+    local castBarLineSkill = barBackdrop:GetNamedChild("_LineSkill") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineSkill
+    local castBarLineDelay = barBackdrop:GetNamedChild("_LineDelay") --- @type LUIE_ACTIONBAR_CASTBAR_TLC_Icon_BarBackdrop_LineDelay
+    --- @type LUIE_CastBarParts
     g_castBarState.bar =
     {
         ["backdrop"] = barBackdrop,
-        ["bar"] = barBackdrop:GetNamedChild("_Bar"),
-        ["name"] = barBackdrop:GetNamedChild("_Name"),
-        ["timer"] = barBackdrop:GetNamedChild("_Timer"),
-        ["lineLA"] = barBackdrop:GetNamedChild("_LineLA"),
-        ["lineSkill"] = barBackdrop:GetNamedChild("_LineSkill"),
-        ["lineDelay"] = barBackdrop:GetNamedChild("_LineDelay"),
+        ["bar"] = castBarFill,
+        ["name"] = castBarName,
+        ["timer"] = castBarTimer,
+        ["lineLA"] = castBarLineLightAttack,
+        ["lineSkill"] = castBarLineSkill,
+        ["lineDelay"] = castBarLineDelay,
     }
     g_castBarState.bar.backdrop:SetDimensions(ActionBar.SV.CastBarSizeW, ActionBar.SV.CastBarSizeH)
     g_castBarState.bar.bar:SetDimensions(ActionBar.SV.CastBarSizeW - 4, ActionBar.SV.CastBarSizeH - 4)
@@ -1027,11 +1058,11 @@ function CastBar.CreateCastBar()
     g_castBarState.bar.backdrop:SetCenterColor((0.1 * 0.50), (0.1 * 0.50), (0.1 * 0.50), 0.75)
     local gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha = 0, 0.18, 0.51, 1
     local gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha = 0.32, 0.84, 1, 1
-    g_castBarState.bar.bar:SetGradientColors(gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha, gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha)
+    castBarFill:SetGradientColors(gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha, gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha)
     g_castBarState.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75)
     gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha = ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], ActionBar.SV.CastBarGradientC1[4]
     gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha = ActionBar.SV.CastBarGradientC2[1], ActionBar.SV.CastBarGradientC2[2], ActionBar.SV.CastBarGradientC2[3], ActionBar.SV.CastBarGradientC2[4]
-    g_castBarState.bar.bar:SetGradientColors(gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha, gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha)
+    castBarFill:SetGradientColors(gradientStartRed, gradientStartGreen, gradientStartBlue, gradientStartAlpha, gradientEndRed, gradientEndGreen, gradientEndBlue, gradientEndAlpha)
 
     g_castBarState.bar.backdrop:ClearAnchors()
     g_castBarState.bar.backdrop:SetAnchor(LEFT, g_castBarState, RIGHT, 4, 0)
