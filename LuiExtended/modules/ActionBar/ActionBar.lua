@@ -3415,7 +3415,7 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
     local combatAbilityId = abilityId
     local barAbilityId = g_barCombatEventRemap[abilityId] or abilityId
 
-    if not isError and sourceType == COMBAT_UNIT_TYPE_PLAYER
+    if  not isError and sourceType == COMBAT_UNIT_TYPE_PLAYER
     and (result == ACTION_RESULT_DAMAGE or result == ACTION_RESULT_CRITICAL_DAMAGE) then
         local chargeTrackAbilityId = g_barConsumeStackOnDamage[abilityId]
         if chargeTrackAbilityId then

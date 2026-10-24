@@ -9,7 +9,7 @@ local ActionBar = LUIE.ActionBar
 
 --- Register one filtered EVENT_COMBAT_EVENT handler for bar highlights; tracks name for unregister.
 --- Remaining arguments after eventName are passed to AddFilterForEvent (filter type/value pairs).
---- @param eventManager EventManager 
+--- @param eventManager EventManager
 --- @param eventNamesList string[]
 --- @param eventName string
 --- @param ... RegisterForEventFilterVararg varargs passed to AddFilterForEvent

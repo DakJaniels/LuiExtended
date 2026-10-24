@@ -742,8 +742,8 @@ function UnitFrames.DumpNameFitDiagnostics(frameKey)
         for registryKey, listedFrame in pairs(UnitFrames.CustomFrames) do
             if type(listedFrame) == "table" and listedFrame.control and listedFrame.name and not listedFrame.control:IsControlHidden() then
                 LUIE.ChatOutput:AddSystemMessage(string.format("  %s (category=%s unitTag=%s) name='%s'",
-                    tostring(registryKey), tostring(listedFrame.frameCategory), tostring(listedFrame.unitTag),
-                    tostring(listedFrame.name:GetText())))
+                                                               tostring(registryKey), tostring(listedFrame.frameCategory), tostring(listedFrame.unitTag),
+                                                               tostring(listedFrame.name:GetText())))
             end
         end
         return
@@ -756,8 +756,8 @@ function UnitFrames.DumpNameFitDiagnostics(frameKey)
     end
     local uiGlobalScale = GetUIGlobalScale()
     output:AddSystemMessage(string.format("[LUIE] namefit %s: category=%s uiScale=%s controlHidden=%s",
-        frameKey, tostring(frame.frameCategory), formatNumber(uiGlobalScale),
-        tostring(frame.control and frame.control:IsControlHidden())))
+                                          frameKey, tostring(frame.frameCategory), formatNumber(uiGlobalScale),
+                                          tostring(frame.control and frame.control:IsControlHidden())))
 
     local function describeLabel(labelName, label)
         if label == nil then
@@ -766,12 +766,12 @@ function UnitFrames.DumpNameFitDiagnostics(frameKey)
         end
         local text = label:GetText() or ""
         output:AddSystemMessage(string.format("  %s: hidden=%s text='%s' stringWidthRaw=%s stringWidthUI=%s textWidth=%s width=%s fontHeight=%s",
-            labelName, tostring(label:IsHidden()), text,
-            formatNumber(label:GetStringWidth(text)),
-            formatNumber(LUIE.GetLabelStringWidthUI(label, text)),
-            formatNumber(label:GetTextWidth()),
-            formatNumber(label:GetWidth()),
-            formatNumber(label:GetFontHeight())))
+                                              labelName, tostring(label:IsHidden()), text,
+                                              formatNumber(label:GetStringWidth(text)),
+                                              formatNumber(LUIE.GetLabelStringWidthUI(label, text)),
+                                              formatNumber(label:GetTextWidth()),
+                                              formatNumber(label:GetWidth()),
+                                              formatNumber(label:GetFontHeight())))
     end
 
     local healthEntry = frame[COMBAT_MECHANIC_FLAGS_HEALTH]
@@ -781,13 +781,13 @@ function UnitFrames.DumpNameFitDiagnostics(frameKey)
 
     local name = frame.name
     output:AddSystemMessage(string.format("  name markupWidthUI=%s leftInset=%s fit{text='%s' maxW=%s size=%s min=%s shrunk=%s}",
-        formatNumber(LUIE.GetLabelMarkupTextWidthUI(name, name:GetText())),
-        formatNumber(frame.compactNameLeftInset),
-        tostring(name.nameFitText),
-        formatNumber(name.nameFitMaxWidth),
-        formatNumber(name.nameFitFontSize),
-        formatNumber(name.nameFitMinFontSize),
-        tostring(name.nameFitWasShrunk)))
+                                          formatNumber(LUIE.GetLabelMarkupTextWidthUI(name, name:GetText())),
+                                          formatNumber(frame.compactNameLeftInset),
+                                          tostring(name.nameFitText),
+                                          formatNumber(name.nameFitMaxWidth),
+                                          formatNumber(name.nameFitFontSize),
+                                          formatNumber(name.nameFitMinFontSize),
+                                          tostring(name.nameFitWasShrunk)))
 
     local appearanceCategory = frame.frameCategory
     if appearanceCategory == "smallGroup" then
@@ -797,8 +797,8 @@ function UnitFrames.DumpNameFitDiagnostics(frameKey)
     end
     local appearance, canShrink = UnitFrames.GetNameFontInfo(appearanceCategory)
     output:AddSystemMessage(string.format("  appearance %s: face=%s fontOther=%s nameMinFont=%s canShrink=%s",
-        appearanceCategory, tostring(appearance.fontFace), formatNumber(appearance.fontOther),
-        formatNumber(appearance.nameMinFont), tostring(canShrink)))
+                                          appearanceCategory, tostring(appearance.fontFace), formatNumber(appearance.fontOther),
+                                          formatNumber(appearance.nameMinFont), tostring(canShrink)))
 end
 
 -- -----------------------------------------------------------------------------

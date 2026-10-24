@@ -219,15 +219,22 @@
     </Control>
     <!--
       Expanded raid member template (selected via UnitFrames.SV.RaidFrameTemplate == "Expanded").
-      Mirrors the design: a padded column container with a top row, a health band that grows, and a bottom row.
+      Mirrors the design: a padded column container with a top row, a health band that grows, and a
+    bottom row.
         _Frame     : outer backdrop (the "rhb" column container of the design), padding 2
-        _TopRow    : TOPLEFT(2,2) / TOPRIGHT(-2,2), h20   | $(grandparent)_Name | _Leader 20 | _RoleIcon 16 | _CustomIcon 20 | _ClassIcon 20
-        _Health    : the health band between the rows (2px gap each side); _Bar/_Shield/_Trauma/overlays and the
+        _TopRow    : TOPLEFT(2,2) / TOPRIGHT(-2,2), h20   | $(grandparent)_Name | _Leader 20 | _RoleIcon 16 |
+    _CustomIcon 20 | _ClassIcon 20
+        _Health    : the health band between the rows (2px gap each side); _Bar/_Shield/_Trauma/overlays and
+    the
                      health text (_Label / _Dead, right aligned) live here exactly like the compact template
-        _BottomRow : BOTTOMLEFT(2,-2) / BOTTOMRIGHT(-2,-2), h16 | _ResourceContainer (2 stacked bars filling the row height, sized in Lua) | $(grandparent)_StatsLabel 66x16 + _StatsBorder
-        _LibGroupContainer (ult1 / ult2 / potion slots) and _ResourceMagicka / _ResourceStamina are direct children.
-      Row children use $(grandparent) names so control:GetNamedChild("_Name") etc. resolve (ZOS UnitFrames.xml pattern).
-      Settings-dependent anchor chains (icons, slot container, resource bars, stats) live in UnitFrames.ApplyRaidExpandedMemberLayout.
+        _BottomRow : BOTTOMLEFT(2,-2) / BOTTOMRIGHT(-2,-2), h16 | _ResourceContainer (2 stacked bars
+    filling the row height, sized in Lua) | $(grandparent)_StatsLabel 66x16 + _StatsBorder
+        _LibGroupContainer (ult1 / ult2 / potion slots) and _ResourceMagicka / _ResourceStamina are direct
+    children.
+      Row children use $(grandparent) names so control:GetNamedChild("_Name") etc. resolve (ZOS
+    UnitFrames.xml pattern).
+      Settings-dependent anchor chains (icons, slot container, resource bars, stats) live in
+    UnitFrames.ApplyRaidExpandedMemberLayout.
     -->
     <Control virtual="true"
              name="LUIE_UF_RaidGroupMemberExpanded_Template"
@@ -239,7 +246,9 @@
               relativeTo="$(parent)"
               relativePoint="TOPLEFT" />
       <Controls>
-        <!-- Outer container backdrop. BACKGROUND layer so the integration slot backdrops (DL_BACKGROUND level 13) draw above it. -->
+        <!-- Outer container backdrop. BACKGROUND layer so the integration
+                                slot backdrops
+        (DL_BACKGROUND level 13) draw above it. -->
         <Backdrop name="$(parent)_Frame"
                   inherits="LUIE_UF_BlackFill40_Edge60"
                   layer="BACKGROUND"
@@ -247,7 +256,9 @@
           <AnchorFill />
           <Edge edgeSize="1" />
         </Backdrop>
-        <!-- Top row: name (fills) | role icon 16 | class icon 20 | leader 20 (chained right-to-left in Lua) -->
+        <!-- Top row: name (fills) | role icon 16 | class icon 20 | leader
+                                20 (chained right-to-left
+        in Lua) -->
         <Control name="$(parent)_TopRow"
                  hidden="false">
           <Dimensions y="20" />
@@ -326,7 +337,9 @@
             </Texture>
           </Controls>
         </Control>
-        <!-- Bottom row: slot container (Lua) | resource container h9 (stacked bars) | DPS/HPS stats 66x16 -->
+        <!-- Bottom row: slot container (Lua) | resource container h9
+                                (stacked bars) | DPS/HPS stats
+        66x16 -->
         <Control name="$(parent)_BottomRow"
                  hidden="false">
           <Dimensions y="16" />
@@ -354,7 +367,9 @@
                       relativeTo="$(parent)"
                       relativePoint="RIGHT" />
             </Label>
-            <!-- Stats box behind the DPS / HPS label: same fill / 1px edge as the slot and resource backdrops in this row -->
+            <!-- Stats box behind the DPS / HPS label: same fill
+                                                / 1px edge as the slot and resource
+            backdrops in this row -->
             <Backdrop name="$(parent)_StatsBorder"
                       inherits="LUIE_UF_BlackFill40_Edge60"
                       hidden="true">
@@ -366,7 +381,9 @@
                       relativePoint="BOTTOMRIGHT" />
               <Edge edgeSize="1" />
             </Backdrop>
-            <!-- Resource container (two stacked 4px bars + 1px gap): left/right anchors are re-chained in Lua (slot container / stats label) -->
+            <!-- Resource container (two stacked 4px bars + 1px
+                                                gap): left/right anchors are
+            re-chained in Lua (slot container / stats label) -->
             <Control name="$(parent)_ResourceContainer"
                      hidden="false">
               <Dimensions y="9" />
@@ -379,7 +396,9 @@
             </Control>
           </Controls>
         </Control>
-        <!-- Health band: grows between the rows. Same children as the compact _Health so bars / shields / overlays wire up unchanged. -->
+        <!-- Health band: grows between the rows. Same children as the
+                                compact _Health so bars /
+        shields / overlays wire up unchanged. -->
         <Backdrop name="$(parent)_Health"
                   inherits="LUIE_UF_BlackFill40_Edge60"
                   hidden="false">
@@ -466,7 +485,8 @@
                 </Texture>
               </Controls>
             </Control>
-            <!-- Health text / status, right aligned on the health band -->
+            <!-- Health text / status, right aligned on the
+                                                health band -->
             <Label name="$(parent)_Label"
                    text="zz%"
                    font="ZoFontGameSmall"
@@ -501,13 +521,17 @@
             </Label>
           </Controls>
         </Backdrop>
-        <!-- LibGroupBroadcast slot container (anchored to the bottom row and sized in Lua). Slots mirror SmallGroup.xml at 16px. -->
+        <!-- LibGroupBroadcast slot container (anchored to the bottom row
+                                and sized in Lua). Slots
+        mirror SmallGroup.xml at 16px. -->
         <Control name="$(parent)_LibGroupContainer"
                  hidden="false">
           <Dimensions x="54"
                       y="16" />
           <Controls>
-            <!-- Food/Drink Buff (SmallGroup.xml slot at the 16px raid size; _GroupFoodDrinkBuff.lua) -->
+            <!-- Food/Drink Buff (SmallGroup.xml slot at the
+                                                16px raid size;
+            _GroupFoodDrinkBuff.lua) -->
             <Backdrop name="$(parent)_FoodDrinkBackdrop"
                       inherits="LUIE_UF_BlackFill40_Edge60"
                       hidden="true">
@@ -531,7 +555,10 @@
                        horizontalAlignment="CENTER"
                        verticalAlignment="BOTTOM"
                        hidden="true">
-                  <!-- Inside the 16px slot: a CENTER->BOTTOM anchor would hang the text over the frame edge / combat glow -->
+                  <!-- Inside the 16px slot: a
+                                                                        CENTER->BOTTOM anchor would
+                                                                        hang the text over the
+                  frame edge / combat glow -->
                   <Anchor point="BOTTOM"
                           relativeTo="$(parent)"
                           relativePoint="BOTTOM" />
@@ -608,7 +635,9 @@
             </Backdrop>
           </Controls>
         </Control>
-        <!-- Half-width resource bars inside _BottomRow_ResourceContainer (anchored in Lua, staminaFirst aware) -->
+        <!-- Half-width resource bars inside _BottomRow_ResourceContainer
+                                (anchored in Lua,
+        staminaFirst aware) -->
         <Backdrop name="$(parent)_ResourceMagicka"
                   inherits="LUIE_UF_BlackFill40_Edge60"
                   hidden="true">

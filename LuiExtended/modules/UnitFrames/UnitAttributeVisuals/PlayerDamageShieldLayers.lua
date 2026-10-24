@@ -202,8 +202,8 @@ function PlayerDamageShieldLayers.IsDrawingLayers()
     if visibilitySetting == DAMAGE_SHIELD_VISIBILITY_SETTING_OFF then
         return false
     end
-    if visibilitySetting ~= DAMAGE_SHIELD_VISIBILITY_SETTING_CURRENT_HEALTH
-        and visibilitySetting ~= DAMAGE_SHIELD_VISIBILITY_SETTING_START_TIME then
+    if  visibilitySetting ~= DAMAGE_SHIELD_VISIBILITY_SETTING_CURRENT_HEALTH
+    and visibilitySetting ~= DAMAGE_SHIELD_VISIBILITY_SETTING_START_TIME then
         return false
     end
     return CountActiveShieldRecords() >= 2

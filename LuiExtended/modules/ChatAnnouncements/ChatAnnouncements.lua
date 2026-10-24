@@ -2621,10 +2621,10 @@ end
 function I.SetGemConversionPending()
     S.g_gemConversionPending = true
     eventManager:RegisterForUpdate(moduleName .. "GemConversionPending", GEM_CONVERSION_PENDING_MS, function ()
-        S.g_gemConversionPending = false
-        S.g_gemExtractHookPrinted = false
-        S.g_gemExtractPredictedCrownGems = nil
-    end, true)
+                                       S.g_gemConversionPending = false
+                                       S.g_gemExtractHookPrinted = false
+                                       S.g_gemExtractPredictedCrownGems = nil
+                                   end, true)
 end
 
 local function ClearGemExtractBuffers()

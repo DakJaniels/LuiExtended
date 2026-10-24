@@ -151,8 +151,8 @@ function FrameObject.IsOverlandDifficultyEnabledOnFrame(self)
 end
 
 ---
----@param difficulty OverlandDifficultyType
----@return string iconPath
+--- @param difficulty OverlandDifficultyType
+--- @return string iconPath
 function FrameObject.GetOverlandChallengeDifficultyIconPath(difficulty)
     if difficulty ~= nil then
         local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty]

@@ -10384,8 +10384,8 @@ function ChatAnnouncements.CreateSettings()
     local displayAnnouncementControls = optionsDataChatAnnouncements[#optionsDataChatAnnouncements].controls
     local displayAnnouncementChannels =
     {
-        { shortStringId = LUIE_STRING_LAM_CA_SHARED_CA_SHORT,    fullStringId = LUIE_STRING_LAM_CA_SHARED_CA,    channelName = "CA" },
-        { shortStringId = LUIE_STRING_LAM_CA_SHARED_CSA_SHORT,   fullStringId = LUIE_STRING_LAM_CA_SHARED_CSA,   channelName = "CSA" },
+        { shortStringId = LUIE_STRING_LAM_CA_SHARED_CA_SHORT,    fullStringId = LUIE_STRING_LAM_CA_SHARED_CA,    channelName = "CA"    },
+        { shortStringId = LUIE_STRING_LAM_CA_SHARED_CSA_SHORT,   fullStringId = LUIE_STRING_LAM_CA_SHARED_CSA,   channelName = "CSA"   },
         { shortStringId = LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT, fullStringId = LUIE_STRING_LAM_CA_SHARED_ALERT, channelName = "Alert" },
     }
     local function AppendDisplayAnnouncementHeader(headerStringId)
@@ -10423,18 +10423,18 @@ function ChatAnnouncements.CreateSettings()
 
     local dungeonDisplaySections =
     {
-        { svKey = "DungeonVateshranHollows",   label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_VATESHRAN_HOLLOWS,     tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_VATESHRAN_HOLLOWS_TP },
-        { svKey = "DungeonBlackDrakeVilla",    label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BLACK_DRAKE_VILLA,    tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BLACK_DRAKE_VILLA_TP },
-        { svKey = "DungeonCoralAerie",         label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_CORAL_AERIE,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_CORAL_AERIE_TP },
-        { svKey = "DungeonShipwrightsRegret",  label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SHIPWRIGHTS_REGRET,   tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SHIPWRIGHTS_REGRET_TP },
+        { svKey = "DungeonVateshranHollows",   label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_VATESHRAN_HOLLOWS,    tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_VATESHRAN_HOLLOWS_TP    },
+        { svKey = "DungeonBlackDrakeVilla",    label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BLACK_DRAKE_VILLA,    tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BLACK_DRAKE_VILLA_TP    },
+        { svKey = "DungeonCoralAerie",         label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_CORAL_AERIE,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_CORAL_AERIE_TP          },
+        { svKey = "DungeonShipwrightsRegret",  label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SHIPWRIGHTS_REGRET,   tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SHIPWRIGHTS_REGRET_TP   },
         { svKey = "DungeonEarthenRootEnclave", label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EARTHEN_ROOT_ENCLAVE, tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EARTHEN_ROOT_ENCLAVE_TP },
-        { svKey = "DungeonGravenDeep",         label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_GRAVEN_DEEP,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_GRAVEN_DEEP_TP },
-        { svKey = "DungeonBalSunnar",          label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BAL_SUNNAR,           tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BAL_SUNNAR_TP },
-        { svKey = "DungeonScrivenersHall",     label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL,      tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL_TP },
-        { svKey = "DungeonBedlamVeil",         label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL_TP },
-        { svKey = "DungeonExiledRedoubt",      label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT_TP },
-        { svKey = "DungeonMarchOfSacrifices",  label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES,  tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES_TP },
-        { svKey = "DungeonMoonHunterKeep",     label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP,     tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP_TP },
+        { svKey = "DungeonGravenDeep",         label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_GRAVEN_DEEP,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_GRAVEN_DEEP_TP          },
+        { svKey = "DungeonBalSunnar",          label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BAL_SUNNAR,           tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BAL_SUNNAR_TP           },
+        { svKey = "DungeonScrivenersHall",     label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL,      tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_SCRIVENERS_HALL_TP      },
+        { svKey = "DungeonBedlamVeil",         label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_BEDLAM_VEIL_TP          },
+        { svKey = "DungeonExiledRedoubt",      label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_EXILED_REDOUBT_TP       },
+        { svKey = "DungeonMarchOfSacrifices",  label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES,  tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MARCH_OF_SACRIFICES_TP  },
+        { svKey = "DungeonMoonHunterKeep",     label = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP,     tooltip = LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_MOON_HUNTER_KEEP_TP     },
     }
     for sectionIndex, section in ipairs(dungeonDisplaySections) do
         AppendDisplayAnnouncementSection(section.svKey, section.label, section.tooltip)
@@ -10443,16 +10443,16 @@ function ChatAnnouncements.CreateSettings()
     AppendDisplayAnnouncementHeader(LUIE_STRING_LAM_CA_DISPLAY_HEADER_TRIAL)
     local trialDisplaySections =
     {
-        { svKey = "TrialHelRa",              label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_HEL_RA,               tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_HEL_RA_TP },
-        { svKey = "TrialAetherianArchive",   label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_AETHERIAN_ARCHIVE,    tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_AETHERIAN_ARCHIVE_TP },
-        { svKey = "TrialSanctumOphidia",     label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SANCTUM_OPHIDIA,      tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SANCTUM_OPHIDIA_TP },
-        { svKey = "TrialMawOfLorkhaj",       label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_MAW_OF_LORKHAJ,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_MAW_OF_LORKHAJ_TP },
+        { svKey = "TrialHelRa",              label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_HEL_RA,               tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_HEL_RA_TP               },
+        { svKey = "TrialAetherianArchive",   label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_AETHERIAN_ARCHIVE,    tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_AETHERIAN_ARCHIVE_TP    },
+        { svKey = "TrialSanctumOphidia",     label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SANCTUM_OPHIDIA,      tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SANCTUM_OPHIDIA_TP      },
+        { svKey = "TrialMawOfLorkhaj",       label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_MAW_OF_LORKHAJ,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_MAW_OF_LORKHAJ_TP       },
         { svKey = "TrialHallsOfFabrication", label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_HALLS_OF_FABRICATION, tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_HALLS_OF_FABRICATION_TP },
-        { svKey = "TrialSunspire",           label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SUNSPIRE,             tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SUNSPIRE_TP },
-        { svKey = "TrialRockgrove",          label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_ROCKGROVE,            tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_ROCKGROVE_TP },
-        { svKey = "TrialDreadsailReef",      label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_DREADSAIL_REEF,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_DREADSAIL_REEF_TP },
-        { svKey = "TrialSanitysEdge",        label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SANITYS_EDGE,         tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SANITYS_EDGE_TP },
-        { svKey = "TrialOsseinCage",         label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_OSSEIN_CAGE,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_OSSEIN_CAGE_TP },
+        { svKey = "TrialSunspire",           label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SUNSPIRE,             tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SUNSPIRE_TP             },
+        { svKey = "TrialRockgrove",          label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_ROCKGROVE,            tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_ROCKGROVE_TP            },
+        { svKey = "TrialDreadsailReef",      label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_DREADSAIL_REEF,       tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_DREADSAIL_REEF_TP       },
+        { svKey = "TrialSanitysEdge",        label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SANITYS_EDGE,         tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_SANITYS_EDGE_TP         },
+        { svKey = "TrialOsseinCage",         label = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_OSSEIN_CAGE,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIAL_OSSEIN_CAGE_TP          },
     }
     for sectionIndex, section in ipairs(trialDisplaySections) do
         AppendDisplayAnnouncementSection(section.svKey, section.label, section.tooltip)
@@ -10460,10 +10460,10 @@ function ChatAnnouncements.CreateSettings()
 
     local catalogDisplaySections =
     {
-        { svKey = "CharacterSystems",    label = LUIE_STRING_LAM_CA_DISPLAY_CHARACTER_SYSTEMS,   tooltip = LUIE_STRING_LAM_CA_DISPLAY_CHARACTER_SYSTEMS_TP },
-        { svKey = "TributeTutorial",     label = LUIE_STRING_LAM_CA_DISPLAY_TRIBUTE_TUTORIAL,    tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIBUTE_TUTORIAL_TP },
-        { svKey = "InstrumentDisplayed", label = LUIE_STRING_LAM_CA_DISPLAY_INSTRUMENT,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_INSTRUMENT_TP },
-        { svKey = "IndrikEvent",         label = LUIE_STRING_LAM_CA_DISPLAY_INDRIK,              tooltip = LUIE_STRING_LAM_CA_DISPLAY_INDRIK_TP },
+        { svKey = "CharacterSystems",    label = LUIE_STRING_LAM_CA_DISPLAY_CHARACTER_SYSTEMS,   tooltip = LUIE_STRING_LAM_CA_DISPLAY_CHARACTER_SYSTEMS_TP   },
+        { svKey = "TributeTutorial",     label = LUIE_STRING_LAM_CA_DISPLAY_TRIBUTE_TUTORIAL,    tooltip = LUIE_STRING_LAM_CA_DISPLAY_TRIBUTE_TUTORIAL_TP    },
+        { svKey = "InstrumentDisplayed", label = LUIE_STRING_LAM_CA_DISPLAY_INSTRUMENT,          tooltip = LUIE_STRING_LAM_CA_DISPLAY_INSTRUMENT_TP          },
+        { svKey = "IndrikEvent",         label = LUIE_STRING_LAM_CA_DISPLAY_INDRIK,              tooltip = LUIE_STRING_LAM_CA_DISPLAY_INDRIK_TP              },
         { svKey = "AntiquityDiscovery",  label = LUIE_STRING_LAM_CA_DISPLAY_ANTIQUITY_DISCOVERY, tooltip = LUIE_STRING_LAM_CA_DISPLAY_ANTIQUITY_DISCOVERY_TP },
     }
     for sectionIndex, section in ipairs(catalogDisplaySections) do

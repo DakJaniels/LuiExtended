@@ -134,7 +134,7 @@ function UnitFrames.FitNameLabelFont(label, appearance, canShrink, maxWidth)
     local text = label:GetText()
     local fitMaxWidth = zo_ceil(maxWidth)
     local fontStyle = label.customNameOutlineFontStyle or appearance.fontStyle
-    if label.nameFitText == text
+    if  label.nameFitText == text
     and label.nameFitMaxWidth == fitMaxWidth
     and label.nameFitFontFace == appearance.fontFace
     and label.nameFitFontStyle == fontStyle

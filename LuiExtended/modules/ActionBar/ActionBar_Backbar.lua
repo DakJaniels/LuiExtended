@@ -78,9 +78,9 @@ end
 --- @param parent Control
 --- @param template string
 --- @param hotbarCategory number
---- @return integer|ZO_InitializingObject|ActionButton
+--- @return ActionButton
 function Backbar.MakeActionButton(slotNum, parent, template, hotbarCategory)
-    local button = ActionButton:New(slotNum, ACTION_BUTTON_TYPE_VISIBLE, parent, template, hotbarCategory)
+    local button = ActionButton:New(slotNum, ACTION_BUTTON_TYPE_VISIBLE, parent, template, hotbarCategory) --- @type ActionButton
     return button
 end
 
@@ -328,15 +328,15 @@ function Backbar.SetupBackbarDragDropHandlers(button)
             if IsSlotUsed(actionBarSlotIndex, hotbarCategory) and not IsActionSlotRestricted(actionBarSlotIndex, hotbarCategory) then
                 ClearMenu()
                 AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function ()
-                    local slotType = GetSlotType(actionBarSlotIndex, hotbarCategory)
-                    if slotType == ACTION_TYPE_ITEM then
-                        local soundCategory = GetSlotItemSound(actionBarSlotIndex, hotbarCategory)
-                        if soundCategory ~= ITEM_SOUND_CATEGORY_NONE then
-                            PlayItemSound(soundCategory, ITEM_SOUND_ACTION_UNEQUIP)
-                        end
-                    end
-                    CallSecureProtected("ClearSlot", actionBarSlotIndex, hotbarCategory)
-                end, MENU_ADD_OPTION_LABEL, LUIE.Font.GetContextMenuFont())
+                                local slotType = GetSlotType(actionBarSlotIndex, hotbarCategory)
+                                if slotType == ACTION_TYPE_ITEM then
+                                    local soundCategory = GetSlotItemSound(actionBarSlotIndex, hotbarCategory)
+                                    if soundCategory ~= ITEM_SOUND_CATEGORY_NONE then
+                                        PlayItemSound(soundCategory, ITEM_SOUND_ACTION_UNEQUIP)
+                                    end
+                                end
+                                CallSecureProtected("ClearSlot", actionBarSlotIndex, hotbarCategory)
+                            end, MENU_ADD_OPTION_LABEL, LUIE.Font.GetContextMenuFont())
                 ShowMenu(control)
             end
         elseif mouseButton == MOUSE_BUTTON_INDEX_LEFT and GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then
