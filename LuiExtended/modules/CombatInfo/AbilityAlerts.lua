@@ -973,18 +973,12 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         if AlertsZone[abilityId][zoneName] then
             unitName = AlertsZone[abilityId][zoneName]
             if LUIE.IsDevDebugEnabled() then
-                LUIE:Log("Debug", [[Zone Name Override:
-    Location: %s
-    Unit Name: %s
-    Ability ID: %d]], zoneName, unitName, abilityId)
+                LUIE:Log("Debug", string_format("Zone Name Override:\n    Location: %s\n    Unit Name: %s\n    Ability ID: %d", zoneName, unitName, abilityId))
             end
         elseif AlertsZone[abilityId][index] then
             unitName = AlertsZone[abilityId][index]
             if LUIE.IsDevDebugEnabled() then
-                LUIE:Log("Debug", [[Zone ID Override:
-    Zone ID: %d
-    Unit Name: %s
-    Ability ID: %d]], index, unitName, abilityId)
+                LUIE:Log("Debug", string_format("Zone ID Override:\n    Zone ID: %d\n    Unit Name: %s\n    Ability ID: %d", index, unitName, abilityId))
             end
         end
     end
@@ -995,10 +989,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         if AlertsMap[abilityId][mapName] then
             unitName = AlertsMap[abilityId][mapName]
             if LUIE.IsDevDebugEnabled() then
-                LUIE:Log("Debug", [[Map Name Override:
-    Map: %s
-    Unit Name: %s
-    Ability ID: %d]], mapName, unitName, abilityId)
+                LUIE:Log("Debug", string_format("Map Name Override:\n    Map: %s\n    Unit Name: %s\n    Ability ID: %d", mapName, unitName, abilityId))
             end
         end
     end
@@ -1011,11 +1002,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
                 if bossName == Alerts[abilityId].bossMatch[x] then
                     unitName = Alerts[abilityId].bossMatch[x]
                     if LUIE.IsDevDebugEnabled() then
-                        LUIE:Log("Debug", [[Boss Name Match:
-    Boss Name: %s
-    Boss Index: %d
-    Match Index: %d
-    Ability ID: %d]], bossName, i, x, abilityId)
+                        LUIE:Log("Debug", string_format("Boss Name Match:\n    Boss Name: %s\n    Boss Index: %d\n    Match Index: %d\n    Ability ID: %d", bossName, i, x, abilityId))
                     end
                 end
             end
@@ -1028,11 +1015,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
             if AlertsConvert[abilityId][bossName] then
                 unitName = AlertsConvert[abilityId][bossName]
                 if LUIE.IsDevDebugEnabled() then
-                    LUIE:Log("Debug", [[Boss Add Conversion:
-    Original Boss: %s
-    Converted Name: %s
-    Boss Index: %d
-    Ability ID: %d]], bossName, unitName, i, abilityId)
+                    LUIE:Log("Debug", string_format("Boss Add Conversion:\n    Original Boss: %s\n    Converted Name: %s\n    Boss Index: %d\n    Ability ID: %d", bossName, unitName, i, abilityId))
                 end
             end
         end
@@ -1043,10 +1026,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         if savedName ~= "" and savedName ~= nil then
             unitName = savedName
             if LUIE.IsDevDebugEnabled() then
-                LUIE:Log("Debug", [[Name Override Prevented:
-    Original Name: %s
-    Ability ID: %d
-    Override Type: noForcedNameOverride]], savedName, abilityId)
+                LUIE:Log("Debug", string_format("Name Override Prevented:\n    Original Name: %s\n    Ability ID: %d\n    Override Type: noForcedNameOverride", savedName, abilityId))
             end
         end
     end
