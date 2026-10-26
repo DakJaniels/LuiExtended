@@ -163,6 +163,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_UF_COMMON_GLOBAL = "Global unit frame display options.",
 
     LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD = "Debug environment is active. LUIE core addons were enabled; you may enable more addons to test interactions. Use '/luie debug off' to restore your addon list.",
+    LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD_OPTDEPS = "Debug environment is active. LUIE core addons and supported optional dependencies were enabled. Use '/luie debug off' to restore your addon list.",
     LUIE_STRING_DEBUG_ENV_ALREADY_ACTIVE = "Debug environment is already active. Use '/luie debug off' first.",
     LUIE_STRING_DEBUG_ENV_ENABLE_RELOAD = "Debug environment enabled. Reloading UI...",
     LUIE_STRING_DEBUG_ENV_NOT_ACTIVE = "Debug environment is not active.",
@@ -171,7 +172,7 @@ local strings =
     LUIE_STRING_DEBUG_ENV_DISABLE_RELOAD = "Debug environment disabled. Reloading UI...",
     LUIE_STRING_DEBUG_ENV_STATUS_ACTIVE = "Debug environment: active (<<1>> addons in restore snapshot).",
     LUIE_STRING_DEBUG_ENV_STATUS_INACTIVE = "Debug environment: inactive.",
-    LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "Usage: /luie debug on | off | status",
+    LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "Usage: /luie debug on | on optdeps | off | status",
     LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS = "       /luie svstatus - SavedVariables migration diagnostics",
 
     LUIE_STRING_CORE_STARTUP_CHAT = "|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r",

@@ -34,6 +34,75 @@ local CORE_ALLOWLIST =
     ["LibMediaProvider"] = true,
 }
 
+--- LuiExtended.addon ## OptionalDependsOn (version suffixes stripped).
+local OPTIONAL_DEPENDENCY_ALLOWLIST =
+{
+    ["LibChatMessage"] = true,
+    ["pChat"] = true,
+    ["rChat"] = true,
+    ["GamepadMiniChatTabs"] = true,
+    ["CombatMetrics"] = true,
+    ["CrutchAlerts"] = true,
+    ["LibGroupResources"] = true,
+    ["LibGroupCombatStats"] = true,
+    ["LibGroupPotionCooldowns"] = true,
+    ["LibDebugLogger"] = true,
+    ["DebugLogViewer"] = true,
+    ["DolgubonsLazyWritCreator"] = true,
+    ["LibLazyCrafting"] = true,
+    ["LootLog"] = true,
+    ["Taneth"] = true,
+    ["LibCombat"] = true,
+    ["LibCombat2"] = true,
+    ["LibSlashCommander"] = true,
+    ["HarvestMap"] = true,
+    ["LibMapPins-1.0"] = true,
+    ["Pre101046UI"] = true,
+    ["LibCustomNames"] = true,
+    ["LibCustomIcons"] = true,
+}
+
+--- ## DependsOn / ## PCDependsOn / ## ConsoleDependsOn of the addons above.
+--- LibAddonMenu-2.0 is core on PC. LibHarvensAddonSettings is core on console.
+--- Both are listed here so the other platform still loads addons that require them.
+local OPTIONAL_DEPENDENCY_REQUIRED_ALLOWLIST =
+{
+    -- HarvestMap.addon and pChat.txt
+    ["LibMainMenu-2.0"] = true,
+    -- HarvestMapData/Modules: addon names are the manifest folders, not the parent folder.
+    -- SubmoduleManager.lua registers these on EVENT_ADD_ON_LOADED. Each DependsOn HarvestMap.
+    ["HarvestMapAD"] = true,
+    ["HarvestMapDC"] = true,
+    ["HarvestMapEP"] = true,
+    ["HarvestMapDLC"] = true,
+    ["HarvestMapNF"] = true,
+    -- HarvestMap.addon ## OptionalDependsOn. Addon folder is HarvestMap/Libs/NodeDetection.
+    ["NodeDetection"] = true,
+    -- pChat.txt; also CombatMetrics.addon and DebugLogViewer.addon
+    ["LibCustomMenu"] = true,
+    -- pChat.txt
+    ["LibAddonMenuSoundSlider"] = true,
+    -- GamepadMiniChatTabs.addon
+    ["LibHarvensAddonSettings"] = true,
+    ["LibRadialMenu"] = true,
+    -- LibGroupResources.addon, LibGroupCombatStats.addon, LibGroupPotionCooldowns.addon
+    ["LibGroupBroadcast"] = true,
+    -- LootLog.addon
+    ["LibExtendedJournal"] = true,
+    -- CombatMetrics.addon; CombatMetricsFightData.txt also DependsOn LibDataEncode and LibCombat
+    ["CombatMetricsFightData"] = true,
+    ["LibDataEncode"] = true,
+    -- DebugLogViewer.addon
+    ["LibGetText"] = true,
+    -- DolgubonsLazyWritCreator.addon ## ConsoleDependsOn
+    ["LibPrice"] = true,
+    ["LibQRCode"] = true,
+    -- DolgubonsLazyWritCreator.addon ## OptionalDependsOn. Standalone LibFeedback.addon DependsOn LibDebugLogger.
+    ["LibFeedback"] = true,
+    -- HarvestMap, pChat, LibCustomIcons, LibGroupBroadcast, CombatMetrics, DebugLogViewer, LibRadialMenu
+    ["LibAddonMenu-2.0"] = true,
+}
+
 --- @class AddOnScanEntry
 --- @field index luaindex
 --- @field name string
@@ -74,8 +143,51 @@ local function ApplyEnabledByName(enabledByName, entries)
     end
 end
 
+--- @param entries AddOnScanEntry[]
+--- @return table<string, luaindex>
+local function BuildAddOnIndexByName(entries)
+    local addOnIndexByName = {}
+    for entryIndex = 1, #entries do
+        local entry = entries[entryIndex]
+        addOnIndexByName[entry.name] = entry.index
+    end
+    return addOnIndexByName
+end
+
+--- Required ## DependsOn only. GetAddOnDependencyInfo does not return ## OptionalDependsOn.
+--- @param allowlist table<string, boolean>
+--- @param addOnIndexByName table<string, luaindex>
+local function AddRequiredDependenciesToAllowlist(allowlist, addOnIndexByName)
+    local namesToVisit = {}
+    for addOnName in pairs(allowlist) do
+        namesToVisit[#namesToVisit + 1] = addOnName
+    end
+    local visitedAddOnName = {}
+    local visitIndex = 1
+    while visitIndex <= #namesToVisit do
+        local addOnName = namesToVisit[visitIndex]
+        visitIndex = visitIndex + 1
+        if not visitedAddOnName[addOnName] then
+            visitedAddOnName[addOnName] = true
+            local addOnIndex = addOnIndexByName[addOnName]
+            if addOnIndex then
+                local numDependencies = addOnManager:GetAddOnNumDependencies(addOnIndex)
+                for dependencyIndex = 1, numDependencies do
+                    local dependencyName = addOnManager:GetAddOnDependencyInfo(addOnIndex, dependencyIndex)
+                    if dependencyName and dependencyName ~= "" and not allowlist[dependencyName] then
+                        allowlist[dependencyName] = true
+                        namesToVisit[#namesToVisit + 1] = dependencyName
+                    end
+                end
+            end
+        end
+    end
+end
+
+--- @param includeOptionalDependencies boolean
+--- @param entries AddOnScanEntry[]
 --- @return table<string, boolean>
-local function GetDebugEnvironmentAllowlist()
+local function GetDebugEnvironmentAllowlist(includeOptionalDependencies, entries)
     local allowlist = {}
     for name in pairs(CORE_ALLOWLIST) do
         allowlist[name] = true
@@ -86,6 +198,15 @@ local function GetDebugEnvironmentAllowlist()
     else
         allowlist["LibAddonMenu-2.0"] = true
     end
+    if includeOptionalDependencies then
+        for name in pairs(OPTIONAL_DEPENDENCY_ALLOWLIST) do
+            allowlist[name] = true
+        end
+        for name in pairs(OPTIONAL_DEPENDENCY_REQUIRED_ALLOWLIST) do
+            allowlist[name] = true
+        end
+        AddRequiredDependenciesToAllowlist(allowlist, BuildAddOnIndexByName(entries))
+    end
     return allowlist
 end
 
@@ -94,6 +215,9 @@ local function DebugEnvironmentChat(message)
 end
 
 local function GetDebugEnvironmentActiveReloadMessage()
+    if LUIE.SV and LUIE.SV.DebugEnvironmentIncludeOptionalDependencies == true then
+        return GetString(LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD_OPTDEPS)
+    end
     return GetString(LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD)
 end
 
@@ -124,6 +248,7 @@ local function ClearDebugEnvironmentSavedVars()
     LUIE.SV.DebugEnvironmentActive = false
     LUIE.SV.DebugEnvironmentRestore = nil
     LUIE.SV.DebugEnvironmentPendingChat = nil
+    LUIE.SV.DebugEnvironmentIncludeOptionalDependencies = nil
 end
 
 --- Restore pre-debug addon selection and clear debug SV before logout unloads the UI.
@@ -148,17 +273,19 @@ function LUIE.RegisterDebugEnvironmentLogoutHooks()
 end
 
 --- @param enable boolean
+--- @param includeOptionalDependencies boolean|nil
 --- @return boolean success
 --- @return string? message
-function LUIE.ApplyDebugEnvironment(enable)
+function LUIE.ApplyDebugEnvironment(enable, includeOptionalDependencies)
     if enable then
         if LUIE.IsDebugEnvironmentActive() then
             return false, GetString(LUIE_STRING_DEBUG_ENV_ALREADY_ACTIVE)
         end
         local currentStates, entries = ScanAddOnManager()
         LUIE.SV.DebugEnvironmentRestore = currentStates
-        ApplyEnabledByName(GetDebugEnvironmentAllowlist(), entries)
+        ApplyEnabledByName(GetDebugEnvironmentAllowlist(includeOptionalDependencies == true, entries), entries)
         LUIE.SV.DebugEnvironmentActive = true
+        LUIE.SV.DebugEnvironmentIncludeOptionalDependencies = includeOptionalDependencies == true
         LUIE.SV.DebugEnvironmentPendingChat = PENDING_CHAT_TOKEN_ACTIVE
         return true, GetString(LUIE_STRING_DEBUG_ENV_ENABLE_RELOAD)
     end
@@ -169,11 +296,13 @@ function LUIE.ApplyDebugEnvironment(enable)
     local restore = LUIE.SV.DebugEnvironmentRestore
     if not restore then
         LUIE.SV.DebugEnvironmentActive = false
+        LUIE.SV.DebugEnvironmentIncludeOptionalDependencies = nil
         return false, GetString(LUIE_STRING_DEBUG_ENV_NO_RESTORE)
     end
     ApplyEnabledByName(restore)
     LUIE.SV.DebugEnvironmentActive = false
     LUIE.SV.DebugEnvironmentRestore = nil
+    LUIE.SV.DebugEnvironmentIncludeOptionalDependencies = nil
     LUIE.SV.DebugEnvironmentPendingChat = PENDING_CHAT_TOKEN_DISABLED
     return true, GetString(LUIE_STRING_DEBUG_ENV_DISABLE_RELOAD)
 end
@@ -256,8 +385,9 @@ function LUIE.LuieSlashCommandDebug(action)
         PrintDebugEnvironmentStatus()
         return
     end
-    if action == "on" then
-        local success, message = LUIE.ApplyDebugEnvironment(true)
+    if action == "on" or action == "on optdeps" then
+        local includeOptionalDependencies = action == "on optdeps"
+        local success, message = LUIE.ApplyDebugEnvironment(true, includeOptionalDependencies)
         DebugEnvironmentChat(message or "")
         if success then
             zo_callLater(function ()
@@ -285,7 +415,7 @@ function LUIE.OnLuieSlashCommand(args)
         PrintUsage()
         return
     end
-    local sub, action = zo_strlower(args):match("^(%S+)%s*(%S*)")
+    local sub, action = zo_strlower(args):match("^(%S+)%s*(.*)$")
     sub = sub or ""
     action = action or ""
     if sub == "svstatus" then

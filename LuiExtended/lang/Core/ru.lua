@@ -165,6 +165,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_UF_COMMON_GLOBAL = "Глобальные параметры отображения фреймов.",
 
     LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD = "Среда отладки активна. Основные аддоны LUIE включены; можно включить другие для проверки. «/luie debug off» - восстановить список аддонов.",
+    LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD_OPTDEPS = "Среда отладки активна. Основные аддоны LUIE и поддерживаемые необязательные зависимости включены. «/luie debug off» - восстановить список аддонов.",
     LUIE_STRING_DEBUG_ENV_ALREADY_ACTIVE = "Среда отладки уже активна. Сначала используйте «/luie debug off».",
     LUIE_STRING_DEBUG_ENV_ENABLE_RELOAD = "Среда отладки включена. Перезагрузка интерфейса…",
     LUIE_STRING_DEBUG_ENV_NOT_ACTIVE = "Среда отладки не активна.",
@@ -173,7 +174,7 @@ local strings =
     LUIE_STRING_DEBUG_ENV_DISABLE_RELOAD = "Среда отладки отключена. Перезагрузка интерфейса…",
     LUIE_STRING_DEBUG_ENV_STATUS_ACTIVE = "Среда отладки: активна (<<1>> аддонов в снимке восстановления).",
     LUIE_STRING_DEBUG_ENV_STATUS_INACTIVE = "Среда отладки: неактивна.",
-    LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "Использование: /luie debug on | off | status",
+    LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "Использование: /luie debug on | on optdeps | off | status",
     LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS = "       /luie svstatus - диагностика миграции SavedVariables",
 
     LUIE_STRING_CORE_STARTUP_CHAT = "|cFFFFFF<<1>> от|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r",

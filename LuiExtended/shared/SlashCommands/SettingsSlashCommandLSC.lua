@@ -66,7 +66,7 @@ function SlashCommandRegistry.RegisterLuieSlashCommand()
                                           debugEnvironmentSubCommand:SetCallback(function (debugAction)
                                               LUIE.LuieSlashCommandDebug(debugAction)
                                           end)
-                                          debugEnvironmentSubCommand:SetAutoComplete({ "on", "off", "status" })
+                                          debugEnvironmentSubCommand:SetAutoComplete({ "on", "on optdeps", "off", "status" })
                                       end,
                                   })
 end
