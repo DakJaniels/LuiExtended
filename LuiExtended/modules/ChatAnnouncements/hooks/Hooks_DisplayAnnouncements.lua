@@ -208,11 +208,6 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
 
     -- EVENT_DISPLAY_ANNOUNCEMENT (CSA Handler)
     local function DisplayAnnouncementHook(primaryText, secondaryText, icon, soundId, lifespanMS, category)
-        -- Disable Respec Display Announcement since we handle this from loot announcements (using Respec scroll)
-        if primaryText == respectypePointsresettitle1Text then
-            return true
-        end
-
         -- Setup CSA with default function (don't display CSA here yet, we filter to check)
         soundId = soundId == "" and SOUNDS.DISPLAY_ANNOUNCEMENT or soundId
 
