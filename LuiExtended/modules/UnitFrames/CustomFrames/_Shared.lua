@@ -16,7 +16,6 @@ local LUIE = LUIE
 --- @field MOVER_ANCHOR_REGISTRY_KEYS string[]
 --- @field SMALL_GROUP_SIZE integer
 --- @field RAID_GROUP_SIZE integer
---- @field CUSTOM_FRAME_HUD_SCENES ZO_Scene[]
 --- @field ForEachMovableAnchorFrame fun(callback: fun(registryKey: string, frame: LUIE_CustomFrameObject, tlw: LUIE_PositionableTopLevelWindow))
 --- @field CreateLUIETopLevel fun(globalName: string, templateName: string): TopLevelWindow
 --- @field ApplyStackedMemberAnchors fun(parent: Control, unitTagPrefix: string, count: number, startIndex: number|nil)
@@ -62,9 +61,6 @@ Shared.MOVER_ANCHOR_REGISTRY_KEYS =
     "AvaPlayerTarget",
     "PetGroup1",
 }
-
--- Same table as LUIE.HudScene.GetGameplayScenes() after first build (ZOS HUD_FRAGMENT_GROUP + siege + loot).
-Shared.CUSTOM_FRAME_HUD_SCENES = nil
 
 --- Instantiate a custom unit frame top-level window from XML virtual template.
 --- @param globalName string
