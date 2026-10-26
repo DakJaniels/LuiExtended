@@ -88,21 +88,32 @@ local ANTIQUITY_STRING_IDS =
     LUIE_STRING_CA_DISPLAY_ANTIQUITY_CLUE_DISCOVERED,
 }
 
+local STYLE_PAGE_STRING_IDS =
+{
+    LUIE_STRING_CA_DISPLAY_STYLE_PAGE_GLENMORIL,
+}
+
 local catalogLookup = {}
 AddPrimaryTextLookup(catalogLookup, CHARACTER_SYSTEM_STRING_IDS, "CharacterSystems")
 AddPrimaryTextLookup(catalogLookup, TRIBUTE_TUTORIAL_STRING_IDS, "TributeTutorial")
 AddPrimaryTextLookup(catalogLookup, INSTRUMENT_STRING_IDS, "InstrumentDisplayed")
 AddPrimaryTextLookup(catalogLookup, INDRIK_STRING_IDS, "IndrikEvent")
 AddPrimaryTextLookup(catalogLookup, ANTIQUITY_STRING_IDS, "AntiquityDiscovery")
+AddPrimaryTextLookup(catalogLookup, STYLE_PAGE_STRING_IDS, "General")
+
+local stylePageLearnFromInventoryText = GetString(LUIE_STRING_CA_DISPLAY_STYLE_PAGE_LEARN_FROM_INVENTORY)
 
 --- @param primaryText string|nil
+--- @param secondaryText string|nil
 --- @return CADisplayAnnouncementSection|nil settings
-function ChatAnnouncements.ResolveCatalogDisplayAnnouncement(primaryText)
-    if not primaryText then
-        return nil
+function ChatAnnouncements.ResolveCatalogDisplayAnnouncement(primaryText, secondaryText)
+    if primaryText then
+        local settingsKey = catalogLookup[primaryText]
+        if settingsKey then
+            return ChatAnnouncements.SV.DisplayAnnouncements[settingsKey]
+        end
     end
-    local settingsKey = catalogLookup[primaryText]
-    if settingsKey then
-        return ChatAnnouncements.SV.DisplayAnnouncements[settingsKey]
+    if secondaryText and secondaryText == stylePageLearnFromInventoryText then
+        return ChatAnnouncements.SV.DisplayAnnouncements.General
     end
 end

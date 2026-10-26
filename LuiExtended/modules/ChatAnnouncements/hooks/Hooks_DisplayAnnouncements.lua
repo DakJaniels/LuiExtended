@@ -316,7 +316,7 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
         end
 
         if not settings then
-            local catalogSettings = ChatAnnouncements.ResolveCatalogDisplayAnnouncement(primaryText)
+            local catalogSettings = ChatAnnouncements.ResolveCatalogDisplayAnnouncement(primaryText, secondaryText)
             if catalogSettings then
                 settings = catalogSettings
                 debugDisable = true
