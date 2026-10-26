@@ -334,6 +334,7 @@
                          textureFile=""
                          layer="OVERLAY"
                          tier="LOW"
+                         inheritAlpha="false"
                          hidden="true">
                   <Dimensions x="22"
                               y="22" />
