@@ -19,9 +19,7 @@ local HudScene = {}
 --- @type LUIE.HudScene
 LUIE.HudScene = HudScene
 
---- @type ZO_Scene[]|nil Built on first GetGameplayScenes() (after ZOS scene globals exist).
-HudScene.GAMEPLAY_SCENES = nil
-
+--- @type ZO_Scene[]
 HudScene.GAMEPLAY_SCENES =
 {
     HUD_SCENE,
@@ -33,13 +31,6 @@ HudScene.GAMEPLAY_SCENES =
 
 --- @return ZO_Scene[]
 function HudScene.GetGameplayScenes()
-    if HudScene.GAMEPLAY_SCENES then
-        return HudScene.GAMEPLAY_SCENES
-    end
-    local customFramesShared = LUIE.CustomFramesShared
-    if customFramesShared then
-        customFramesShared.CUSTOM_FRAME_HUD_SCENES = HudScene.GAMEPLAY_SCENES
-    end
     return HudScene.GAMEPLAY_SCENES
 end
 
