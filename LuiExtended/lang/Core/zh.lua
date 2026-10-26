@@ -165,6 +165,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_UF_COMMON_GLOBAL = "单位框架全局显示选项。",
 
     LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD = "调试环境已激活。已启用 LUIE 核心插件；可启用更多插件测试交互。使用「/luie debug off」恢复插件列表。",
+    LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD_OPTDEPS = "调试环境已激活。已启用 LUIE 核心插件和支持的可选依赖。使用「/luie debug off」恢复插件列表。",
     LUIE_STRING_DEBUG_ENV_ALREADY_ACTIVE = "调试环境已处于激活状态。请先使用「/luie debug off」。",
     LUIE_STRING_DEBUG_ENV_ENABLE_RELOAD = "调试环境已启用。正在重载用户界面…",
     LUIE_STRING_DEBUG_ENV_NOT_ACTIVE = "调试环境未激活。",
@@ -173,7 +174,7 @@ local strings =
     LUIE_STRING_DEBUG_ENV_DISABLE_RELOAD = "调试环境已关闭。正在重载用户界面…",
     LUIE_STRING_DEBUG_ENV_STATUS_ACTIVE = "调试环境：激活（恢复快照中有 <<1>> 个插件）。",
     LUIE_STRING_DEBUG_ENV_STATUS_INACTIVE = "调试环境：未激活。",
-    LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "用法：/luie debug on | off | status",
+    LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "用法：/luie debug on | on optdeps | off | status",
     LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS = "       /luie svstatus - SavedVariables 迁移诊断",
 
     LUIE_STRING_CORE_STARTUP_CHAT = "|cFFFFFF<<1>> 作者 |r |c00C000<<2>>|r |cFFFFFFv<<3>>|r",

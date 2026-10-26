@@ -165,6 +165,7 @@ local strings =
     LUIE_STRING_CONSOLE_SECTION_UF_COMMON_GLOBAL = "Options d'affichage globales des cadres d'unités.",
 
     LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD = "Environnement de débogage actif. Les add-ons noyau LUIE ont été activés ; vous pouvez en activer d'autres pour tester. Utilisez « /luie debug off » pour restaurer votre liste d'add-ons.",
+    LUIE_STRING_DEBUG_ENV_ACTIVE_RELOAD_OPTDEPS = "Environnement de débogage actif. Les add-ons noyau LUIE et les dépendances facultatives prises en charge ont été activés. Utilisez « /luie debug off » pour restaurer votre liste d'add-ons.",
     LUIE_STRING_DEBUG_ENV_ALREADY_ACTIVE = "L'environnement de débogage est déjà actif. Utilisez d'abord « /luie debug off ».",
     LUIE_STRING_DEBUG_ENV_ENABLE_RELOAD = "Environnement de débogage activé. Rechargement de l'interface…",
     LUIE_STRING_DEBUG_ENV_NOT_ACTIVE = "L'environnement de débogage n'est pas actif.",
@@ -173,7 +174,7 @@ local strings =
     LUIE_STRING_DEBUG_ENV_DISABLE_RELOAD = "Environnement de débogage désactivé. Rechargement de l'interface…",
     LUIE_STRING_DEBUG_ENV_STATUS_ACTIVE = "Environnement de débogage : actif (<<1>> add-ons dans l'instantané).",
     LUIE_STRING_DEBUG_ENV_STATUS_INACTIVE = "Environnement de débogage : inactif.",
-    LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "Utilisation : /luie debug on | off | status",
+    LUIE_STRING_DEBUG_ENV_USAGE_DEBUG = "Utilisation : /luie debug on | on optdeps | off | status",
     LUIE_STRING_DEBUG_ENV_USAGE_SVSTATUS = "       /luie svstatus - diagnostic de migration SavedVariables",
 
     LUIE_STRING_CORE_STARTUP_CHAT = "|cFFFFFF<<1>> par|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r",
