@@ -9,6 +9,10 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local skillGuildAlertFormat = GetString(LUIE_STRING_CA_SKILL_GUILD_ALERT)
+local abilityXpGainProgressFormat = GetString(LUIE_STRING_CA_ABILITY_XP_GAIN_PROGRESS)
+local abilityXpGainFormat = GetString(LUIE_STRING_CA_ABILITY_XP_GAIN)
+local abilityNameAndRankFormat = GetString(SI_ABILITY_NAME_AND_RANK)
 
 local ColorizeColors = ChatAnnouncements.Colors
 
@@ -142,7 +146,7 @@ function ChatAnnouncements.SkillXPUpdate(eventId, skillType, skillIndex, reason,
         local priority
 
         if ChatAnnouncements.SV.Skills.SkillGuildAlert then
-            local text = zo_strformat(GetString(LUIE_STRING_CA_SKILL_GUILD_ALERT), formattedName)
+            local text = zo_strformat(skillGuildAlertFormat, formattedName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
         end
 
@@ -283,9 +287,9 @@ function ChatAnnouncements.PrintAbilityProgressionXpGain(abilityNameAndRank, cha
     local plainText
     if ChatAnnouncements.SV.Skills.SkillAbilityXpProgress and rankXpWindow and rankXpWindow > 0 then
         local percentLeft = string.format("%.1f", ((rankXpWindow - rankProgress) / rankXpWindow) * 100)
-        plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN_PROGRESS, abilityNameAndRank, ZO_CommaDelimitDecimalNumber(change), ZO_CommaDelimitDecimalNumber(rankProgress), ZO_CommaDelimitDecimalNumber(rankXpWindow), percentLeft)
+        plainText = zo_strformat(abilityXpGainProgressFormat, abilityNameAndRank, ZO_CommaDelimitDecimalNumber(change), ZO_CommaDelimitDecimalNumber(rankProgress), ZO_CommaDelimitDecimalNumber(rankXpWindow), percentLeft)
     else
-        plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN, abilityNameAndRank, ZO_CommaDelimitDecimalNumber(change))
+        plainText = zo_strformat(abilityXpGainFormat, abilityNameAndRank, ZO_CommaDelimitDecimalNumber(change))
     end
 
     if ChatAnnouncements.SV.Skills.SkillAbilityXpCA then
@@ -376,7 +380,7 @@ function ChatAnnouncements.OnAbilityProgressionXpUpdate(eventId, progressionInde
 
     local _, morph, rank = GetAbilityProgressionInfo(progressionIndex)
     local abilityName, texture = GetAbilityProgressionAbilityInfo(progressionIndex, morph, rank)
-    local abilityNameAndRank = zo_strformat(SI_ABILITY_NAME_AND_RANK, abilityName, rank)
+    local abilityNameAndRank = zo_strformat(abilityNameAndRankFormat, abilityName, rank)
 
     local rankProgress = currentXP - lastRankXP
     local rankXpWindow = nextRankXP - lastRankXP

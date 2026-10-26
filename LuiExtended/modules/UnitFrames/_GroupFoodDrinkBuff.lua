@@ -291,7 +291,7 @@ local function ShowBuffTooltip(control, frameData)
     local abilityId = frameData.foodDrinkBuff.currentAbilityId
     local effectOverride = Effects.EffectOverride and Effects.EffectOverride[abilityId]
 
-    local tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, frameData.foodDrinkBuff.currentBuffName or "")
+    local tooltipTitle = ZO_CachedStrFormat(SI_ABILITY_TOOLTIP_NAME, frameData.foodDrinkBuff.currentBuffName or "")
     local tooltipText
 
     if effectOverride and effectOverride.tooltip then

@@ -8,6 +8,36 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local duelInviteReceivedFormat = GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED)
+local duelInviteAcceptedText = GetString(LUIE_STRING_CA_DUEL_INVITE_ACCEPTED)
+local duelInviteSentFormat = GetString(LUIE_STRING_CA_DUEL_INVITE_SENT)
+local duelInvitePlayerText = GetString(LUIE_STRING_CA_DUEL_INVITE_PLAYER)
+local duelState1Text = GetString(LUIE_STRING_CA_DUEL_STATE1)
+local duelState2Text = GetString(LUIE_STRING_CA_DUEL_STATE2)
+local groupInviteMessageText = GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE)
+local friendsIncomingFriendRequestText = GetString(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST)
+local groupIncomingQuestShareP2pText = GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P)
+local tradeInviteMessageFormat = GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE)
+local mailSendmailresult2Text = GetString(LUIE_STRING_CA_MAIL_SENDMAILRESULT2)
+local mailSendmailresult3Text = GetString(LUIE_STRING_CA_MAIL_SENDMAILRESULT3)
+local duelInviteDeclinedText = GetString(LUIE_STRING_CA_DUEL_INVITE_DECLINED)
+local duelInviteCanceledText = GetString(LUIE_STRING_CA_DUEL_INVITE_CANCELED)
+local lockpickFailedText = GetString(LUIE_STRING_CA_LOCKPICK_FAILED)
+local noOutfitEquipEntryText = GetString(SI_NO_OUTFIT_EQUIP_ENTRY)
+local crownStoreSearchAdditionalOutfitsText = GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS)
+local slashcmdsOutfitConfirmationFormat = GetString(LUIE_STRING_SLASHCMDS_OUTFIT_CONFIRMATION)
+local armoryBuildDefaultNameFormatterFormat = GetString(SI_ARMORY_BUILD_DEFAULT_NAME_FORMATTER)
+local tradeInviteConfirmFormat = GetString(LUIE_STRING_CA_TRADE_INVITE_CONFIRM)
+local tradeInviteDeclinedText = GetString(LUIE_STRING_CA_TRADE_INVITE_DECLINED)
+local tradeInviteCanceledText = GetString(LUIE_STRING_CA_TRADE_INVITE_CANCELED)
+local tradeCanceledText = GetString(SI_TRADE_CANCELED)
+local tradeCompleteText = GetString(SI_TRADE_COMPLETE)
+local challengeDifficultyCooldownAlertText = GetString(SI_CHALLENGE_DIFFICULTY_COOLDOWN_ALERT)
+local challengeDifficultyCombatAlertText = GetString(SI_CHALLENGE_DIFFICULTY_COMBAT_ALERT)
+local duelNearBoundaryCsaText = GetString(LUIE_STRING_CA_DUEL_NEAR_BOUNDARY_CSA)
+local mailErrorNoCodValueText = GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -33,13 +63,13 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
             local finalName = ChatAnnouncements.ResolveNameLink(inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), finalName), true)
+            ChatOutput:Print(zo_strformat(duelInviteReceivedFormat, finalName), true)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
             local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
-            local formattedString = zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), finalAlertName)
+            local formattedString = zo_strformat(duelInviteReceivedFormat, finalAlertName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
         end
 
@@ -50,12 +80,12 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     local function DuelInviteAcceptedAlert()
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
-            ChatOutput:Print(GetString(LUIE_STRING_CA_DUEL_INVITE_ACCEPTED), true)
+            ChatOutput:Print(duelInviteAcceptedText, true)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_DUEL_INVITE_ACCEPTED))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, duelInviteAcceptedText)
         end
         PlaySound(SOUNDS.DUEL_ACCEPTED)
         return true
@@ -67,13 +97,13 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
             local finalName = ChatAnnouncements.ResolveNameLink(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_SENT), finalName), true)
+            ChatOutput:Print(zo_strformat(duelInviteSentFormat, finalName), true)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
             local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
-            local formattedString = zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_SENT), finalAlertName)
+            local formattedString = zo_strformat(duelInviteSentFormat, finalAlertName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
         end
         return true
@@ -82,24 +112,24 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     -- Register Strings here for Alert and CSA Handlers
 
     -- Player to Player replacement strings for Duels
-    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_DUEL, GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), 5)
-    SafeAddString(SI_DUEL_INVITE_MESSAGE, GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), 5)
-    SafeAddString(SI_PLAYER_TO_PLAYER_INVITE_DUEL, GetString(LUIE_STRING_CA_DUEL_INVITE_PLAYER), 5)
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_DUEL, duelInviteReceivedFormat, 5)
+    SafeAddString(SI_DUEL_INVITE_MESSAGE, duelInviteReceivedFormat, 5)
+    SafeAddString(SI_PLAYER_TO_PLAYER_INVITE_DUEL, duelInvitePlayerText, 5)
     -- These are likely a standard error response string for Duels
-    SafeAddString(SI_DUELSTATE1, GetString(LUIE_STRING_CA_DUEL_STATE1), 5)
-    SafeAddString(SI_DUELSTATE1, GetString(LUIE_STRING_CA_DUEL_STATE2), 5)
+    SafeAddString(SI_DUELSTATE1, duelState1Text, 5)
+    SafeAddString(SI_DUELSTATE1, duelState2Text, 5)
     -- Group Player to Player notification replacement
-    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_GROUP, GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE), 5)
-    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_FRIEND_REQUEST, GetString(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST), 5)
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_GROUP, groupInviteMessageText, 5)
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_FRIEND_REQUEST, friendsIncomingFriendRequestText, 5)
     -- Quest Share String Replacements
-    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P), 5)
-    SafeAddString(SI_QUEST_SHARE_MESSAGE, GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P), 5)
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, groupIncomingQuestShareP2pText, 5)
+    SafeAddString(SI_QUEST_SHARE_MESSAGE, groupIncomingQuestShareP2pText, 5)
     -- Trade String Replacements
-    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_TRADE, GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE), 1)
-    SafeAddString(SI_TRADE_INVITE_MESSAGE, GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE), 1)
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_TRADE, tradeInviteMessageFormat, 1)
+    SafeAddString(SI_TRADE_INVITE_MESSAGE, tradeInviteMessageFormat, 1)
     -- Mail String Replacements
-    SafeAddString(SI_SENDMAILRESULT2, GetString(LUIE_STRING_CA_MAIL_SENDMAILRESULT2), 5)
-    SafeAddString(SI_SENDMAILRESULT3, GetString(LUIE_STRING_CA_MAIL_SENDMAILRESULT3), 5)
+    SafeAddString(SI_SENDMAILRESULT2, mailSendmailresult2Text, 5)
+    SafeAddString(SI_SENDMAILRESULT3, mailSendmailresult3Text, 5)
 
     -- EVENT_DUEL_INVITE_FAILED (Alert Handler)
     -- P51: targetCrossplayDisplayName, targetPlatformDisplayName
@@ -111,7 +141,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
             if userFacingName then
                 ChatOutput:Print(zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason), finalName), true)
             else
-                ChatOutput:Print(zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason)), true)
+                ChatOutput:Print(ZO_CachedStrFormat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason)), true)
             end
         end
 
@@ -133,12 +163,12 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     local function DuelInviteDeclinedAlert()
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
-            ChatOutput:Print(GetString(LUIE_STRING_CA_DUEL_INVITE_DECLINED), true)
+            ChatOutput:Print(duelInviteDeclinedText, true)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(LUIE_STRING_CA_DUEL_INVITE_DECLINED))
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, duelInviteDeclinedText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
         return true
@@ -148,12 +178,12 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     local function DuelInviteCanceledAlert()
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
-            ChatOutput:Print(GetString(LUIE_STRING_CA_DUEL_INVITE_CANCELED), true)
+            ChatOutput:Print(duelInviteCanceledText, true)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(LUIE_STRING_CA_DUEL_INVITE_CANCELED))
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, duelInviteCanceledText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
         return true
@@ -163,13 +193,13 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     -- EVENT_LOCKPICK_FAILED (Alert Handler)
     local function LockpickFailedAlert(result)
         if ChatAnnouncements.SV.Notify.NotificationLockpickCA then
-            local message = GetString(LUIE_STRING_CA_LOCKPICK_FAILED)
+            local message = lockpickFailedText
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.NotificationLockpickAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_LOCKPICK_FAILED))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, lockpickFailedText)
         end
         S.g_lockpickBroken = true
         zo_callLater(function ()
@@ -210,7 +240,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         if not (ChatAnnouncements.Enabled and (notify.SocialErrorCA or notify.SocialErrorAlert)) then
             return false
         end
-        local message = zo_strformat(GetString("SI_SOCIALACTIONRESULT", error))
+        local message = ZO_CachedStrFormat(GetString("SI_SOCIALACTIONRESULT", error))
         if notify.SocialErrorAlert and ShouldShowSocialErrorInAlert(error) then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, message)
         end
@@ -267,14 +297,14 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
             local outfitIndex = GetEquippedOutfitIndex(actorCategory)
             local name
             if outfitIndex == nil then
-                name = GetString(SI_NO_OUTFIT_EQUIP_ENTRY)
+                name = noOutfitEquipEntryText
             else
                 name = GetOutfitName(actorCategory, outfitIndex)
                 if name == "" then
-                    name = zo_strformat("<<1>> <<2>>", GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS), outfitIndex)
+                    name = zo_strformat("<<1>> <<2>>", crownStoreSearchAdditionalOutfitsText, outfitIndex)
                 end
             end
-            message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_OUTFIT_CONFIRMATION), name)
+            message = zo_strformat(slashcmdsOutfitConfirmationFormat, name)
             alertCategory = UI_ALERT_CATEGORY_ALERT
             sound = SOUNDS.NONE
         else
@@ -295,7 +325,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
         end
         local buildName = GetArmoryBuildName(buildIndex)
         if buildName == "" then
-            buildName = zo_strformat(SI_ARMORY_BUILD_DEFAULT_NAME_FORMATTER, buildIndex)
+            buildName = zo_strformat(armoryBuildDefaultNameFormatterFormat, buildIndex)
         end
         return EscapeMarkup(buildName, ALLOW_MARKUP_TYPE_COLOR_ONLY)
     end
@@ -375,10 +405,10 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
             S.g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", finalName))
 
             if ChatAnnouncements.SV.Notify.NotificationTradeCA then
-                ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE), finalName), true)
+                ChatOutput:Print(zo_strformat(tradeInviteMessageFormat, finalName), true)
             end
             if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE), finalAlertName))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(tradeInviteMessageFormat, finalAlertName))
             end
         end
         return true
@@ -393,10 +423,10 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
             S.g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", finalName))
 
             if ChatAnnouncements.SV.Notify.NotificationTradeCA then
-                ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_TRADE_INVITE_CONFIRM), finalName), true)
+                ChatOutput:Print(zo_strformat(tradeInviteConfirmFormat, finalName), true)
             end
             if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_TRADE_INVITE_CONFIRM), finalAlertName))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(tradeInviteConfirmFormat, finalAlertName))
             end
         end
         return true
@@ -405,10 +435,10 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     -- EVENT_TRADE_INVITE_DECLINED (Alert Handler)
     local function TradeInviteDeclinedAlert()
         if ChatAnnouncements.SV.Notify.NotificationTradeCA then
-            ChatOutput:Print(GetString(LUIE_STRING_CA_TRADE_INVITE_DECLINED), true)
+            ChatOutput:Print(tradeInviteDeclinedText, true)
         end
         if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_TRADE_INVITE_DECLINED))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, tradeInviteDeclinedText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
         S.g_tradeTarget = ""
@@ -420,10 +450,10 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     -- EVENT_TRADE_INVITE_CANCELED (Alert Handler)
     local function TradeInviteCanceledAlert()
         if ChatAnnouncements.SV.Notify.NotificationTradeCA then
-            ChatOutput:Print(GetString(LUIE_STRING_CA_TRADE_INVITE_CANCELED), true)
+            ChatOutput:Print(tradeInviteCanceledText, true)
         end
         if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_TRADE_INVITE_CANCELED))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, tradeInviteCanceledText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
         S.g_tradeTarget = ""
@@ -435,10 +465,10 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     -- EVENT_TRADE_CANCELED (Alert Handler)
     local function TradeCanceledAlert()
         if ChatAnnouncements.SV.Notify.NotificationTradeCA then
-            ChatOutput:Print(GetString(SI_TRADE_CANCELED), true)
+            ChatOutput:Print(tradeCanceledText, true)
         end
         if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_TRADE_CANCELED))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, tradeCanceledText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
 
@@ -475,13 +505,13 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     -- EVENT_TRADE_SUCCEEDED (Alert Handler)
     local function TradeSucceededAlert()
         if ChatAnnouncements.SV.Notify.NotificationTradeCA then
-            local message = GetString(SI_TRADE_COMPLETE)
+            local message = tradeCompleteText
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_TRADE_COMPLETE))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, tradeCompleteText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
 
@@ -586,7 +616,7 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     end)
 
     ZO_PreHook("ZO_Alert", function (category, sound, message, ...)
-        if message ~= GetString(SI_CHALLENGE_DIFFICULTY_COOLDOWN_ALERT) and message ~= GetString(SI_CHALLENGE_DIFFICULTY_COMBAT_ALERT) then
+        if message ~= challengeDifficultyCooldownAlertText and message ~= challengeDifficultyCombatAlertText then
             return
         end
         if not (Notify.ChallengeDifficultyCA or Notify.ChallengeDifficultyAlert) then
@@ -628,17 +658,17 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     local function CheckBoundary()
         if IsNearDuelBoundary() then
             if ChatAnnouncements.SV.Social.DuelBoundaryCA then
-                ChatOutput:Print(GetString(LUIE_STRING_CA_DUEL_NEAR_BOUNDARY_CSA), true)
+                ChatOutput:Print(duelNearBoundaryCsaText, true)
             end
             if ChatAnnouncements.SV.Social.DuelBoundaryCSA then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.DUEL_BOUNDARY_WARNING)
-                messageParams:SetText(GetString(LUIE_STRING_CA_DUEL_NEAR_BOUNDARY_CSA))
+                messageParams:SetText(duelNearBoundaryCsaText)
                 messageParams:SetLifespanMS(DUEL_BOUNDARY_WARNING_LIFESPAN_MS)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_NEAR_BOUNDARY)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
             if ChatAnnouncements.SV.Social.DuelBoundaryAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, (GetString(LUIE_STRING_CA_DUEL_NEAR_BOUNDARY_CSA)))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, (duelNearBoundaryCsaText))
             end
             if not ChatAnnouncements.SV.Social.DuelBoundaryCSA then
                 PlaySound(SOUNDS.DUEL_BOUNDARY_WARNING)
@@ -794,10 +824,10 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
             -- Validate COD mode
             if not self.sendMoneyMode and GetQueuedCOD() == 0 then
                 if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
-                    ChatOutput:Print(GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE), true)
+                    ChatOutput:Print(mailErrorNoCodValueText, true)
                 end
                 if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE))
+                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, mailErrorNoCodValueText)
                 end
                 PlaySound(SOUNDS.NEGATIVE_CLICK)
                 return

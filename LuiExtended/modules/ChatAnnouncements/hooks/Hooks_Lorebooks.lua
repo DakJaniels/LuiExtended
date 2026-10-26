@@ -8,6 +8,15 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local loreLibraryAnnounceBookLearnedText = GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED)
+local lorebookBookText = GetString(LUIE_STRING_CA_LOREBOOK_BOOK)
+local lorebookAddedCaText = GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA)
+local windowTitleLoreLibraryText = GetString(SI_WINDOW_TITLE_LORE_LIBRARY)
+local lorebookAddedCsaFormat = GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CSA)
+local loreLibraryCollectionCompletedLargeText = GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE)
+local loreLibraryCollectionCompletedSmallFormat = GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -62,11 +71,11 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
                 if categoryIndex == 1 then
                     -- Is a lore book
                     stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix1")
-                    csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED)
+                    csaPrefix = stringPrefix ~= "" and stringPrefix or loreLibraryAnnounceBookLearnedText
                 else
                     -- Is a normal book
                     stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix2")
-                    csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(LUIE_STRING_CA_LOREBOOK_BOOK)
+                    csaPrefix = stringPrefix ~= "" and stringPrefix or lorebookBookText
                 end
 
                 -- Chat Announcement
@@ -80,7 +89,7 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
                         stringPart1 = ""
                     end
                     if ChatAnnouncements.SV.Lorebooks.LorebookCategory then
-                        stringPart2 = collectionName ~= "" and ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), collectionName)) or ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), GetString(SI_WINDOW_TITLE_LORE_LIBRARY)))
+                        stringPart2 = collectionName ~= "" and ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", lorebookAddedCaText, collectionName)) or ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", lorebookAddedCaText, windowTitleLoreLibraryText))
                     else
                         stringPart2 = ""
                     end
@@ -93,7 +102,7 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
 
                 -- Alert Announcement
                 if ChatAnnouncements.SV.Lorebooks.LorebookAlert then
-                    local text = collectionName ~= "" and zo_strformat("<<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), collectionName) or zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), GetString(SI_WINDOW_TITLE_LORE_LIBRARY))
+                    local text = collectionName ~= "" and zo_strformat("<<1>> <<2>>.", lorebookAddedCaText, collectionName) or zo_strformat(" <<1>> <<2>>.", lorebookAddedCaText, windowTitleLoreLibraryText)
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat("<<1>> <<2>>", title, text))
                 end
 
@@ -103,9 +112,9 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
                     if (categoryIndex == 1 and ChatAnnouncements.SV.Lorebooks.LorebookCSALoreOnly) or not ChatAnnouncements.SV.Lorebooks.LorebookCSALoreOnly then
                         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_ACQUIRED)
                         if collectionName ~= "" then
-                            messageParams:SetText(csaPrefix, zo_strformat(LUIE_STRING_CA_LOREBOOK_ADDED_CSA, title, collectionName))
+                            messageParams:SetText(csaPrefix, zo_strformat(lorebookAddedCsaFormat, title, collectionName))
                         else
-                            messageParams:SetText(csaPrefix, zo_strformat(LUIE_STRING_CA_LOREBOOK_ADDED_CSA, title, GetString(SI_WINDOW_TITLE_LORE_LIBRARY)))
+                            messageParams:SetText(csaPrefix, zo_strformat(lorebookAddedCsaFormat, title, windowTitleLoreLibraryText))
                         end
                         messageParams:SetIconData(icon, "EsoUI/Art/Achievements/achievements_iconBG.dds")
                         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_BOOK_LEARNED)
@@ -144,11 +153,11 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
             if categoryIndex == 1 then
                 -- Is a lore book
                 stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix1")
-                csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED)
+                csaPrefix = stringPrefix ~= "" and stringPrefix or loreLibraryAnnounceBookLearnedText
             else
                 -- Is a normal book
                 stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookPrefix2")
-                csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(LUIE_STRING_CA_LOREBOOK_BOOK)
+                csaPrefix = stringPrefix ~= "" and stringPrefix or lorebookBookText
             end
 
             -- Chat Announcement
@@ -162,7 +171,7 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
                     stringPart1 = ""
                 end
                 if ChatAnnouncements.SV.Lorebooks.LorebookCategory then
-                    stringPart2 = collectionName ~= "" and ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), collectionName)) or ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), GetString(SI_WINDOW_TITLE_LORE_LIBRARY)))
+                    stringPart2 = collectionName ~= "" and ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", lorebookAddedCaText, collectionName)) or ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", lorebookAddedCaText, windowTitleLoreLibraryText))
                 else
                     stringPart2 = ""
                 end
@@ -175,7 +184,7 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
 
             -- Alert Announcement
             if ChatAnnouncements.SV.Lorebooks.LorebookAlert then
-                local text = collectionName ~= "" and zo_strformat("<<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), collectionName) or zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), GetString(SI_WINDOW_TITLE_LORE_LIBRARY))
+                local text = collectionName ~= "" and zo_strformat("<<1>> <<2>>.", lorebookAddedCaText, collectionName) or zo_strformat(" <<1>> <<2>>.", lorebookAddedCaText, windowTitleLoreLibraryText)
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat("<<1>> <<2>>", title, text))
             end
 
@@ -193,9 +202,9 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
                         messageParams:SetBarParams(barParams)
                     end
                     if collectionName ~= "" then
-                        messageParams:SetText(csaPrefix, zo_strformat(LUIE_STRING_CA_LOREBOOK_ADDED_CSA, title, collectionName))
+                        messageParams:SetText(csaPrefix, zo_strformat(lorebookAddedCsaFormat, title, collectionName))
                     else
-                        messageParams:SetText(csaPrefix, zo_strformat(LUIE_STRING_CA_LOREBOOK_ADDED_CSA, title, GetString(SI_WINDOW_TITLE_LORE_LIBRARY)))
+                        messageParams:SetText(csaPrefix, zo_strformat(lorebookAddedCsaFormat, title, windowTitleLoreLibraryText))
                     end
                     messageParams:SetIconData(icon, "EsoUI/Art/Achievements/achievements_iconBG.dds")
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_BOOK_LEARNED_SKILL_EXPERIENCE)
@@ -215,7 +224,7 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
             -- Only fire this message if we're not part of the guild or at max level within the guild.
             local collectionName, description, numKnownBooks, totalBooks, hidden, textureName = GetLoreCollectionInfo(categoryIndex, collectionIndex)
             local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookCollectionPrefix")
-            local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE)
+            local csaPrefix = stringPrefix ~= "" and stringPrefix or loreLibraryCollectionCompletedLargeText
             if not hidden or ChatAnnouncements.SV.Lorebooks.LorebookShowHidden then
                 if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCA then
                     local formattedIcon
@@ -230,7 +239,7 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
                         formattedIcon = ChatAnnouncements.SV.Lorebooks.LorebookIcon and ("|t16:16:" .. textureName .. "|t ") or ""
                     end
                     if ChatAnnouncements.SV.Lorebooks.LorebookCategory then
-                        stringPart2 = ColorizeColors.LorebookColorize2:Colorize(zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
+                        stringPart2 = ColorizeColors.LorebookColorize2:Colorize(zo_strformat(loreLibraryCollectionCompletedSmallFormat, collectionName))
                     else
                         stringPart2 = ""
                     end
@@ -243,14 +252,14 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
 
                 if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCSA then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_COLLECTION_COMPLETED)
-                    messageParams:SetText(csaPrefix, zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
+                    messageParams:SetText(csaPrefix, zo_strformat(loreLibraryCollectionCompletedSmallFormat, collectionName))
                     messageParams:SetIconData(textureName, "EsoUI/Art/Achievements/achievements_iconBG.dds")
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_COLLECTION_COMPLETED)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
 
                 if ChatAnnouncements.SV.Lorebooks.LorebookCollectionAlert then
-                    local text = zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName)
+                    local text = zo_strformat(loreLibraryCollectionCompletedSmallFormat, collectionName)
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
                 end
                 if not ChatAnnouncements.SV.Lorebooks.LorebookCSA then
@@ -266,7 +275,7 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
         if guildReputationIndex > 0 then
             local collectionName, description, numKnownBooks, totalBooks, hidden, textureName = GetLoreCollectionInfo(categoryIndex, collectionIndex)
             local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Lorebooks", "LorebookCollectionPrefix")
-            local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE)
+            local csaPrefix = stringPrefix ~= "" and stringPrefix or loreLibraryCollectionCompletedLargeText
             if not hidden or ChatAnnouncements.SV.Lorebooks.LorebookShowHidden then
                 if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCA then
                     local formattedIcon
@@ -281,7 +290,7 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
                         formattedIcon = ChatAnnouncements.SV.Lorebooks.LorebookIcon and zo_strformat("<<1>> ", zo_iconFormat(textureName, 16, 16)) or ""
                     end
                     if ChatAnnouncements.SV.Lorebooks.LorebookCategory then
-                        stringPart2 = ColorizeColors.LorebookColorize2:Colorize(zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
+                        stringPart2 = ColorizeColors.LorebookColorize2:Colorize(zo_strformat(loreLibraryCollectionCompletedSmallFormat, collectionName))
                     else
                         stringPart2 = ""
                     end
@@ -302,14 +311,14 @@ function ChatAnnouncements.Hooks.RegisterLorebooks(ctx)
                         I.ValidateProgressBarParams(barParams)
                         messageParams:SetBarParams(barParams)
                     end
-                    messageParams:SetText(csaPrefix, zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
+                    messageParams:SetText(csaPrefix, zo_strformat(loreLibraryCollectionCompletedSmallFormat, collectionName))
                     messageParams:SetIconData(textureName, "EsoUI/Art/Achievements/achievements_iconBG.dds")
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
 
                 if ChatAnnouncements.SV.Lorebooks.LorebookCollectionAlert then
-                    local text = zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName)
+                    local text = zo_strformat(loreLibraryCollectionCompletedSmallFormat, collectionName)
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
                 end
                 if not ChatAnnouncements.SV.Lorebooks.LorebookCSA then

@@ -9,6 +9,16 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local itemFormatStrText1Text2ItemstyleFormat = GetString(SI_ITEM_FORMAT_STR_TEXT1_TEXT2_ITEMSTYLE)
+local itemFormatStrText1Text2Format = GetString(SI_ITEM_FORMAT_STR_TEXT1_TEXT2)
+local itemFormatStrText1Format = GetString(SI_ITEM_FORMAT_STR_TEXT1)
+local itemFormatStrUnknownRecipeText = GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE)
+local itemSubTypeBaitText = GetString(SI_ITEM_SUB_TYPE_BAIT)
+local itemSubTypeBookText = GetString(SI_ITEM_SUB_TYPE_BOOK)
+local itemFormatStrQuestStarterItemText = GetString(SI_ITEM_FORMAT_STR_QUEST_STARTER_ITEM)
+local itemFormatStrQuestItemText = GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM)
+local listCommaSeparatorText = GetString(SI_LIST_COMMA_SEPARATOR)
+
 local S = ChatAnnouncements.State
 
 local ColorizeColors = ChatAnnouncements.Colors
@@ -143,12 +153,12 @@ function ChatAnnouncements.FormatLootItemTypeSlotLine(text1, text2, text3)
 
     if text2 then
         if text3 then
-            return zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2_ITEMSTYLE, text1, text2, text3)
+            return zo_strformat(itemFormatStrText1Text2ItemstyleFormat, text1, text2, text3)
         else
-            return zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, text1, text2)
+            return zo_strformat(itemFormatStrText1Text2Format, text1, text2)
         end
     end
-    return zo_strformat(SI_ITEM_FORMAT_STR_TEXT1, text1)
+    return zo_strformat(itemFormatStrText1Format, text1)
 end
 
 --- Tooltip-style type line (see EsoUI PublicAllIngames/Tooltip/ItemTooltips.lua AddTopSection).
@@ -182,7 +192,7 @@ function ChatAnnouncements.GetLootItemTypeDisplayText(itemLink)
         if IsItemLinkRecipeKnown(itemLink) then
             text1 = specializedItemTypeText
         else
-            text1 = GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE)
+            text1 = itemFormatStrUnknownRecipeText
         end
         text2 = GetCraftingSkillName(GetItemLinkRecipeCraftingSkillType(itemLink))
     elseif itemType == ITEMTYPE_FURNISHING then
@@ -209,17 +219,17 @@ function ChatAnnouncements.GetLootItemTypeDisplayText(itemLink)
             text1 = specializedItemTypeText
         end
     elseif itemType == ITEMTYPE_LURE and IsItemLinkConsumable(itemLink) then
-        text1 = GetString(SI_ITEM_SUB_TYPE_BAIT)
+        text1 = itemSubTypeBaitText
     elseif GetItemLinkBookTitle(itemLink) then
         if specializedItemType ~= SPECIALIZED_ITEMTYPE_NONE then
             text1 = specializedItemTypeText
         else
-            text1 = GetString(SI_ITEM_SUB_TYPE_BOOK)
+            text1 = itemSubTypeBookText
         end
     elseif DoesItemLinkStartQuest(itemLink) then
-        text1 = GetString(SI_ITEM_FORMAT_STR_QUEST_STARTER_ITEM)
+        text1 = itemFormatStrQuestStarterItemText
     elseif DoesItemLinkFinishQuest(itemLink) then
-        text1 = GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM)
+        text1 = itemFormatStrQuestItemText
     else
         local craftingSkillType = GetItemLinkCraftingSkillType(itemLink)
         if craftingSkillType ~= CRAFTING_TYPE_INVALID then
@@ -246,8 +256,8 @@ function ChatAnnouncements.GetLootItemTypeDisplayText(itemLink)
         end
         if #treasureTagDescriptions > 0 then
             table.sort(treasureTagDescriptions)
-            local treasureTypeList = table.concat(treasureTagDescriptions, GetString(SI_LIST_COMMA_SEPARATOR))
-            displayText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, displayText, treasureTypeList)
+            local treasureTypeList = table.concat(treasureTagDescriptions, listCommaSeparatorText)
+            displayText = zo_strformat(itemFormatStrText1Text2Format, displayText, treasureTypeList)
         end
     end
 

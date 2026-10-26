@@ -8,6 +8,14 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local skillLineAddedFormat = GetString(LUIE_STRING_CA_SKILL_LINE_ADDED)
+local companionSkillLineAddedFormat = GetString(SI_COMPANION_SKILL_LINE_ADDED)
+local companionActiveSkillUnlockedCsaText = GetString(SI_COMPANION_ACTIVE_SKILL_UNLOCKED_CSA)
+local promotionalEventRewardsClaimedAnnouncementFormat = GetString(SI_PROMOTIONAL_EVENT_REWARDS_CLAIMED_ANNOUNCEMENT)
+local promotionalEventRewardClaimedAnnouncementText = GetString(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT)
+local titleUnlockedAnnounceTitleFormat = GetString(SI_TITLE_UNLOCKED_ANNOUNCE_TITLE)
+
+
 local Internal = ChatAnnouncements.Internal
 local ColorizeColors = ChatAnnouncements.Colors
 
@@ -50,7 +58,7 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
 
         if ChatAnnouncements.SV.Companion.SkillLineCA then
             local formattedIcon = zo_strformat("<<1>> ", zo_iconFormatInheritColor(icon, 16, 16))
-            local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(LUIE_STRING_CA_SKILL_LINE_ADDED, formattedIcon, lineName))
+            local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(skillLineAddedFormat, formattedIcon, lineName))
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL GAIN" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
@@ -63,11 +71,11 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
             else
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_PARTIAL_GAINED)
             end
-            messageParams:SetText(zo_strformat(SI_COMPANION_SKILL_LINE_ADDED, formattedIcon, lineName))
+            messageParams:SetText(zo_strformat(companionSkillLineAddedFormat, formattedIcon, lineName))
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
         if ChatAnnouncements.SV.Companion.SkillLineAlert then
-            local text = zo_strformat(SI_COMPANION_SKILL_LINE_ADDED, "", lineName)
+            local text = zo_strformat(companionSkillLineAddedFormat, "", lineName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
         end
         if not ChatAnnouncements.SV.Companion.SkillLineCSA then
@@ -84,7 +92,7 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
             return
         end
         local progressionData = companionSkillData:GetPointAllocatorProgressionData()
-        local primaryText = GetString(SI_COMPANION_ACTIVE_SKILL_UNLOCKED_CSA)
+        local primaryText = companionActiveSkillUnlockedCsaText
         local secondaryText = progressionData:GetFormattedName()
         local formattedMessage = zo_strformat("<<1>>: <<2>>", primaryText, secondaryText)
 
@@ -129,7 +137,7 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
             -- Display Announcements General chat cannot duplicate the typed Golden Pursuit lines.
             local general = ChatAnnouncements.SV.DisplayAnnouncements.General
             if #rewards > MAX_INDIVIDUAL_CSAS then
-                local primaryText = zo_strformat(SI_PROMOTIONAL_EVENT_REWARDS_CLAIMED_ANNOUNCEMENT, #rewards)
+                local primaryText = zo_strformat(promotionalEventRewardsClaimedAnnouncementFormat, #rewards)
                 if general.CSA then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
                     messageParams:SetText(primaryText)
@@ -150,7 +158,7 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
                 if wasFallbackClaimed then
                     claimedReward = claimedReward:GetFallbackRewardData()
                 end
-                local headerText = GetString(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT)
+                local headerText = promotionalEventRewardClaimedAnnouncementText
                 local secondaryText = claimedReward:GetQuantity() > 1 and claimedReward:GetFormattedNameWithStack() or claimedReward:GetFormattedName()
                 local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, secondaryText)
 
@@ -219,7 +227,7 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
                 return
             end
             for _, newUnlockedTitle in ipairs(newUnlockedTitles) do
-                local formattedMessage = zo_strformat(SI_TITLE_UNLOCKED_ANNOUNCE_TITLE, 1) .. ": " .. newUnlockedTitle.name
+                local formattedMessage = zo_strformat(titleUnlockedAnnounceTitleFormat, 1) .. ": " .. newUnlockedTitle.name
                 if ChatAnnouncements.SV.Achievement.AchievementCompleteCA then
                     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "ACHIEVEMENT" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -228,7 +236,7 @@ function ChatAnnouncements.Hooks.RegisterCsaCallbacks(ctx)
                 if ChatAnnouncements.SV.Achievement.AchievementCompleteCSA then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
-                    messageParams:SetText(zo_strformat(SI_TITLE_UNLOCKED_ANNOUNCE_TITLE, 1), newUnlockedTitle.name)
+                    messageParams:SetText(zo_strformat(titleUnlockedAnnounceTitleFormat, 1), newUnlockedTitle.name)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
                 if ChatAnnouncements.SV.Achievement.AchievementCompleteAlert then

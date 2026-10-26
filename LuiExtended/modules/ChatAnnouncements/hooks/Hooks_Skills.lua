@@ -8,6 +8,17 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local skyshardGainedText = GetString(SI_SKYSHARD_GAINED)
+local skyshardGainedPointsFormat = GetString(SI_SKYSHARD_GAINED_POINTS)
+local skillPointGainedFormat = GetString(SI_SKILL_POINT_GAINED)
+local skillPointAndSkyshardPiecesGainedFormat = GetString(SI_SKILL_POINT_AND_SKYSHARD_PIECES_GAINED)
+local skillLineAddedFormat = GetString(LUIE_STRING_CA_SKILL_LINE_ADDED)
+local skillLineAddedFormat2 = GetString(SI_SKILL_LINE_ADDED)
+local morphAvailableAnnouncementFormat = GetString(SI_MORPH_AVAILABLE_ANNOUNCEMENT)
+local abilityRankUpFormat = GetString(LUIE_STRING_CA_ABILITY_RANK_UP)
+local skillRankUpFormat = GetString(SI_SKILL_RANK_UP)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -32,7 +43,7 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
         local numSkillPointsGained = newPoints - oldPoints
         local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Skills", "SkillPointSkyshard")
-        local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_SKYSHARD_GAINED)
+        local csaPrefix = stringPrefix ~= "" and stringPrefix or skyshardGainedText
         local hasStringPrefix = stringPrefix ~= ""
         local flagDisplay, sound, finalMessage, finalText
 
@@ -50,7 +61,7 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
             -- if only the partial points changed, message out the new count of skyshard pieces
             if newPoints == oldPoints then
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_PARTIAL_GAINED)
-                local skyshardGainedPoints = zo_strformat(SI_SKYSHARD_GAINED_POINTS, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+                local skyshardGainedPoints = zo_strformat(skyshardGainedPointsFormat, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
                 messageParams:SetText(largeText, skyshardGainedPoints)
                 finalText = zo_strformat("<<1>> (<<2>>/<<3>>)", largeText, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
                 if hasStringPrefix then
@@ -72,9 +83,9 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
                 local messageText
                 -- if there are no leftover skyshard pieces, don't include them in the message
                 if newPartialPoints == 0 then
-                    messageText = zo_strformat(SI_SKILL_POINT_GAINED, numSkillPointsGained)
+                    messageText = zo_strformat(skillPointGainedFormat, numSkillPointsGained)
                 else
-                    messageText = zo_strformat(SI_SKILL_POINT_AND_SKYSHARD_PIECES_GAINED, numSkillPointsGained, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+                    messageText = zo_strformat(skillPointAndSkyshardPiecesGainedFormat, numSkillPointsGained, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
                 end
                 messageParams:SetText(largeText, messageText)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
@@ -92,7 +103,7 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
                 flagDisplay = true
                 sound = SOUNDS.SKILL_POINT_GAINED
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
-                local skillPointGained = zo_strformat(SI_SKILL_POINT_GAINED, numSkillPointsGained)
+                local skillPointGained = zo_strformat(skillPointGainedFormat, numSkillPointsGained)
                 messageParams:SetText(skillPointGained)
                 finalMessage = ColorizeColors.SkillPointColorize2:Colorize(skillPointGained .. ".")
                 finalText = skillPointGained .. "."
@@ -129,7 +140,7 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
 
             if ChatAnnouncements.SV.Skills.SkillLineUnlockCA then
                 local formattedIcon = ChatAnnouncements.SV.Skills.SkillLineIcon and zo_strformat("<<1>> ", zo_iconFormatInheritColor(icon, 16, 16)) or ""
-                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(LUIE_STRING_CA_SKILL_LINE_ADDED, formattedIcon, lineName))
+                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(skillLineAddedFormat, formattedIcon, lineName))
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL GAIN" }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                 eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
@@ -139,12 +150,12 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
                 local formattedIcon = zo_iconFormat(icon, 32, 32)
                 -- Note: We set the CSA type to SKILL_POINTS_PARTIAL_GAINED instead of SKILL_LINE_ADDED so this orders itself BEFORE some other events.
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_PARTIAL_GAINED)
-                messageParams:SetText(zo_strformat(SI_SKILL_LINE_ADDED, formattedIcon, lineName))
+                messageParams:SetText(zo_strformat(skillLineAddedFormat2, formattedIcon, lineName))
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
             if ChatAnnouncements.SV.Skills.SkillLineUnlockAlert then
                 local formattedIcon = ""
-                local text = zo_strformat(SI_SKILL_LINE_ADDED, formattedIcon, lineName)
+                local text = zo_strformat(skillLineAddedFormat2, formattedIcon, lineName)
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
             end
             if not ChatAnnouncements.SV.Skills.SkillLineUnlockCSA then
@@ -163,7 +174,7 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
 
         if atMorph then
             if ChatAnnouncements.SV.Skills.SkillAbilityCA then
-                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(SI_MORPH_AVAILABLE_ANNOUNCEMENT, name) .. ".")
+                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(morphAvailableAnnouncementFormat, name) .. ".")
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL MORPH" }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                 eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
@@ -172,12 +183,12 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
             if ChatAnnouncements.SV.Skills.SkillAbilityCSA then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ABILITY_MORPH_AVAILABLE)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ABILITY_PROGRESSION_RANK_MORPH)
-                messageParams:SetText(zo_strformat(SI_MORPH_AVAILABLE_ANNOUNCEMENT, name))
+                messageParams:SetText(zo_strformat(morphAvailableAnnouncementFormat, name))
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
 
             if ChatAnnouncements.SV.Skills.SkillAbilityAlert then
-                local text = zo_strformat(SI_MORPH_AVAILABLE_ANNOUNCEMENT, name) .. "."
+                local text = zo_strformat(morphAvailableAnnouncementFormat, name) .. "."
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
             end
 
@@ -186,7 +197,7 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
             end
         else
             if ChatAnnouncements.SV.Skills.SkillAbilityCA then
-                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(LUIE_STRING_CA_ABILITY_RANK_UP, name, rank) .. ".")
+                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(abilityRankUpFormat, name, rank) .. ".")
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL" }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                 eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
@@ -195,12 +206,12 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
             if ChatAnnouncements.SV.Skills.SkillAbilityCSA then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.ABILITY_RANK_UP)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ABILITY_PROGRESSION_RANK_UPDATE)
-                messageParams:SetText(zo_strformat(LUIE_STRING_CA_ABILITY_RANK_UP, name, rank))
+                messageParams:SetText(zo_strformat(abilityRankUpFormat, name, rank))
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
 
             if ChatAnnouncements.SV.Skills.SkillAbilityAlert then
-                local text = zo_strformat(LUIE_STRING_CA_ABILITY_RANK_UP, name, rank) .. "."
+                local text = zo_strformat(abilityRankUpFormat, name, rank) .. "."
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
             end
 
@@ -221,7 +232,7 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
                 local lineName = skillLineData:GetName()
 
                 if ChatAnnouncements.SV.Skills.SkillLineCA then
-                    local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(SI_SKILL_RANK_UP, lineName, rank) .. ".")
+                    local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(skillRankUpFormat, lineName, rank) .. ".")
                     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL LINE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                     eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
@@ -229,13 +240,13 @@ function ChatAnnouncements.Hooks.RegisterSkills(ctx)
 
                 if ChatAnnouncements.SV.Skills.SkillLineCSA then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SKILL_LINE_LEVELED_UP)
-                    messageParams:SetText(zo_strformat(SI_SKILL_RANK_UP, lineName, rank))
+                    messageParams:SetText(zo_strformat(skillRankUpFormat, lineName, rank))
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
 
                 if ChatAnnouncements.SV.Skills.SkillLineAlert then
-                    local formattedText = zo_strformat(SI_SKILL_RANK_UP, lineName, rank) .. "."
+                    local formattedText = zo_strformat(skillRankUpFormat, lineName, rank) .. "."
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedText)
                 end
 

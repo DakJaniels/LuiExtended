@@ -8,6 +8,11 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local collectionsUpdatedAnnouncementTitleText = GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE)
+local collectiblesUpdatedAnnouncementBodyFormat = GetString(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY)
+local collectionsUpdatedAnnouncementBodyFormat = GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -36,7 +41,7 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                     and #nowOwnedCollectibles > MAX_INDIVIDUAL_COLLECTIBLE_UPDATES
                 if condenseCollectibleUnlocks then
                     local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Collectibles", "CollectiblePrefix")
-                    local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE)
+                    local csaPrefix = stringPrefix ~= "" and stringPrefix or collectionsUpdatedAnnouncementTitleText
 
                     if ChatAnnouncements.SV.Collectibles.CollectibleCA then
                         local string1
@@ -45,7 +50,7 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                         else
                             string1 = ""
                         end
-                        local string2 = ColorizeColors.CollectibleColorize2:Colorize(zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, #nowOwnedCollectibles) .. ".")
+                        local string2 = ColorizeColors.CollectibleColorize2:Colorize(zo_strformat(collectiblesUpdatedAnnouncementBodyFormat, #nowOwnedCollectibles) .. ".")
                         local finalString = zo_strformat("<<1>><<2>>", string1, string2)
                         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "COLLECTIBLE" }
                         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -56,13 +61,13 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                     -- Note: This also means we don't need to Play Sound if the CSA isn't enabled since a blank one is always sent if the CSA is disabled.
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
                     if ChatAnnouncements.SV.Collectibles.CollectibleCSA then
-                        messageParams:SetText(csaPrefix, zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, #nowOwnedCollectibles))
+                        messageParams:SetText(csaPrefix, zo_strformat(collectiblesUpdatedAnnouncementBodyFormat, #nowOwnedCollectibles))
                         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
                         CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                     end
 
                     if ChatAnnouncements.SV.Collectibles.CollectibleAlert then
-                        local text = zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, #nowOwnedCollectibles) .. "."
+                        local text = zo_strformat(collectiblesUpdatedAnnouncementBodyFormat, #nowOwnedCollectibles) .. "."
                         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
                     end
                     return true
@@ -79,7 +84,7 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                         local collectibleId = collectibleData:GetId()
 
                         local stringPrefix = ChatAnnouncements.GetModuleMessageFormat("Collectibles", "CollectiblePrefix")
-                        local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE)
+                        local csaPrefix = stringPrefix ~= "" and stringPrefix or collectionsUpdatedAnnouncementTitleText
 
                         if ChatAnnouncements.SV.Collectibles.CollectibleCA then
                             local link = GetCollectibleLink(collectibleId, B.linkBrackets[ChatAnnouncements.SV.BracketOptionCollectible])
@@ -101,7 +106,7 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                                 else
                                     categoryString = categoryName
                                 end
-                                string2 = ColorizeColors.CollectibleColorize2:Colorize(zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, link, categoryString) .. ".")
+                                string2 = ColorizeColors.CollectibleColorize2:Colorize(zo_strformat(collectionsUpdatedAnnouncementBodyFormat, link, categoryString) .. ".")
                             else
                                 string2 = link
                             end
@@ -125,9 +130,9 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                                 else
                                     categoryString = categoryName
                                 end
-                                csaString = zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryString)
+                                csaString = zo_strformat(collectionsUpdatedAnnouncementBodyFormat, collectibleName, categoryString)
                             else
-                                csaString = zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName)
+                                csaString = zo_strformat(collectionsUpdatedAnnouncementBodyFormat, collectibleName, categoryName)
                             end
                             messageParams:SetText(csaPrefix, csaString)
                             messageParams:SetIconData(icon, "EsoUI/Art/Achievements/achievements_iconBG.dds")
@@ -146,9 +151,9 @@ function ChatAnnouncements.Hooks.RegisterCollectibles(ctx)
                                 else
                                     categoryString = categoryName
                                 end
-                                alertString = zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryString .. ".")
+                                alertString = zo_strformat(collectionsUpdatedAnnouncementBodyFormat, collectibleName, categoryString .. ".")
                             else
-                                alertString = zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName .. ".")
+                                alertString = zo_strformat(collectionsUpdatedAnnouncementBodyFormat, collectibleName, categoryName .. ".")
                             end
                             local text = alertString
                             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)

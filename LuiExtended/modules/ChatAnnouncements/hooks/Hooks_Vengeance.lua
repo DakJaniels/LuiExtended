@@ -8,6 +8,10 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local campaignVengeanceLoadoutEquipAnnouncementFormat = GetString(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ANNOUNCEMENT)
+local campaignVengeanceLoadoutAnnouncementDecriptionText = GetString(SI_CAMPAIGN_VENGEANCE_LOADOUT_ANNOUNCEMENT_DECRIPTION)
+
+
 local Internal = ChatAnnouncements.Internal
 
 --- @param ctx CAHookContext
@@ -32,8 +36,8 @@ function ChatAnnouncements.Hooks.RegisterVengeance(ctx)
         if not equippedLoadoutData then
             return true
         end
-        local primaryText = zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ANNOUNCEMENT, equippedLoadoutData:GetName())
-        local secondaryText = GetString(SI_CAMPAIGN_VENGEANCE_LOADOUT_ANNOUNCEMENT_DECRIPTION)
+        local primaryText = zo_strformat(campaignVengeanceLoadoutEquipAnnouncementFormat, equippedLoadoutData:GetName())
+        local secondaryText = campaignVengeanceLoadoutAnnouncementDecriptionText
         local formattedMessage = zo_strformat("<<1>>: <<2>>", primaryText, secondaryText)
 
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then

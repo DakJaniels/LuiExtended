@@ -523,7 +523,7 @@ function FrameObject:UpdateStaticControlClassName()
         return
     end
     local classId = GetUnitClassId(self.unitTag)
-    local className = zo_strformat(GetString(SI_CLASS_NAME), GetClassName(GENDER_MALE, classId))
+    local className = ZO_CachedStrFormat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))
     local showClass = self.isPlayer and className ~= nil and UnitFrames.SV.TargetEnableClass
     if showClass then
         local classNameText = StringOnlyGSUB(className, "%^%a+", "")
@@ -654,7 +654,7 @@ function FrameObject:UpdateStaticControlLevelRow()
             local veterancyRank = GetUnitVeterancyRank(self.unitTag)
             if GetVeterancyRankTitle and SI_VETERANCY_RANK_AND_TITLE_FORMATTER then
                 local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
-                levelText = zo_strformat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, veterancyRank, GetVeterancyRankTitle(veterancyRank, seasonId))
+                levelText = ZO_CachedStrFormat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, veterancyRank, GetVeterancyRankTitle(veterancyRank, seasonId))
             else
                 levelText = tostring(veterancyRank)
             end
@@ -720,7 +720,7 @@ function FrameObject:UpdateStaticControlTitleAndAva()
             -- NPC captions follow Display Title only; AVA Rank Name is player-only.
             if UnitFrames.SV.TargetEnableTitle then
                 local unitCaption = GetUnitCaption(self.unitTag)
-                title = unitCaption and zo_strformat(SI_TOOLTIP_UNIT_CAPTION, unitCaption) or ""
+                title = unitCaption and ZO_CachedStrFormat(SI_TOOLTIP_UNIT_CAPTION, unitCaption) or ""
             else
                 title = ""
             end

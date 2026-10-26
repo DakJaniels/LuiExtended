@@ -6,6 +6,9 @@
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local displayArachnidInvasionRepelledText = GetString(LUIE_STRING_CA_DISPLAY_ARACHNID_INVASION_REPELLED)
+local displayScavengingMawPrefixText = GetString(LUIE_STRING_CA_DISPLAY_SCAVENGING_MAW_PREFIX)
+
 local function BuildPrimaryTextLookup(stringIds)
     local lookup = {}
     for i = 1, #stringIds do
@@ -122,8 +125,8 @@ local zoneHuntLookup = BuildPrimaryTextLookup(ZONE_HUNT_STRING_IDS)
 local essenceLookup = BuildPrimaryTextLookup(ESSENCE_STRING_IDS)
 local miscLookup = BuildPrimaryTextLookup(MISC_STRING_IDS)
 
-local arachnidRepelledSecondary = GetString(LUIE_STRING_CA_DISPLAY_ARACHNID_INVASION_REPELLED)
-local scavengingMawPrefix = GetString(LUIE_STRING_CA_DISPLAY_SCAVENGING_MAW_PREFIX)
+local arachnidRepelledSecondary = displayArachnidInvasionRepelledText
+local scavengingMawPrefix = displayScavengingMawPrefixText
 
 --- @param primaryText string|nil
 --- @param secondaryText string|nil

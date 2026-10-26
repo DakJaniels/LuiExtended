@@ -8,6 +8,9 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local journalProgressCategoryGeneralText = GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -54,7 +57,7 @@ function ChatAnnouncements.Hooks.RegisterAchievement(ctx)
         if ChatAnnouncements.SV.Achievement.AchievementCompleteCA then
             local link = zo_strformat(GetAchievementLink(id, B.linkBrackets[ChatAnnouncements.SV.BracketOptionAchievement]))
             local catName = GetAchievementCategoryInfo(topLevelIndex)
-            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL)
+            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or journalProgressCategoryGeneralText
             local _, _, _, icon = GetAchievementInfo(id)
             icon = ChatAnnouncements.SV.Achievement.AchievementIcon and ("|t16:16:" .. icon .. "|t ") or ""
 

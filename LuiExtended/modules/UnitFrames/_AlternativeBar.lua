@@ -22,6 +22,16 @@ local TOOLTIP_POWER_NAMESPACE_WEREWOLF = moduleName .. "TooltipPowerWerewolf"
 local TOOLTIP_POWER_NAMESPACE_MOUNT = moduleName .. "TooltipPowerMount"
 local TOOLTIP_POWER_NAMESPACE_SIEGE = moduleName .. "TooltipPowerSiege"
 
+local experienceChampionLabel = GetString(SI_EXPERIENCE_CHAMPION_LABEL)
+local experienceLevelLabel = GetString(SI_EXPERIENCE_LEVEL_LABEL)
+local experienceLevelDisplayFormat = GetString(SI_LEVEL_DISPLAY)
+local experienceLimitReachedText = GetString(SI_EXPERIENCE_LIMIT_REACHED)
+local experienceCurrentMaxPercentFormat = GetString(SI_EXPERIENCE_CURRENT_MAX_PERCENT)
+local experienceEnlightenedTooltipFormat = GetString(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP)
+local werewolfPowerFormat = GetString(LUIE_STRING_UF_WEREWOLF_POWER)
+local mountPowerFormat = GetString(LUIE_STRING_UF_MOUNT_POWER)
+local siegePowerFormat = GetString(LUIE_STRING_UF_SIEGE_POWER)
+
 --- SetTooltipText equivalent with a platform-usable font (SetTooltipText always passes "").
 --- @param text string
 local function AddTooltipTitleText(text)
@@ -43,12 +53,12 @@ function UnitFrames.AltBar_OnMouseEnterXP(control)
             levelSize = current
             isMax = true
         end
-        label = GetString(SI_EXPERIENCE_CHAMPION_LABEL)
+        label = experienceChampionLabel
     else
         level = GetUnitLevel("player")
         current = GetUnitXP("player")
         levelSize = GetUnitXPMax("player")
-        label = GetString(SI_EXPERIENCE_LEVEL_LABEL)
+        label = experienceLevelLabel
     end
     local percentageXP = zo_floor(current / levelSize * 100)
     local enlightenedPool = GetEnlightenedPool()
@@ -57,13 +67,13 @@ function UnitFrames.AltBar_OnMouseEnterXP(control)
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
 
     local bodyFont = LUIE.Font.GetTooltipBodyFont()
-    AddTooltipTitleText(zo_strformat(SI_LEVEL_DISPLAY, label, level))
+    AddTooltipTitleText(zo_strformat(experienceLevelDisplayFormat, label, level))
     if isMax then
-        InformationTooltip:AddLine(GetString(SI_EXPERIENCE_LIMIT_REACHED), bodyFont)
+        InformationTooltip:AddLine(experienceLimitReachedText, bodyFont)
     else
-        InformationTooltip:AddLine(zo_strformat(SI_EXPERIENCE_CURRENT_MAX_PERCENT, ZO_CommaDelimitNumber(current), ZO_CommaDelimitNumber(levelSize), percentageXP), bodyFont)
+        InformationTooltip:AddLine(zo_strformat(experienceCurrentMaxPercentFormat, ZO_CommaDelimitNumber(current), ZO_CommaDelimitNumber(levelSize), percentageXP), bodyFont)
         if enlightenedPool > 0 then
-            InformationTooltip:AddLine(zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP, enlightenedValue), bodyFont, ZO_SUCCEEDED_TEXT:UnpackRGB())
+            InformationTooltip:AddLine(zo_strformat(experienceEnlightenedTooltipFormat, enlightenedValue), bodyFont, ZO_SUCCEEDED_TEXT:UnpackRGB())
         end
     end
 end
@@ -74,8 +84,8 @@ function UnitFrames.AltBar_OnMouseEnterWerewolf(control)
         local percentagePower = zo_floor(currentPower / maxPower * 100)
 
         InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
-        AddTooltipTitleText(zo_strformat(SI_MONSTERSOCIALCLASS45))
-        InformationTooltip:AddLine(zo_strformat(LUIE_STRING_UF_WEREWOLF_POWER, currentPower, maxPower, percentagePower), LUIE.Font.GetTooltipBodyFont())
+        AddTooltipTitleText(ZO_CachedStrFormat(SI_MONSTERSOCIALCLASS45))
+        InformationTooltip:AddLine(zo_strformat(werewolfPowerFormat, currentPower, maxPower, percentagePower), LUIE.Font.GetTooltipBodyFont())
     end
     UpdateWerewolfPower()
 
@@ -89,8 +99,8 @@ function UnitFrames.AltBar_OnMouseEnterMounted(control)
         local percentagePower = zo_floor(currentPower / maxPower * 100)
         InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
 
-        AddTooltipTitleText(zo_strformat(LUIE_STRING_SKILL_MOUNTED))
-        InformationTooltip:AddLine(zo_strformat(LUIE_STRING_UF_MOUNT_POWER, currentPower, maxPower, percentagePower), LUIE.Font.GetTooltipBodyFont())
+        AddTooltipTitleText(ZO_CachedStrFormat(LUIE_STRING_SKILL_MOUNTED))
+        InformationTooltip:AddLine(zo_strformat(mountPowerFormat, currentPower, maxPower, percentagePower), LUIE.Font.GetTooltipBodyFont())
     end
     UpdateMountPower()
 
@@ -106,7 +116,7 @@ function UnitFrames.AltBar_OnMouseEnterSiege(control)
         InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
 
         AddTooltipTitleText(zo_strformat("<<C:1>>", siegeName))
-        InformationTooltip:AddLine(zo_strformat(LUIE_STRING_UF_SIEGE_POWER, ZO_CommaDelimitNumber(currentPower), ZO_CommaDelimitNumber(maxPower), percentagePower), LUIE.Font.GetTooltipBodyFont())
+        InformationTooltip:AddLine(zo_strformat(siegePowerFormat, ZO_CommaDelimitNumber(currentPower), ZO_CommaDelimitNumber(maxPower), percentagePower), LUIE.Font.GetTooltipBodyFont())
     end
     UpdateSiegePower()
 

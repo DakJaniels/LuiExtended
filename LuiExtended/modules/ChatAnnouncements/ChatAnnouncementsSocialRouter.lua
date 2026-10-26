@@ -79,7 +79,7 @@ function ChatAnnouncements.OnErrorSocialChat(_, error)
         return
     end
     if not IsSocialErrorIgnoreResponse(error) then
-        ChatOutput:Print(zo_strformat(GetString("SI_SOCIALACTIONRESULT", error)))
+        ChatOutput:Print(ZO_CachedStrFormat(GetString("SI_SOCIALACTIONRESULT", error)))
     end
 end
 

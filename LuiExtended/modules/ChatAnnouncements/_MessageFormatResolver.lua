@@ -14,6 +14,7 @@ local LUIE = LUIE
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 local LOOT_TOTAL_STRING_ID = LUIE_STRING_CA_LOOT_MESSAGE_TOTAL
+local lootMessageTotalText = GetString(LOOT_TOTAL_STRING_ID)
 
 --- @type table<string, integer|string>
 ChatAnnouncements.CurrencyMessageFormatStringIds =
@@ -401,7 +402,7 @@ end
 function ChatAnnouncements.GetLootTotalString()
     local sv = ChatAnnouncements.SV
     if not sv or not sv.Inventory then
-        return GetString(LOOT_TOTAL_STRING_ID)
+        return lootMessageTotalText
     end
     return resolveStoredFormat(sv.Inventory.LootTotalString, LOOT_TOTAL_STRING_ID)
 end
