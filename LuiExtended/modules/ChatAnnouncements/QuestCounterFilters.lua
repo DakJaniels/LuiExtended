@@ -9,6 +9,38 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local lamCaQuestCounterFilterConditionAllText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CONDITION_ALL)
+local lamCaQuestCounterFilterModeMilestonesText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_MILESTONES)
+local lamCaQuestCounterFilterModeSuppressText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_SUPPRESS)
+local lamCaQuestCounterFilterModeCompleteText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_COMPLETE)
+local lamCaQuestCounterFilterAddedFormat = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADDED)
+local lamCaQuestCounterFilterManageText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MANAGE)
+local lamCaQuestCounterFilterRemovedText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMOVED)
+local lamCaQuestCounterFilterRemlistHeaderText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMLIST_HEADER)
+local lamCaQuestCounterFilterListEmptyText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_LIST_EMPTY)
+local lamCaQuestCounterFilterClearText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR)
+local lamCaQuestCounterFilterClearDialogText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR_DIALOG)
+local lamCaQuestCounterFilterClearedText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEARED)
+local lamCaQuestCounterFilterDescriptionText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_DESCRIPTION)
+local lamCaQuestCounterFilterEnableText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ENABLE)
+local lamCaQuestCounterFilterEnableTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ENABLE_TP)
+local lamCaQuestCounterFilterQuestIdText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_QUEST_ID)
+local lamCaQuestCounterFilterQuestIdTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_QUEST_ID_TP)
+local lamCaQuestCounterFilterConditionText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CONDITION)
+local lamCaQuestCounterFilterConditionTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CONDITION_TP)
+local lamCaQuestCounterFilterModeText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE)
+local lamCaQuestCounterFilterModeTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_TP)
+local lamCaQuestCounterFilterMilestonesText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MILESTONES)
+local lamCaQuestCounterFilterMilestonesTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MILESTONES_TP)
+local lamCaQuestCounterFilterAddText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD)
+local lamCaQuestCounterFilterAddTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_TP)
+local lamCaQuestCounterFilterAddFailedText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_FAILED)
+local lamCaQuestCounterFilterManageTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MANAGE_TP)
+local lamCaQuestCounterFilterClearTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR_TP)
+local lamCaQuestCounterFilterRemlistText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMLIST)
+local lamCaQuestCounterFilterRemlistTpText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMLIST_TP)
+
+
 local ChatOutput = LUIE.ChatOutput
 
 local table_insert = table.insert
@@ -102,13 +134,13 @@ function ChatAnnouncements.FormatQuestCounterFilterRuleLabel(rule)
     end
     local conditionPart = rule.conditionText
     if conditionPart == nil or conditionPart == "" or conditionPart == "*" then
-        conditionPart = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CONDITION_ALL)
+        conditionPart = lamCaQuestCounterFilterConditionAllText
     end
-    local modeLabel = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_MILESTONES)
+    local modeLabel = lamCaQuestCounterFilterModeMilestonesText
     if rule.mode == ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_SUPPRESS_ALL then
-        modeLabel = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_SUPPRESS)
+        modeLabel = lamCaQuestCounterFilterModeSuppressText
     elseif rule.mode == ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_COMPLETE_ONLY then
-        modeLabel = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_COMPLETE)
+        modeLabel = lamCaQuestCounterFilterModeCompleteText
     end
     return zo_strformat("<<1>> - <<2>> - <<3>>", questPart, conditionPart, modeLabel)
 end
@@ -439,7 +471,7 @@ function ChatAnnouncements.TryAddQuestCounterFilterFromStaging()
         return false
     end
     local label = ChatAnnouncements.FormatQuestCounterFilterRuleLabel(rule)
-    ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADDED), label), true)
+    ChatOutput:Print(zo_strformat(lamCaQuestCounterFilterAddedFormat, label), true)
     staging.questIdentifier = ""
     staging.conditionText = ""
     staging.milestonesText = ""
@@ -453,13 +485,13 @@ local QUEST_COUNTER_FILTER_CLEAR_DIALOG = "LUIE_CLEAR_CA_QUEST_COUNTER_FILTERS"
 function ChatAnnouncements.RegisterQuestCounterFilterDialogs()
     LUIE.RegisterBlacklistDialog(
         QUEST_COUNTER_FILTER_DIALOG,
-        GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MANAGE),
+        lamCaQuestCounterFilterManageText,
         function ()
             return ChatAnnouncements.GenerateQuestCounterFilterListItems()
         end,
         function (itemData)
             ChatAnnouncements.RemoveQuestCounterFilter(itemData)
-            ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMOVED), true)
+            ChatOutput:Print(lamCaQuestCounterFilterRemovedText, true)
             LUIE.RefreshBlacklistDialog(QUEST_COUNTER_FILTER_DIALOG)
         end,
         nil,
@@ -467,8 +499,8 @@ function ChatAnnouncements.RegisterQuestCounterFilterDialogs()
             ChatAnnouncements.ClearQuestCounterFilters()
             LUIE.RefreshBlacklistDialog(QUEST_COUNTER_FILTER_DIALOG)
         end,
-        GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMLIST_HEADER),
-        GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_LIST_EMPTY)
+        lamCaQuestCounterFilterRemlistHeaderText,
+        lamCaQuestCounterFilterListEmptyText
     )
 end
 
@@ -479,11 +511,11 @@ end
 function ChatAnnouncements.RegisterQuestCounterFilterClearDialog()
     LUIE.RegisterDialogueButton(
         QUEST_COUNTER_FILTER_CLEAR_DIALOG,
-        GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR),
-        GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR_DIALOG),
+        lamCaQuestCounterFilterClearText,
+        lamCaQuestCounterFilterClearDialogText,
         function ()
             ChatAnnouncements.ClearQuestCounterFilters()
-            ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEARED), true)
+            ChatOutput:Print(lamCaQuestCounterFilterClearedText, true)
         end
     )
 end
@@ -511,9 +543,9 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
     end
     local modeItems =
     {
-        { name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_MILESTONES), data = ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_MILESTONES    },
-        { name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_SUPPRESS),   data = ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_SUPPRESS_ALL  },
-        { name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_COMPLETE),   data = ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_COMPLETE_ONLY },
+        { name = lamCaQuestCounterFilterModeMilestonesText, data = ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_MILESTONES    },
+        { name = lamCaQuestCounterFilterModeSuppressText,   data = ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_SUPPRESS_ALL  },
+        { name = lamCaQuestCounterFilterModeCompleteText,   data = ChatAnnouncements.QUEST_COUNTER_FILTER_MODE_COMPLETE_ONLY },
     }
     local staging = ChatAnnouncements.QuestCounterFilterStaging
 
@@ -525,13 +557,13 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_DESCRIPTION),
+            label = lamCaQuestCounterFilterDescriptionText,
         }
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ENABLE),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ENABLE_TP),
+            label = lamCaQuestCounterFilterEnableText,
+            tooltip = lamCaQuestCounterFilterEnableTpText,
             getFunction = function ()
                 return Settings.Quests.QuestCounterFilterEnable
             end,
@@ -544,8 +576,8 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_QUEST_ID),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_QUEST_ID_TP),
+            label = lamCaQuestCounterFilterQuestIdText,
+            tooltip = lamCaQuestCounterFilterQuestIdTpText,
             getFunction = function ()
                 return staging.questIdentifier or ""
             end,
@@ -557,8 +589,8 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CONDITION),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CONDITION_TP),
+            label = lamCaQuestCounterFilterConditionText,
+            tooltip = lamCaQuestCounterFilterConditionTpText,
             getFunction = function ()
                 return staging.conditionText or ""
             end,
@@ -570,8 +602,8 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_TP),
+            label = lamCaQuestCounterFilterModeText,
+            tooltip = lamCaQuestCounterFilterModeTpText,
             items = modeItems,
             getFunction = function ()
                 return settingsApi:LHASDropdownGetData(staging.mode)
@@ -585,8 +617,8 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MILESTONES),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MILESTONES_TP),
+            label = lamCaQuestCounterFilterMilestonesText,
+            tooltip = lamCaQuestCounterFilterMilestonesTpText,
             getFunction = function ()
                 return staging.milestonesText or ""
             end,
@@ -598,16 +630,16 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_BUTTON,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_TP),
-            buttonText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD),
+            label = lamCaQuestCounterFilterAddText,
+            tooltip = lamCaQuestCounterFilterAddTpText,
+            buttonText = lamCaQuestCounterFilterAddText,
             clickHandler = function ()
                 if ChatAnnouncements.TryAddQuestCounterFilterFromStaging() then
                     if panel and settingsApi then
                         settingsApi:RefreshPanel(panel)
                     end
                 else
-                    ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_FAILED), true)
+                    ChatOutput:Print(lamCaQuestCounterFilterAddFailedText, true)
                 end
             end,
             disable = filterDisabled,
@@ -615,9 +647,9 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_BUTTON,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR_DIALOG),
-            buttonText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR),
+            label = lamCaQuestCounterFilterClearText,
+            tooltip = lamCaQuestCounterFilterClearDialogText,
+            buttonText = lamCaQuestCounterFilterClearText,
             clickHandler = function ()
                 ChatAnnouncements.ShowQuestCounterFilterClearDialog()
             end,
@@ -626,9 +658,9 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_BUTTON,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MANAGE),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MANAGE_TP),
-            buttonText = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MANAGE),
+            label = lamCaQuestCounterFilterManageText,
+            tooltip = lamCaQuestCounterFilterManageTpText,
+            buttonText = lamCaQuestCounterFilterManageText,
             clickHandler = function ()
                 ChatAnnouncements.ShowQuestCounterFilterManageDialog()
             end,
@@ -646,9 +678,9 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
     local staging = ChatAnnouncements.QuestCounterFilterStaging
     local modeChoices =
     {
-        GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_MILESTONES),
-        GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_SUPPRESS),
-        GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_COMPLETE),
+        lamCaQuestCounterFilterModeMilestonesText,
+        lamCaQuestCounterFilterModeSuppressText,
+        lamCaQuestCounterFilterModeCompleteText,
     }
     local modeValues =
     {
@@ -670,13 +702,13 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
     {
         {
             type = "description",
-            text = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_DESCRIPTION),
+            text = lamCaQuestCounterFilterDescriptionText,
             width = "full",
         },
         {
             type = "checkbox",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ENABLE),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ENABLE_TP),
+            name = lamCaQuestCounterFilterEnableText,
+            tooltip = lamCaQuestCounterFilterEnableTpText,
             getFunc = function ()
                 return Settings.Quests.QuestCounterFilterEnable
             end,
@@ -689,8 +721,8 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
         },
         {
             type = "editbox",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_QUEST_ID),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_QUEST_ID_TP),
+            name = lamCaQuestCounterFilterQuestIdText,
+            tooltip = lamCaQuestCounterFilterQuestIdTpText,
             getFunc = function ()
                 return staging.questIdentifier or ""
             end,
@@ -703,8 +735,8 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
         },
         {
             type = "editbox",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CONDITION),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CONDITION_TP),
+            name = lamCaQuestCounterFilterConditionText,
+            tooltip = lamCaQuestCounterFilterConditionTpText,
             getFunc = function ()
                 return staging.conditionText or ""
             end,
@@ -717,8 +749,8 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
         },
         {
             type = "dropdown",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MODE_TP),
+            name = lamCaQuestCounterFilterModeText,
+            tooltip = lamCaQuestCounterFilterModeTpText,
             choices = modeChoices,
             choicesValues = modeValues,
             getFunc = function ()
@@ -733,8 +765,8 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
         },
         {
             type = "editbox",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MILESTONES),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_MILESTONES_TP),
+            name = lamCaQuestCounterFilterMilestonesText,
+            tooltip = lamCaQuestCounterFilterMilestonesTpText,
             getFunc = function ()
                 return staging.milestonesText or ""
             end,
@@ -747,13 +779,13 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
         },
         {
             type = "button",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_TP),
+            name = lamCaQuestCounterFilterAddText,
+            tooltip = lamCaQuestCounterFilterAddTpText,
             func = function ()
                 if ChatAnnouncements.TryAddQuestCounterFilterFromStaging() then
                     RefreshQuestCounterFilterListControl()
                 else
-                    ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_ADD_FAILED), true)
+                    ChatOutput:Print(lamCaQuestCounterFilterAddFailedText, true)
                 end
             end,
             width = "half",
@@ -761,8 +793,8 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
         },
         {
             type = "button",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR_TP),
+            name = lamCaQuestCounterFilterClearText,
+            tooltip = lamCaQuestCounterFilterClearTpText,
             func = function ()
                 ZO_Dialogs_ShowDialog("LUIE_CLEAR_CA_QUEST_COUNTER_FILTERS")
             end,
@@ -771,8 +803,8 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
         },
         {
             type = "dropdown",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMLIST),
-            tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMLIST_TP),
+            name = lamCaQuestCounterFilterRemlistText,
+            tooltip = lamCaQuestCounterFilterRemlistTpText,
             choices = listChoices,
             choicesValues = listValues,
             scrollable = 7,
@@ -782,7 +814,7 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
             end,
             setFunc = function (value)
                 ChatAnnouncements.RemoveQuestCounterFilter(value)
-                ChatOutput:Print(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_REMOVED), true)
+                ChatOutput:Print(lamCaQuestCounterFilterRemovedText, true)
                 RefreshQuestCounterFilterListControl()
             end,
             width = "full",

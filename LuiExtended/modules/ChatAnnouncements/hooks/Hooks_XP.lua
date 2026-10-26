@@ -8,6 +8,23 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local questDiscoverFormat = GetString(LUIE_STRING_CA_QUEST_DISCOVER)
+local notifytextObjectiveDiscoveredFormat = GetString(SI_NOTIFYTEXT_OBJECTIVE_DISCOVERED)
+local gamepadQuestJournalQuestLevelText = GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL)
+local lvlAnnounceXpText = GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP)
+local levelUpNotificationText = GetString(SI_LEVEL_UP_NOTIFICATION)
+local enlightenedStateGainedHeaderText = GetString(SI_ENLIGHTENED_STATE_GAINED_HEADER)
+local enlightenedStateGainedDescriptionText = GetString(SI_ENLIGHTENED_STATE_GAINED_DESCRIPTION)
+local enlightenedStateLostHeaderText = GetString(SI_ENLIGHTENED_STATE_LOST_HEADER)
+local championAnnouncementUnlockedFormat = GetString(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED)
+local championPointEarnedFormat = GetString(SI_CHAMPION_POINT_EARNED)
+local championPointTypeFormat = GetString(LUIE_STRING_CHAMPION_POINT_TYPE)
+local championPointTypeFormat2 = GetString(SI_CHAMPION_POINT_TYPE)
+local veterancyRankUpAnnouncementHeaderText = GetString(SI_VETERANCY_RANK_UP_ANNOUNCEMENT_HEADER)
+local veterancyMaxRankClaimedCountFormatterFormat = GetString(SI_VETERANCY_MAX_RANK_CLAIMED_COUNT_FORMATTER)
+local veterancyMaxRankClaimedAnnouncementHeaderText = GetString(SI_VETERANCY_MAX_RANK_CLAIMED_ANNOUNCEMENT_HEADER)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -43,7 +60,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
         if ChatAnnouncements.SV.Quests.QuestLocDiscoveryCA then
             local nameFormatted = (zo_strformat("|c<<1>><<2>>|r", ColorizeColors.QuestColorLocNameColorize, subzoneName))
-            local formattedString = zo_strformat(LUIE_STRING_CA_QUEST_DISCOVER, nameFormatted)
+            local formattedString = zo_strformat(questDiscoverFormat, nameFormatted)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "QUEST" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
@@ -56,13 +73,13 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
                     messageParams:SetBarParams(I.GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_DISCOVERY_EXPERIENCE))
                 end
             end
-            messageParams:SetText(zo_strformat(LUIE_STRING_CA_QUEST_DISCOVER, subzoneName))
+            messageParams:SetText(zo_strformat(questDiscoverFormat, subzoneName))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISCOVERY_EXPERIENCE)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
 
         if ChatAnnouncements.SV.Quests.QuestLocDiscoveryAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_QUEST_DISCOVER, subzoneName))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(questDiscoverFormat, subzoneName))
         end
 
         if not ChatAnnouncements.SV.Quests.QuestLocDiscoveryCSA then
@@ -87,13 +104,13 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
         if ChatAnnouncements.SV.Quests.QuestLocObjectiveCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OBJECTIVE_ACCEPTED)
-            messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_DISCOVERED, name), startDescription)
+            messageParams:SetText(zo_strformat(notifytextObjectiveDiscoveredFormat, name), startDescription)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
 
         if ChatAnnouncements.SV.Quests.QuestLocObjectiveAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_DISCOVERED, name), startDescription)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(notifytextObjectiveDiscoveredFormat, name), startDescription)
         end
         return true
     end
@@ -156,16 +173,16 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
                 local CurrentLevelFormatted = ""
                 if ChatAnnouncements.SV.XP.ExperienceLevelColorByLevel then
-                    CurrentLevelFormatted = ZO_XP_BAR_GRADIENT_COLORS[2]:Colorize(GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL) .. " " .. CurrentLevel)
+                    CurrentLevelFormatted = ZO_XP_BAR_GRADIENT_COLORS[2]:Colorize(gamepadQuestJournalQuestLevelText .. " " .. CurrentLevel)
                 else
-                    CurrentLevelFormatted = ColorizeColors.ExperienceLevelUpColorize:Colorize(GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL) .. " " .. CurrentLevel)
+                    CurrentLevelFormatted = ColorizeColors.ExperienceLevelUpColorize:Colorize(gamepadQuestJournalQuestLevelText .. " " .. CurrentLevel)
                 end
 
                 local formattedString
                 if ChatAnnouncements.SV.XP.ExperienceLevelColorByLevel then
-                    formattedString = zo_strformat("<<1>><<2>> <<3>><<4>>", ColorizeColors.ExperienceLevelUpColorize:Colorize(GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP)), icon, CurrentLevelFormatted, ColorizeColors.ExperienceLevelUpColorize:Colorize("!"))
+                    formattedString = zo_strformat("<<1>><<2>> <<3>><<4>>", ColorizeColors.ExperienceLevelUpColorize:Colorize(lvlAnnounceXpText), icon, CurrentLevelFormatted, ColorizeColors.ExperienceLevelUpColorize:Colorize("!"))
                 else
-                    formattedString = zo_strformat("<<1>><<2>> <<3>><<4>>", ColorizeColors.ExperienceLevelUpColorize:Colorize(GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP)), icon, CurrentLevelFormatted, ColorizeColors.ExperienceLevelUpColorize:Colorize("!"))
+                    formattedString = zo_strformat("<<1>><<2>> <<3>><<4>>", ColorizeColors.ExperienceLevelUpColorize:Colorize(lvlAnnounceXpText), icon, CurrentLevelFormatted, ColorizeColors.ExperienceLevelUpColorize:Colorize("!"))
                 end
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE LEVEL" }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -176,10 +193,10 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
                 local iconCSA = (" " .. zo_iconFormat(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_UP_DDS, "100%", "100%")) or ""
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.LEVEL_UP)
                 if ChatAnnouncements.SV.XP.ExperienceLevelUpCSAExpand then
-                    local levelUpExpanded = zo_strformat("<<1>><<2>> <<3>> <<4>>", GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP), iconCSA, GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL), CurrentLevel)
-                    messageParams:SetText(zo_strformat(SI_LEVEL_UP_NOTIFICATION), levelUpExpanded)
+                    local levelUpExpanded = zo_strformat("<<1>><<2>> <<3>> <<4>>", lvlAnnounceXpText, iconCSA, gamepadQuestJournalQuestLevelText, CurrentLevel)
+                    messageParams:SetText(ZO_CachedStrFormat(SI_LEVEL_UP_NOTIFICATION), levelUpExpanded)
                 else
-                    messageParams:SetText(GetString(SI_LEVEL_UP_NOTIFICATION))
+                    messageParams:SetText(levelUpNotificationText)
                 end
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LEVEL_GAIN)
                 if not LUIE.SV.HideXPBar then
@@ -194,7 +211,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
             if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
                 local iconAlert = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and (" " .. zo_iconFormat(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_UP_DDS, "75%", "75%")) or ""
-                local text = zo_strformat("<<1>><<2>> <<3>> <<4>>!", GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP), iconAlert, GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL), CurrentLevel)
+                local text = zo_strformat("<<1>><<2>> <<3>> <<4>>!", lvlAnnounceXpText, iconAlert, gamepadQuestJournalQuestLevelText, CurrentLevel)
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
             end
 
@@ -209,7 +226,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
     -- Called by EnlightenGainHook()
     local function GetEnlightenedGainedAnnouncement(triggeringEvent)
-        local formattedString = zo_strformat("<<1>>! <<2>>", GetString(SI_ENLIGHTENED_STATE_GAINED_HEADER), GetString(SI_ENLIGHTENED_STATE_GAINED_DESCRIPTION))
+        local formattedString = zo_strformat("<<1>>! <<2>>", enlightenedStateGainedHeaderText, enlightenedStateGainedDescriptionText)
         if ChatAnnouncements.SV.XP.ExperienceEnlightenedCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -218,7 +235,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
         if ChatAnnouncements.SV.XP.ExperienceEnlightenedCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENLIGHTENED_STATE_GAINED)
-            messageParams:SetText(zo_strformat(SI_ENLIGHTENED_STATE_GAINED_HEADER), zo_strformat(SI_ENLIGHTENED_STATE_GAINED_DESCRIPTION))
+            messageParams:SetText(ZO_CachedStrFormat(SI_ENLIGHTENED_STATE_GAINED_HEADER), ZO_CachedStrFormat(SI_ENLIGHTENED_STATE_GAINED_DESCRIPTION))
             if not LUIE.SV.HideXPBar then
                 local barParams = I.GetCurrentChampionPointsBarParams(triggeringEvent)
                 I.ValidateProgressBarParams(barParams)
@@ -249,7 +266,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
     -- EVENT_ENLIGHTENED_STATE_LOST (CSA Handler)
     local function EnlightenLostHook()
         if IsEnlightenedAvailableForCharacter() then
-            local formattedString = zo_strformat("<<1>>!", GetString(SI_ENLIGHTENED_STATE_LOST_HEADER))
+            local formattedString = zo_strformat("<<1>>!", enlightenedStateLostHeaderText)
 
             if ChatAnnouncements.SV.XP.ExperienceEnlightenedCA then
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE" }
@@ -264,7 +281,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
                     I.ValidateProgressBarParams(barParams)
                     messageParams:SetBarParams(barParams)
                 end
-                messageParams:SetText(zo_strformat(SI_ENLIGHTENED_STATE_LOST_HEADER))
+                messageParams:SetText(ZO_CachedStrFormat(SI_ENLIGHTENED_STATE_LOST_HEADER))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENLIGHTENMENT_LOST)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
@@ -299,7 +316,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
             local formattedIcon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and zo_strformat("<<1>> ", zo_iconFormatInheritColor(icon, 16, 16)) or ""
-            local formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(GetString(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED), formattedIcon))
+            local formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(championAnnouncementUnlockedFormat, formattedIcon))
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE LEVEL" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
@@ -308,7 +325,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED)
             local formattedIcon = zo_strformat("<<1>> ", zo_iconFormat(icon, "100%", "100%"))
-            messageParams:SetText(zo_strformat(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED, formattedIcon))
+            messageParams:SetText(zo_strformat(championAnnouncementUnlockedFormat, formattedIcon))
             if not LUIE.SV.HideXPBar then
                 if wasChampionSystemUnlocked then
                     local championPoints = GetPlayerChampionPointsEarned()
@@ -341,7 +358,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
         if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
             local formattedIcon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and zo_strformat("<<1>> ", zo_iconFormat(icon, "75%", "75%")) or ""
-            local text = zo_strformat(GetString(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED), formattedIcon)
+            local text = zo_strformat(championAnnouncementUnlockedFormat, formattedIcon)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
         end
 
@@ -372,7 +389,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
         end
 
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
-            local formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(SI_CHAMPION_POINT_EARNED, savedPointDelta) .. ": ")
+            local formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(championPointEarnedFormat, savedPointDelta) .. ": ")
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE LEVEL" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages, true)
@@ -392,9 +409,9 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
                     local formattedString
                     if ChatAnnouncements.SV.XP.ExperienceLevelColorByLevel then
-                        formattedString = ZO_CP_BAR_GRADIENT_COLORS[pointType][2]:Colorize(zo_strformat(LUIE_STRING_CHAMPION_POINT_TYPE, amount, formattedIcon, disciplineName))
+                        formattedString = ZO_CP_BAR_GRADIENT_COLORS[pointType][2]:Colorize(zo_strformat(championPointTypeFormat, amount, formattedIcon, disciplineName))
                     else
-                        formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(LUIE_STRING_CHAMPION_POINT_TYPE, amount, formattedIcon, disciplineName))
+                        formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(championPointTypeFormat, amount, formattedIcon, disciplineName))
                     end
                     if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
                         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE LEVEL" }
@@ -402,7 +419,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
                         eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages, true)
                     end
                     if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
-                        secondLine = secondLine .. zo_strformat(SI_CHAMPION_POINT_TYPE, amount, icon, disciplineName) .. "\n"
+                        secondLine = secondLine .. zo_strformat(championPointTypeFormat2, amount, icon, disciplineName) .. "\n"
                     end
                 end
             end
@@ -410,7 +427,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
 
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED)
-            messageParams:SetText(zo_strformat(SI_CHAMPION_POINT_EARNED, savedPointDelta), secondLine)
+            messageParams:SetText(zo_strformat(championPointEarnedFormat, savedPointDelta), secondLine)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CHAMPION_POINT_GAINED)
             messageParams:MarkSuppressIconFrame()
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -466,7 +483,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
             if not currentRankData then
                 return true
             end
-            local headerText = GetString(SI_VETERANCY_RANK_UP_ANNOUNCEMENT_HEADER)
+            local headerText = veterancyRankUpAnnouncementHeaderText
             local rankName = currentRankData:GetName()
             local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, rankName)
             if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
@@ -517,8 +534,8 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
             end
             local rewardData = rankRewardData:GetRewardData()
             local rewardText = rewardData:GetQuantity() > 1 and rewardData:GetFormattedNameWithStack() or rewardData:GetFormattedName()
-            local secondaryText = claimedCount > 1 and zo_strformat(SI_VETERANCY_MAX_RANK_CLAIMED_COUNT_FORMATTER, claimedCount, rewardText) or rewardText
-            local headerText = GetString(SI_VETERANCY_MAX_RANK_CLAIMED_ANNOUNCEMENT_HEADER)
+            local secondaryText = claimedCount > 1 and zo_strformat(veterancyMaxRankClaimedCountFormatterFormat, claimedCount, rewardText) or rewardText
+            local headerText = veterancyMaxRankClaimedAnnouncementHeaderText
             local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, secondaryText)
             if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "EXPERIENCE" }

@@ -8,6 +8,37 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local groupAlertInvitePlayerAlreadyMemberText = GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
+local playerBusyText = GetString(SI_PLAYER_BUSY)
+local groupfinderVotekickPassedFormat = GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED)
+local groupMemberKickedFormat = GetString(LUIE_STRING_CA_GROUP_MEMBER_KICKED)
+local groupMemberLeaveSelfFormat = GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF)
+local groupMemberJoinFormat = GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN)
+local groupLeaderChangedFormat = GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED)
+local groupLeaderChangedSelfText = GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED_SELF)
+local groupfinderVotekickFailFormat = GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_FAIL)
+local groupfinderVotekickStartSelfFormat = GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START_SELF)
+local dungeonDifficultyChangedToVeteranText = GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_VETERAN)
+local dungeonDifficultyChangedToNormalText = GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_NORMAL)
+local groupTrialStartedFormat = GetString(LUIE_STRING_CA_GROUP_TRIAL_STARTED)
+local groupTrialCompletedLargeFormat = GetString(LUIE_STRING_CA_GROUP_TRIAL_COMPLETED_LARGE)
+local groupTrialScoretallyFormat = GetString(LUIE_STRING_CA_GROUP_TRIAL_SCORETALLY)
+local reviveCounterRevivesUsedFormat = GetString(SI_REVIVE_COUNTER_REVIVES_USED)
+local trialCompletedLargeFormat = GetString(SI_TRIAL_COMPLETED_LARGE)
+local groupTrialFailedFormat = GetString(LUIE_STRING_CA_GROUP_TRIAL_FAILED)
+local trialNewBestScoreWeeklyFormat = GetString(SI_TRIAL_NEW_BEST_SCORE_WEEKLY)
+local trialNewBestScoreLifetimeFormat = GetString(SI_TRIAL_NEW_BEST_SCORE_LIFETIME)
+local groupReviveCounterUpdatedFormat = GetString(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED)
+local groupTrialScoreUpdatedFormat = GetString(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED)
+local groupInviteMenuFormat = GetString(LUIE_STRING_CA_GROUP_INVITE_MENU)
+local ignoreErrorGroupText = GetString(LUIE_STRING_IGNORE_ERROR_GROUP)
+local lfgreadycheckcancelreason3Text = GetString(SI_LFGREADYCHECKCANCELREASON3)
+local groupInviteResponseSelfInviteFormat = GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_SELF_INVITE)
+local groupInviteResponseGenericJoinFailureText = GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_GENERIC_JOIN_FAILURE)
+local groupInviteResponseInvitedFormat = GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED)
+local groupInviteResponseOnlyLeaderCanInviteText = GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -80,17 +111,17 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
             local alertMessage
 
             if response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED and (LUIE.PlayerNameFormatted == characterName or LUIE.PlayerDisplayName == displayName) then
-                message = zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_SELF_INVITE))
-                alertMessage = zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_SELF_INVITE))
+                message = ZO_CachedStrFormat(groupInviteResponseSelfInviteFormat)
+                alertMessage = ZO_CachedStrFormat(groupInviteResponseSelfInviteFormat)
             elseif response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED and (IsPlayerInGroup(characterName) or IsPlayerInGroup(displayName)) then
-                message = GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
-                alertMessage = GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
+                message = groupAlertInvitePlayerAlreadyMemberText
+                alertMessage = groupAlertInvitePlayerAlreadyMemberText
             elseif response == GROUP_INVITE_RESPONSE_IGNORED then
-                message = finalName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalName) or GetString(SI_PLAYER_BUSY)
-                alertMessage = finalAlertName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalAlertName) or GetString(SI_PLAYER_BUSY)
+                message = finalName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalName) or playerBusyText
+                alertMessage = finalAlertName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalAlertName) or playerBusyText
             else
-                message = finalName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalName) or characterName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), characterName) or GetString(SI_PLAYER_BUSY)
-                alertMessage = finalAlertName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalAlertName) or characterName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), characterName) or GetString(SI_PLAYER_BUSY)
+                message = finalName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalName) or characterName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), characterName) or playerBusyText
+                alertMessage = finalAlertName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalAlertName) or characterName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), characterName) or playerBusyText
             end
 
             if ChatAnnouncements.SV.Group.GroupCA or response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED or response == GROUP_INVITE_RESPONSE_IGNORED or response == GROUP_INVITE_RESPONSE_PLAYER_NOT_FOUND then
@@ -106,9 +137,9 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
 
     -- EVENT_GROUP_INVITE_ACCEPT_RESPONSE_TIMEOUT (Alert Handler)
     local function GroupInviteTimeoutAlert()
-        ChatOutput:Print(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_GENERIC_JOIN_FAILURE), true)
+        ChatOutput:Print(groupInviteResponseGenericJoinFailureText, true)
         if ChatAnnouncements.SV.Group.GroupAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_GENERIC_JOIN_FAILURE))
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, groupInviteResponseGenericJoinFailureText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
         return true
@@ -156,8 +187,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
             if isLeader and not isLocalPlayer then
                 useDefaultReasonText = true
             elseif isLeader and isLocalPlayer then
-                message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
-                alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
+                message = ZO_CachedStrFormat(LUIE_STRING_GROUPDISBANDLEADER)
+                alert = ZO_CachedStrFormat(LUIE_STRING_GROUPDISBANDLEADER)
                 zo_callLater(function ()
                                  ChatAnnouncements.CheckLFGStatusLeave(false)
                              end, 100)
@@ -173,22 +204,22 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                     zo_callLater(function ()
                                      ChatAnnouncements.CheckLFGStatusLeave(true)
                                  end, 100)
-                    message = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
-                    alert = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
+                    message = ZO_CachedStrFormat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
+                    alert = ZO_CachedStrFormat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
                 elseif hasValidNames then
                     zo_callLater(function ()
                                      ChatAnnouncements.CheckLFGStatusLeave(false)
                                  end, 100)
-                    message = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalName)
-                    alert = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalAlertName)
-                    message2 = zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_KICKED), finalName)
-                    alert2 = zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_KICKED), finalAlertName)
+                    message = zo_strformat(groupfinderVotekickPassedFormat, finalName)
+                    alert = zo_strformat(groupfinderVotekickPassedFormat, finalAlertName)
+                    message2 = zo_strformat(groupMemberKickedFormat, finalName)
+                    alert2 = zo_strformat(groupMemberKickedFormat, finalAlertName)
                 end
                 sound = SOUNDS.GROUP_KICK
             else
                 if isLeader and isLocalPlayer then
-                    message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
-                    alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
+                    message = ZO_CachedStrFormat(LUIE_STRING_GROUPDISBANDLEADER)
+                    alert = ZO_CachedStrFormat(LUIE_STRING_GROUPDISBANDLEADER)
                     zo_callLater(function ()
                                      ChatAnnouncements.CheckLFGStatusLeave(false)
                                  end, 100)
@@ -197,8 +228,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                     zo_callLater(function ()
                                      ChatAnnouncements.CheckLFGStatusLeave(true)
                                  end, 100)
-                    message = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
-                    alert = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
+                    message = ZO_CachedStrFormat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
+                    alert = ZO_CachedStrFormat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
                     sound = SOUNDS.GROUP_KICK
                 else
                     zo_callLater(function ()
@@ -215,8 +246,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                                  ChatAnnouncements.CheckLFGStatusLeave(false)
                              end, 100)
             else
-                message = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalName))
-                alert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalAlertName))
+                message = (zo_strformat(groupMemberLeaveSelfFormat, finalName))
+                alert = (zo_strformat(groupMemberLeaveSelfFormat, finalAlertName))
                 zo_callLater(function ()
                                  ChatAnnouncements.CheckLFGStatusLeave(false)
                              end, 100)
@@ -282,8 +313,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
             local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName, joinedPlatformDisplayName)
             local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName, joinedPlatformDisplayName)
             -- Set final messages to send
-            local SendMessage = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalName))
-            local SendAlert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalAlertName))
+            local SendMessage = (zo_strformat(groupMemberJoinFormat, finalName))
+            local SendAlert = (zo_strformat(groupMemberJoinFormat, finalAlertName))
             zo_callLater(function ()
                              ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
                          end, 100)
@@ -312,11 +343,11 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         local finalAlertName = ChatAnnouncements.ResolveNameNoLink(S.g_currentGroupLeaderRawName, S.g_currentGroupLeaderDisplayName, leaderPlatformDisplayName)
 
         if LUIE.PlayerNameRaw ~= S.g_currentGroupLeaderRawName then -- If another player became the leader
-            displayString = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED), finalName))
-            alertString = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED), finalAlertName))
+            displayString = (zo_strformat(groupLeaderChangedFormat, finalName))
+            alertString = (zo_strformat(groupLeaderChangedFormat, finalAlertName))
         elseif LUIE.PlayerNameRaw == S.g_currentGroupLeaderRawName then -- If the player character became the leader
-            displayString = (GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED_SELF))
-            alertString = (GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED_SELF))
+            displayString = (groupLeaderChangedSelfText)
+            alertString = (groupLeaderChangedSelfText)
         end
 
         -- Don't show leader updates when joining LFG.
@@ -403,8 +434,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                         local kickFinalName = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName, kickMemberPlatformDisplayName)
                         local kickfinalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName, kickMemberPlatformDisplayName)
 
-                        message = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_FAIL, kickFinalName)
-                        alertText = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_FAIL, kickfinalAlertName)
+                        message = zo_strformat(groupfinderVotekickFailFormat, kickFinalName)
+                        alertText = zo_strformat(groupfinderVotekickFailFormat, kickfinalAlertName)
                     else
                         -- Successful kicks are handled in the GROUP_MEMBER_LEFT alert
                         return true
@@ -459,9 +490,9 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
             local kickMemberAccountName = GetUnitDisplayName(targetUnitTag)
             if kickMemberName ~= nil and kickMemberName ~= "" and kickMemberAccountName ~= nil and kickMemberAccountName ~= "" then
                 local finalNameCA = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName)
-                messageText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START_SELF), finalNameCA)
+                messageText = zo_strformat(groupfinderVotekickStartSelfFormat, finalNameCA)
                 local finalNameAlert = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName)
-                alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START_SELF), finalNameAlert)
+                alertText = zo_strformat(groupfinderVotekickStartSelfFormat, finalNameAlert)
             end
         end
         ]]
@@ -513,10 +544,10 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         local message
         local sound
         if isVeteranDifficulty then
-            message = GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_VETERAN)
+            message = dungeonDifficultyChangedToVeteranText
             sound = SOUNDS.DUNGEON_DIFFICULTY_VETERAN
         else
-            message = GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_NORMAL)
+            message = dungeonDifficultyChangedToNormalText
             sound = SOUNDS.DUNGEON_DIFFICULTY_NORMAL
         end
 
@@ -560,20 +591,20 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         -- Display CA
         if ChatAnnouncements.SV.Group.GroupRaidCA then
             local formattedName = zo_strformat("|cFFFFFF<<1>>|r", raidName)
-            ChatOutput:Print(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_STARTED, formattedName), true)
+            ChatOutput:Print(zo_strformat(groupTrialStartedFormat, formattedName), true)
         end
 
         -- Display CSA
         if ChatAnnouncements.SV.Group.GroupRaidCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RAID_TRIAL_STARTED)
-            messageParams:SetText(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_STARTED, raidName))
+            messageParams:SetText(zo_strformat(groupTrialStartedFormat, raidName))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Group.GroupRaidAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_STARTED, raidName))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(groupTrialStartedFormat, raidName))
         end
 
         -- Play sound if CSA is not enabled
@@ -609,8 +640,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                 formattedTime = ZO_ERROR_COLOR:Colorize(formattedTime)
             end
 
-            ChatOutput:Print(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_COMPLETED_LARGE, formattedName), true)
-            ChatOutput:Print(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORETALLY, finalScore, formattedTime, vitalityBonus, vitalityCounterString), true)
+            ChatOutput:Print(zo_strformat(groupTrialCompletedLargeFormat, formattedName), true)
+            ChatOutput:Print(zo_strformat(groupTrialScoretallyFormat, finalScore, formattedTime, vitalityBonus, vitalityCounterString), true)
         end
 
         -- Display CSA
@@ -622,9 +653,9 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                     formattedTime,
                     wasUnderTargetTime,
                     vitalityBonus,
-                    zo_strformat(SI_REVIVE_COUNTER_REVIVES_USED, currentCount, maxCount),
+                    zo_strformat(reviveCounterRevivesUsedFormat, currentCount, maxCount),
                 })
-            messageParams:SetText(zo_strformat(SI_TRIAL_COMPLETED_LARGE, raidName))
+            messageParams:SetText(zo_strformat(trialCompletedLargeFormat, raidName))
             messageParams:SetLifespanMS(TRIAL_COMPLETE_LIFESPAN_MS)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -632,7 +663,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
 
         -- Display Alert
         if ChatAnnouncements.SV.Group.GroupRaidAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_TRIAL_COMPLETED_LARGE, raidName))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(trialCompletedLargeFormat, raidName))
         end
 
         -- Play sound if CSA is not enabled
@@ -647,20 +678,20 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         -- Display CA
         if ChatAnnouncements.SV.Group.GroupRaidCA then
             local formattedName = zo_strformat("|cFFFFFF<<1>>|r", raidName)
-            ChatOutput:Print(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_FAILED, formattedName), true)
+            ChatOutput:Print(zo_strformat(groupTrialFailedFormat, formattedName), true)
         end
 
         -- Display CSA
         if ChatAnnouncements.SV.Group.GroupRaidCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RAID_TRIAL_FAILED)
-            messageParams:SetText(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_FAILED, raidName))
+            messageParams:SetText(zo_strformat(groupTrialFailedFormat, raidName))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
 
         -- Display Alert
         if ChatAnnouncements.SV.Group.GroupRaidAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_FAILED, raidName))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(groupTrialFailedFormat, raidName))
         end
 
         -- Play sound if CSA is not enabled
@@ -675,7 +706,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         -- Display CA
         if ChatAnnouncements.SV.Group.GroupRaidBestScoreCA then
             local formattedName = zo_strformat("|cFFFFFF<<1>>|r", raidName)
-            local formattedString = isWeekly and zo_strformat(SI_TRIAL_NEW_BEST_SCORE_WEEKLY, formattedName) or zo_strformat(SI_TRIAL_NEW_BEST_SCORE_LIFETIME, formattedName)
+            local formattedString = isWeekly and zo_strformat(trialNewBestScoreWeeklyFormat, formattedName) or zo_strformat(trialNewBestScoreLifetimeFormat, formattedName)
             ChatOutput:Print(formattedString, true)
         end
 
@@ -707,20 +738,20 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         if countDelta < 0 then
             if ChatAnnouncements.SV.Group.GroupRaidReviveCA then
                 local iconCA = zo_iconFormat("EsoUI/Art/Trials/VitalityDepletion.dds", 16, 16)
-                ChatOutput:Print(zo_strformat(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED, iconCA), true)
+                ChatOutput:Print(zo_strformat(groupReviveCounterUpdatedFormat, iconCA), true)
             end
 
             if ChatAnnouncements.SV.Group.GroupRaidReviveCSA then
                 local iconCSA = zo_iconFormat("EsoUI/Art/Trials/VitalityDepletion.dds", "100%", "100%")
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RAID_TRIAL_COUNTER_UPDATE)
-                messageParams:SetText(zo_strformat(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED, iconCSA))
+                messageParams:SetText(zo_strformat(groupReviveCounterUpdatedFormat, iconCSA))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
 
             if ChatAnnouncements.SV.Group.GroupRaidReviveAlert then
                 local iconAlert = zo_iconFormat("EsoUI/Art/Trials/VitalityDepletion.dds", "75%", "75%")
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED, iconAlert))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(groupReviveCounterUpdatedFormat, iconAlert))
             end
 
             -- Play Sound if CSA is not enabled
@@ -794,14 +825,14 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
             -- Display CA
             if ChatAnnouncements.SV.Group.GroupRaidScoreCA then
                 local iconCA = zo_iconFormat(reasonAssets.icon, 16, 16)
-                ChatOutput:Print(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED, iconCA, scoreAmount), true)
+                ChatOutput:Print(zo_strformat(groupTrialScoreUpdatedFormat, iconCA, scoreAmount), true)
             end
 
             -- Display CSA
             if ChatAnnouncements.SV.Group.GroupRaidScoreCSA then
                 local iconCSA = zo_iconFormat(reasonAssets.icon, "100%", "100%")
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, reasonAssets.soundId)
-                messageParams:SetText(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED, iconCSA, scoreAmount))
+                messageParams:SetText(zo_strformat(groupTrialScoreUpdatedFormat, iconCSA, scoreAmount))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
@@ -809,7 +840,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
             -- Display Alert
             if ChatAnnouncements.SV.Group.GroupRaidScoreAlert then
                 local iconAlert = zo_iconFormat(reasonAssets.icon, "75%", "75%")
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED, iconAlert, scoreAmount))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(groupTrialScoreUpdatedFormat, iconAlert, scoreAmount))
             end
 
             -- Play Sound if CSA is not enabled
@@ -845,14 +876,14 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
                 else
                     link = ZO_LinkHandler_CreateLink(characterOrDisplayName, nil, CHARACTER_LINK_TYPE, characterOrDisplayName)
                 end
-                ChatOutput:PrintAnnouncementOrSystemFallback(zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), link))
+                ChatOutput:PrintAnnouncementOrSystemFallback(zo_strformat(groupInviteMenuFormat, link))
                 if ChatAnnouncements.SV.Group.GroupAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(groupInviteMenuFormat, ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
                 end
             else
-                ChatOutput:PrintAnnouncementOrSystemFallback(zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
+                ChatOutput:PrintAnnouncementOrSystemFallback(zo_strformat(groupInviteResponseInvitedFormat, ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
                 if ChatAnnouncements.SV.Group.GroupAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(groupInviteResponseInvitedFormat, ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
                 end
             end
         end
@@ -861,7 +892,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
     -- Hook TryGroupInviteByName to add custom chat announcements and handle isMenu parameter
     ZO_PreHook("TryGroupInviteByName", function (characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
         if IsPlayerInGroup(characterOrDisplayName) then
-            ChatOutput:PrintAnnouncementOrSystemFallback(GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER))
+            ChatOutput:PrintAnnouncementOrSystemFallback(groupAlertInvitePlayerAlreadyMemberText)
             if ChatAnnouncements.SV.Group.GroupAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
             end
@@ -873,7 +904,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         local groupSize = GetGroupSize()
 
         if not isLeader and groupSize > 0 then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, groupInviteResponseOnlyLeaderCanInviteText)
             return true -- Prevent original from running
         end
 
@@ -890,7 +921,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
             return true -- Prevent original from running
         else
             if IsIgnored(characterOrDisplayName) then
-                ChatOutput:PrintAnnouncementOrSystemFallback(GetString(LUIE_STRING_IGNORE_ERROR_GROUP))
+                ChatOutput:PrintAnnouncementOrSystemFallback(ignoreErrorGroupText)
                 if ChatAnnouncements.SV.Group.GroupAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, LUIE_STRING_IGNORE_ERROR_GROUP)
                 end
@@ -907,7 +938,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
     DeclineLFGReadyCheckNotification = function (self)
         zos_DeclineLFGReadyCheckNotification()
 
-        local message = (GetString(SI_LFGREADYCHECKCANCELREASON3))
+        local message = (lfgreadycheckcancelreason3Text)
         S.g_showRCUpdates = true
         S.g_weDeclinedTheQueue = true
         zo_callLater(function ()

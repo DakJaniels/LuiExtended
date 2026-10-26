@@ -17,6 +17,23 @@ local zo_strformat = zo_strformat
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local playerToPlayerRestrictedCommunicationText = GetString(SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION)
+local groupLeaderkickErrorText = GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR)
+local playerToPlayerTargetFormat = GetString(SI_PLAYER_TO_PLAYER_TARGET)
+local playerToPlayerWhisperText = GetString(SI_PLAYER_TO_PLAYER_WHISPER)
+local playerToPlayerRemoveGroupText = GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP)
+local playerToPlayerAddGroupText = GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP)
+local playerToPlayerAddFriendText = GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND)
+local slashcmdsFriendInviteMsgLinkFormat = GetString(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK)
+local chatPlayerContextReportText = GetString(SI_CHAT_PLAYER_CONTEXT_REPORT)
+local playerToPlayerInviteDuelText = GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL)
+local playerToPlayerInviteTributeText = GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE)
+local playerToPlayerTributeLockedText = GetString(SI_PLAYER_TO_PLAYER_TRIBUTE_LOCKED)
+local playerToPlayerInviteTradeText = GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE)
+local radialMenuCancelButtonText = GetString(SI_RADIAL_MENU_CANCEL_BUTTON)
+local groupInviteResponseOnlyLeaderCanInviteText = GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE)
+local socialResultAccountAlreadyFriendsText = GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS)
+
 -- HOOK PLAYER_TO_PLAYER Group Notifications to edit Ignore alert
 function ChatAnnouncements.PlayerToPlayerHook()
     local KEYBOARD_INTERACT_ICONS =
@@ -186,7 +203,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
     end
 
     local function AlertRestrictedCommunication()
-        ChatOutput:Print(GetString(SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION), true)
+        ChatOutput:Print(playerToPlayerRestrictedCommunicationText, true)
         if ChatAnnouncements.SV.Group.GroupAlert then
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION)
         end
@@ -194,25 +211,25 @@ function ChatAnnouncements.PlayerToPlayerHook()
     end
 
     local function AlertGroupDisabled()
-        ChatOutput:Print(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE), true)
+        ChatOutput:Print(groupInviteResponseOnlyLeaderCanInviteText, true)
         if ChatAnnouncements.SV.Group.GroupAlert then
-            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, groupInviteResponseOnlyLeaderCanInviteText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
     end
 
     local function AlertGroupKickDisabled()
-        ChatOutput:Print(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR), true)
+        ChatOutput:Print(groupLeaderkickErrorText, true)
         if ChatAnnouncements.SV.Group.GroupAlert then
-            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, groupLeaderkickErrorText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
     end
 
     local function AlreadyFriendsWarning()
-        ChatOutput:Print(GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS), true)
+        ChatOutput:Print(socialResultAccountAlreadyFriendsText, true)
         if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS))
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, socialResultAccountAlreadyFriendsText)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
     end
@@ -254,7 +271,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
         end
 
         local characterNameRaw = GetRawUnitName(unitTag)
-        local characterName = zo_strformat(SI_PLAYER_TO_PLAYER_TARGET, characterNameRaw)
+        local characterName = zo_strformat(playerToPlayerTargetFormat, characterNameRaw)
         local crossplayDisplayName = GetUnitDisplayName(unitTag)
         local primaryNameUnformatted = ZO_GetPrimaryPlayerNameFromUnitTag(unitTag, DONT_FORMAT_DISPLAY_NAME)
         local platformIcons = IsInGamepadPreferredMode() and GAMEPAD_INTERACT_ICONS or KEYBOARD_INTERACT_ICONS
@@ -272,7 +289,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
             end
             local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
             local whisperFunction = isEnabled and WhisperOption or disabledOption
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_WHISPER), platformIcons[SI_PLAYER_TO_PLAYER_WHISPER], isEnabled, whisperFunction)
+            self:AddMenuEntry(playerToPlayerWhisperText, platformIcons[SI_PLAYER_TO_PLAYER_WHISPER], isEnabled, whisperFunction)
         end
 
         -- Group
@@ -288,7 +305,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
             else
                 groupKickFunction = AlertGroupKickDisabled
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], groupKickEnabled, groupKickFunction)
+            self:AddMenuEntry(playerToPlayerRemoveGroupText, platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], groupKickEnabled, groupKickFunction)
         else
             local groupInviteEnabled = ENABLED_IF_NOT_IGNORED and isGroupModificationAvailable and isSoloOrLeader
             local groupInviteFunction
@@ -306,24 +323,24 @@ function ChatAnnouncements.PlayerToPlayerHook()
                     groupInviteFunction = AlertIgnored
                 end
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], groupInviteEnabled, groupInviteFunction)
+            self:AddMenuEntry(playerToPlayerAddGroupText, platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], groupInviteEnabled, groupInviteFunction)
         end
 
         -- Friend
         if IsFriend(characterNameRaw) then
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], DISABLED, AlreadyFriendsWarning)
+            self:AddMenuEntry(playerToPlayerAddFriendText, platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], DISABLED, AlreadyFriendsWarning)
         else
             local function RequestFriendOption()
                 RequestFriend(crossplayDisplayName)
 
                 local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(crossplayDisplayName, crossplayDisplayName)
-                local formattedMessage = zo_strformat(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK, displayNameLink)
+                local formattedMessage = zo_strformat(slashcmdsFriendInviteMsgLinkFormat, displayNameLink)
 
                 if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, formattedMessage)
                 end
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and RequestFriendOption or AlertIgnored)
+            self:AddMenuEntry(playerToPlayerAddFriendText, platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and RequestFriendOption or AlertIgnored)
         end
 
         -- Passenger Mount
@@ -344,7 +361,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
         local function ReportCallback()
             ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(crossplayDisplayName)
         end
-        self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, ReportCallback)
+        self:AddMenuEntry(chatPlayerContextReportText, platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, ReportCallback)
 
         -- Duel
         local duelState, partnerCharacterName, partnerCrossplayDisplayName, _, partnerPlatformDisplayName = GetDuelInfo()
@@ -365,7 +382,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
                     PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
                 end
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], DISABLED, AlreadyDuelingWarning(duelState, partnerCharacterName, partnerCrossplayDisplayName, partnerPlatformDisplayName))
+            self:AddMenuEntry(playerToPlayerInviteDuelText, platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], DISABLED, AlreadyDuelingWarning(duelState, partnerCharacterName, partnerCrossplayDisplayName, partnerPlatformDisplayName))
         else
             local function DuelInviteOption()
                 if isApiUpdate51OrLater then
@@ -375,7 +392,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
                 end
             end
             local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], isEnabled, isEnabled and DuelInviteOption or disabledOption)
+            self:AddMenuEntry(playerToPlayerInviteDuelText, platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], isEnabled, isEnabled and DuelInviteOption or disabledOption)
         end
 
         -- Play Tribute
@@ -392,13 +409,13 @@ function ChatAnnouncements.PlayerToPlayerHook()
                     PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
                 end
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], DISABLED, TributeInviteFailWarning(tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName))
+            self:AddMenuEntry(playerToPlayerInviteTributeText, platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], DISABLED, TributeInviteFailWarning(tributeInviteState, tributePartnerCharacterName, tributePartnerDisplayName))
         else
             local function TributeInviteOption()
                 ChallengeTargetToTribute(characterName)
             end
             local function TributeLockedAlert()
-                ChatOutput:Print(GetString(SI_PLAYER_TO_PLAYER_TRIBUTE_LOCKED), true)
+                ChatOutput:Print(playerToPlayerTributeLockedText, true)
                 if ChatAnnouncements.SV.Group.GroupAlert then
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_TRIBUTE_LOCKED)
                 end
@@ -413,7 +430,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
             else
                 entryFunction = disabledOption
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], isEnabled, entryFunction)
+            self:AddMenuEntry(playerToPlayerInviteTributeText, platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], isEnabled, entryFunction)
         end
 
         -- Trade
@@ -423,10 +440,10 @@ function ChatAnnouncements.PlayerToPlayerHook()
         end
         local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
         local tradeInviteFunction = isEnabled and TradeInviteOption or disabledOption
-        self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], isEnabled, tradeInviteFunction)
+        self:AddMenuEntry(playerToPlayerInviteTradeText, platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], isEnabled, tradeInviteFunction)
 
         -- Cancel
-        self:AddMenuEntry(GetString(SI_RADIAL_MENU_CANCEL_BUTTON), platformIcons[SI_RADIAL_MENU_CANCEL_BUTTON], ENABLED)
+        self:AddMenuEntry(radialMenuCancelButtonText, platformIcons[SI_RADIAL_MENU_CANCEL_BUTTON], ENABLED)
 
         self:GetRadialMenu():Show()
         self.showingPlayerInteractMenu = true

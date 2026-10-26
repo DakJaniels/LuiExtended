@@ -9,6 +9,112 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local campaignBrowserQueuedFormat = GetString(SI_CAMPAIGN_BROWSER_QUEUED)
+local campaignBrowserReadyFormat = GetString(SI_CAMPAIGN_BROWSER_READY)
+local campaignQueueJoinedFormat = GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_JOINED)
+local campaignQueueLeftFormat = GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_LEFT)
+local campaignQueueStateFormat = GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_STATE)
+local questJournalUnknownQuestNameText = GetString(SI_QUEST_JOURNAL_UNKNOWN_QUEST_NAME)
+local friendsFriendAddedFormat = GetString(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED)
+local friendsFriendRemovedFormat = GetString(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED)
+local friendsIncomingFriendRequestFormat = GetString(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST)
+local friendsListIgnoreAddedFormat = GetString(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED)
+local friendsListIgnoreRemovedFormat = GetString(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED)
+local groupIncomingQuestShareFormat = GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE)
+local groupIncomingQuestShareP2pFormat = GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P)
+local groupfinderAlertLfgJoinedFormat = GetString(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED)
+local groupfinderQueueEndText = GetString(LUIE_STRING_CA_GROUPFINDER_QUEUE_END)
+local groupfinderQueueStartText = GetString(LUIE_STRING_CA_GROUPFINDER_QUEUE_START)
+local lfgreadycheckcancelreason3Text = GetString(SI_LFGREADYCHECKCANCELREASON3)
+local groupfinderReadyCheckActivityRoleFormat = GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY_ROLE)
+local groupfinderReadyCheckActivityFormat = GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY)
+local groupRoleUpdatedFormat = GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED)
+local groupRoleUpdatedSelfFormat = GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED_SELF)
+local groupDisconnectedFormat = GetString(LUIE_STRING_CA_GROUP_DISCONNECTED)
+local groupReconnectedFormat = GetString(LUIE_STRING_CA_GROUP_RECONNECTED)
+local currencyNotifyChampionText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_CHAMPION)
+local currencyNotifyAttributesText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_ATTRIBUTES)
+local currencyNotifySkillsText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILLS)
+local currencyNotifyMorphsText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_MORPHS)
+local currencyNotifySkillLineText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILL_LINE)
+local debugMsgCurrencyFormat = GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY)
+local storageBagtype1Text = GetString(LUIE_STRING_CA_STORAGE_BAGTYPE1)
+local storageBagtype2Text = GetString(LUIE_STRING_CA_STORAGE_BAGTYPE2)
+local currencyNameHeraldryText = GetString(LUIE_STRING_CA_CURRENCY_NAME_HERALDRY)
+local storageRidingtype1Text = GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE1)
+local storageRidingtype2Text = GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE2)
+local storageRidingtype3Text = GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE3)
+local lockpickSuccessText = GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS)
+local inventoryBagUpgradeAnouncementDescriptionFormat = GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION)
+local inventoryBankUpgradeAnouncementDescriptionFormat = GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION)
+local mailDeletedMsgText = GetString(LUIE_STRING_CA_MAIL_DELETED_MSG)
+local mailGuildStoreItemSoldSubjectText = GetString(LUIE_STRING_CA_MAIL_GUILD_STORE_ITEM_SOLD_SUBJECT)
+local gamepadGuildHeaderGuildServicesStoreText = GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_SERVICES_STORE)
+local mailReceivedCodText = GetString(LUIE_STRING_CA_MAIL_RECEIVED_COD)
+local mailReceivedText = GetString(LUIE_STRING_CA_MAIL_RECEIVED)
+local mailSentCodText = GetString(LUIE_STRING_CA_MAIL_SENT_COD)
+local mailSentText = GetString(LUIE_STRING_CA_MAIL_SENT)
+local journalProgressCategoryGeneralText = GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL)
+local timedActivityClaimedProgressText = GetString(SI_TIMED_ACTIVITY_CLAIMED_PROGRESS)
+local timedactivitytype0Text = GetString(SI_TIMEDACTIVITYTYPE0)
+local timedactivitytype1Text = GetString(SI_TIMEDACTIVITYTYPE1)
+local timedactivitytype2Text = GetString(SI_TIMEDACTIVITYTYPE2)
+local timedActivitiesTypeHeaderFormat = GetString(SI_TIMED_ACTIVITIES_TYPE_HEADER)
+local timedActivityRerollGoldResetFormat = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_REROLL_GOLD_RESET)
+local timedActivityRerollGoldResetMinText = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_REROLL_GOLD_RESET_MIN)
+local tamrielTomesSeasonEndDialogTitleText = GetString(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_TITLE)
+local promotionalEventTrackerHeaderText = GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER)
+local promotionalEventRewardClaimedAnnouncementText = GetString(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT)
+local tooltipItemNameFormat = GetString(SI_TOOLTIP_ITEM_NAME)
+local currencyNameFormatFormat = GetString(SI_CURRENCY_NAME_FORMAT)
+local craftedAbilityUnlockedAnnounceTitleText = GetString(SI_CRAFTED_ABILITY_UNLOCKED_ANNOUNCE_TITLE)
+local craftedAbilityScriptUnlockedAnnounceTitleText = GetString(SI_CRAFTED_ABILITY_SCRIPT_UNLOCKED_ANNOUNCE_TITLE)
+local furnitureVaultStowedAllItemsFormat = GetString(SI_FURNITURE_VAULT_STOWED_ALL_ITEMS)
+local furnitureVaultStowedItemsFormat = GetString(SI_FURNITURE_VAULT_STOWED_ITEMS)
+local lootHistoryAdventureZoneFactionReputationText = GetString(SI_LOOT_HISTORY_ADVENTURE_ZONE_FACTION_REPUTATION)
+local justiceConfiscatedBountyItemsMsgText = GetString(LUIE_STRING_CA_JUSTICE_CONFISCATED_BOUNTY_ITEMS_MSG)
+local justiceConfiscatedMsgText = GetString(LUIE_STRING_CA_JUSTICE_CONFISCATED_MSG)
+local justiceDisguiseStateDangerText = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER)
+local justiceDisguiseStateSuspiciousText = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS)
+local justiceDisguiseStateNoneText = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE)
+local justiceDisguiseStateDisguisedText = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED)
+local stuckErrorOnCooldownFormat = GetString(SI_STUCK_ERROR_ON_COOLDOWN)
+local inventoryErrorInventoryFullText = GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)
+local inventoryErrorInsufficientSpaceFormat = GetString(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE)
+local groupQuitLfgText = GetString(LUIE_STRING_CA_GROUP_QUIT_LFG)
+local groupInviteMessageFormat = GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE)
+local chatAnnouncementInLargeGroupText = GetString(SI_CHAT_ANNOUNCEMENT_IN_LARGE_GROUP)
+local chatAnnouncementInSmallGroupText = GetString(SI_CHAT_ANNOUNCEMENT_IN_SMALL_GROUP)
+local groupElectionReadyCheckMessageText = GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE)
+local groupfinderVotekickStartFormat = GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START)
+local pledgeOfMaraSenderMessageFormat = GetString(SI_PLEDGE_OF_MARA_SENDER_MESSAGE)
+local pledgeOfMaraMessageFormat = GetString(SI_PLEDGE_OF_MARA_MESSAGE)
+local duelStartedWithIconFormat = GetString(LUIE_STRING_CA_DUEL_STARTED_WITH_ICON)
+local duelStartedText = GetString(LUIE_STRING_CA_DUEL_STARTED)
+local slashcmdsCollectibleCakeText = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_CAKE)
+local slashcmdsCollectiblePieText = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_PIE)
+local slashcmdsCollectibleMeadText = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_MEAD)
+local slashcmdsCollectibleWitchText = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_WITCH)
+local slashcmdsCollectibleSummonNnFormat = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_SUMMON_NN)
+local slashcmdsCollectibleSummonFormat = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_SUMMON)
+local slashcmdsCollectibleUnsummonNnFormat = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_UNSUMMON_NN)
+local slashcmdsCollectibleUnsummonFormat = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_UNSUMMON)
+local collectiblecategorytype29Text = GetString(SI_COLLECTIBLECATEGORYTYPE29)
+local collectiblecategorytype30Text = GetString(SI_COLLECTIBLECATEGORYTYPE30)
+local collectiblecategorytype10Text = GetString(SI_COLLECTIBLECATEGORYTYPE10)
+local collectiblecategorytype13Text = GetString(SI_COLLECTIBLECATEGORYTYPE13)
+local collectiblecategorytype17Text = GetString(SI_COLLECTIBLECATEGORYTYPE17)
+local collectiblecategorytype14Text = GetString(SI_COLLECTIBLECATEGORYTYPE14)
+local collectiblecategorytype15Text = GetString(SI_COLLECTIBLECATEGORYTYPE15)
+local collectiblecategorytype16Text = GetString(SI_COLLECTIBLECATEGORYTYPE16)
+local collectiblecategorytype4Text = GetString(SI_COLLECTIBLECATEGORYTYPE4)
+local collectiblecategorytype18Text = GetString(SI_COLLECTIBLECATEGORYTYPE18)
+local collectiblecategorytype11Text = GetString(SI_COLLECTIBLECATEGORYTYPE11)
+local collectiblecategorytype9Text = GetString(SI_COLLECTIBLECATEGORYTYPE9)
+local collectiblecategorytype12Text = GetString(SI_COLLECTIBLECATEGORYTYPE12)
+local slashcmdsCollectibleUseCategoryFormat = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_USE_CATEGORY)
+local slashcmdsCollectibleDisableCategoryFormat = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_DISABLE_CATEGORY)
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -388,10 +494,10 @@ local function CampaignQueueStateLabel(campaignId, isGroup, state)
         return GetString(pendingMessageId)
     end
     if state == CAMPAIGN_QUEUE_REQUEST_STATE_WAITING then
-        return zo_strformat(SI_CAMPAIGN_BROWSER_QUEUED, GetCampaignQueuePosition(campaignId, isGroup))
+        return zo_strformat(campaignBrowserQueuedFormat, GetCampaignQueuePosition(campaignId, isGroup))
     elseif state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING then
         local timeString = ZO_FormatTime(GetCampaignQueueRemainingConfirmationSeconds(campaignId, isGroup), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-        return zo_strformat(SI_CAMPAIGN_BROWSER_READY, timeString)
+        return zo_strformat(campaignBrowserReadyFormat, timeString)
     end
     return tostring(state)
 end
@@ -400,7 +506,7 @@ end
 --- @param campaignId integer
 function ChatAnnouncements.OnCampaignQueueJoined(_, campaignId)
     local campaignName = GetCampaignName(campaignId)
-    local message = zo_strformat(GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_JOINED), campaignName)
+    local message = zo_strformat(campaignQueueJoinedFormat, campaignName)
     ChatAnnouncements.AnnounceNotifySetting(message, UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "CampaignQueueCA", "CampaignQueueAlert")
 end
 
@@ -408,7 +514,7 @@ end
 --- @param campaignId integer
 function ChatAnnouncements.OnCampaignQueueLeft(_, campaignId)
     local campaignName = GetCampaignName(campaignId)
-    local message = zo_strformat(GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_LEFT), campaignName)
+    local message = zo_strformat(campaignQueueLeftFormat, campaignName)
     ChatAnnouncements.AnnounceNotifySetting(message, UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "CampaignQueueCA", "CampaignQueueAlert")
 end
 
@@ -419,7 +525,7 @@ end
 function ChatAnnouncements.OnCampaignQueueStateChanged(_, campaignId, isGroup, state)
     local campaignName = GetCampaignName(campaignId)
     local stateLabel = CampaignQueueStateLabel(campaignId, isGroup, state)
-    local message = zo_strformat(GetString(LUIE_STRING_CA_CAMPAIGN_QUEUE_STATE), campaignName, stateLabel)
+    local message = zo_strformat(campaignQueueStateFormat, campaignName, stateLabel)
     ChatAnnouncements.AnnounceNotifySetting(message, UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, "CampaignQueueCA", "CampaignQueueAlert")
 end
 
@@ -622,7 +728,7 @@ function ChatAnnouncements.RegisterQuestEvents()
             local zoneDisplayType = GetJournalQuestZoneDisplayType(i)
 
             if name == "" then
-                name = GetString(SI_QUEST_JOURNAL_UNKNOWN_QUEST_NAME)
+                name = questJournalUnknownQuestNameText
             end
 
             S.g_questIndex[name] =
@@ -1062,10 +1168,10 @@ function ChatAnnouncements.FriendAdded(eventId, displayName)
     local social = GetChatOutputSocialSettings()
     if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(friendsFriendAddedFormat, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(friendsFriendAddedFormat, displayName))
     end
 end
 
@@ -1075,10 +1181,10 @@ function ChatAnnouncements.FriendRemoved(eventId, displayName)
     local social = GetChatOutputSocialSettings()
     if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(friendsFriendRemovedFormat, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(friendsFriendRemovedFormat, displayName))
     end
 end
 
@@ -1088,10 +1194,10 @@ function ChatAnnouncements.FriendInviteAdded(eventId, displayName)
     local social = GetChatOutputSocialSettings()
     if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(friendsIncomingFriendRequestFormat, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(friendsIncomingFriendRequestFormat, displayName))
     end
 end
 
@@ -1101,10 +1207,10 @@ function ChatAnnouncements.IgnoreAdded(eventId, displayName)
     local social = GetChatOutputSocialSettings()
     if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(friendsListIgnoreAddedFormat, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(friendsListIgnoreAddedFormat, displayName))
     end
 end
 
@@ -1114,10 +1220,10 @@ function ChatAnnouncements.IgnoreRemoved(eventId, displayName)
     local social = GetChatOutputSocialSettings()
     if social and social.FriendIgnoreCA then
         local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
-        ChatOutput:Print(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayNameLink), true)
+        ChatOutput:Print(zo_strformat(friendsListIgnoreRemovedFormat, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(friendsListIgnoreRemovedFormat, displayName))
     end
 end
 
@@ -1168,8 +1274,8 @@ function ChatAnnouncements.QuestShared(eventId, questId)
 
         local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
 
-        local message = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE), finalName, ColorizeColors.QuestColorQuestNameColorize:Colorize(questName))
-        local alertMessage = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P), finalName, questName)
+        local message = zo_strformat(groupIncomingQuestShareFormat, finalName, ColorizeColors.QuestColorQuestNameColorize:Colorize(questName))
+        local alertMessage = zo_strformat(groupIncomingQuestShareP2pFormat, finalName, questName)
 
         if ChatAnnouncements.SV.Quests.QuestShareCA then
             ChatOutput:Print(message, true)
@@ -1201,10 +1307,10 @@ function ChatAnnouncements.GroupingToolsLFGJoined(eventId, locationName)
     -- If the locationName is different thant the saved currentActivityName we have entered a new LFG instance, so display this message.
     if locationName ~= currentActivityName then
         if ChatAnnouncements.SV.Group.GroupLFGCA then
-            ChatOutput:Print(zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName), true)
+            ChatOutput:Print(zo_strformat(groupfinderAlertLfgJoinedFormat, locationName), true)
         end
         if ChatAnnouncements.SV.Group.GroupLFGAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(groupfinderAlertLfgJoinedFormat, locationName))
         end
         S.g_lfgDisableGroupEvents = true
         zo_callLater(function ()
@@ -1224,15 +1330,15 @@ function ChatAnnouncements.ActivityStatusUpdate(eventId, status)
         if not S.g_weDeclinedTheQueue then
             -- If we are NOT queued and were formerly queued, forming group, or in a ready check, display left queue message.
             if status == ACTIVITY_FINDER_STATUS_NONE and (S.g_savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED or S.g_savedQueueValue == ACTIVITY_FINDER_STATUS_READY_CHECK) then
-                message = (GetString(LUIE_STRING_CA_GROUPFINDER_QUEUE_END))
+                message = (groupfinderQueueEndText)
             end
             -- If we are queued and previously we were not queued then display a message.
             if status == ACTIVITY_FINDER_STATUS_QUEUED and (S.g_savedQueueValue == ACTIVITY_FINDER_STATUS_NONE or S.g_savedQueueValue == ACTIVITY_FINDER_STATUS_IN_PROGRESS) then
-                message = (GetString(LUIE_STRING_CA_GROUPFINDER_QUEUE_START))
+                message = (groupfinderQueueStartText)
             end
             -- If we were in the queue and are now in progress without a ready check triggered, we left the queue to find a replacement member so this should be displayed.
             if status == ACTIVITY_FINDER_STATUS_IN_PROGRESS and (S.g_savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED) then
-                message = (GetString(LUIE_STRING_CA_GROUPFINDER_QUEUE_END))
+                message = (groupfinderQueueEndText)
             end
         end
     end
@@ -1242,7 +1348,7 @@ function ChatAnnouncements.ActivityStatusUpdate(eventId, status)
     if (status == ACTIVITY_FINDER_STATUS_COMPLETE and S.g_savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED) or (status == ACTIVITY_FINDER_STATUS_QUEUED and S.g_savedQueueValue == ACTIVITY_FINDER_STATUS_READY_CHECK) then
         -- Don't show if we already got a ready check cancel message.
         if not S.g_lfgHideStatusCancel then
-            message = (GetString(SI_LFGREADYCHECKCANCELREASON3))
+            message = (lfgreadycheckcancelreason3Text)
         end
         S.g_showRCUpdates = true
     end
@@ -1324,10 +1430,10 @@ function ChatAnnouncements.ReadyCheckUpdate(eventId)
             local roleIconLarge = zo_strformat("<<1>> ", zo_iconFormat(ZO_GetRoleIcon(playerRole), "100%", "100%")) or ""
             local roleString = GetString("SI_LFGROLE", playerRole)
 
-            message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY_ROLE), activityName, roleIconSmall, roleString)
-            alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY_ROLE), activityName, roleIconLarge, roleString)
+            message = zo_strformat(groupfinderReadyCheckActivityRoleFormat, activityName, roleIconSmall, roleString)
+            alertText = zo_strformat(groupfinderReadyCheckActivityRoleFormat, activityName, roleIconLarge, roleString)
         else
-            message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY), activityName)
+            message = zo_strformat(groupfinderReadyCheckActivityFormat, activityName)
             alertText = message
         end
 
@@ -1428,16 +1534,16 @@ local message = ""
 
     if updatedRoleName ~= LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED), displayNameLink, message) )
+            ChatOutput:Print(zo_strformat(groupRoleUpdatedFormat, displayNameLink, message) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED), characterNameLink, message) )
+            ChatOutput:Print(zo_strformat(groupRoleUpdatedFormat, characterNameLink, message) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED), displayBoth, message) )
+            ChatOutput:Print(zo_strformat(groupRoleUpdatedFormat, displayBoth, message) )
         end
     else
-        ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED_SELF), message) )
+        ChatOutput:Print(zo_strformat(groupRoleUpdatedSelfFormat, message) )
     end
 end
 ]]
@@ -1462,23 +1568,23 @@ function ChatAnnouncements.GMCS(eventId, unitTag, isOnline)
 
     if not isOnline and onlineRoleName ~=LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_DISCONNECTED), displayNameLink) )
+            ChatOutput:Print(zo_strformat(groupDisconnectedFormat, displayNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_DISCONNECTED), characterNameLink) )
+            ChatOutput:Print(zo_strformat(groupDisconnectedFormat, characterNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_DISCONNECTED), displayBoth) )
+            ChatOutput:Print(zo_strformat(groupDisconnectedFormat, displayBoth) )
         end
     elseif isOnline and onlineRoleName ~=LUIE.PlayerNameFormatted then
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_RECONNECTED), displayNameLink) )
+            ChatOutput:Print(zo_strformat(groupReconnectedFormat, displayNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_RECONNECTED), characterNameLink) )
+            ChatOutput:Print(zo_strformat(groupReconnectedFormat, characterNameLink) )
         end
         if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-            ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_GROUP_RECONNECTED), displayBoth) )
+            ChatOutput:Print(zo_strformat(groupReconnectedFormat, displayBoth) )
         end
     end
 end
@@ -1493,11 +1599,11 @@ local RESPEC_TYPE_SKILL_LINE = 5
 
 local LUIE_AttributeDisplayType =
 {
-    [RESPEC_TYPE_CHAMPION] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_CHAMPION),
-    [RESPEC_TYPE_ATTRIBUTES] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_ATTRIBUTES),
-    [RESPEC_TYPE_SKILLS] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILLS),
-    [RESPEC_TYPE_MORPHS] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_MORPHS),
-    [RESPEC_TYPE_SKILL_LINE] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILL_LINE),
+    [RESPEC_TYPE_CHAMPION] = currencyNotifyChampionText,
+    [RESPEC_TYPE_ATTRIBUTES] = currencyNotifyAttributesText,
+    [RESPEC_TYPE_SKILLS] = currencyNotifySkillsText,
+    [RESPEC_TYPE_MORPHS] = currencyNotifyMorphsText,
+    [RESPEC_TYPE_SKILL_LINE] = currencyNotifySkillLineText,
 }
 
 -- Called by various functions to display a respec message, type serves as the message type, delay allows the message to sync timing with the chat printer based on source.
@@ -1968,7 +2074,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         elseif changeReason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_GEMS or changeReason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_CROWNS then
             return (currencyType == CURT_STYLE_STONES or currencyType == CURT_SEALS or currencyType == CURT_TRADE_BARS) and ChatAnnouncements.GetContextMessage("CurrencyMessageReceive") or ChatAnnouncements.GetContextMessage("CurrencyMessageSpend"), nil, "continue"
         elseif debugReasonIds[changeReason] then
-            return zo_strformat(GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY), changeReason), nil, "continue"
+            return zo_strformat(debugMsgCurrencyFormat, changeReason), nil, "continue"
         end
         local contextMessageKey = reasonToMessageKey[changeReason]
         if contextMessageKey then
@@ -2062,11 +2168,11 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
             local bagType
             local icon
             if type == "LUIE_CURRENCY_BAG" then
-                bagType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_BAGTYPE1) .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                bagType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. storageBagtype1Text .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
                 icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/icons/store_upgrade_bag.dds|t " or ""
             end
             if type == "LUIE_CURRENCY_BANK" then
-                bagType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_BAGTYPE2) .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                bagType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. storageBagtype2Text .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
                 icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/icons/store_upgrade_bank.dds|t " or ""
             end
             return string_format("|r" .. icon .. "|cFFFFFF" .. bagType .. "|r|c" .. changeColor)
@@ -2075,7 +2181,7 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         -- TODO:
     elseif type == "LUIE_CURRENCY_HERALDRY" then
         local icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:" .. LUIE_MEDIA_UNITFRAMES_CA_HERALDRY_DDS .. "|t " or ""
-        local heraldryMessage = string_format("|r" .. icon .. "|cFFFFFF" .. B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_CURRENCY_NAME_HERALDRY) .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem] .. "|r|c" .. changeColor)
+        local heraldryMessage = string_format("|r" .. icon .. "|cFFFFFF" .. B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. currencyNameHeraldryText .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem] .. "|r|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, heraldryMessage))
     elseif type == "LUIE_CURRENCY_RIDING_SPEED" or type == "LUIE_CURRENCY_RIDING_CAPACITY" or type == "LUIE_CURRENCY_RIDING_STAMINA" then
         local function ResolveRidingStats()
@@ -2083,13 +2189,13 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
             local skillType
             local icon
             if type == "LUIE_CURRENCY_RIDING_SPEED" then
-                skillType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE1) .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                skillType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. storageRidingtype1Text .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
                 icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_speed.dds|t " or ""
             elseif type == "LUIE_CURRENCY_RIDING_CAPACITY" then
-                skillType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE2) .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                skillType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. storageRidingtype2Text .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
                 icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_capacity.dds|t " or ""
             elseif type == "LUIE_CURRENCY_RIDING_STAMINA" then
-                skillType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE3) .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                skillType = string_format(B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. storageRidingtype3Text .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
                 icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_stamina.dds|t " or ""
             end
             return string_format("|r" .. icon .. "|cFFFFFF" .. skillType .. "|r|c" .. changeColor)
@@ -2212,13 +2318,13 @@ end
 --- @param eventId integer
 function ChatAnnouncements.MiscAlertLockSuccess(eventId)
     if ChatAnnouncements.SV.Notify.NotificationLockpickCA then
-        local message = GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS)
+        local message = lockpickSuccessText
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
     end
     if ChatAnnouncements.SV.Notify.NotificationLockpickAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, lockpickSuccessText)
     end
     S.g_lockpickBroken = true
     zo_callLater(function ()
@@ -2234,14 +2340,14 @@ end
 function ChatAnnouncements.StorageBag(eventId, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
     if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
         if ChatAnnouncements.SV.Notify.StorageBagCA then
-            local formattedString = ColorizeColors.StorageBagColorize:Colorize(zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
+            local formattedString = ColorizeColors.StorageBagColorize:Colorize(zo_strformat(inventoryBagUpgradeAnouncementDescriptionFormat, previousCapacity, currentCapacity))
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.Notify.StorageBagAlert then
-            local text = zo_strformat(LUIE_STRING_CA_STORAGE_BAG_UPGRADE)
+            local text = ZO_CachedStrFormat(LUIE_STRING_CA_STORAGE_BAG_UPGRADE)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
         end
     end
@@ -2255,14 +2361,14 @@ end
 function ChatAnnouncements.StorageBank(eventId, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
     if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
         if ChatAnnouncements.SV.Notify.StorageBagCA then
-            local formattedString = ColorizeColors.StorageBagColorize:Colorize(zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
+            local formattedString = ColorizeColors.StorageBagColorize:Colorize(zo_strformat(inventoryBankUpgradeAnouncementDescriptionFormat, previousCapacity, currentCapacity))
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
 
         if ChatAnnouncements.SV.Notify.StorageBagAlert then
-            local text = zo_strformat(LUIE_STRING_CA_STORAGE_BANK_UPGRADE)
+            local text = ZO_CachedStrFormat(LUIE_STRING_CA_STORAGE_BANK_UPGRADE)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
         end
     end
@@ -2806,13 +2912,13 @@ function ChatAnnouncements.MailRemoved(eventId)
     end
     if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
         if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
-            local message = GetString(LUIE_STRING_CA_MAIL_DELETED_MSG)
+            local message = mailDeletedMsgText
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_MAIL_DELETED_MSG))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, mailDeletedMsgText)
         end
     end
 end
@@ -2825,14 +2931,14 @@ function I.IsGuildStoreItemSoldMail(fromSystem, subject)
     if not fromSystem or subject == nil or subject == "" then
         return false
     end
-    return subject == GetString(LUIE_STRING_CA_MAIL_GUILD_STORE_ITEM_SOLD_SUBJECT)
+    return subject == mailGuildStoreItemSoldSubjectText
 end
 
 --- @param authoritativeSender string
 --- @return string
 function I.ResolveGuildStoreSaleMailSender(authoritativeSender)
     local displayName = (authoritativeSender and authoritativeSender ~= "") and authoritativeSender
-        or GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_SERVICES_STORE)
+        or gamepadGuildHeaderGuildServicesStoreText
     return ZO_GAME_REPRESENTATIVE_TEXT:Colorize(displayName)
 end
 
@@ -3187,9 +3293,9 @@ function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
     if not I.ShouldSkipMailReceivedDeletedNotifications() and (ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert) then
         local mailString
         if hasCOD then
-            mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED_COD)
+            mailString = mailReceivedCodText
         else
-            mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED)
+            mailString = mailReceivedText
         end
         if mailString then
             if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
@@ -3318,7 +3424,7 @@ function ChatAnnouncements.OnMailSuccess(eventId)
     if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
         local mailString
         if not S.g_mailCODPresent then
-            mailString = S.g_mailCOD > 1 and GetString(LUIE_STRING_CA_MAIL_SENT_COD) or GetString(LUIE_STRING_CA_MAIL_SENT)
+            mailString = S.g_mailCOD > 1 and mailSentCodText or mailSentText
         end
         if mailString then
             if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
@@ -3447,7 +3553,7 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
 
         if ChatAnnouncements.SV.Achievement.AchievementUpdateCA then
             local catName = GetAchievementCategoryInfo(topLevelIndex)
-            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL)
+            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or journalProgressCategoryGeneralText
             local _, _, _, icon = GetAchievementInfo(id)
             icon = ChatAnnouncements.SV.Achievement.AchievementIcon and ("|t16:16:" .. icon .. "|t ") or ""
 
@@ -3619,7 +3725,7 @@ function I.BuildTimedActivityClaimedSuffix(index, forAlert)
         return ""
     end
     local numClaimed = GetTimedActivityNumTimesClaimed(index)
-    local formatStr = GetString(SI_TIMED_ACTIVITY_CLAIMED_PROGRESS):gsub("|c%x%x%x%x%x%x", ""):gsub("|r", "")
+    local formatStr = timedActivityClaimedProgressText:gsub("|c%x%x%x%x%x%x", ""):gsub("|r", "")
     local claimedProgress = zo_strformat(formatStr, numClaimed, totalClaimable)
     if forAlert then
         return string_format(" |cAAAAAA[%s]|r", claimedProgress)
@@ -3641,15 +3747,15 @@ function I.BuildTimedActivityMessage(index, currentProgress, maxProgress, forAle
     local claimedSuffix = I.BuildTimedActivityClaimedSuffix(index, forAlert)
     local typeName
     if activityType == TIMED_ACTIVITY_TYPE_DAILY then
-        typeName = GetString(SI_TIMEDACTIVITYTYPE0)
+        typeName = timedactivitytype0Text
     elseif activityType == TIMED_ACTIVITY_TYPE_WEEKLY then
-        typeName = GetString(SI_TIMEDACTIVITYTYPE1)
+        typeName = timedactivitytype1Text
     elseif activityType == TIMED_ACTIVITY_TYPE_SEASONAL then
-        typeName = GetString(SI_TIMEDACTIVITYTYPE2) or "Seasonal"
+        typeName = timedactivitytype2Text or "Seasonal"
     else
         typeName = tostring(activityType)
     end
-    local challengeHeader = string_format("[%s]", zo_strformat(GetString(SI_TIMED_ACTIVITIES_TYPE_HEADER), typeName))
+    local challengeHeader = string_format("[%s]", zo_strformat(timedActivitiesTypeHeaderFormat, typeName))
     local bracketOpt = ChatAnnouncements.SV.BracketOptionItem or 1
     local formattedName = (bracketOpt == 1) and name or ("[" .. name .. "]")
     if forAlert then
@@ -3739,9 +3845,9 @@ function ChatAnnouncements.OnTimedActivitiesRerollPriceReset()
     local goldCost = GetGoldCostOfNextTimedActivityReroll()
     local message
     if goldCost and goldCost > 0 then
-        message = zo_strformat(GetString(LUIE_STRING_CA_TIMED_ACTIVITY_REROLL_GOLD_RESET), ZO_CommaDelimitDecimalNumber(goldCost))
+        message = zo_strformat(timedActivityRerollGoldResetFormat, ZO_CommaDelimitDecimalNumber(goldCost))
     else
-        message = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_REROLL_GOLD_RESET_MIN)
+        message = timedActivityRerollGoldResetMinText
     end
     if message == nil or message == "" then
         return
@@ -3761,7 +3867,7 @@ function ChatAnnouncements.OnTamrielTomesEndOfSeasonRecapAvailable()
     if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then
         return
     end
-    local message = GetString(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_TITLE)
+    local message = tamrielTomesSeasonEndDialogTitleText
     if ChatAnnouncements.SV.Notify.TimedActivityCA then
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -3783,7 +3889,7 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventId, c
     if ChatAnnouncements.SV.Notify.PromotionalEventsActivityCA or ChatAnnouncements.SV.Notify.PromotionalEventsActivityAlert then
         local activityId, displayName, description, completionThreshold, rewardId, rewardQuantity = GetPromotionalEventCampaignActivityInfo(campaignKey, activityIndex)
         local progress = string_format("%i / %i", newProgress, completionThreshold)
-        local iconString = zo_iconTextFormat("EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_up.dds", 16, 16, GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER), true, true)
+        local iconString = zo_iconTextFormat("EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_up.dds", 16, 16, promotionalEventTrackerHeaderText, true, true)
         local message = string_format("[%s] %s: %s", iconString, displayName, progress)
 
         if ChatAnnouncements.SV.Notify.PromotionalEventsActivityCA then
@@ -3800,7 +3906,7 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventId, c
         end
 
         if ChatAnnouncements.SV.Notify.PromotionalEventsActivityAlert then
-            local header = GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER)
+            local header = promotionalEventTrackerHeaderText
             local alertMessage = string_format("|c71DE73[%s]|r |cFFFF00%s|r: |cFFFFFF%s|r", header, displayName, progress)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
@@ -3830,7 +3936,7 @@ local PROMOTIONAL_EVENT_CURRENCY_CHANGE_ENABLED_KEYS =
 }
 
 local function QueuePromotionalEventClaimMessage(rewardText)
-    local headerText = GetString(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT)
+    local headerText = promotionalEventRewardClaimedAnnouncementText
     local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, rewardText)
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "DISPLAY" }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -3889,7 +3995,7 @@ local function GetPromotionalEventClaimedRewardText(claimedReward)
             return nil
         end
         local crateId = GetCrownCrateRewardCrateId(rewardId)
-        local crateName = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetCrownCrateName(crateId))
+        local crateName = zo_strformat(tooltipItemNameFormat, GetCrownCrateName(crateId))
         local formattedName = B.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. crateName .. B.linkBracket2[ChatAnnouncements.SV.BracketOptionItem]
         return GetPromotionalEventLootIconMarkup(GetCrownCrateIcon(crateId)) .. GetPromotionalEventQuantityPrefix(quantity) .. formattedName
     end
@@ -3925,7 +4031,7 @@ local function GetPromotionalEventClaimedRewardText(claimedReward)
             iconMarkup = "|t16:16:" .. GetCurrencyLootKeyboardIcon(currencyType) .. "|t "
         end
         local formattedAmount = ZO_CommaDelimitDecimalNumber(quantity)
-        local currencyName = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, quantity ~= 1, false))
+        local currencyName = zo_strformat(currencyNameFormatFormat, GetCurrencyName(currencyType, quantity ~= 1, false))
         return iconMarkup .. formattedAmount .. " " .. currencyName
     end
 
@@ -4010,7 +4116,7 @@ function ChatAnnouncements.OnCraftedAbilityLockStateChanged(eventId, craftedAbil
         local stateColor = "71DE73" -- Green for unlocked state
 
         local message = string_format("|c%s%s|r: %s|c%s%s|r",
-                                      stateColor, GetString(SI_CRAFTED_ABILITY_UNLOCKED_ANNOUNCE_TITLE),
+                                      stateColor, craftedAbilityUnlockedAnnounceTitleText,
                                       iconString,
                                       nameColor, abilityName)
 
@@ -4051,7 +4157,7 @@ function ChatAnnouncements.OnCraftedAbilityScriptLockStateChanged(eventId, craft
         local stateColor = "71DE73" -- Green for unlocked state
 
         local message = string_format("|c%s%s|r: %s|c%s%s|r",
-                                      stateColor, GetString(SI_CRAFTED_ABILITY_SCRIPT_UNLOCKED_ANNOUNCE_TITLE),
+                                      stateColor, craftedAbilityScriptUnlockedAnnounceTitleText,
                                       iconString,
                                       nameColor, scriptName)
 
@@ -4082,9 +4188,9 @@ function ChatAnnouncements.OnFurnitureItemsTransferredToVault(eventId, numEligib
     end
     local msg
     if numEligibleSlotsTransferred == numEligibleSlots then
-        msg = zo_strformat(GetString(SI_FURNITURE_VAULT_STOWED_ALL_ITEMS), numEligibleSlotsTransferred)
+        msg = zo_strformat(furnitureVaultStowedAllItemsFormat, numEligibleSlotsTransferred)
     else
-        msg = zo_strformat(GetString(SI_FURNITURE_VAULT_STOWED_ITEMS), numEligibleSlotsTransferred, numEligibleSlots)
+        msg = zo_strformat(furnitureVaultStowedItemsFormat, numEligibleSlotsTransferred, numEligibleSlots)
     end
     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = msg, type = "MESSAGE" }
     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -4751,7 +4857,7 @@ function ChatAnnouncements.QueueAdventureZoneFactionReputationGain(deltaReputati
     S.g_factionRepAnnounceDedupe.time = now
 
     local faction = GetUnitAdventureZoneFaction("player")
-    local label = GetString(SI_LOOT_HISTORY_ADVENTURE_ZONE_FACTION_REPUTATION)
+    local label = lootHistoryAdventureZoneFactionReputationText
     local iconPath = ZO_GetAdventureZoneFactionIcon(faction) or ""
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and iconPath ~= "") and zo_strformat("<<1>> ", zo_iconFormat(iconPath, 16, 16)) or ""
 
@@ -4932,9 +5038,9 @@ function ChatAnnouncements.JusticeDisplayConfiscate()
     if ChatAnnouncements.SV.Notify.NotificationConfiscateCA or ChatAnnouncements.SV.Notify.NotificationConfiscateAlert then
         local ConfiscateMessage
         if S.g_itemsConfiscated then
-            ConfiscateMessage = GetString(LUIE_STRING_CA_JUSTICE_CONFISCATED_BOUNTY_ITEMS_MSG)
+            ConfiscateMessage = justiceConfiscatedBountyItemsMsgText
         else
-            ConfiscateMessage = GetString(LUIE_STRING_CA_JUSTICE_CONFISCATED_MSG)
+            ConfiscateMessage = justiceConfiscatedMsgText
         end
 
         if ChatAnnouncements.SV.Notify.NotificationConfiscateCA then
@@ -5031,19 +5137,19 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
 
     if disguiseState == DISGUISE_STATE_DANGER then
         if ChatAnnouncements.SV.Notify.DisguiseWarnCA then
-            local message = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER)
+            local message = justiceDisguiseStateDangerText
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_MAJOR_TEXT, SOUNDS.GROUP_ELECTION_REQUESTED)
-            messageParams:SetText(ColorizeColors.DisguiseAlertColorize:Colorize(GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER)))
+            messageParams:SetText(ColorizeColors.DisguiseAlertColorize:Colorize(justiceDisguiseStateDangerText))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, justiceDisguiseStateDangerText)
         end
 
         if (ChatAnnouncements.SV.Notify.DisguiseWarnCA or ChatAnnouncements.SV.Notify.DisguiseWarnAlert) and not ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
@@ -5053,19 +5159,19 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
 
     if disguiseState == DISGUISE_STATE_SUSPICIOUS then
         if ChatAnnouncements.SV.Notify.DisguiseWarnCA then
-            local message = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS)
+            local message = justiceDisguiseStateSuspiciousText
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_MAJOR_TEXT, SOUNDS.GROUP_ELECTION_REQUESTED)
-            messageParams:SetText(ColorizeColors.DisguiseAlertColorize:Colorize(GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS)))
+            messageParams:SetText(ColorizeColors.DisguiseAlertColorize:Colorize(justiceDisguiseStateSuspiciousText))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, justiceDisguiseStateSuspiciousText)
         end
         if (ChatAnnouncements.SV.Notify.DisguiseWarnCA or ChatAnnouncements.SV.Notify.DisguiseWarnAlert) and not ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
             PlaySound(SOUNDS.GROUP_ELECTION_REQUESTED)
@@ -5078,7 +5184,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
     end
 
     if S.g_disguiseState == 1 and (disguiseState == DISGUISE_STATE_NONE) then
-        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
+        local message = zo_strformat("<<1>> <<2>>", justiceDisguiseStateNoneText, Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
         if ChatAnnouncements.SV.Notify.DisguiseCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -5097,7 +5203,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
 
     if S.g_disguiseState == 0 and (disguiseState == DISGUISE_STATE_DISGUISED or disguiseState == DISGUISE_STATE_DANGER or disguiseState == DISGUISE_STATE_SUSPICIOUS or disguiseState == DISGUISE_STATE_DISCOVERED) then
         S.g_currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
-        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
+        local message = zo_strformat("<<1>> <<2>>", justiceDisguiseStateDisguisedText, Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
         if ChatAnnouncements.SV.Notify.DisguiseCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -5153,7 +5259,7 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
             elseif S.g_disguiseState ~= 0 then
                 S.g_disguiseState = 1
                 S.g_currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
-                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
+                local message = zo_strformat("<<1>> <<2>>", justiceDisguiseStateDisguisedText, Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
                 if ChatAnnouncements.SV.Notify.DisguiseCA then
                     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -5173,7 +5279,7 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
         elseif S.g_disguiseState == 1 then
             S.g_disguiseState = GetUnitDisguiseState("player")
             if S.g_disguiseState == 0 then
-                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
+                local message = zo_strformat("<<1>> <<2>>", justiceDisguiseStateNoneText, Effects.GetDisguiseDisplayData(S.g_currentDisguise).description)
                 if ChatAnnouncements.SV.Notify.DisguiseCA then
                     ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -5203,7 +5309,7 @@ end
 function ChatAnnouncements.StuckOnCooldown(eventId)
     local cooldownText = ZO_FormatTime(GetStuckCooldown(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
     local cooldownRemainingText = ZO_FormatTimeMilliseconds(GetTimeUntilStuckAvailable(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-    ChatOutput:Print(zo_strformat(GetString(SI_STUCK_ERROR_ON_COOLDOWN), cooldownText, cooldownRemainingText ))
+    ChatOutput:Print(zo_strformat(stuckErrorOnCooldownFormat, cooldownText, cooldownRemainingText ))
 end
 ]]
 
@@ -5212,7 +5318,7 @@ end
 --[[
 --- @param eventId integer
 function ChatAnnouncements.InventoryFullQuest(eventId)
-    ChatOutput:Print(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), true)
+    ChatOutput:Print(inventoryErrorInventoryFullText, true)
 end
 
 --- @param eventId integer
@@ -5221,9 +5327,9 @@ end
 function ChatAnnouncements.InventoryFull(eventId, numSlotsRequested, numSlotsFree)
     local function DisplayItemFailed()
         if numSlotsRequested == 1 then
-            ChatOutput:Print(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), true)
+            ChatOutput:Print(inventoryErrorInventoryFullText, true)
         else
-            ChatOutput:Print(zo_strformat(GetString(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE), (numSlotsRequested - numSlotsFree) ))
+            ChatOutput:Print(zo_strformat(inventoryErrorInsufficientSpaceFormat, (numSlotsRequested - numSlotsFree) ))
         end
     end
 
@@ -5320,10 +5426,10 @@ function ChatAnnouncements.CheckLFGStatusLeave(WasKicked)
     end
     if S.g_leaveLFGOverride and GetGroupSize() == 0 then
         if ChatAnnouncements.SV.Group.GroupCA then
-            ChatOutput:Print(GetString(LUIE_STRING_CA_GROUP_QUIT_LFG), true)
+            ChatOutput:Print(groupQuitLfgText, true)
         end
         if ChatAnnouncements.SV.Group.GroupAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_QUIT_LFG))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, groupQuitLfgText)
         end
     end
     S.g_leaveLFGOverride = false
@@ -5336,12 +5442,12 @@ end
 function ChatAnnouncements.OnGroupInviteReceived(eventId, inviterName, inviterDisplayName)
     if ChatAnnouncements.SV.Group.GroupCA then
         local finalName = ChatAnnouncements.ResolveNameLink(inviterName, inviterDisplayName)
-        local message = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE), finalName)
+        local message = zo_strformat(groupInviteMessageFormat, finalName)
         ChatOutput:Print(message, true)
     end
     if ChatAnnouncements.SV.Group.GroupAlert then
         local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterName, inviterDisplayName)
-        local alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE), finalAlertName)
+        local alertText = zo_strformat(groupInviteMessageFormat, finalAlertName)
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
     end
 end
@@ -5419,9 +5525,9 @@ function ChatAnnouncements.OnGroupTypeChanged(eventId, largeGroup)
 
     local message
     if largeGroup then
-        message = GetString(SI_CHAT_ANNOUNCEMENT_IN_LARGE_GROUP)
+        message = chatAnnouncementInLargeGroupText
     else
-        message = GetString(SI_CHAT_ANNOUNCEMENT_IN_SMALL_GROUP)
+        message = chatAnnouncementInSmallGroupText
     end
 
     if ChatAnnouncements.SV.Group.GroupCA then
@@ -5438,10 +5544,10 @@ function ChatAnnouncements.VoteNotify(eventId)
     local electionType, timeRemainingSeconds, electionDescriptor, targetUnitTag = GetGroupElectionInfo()
     if electionType == GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS then -- Ready Check
         if ChatAnnouncements.SV.Group.GroupVoteCA then
-            ChatOutput:Print(GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE), true)
+            ChatOutput:Print(groupElectionReadyCheckMessageText, true)
         end
         if ChatAnnouncements.SV.Group.GroupVoteAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, groupElectionReadyCheckMessageText)
         end
     end
 
@@ -5452,12 +5558,12 @@ function ChatAnnouncements.VoteNotify(eventId)
 
         if ChatAnnouncements.SV.Group.GroupVoteCA then
             local finalName = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName, kickMemberPlatformDisplayName)
-            local message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START), finalName)
+            local message = zo_strformat(groupfinderVotekickStartFormat, finalName)
             ChatOutput:Print(message, true)
         end
         if ChatAnnouncements.SV.Group.GroupVoteAlert then
             local finalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName, kickMemberPlatformDisplayName)
-            local alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START), finalAlertName)
+            local alertText = zo_strformat(groupfinderVotekickStartFormat, finalAlertName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
         end
     end
@@ -5479,9 +5585,9 @@ function ChatAnnouncements.MaraOffer(eventId, characterName, isSender, displayNa
     if ChatAnnouncements.SV.Social.PledgeOfMaraCA then
         local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
         if isSender then
-            ChatOutput:Print(zo_strformat(GetString(SI_PLEDGE_OF_MARA_SENDER_MESSAGE), finalName), true)
+            ChatOutput:Print(zo_strformat(pledgeOfMaraSenderMessageFormat, finalName), true)
         else
-            ChatOutput:Print(zo_strformat(GetString(SI_PLEDGE_OF_MARA_MESSAGE), finalName), true)
+            ChatOutput:Print(zo_strformat(pledgeOfMaraMessageFormat, finalName), true)
         end
     end
 
@@ -5490,9 +5596,9 @@ function ChatAnnouncements.MaraOffer(eventId, characterName, isSender, displayNa
         local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
         local alertString
         if isSender then
-            alertString = zo_strformat(GetString(SI_PLEDGE_OF_MARA_SENDER_MESSAGE), finalAlertName)
+            alertString = zo_strformat(pledgeOfMaraSenderMessageFormat, finalAlertName)
         else
-            alertString = zo_strformat(GetString(SI_PLEDGE_OF_MARA_MESSAGE), finalAlertName)
+            alertString = zo_strformat(pledgeOfMaraMessageFormat, finalAlertName)
         end
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertString)
     end
@@ -5506,9 +5612,9 @@ function ChatAnnouncements.DuelStarted(eventId)
         local message
         local formattedIcon = zo_iconFormat("EsoUI/Art/HUD/HUD_Countdown_Badge_Dueling.dds", 16, 16)
         if ChatAnnouncements.SV.Social.DuelStartOptions == 1 then
-            message = zo_strformat(GetString(LUIE_STRING_CA_DUEL_STARTED_WITH_ICON), formattedIcon)
+            message = zo_strformat(duelStartedWithIconFormat, formattedIcon)
         elseif ChatAnnouncements.SV.Social.DuelStartOptions == 2 then
-            message = GetString(LUIE_STRING_CA_DUEL_STARTED)
+            message = duelStartedText
         elseif ChatAnnouncements.SV.Social.DuelStartOptions == 3 then
             message = zo_strformat("<<1>>", formattedIcon)
         end
@@ -5588,10 +5694,10 @@ end
 
 local mementoTable =
 {
-    [10287] = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_CAKE),
-    [1167] = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_PIE),
-    [1168] = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_MEAD),
-    [479] = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_WITCH),
+    [10287] = slashcmdsCollectibleCakeText,
+    [1167] = slashcmdsCollectiblePieText,
+    [1168] = slashcmdsCollectibleMeadText,
+    [479] = slashcmdsCollectibleWitchText,
 }
 
 function ChatAnnouncements.AnnounceMemento()
@@ -5826,19 +5932,19 @@ function ChatAnnouncements.CollectibleResult()
     if collectibleType == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET and (ChatAnnouncements.SV.Collectibles.CollectibleUseCategory10 or LUIE.SlashCollectibleOverride) then
         if GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_VANITY_PET, GAMEPLAY_ACTOR_CATEGORY_PLAYER) > 0 then
             if ChatAnnouncements.SV.Collectibles.CollectibleUsePetNickname and nickname then
-                message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_SUMMON_NN), link, nickname, formattedIcon)
-                alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_SUMMON_NN), name, nickname, "")
+                message = zo_strformat(slashcmdsCollectibleSummonNnFormat, link, nickname, formattedIcon)
+                alert = zo_strformat(slashcmdsCollectibleSummonNnFormat, name, nickname, "")
             else
-                message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_SUMMON), link, formattedIcon)
-                alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_SUMMON), name, "")
+                message = zo_strformat(slashcmdsCollectibleSummonFormat, link, formattedIcon)
+                alert = zo_strformat(slashcmdsCollectibleSummonFormat, name, "")
             end
         else
             if ChatAnnouncements.SV.Collectibles.CollectibleUsePetNickname and nickname then
-                message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_UNSUMMON_NN), link, nickname, formattedIcon)
-                alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_UNSUMMON_NN), name, nickname, "")
+                message = zo_strformat(slashcmdsCollectibleUnsummonNnFormat, link, nickname, formattedIcon)
+                alert = zo_strformat(slashcmdsCollectibleUnsummonNnFormat, name, nickname, "")
             else
-                message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_UNSUMMON), link, formattedIcon)
-                alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_UNSUMMON), name, "")
+                message = zo_strformat(slashcmdsCollectibleUnsummonFormat, link, formattedIcon)
+                alert = zo_strformat(slashcmdsCollectibleUnsummonFormat, name, "")
             end
         end
     end
@@ -5851,12 +5957,12 @@ function ChatAnnouncements.CollectibleResult()
         -- If summoning a new assistant/companion
         if (collectibleType == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT and activeAssistant > 0) or
         (collectibleType == COLLECTIBLE_CATEGORY_TYPE_COMPANION and activeCompanion > 0) then
-            message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_SUMMON), link, formattedIcon)
-            alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_SUMMON), name, "")
+            message = zo_strformat(slashcmdsCollectibleSummonFormat, link, formattedIcon)
+            alert = zo_strformat(slashcmdsCollectibleSummonFormat, name, "")
         else
             -- If dismissing the current assistant/companion
-            message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_UNSUMMON), link, formattedIcon)
-            alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_UNSUMMON), name, "")
+            message = zo_strformat(slashcmdsCollectibleUnsummonFormat, link, formattedIcon)
+            alert = zo_strformat(slashcmdsCollectibleUnsummonFormat, name, "")
         end
     end
 
@@ -5872,11 +5978,11 @@ function ChatAnnouncements.CollectibleResult()
                 local abilityType = GetCollectiblePlayerFxOverrideAbilityType(S.lastCollectibleUsed)
                 categoryString = GetString("SI_PLAYERFXOVERRIDEABILITYTYPE", abilityType)
             else
-                categoryString = GetString(SI_COLLECTIBLECATEGORYTYPE29)
+                categoryString = collectiblecategorytype29Text
             end
         else
-            categoryString = (collectibleType == COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE) and GetString(SI_COLLECTIBLECATEGORYTYPE30) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_HAT) and GetString(SI_COLLECTIBLECATEGORYTYPE10) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_HAIR) and GetString(SI_COLLECTIBLECATEGORYTYPE13) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_HEAD_MARKING) and GetString(SI_COLLECTIBLECATEGORYTYPE17) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_FACIAL_HAIR_HORNS) and GetString(SI_COLLECTIBLECATEGORYTYPE14) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_FACIAL_ACCESSORY) and GetString(SI_COLLECTIBLECATEGORYTYPE15) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_PIERCING_JEWELRY) and GetString(SI_COLLECTIBLECATEGORYTYPE16) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_COSTUME) and GetString(SI_COLLECTIBLECATEGORYTYPE4) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_BODY_MARKING) and GetString(SI_COLLECTIBLECATEGORYTYPE18) or
-                (collectibleType == COLLECTIBLE_CATEGORY_TYPE_SKIN) and GetString(SI_COLLECTIBLECATEGORYTYPE11) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_PERSONALITY) and GetString(SI_COLLECTIBLECATEGORYTYPE9) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_POLYMORPH) and GetString(SI_COLLECTIBLECATEGORYTYPE12)
+            categoryString = (collectibleType == COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE) and collectiblecategorytype30Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_HAT) and collectiblecategorytype10Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_HAIR) and collectiblecategorytype13Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_HEAD_MARKING) and collectiblecategorytype17Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_FACIAL_HAIR_HORNS) and collectiblecategorytype14Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_FACIAL_ACCESSORY) and collectiblecategorytype15Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_PIERCING_JEWELRY) and collectiblecategorytype16Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_COSTUME) and collectiblecategorytype4Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_BODY_MARKING) and collectiblecategorytype18Text or
+                (collectibleType == COLLECTIBLE_CATEGORY_TYPE_SKIN) and collectiblecategorytype11Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_PERSONALITY) and collectiblecategorytype9Text or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_POLYMORPH) and collectiblecategorytype12Text
         end
 
         if (collectibleType == COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE and (ChatAnnouncements.SV.Collectibles.CollectibleUseCategory12 or LUIE.SlashCollectibleOverride))
@@ -5888,11 +5994,11 @@ function ChatAnnouncements.CollectibleResult()
                 isActive = GetActiveCollectibleByType(GetCollectibleCategoryType(S.lastCollectibleUsed), GAMEPLAY_ACTOR_CATEGORY_PLAYER) > 0
             end
             if isActive then
-                message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_USE_CATEGORY), categoryString, link, formattedIcon)
-                alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_USE_CATEGORY), categoryString, name, "")
+                message = zo_strformat(slashcmdsCollectibleUseCategoryFormat, categoryString, link, formattedIcon)
+                alert = zo_strformat(slashcmdsCollectibleUseCategoryFormat, categoryString, name, "")
             else
-                message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_DISABLE_CATEGORY), categoryString, link, formattedIcon)
-                alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_DISABLE_CATEGORY), categoryString, name, "")
+                message = zo_strformat(slashcmdsCollectibleDisableCategoryFormat, categoryString, link, formattedIcon)
+                alert = zo_strformat(slashcmdsCollectibleDisableCategoryFormat, categoryString, name, "")
             end
         end
     end

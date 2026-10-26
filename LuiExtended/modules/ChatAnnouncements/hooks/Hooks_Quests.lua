@@ -8,6 +8,22 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local questAcceptWithIconFormat = GetString(LUIE_STRING_CA_QUEST_ACCEPT_WITH_ICON)
+local notifytextQuestAcceptFormat = GetString(SI_NOTIFYTEXT_QUEST_ACCEPT)
+local questAcceptText = GetString(LUIE_STRING_CA_QUEST_ACCEPT)
+local questCompleteWithIconFormat = GetString(LUIE_STRING_CA_QUEST_COMPLETE_WITH_ICON)
+local notifytextQuestCompleteFormat = GetString(SI_NOTIFYTEXT_QUEST_COMPLETE)
+local notifytextObjectiveCompleteFormat = GetString(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE)
+local trackedQuestStepDoneFormat = GetString(SI_TRACKED_QUEST_STEP_DONE)
+local alerttextQuestConditionFailFormat = GetString(SI_ALERTTEXT_QUEST_CONDITION_FAIL)
+local alerttextQuestConditionFailNoCountFormat = GetString(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT)
+local alerttextQuestConditionUpdateFormat = GetString(SI_ALERTTEXT_QUEST_CONDITION_UPDATE)
+local alerttextQuestConditionUpdateNoCountFormat = GetString(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT)
+local questAbandonedWithIconFormat = GetString(LUIE_STRING_CA_QUEST_ABANDONED_WITH_ICON)
+local questAbandonedFormat = GetString(LUIE_STRING_CA_QUEST_ABANDONED)
+local writCrafterQuestAbandonedFormat = GetString(LUIE_STRING_CA_WRIT_CRAFTER_QUEST_ABANDONED)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -66,9 +82,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         if ChatAnnouncements.SV.Quests.QuestAcceptCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_ACCEPTED)
             if iconTexture then
-                messageParams:SetText(zo_strformat(LUIE_STRING_CA_QUEST_ACCEPT_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName))
+                messageParams:SetText(zo_strformat(questAcceptWithIconFormat, zo_iconFormat(iconTexture, "75%", "75%"), questName))
             else
-                messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_QUEST_ACCEPT, questName))
+                messageParams:SetText(zo_strformat(notifytextQuestAcceptFormat, questName))
             end
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -77,9 +93,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         if ChatAnnouncements.SV.Quests.QuestAcceptAlert then
             local alertString
             if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
-                alertString = zo_strformat(LUIE_STRING_CA_QUEST_ACCEPT_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName)
+                alertString = zo_strformat(questAcceptWithIconFormat, zo_iconFormat(iconTexture, "75%", "75%"), questName)
             else
-                alertString = zo_strformat(SI_NOTIFYTEXT_QUEST_ACCEPT, questName)
+                alertString = zo_strformat(notifytextQuestAcceptFormat, questName)
             end
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertString)
         end
@@ -100,9 +116,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
                 questNameFormatted = (zo_strformat("|c<<1>><<2>>|r", ColorizeColors.QuestColorQuestNameColorize:ToHex(), questName))
             end
             if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
-                formattedString = string_format(GetString(LUIE_STRING_CA_QUEST_ACCEPT) .. zo_iconFormat(iconTexture, 16, 16) .. " " .. questNameFormatted)
+                formattedString = string_format(questAcceptText .. zo_iconFormat(iconTexture, 16, 16) .. " " .. questNameFormatted)
             else
-                formattedString = string_format("%s%s", GetString(LUIE_STRING_CA_QUEST_ACCEPT), questNameFormatted)
+                formattedString = string_format("%s%s", questAcceptText, questNameFormatted)
             end
 
             -- If this message is duplicated by another addon then don't display twice.
@@ -130,9 +146,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         if ChatAnnouncements.SV.Quests.QuestCompleteCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_COMPLETED)
             if iconTexture then
-                messageParams:SetText(zo_strformat(LUIE_STRING_CA_QUEST_COMPLETE_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName))
+                messageParams:SetText(zo_strformat(questCompleteWithIconFormat, zo_iconFormat(iconTexture, "75%", "75%"), questName))
             else
-                messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE, questName))
+                messageParams:SetText(zo_strformat(notifytextQuestCompleteFormat, questName))
             end
             if not LUIE.SV.HideXPBar then
                 messageParams:SetBarParams(I.GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_QUEST_COMPLETE))
@@ -144,9 +160,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         if ChatAnnouncements.SV.Quests.QuestCompleteAlert then
             local alertString
             if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
-                alertString = zo_strformat(LUIE_STRING_CA_QUEST_COMPLETE_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName)
+                alertString = zo_strformat(questCompleteWithIconFormat, zo_iconFormat(iconTexture, "75%", "75%"), questName)
             else
-                alertString = zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE, questName)
+                alertString = zo_strformat(notifytextQuestCompleteFormat, questName)
             end
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertString)
         end
@@ -155,9 +171,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
             local questNameFormatted = (zo_strformat("|cFFA500<<1>>|r", questName))
             local formattedString
             if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
-                formattedString = zo_strformat(LUIE_STRING_CA_QUEST_COMPLETE_WITH_ICON, zo_iconFormat(iconTexture, 16, 16), questNameFormatted)
+                formattedString = zo_strformat(questCompleteWithIconFormat, zo_iconFormat(iconTexture, 16, 16), questNameFormatted)
             else
-                formattedString = zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE, questNameFormatted)
+                formattedString = zo_strformat(notifytextQuestCompleteFormat, questNameFormatted)
             end
             -- This event double fires on quest completion, if an equivalent message is already detected in queue, then abort!
             for i = 1, #ChatAnnouncements.QueuedMessages do
@@ -196,10 +212,10 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         else
             nameFormatted = (zo_strformat("|c<<1>><<2>>|r", ColorizeColors.QuestColorLocNameColorize, name))
         end
-        formattedText = zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE, nameFormatted)
+        formattedText = zo_strformat(notifytextObjectiveCompleteFormat, nameFormatted)
 
         if ChatAnnouncements.SV.Quests.QuestCompleteAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE, name))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(notifytextObjectiveCompleteFormat, name))
         end
 
         if ChatAnnouncements.SV.Quests.QuestCompleteCSA then
@@ -207,7 +223,7 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
             if not LUIE.SV.HideXPBar then
                 messageParams:SetBarParams(I.GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_OBJECTIVE_COMPLETED))
             end
-            messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE, name), finishedDescription)
+            messageParams:SetText(zo_strformat(notifytextObjectiveCompleteFormat, name), finishedDescription)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
@@ -273,44 +289,44 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         end
 
         if isConditionComplete and conditionType == QUEST_CONDITION_TYPE_GIVE_ITEM then
-            messageParams:SetText(zo_strformat(SI_TRACKED_QUEST_STEP_DONE, conditionText))
-            alertMessage = zo_strformat(SI_TRACKED_QUEST_STEP_DONE, conditionText)
-            formattedMessage = zo_strformat(SI_TRACKED_QUEST_STEP_DONE, conditionText)
+            messageParams:SetText(zo_strformat(trackedQuestStepDoneFormat, conditionText))
+            alertMessage = zo_strformat(trackedQuestStepDoneFormat, conditionText)
+            formattedMessage = zo_strformat(trackedQuestStepDoneFormat, conditionText)
             type = 1
         elseif stepOverrideText == "" then
             if isFailCondition then
                 if conditionMax > 1 then
-                    messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL, conditionText, newConditionVal, conditionMax))
-                    alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL, conditionText, newConditionVal, conditionMax)
-                    formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL, conditionText, newConditionVal, conditionMax)
+                    messageParams:SetText(zo_strformat(alerttextQuestConditionFailFormat, conditionText, newConditionVal, conditionMax))
+                    alertMessage = zo_strformat(alerttextQuestConditionFailFormat, conditionText, newConditionVal, conditionMax)
+                    formattedMessage = zo_strformat(alerttextQuestConditionFailFormat, conditionText, newConditionVal, conditionMax)
                 else
-                    messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, conditionText))
-                    alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, conditionText)
-                    formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, conditionText)
+                    messageParams:SetText(zo_strformat(alerttextQuestConditionFailNoCountFormat, conditionText))
+                    alertMessage = zo_strformat(alerttextQuestConditionFailNoCountFormat, conditionText)
+                    formattedMessage = zo_strformat(alerttextQuestConditionFailNoCountFormat, conditionText)
                 end
                 type = 2
             else
                 if conditionMax > 1 and newConditionVal < conditionMax then
-                    messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE, conditionText, newConditionVal, conditionMax))
-                    alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE, conditionText, newConditionVal, conditionMax)
-                    formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE, conditionText, newConditionVal, conditionMax)
+                    messageParams:SetText(zo_strformat(alerttextQuestConditionUpdateFormat, conditionText, newConditionVal, conditionMax))
+                    alertMessage = zo_strformat(alerttextQuestConditionUpdateFormat, conditionText, newConditionVal, conditionMax)
+                    formattedMessage = zo_strformat(alerttextQuestConditionUpdateFormat, conditionText, newConditionVal, conditionMax)
                 else
-                    messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, conditionText))
-                    alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, conditionText)
-                    formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, conditionText)
+                    messageParams:SetText(zo_strformat(alerttextQuestConditionUpdateNoCountFormat, conditionText))
+                    alertMessage = zo_strformat(alerttextQuestConditionUpdateNoCountFormat, conditionText)
+                    formattedMessage = zo_strformat(alerttextQuestConditionUpdateNoCountFormat, conditionText)
                 end
                 type = 1
             end
         else
             if isFailCondition then
-                messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, stepOverrideText))
-                alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, stepOverrideText)
-                formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, stepOverrideText)
+                messageParams:SetText(zo_strformat(alerttextQuestConditionFailNoCountFormat, stepOverrideText))
+                alertMessage = zo_strformat(alerttextQuestConditionFailNoCountFormat, stepOverrideText)
+                formattedMessage = zo_strformat(alerttextQuestConditionFailNoCountFormat, stepOverrideText)
                 type = 2
             else
-                messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, stepOverrideText))
-                alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, stepOverrideText)
-                formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, stepOverrideText)
+                messageParams:SetText(zo_strformat(alerttextQuestConditionUpdateNoCountFormat, stepOverrideText))
+                alertMessage = zo_strformat(alerttextQuestConditionUpdateNoCountFormat, stepOverrideText)
+                formattedMessage = zo_strformat(alerttextQuestConditionUpdateNoCountFormat, stepOverrideText)
                 type = 1
             end
         end
@@ -381,7 +397,7 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
     local function OptionalStepHook(text)
         if text ~= "" then
             local message = zo_strformat("|c<<1>><<2>>|r", ColorizeColors.QuestColorQuestDescriptionColorize, text)
-            local formattedString = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, message)
+            local formattedString = zo_strformat(alerttextQuestConditionUpdateNoCountFormat, message)
 
             if ChatAnnouncements.SV.Quests.QuestObjCompleteCA then
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
@@ -391,7 +407,7 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
 
             if ChatAnnouncements.SV.Quests.QuestObjCompleteCSA then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.QUEST_OBJECTIVE_COMPLETE)
-                messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, text))
+                messageParams:SetText(zo_strformat(alerttextQuestConditionUpdateNoCountFormat, text))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
@@ -426,9 +442,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
                 local questNameFormatted = (zo_strformat("|cFFA500<<1>>|r", questName))
                 local formattedString
                 if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
-                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED_WITH_ICON, zo_iconFormat(iconTexture, 16, 16), questNameFormatted)
+                    formattedString = zo_strformat(questAbandonedWithIconFormat, zo_iconFormat(iconTexture, 16, 16), questNameFormatted)
                 else
-                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED, questNameFormatted)
+                    formattedString = zo_strformat(questAbandonedFormat, questNameFormatted)
                 end
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
@@ -438,9 +454,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
             if ChatAnnouncements.SV.Quests.QuestAbandonCSA then
                 local formattedString
                 if iconTexture then
-                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName)
+                    formattedString = zo_strformat(questAbandonedWithIconFormat, zo_iconFormat(iconTexture, "75%", "75%"), questName)
                 else
-                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED, questName)
+                    formattedString = zo_strformat(questAbandonedFormat, questName)
                 end
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_ABANDONED)
                 messageParams:SetText(formattedString)
@@ -451,9 +467,9 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
             if ChatAnnouncements.SV.Quests.QuestAbandonAlert then
                 local formattedString
                 if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
-                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName)
+                    formattedString = zo_strformat(questAbandonedWithIconFormat, zo_iconFormat(iconTexture, "75%", "75%"), questName)
                 else
-                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED, questName)
+                    formattedString = zo_strformat(questAbandonedFormat, questName)
                 end
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
             end
@@ -573,7 +589,7 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
             local rejectedMat = I.rejectQuest(questIndex)
             if rejectedMat then
                 local questName = GetJournalQuestName(questIndex)
-                ChatOutput:Print(zo_strformat(GetString(LUIE_STRING_CA_WRIT_CRAFTER_QUEST_ABANDONED), questName, rejectedMat), true)
+                ChatOutput:Print(zo_strformat(writCrafterQuestAbandonedFormat, questName, rejectedMat), true)
                 zo_callLater(function ()
                                  AbandonQuest(questIndex)
                              end, 500)

@@ -8,6 +8,16 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local companionNameFormatterFormat = GetString(SI_COMPANION_NAME_FORMATTER)
+local companionLevelUpNameCsaFormat = GetString(SI_COMPANION_LEVEL_UP_NAME_CSA)
+local companionLevelUpNotificationText = GetString(SI_COMPANION_LEVEL_UP_NOTIFICATION)
+local companionActionSlotUnlockedNotificationText = GetString(SI_COMPANION_ACTION_SLOT_UNLOCKED_NOTIFICATION)
+local companionRapportChangedFormat = GetString(LUIE_STRING_CA_COMPANION_RAPPORT_CHANGED)
+local companionSkillXpSubjectFormat = GetString(LUIE_STRING_CA_COMPANION_SKILL_XP_SUBJECT)
+local abilityXpGainProgressFormat = GetString(LUIE_STRING_CA_ABILITY_XP_GAIN_PROGRESS)
+local abilityXpGainFormat = GetString(LUIE_STRING_CA_ABILITY_XP_GAIN)
+
+
 local ColorizeColors = ChatAnnouncements.Colors
 local COMPANION_NAME_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_UNIT_REACTION_COLOR, UNIT_REACTION_COLOR_COMPANION))
 
@@ -15,7 +25,7 @@ local function GetFormattedCompanionName(companionId)
     if not companionId or companionId == 0 then
         return ""
     end
-    return zo_strformat(SI_COMPANION_NAME_FORMATTER, GetCompanionName(companionId))
+    return zo_strformat(companionNameFormatterFormat, GetCompanionName(companionId))
 end
 
 local function QueueCompanionChatAnnouncement(eventManager, moduleName, message, messageType)
@@ -49,13 +59,13 @@ function ChatAnnouncements.Hooks.RegisterCompanion(ctx)
         local showIcon = companionSettings.LevelUpIcon and collectibleIcon and collectibleIcon ~= ""
         local chatIcon = showIcon and (zo_iconFormatInheritColor(collectibleIcon, 16, 16) .. " ") or ""
         local csaIcon = showIcon and zo_iconFormat(collectibleIcon, "100%", "100%") or ""
-        local nameLine = zo_strformat(SI_COMPANION_LEVEL_UP_NAME_CSA, csaIcon, companionName)
-        local levelUpText = GetString(SI_COMPANION_LEVEL_UP_NOTIFICATION)
+        local nameLine = zo_strformat(companionLevelUpNameCsaFormat, csaIcon, companionName)
+        local levelUpText = companionLevelUpNotificationText
         local slotUnlockText
         local previousNumSlots = GetCompanionNumSlotsUnlockedForLevel(previousLevel)
         local currentNumSlots = GetCompanionNumSlotsUnlockedForLevel(currentLevel)
         if currentNumSlots > previousNumSlots then
-            slotUnlockText = GetString(SI_COMPANION_ACTION_SLOT_UNLOCKED_NOTIFICATION)
+            slotUnlockText = companionActionSlotUnlockedNotificationText
         end
 
         if companionSettings.LevelUpCA then
@@ -104,7 +114,7 @@ function ChatAnnouncements.Hooks.RegisterCompanion(ctx)
 
         local rapportChange = currentRapport - previousRapport
         local rapportArrow = currentRapport > previousRapport and "|c00FF00↑ +" or "|cFF0000↓ "
-        local rapportMessage = zo_strformat(LUIE_STRING_CA_COMPANION_RAPPORT_CHANGED, GetFormattedCompanionName(companionId), previousRapport, currentRapport, rapportArrow, rapportChange)
+        local rapportMessage = zo_strformat(companionRapportChangedFormat, GetFormattedCompanionName(companionId), previousRapport, currentRapport, rapportArrow, rapportChange)
 
         if companionSettings.RapportCA then
             QueueCompanionChatAnnouncement(eventManager, moduleName, rapportMessage, "MESSAGE")
@@ -138,7 +148,7 @@ function ChatAnnouncements.Hooks.RegisterCompanion(ctx)
         local companionName = GetFormattedCompanionName(GetActiveCompanionDefId())
         local skillSubject = lineName
         if companionName ~= "" then
-            skillSubject = zo_strformat(LUIE_STRING_CA_COMPANION_SKILL_XP_SUBJECT, companionName, lineName)
+            skillSubject = zo_strformat(companionSkillXpSubjectFormat, companionName, lineName)
         end
         local lastRankXP, nextRankXP, reportedCurrentXP = GetCompanionSkillLineXPInfo(skillLineId)
         local rankProgress = 0
@@ -161,9 +171,9 @@ function ChatAnnouncements.Hooks.RegisterCompanion(ctx)
         local plainText
         if companionSettings.SkillXpProgress and rankXpWindow > 0 then
             local percentLeft = string.format("%.1f", ((rankXpWindow - rankProgress) / rankXpWindow) * 100)
-            plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN_PROGRESS, skillSubject, ZO_CommaDelimitDecimalNumber(experienceGained), ZO_CommaDelimitDecimalNumber(rankProgress), ZO_CommaDelimitDecimalNumber(rankXpWindow), percentLeft)
+            plainText = zo_strformat(abilityXpGainProgressFormat, skillSubject, ZO_CommaDelimitDecimalNumber(experienceGained), ZO_CommaDelimitDecimalNumber(rankProgress), ZO_CommaDelimitDecimalNumber(rankXpWindow), percentLeft)
         else
-            plainText = zo_strformat(LUIE_STRING_CA_ABILITY_XP_GAIN, skillSubject, ZO_CommaDelimitDecimalNumber(experienceGained))
+            plainText = zo_strformat(abilityXpGainFormat, skillSubject, ZO_CommaDelimitDecimalNumber(experienceGained))
         end
 
         if companionSettings.SkillXpCA then

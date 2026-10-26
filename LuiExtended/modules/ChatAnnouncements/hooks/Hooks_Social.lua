@@ -8,6 +8,10 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local ritualOfMaraCompletionAnnounceLargeText = GetString(SI_RITUAL_OF_MARA_COMPLETION_ANNOUNCE_LARGE)
+local maraPledgeofmararesult3Format = GetString(LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT3)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -49,7 +53,7 @@ function ChatAnnouncements.Hooks.RegisterSocial(ctx)
                 if result == PLEDGE_OF_MARA_RESULT_PLEDGED then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_PLEDGE_OF_MARA_RESULT)
-                    messageParams:SetText(GetString(SI_RITUAL_OF_MARA_COMPLETION_ANNOUNCE_LARGE), zo_strformat(LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT3, finalAlertName))
+                    messageParams:SetText(ritualOfMaraCompletionAnnounceLargeText, zo_strformat(maraPledgeofmararesult3Format, finalAlertName))
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
             end
@@ -58,7 +62,7 @@ function ChatAnnouncements.Hooks.RegisterSocial(ctx)
             if ChatAnnouncements.SV.Social.PledgeOfMaraAlert then
                 -- If the menu setting to only display Alert on Failure state is toggled, then do not display an Alert on successful Mara Event
                 if result == PLEDGE_OF_MARA_RESULT_PLEDGED and not ChatAnnouncements.SV.Social.PledgeOfMaraAlertOnlyFail then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT3, finalAlertName))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(maraPledgeofmararesult3Format, finalAlertName))
                 elseif result ~= PLEDGE_OF_MARA_RESULT_PLEDGED and result ~= PLEDGE_OF_MARA_RESULT_BEGIN_PLEDGE then
                     ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, zo_strformat(GetString("LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT", result), finalAlertName))
                 end

@@ -9,6 +9,12 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local tradeInviteAcceptedText = GetString(LUIE_STRING_CA_TRADE_INVITE_ACCEPTED)
+local groupMemberJoinSelfLfgText = GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF_LFG)
+local groupMemberJoinFormText = GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_FORM)
+local groupMemberJoinSelfText = GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF)
+local groupMemberJoinFormat = GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN)
+
 local S = ChatAnnouncements.State
 local B = ChatAnnouncements.Brackets
 
@@ -34,10 +40,10 @@ end
 --- @param eventId integer
 function ChatAnnouncements.TradeInviteAccepted(eventId)
     if ChatAnnouncements.SV.Notify.NotificationTradeCA then
-        ChatOutput:Print(GetString(LUIE_STRING_CA_TRADE_INVITE_ACCEPTED), true)
+        ChatOutput:Print(tradeInviteAcceptedText, true)
     end
     if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_TRADE_INVITE_ACCEPTED))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, tradeInviteAcceptedText)
     end
 
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
@@ -85,25 +91,25 @@ function ChatAnnouncements.CheckLFGStatusJoin()
         if not S.g_lfgDisableGroupEvents then
             if IsInLFGGroup() and not S.g_joinLFGOverride then
                 if ChatAnnouncements.SV.Group.GroupCA then
-                    ChatOutput:Print(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF_LFG), true)
+                    ChatOutput:Print(groupMemberJoinSelfLfgText, true)
                 end
                 if ChatAnnouncements.SV.Group.GroupAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF_LFG))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, groupMemberJoinSelfLfgText)
                 end
             elseif not IsInLFGGroup() and not S.g_joinLFGOverride then
                 local isLeader = IsUnitGroupLeader("player")
                 if ChatAnnouncements.SV.Group.GroupCA then
                     if isLeader then
-                        ChatOutput:Print(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_FORM), true)
+                        ChatOutput:Print(groupMemberJoinFormText, true)
                     else
-                        ChatOutput:Print(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF), true)
+                        ChatOutput:Print(groupMemberJoinSelfText, true)
                     end
                 end
                 if ChatAnnouncements.SV.Group.GroupAlert then
                     if isLeader then
-                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_FORM))
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, groupMemberJoinFormText)
                     else
-                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF))
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, groupMemberJoinSelfText)
                     end
                 end
                 if isLeader and not IsInLFGGroup() then
@@ -120,8 +126,8 @@ function ChatAnnouncements.CheckLFGStatusJoin()
                         local joinedMemberPlatformDisplayName = GetUnitPlatformDisplayName(unitToJoin)
                         local finalName = ChatAnnouncements.ResolveNameLink(joinedMemberName, joinedMemberAccountName, joinedMemberPlatformDisplayName)
                         local finalAlertName = ChatAnnouncements.ResolveNameNoLink(joinedMemberName, joinedMemberAccountName, joinedMemberPlatformDisplayName)
-                        local SendMessage = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalName))
-                        local SendAlert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalAlertName))
+                        local SendMessage = (zo_strformat(groupMemberJoinFormat, finalName))
+                        local SendAlert = (zo_strformat(groupMemberJoinFormat, finalAlertName))
                         ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
                     end
                 end

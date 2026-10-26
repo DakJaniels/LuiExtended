@@ -8,6 +8,22 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local newStyleLearnedFormat = GetString(SI_NEW_STYLE_LEARNED)
+local newStyleChapterLearnedFormat = GetString(SI_NEW_STYLE_CHAPTER_LEARNED)
+local newRecipeLearnedFormat = GetString(SI_NEW_RECIPE_LEARNED)
+local newRecipesLearnedFormat = GetString(SI_NEW_RECIPES_LEARNED)
+local ridingSkillAnnoucementSkillIncreaseFormat = GetString(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE)
+local ridingSkillAnnoucementBannerText = GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER)
+local storageLearnText = GetString(LUIE_STRING_CA_STORAGE_LEARN)
+local inventoryBagUpgradeAnouncementTitleText = GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_TITLE)
+local inventoryBagUpgradeAnouncementDescriptionFormat = GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION)
+local inventoryBankUpgradeAnouncementTitleText = GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_TITLE)
+local inventoryBankUpgradeAnouncementDescriptionFormat = GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION)
+local smithingConsolidatedStationSetsUpdatedAnnouncementTitleText = GetString(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_ANNOUNCEMENT_TITLE)
+local smithingConsolidatedStationSetsUpdatedSingleSetMessageFormat = GetString(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_SINGLE_SET_MESSAGE)
+local smithingConsolidatedStationSetsUpdatedMultiSetMessageFormat = GetString(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_MULTI_SET_MESSAGE)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -39,10 +55,10 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
         if not flag then
             if not isDefaultRacialStyle then
                 if chapterIndex == ITEM_STYLE_CHAPTER_ALL then
-                    local text = zo_strformat(SI_NEW_STYLE_LEARNED, GetItemStyleName(itemStyleId))
+                    local text = zo_strformat(newStyleLearnedFormat, GetItemStyleName(itemStyleId))
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
                 else
-                    local text = zo_strformat(SI_NEW_STYLE_CHAPTER_LEARNED, GetItemStyleName(itemStyleId), GetString("SI_ITEMSTYLECHAPTER", chapterIndex))
+                    local text = zo_strformat(newStyleChapterLearnedFormat, GetItemStyleName(itemStyleId), GetString("SI_ITEMSTYLECHAPTER", chapterIndex))
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
                 end
             end
@@ -61,7 +77,7 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
 
         if not flag then
             local _, name = GetRecipeInfo(recipeListIndex, recipeIndex)
-            local text = zo_strformat(SI_NEW_RECIPE_LEARNED, name)
+            local text = zo_strformat(newRecipeLearnedFormat, name)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.RECIPE_LEARNED, text)
         end
         return true
@@ -77,7 +93,7 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
         end
 
         if not flag then
-            local text = zo_strformat(SI_NEW_RECIPES_LEARNED, numLearned)
+            local text = zo_strformat(newRecipesLearnedFormat, numLearned)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.RECIPE_LEARNED, text)
         end
         return true
@@ -108,20 +124,20 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
             end
 
             if ChatAnnouncements.SV.Notify.StorageRidingCA then
-                local formattedString = ColorizeColors.StorageRidingColorize:Colorize(zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
+                local formattedString = ColorizeColors.StorageRidingColorize:Colorize(zo_strformat(ridingSkillAnnoucementSkillIncreaseFormat, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                 eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
             end
 
             if ChatAnnouncements.SV.Notify.StorageRidingAlert then
-                local text = zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current)
+                local text = zo_strformat(ridingSkillAnnoucementSkillIncreaseFormat, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current)
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
             end
 
             if ChatAnnouncements.SV.Notify.StorageRidingCSA then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-                messageParams:SetText(GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
+                messageParams:SetText(ridingSkillAnnoucementBannerText, zo_strformat(ridingSkillAnnoucementSkillIncreaseFormat, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
@@ -140,7 +156,7 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
                     local icon
                     local bookString
                     local value = current - previous
-                    local learnString = GetString(LUIE_STRING_CA_STORAGE_LEARN)
+                    local learnString = storageLearnText
 
                     if ridingSkill == 1 then
                         if ChatAnnouncements.SV.BracketOptionItem == 1 then
@@ -177,20 +193,20 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
                     eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                 end
 
-                local formattedString = ColorizeColors.StorageRidingColorize:Colorize(zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
+                local formattedString = ColorizeColors.StorageRidingColorize:Colorize(zo_strformat(ridingSkillAnnoucementSkillIncreaseFormat, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
                 ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                 eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
             end
 
             if ChatAnnouncements.SV.Notify.StorageRidingAlert then
-                local text = zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current)
+                local text = zo_strformat(ridingSkillAnnoucementSkillIncreaseFormat, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current)
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
             end
 
             if ChatAnnouncements.SV.Notify.StorageRidingCSA then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-                messageParams:SetText(GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
+                messageParams:SetText(ridingSkillAnnoucementBannerText, zo_strformat(ridingSkillAnnoucementSkillIncreaseFormat, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
@@ -203,7 +219,7 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
         if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
             if ChatAnnouncements.SV.Notify.StorageBagCSA then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-                messageParams:SetText(GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
+                messageParams:SetText(inventoryBagUpgradeAnouncementTitleText, zo_strformat(inventoryBagUpgradeAnouncementDescriptionFormat, previousCapacity, currentCapacity))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BAG_CAPACITY_CHANGED)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
@@ -216,7 +232,7 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
         if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
             if ChatAnnouncements.SV.Notify.StorageBagCSA then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-                messageParams:SetText(GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
+                messageParams:SetText(inventoryBankUpgradeAnouncementTitleText, zo_strformat(inventoryBankUpgradeAnouncementDescriptionFormat, previousCapacity, currentCapacity))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BANK_CAPACITY_CHANGED)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
@@ -247,13 +263,13 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
         end
 
         local inventory = ChatAnnouncements.SV.Inventory
-        local messageTitle = GetString(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_ANNOUNCEMENT_TITLE)
+        local messageTitle = smithingConsolidatedStationSetsUpdatedAnnouncementTitleText
         local messageSubheading
         if numUnlockedSetIds == 1 then
             local setName = GetItemSetName(unlockedSetIds[1])
-            messageSubheading = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_SINGLE_SET_MESSAGE, setName)
+            messageSubheading = zo_strformat(smithingConsolidatedStationSetsUpdatedSingleSetMessageFormat, setName)
         else
-            messageSubheading = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_MULTI_SET_MESSAGE, numUnlockedSetIds)
+            messageSubheading = zo_strformat(smithingConsolidatedStationSetsUpdatedMultiSetMessageFormat, numUnlockedSetIds)
         end
 
         local stationIcon = select(2, GetPlacedHousingFurnitureInfo(craftingStationFurnitureId))

@@ -8,6 +8,10 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local antiquityLeadAcquiredTextFormat = GetString(SI_ANTIQUITY_LEAD_ACQUIRED_TEXT)
+local antiquityLeadAcquiredTitleText = GetString(SI_ANTIQUITY_LEAD_ACQUIRED_TITLE)
+
+
 local S = ChatAnnouncements.State
 local I = ChatAnnouncements.Internal
 local B = ChatAnnouncements.Brackets
@@ -67,8 +71,8 @@ function ChatAnnouncements.Hooks.RegisterAntiquities(ctx)
 
         if ChatAnnouncements.SV.Antiquities.AntiquityCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-            local secondaryText = zo_strformat(SI_ANTIQUITY_LEAD_ACQUIRED_TEXT, antiquityData:GetColorizedName())
-            messageParams:SetText(GetString(SI_ANTIQUITY_LEAD_ACQUIRED_TITLE), secondaryText)
+            local secondaryText = zo_strformat(antiquityLeadAcquiredTextFormat, antiquityData:GetColorizedName())
+            messageParams:SetText(antiquityLeadAcquiredTitleText, secondaryText)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end

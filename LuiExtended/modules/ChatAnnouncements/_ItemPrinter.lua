@@ -9,6 +9,8 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local lootTooManyItemsColoredText = GetString(LUIE_STRING_CA_LOOT_TOO_MANY_ITEMS_COLORED)
+
 local S = ChatAnnouncements.State
 
 local ChatOutput = LUIE.ChatOutput
@@ -81,7 +83,7 @@ local function queueCraftAggregatedItem(isGain, itemString, color, messageType, 
         S.g_itemStringGain = aggregatedString
         S.g_itemCounterGainTracker = S.g_itemCounterGainTracker + 1
         if S.g_itemCounterGainTracker > tooManyThreshold then
-            S.g_itemStringGain = string_format(GetString(LUIE_STRING_CA_LOOT_TOO_MANY_ITEMS_COLORED), color)
+            S.g_itemStringGain = string_format(lootTooManyItemsColoredText, color)
         end
         if S.g_itemCounterGain == 0 then
             S.g_itemCounterGain = ChatAnnouncements.QueuedMessagesCounter
@@ -95,7 +97,7 @@ local function queueCraftAggregatedItem(isGain, itemString, color, messageType, 
         S.g_itemStringLoss = aggregatedString
         S.g_itemCounterLossTracker = S.g_itemCounterLossTracker + 1
         if S.g_itemCounterLossTracker > tooManyThreshold then
-            S.g_itemStringLoss = string_format(GetString(LUIE_STRING_CA_LOOT_TOO_MANY_ITEMS_COLORED), color)
+            S.g_itemStringLoss = string_format(lootTooManyItemsColoredText, color)
         end
         if S.g_itemCounterLoss == 0 then
             S.g_itemCounterLoss = ChatAnnouncements.QueuedMessagesCounter
