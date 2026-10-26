@@ -313,18 +313,6 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                         logPrefix = ChatAnnouncements.GetContextMessage("CurrencyMessageFillet")
                         flag = true
                     end
-                    -- If this is a Skill respec scroll, manually call an announcement for it if enabled (for some reason doesn't display an EVENT_DISPLAY_ANNOUNCEMENT on use anymore)
-                    if removedItemType == ITEMTYPE_CROWN_ITEM and (itemId == 64524 or itemId == 135128) then
-                        zo_callLater(function ()
-                                         ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
-                                     end, 25)
-                    end
-                    -- If this is an Attribute respec scroll, manually call an announcement for it if enabled (we disable EVENT_DISPLAY_ANNOUNCEMENT for this to sync it better)
-                    if removedItemType == ITEMTYPE_CROWN_ITEM and (itemId == 64523 or itemId == 135130) then
-                        zo_callLater(function ()
-                                         ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
-                                     end, 25)
-                    end
                     if ChatAnnouncements.SV.Inventory.LootShowUseMisc and (removedItemType == ITEMTYPE_RECALL_STONE or removedItemType == ITEMTYPE_TROPHY or removedItemType == ITEMTYPE_MASTER_WRIT or removedItemType == ITEMTYPE_CROWN_ITEM) then
                         -- Check to make sure the items aren't riding lesson books.
                         if not crownRidingIds[removedItemId] then

@@ -32,11 +32,6 @@ local groupRoleUpdatedFormat = GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED)
 local groupRoleUpdatedSelfFormat = GetString(LUIE_STRING_CA_GROUP_ROLE_UPDATED_SELF)
 local groupDisconnectedFormat = GetString(LUIE_STRING_CA_GROUP_DISCONNECTED)
 local groupReconnectedFormat = GetString(LUIE_STRING_CA_GROUP_RECONNECTED)
-local currencyNotifyChampionText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_CHAMPION)
-local currencyNotifyAttributesText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_ATTRIBUTES)
-local currencyNotifySkillsText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILLS)
-local currencyNotifyMorphsText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_MORPHS)
-local currencyNotifySkillLineText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILL_LINE)
 local debugMsgCurrencyFormat = GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY)
 local storageBagtype1Text = GetString(LUIE_STRING_CA_STORAGE_BAGTYPE1)
 local storageBagtype2Text = GetString(LUIE_STRING_CA_STORAGE_BAGTYPE2)
@@ -582,6 +577,7 @@ function ChatAnnouncements.Initialize(enabled)
 
     -- Register events
     ChatAnnouncements.RegisterGoldEvents()
+    ChatAnnouncements.RegisterRespecEvents()
     ChatAnnouncements.RegisterLootEvents()
     ChatAnnouncements.RegisterLootHistoryHooks()
     ChatAnnouncements.RegisterMailEvents()
@@ -1367,7 +1363,7 @@ function ChatAnnouncements.ActivityStatusUpdate(eventId, status)
     -- Debug
     -- if status == ACTIVITY_FINDER_STATUS_FORMING_GROUP and S.g_savedQueueValue ~= ACTIVITY_FINDER_STATUS_FORMING_GROUP then
     --     if LUIE.IsDevDebugEnabled() then
-    --         LUIE:Log("Debug", "Old ACTIVITY_FINDER_STATUS_FORMING_GROUP event triggered")
+    --         LogRespecDevDebug("Old ACTIVITY_FINDER_STATUS_FORMING_GROUP event triggered")
     --     end
     -- end
 
@@ -1585,48 +1581,6 @@ end
 ]]
 --
 
-local RESPEC_TYPE_CHAMPION = 1
-local RESPEC_TYPE_ATTRIBUTES = 2
-local RESPEC_TYPE_SKILLS = 3
-local RESPEC_TYPE_MORPHS = 4
-local RESPEC_TYPE_SKILL_LINE = 5
-
-local LUIE_AttributeDisplayType =
-{
-    [RESPEC_TYPE_CHAMPION] = currencyNotifyChampionText,
-    [RESPEC_TYPE_ATTRIBUTES] = currencyNotifyAttributesText,
-    [RESPEC_TYPE_SKILLS] = currencyNotifySkillsText,
-    [RESPEC_TYPE_MORPHS] = currencyNotifyMorphsText,
-    [RESPEC_TYPE_SKILL_LINE] = currencyNotifySkillLineText,
-}
-
--- Called by various functions to display a respec message, type serves as the message type, delay allows the message to sync timing with the chat printer based on source.
---- @param respecType integer
-function ChatAnnouncements.PointRespecDisplay(respecType)
-    local message = LUIE_AttributeDisplayType[respecType] .. "."
-    local messageCSA = LUIE_AttributeDisplayType[respecType]
-
-    if ChatAnnouncements.SV.DisplayAnnouncements.Respec.CA then
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE", isSystem = true }
-        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
-    end
-
-    if ChatAnnouncements.SV.DisplayAnnouncements.Respec.CSA then
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-        messageParams:SetText(messageCSA)
-        messageParams:SetSound(SOUNDS.DISPLAY_ANNOUNCEMENT)
-        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
-        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
-    end
-
-    if ChatAnnouncements.SV.DisplayAnnouncements.Respec.Alert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
-    end
-end
-
---- @param changeReason CurrencyChangeReason
---- @return boolean
 function I.IsContainerLootCurrencyReason(changeReason)
     return changeReason == CURRENCY_CHANGE_REASON_LOOT
         or changeReason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER
@@ -2032,19 +1986,19 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             end
             return nil, nil, "saved_purchase_return"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_SKILLS then
-            ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
+            ChatAnnouncements.PointRespecDisplay(ChatAnnouncements.RespecDisplay.Skills)
             return ChatAnnouncements.GetContextMessage("CurrencyMessageSkills"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_ATTRIBUTES then
-            ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
+            ChatAnnouncements.PointRespecDisplay(ChatAnnouncements.RespecDisplay.Attributes)
             return ChatAnnouncements.GetContextMessage("CurrencyMessageAttributes"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_MORPHS then
-            ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_MORPHS)
+            ChatAnnouncements.PointRespecDisplay(ChatAnnouncements.RespecDisplay.Morphs)
             return ChatAnnouncements.GetContextMessage("CurrencyMessageMorphs"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_SUBCLASS then
-            ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILL_LINE)
+            ChatAnnouncements.PointRespecDisplay(ChatAnnouncements.RespecDisplay.SkillLine)
             return ChatAnnouncements.GetContextMessage("CurrencyMessageSkillLine"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_CHAMPION then
-            ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_CHAMPION)
+            ChatAnnouncements.PointRespecDisplay(ChatAnnouncements.RespecDisplay.Champion)
             return ChatAnnouncements.GetContextMessage("CurrencyMessageChampion"), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_VENDOR_LAUNDER then
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
@@ -2110,7 +2064,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     -- CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER (76): opening currency containers (e.g. Transmutation Geode, other geodes that grant crystals/currency). Mapped to CurrencyMessageLoot above.
     -- if reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
     --     if LUIE.IsDevDebugEnabled() then
-    --         LUIE:Log("Debug", "Currency Change Reason 76 - CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER")
+    --         LogRespecDevDebug("Currency Change Reason 76 - CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER")
     --     end
     -- end
 
@@ -4573,7 +4527,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
             if newValue < questItemIndex[itemId].stack then
                 -- Easy temporary debug for my accounts only
                 -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE:Log("Debug", itemId .. " Removed")
+                --     LogRespecDevDebug(itemId .. " Removed")
                 -- end
                 --
 
@@ -4646,7 +4600,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
             if newValue > questItemIndex[itemId].stack then
                 -- Easy debug for my devs only
                 -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE:Log("Debug", itemId .. " Added")
+                --     LogRespecDevDebug(itemId .. " Added")
                 -- end
                 --
                 countChange = newValue - questItemIndex[itemId].stack
@@ -5118,7 +5072,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
     --         "--> eventId: " .. tostring(eventId) .. "\n" ..
     --         "--> unitTag: " .. tostring(unitTag) .. "\n" ..
     --         "--> disguiseState: " .. tostring(disguiseState)
-    --     LUIE:Log("Debug", traceback)
+    --     LogRespecDevDebug(traceback)
     -- end
 
     if disguiseState == DISGUISE_STATE_DANGER then
@@ -5356,7 +5310,7 @@ function LUIE.HandleClickEvent(rawLink, mouseButton, linkText, linkStyle, linkTy
     --         "--> categoryIndex: " .. tostring(categoryIndex) .. "\n" ..
     --         "--> collectionIndex: " .. tostring(collectionIndex) .. "\n" ..
     --         "--> bookIndex: " .. tostring(bookIndex)
-    --     LUIE:Log("Debug", traceback)
+    --     LogRespecDevDebug(traceback)
     -- end
 
     if linkType == "LINK_TYPE_LUIBOOK" then
