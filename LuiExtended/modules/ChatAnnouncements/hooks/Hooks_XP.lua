@@ -470,100 +470,92 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
     ZO_PreHook(csaHandlers, EVENT_CHAMPION_LEVEL_ACHIEVED, ChampionLevelAchievedHook)
     ZO_PreHook(csaHandlers, EVENT_CHAMPION_POINT_GAINED, ChampionPointGainedHook)
 
-    if CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_RANK_UP then
-        local VETERANCY_RANK_BACKGROUND = "EsoUI/Art/Veterancy/veterancy_rank_bg.dds"
-        local function VeterancyRankUpHook(rankIndex)
-            if not I.AnyExperienceLevelUpAnnouncementEnabled() then
-                return
-            end
-            if not ZO_VETERANCY_MANAGER then
-                return true
-            end
-            local currentRankData = ZO_VETERANCY_MANAGER:GetRankDataByIndex(rankIndex)
-            if not currentRankData then
-                return true
-            end
-            local headerText = veterancyRankUpAnnouncementHeaderText
-            local rankName = currentRankData:GetName()
-            local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, rankName)
-            if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
-                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "EXPERIENCE" }
-                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
-            end
-            local soundId
-            if rankIndex < ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_LOW then
-                soundId = SOUNDS.VETERANCY_RANK_UP_LOW
-            elseif rankIndex < ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_HIGH then
-                soundId = SOUNDS.VETERANCY_RANK_UP_HIGH
-            elseif rankIndex == ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_HIGH then
-                soundId = SOUNDS.VETERANCY_RANK_UP_MAX
-            else
-                soundId = SOUNDS.VETERANCY_RANK_UP_REPEATABLE
-            end
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-            if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
-                messageParams:SetText(headerText, rankName)
-                messageParams:SetIconData(currentRankData:GetIcon(), VETERANCY_RANK_BACKGROUND)
-                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_RANK_UP)
-                messageParams:SetSound(soundId)
-                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
-            end
-            if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedMessage)
-            end
-            if not ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
-                PlaySound(soundId)
-            end
+    local VETERANCY_RANK_BACKGROUND = "EsoUI/Art/Veterancy/veterancy_rank_bg.dds"
+    local function VeterancyRankUpHook(rankIndex)
+        if not I.AnyExperienceLevelUpAnnouncementEnabled() then
+            return
+        end
+        local currentRankData = ZO_VETERANCY_MANAGER:GetRankDataByIndex(rankIndex)
+        if not currentRankData then
             return true
         end
-        local function VeterancyRepeatableRankClaimedHook(claimedCount)
-            if not I.AnyExperienceLevelUpAnnouncementEnabled() then
-                return
-            end
-            if not ZO_VETERANCY_MANAGER then
-                return true
-            end
-            local currentRankData = ZO_VETERANCY_MANAGER:GetCurrentRankData()
-            if not currentRankData then
-                return true
-            end
-            local rankRewardData = currentRankData:GetRankRewardDataByIndex(1)
-            if not rankRewardData then
-                return true
-            end
-            local rewardData = rankRewardData:GetRewardData()
-            local rewardText = rewardData:GetQuantity() > 1 and rewardData:GetFormattedNameWithStack() or rewardData:GetFormattedName()
-            local secondaryText = claimedCount > 1 and zo_strformat(veterancyMaxRankClaimedCountFormatterFormat, claimedCount, rewardText) or rewardText
-            local headerText = veterancyMaxRankClaimedAnnouncementHeaderText
-            local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, secondaryText)
-            if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
-                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "EXPERIENCE" }
-                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
-            end
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.VETERANCY_RANK_UP_REPEATABLE)
-            if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
-                messageParams:SetText(headerText, secondaryText)
-                messageParams:SetIconData(rewardData:GetPlatformLootIcon(), EMERGENCY_BACKGROUND)
-                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_MAX_REWARD_CLAIMED)
-                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
-            end
-            if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedMessage)
-            end
-            if not ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
-                PlaySound(SOUNDS.VETERANCY_RANK_UP_REPEATABLE)
-            end
+        local headerText = veterancyRankUpAnnouncementHeaderText
+        local rankName = currentRankData:GetName()
+        local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, rankName)
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "EXPERIENCE" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
+        end
+        local soundId
+        if rankIndex < ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_LOW then
+            soundId = SOUNDS.VETERANCY_RANK_UP_LOW
+        elseif rankIndex < ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_HIGH then
+            soundId = SOUNDS.VETERANCY_RANK_UP_HIGH
+        elseif rankIndex == ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_HIGH then
+            soundId = SOUNDS.VETERANCY_RANK_UP_MAX
+        else
+            soundId = SOUNDS.VETERANCY_RANK_UP_REPEATABLE
+        end
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            messageParams:SetText(headerText, rankName)
+            messageParams:SetIconData(currentRankData:GetIcon(), VETERANCY_RANK_BACKGROUND)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_RANK_UP)
+            messageParams:SetSound(soundId)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedMessage)
+        end
+        if not ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            PlaySound(soundId)
+        end
+        return true
+    end
+    local function VeterancyRepeatableRankClaimedHook(claimedCount)
+        if not I.AnyExperienceLevelUpAnnouncementEnabled() then
+            return
+        end
+        local currentRankData = ZO_VETERANCY_MANAGER:GetCurrentRankData()
+        if not currentRankData then
             return true
         end
-        local veterancyRankUpHandler = FindCsaCallbackHandler("OnVeterancyRankUp")
-        if veterancyRankUpHandler then
-            ZO_PreHook(veterancyRankUpHandler, "callbackFunction", VeterancyRankUpHook)
+        local rankRewardData = currentRankData:GetRankRewardDataByIndex(1)
+        if not rankRewardData then
+            return true
         end
-        local veterancyClaimHandler = FindCsaCallbackHandler("OnVeterancyRepeatableRankClaimed")
-        if veterancyClaimHandler then
-            ZO_PreHook(veterancyClaimHandler, "callbackFunction", VeterancyRepeatableRankClaimedHook)
+        local rewardData = rankRewardData:GetRewardData()
+        local rewardText = rewardData:GetQuantity() > 1 and rewardData:GetFormattedNameWithStack() or rewardData:GetFormattedName()
+        local secondaryText = claimedCount > 1 and zo_strformat(veterancyMaxRankClaimedCountFormatterFormat, claimedCount, rewardText) or rewardText
+        local headerText = veterancyMaxRankClaimedAnnouncementHeaderText
+        local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, secondaryText)
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "EXPERIENCE" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
         end
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.VETERANCY_RANK_UP_REPEATABLE)
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            messageParams:SetText(headerText, secondaryText)
+            messageParams:SetIconData(rewardData:GetPlatformLootIcon(), EMERGENCY_BACKGROUND)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_MAX_REWARD_CLAIMED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedMessage)
+        end
+        if not ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            PlaySound(SOUNDS.VETERANCY_RANK_UP_REPEATABLE)
+        end
+        return true
+    end
+    local veterancyRankUpHandler = FindCsaCallbackHandler("OnVeterancyRankUp")
+    if veterancyRankUpHandler then
+        ZO_PreHook(veterancyRankUpHandler, "callbackFunction", VeterancyRankUpHook)
+    end
+    local veterancyClaimHandler = FindCsaCallbackHandler("OnVeterancyRepeatableRankClaimed")
+    if veterancyClaimHandler then
+        ZO_PreHook(veterancyClaimHandler, "callbackFunction", VeterancyRepeatableRankClaimedHook)
     end
 end
