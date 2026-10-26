@@ -613,14 +613,10 @@ function ChatAnnouncements.Initialize(enabled)
         eventManager:UnregisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED)
         eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, ChatAnnouncements.OnTimedActivityTrackingUpdated)
         eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnTimedActivityProgressUpdated)
-        if EVENT_TIMED_ACTIVITIES_REROLL_PRICE_RESET then
-            eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITIES_REROLL_PRICE_RESET, ChatAnnouncements.OnTimedActivitiesRerollPriceReset)
-        end
+        eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITIES_REROLL_PRICE_RESET, ChatAnnouncements.OnTimedActivitiesRerollPriceReset)
     end
 
-    if EVENT_TAMRIEL_TOMES_END_OF_SEASON_RECAP_AVAILABLE then
-        eventManager:RegisterForEvent(moduleName, EVENT_TAMRIEL_TOMES_END_OF_SEASON_RECAP_AVAILABLE, ChatAnnouncements.OnTamrielTomesEndOfSeasonRecapAvailable)
-    end
+    eventManager:RegisterForEvent(moduleName, EVENT_TAMRIEL_TOMES_END_OF_SEASON_RECAP_AVAILABLE, ChatAnnouncements.OnTamrielTomesEndOfSeasonRecapAvailable)
 
     -- Promotional Events Activity
     eventManager:RegisterForEvent(moduleName, EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated)
@@ -799,10 +795,8 @@ function ChatAnnouncements.RegisterMailEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_REMOVED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_INBOX_UPDATE)
-    if EVENT_MAIL_LISTS_INITIALIZED then
-        eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_LISTS_INITIALIZED)
-        eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_LISTS_UPDATED)
-    end
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_LISTS_INITIALIZED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_LISTS_UPDATED)
     if ChatAnnouncements.SV.Inventory.LootMail then
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_READABLE, ChatAnnouncements.OnMailReadable)
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, ChatAnnouncements.OnMailTakeAttachedItem)
@@ -825,7 +819,7 @@ function ChatAnnouncements.RegisterMailEvents()
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_OPEN_MAILBOX, ChatAnnouncements.OnMailOpenBox)
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX, ChatAnnouncements.OnMailCloseBox)
     end
-    if EVENT_MAIL_LISTS_INITIALIZED and ChatAnnouncements.SV.Inventory.LootMail then
+    if ChatAnnouncements.SV.Inventory.LootMail then
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_LISTS_INITIALIZED, ChatAnnouncements.OnMailListsUpdated)
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_LISTS_UPDATED, ChatAnnouncements.OnMailListsUpdated)
     end
@@ -1912,10 +1906,8 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURRENCY_CHANGE_REASON_TOME_CHALLENGE_REROLL] = "CurrencyMessageSpend",
         [CURRENCY_CHANGE_REASON_WEEKLY_REROLL_GRANT] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_ENDLESS_DUNGEON_VISION_REROLL] = "CurrencyMessageSpend",
+        [CURRENCY_CHANGE_REASON_TAMRIEL_TOMES_END_OF_SEASON_ROLLOVER_CAP] = "CurrencyMessageReceive",
     }
-    if CURRENCY_CHANGE_REASON_TAMRIEL_TOMES_END_OF_SEASON_ROLLOVER_CAP then
-        reasonToMessageKey[CURRENCY_CHANGE_REASON_TAMRIEL_TOMES_END_OF_SEASON_ROLLOVER_CAP] = "CurrencyMessageReceive"
-    end
     local reasonToCurrencyType =
     {
         [CURRENCY_CHANGE_REASON_BAGSPACE] = "LUIE_CURRENCY_BAG",
@@ -2946,9 +2938,6 @@ end
 --- @param subject string
 --- @return string|nil
 function I.TryGetSenderFromHirelingMailList(subject)
-    if GetNumMailLists == nil or GetMailInfoFromMailList == nil or MAIL_LIST_TYPE_HIRELING == nil then
-        return
-    end
     if subject == nil or subject == "" then
         return
     end
@@ -3839,9 +3828,6 @@ function ChatAnnouncements.OnTimedActivitiesRerollPriceReset()
     if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then
         return
     end
-    if not GetGoldCostOfNextTimedActivityReroll then
-        return
-    end
     local goldCost = GetGoldCostOfNextTimedActivityReroll()
     local message
     if goldCost and goldCost > 0 then
@@ -3861,7 +3847,7 @@ function ChatAnnouncements.OnTimedActivitiesRerollPriceReset()
 end
 
 function ChatAnnouncements.OnTamrielTomesEndOfSeasonRecapAvailable()
-    if not HasTamrielTomesEndOfSeasonRecap or not HasTamrielTomesEndOfSeasonRecap() then
+    if not HasTamrielTomesEndOfSeasonRecap() then
         return
     end
     if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then

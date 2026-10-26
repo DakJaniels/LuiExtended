@@ -757,6 +757,7 @@ function ActionBar.HookGCD()
     function ActionButton:UpdateUsable(slotnum, hotbarCategory, cooldownDuration)
         local duration = cooldownDuration
         if slotnum == nil then
+            local _
             slotnum, hotbarCategory, _, duration = GetActionButtonCooldownInfo(self)
         end
         local isGamepad = IsInGamepadPreferredMode()

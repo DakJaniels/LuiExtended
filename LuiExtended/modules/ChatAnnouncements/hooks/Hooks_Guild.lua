@@ -61,7 +61,7 @@ local function FormatGuildMailSubject(subject)
 end
 
 local function IsGuildMailVisibleToPlayer(guildMailId)
-    if MAIL_MANAGER and MAIL_MANAGER.HasDeletedGuildMail and MAIL_MANAGER:HasDeletedGuildMail(guildMailId) then
+    if MAIL_MANAGER:HasDeletedGuildMail(guildMailId) then
         return false
     end
     return true
@@ -114,12 +114,10 @@ local function AppendGuildMailSentDetails(messageCA, messageAlert, guildId, rank
     local ranksAlert = FormatGuildMailTargetRanks(guildId, rankIds, true)
     messageCA = messageCA .. " " .. zo_strformat(guildMailSentToFormat, ranksCA)
     messageAlert = messageAlert .. "\n" .. zo_strformat(guildMailSentToFormat, ranksAlert)
-    if GetNumActiveGuildMailsForGuild and MAX_GUILD_MAIL_PER_GUILD then
-        local numActive = GetNumActiveGuildMailsForGuild(guildId)
-        local activeLine = zo_strformat(guildMailSentActiveFormat, numActive, MAX_GUILD_MAIL_PER_GUILD)
-        messageCA = messageCA .. " " .. activeLine
-        messageAlert = messageAlert .. "\n" .. activeLine
-    end
+    local numActive = GetNumActiveGuildMailsForGuild(guildId)
+    local activeLine = zo_strformat(guildMailSentActiveFormat, numActive, MAX_GUILD_MAIL_PER_GUILD)
+    messageCA = messageCA .. " " .. activeLine
+    messageAlert = messageAlert .. "\n" .. activeLine
     return messageCA, messageAlert
 end
 
@@ -155,16 +153,10 @@ local function EmitGuildManageError(social, message)
 end
 
 local function GuildMailIdIterator(_, previousMailId)
-    if GetNextValidGuildMailId then
-        return GetNextValidGuildMailId(previousMailId)
-    end
+    return GetNextValidGuildMailId(previousMailId)
 end
 
 function ChatAnnouncements.OnGuildMailUpdate()
-    if not GetNextValidGuildMailId or not IsValidGuildMail then
-        return
-    end
-
     local newMailIds = {}
     for guildMailId in GuildMailIdIterator do
         if IsGuildMailVisibleToPlayer(guildMailId) and IsValidGuildMail(guildMailId) then
@@ -216,9 +208,7 @@ function ChatAnnouncements.RegisterGuildEvents()
     guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_RANK_CHANGED, ChatAnnouncements.GuildRankSaved)
     guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_DESCRIPTION_CHANGED, ChatAnnouncements.GuildTextChanged)
     guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_MOTD_CHANGED, ChatAnnouncements.GuildTextChanged)
-    if EVENT_GUILD_MAIL_UPDATE then
-        guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_MAIL_UPDATE, ChatAnnouncements.OnGuildMailUpdate)
-    end
+    guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_MAIL_UPDATE, ChatAnnouncements.OnGuildMailUpdate)
 end
 
 function ChatAnnouncements.GuildHeraldrySaved()
@@ -768,105 +758,99 @@ function ChatAnnouncements.Hooks.RegisterGuild(ctx)
         end
     end
 
-    if RequestSendGuildMail then
-        local origRequestSendGuildMail = RequestSendGuildMail
-        local function CapturePendingGuildMailSend(guildId, subject, message, ...)
-            local rankIds = { ... }
-            S.pendingGuildMailSend = { guildId = guildId, subject = subject, rankIds = rankIds }
-            return origRequestSendGuildMail(guildId, subject, message, ...)
+    local origRequestSendGuildMail = RequestSendGuildMail
+    local function CapturePendingGuildMailSend(guildId, subject, message, ...)
+        local rankIds = { ... }
+        S.pendingGuildMailSend = { guildId = guildId, subject = subject, rankIds = rankIds }
+        return origRequestSendGuildMail(guildId, subject, message, ...)
+    end
+    --- @diagnostic disable-next-line: duplicate-set-field, missing-global-doc
+    RequestSendGuildMail = CapturePendingGuildMailSend
+
+    local origRequestDeleteGuildMail = RequestDeleteGuildMail
+    local function CapturePendingGuildMailDelete(guildMailId)
+        if IsValidGuildMail(guildMailId) then
+            local guildId, subject = GetGuildMailItemInfo(guildMailId)
+            S.pendingGuildMailDelete = { guildMailId = guildMailId, guildId = guildId, subject = subject }
+        else
+            S.pendingGuildMailDelete = { guildMailId = guildMailId }
         end
-        --- @diagnostic disable-next-line: duplicate-set-field, missing-global-doc
-        RequestSendGuildMail = CapturePendingGuildMailSend
+        return origRequestDeleteGuildMail(guildMailId)
+    end
+    --- @diagnostic disable-next-line: duplicate-set-field, missing-global-doc
+    RequestDeleteGuildMail = CapturePendingGuildMailDelete
+
+    local function BuildGuildMailSentMessages(guildId, subject, rankIds)
+        local guildNameAlliance, guildNameAllianceAlert = GetGuildFormattedNames(guildId)
+        subject = FormatGuildMailSubject(subject)
+        local messageCA = zo_strformat(guildMailSentFormat, guildNameAlliance, subject)
+        local messageAlert = zo_strformat(guildMailSentFormat, guildNameAllianceAlert, subject)
+        return AppendGuildMailSentDetails(messageCA, messageAlert, guildId, rankIds)
     end
 
-    if RequestDeleteGuildMail and GetGuildMailItemInfo then
-        local origRequestDeleteGuildMail = RequestDeleteGuildMail
-        local function CapturePendingGuildMailDelete(guildMailId)
-            if IsValidGuildMail and IsValidGuildMail(guildMailId) then
-                local guildId, subject = GetGuildMailItemInfo(guildMailId)
-                S.pendingGuildMailDelete = { guildMailId = guildMailId, guildId = guildId, subject = subject }
-            else
-                S.pendingGuildMailDelete = { guildMailId = guildMailId }
-            end
-            return origRequestDeleteGuildMail(guildMailId)
-        end
-        --- @diagnostic disable-next-line: duplicate-set-field, missing-global-doc
-        RequestDeleteGuildMail = CapturePendingGuildMailDelete
+    local function BuildGuildMailDeletedMessages(guildId, subject)
+        local guildNameAlliance, guildNameAllianceAlert = GetGuildFormattedNames(guildId)
+        subject = FormatGuildMailSubject(subject)
+        local messageCA = zo_strformat(guildMailDeletedFormat, guildNameAlliance, subject)
+        local messageAlert = zo_strformat(guildMailDeletedFormat, guildNameAllianceAlert, subject)
+        return messageCA, messageAlert
     end
 
-    if EVENT_CREATE_GUILD_MAIL_RESULT and GUILD_MAIL_RESULT_SUCCESS then
-        local function BuildGuildMailSentMessages(guildId, subject, rankIds)
-            local guildNameAlliance, guildNameAllianceAlert = GetGuildFormattedNames(guildId)
-            subject = FormatGuildMailSubject(subject)
-            local messageCA = zo_strformat(guildMailSentFormat, guildNameAlliance, subject)
-            local messageAlert = zo_strformat(guildMailSentFormat, guildNameAllianceAlert, subject)
-            return AppendGuildMailSentDetails(messageCA, messageAlert, guildId, rankIds)
-        end
+    local function HandleGuildMailerResultAlert(result, operation)
+        local social = ChatAnnouncements.SV.Social
+        local manageEnabled = ChatAnnouncements.Enabled and (social.GuildManageCA or social.GuildManageAlert)
 
-        local function BuildGuildMailDeletedMessages(guildId, subject)
-            local guildNameAlliance, guildNameAllianceAlert = GetGuildFormattedNames(guildId)
-            subject = FormatGuildMailSubject(subject)
-            local messageCA = zo_strformat(guildMailDeletedFormat, guildNameAlliance, subject)
-            local messageAlert = zo_strformat(guildMailDeletedFormat, guildNameAllianceAlert, subject)
-            return messageCA, messageAlert
-        end
-
-        local function HandleGuildMailerResultAlert(result, operation)
-            local social = ChatAnnouncements.SV.Social
-            local manageEnabled = ChatAnnouncements.Enabled and (social.GuildManageCA or social.GuildManageAlert)
-
-            if result == GUILD_MAIL_RESULT_SUCCESS then
-                if not manageEnabled then
-                    S.pendingGuildMailSend = nil
-                    S.pendingGuildMailDelete = nil
-                    return false
-                end
-                local messageCA
-                local messageAlert
-                local sound
-                if operation == "create" then
-                    local pending = S.pendingGuildMailSend
-                    if pending and pending.guildId then
-                        messageCA, messageAlert = BuildGuildMailSentMessages(pending.guildId, pending.subject, pending.rankIds)
-                    else
-                        messageCA = guildMailManagementMailSentText
-                        messageAlert = messageCA
-                    end
-                    S.guildMailIncomingSuppressUntilMs = GetGameTimeMilliseconds() + GUILD_MAIL_INCOMING_SUPPRESS_MS
-                    sound = SOUNDS.MAIL_SENT
-                else
-                    local pending = S.pendingGuildMailDelete
-                    if pending and pending.guildId then
-                        messageCA, messageAlert = BuildGuildMailDeletedMessages(pending.guildId, pending.subject)
-                    else
-                        messageCA = guildMailManagementMailDeletedText
-                        messageAlert = messageCA
-                    end
-                    sound = SOUNDS.MAIL_ITEM_DELETED
-                end
-                S.pendingGuildMailSend = nil
-                S.pendingGuildMailDelete = nil
-                EmitGuildManageSuccess(social, messageCA, messageAlert, sound)
-                return true
-            end
-
+        if result == GUILD_MAIL_RESULT_SUCCESS then
             if not manageEnabled then
                 S.pendingGuildMailSend = nil
                 S.pendingGuildMailDelete = nil
                 return false
             end
-            local message = GetString("SI_GUILDMAILERRESULT", result)
+            local messageCA
+            local messageAlert
+            local sound
+            if operation == "create" then
+                local pending = S.pendingGuildMailSend
+                if pending and pending.guildId then
+                    messageCA, messageAlert = BuildGuildMailSentMessages(pending.guildId, pending.subject, pending.rankIds)
+                else
+                    messageCA = guildMailManagementMailSentText
+                    messageAlert = messageCA
+                end
+                S.guildMailIncomingSuppressUntilMs = GetGameTimeMilliseconds() + GUILD_MAIL_INCOMING_SUPPRESS_MS
+                sound = SOUNDS.MAIL_SENT
+            else
+                local pending = S.pendingGuildMailDelete
+                if pending and pending.guildId then
+                    messageCA, messageAlert = BuildGuildMailDeletedMessages(pending.guildId, pending.subject)
+                else
+                    messageCA = guildMailManagementMailDeletedText
+                    messageAlert = messageCA
+                end
+                sound = SOUNDS.MAIL_ITEM_DELETED
+            end
             S.pendingGuildMailSend = nil
             S.pendingGuildMailDelete = nil
-            EmitGuildManageError(social, message)
+            EmitGuildManageSuccess(social, messageCA, messageAlert, sound)
             return true
         end
 
-        ZO_PreHook(alertHandlers, EVENT_CREATE_GUILD_MAIL_RESULT, function (result)
-            return HandleGuildMailerResultAlert(result, "create")
-        end)
-        ZO_PreHook(alertHandlers, EVENT_DELETE_GUILD_MAIL_RESULT, function (result)
-            return HandleGuildMailerResultAlert(result, "delete")
-        end)
+        if not manageEnabled then
+            S.pendingGuildMailSend = nil
+            S.pendingGuildMailDelete = nil
+            return false
+        end
+        local message = GetString("SI_GUILDMAILERRESULT", result)
+        S.pendingGuildMailSend = nil
+        S.pendingGuildMailDelete = nil
+        EmitGuildManageError(social, message)
+        return true
     end
+
+    ZO_PreHook(alertHandlers, EVENT_CREATE_GUILD_MAIL_RESULT, function (result)
+        return HandleGuildMailerResultAlert(result, "create")
+    end)
+    ZO_PreHook(alertHandlers, EVENT_DELETE_GUILD_MAIL_RESULT, function (result)
+        return HandleGuildMailerResultAlert(result, "delete")
+    end)
 end

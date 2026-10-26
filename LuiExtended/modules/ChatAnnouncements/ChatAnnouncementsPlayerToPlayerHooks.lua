@@ -246,29 +246,18 @@ function ChatAnnouncements.PlayerToPlayerHook()
         self:GetRadialMenu():AddEntry(text, normalIcon, selectedIcon, selectedFunction, errorReason)
     end
 
-    -- P51: ShowPlayerInteractMenu(unitTag); U50 still passes boolean isIgnored.
     -- Keep LUIE ChatOutput / alert SV behavior on duel, tribute, friend, and group-kick paths.
+    -- ShowPlayerInteractMenu(unitTag): EsoUI/Ingame/PlayerToPlayer/PlayerToPlayer.lua
     local ENABLED = true
     local DISABLED = false
     local DONT_FORMAT_DISPLAY_NAME = true
-    local P2P_UNIT_TAG = "reticleoverplayer"
-    local isApiUpdate51OrLater = GetAPIVersion() >= 101051
 
-    function ZO_PlayerToPlayer:ShowPlayerInteractMenu(unitTagOrIsIgnored)
+    function ZO_PlayerToPlayer:ShowPlayerInteractMenu(unitTag)
         if ZO_IsConsoleOrGameCoreUI() then
-            return originalShowPlayerInteractMenu(self, unitTagOrIsIgnored)
+            return originalShowPlayerInteractMenu(self, unitTag)
         end
 
-        local unitTag
-        local ENABLED_IF_NOT_IGNORED
-        if type(unitTagOrIsIgnored) == "string" then
-            unitTag = unitTagOrIsIgnored
-            ENABLED_IF_NOT_IGNORED = not IsUnitIgnored(unitTag)
-        else
-            -- U50: first arg is isIgnored boolean
-            unitTag = P2P_UNIT_TAG
-            ENABLED_IF_NOT_IGNORED = not unitTagOrIsIgnored
-        end
+        local ENABLED_IF_NOT_IGNORED = not IsUnitIgnored(unitTag)
 
         local characterNameRaw = GetRawUnitName(unitTag)
         local characterName = zo_strformat(playerToPlayerTargetFormat, characterNameRaw)
@@ -313,8 +302,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
                 groupInviteFunction = function ()
                     local NOT_SENT_FROM_CHAT = false
                     local DISPLAY_INVITED_MESSAGE = true
-                    local inviteName = isApiUpdate51OrLater and crossplayDisplayName or primaryNameUnformatted
-                    TryGroupInviteByName(inviteName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
+                    TryGroupInviteByName(crossplayDisplayName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
                 end
             else
                 if ENABLED_IF_NOT_IGNORED then
@@ -368,12 +356,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
         if duelState ~= DUEL_STATE_IDLE then
             local function AlreadyDuelingWarning(state, partnerCharacter, partnerCrossplay, partnerPlatform)
                 return function ()
-                    local userFacingPartnerName
-                    if isApiUpdate51OrLater then
-                        userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(partnerCrossplay, partnerCharacter, partnerPlatform)
-                    else
-                        userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(partnerCrossplay, partnerCharacter)
-                    end
+                    local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(partnerCrossplay, partnerCharacter, partnerPlatform)
                     local statusString = zo_strformat(GetString("SI_DUELSTATE", state), userFacingPartnerName)
                     ChatOutput:Print(statusString, true)
                     if ChatAnnouncements.SV.Group.GroupAlert then
@@ -385,11 +368,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
             self:AddMenuEntry(playerToPlayerInviteDuelText, platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], DISABLED, AlreadyDuelingWarning(duelState, partnerCharacterName, partnerCrossplayDisplayName, partnerPlatformDisplayName))
         else
             local function DuelInviteOption()
-                if isApiUpdate51OrLater then
-                    ChallengeTargetToDuel(crossplayDisplayName)
-                else
-                    ChallengeTargetToDuel(characterName)
-                end
+                ChallengeTargetToDuel(crossplayDisplayName)
             end
             local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
             self:AddMenuEntry(playerToPlayerInviteDuelText, platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], isEnabled, isEnabled and DuelInviteOption or disabledOption)
@@ -435,8 +414,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
 
         -- Trade
         local function TradeInviteOption()
-            local tradeName = isApiUpdate51OrLater and crossplayDisplayName or primaryNameUnformatted
-            TRADE_WINDOW:InitiateTrade(tradeName)
+            TRADE_WINDOW:InitiateTrade(crossplayDisplayName)
         end
         local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
         local tradeInviteFunction = isEnabled and TradeInviteOption or disabledOption

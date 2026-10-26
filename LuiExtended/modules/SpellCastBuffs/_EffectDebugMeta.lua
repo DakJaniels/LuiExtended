@@ -193,10 +193,8 @@ local abilityTypeNames =
     [ABILITY_TYPE_LEVITATE] = "LEVITATE",
     [ABILITY_TYPE_PACIFY] = "PACIFY",
     [ABILITY_TYPE_OFFBALANCE] = "OFFBALANCE",
+    [ABILITY_TYPE_SPECIALMOVEREPLACEMENT] = "SPECIALMOVEREPLACEMENT",
 }
-if ABILITY_TYPE_SPECIALMOVEREPLACEMENT then
-    abilityTypeNames[ABILITY_TYPE_SPECIALMOVEREPLACEMENT] = "SPECIALMOVEREPLACEMENT"
-end
 
 --- AbilityType value → label (API order 0..119). Fills gaps without pairs(_G) - insecure scan hits protected globals.
 local ABILITY_TYPE_VALUE_LABELS =
