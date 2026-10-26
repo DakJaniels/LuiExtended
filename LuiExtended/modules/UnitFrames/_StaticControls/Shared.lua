@@ -276,17 +276,15 @@ end
 --- @param veterancyRank integer
 --- @return string|nil iconPath
 function FrameObject.GetVeterancyRankIconPath(veterancyRank)
-    if not GetVeterancyRankIcon or veterancyRank == nil then
+    if veterancyRank == nil then
         return nil
     end
     local rankForIcon = veterancyRank
-    if ZO_VETERANCY_MANAGER and ZO_VETERANCY_MANAGER.GetNumRanks then
-        local numRanks = ZO_VETERANCY_MANAGER:GetNumRanks()
-        if numRanks and numRanks > 0 and rankForIcon > numRanks then
-            rankForIcon = numRanks
-        end
+    local numRanks = ZO_VETERANCY_MANAGER:GetNumRanks()
+    if numRanks and numRanks > 0 and rankForIcon > numRanks then
+        rankForIcon = numRanks
     end
-    local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
+    local seasonId = GetCurrentVeterancySeasonId()
     return GetVeterancyRankIcon(rankForIcon, seasonId)
 end
 
@@ -652,12 +650,8 @@ function FrameObject:UpdateStaticControlLevelRow()
         local levelText
         if shouldShowVeterancyInfo then
             local veterancyRank = GetUnitVeterancyRank(self.unitTag)
-            if GetVeterancyRankTitle and SI_VETERANCY_RANK_AND_TITLE_FORMATTER then
-                local seasonId = GetCurrentVeterancySeasonId and GetCurrentVeterancySeasonId() or nil
-                levelText = ZO_CachedStrFormat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, veterancyRank, GetVeterancyRankTitle(veterancyRank, seasonId))
-            else
-                levelText = tostring(veterancyRank)
-            end
+            local seasonId = GetCurrentVeterancySeasonId()
+            levelText = ZO_CachedStrFormat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, veterancyRank, GetVeterancyRankTitle(veterancyRank, seasonId))
             iconPath = FrameObject.GetVeterancyRankIconPath(veterancyRank)
         elseif self.isChampion then
             if IsInGamepadPreferredMode() then
