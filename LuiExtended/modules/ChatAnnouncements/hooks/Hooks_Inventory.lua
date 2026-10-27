@@ -115,7 +115,7 @@ function ChatAnnouncements.Hooks.RegisterInventory(ctx)
                 local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
                 local changeType = ZO_CommaDelimitDecimalNumber(250)
                 local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
-                local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
+                local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY) .. "|t") or ""
                 local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, 250)
                 local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
                 local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold

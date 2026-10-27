@@ -1869,6 +1869,186 @@ function ChatAnnouncements.CreateSettings()
                 end,
                 default = Defaults.Currency.CurrencyMessageTotalTomeChallengeRerolls,
             },
+            {
+                -- Show Imperial Fragments
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTS_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyImperialFragmentsChange
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyImperialFragmentsChange = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Currency.CurrencyImperialFragmentsChange,
+            },
+            {
+                -- Show Imperial Fragments Color
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSCOLOR)),
+                getFunc = function ()
+                    return unpack(Settings.Currency.CurrencyImperialFragmentsColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.Currency.CurrencyImperialFragmentsColor = { r, g, b, a }
+                    ChatAnnouncements.RegisterColorEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyImperialFragmentsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default =
+                {
+                    r = Defaults.Currency.CurrencyImperialFragmentsColor[1],
+                    g = Defaults.Currency.CurrencyImperialFragmentsColor[2],
+                    b = Defaults.Currency.CurrencyImperialFragmentsColor[3],
+                },
+            },
+            {
+                -- Show Imperial Fragments Name
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSNAME_TP),
+                getFunc = function ()
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyImperialFragmentsName")
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyImperialFragmentsName = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyImperialFragmentsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyImperialFragmentsName,
+            },
+            {
+                -- Show Imperial Fragments Total
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSTOTAL_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyImperialFragmentsShowTotal
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyImperialFragmentsShowTotal = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyImperialFragmentsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyImperialFragmentsShowTotal,
+            },
+            {
+                -- Total Currency Message (Imperial Fragments)
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_IMPERIALFRAGMENTSTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_IMPERIALFRAGMENTSTOTAL_MSG_TP),
+                getFunc = function ()
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalImperialFragments")
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyMessageTotalImperialFragments = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyImperialFragmentsChange and Settings.Currency.CurrencyImperialFragmentsShowTotal)
+                end,
+                default = Defaults.Currency.CurrencyMessageTotalImperialFragments,
+            },
+            {
+                -- Show Jerall Marks
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKS_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyJerallMarksChange
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyJerallMarksChange = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Currency.CurrencyJerallMarksChange,
+            },
+            {
+                -- Show Jerall Marks Color
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSCOLOR)),
+                getFunc = function ()
+                    return unpack(Settings.Currency.CurrencyJerallMarksColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.Currency.CurrencyJerallMarksColor = { r, g, b, a }
+                    ChatAnnouncements.RegisterColorEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyJerallMarksChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default =
+                {
+                    r = Defaults.Currency.CurrencyJerallMarksColor[1],
+                    g = Defaults.Currency.CurrencyJerallMarksColor[2],
+                    b = Defaults.Currency.CurrencyJerallMarksColor[3],
+                },
+            },
+            {
+                -- Show Jerall Marks Name
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSNAME_TP),
+                getFunc = function ()
+                    return ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyJerallMarksName")
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyJerallMarksName = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyJerallMarksChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyJerallMarksName,
+            },
+            {
+                -- Show Jerall Marks Total
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSTOTAL_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyJerallMarksShowTotal
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyJerallMarksShowTotal = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyJerallMarksChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyJerallMarksShowTotal,
+            },
+            {
+                -- Total Currency Message (Jerall Marks)
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_JERALLMARKSTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_JERALLMARKSTOTAL_MSG_TP),
+                getFunc = function ()
+                    return ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalJerallMarks")
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyMessageTotalJerallMarks = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyJerallMarksChange and Settings.Currency.CurrencyJerallMarksShowTotal)
+                end,
+                default = Defaults.Currency.CurrencyMessageTotalJerallMarks,
+            },
         },
     }
 

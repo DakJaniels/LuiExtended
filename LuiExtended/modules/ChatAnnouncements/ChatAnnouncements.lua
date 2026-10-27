@@ -666,6 +666,8 @@ function ChatAnnouncements.RegisterColorEvents()
     ColorizeColors.CurrencyTomePointCachesColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTomePointCachesColor))
     ColorizeColors.CurrencyTomeTokensColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTomeTokensColor))
     ColorizeColors.CurrencyTomeChallengeRerollsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTomeChallengeRerollsColor))
+    ColorizeColors.CurrencyImperialFragmentsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyImperialFragmentsColor))
+    ColorizeColors.CurrencyJerallMarksColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyJerallMarksColor))
     ColorizeColors.DisguiseAlertColorize = ZO_ColorDef:New(unpack(SV.Notify.DisguiseAlertColor))
     ColorizeColors.AchievementColorize1 = ZO_ColorDef:New(unpack(SV.Achievement.AchievementColor1))
     ColorizeColors.AchievementColorize2 = ZO_ColorDef:New(unpack(SV.Achievement.AchievementColor2))
@@ -1693,20 +1695,22 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     -- Descriptor table for currencies without throttle/filter (icon path uses |t16:16:...|t when CurrencyIcon is true)
     local SIMPLE_CURRENCY =
     {
-        [CURT_WRIT_VOUCHERS]          = { "CurrencyWVChange", "CurrencyWVColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_WRIT_VOUCHERS), "CurrencyWVName", "CurrencyWVShowTotal", "CurrencyMessageTotalWV" },
-        [CURT_STYLE_STONES]           = { "CurrencyOutfitTokenChange", "CurrencyOutfitTokenColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_STYLE_STONES), "CurrencyOutfitTokenName", "CurrencyOutfitTokenShowTotal", "CurrencyMessageTotalOutfitToken" },
-        [CURT_TRANSMUTE_CRYSTALS]     = { "CurrencyTransmuteChange", "CurrencyTransmuteColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TRANSMUTE_CRYSTALS), "CurrencyTransmuteName", "CurrencyTransmuteShowTotal", "CurrencyMessageTotalTransmute" },
-        [CURT_UNDAUNTED_KEYS]         = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_UNDAUNTED_KEYS), "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
-        [CURT_UNDAUNTED_CRESTS]       = { "CurrencyUndauntedCrestsChange", "CurrencyUndauntedCrestsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_UNDAUNTED_CRESTS), "CurrencyUndauntedCrestsName", "CurrencyUndauntedCrestsShowTotal", "CurrencyMessageTotalUndauntedCrests" },
+        [CURT_WRIT_VOUCHERS]          = { "CurrencyWVChange", "CurrencyWVColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_WRIT_VOUCHERS), "CurrencyWVName", "CurrencyWVShowTotal", "CurrencyMessageTotalWV" },
+        [CURT_STYLE_STONES]           = { "CurrencyOutfitTokenChange", "CurrencyOutfitTokenColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_STYLE_STONES), "CurrencyOutfitTokenName", "CurrencyOutfitTokenShowTotal", "CurrencyMessageTotalOutfitToken" },
+        [CURT_TRANSMUTE_CRYSTALS]     = { "CurrencyTransmuteChange", "CurrencyTransmuteColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_TRANSMUTE_CRYSTALS), "CurrencyTransmuteName", "CurrencyTransmuteShowTotal", "CurrencyMessageTotalTransmute" },
+        [CURT_UNDAUNTED_KEYS]         = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_UNDAUNTED_KEYS), "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
+        [CURT_UNDAUNTED_CRESTS]       = { "CurrencyUndauntedCrestsChange", "CurrencyUndauntedCrestsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_UNDAUNTED_CRESTS), "CurrencyUndauntedCrestsName", "CurrencyUndauntedCrestsShowTotal", "CurrencyMessageTotalUndauntedCrests" },
         [CURT_CROWNS]                 = { "CurrencyCrownsChange", "CurrencyCrownsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS), "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
         [CURT_CROWN_GEMS]             = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
-        [CURT_ARCHIVAL_FORTUNES]      = { "CurrencyEndlessChange", "CurrencyEndlessColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_ARCHIVAL_FORTUNES), "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
-        [CURT_SEALS]                  = { "CurrencySealsChange", "CurrencySealsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_SEALS), "CurrencySealsName", "CurrencySealsShowTotal", "CurrencyMessageTotalSeals" },
-        [CURT_TRADE_BARS]             = { "CurrencyTradeBarsChange", "CurrencyTradeBarsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TRADE_BARS), "CurrencyTradeBarsName", "CurrencyTradeBarsShowTotal", "CurrencyMessageTotalTradeBars" },
-        [CURT_TOME_POINTS]            = { "CurrencyTomePointsChange", "CurrencyTomePointsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_POINTS), "CurrencyTomePointsName", "CurrencyTomePointsShowTotal", "CurrencyMessageTotalTomePoints" },
-        [CURT_TOME_POINT_CACHES]      = { "CurrencyTomePointCachesChange", "CurrencyTomePointCachesColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_POINT_CACHES), "CurrencyTomePointCachesName", "CurrencyTomePointCachesShowTotal", "CurrencyMessageTotalTomePointCaches" },
-        [CURT_TOME_TOKENS]            = { "CurrencyTomeTokensChange", "CurrencyTomeTokensColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_TOKENS), "CurrencyTomeTokensName", "CurrencyTomeTokensShowTotal", "CurrencyMessageTotalTomeTokens" },
-        [CURT_TOME_CHALLENGE_REROLLS] = { "CurrencyTomeChallengeRerollsChange", "CurrencyTomeChallengeRerollsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_CHALLENGE_REROLLS), "CurrencyTomeChallengeRerollsName", "CurrencyTomeChallengeRerollsShowTotal", "CurrencyMessageTotalTomeChallengeRerolls" },
+        [CURT_ARCHIVAL_FORTUNES]      = { "CurrencyEndlessChange", "CurrencyEndlessColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_ARCHIVAL_FORTUNES), "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
+        [CURT_SEALS]                  = { "CurrencySealsChange", "CurrencySealsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_SEALS), "CurrencySealsName", "CurrencySealsShowTotal", "CurrencyMessageTotalSeals" },
+        [CURT_TRADE_BARS]             = { "CurrencyTradeBarsChange", "CurrencyTradeBarsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_TRADE_BARS), "CurrencyTradeBarsName", "CurrencyTradeBarsShowTotal", "CurrencyMessageTotalTradeBars" },
+        [CURT_TOME_POINTS]            = { "CurrencyTomePointsChange", "CurrencyTomePointsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_TOME_POINTS), "CurrencyTomePointsName", "CurrencyTomePointsShowTotal", "CurrencyMessageTotalTomePoints" },
+        [CURT_TOME_POINT_CACHES]      = { "CurrencyTomePointCachesChange", "CurrencyTomePointCachesColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_TOME_POINT_CACHES), "CurrencyTomePointCachesName", "CurrencyTomePointCachesShowTotal", "CurrencyMessageTotalTomePointCaches" },
+        [CURT_TOME_TOKENS]            = { "CurrencyTomeTokensChange", "CurrencyTomeTokensColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_TOME_TOKENS), "CurrencyTomeTokensName", "CurrencyTomeTokensShowTotal", "CurrencyMessageTotalTomeTokens" },
+        [CURT_TOME_CHALLENGE_REROLLS] = { "CurrencyTomeChallengeRerollsChange", "CurrencyTomeChallengeRerollsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_TOME_CHALLENGE_REROLLS), "CurrencyTomeChallengeRerollsName", "CurrencyTomeChallengeRerollsShowTotal", "CurrencyMessageTotalTomeChallengeRerolls" },
+        [CURT_IMPERIAL_FRAGMENTS]     = { "CurrencyImperialFragmentsChange", "CurrencyImperialFragmentsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_IMPERIAL_FRAGMENTS), "CurrencyImperialFragmentsName", "CurrencyImperialFragmentsShowTotal", "CurrencyMessageTotalImperialFragments" },
+        [CURT_JERALL_MARKS]           = { "CurrencyJerallMarksChange", "CurrencyJerallMarksColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_JERALL_MARKS), "CurrencyJerallMarksName", "CurrencyJerallMarksShowTotal", "CurrencyMessageTotalJerallMarks" },
     }
 
     local function GetCurrencyDisplayInfo(currencyType, amountDelta, changeReason)
@@ -1730,7 +1734,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             return
             {
                 currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex(),
-                currencyIcon = currencySettings.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or "",
+                currencyIcon = currencySettings.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY) .. "|t") or "",
                 currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyGoldName"), amountDelta),
                 currencyTotal = currencySettings.CurrencyGoldShowTotal,
                 messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalGold"),
@@ -1752,7 +1756,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             return
             {
                 currencyTypeColor = ColorizeColors.CurrencyAPColorize:ToHex(),
-                currencyIcon = currencySettings.CurrencyIcon and "|t16:16:/esoui/art/currency/alliancepoints.dds|t" or "",
+                currencyIcon = currencySettings.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_ALLIANCE_POINTS) .. "|t") or "",
                 currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyAPName"), amountDelta),
                 currencyTotal = currencySettings.CurrencyAPShowTotal,
                 messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalAP"),
@@ -1774,7 +1778,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             return
             {
                 currencyTypeColor = ColorizeColors.CurrencyTVColorize:ToHex(),
-                currencyIcon = currencySettings.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_telvar.dds|t" or "",
+                currencyIcon = currencySettings.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_TELVAR_STONES) .. "|t") or "",
                 currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTVName"), amountDelta),
                 currencyTotal = currencySettings.CurrencyTVShowTotal,
                 messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTV"),
@@ -2204,7 +2208,7 @@ function ChatAnnouncements.CurrencyGoldThrottlePrinter()
         local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyUpColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
         local changeType = ZO_CommaDelimitDecimalNumber(S.g_currencyGoldThrottleValue)
         local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY) .. "|t") or ""
         local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyGoldName"), S.g_currencyGoldThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
         local messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalGold")
@@ -2222,7 +2226,7 @@ function ChatAnnouncements.CurrencyAPThrottlePrinter()
         local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyUpColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
         local changeType = ZO_CommaDelimitDecimalNumber(S.g_currencyAPThrottleValue)
         local currencyTypeColor = ColorizeColors.CurrencyAPColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/alliancepoints.dds|t" or ""
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_ALLIANCE_POINTS) .. "|t") or ""
         local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyAPName"), S.g_currencyAPThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyAPShowTotal
         local messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalAP")
@@ -2240,7 +2244,7 @@ function ChatAnnouncements.CurrencyTVThrottlePrinter()
         local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyUpColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
         local changeType = ZO_CommaDelimitDecimalNumber(S.g_currencyTVThrottleValue)
         local currencyTypeColor = ColorizeColors.CurrencyTVColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_telvar.dds|t" or ""
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_TELVAR_STONES) .. "|t") or ""
         local currencyName = zo_strformat(ChatAnnouncements.GetCurrencyDisplayNameFormat("CurrencyTVName"), S.g_currencyTVThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTVShowTotal
         local messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalTV")
@@ -3344,7 +3348,7 @@ function ChatAnnouncements.OnMailSuccess(eventId)
     local formattedValue = ZO_CommaDelimitDecimalNumber(I.GetCarriedCurrencyAmount(1))
     local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
     local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
-    local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
+    local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and ("|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY) .. "|t") or ""
     local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
     local messageTotal = ChatAnnouncements.GetCurrencyMessageFormat("CurrencyMessageTotalGold")
 
@@ -3873,6 +3877,8 @@ local PROMOTIONAL_EVENT_CURRENCY_CHANGE_ENABLED_KEYS =
     [CURT_TOME_POINT_CACHES] = "CurrencyTomePointCachesChange",
     [CURT_TOME_TOKENS] = "CurrencyTomeTokensChange",
     [CURT_TOME_CHALLENGE_REROLLS] = "CurrencyTomeChallengeRerollsChange",
+    [CURT_IMPERIAL_FRAGMENTS] = "CurrencyImperialFragmentsChange",
+    [CURT_JERALL_MARKS] = "CurrencyJerallMarksChange",
 }
 
 local function QueuePromotionalEventClaimMessage(rewardText)
@@ -3968,7 +3974,7 @@ local function GetPromotionalEventClaimedRewardText(claimedReward)
         end
         local iconMarkup = ""
         if ChatAnnouncements.SV.Currency.CurrencyIcon then
-            iconMarkup = "|t16:16:" .. GetCurrencyLootKeyboardIcon(currencyType) .. "|t "
+            iconMarkup = "|t16:16:" .. ZO_Currency_GetPlatformCurrencyIcon(currencyType) .. "|t "
         end
         local formattedAmount = ZO_CommaDelimitDecimalNumber(quantity)
         local currencyName = zo_strformat(currencyNameFormatFormat, GetCurrencyName(currencyType, quantity ~= 1, false))

@@ -1802,6 +1802,178 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomeChallengeRerollsChange and Settings.Currency.CurrencyTomeChallengeRerollsShowTotal)
             end
         }
+
+        -- Imperial Fragments
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTS_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyImperialFragmentsChange
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyImperialFragmentsChange = value
+            end,
+            default = Defaults.Currency.CurrencyImperialFragmentsChange,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSCOLOR),
+            getFunction = function ()
+                return Settings.Currency.CurrencyImperialFragmentsColor[1], Settings.Currency.CurrencyImperialFragmentsColor[2], Settings.Currency.CurrencyImperialFragmentsColor[3], Settings.Currency.CurrencyImperialFragmentsColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.Currency.CurrencyImperialFragmentsColor = { r, g, b, a }
+                ChatAnnouncements.RegisterColorEvents()
+            end,
+            default = Defaults.Currency.CurrencyImperialFragmentsColor,
+            disable = function ()
+                return not (Settings.Currency.CurrencyImperialFragmentsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSNAME_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyImperialFragmentsName
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyImperialFragmentsName = value
+            end,
+            default = Defaults.Currency.CurrencyImperialFragmentsName,
+            disable = function ()
+                return not (Settings.Currency.CurrencyImperialFragmentsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWIMPERIALFRAGMENTSTOTAL_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyImperialFragmentsShowTotal
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyImperialFragmentsShowTotal = value
+            end,
+            default = Defaults.Currency.CurrencyImperialFragmentsShowTotal,
+            disable = function ()
+                return not (Settings.Currency.CurrencyImperialFragmentsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_IMPERIALFRAGMENTSTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_IMPERIALFRAGMENTSTOTAL_MSG_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyMessageTotalImperialFragments
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyMessageTotalImperialFragments = value
+            end,
+            default = Defaults.Currency.CurrencyMessageTotalImperialFragments,
+            disable = function ()
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyImperialFragmentsChange and Settings.Currency.CurrencyImperialFragmentsShowTotal)
+            end
+        }
+
+        -- Jerall Marks
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKS_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyJerallMarksChange
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyJerallMarksChange = value
+            end,
+            default = Defaults.Currency.CurrencyJerallMarksChange,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSCOLOR),
+            getFunction = function ()
+                return Settings.Currency.CurrencyJerallMarksColor[1], Settings.Currency.CurrencyJerallMarksColor[2], Settings.Currency.CurrencyJerallMarksColor[3], Settings.Currency.CurrencyJerallMarksColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.Currency.CurrencyJerallMarksColor = { r, g, b, a }
+                ChatAnnouncements.RegisterColorEvents()
+            end,
+            default = Defaults.Currency.CurrencyJerallMarksColor,
+            disable = function ()
+                return not (Settings.Currency.CurrencyJerallMarksChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSNAME_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyJerallMarksName
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyJerallMarksName = value
+            end,
+            default = Defaults.Currency.CurrencyJerallMarksName,
+            disable = function ()
+                return not (Settings.Currency.CurrencyJerallMarksChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWJERALLMARKSTOTAL_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyJerallMarksShowTotal
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyJerallMarksShowTotal = value
+            end,
+            default = Defaults.Currency.CurrencyJerallMarksShowTotal,
+            disable = function ()
+                return not (Settings.Currency.CurrencyJerallMarksChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_JERALLMARKSTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_JERALLMARKSTOTAL_MSG_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyMessageTotalJerallMarks
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyMessageTotalJerallMarks = value
+            end,
+            default = Defaults.Currency.CurrencyMessageTotalJerallMarks,
+            disable = function ()
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyJerallMarksChange and Settings.Currency.CurrencyJerallMarksShowTotal)
+            end
+        }
     end)
 
     -- Build Loot Announcements Section
