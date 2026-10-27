@@ -85,6 +85,7 @@ local debugAuras =
     [185923] = true, -- Minor Vulnerability (Uncanny Adoration bundle)
     [106754] = true, -- Major Vulnerability
     [61723] = true,  -- Minor Maim
+    [212397] = true, -- Minor Maim (Inner Beast)
     [183166] = true, -- Minor Maim (Apocrypha bundle)
     [183431] = true, -- Minor Maim (Runic Sunder bundle)
     [61725] = true,  -- Major Maim
@@ -3653,6 +3654,14 @@ local debugAuras =
 
     [67280] = true,  -- Tormentor (of the Tormentor)
     [67283] = true,  -- Tormentor Resistance (of the Tormentor)
+    [219193] = true, -- Tormentor (heal proc)
+
+    [167059] = true, -- Turning Tide
+    [167062] = true, -- Turning Tide
+    [167061] = true, -- Major Vulnerability (Turning Tide)
+    [167350] = true, -- Flowing Water
+
+    [159304] = true, -- Magma Incarnate
 
     [59663] = true,  -- Undaunted Bastion (of the Undaunted Bastion)
     [61200] = true,  -- Undaunted Bastion (of the Undaunted Bastion)
@@ -4302,6 +4311,9 @@ local debugAuras =
     [270020] = true, -- DK Booming Voice (recovery buff after proc delay)
     [259224] = true, -- DK Wildfire Embers
     [263220] = true, -- DK Resolute Defense
+    [263230] = true, -- DK Resolute Defense (player buff)
+    [263232] = true, -- DK Resolute Defense (proc)
+    [263233] = true, -- DK Resolute Defense (resource)
     [263247] = true, -- DK Lead from the Front
     [263316] = true, -- Arc Abyssal Emergence
     [263398] = true, -- Arc Fate Realigned
@@ -6281,8 +6293,6 @@ local debugAuras =
     [122398] = true, -- Pestilent Colossus (Pestilent Colossus)
     [122396] = true, -- Pestilent Colossus (Pestilent Colossus)
     [122399] = true, -- Pestilent Colossus (Pestilent Colossus)
-    [122400] = true, -- Pestilent Colossus (Pestilent Colossus)
-    [122401] = true, -- Pestilent Colossus (Pestilent Colossus)
     [122397] = true, -- Major Vulnerability (Pestilent Colossus)
 
     [122388] = true, -- Glacial Colossus (Glacial Colossus)
@@ -7109,6 +7119,7 @@ local debugAuras =
     [114885] = true, -- Summon Shade
     [146311] = true, -- Frost Safeguard (Elemental Blockade) -- Frost
     [62951] = true,  -- Blockade of Frost (Elemental Blockade) -- Frost
+    [177595] = true, -- Blockade of Frost (Elemental Blockade) -- Frost
 
     [29091] = true,  -- Destructive Touch (Destructive Touch)
     [29073] = true,  -- Flame Touch (Destructive Touch) -- Fire
@@ -8385,6 +8396,8 @@ local debugAuras =
     [42062] = true,  -- Inner Rage (Inner Beast)
     [42063] = true,  -- Inner Rage (Inner Beast)
     [42061] = true,  -- Inner Rage (Inner Beast)
+    [273366] = true, -- Inner Beast (pull)
+    [273367] = true, -- Inner Beast (pull stun)
 
     [39379] = true,  -- Bone Wall (Bone Shield - Bone Wall Synergy)
     [39424] = true,  -- Bone Wall (Bone Shield - Bone Wall Synergy)
@@ -8983,6 +8996,8 @@ local debugAuras =
 
     -------------------------------------
     -- NPC ABILITIES (SHARED) -----------
+    [77878] = true, -- Arrow
+    [79101] = true, -- Stun
     -------------------------------------
 
     -- GENERIC NPC COMBAT EVENTS

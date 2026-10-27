@@ -2798,19 +2798,19 @@ local effectOverride =
     -- Dawn's Wrath
 
     -- Sun Fire / Vampire's Bane / Reflective Light
-    [21728] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },                                                                                               -- Sun Fire (Sun Fire)
-    [21731] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },                                                                                               -- Vampire's Bane (Vampire's Bane)
+    [21728] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2, dynamicTooltip = true, tooltipMorphId = 21726 },                                                  -- Sun Fire (Sun Fire)
+    [21731] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2, dynamicTooltip = true, tooltipMorphId = 21729 },                                                  -- Vampire's Bane (Vampire's Bane)
     [21733] = { icon = "/esoui/art/icons/ability_templar_reflective_light.dds", tooltip = Tooltips.Skill_Sun_Fire_Snare, tooltipValue2Mod = 7, hideReduce = true }, -- Reflective Light (Reflective Light)
     [21734] = { tooltip = Tooltips.Skill_Sun_Fire, tooltipValue2Mod = -7 },                                                                                         -- Reflective Light (Reflective Light)
 
     -- Solar Flare / Dark Flare / Solar Barrage
-    [22095] = { tooltip = Tooltips.Skill_Solar_Barrage }, -- Solar Barrage (Solar Barrage)
+    [22095] = { tooltip = Tooltips.Skill_Solar_Barrage, dynamicTooltip = true, toggle = true }, -- Solar Barrage (Solar Barrage)
 
     -- Backlash / Purifying Light / Power of the Light
-    [21761] = { tooltip = Tooltips.Skill_Backlash },                             -- Backlash (Backlash)
-    [21765] = { tooltip = Tooltips.Skill_Purifying_Light },                      -- Purifying Light (Purifying Light)
-    [21908] = { icon = "/esoui/art/icons/ability_templar_purifying_light.dds" }, -- Purifying Light (Purifying Light)
-    [21763] = { tooltip = Tooltips.Skill_Power_of_the_Light },                   -- Power of the Light (Power of the Light)
+    [21761] = { tooltip = Tooltips.Skill_Backlash, dynamicTooltip = true },           -- Backlash (Backlash)
+    [21765] = { tooltip = Tooltips.Skill_Purifying_Light, dynamicTooltip = true },    -- Purifying Light (Purifying Light)
+    [21908] = { icon = "/esoui/art/icons/ability_templar_purifying_light.dds" },      -- Purifying Light (Purifying Light)
+    [21763] = { tooltip = Tooltips.Skill_Power_of_the_Light, dynamicTooltip = true }, -- Power of the Light (Power of the Light)
 
     -- Eclipse / Total Dark / Unstable Core
     [21776] = { tooltip = Tooltips.Skill_Eclipse },                                                                                   -- Eclipse (Eclipse)
@@ -3155,10 +3155,8 @@ local effectOverride =
     -- Frozen Colossus / Pestilent Colossus / Glacial Colossus
     [122174] = { tooltip = Tooltips.Skill_Frozen_Colossus },                                                  -- Frozen Colossus (Frozen Colossus)
     [122178] = { tooltip = Tooltips.Skill_Frozen_Colossus_Ground, tooltipValue2 = 1, groundLabel = true },    -- Frozen Colossus (Frozen Colossus)
-    [122395] = { tooltip = Tooltips.Skill_Pestilent_Colossus },                                               -- Pestilent Colossus (Pestilent Colossus)
-    [122399] = { tooltip = Tooltips.Skill_Pestilent_Colossus_Ground, tooltipValue2 = 1, groundLabel = true }, -- Pestilent Colossus (Pestilent Colossus)
-    [122400] = { tooltip = Tooltips.Skill_Pestilent_Colossus_Ground, tooltipValue2 = 1, groundLabel = true }, -- Pestilent Colossus (Pestilent Colossus)
-    [122401] = { tooltip = Tooltips.Skill_Pestilent_Colossus_Ground, tooltipValue2 = 1, groundLabel = true }, -- Pestilent Colossus (Pestilent Colossus)
+    [122395] = { tooltip = Tooltips.Skill_Pestilent_Colossus, dynamicTooltip = true },                                               -- Pestilent Colossus (Pestilent Colossus)
+    [122399] = { tooltip = Tooltips.Skill_Pestilent_Colossus_Ground, tooltipValue2 = 1, groundLabel = true, dynamicTooltip = true, tooltipMorphId = 122395 }, -- Pestilent Colossus (Pestilent Colossus)
     [122388] = { tooltip = Tooltips.Skill_Glacial_Colossus, tooltipValue2Id = 122394 },                       -- Glacial Colossus (Glacial Colossus)
     [122392] = { tooltip = Tooltips.Skill_Glacial_Colossus_Ground, groundLabel = true },                      -- Glacial Colossus (Glacial Colossus)
     [122394] = { tooltip = Tooltips.Generic_Stun },                                                           -- Glacial Colossus (Glacial Colossus)
@@ -3844,7 +3842,7 @@ local effectOverride =
 
     -- Power Bash / Reverberating Bash / Power Slam
     [83446] = { tooltip = Tooltips.Skill_Reverberating_Bash }, -- Reverberating Bash (Reverberating Bash)
-    [80625] = { tooltip = Tooltips.Skill_Resentment },         -- Resentment (Power Slam)
+    [80625] = { tooltip = Tooltips.Skill_Resentment, dynamicTooltip = true, tooltipMorphId = 38452 }, -- Focus (Power Slam)
 
     -- Shield Wall / Spell Wall / Shield Discipline
     [83272] = { tooltip = Tooltips.Skill_Shield_Wall },       -- Shield Wall (Shield Wall)

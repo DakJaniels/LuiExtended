@@ -44,8 +44,6 @@ local aoePlayerUltimate =
     [122178] = 1, -- Frozen Colossus (Frozen Colossus),
     [122392] = 0, -- Glacial Colossus (Glacial Colossus),
     [122399] = 0, -- Pestilent Colossus (Pestilent Colossus),
-    [122400] = 0, -- Pestilent Colossus (Pestilent Colossus),
-    [122401] = 0, -- Pestilent Colossus (Pestilent Colossus),
 
     -- Sorcerer
     [80435] = 1, -- Suppression Field (Suppression Field),

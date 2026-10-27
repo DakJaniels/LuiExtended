@@ -40,7 +40,11 @@ local barHighlightTauntSlotted =
     -- Undaunted
     [39475] = true,  -- Inner Fire
     [42056] = true,  -- Inner Rage
-    [42060] = true,  -- Inner Beast
+
+    -- Heavy Armor
+    [126581] = true, -- Unstoppable
+    [126582] = true, -- Unstoppable Brute
+    [126583] = true, -- Immovable
 
     -- Arcanist
     [183165] = true, -- Runic Jolt

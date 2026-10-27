@@ -135,7 +135,7 @@ local barHighlightCheckOnFade =
 
     -- Heavy Armor
     [126581] = { duration = 63084, durationMod = 126581, unitTag = PLAYER_UNIT_TAG }, -- Unstoppable --> Major Resolve
-    [126582] = { duration = 63134, durationMod = 126582, unitTag = PLAYER_UNIT_TAG }, -- Immovable Brute --> Major Resolve
+    [126582] = { duration = 63134, durationMod = 126582, unitTag = PLAYER_UNIT_TAG }, -- Unstoppable Brute --> Major Resolve
     [126583] = { duration = 63119, durationMod = 126583, unitTag = PLAYER_UNIT_TAG }, -- Immovable --> Major Resolve
 
     -- Werewolf

@@ -138,8 +138,6 @@ local addGroundDamageAura =
 
     [122178] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF },            -- Frozen Colossus (Frozen Colossus)
     [122399] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF, merge = 2 }, -- Pestilent Colossus (Pestilent Colossus)
-    [122400] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF, merge = 2 }, -- Pestilent Colossus (Pestilent Colossus)
-    [122401] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF, merge = 2 }, -- Pestilent Colossus (Pestilent Colossus)
     [122392] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF },            -- Glacial Colossus (Glacial Colossus)
 
     [118289] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF },            -- Ravenous Goliath (Ravenous Goliath)
