@@ -312,9 +312,10 @@ LUIE.GridOverlay = GridOverlayManager
 
 -- Saved preview offsets are UI units on the canvas that was active when they were stored.
 -- Custom scale changes how many UI units fit on screen, so the same 1620,200 is a different point after the toggle.
+-- EVENT_ALL_GUI_SCREENS_RESIZED is the finished canvas (ScreenAdjust enables its save button there).
+-- Alt-tab reaches that event too, but must not rewrite saved positions. Only a custom UI scale setting does.
 local CANVAS_RATIO_EPSILON = 0.001
-local UI_SCALE_REFRESH_DELAY_MS = 50
-local uiScaleRefreshGeneration = 0
+local translateOnNextSettledCanvas = false
 local cachedCanvasWidth = 0
 local cachedCanvasHeight = 0
 
@@ -413,15 +414,19 @@ local function TranslatePreviewPositionsForCanvasChange()
     ApplyTranslatedPreviewAnchors()
 end
 
-local function ScheduleTranslatePreviewPositionsForCanvasChange()
-    uiScaleRefreshGeneration = uiScaleRefreshGeneration + 1
-    local scheduledGeneration = uiScaleRefreshGeneration
-    zo_callLater(function ()
-                     if scheduledGeneration ~= uiScaleRefreshGeneration then
-                         return
-                     end
-                     TranslatePreviewPositionsForCanvasChange()
-                 end, UI_SCALE_REFRESH_DELAY_MS)
+local function RememberSettledCanvas()
+    local canvasWidth, canvasHeight = GuiRoot:GetDimensions()
+    if not canvasWidth or canvasWidth <= 0 or not canvasHeight or canvasHeight <= 0 then
+        return
+    end
+    local shouldTranslate = translateOnNextSettledCanvas
+    translateOnNextSettledCanvas = false
+    if shouldTranslate then
+        TranslatePreviewPositionsForCanvasChange()
+    else
+        cachedCanvasWidth = canvasWidth
+        cachedCanvasHeight = canvasHeight
+    end
 end
 
 local GRID_OVERLAY_UI_SCALE_EVENT = "LUIE_GridOverlay_UIScale"
@@ -430,9 +435,9 @@ eventManager:RegisterForEvent(GRID_OVERLAY_UI_SCALE_EVENT, EVENT_INTERFACE_SETTI
         return
     end
     if settingId == UI_SETTING_USE_CUSTOM_SCALE or settingId == UI_SETTING_CUSTOM_SCALE then
-        ScheduleTranslatePreviewPositionsForCanvasChange()
+        translateOnNextSettledCanvas = true
     end
 end)
-eventManager:RegisterForEvent(GRID_OVERLAY_UI_SCALE_EVENT, EVENT_SCREEN_RESIZED, function ()
-    TranslatePreviewPositionsForCanvasChange()
+eventManager:RegisterForEvent(GRID_OVERLAY_UI_SCALE_EVENT, EVENT_ALL_GUI_SCREENS_RESIZED, function ()
+    RememberSettledCanvas()
 end)

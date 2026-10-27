@@ -1132,6 +1132,9 @@ function SpellCastBuffs.SetMovingState(state)
         container:SetMovable(state)
         UpdatePositionLabel(container, container.preview and container.preview.anchorLabel)
         container:SetHandler("OnMoveStop", function (self)
+            if not state then
+                return
+            end
             local left, top = self:GetLeft(), self:GetTop()
             if IsSnapToGridBuffsEnabled() then
                 left, top = LUIE.ApplyGridSnap(left, top, "buffs")

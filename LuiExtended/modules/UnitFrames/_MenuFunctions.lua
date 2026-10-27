@@ -131,6 +131,9 @@ function UnitFrames.CustomFramesSetMovingState(state)
 
         --- @param self LUIE_PositionableTopLevelWindow
         local function OnMoveStop(self)
+            if UnitFrames.CustomFramesMovingState ~= true then
+                return
+            end
             local left, top = self:GetLeft(), self:GetTop()
             left, top = LUIE.ApplyGridSnap(left, top, "unitFrames")
             self:ClearAnchors()

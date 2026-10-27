@@ -278,43 +278,19 @@ function LUIE.GetLabelMarkupTextWidthUI(label, text)
     return LUIE.GetLabelStringWidthUI(label, plainText) + iconWidthTotal
 end
 
--- GuiRoot dimensions settle after the custom UI scale setting event, so canvas callbacks run deferred.
-local UI_CANVAS_CHANGE_DELAY_MS = 50
---- @type table<string, integer>
-local uiCanvasChangeGenerations = {}
-
---- Calls callback (deferred and coalesced) when the UI canvas changes: resolution / window resize or custom UI scale.
+--- Calls callback when every GUI screen has finished resizing (resolution, window, or custom UI scale).
+--- EVENT_ALL_GUI_SCREENS_RESIZED is the finished canvas. ScreenAdjust enables its save button on this event.
 --- @param namespace string
 --- @param callback fun()
 function LUIE.RegisterForUiCanvasChange(namespace, callback)
-    uiCanvasChangeGenerations[namespace] = 0
-    local function ScheduleCanvasChangeCallback()
-        local scheduledGeneration = (uiCanvasChangeGenerations[namespace] or 0) + 1
-        uiCanvasChangeGenerations[namespace] = scheduledGeneration
-        zo_callLater(function ()
-                         if uiCanvasChangeGenerations[namespace] ~= scheduledGeneration then
-                             return
-                         end
-                         callback()
-                     end, UI_CANVAS_CHANGE_DELAY_MS)
-    end
-    eventManager:RegisterForEvent(namespace, EVENT_SCREEN_RESIZED, ScheduleCanvasChangeCallback)
-    eventManager:RegisterForEvent(namespace, EVENT_INTERFACE_SETTING_CHANGED, function (_, settingSystemType, settingId)
-        if settingSystemType ~= SETTING_TYPE_UI then
-            return
-        end
-        if settingId == UI_SETTING_USE_CUSTOM_SCALE or settingId == UI_SETTING_CUSTOM_SCALE then
-            ScheduleCanvasChangeCallback()
-        end
+    eventManager:RegisterForEvent(namespace, EVENT_ALL_GUI_SCREENS_RESIZED, function ()
+        callback()
     end)
 end
 
 --- @param namespace string
 function LUIE.UnregisterForUiCanvasChange(namespace)
-    -- Invalidates any pending deferred callback for this namespace.
-    uiCanvasChangeGenerations[namespace] = nil
-    eventManager:UnregisterForEvent(namespace, EVENT_SCREEN_RESIZED)
-    eventManager:UnregisterForEvent(namespace, EVENT_INTERFACE_SETTING_CHANGED)
+    eventManager:UnregisterForEvent(namespace, EVENT_ALL_GUI_SCREENS_RESIZED)
 end
 
 --- Apply grid snapping to coordinates when the matching snapToGrid_* SV is enabled.
