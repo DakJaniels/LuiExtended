@@ -427,6 +427,9 @@ function LUIE_CustomFrameData_Base:SetupMovementAndPreview(moduleName, eventMana
 
     local function tlwOnMoveStop(tlwSelf)
         eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
+        if UnitFrames.CustomFramesMovingState ~= true then
+            return
+        end
         local left, top = tlwSelf:GetLeft(), tlwSelf:GetTop()
         left, top = LUIE.ApplyGridSnap(left, top, "unitFrames")
         tlwSelf:ClearAnchors()
