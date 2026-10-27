@@ -1,5 +1,20 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.8
+
+### New
+
+- Unit Frames: **Custom Names** and **Outline Custom Names**, under Common Options. Off by default. Needs LibCustomNames. When an account has a custom name, that colored name replaces the character name, @UserID, or platform name on the frame. Outline keeps a dark color readable. PC and console.
+- Unit Frames: **Custom Icons**, **Animate Custom Icons**, and **Custom Icon Position**, under Common Options. Off by default. Needs LibCustomIcons. A portrait shows on the player, target, group, raid, and AvA frames when that account has one. On your own frame it shows only while **Display Your Name** is on. Position is Beside Class Icon (default), Left of Name, or Replace Class Icon. Animation plays the animated portrait; with animation off, a static portrait is used, or the first frame if there is no static one. The portrait stays fully visible when the frame fades. PC and console.
+- Chat Announcements: A skill or morph change that costs gold without returning points prints Skill Points redistributed or Skill Morphs redistributed. The gold spent still prints the existing Skill Points reset or Skill Morphs reset line. A reset that returns points still prints only the reset line. Same Respec chat, center screen, and alert toggles. PC and console.
+- Chat Announcements: In a Vengeance campaign, changing a perk prints the colored slot and the perk you unequipped and equipped, with the perk icon. A forced Vengeance perk or role respec uses the same Respec toggles. PC and console.
+
+### Fixed
+
+- Chat Announcements: Glenmoril and other outfit style pages follow General announcements, including while you are in a dungeon or trial. English, German, French, Russian, and Chinese.
+- Unit Frames and buff containers: saved positions no longer shift when you alt-tab. Changing custom UI scale still keeps them in the same relative spot after the screen finishes resizing.
+- Unit Frames and buff containers: while they are locked, a move no longer saves a new position.
+
 ## Version 7.2.7.7
 
 ### New
