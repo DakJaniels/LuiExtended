@@ -56,14 +56,7 @@
               <AnchorFill />
             </Label>
             <Button name="LUIE_Changelog_Close"
-                    font="ZoFontGame"
-                    text="X"
-                    mouseEnabled="true">
-              <Dimensions x="40"
-                          y="28" />
-              <Anchor point="TOPRIGHT"
-                      offsetX="-8"
-                      offsetY="4" />
+                    inherits="ZO_CloseButton">
               <OnClicked>
                 LUIE.ToggleChangelog(true)
               </OnClicked>
