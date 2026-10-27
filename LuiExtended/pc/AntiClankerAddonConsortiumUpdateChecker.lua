@@ -1,36 +1,34 @@
 local NAME = "AntiClankerAddonConsortiumUpdateChecker"
-local VERSION = 44
+local VERSION = 46
 
 if type(_G[NAME]) == "number" and _G[NAME] >= VERSION then return end
 _G[NAME] = VERSION
 
-local KNOWN_VERSIONS =
-{
+local KNOWN_VERSIONS = {
     -- Kyzeragon
-    ["CrutchAlerts"]        = 22800,
-    ["KyzderpsDerps"]       = 1550,
+    ["CrutchAlerts"]          = 22801,
+    ["KyzderpsDerps"]         = 1550,
 
     -- code65536
-    ["CharacterKnowledge"]  = 301040,
-    ["CollectiblesTracker"] = 306040,
-    ["CombatAlerts"]        = 206080,
-    ["GroupBuffPanels"]     = 203030,
-    ["ItemBrowser"]         = 407010,
-    ["LootLog"]             = 410060,
-    ["Raidificator"]        = 408020,
+    ["CharacterKnowledge"]    = 301040,
+    ["CollectiblesTracker"]   = 306040,
+    ["CombatAlerts"]          = 206080,
+    ["GroupBuffPanels"]       = 203030,
+    ["ItemBrowser"]           = 407010,
+    ["LootLog"]               = 410060,
+    ["Raidificator"]          = 408020,
 
     -- M0R_Gaming
-    ["M0RMarkers"]          = 223,
+    ["M0RMarkers"]            = 223,
 
     -- DakJaniels
-    ["LuiExtended"]         = 7277,
+    ["LuiExtended"]           = 7278,
 
     -- m00nyONE
-    ["LibGroupCombatStats"] = 20261004,
+    ["LibGroupCombatStats"]   = 20261004,
 }
 
-local MESSAGE =
-{
+local MESSAGE = {
     default = "[LibForgottenAddons] You have the addon “<<1>>” installed, but it is an older version. Your version is <<2>>, while the expected version is <<3>> or newer.",
     de = "[LibForgottenAddons] Du hast das Add-on „<<1>>“ installiert, aber es handelt sich dabei um eine veraltete Version. Deine Version ist <<2>>, während die erwartete Version <<3>> oder neuer ist.",
     es = "[LibForgottenAddons] Tienes una instalación antigua del addon “<<1>>”. Tu instalación es la versión <<2>> mientras que la versión esperada es <<3>> o más reciente.",
@@ -102,16 +100,14 @@ local function CreateSettingsMenu()
     local LAM = LibAddonMenu2
     if (not LAM) then return false end
 
-    local panelData =
-    {
+    local panelData = {
         type = "panel",
         name = "LibForgottenAddons",
         author = "Kyzeragon, @code65536",
         version = tostring(VERSION),
     }
 
-    local optionsData =
-    {
+    local optionsData = {
         {
             type = "description",
             text = "LibForgottenAddons is a bundled library distributed within multiple addons. It checks installed add-on versions against known versions, because Minion 3 tends to \"forget\" the addons that it's tracking.",
@@ -184,11 +180,11 @@ local function CheckVersions()
         if (CreateSettingsMenu()) then -- menu creation can fail if no LAM
             table.insert(messageQueue, "[LibForgottenAddons] For more information, |c20aaf5|H0:ACACUC:1|h[open the settings]|h|r.")
         end
-        zo_callLater(function ()
-                         for _, message in ipairs(messageQueue) do
-                             CHAT_ROUTER:AddSystemMessage(message)
-                         end
-                     end, 6000)
+        zo_callLater(function()
+            for _, message in ipairs(messageQueue) do
+                CHAT_ROUTER:AddSystemMessage(message)
+            end
+        end, 6000)
     end
 end
 
@@ -198,27 +194,27 @@ end
 ---------------------------------------------------------------------
 EVENT_MANAGER:UnregisterForEvent(NAME, EVENT_PLAYER_ACTIVATED) -- In case we are overriding an older version embedded in another addon
 
-EVENT_MANAGER:RegisterForEvent(NAME, EVENT_PLAYER_ACTIVATED, function ()
-                                   if (GetEnablementState()) then
-                                       CheckVersions()
-                                   else
-                                       SLASH_COMMANDS["/libforgottenaddonsenable"] = function ()
-                                           CHAT_ROUTER:AddSystemMessage("[LibForgottenAddons] Enabled. This will take effect on the next reload.")
-                                           SetEnablementState(true)
-                                       end
-                                   end
+EVENT_MANAGER:RegisterForEvent(NAME, EVENT_PLAYER_ACTIVATED, function()
+    if (GetEnablementState()) then
+        CheckVersions()
+    else
+        SLASH_COMMANDS["/libforgottenaddonsenable"] = function()
+            CHAT_ROUTER:AddSystemMessage("[LibForgottenAddons] Enabled. This will take effect on the next reload.")
+            SetEnablementState(true)
+        end
+    end
 
-                                   -- Always register the link handler because there can be an error with unhandled links, e.g. if clicking an old link in pChat history
-                                   local linkHandler = function (_, _, _, _, linkType)
-                                       if (linkType == "ACACUC") then
-                                           if (_G[PANEL_ID] or CreateSettingsMenu()) then
-                                               LibAddonMenu2:OpenToPanel(_G[PANEL_ID])
-                                           else
-                                               CHAT_ROUTER:AddSystemMessage("[LibForgottenAddons] Cannot open settings because LibAddonMenu-2.0 is not available.")
-                                           end
-                                           return true
-                                       end
-                                   end
-                                   LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, linkHandler)
-                                   LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, linkHandler)
-                               end, true)
+    -- Always register the link handler because there can be an error with unhandled links, e.g. if clicking an old link in pChat history
+    local linkHandler = function(_, _, _, _, linkType)
+        if (linkType == "ACACUC") then
+            if (_G[PANEL_ID] or CreateSettingsMenu()) then
+                LibAddonMenu2:OpenToPanel(_G[PANEL_ID])
+            else
+                CHAT_ROUTER:AddSystemMessage("[LibForgottenAddons] Cannot open settings because LibAddonMenu-2.0 is not available.")
+            end
+            return true
+        end
+    end
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, linkHandler)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, linkHandler)
+end, true)
