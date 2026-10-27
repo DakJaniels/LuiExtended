@@ -113,6 +113,9 @@ local function RefreshDebugAttributeVisualizers(visualUnitTag)
                 module:UpdateStat(visualUnitTag, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
                 module:UpdateStat(visualUnitTag, STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
             end
+            if module.UpdateForceArmorShred and ATTRIBUTE_VISUAL_FORCE_ARMOR_SHRED then
+                module:UpdateForceArmorShred(visualUnitTag, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+            end
             if module.UpdateRegen then
                 module:UpdateRegen(visualUnitTag, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
                 module:UpdateRegen(visualUnitTag, STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
@@ -139,7 +142,7 @@ end
 
 local DEBUG_VISUAL_PRESET_NAMES =
 {
-    "power", "powerdec", "armor", "armordec", "hot", "dot", "maghot", "stamhot",
+    "power", "powerdec", "armor", "armordec", "armorshred", "hot", "dot", "maghot", "stamhot",
     "shield", "trauma", "noheal", "possession", "unwavering", "clear",
 }
 
@@ -181,6 +184,10 @@ local function ApplyDebugVisualPreset(visualUnitTag, presetName)
         SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_DECREASED_STAT, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, -1)
     elseif presetName == "armordec" then
         SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_INCREASED_STAT, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, 1)
+    elseif presetName == "armorshred" then
+        if ATTRIBUTE_VISUAL_FORCE_ARMOR_SHRED then
+            SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_FORCE_ARMOR_SHRED, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, 1)
+        end
     elseif presetName == "hot" then
         SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, -1)
     elseif presetName == "dot" then

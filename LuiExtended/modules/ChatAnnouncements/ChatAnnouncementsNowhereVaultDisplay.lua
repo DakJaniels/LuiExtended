@@ -1,0 +1,106 @@
+-- -----------------------------------------------------------------------------
+-- Nowhere Vault EVENT_DISPLAY_ANNOUNCEMENT classification (text match only).
+-- Each primary line has its own LUIE string; lookups are built from GetString for localization.
+-- Shown only in zones 1533 and 1583 (The Nowhere Vault). Matches outside those zones are swallowed.
+-- -----------------------------------------------------------------------------
+
+--- @class (partial) LUIE.ChatAnnouncements
+local ChatAnnouncements = LUIE.ChatAnnouncements
+
+local function BuildPrimaryTextLookup(stringIds)
+    local lookup = {}
+    for index = 1, #stringIds do
+        lookup[GetString(stringIds[index])] = true
+    end
+    return lookup
+end
+
+-- Room lines from client table 39248996, plus activity name id 115337253 index 306.
+local NOWHERE_VAULT_STRING_IDS =
+{
+    LUIE_STRING_CA_DISPLAY_NV_NOWHERE_VAULT,
+    LUIE_STRING_CA_DISPLAY_NV_TWILIGHT_SONG_BEGINS,
+    LUIE_STRING_CA_DISPLAY_NV_TWILIGHT_SONG_NEARS_END,
+    LUIE_STRING_CA_DISPLAY_NV_TWILIGHT_GROW_SILENT,
+    LUIE_STRING_CA_DISPLAY_NV_TWILIGHT_DISTURBED,
+    LUIE_STRING_CA_DISPLAY_NV_TWILIGHT_NOISINESS,
+    LUIE_STRING_CA_DISPLAY_NV_PROTECT_LANTERNS,
+    LUIE_STRING_CA_DISPLAY_NV_RETURN_STEW_CHUNK,
+    LUIE_STRING_CA_DISPLAY_NV_ASTRALIGHT_LUMEN_ACQUIRED,
+    LUIE_STRING_CA_DISPLAY_NV_MORE_LANTERNS_APPEAR,
+    LUIE_STRING_CA_DISPLAY_NV_SEWER_SKEEVERS,
+    LUIE_STRING_CA_DISPLAY_NV_STEWMASTER_NOTICE,
+    LUIE_STRING_CA_DISPLAY_NV_STEW_RESTORED,
+    LUIE_STRING_CA_DISPLAY_NV_MINDSPORE_ACQUIRED,
+    LUIE_STRING_CA_DISPLAY_NV_FUNGAL_SIGHT_ACQUIRED,
+    LUIE_STRING_CA_DISPLAY_NV_RESONATING_CORE_ACQUIRED,
+    LUIE_STRING_CA_DISPLAY_NV_WATCHER_GILLS_ACQUIRED,
+    LUIE_STRING_CA_DISPLAY_NV_TWILIGHT_MAZE_COMPLETED,
+    LUIE_STRING_CA_DISPLAY_NV_MURKY_GROTTO_COMPLETED,
+    LUIE_STRING_CA_DISPLAY_NV_MOONLIT_ISLES_COMPLETED,
+    LUIE_STRING_CA_DISPLAY_NV_FUNGAL_CHASM_COMPLETED,
+    LUIE_STRING_CA_DISPLAY_NV_HUNT_WATCHERS_COMPLETED,
+    LUIE_STRING_CA_DISPLAY_NV_ONE_CURIO_FOUND,
+    LUIE_STRING_CA_DISPLAY_NV_TWO_CURIOS_FOUND,
+    LUIE_STRING_CA_DISPLAY_NV_ALL_CURIOS_FOUND,
+    LUIE_STRING_CA_DISPLAY_NV_ECLIPSED_HALL_COMPLETE,
+    LUIE_STRING_CA_DISPLAY_NV_ASTRALIGHT_LUMEN_SHINES,
+    LUIE_STRING_CA_DISPLAY_NV_TIMEWARD_SEAL_COLLECTED,
+    LUIE_STRING_CA_DISPLAY_NV_MINDSPORE_CONSCIOUSNESS,
+    LUIE_STRING_CA_DISPLAY_NV_CREATIVE_VISION,
+    LUIE_STRING_CA_DISPLAY_NV_HAUNTED_UNDERCROFT_COMPLETED,
+    LUIE_STRING_CA_DISPLAY_NV_CANTOR_STARSONG_ACQUIRED,
+    LUIE_STRING_CA_DISPLAY_NV_ARTISTS_TOUCH_ACQUIRED,
+    LUIE_STRING_CA_DISPLAY_NV_CONNOISSEUR_VISION_ACQUIRED,
+    LUIE_STRING_CA_DISPLAY_NV_ECLIPSED_HALL_RESETS,
+    LUIE_STRING_CA_DISPLAY_NV_CURIOS_TAKE_MERCY,
+    LUIE_STRING_CA_DISPLAY_NV_GOLDEN_CRYSTAL_ACTIVE,
+    LUIE_STRING_CA_DISPLAY_NV_BLUE_CRYSTAL_ACTIVE,
+    LUIE_STRING_CA_DISPLAY_NV_CRIMSON_CRYSTAL_ACTIVE,
+    LUIE_STRING_CA_DISPLAY_NV_GOLDEN_CRYSTAL_DESTROYED,
+    LUIE_STRING_CA_DISPLAY_NV_BLUE_CRYSTAL_DESTROYED,
+    LUIE_STRING_CA_DISPLAY_NV_CRIMSON_CRYSTAL_DESTROYED,
+    LUIE_STRING_CA_DISPLAY_NV_ALL_CRYSTALS_DESTROYED,
+    LUIE_STRING_CA_DISPLAY_NV_RAIN_TOTEMS_REPAIRED_1,
+    LUIE_STRING_CA_DISPLAY_NV_RAIN_TOTEMS_REPAIRED_2,
+    LUIE_STRING_CA_DISPLAY_NV_RAIN_TOTEMS_REPAIRED_3,
+    LUIE_STRING_CA_DISPLAY_NV_GOLDEN_CRYSTAL_REFORMING,
+    LUIE_STRING_CA_DISPLAY_NV_BLUE_CRYSTAL_REFORMING,
+    LUIE_STRING_CA_DISPLAY_NV_CRIMSON_CRYSTAL_REFORMING,
+}
+
+-- GetRawZoneName: 1533 and 1583 are both "The Nowhere Vault".
+local NOWHERE_VAULT_ZONE_IDS =
+{
+    [1533] = true,
+    [1583] = true,
+}
+
+local NOWHERE_VAULT_SUPPRESSED_SETTINGS =
+{
+    CA = false,
+    CSA = false,
+    Alert = false,
+}
+
+local nowhereVaultLookup = BuildPrimaryTextLookup(NOWHERE_VAULT_STRING_IDS)
+
+local function ResolveNowhereVaultSettings()
+    local zoneId = GetZoneId(GetCurrentMapZoneIndex())
+    if NOWHERE_VAULT_ZONE_IDS[zoneId] then
+        return ChatAnnouncements.SV.DisplayAnnouncements.ZoneDynamicEncounterNowhereVault
+    end
+    return NOWHERE_VAULT_SUPPRESSED_SETTINGS
+end
+
+--- @param primaryText string|nil
+--- @param secondaryText string|nil
+--- @return CADisplayAnnouncementSection|nil settings
+function ChatAnnouncements.ResolveNowhereVaultDisplayAnnouncement(primaryText, secondaryText)
+    if primaryText and nowhereVaultLookup[primaryText] then
+        return ResolveNowhereVaultSettings()
+    end
+    if not primaryText and secondaryText and nowhereVaultLookup[secondaryText] then
+        return ResolveNowhereVaultSettings()
+    end
+end

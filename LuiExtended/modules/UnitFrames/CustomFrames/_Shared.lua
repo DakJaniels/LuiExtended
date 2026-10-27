@@ -33,6 +33,7 @@ local LUIE = LUIE
 --- @field CreateNoHealingFadeAnimation fun(overlay: StatusBarControl, stripeOverlay: StatusBarControl|nil): AnimationTimeline|nil
 --- @field CreateCombatGlowBorder fun(backdrop: Control): Control
 --- @field CreateDecreasedArmorOverlay fun(parent: Control, small: boolean): Control
+--- @field CreateForceArmorShredOverlay fun(parent: Control): Control
 local Shared = {}
 
 --- @type LUIE.CustomFramesShared
@@ -313,6 +314,20 @@ function Shared.CreateDecreasedArmorOverlay(parent, small)
     if control.normalTex then
         control.normalTex:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_STANDARD_DDS)
     end
+
+    return control
+end
+
+--- Glow overlay for ATTRIBUTE_VISUAL_FORCE_ARMOR_SHRED. Separate from the cracked decreased-armor control.
+--- @param parent Control
+--- @return Control
+function Shared.CreateForceArmorShredOverlay(parent)
+    local control = CreateControlFromVirtual("$(parent)_ForceArmorShredOverlay", parent, "LUIE_ForceArmorShredOverlay")
+
+    control.smallTex = control:GetNamedChild("_SmallTex")
+    control.normalTex = control:GetNamedChild("_NormalTex")
+    control.smallTex:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_SMALL_GLOW_DDS)
+    control.normalTex:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_STANDARD_GLOW_DDS)
 
     return control
 end

@@ -16,6 +16,7 @@ local ModuleClasses = UnitFrames.VisualizerModuleClasses
 local function AddStandardCombatModules(visualizer)
     visualizer:AddModule(ModuleClasses.RegenerationModule:New())
     visualizer:AddModule(ModuleClasses.StatChangeModule:New())
+    visualizer:AddModule(ModuleClasses.ForceArmorShredModule:New())
     visualizer:AddModule(ModuleClasses.PowerShieldModule:New())
     visualizer:AddModule(ModuleClasses.UnwaveringModule:New())
     visualizer:AddModule(ModuleClasses.PossessionModule:New())

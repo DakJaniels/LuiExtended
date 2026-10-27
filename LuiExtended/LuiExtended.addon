@@ -119,6 +119,8 @@ modules/ChatAnnouncements/ChatAnnouncementsCSA.lua
 modules/ChatAnnouncements/QuestCounterFilters.lua
 modules/ChatAnnouncements/ChatAnnouncementsNightMarketDisplay.lua
 modules/ChatAnnouncements/ChatAnnouncementsHighSeasDisplay.lua
+modules/ChatAnnouncements/ChatAnnouncementsPyreLordDisplay.lua
+modules/ChatAnnouncements/ChatAnnouncementsNowhereVaultDisplay.lua
 modules/ChatAnnouncements/ChatAnnouncementsDynamicEncounterDisplay.lua
 modules/ChatAnnouncements/ChatAnnouncementsCatalogDisplay.lua
 modules/ChatAnnouncements/hooks/_HookShared.lua
@@ -275,6 +277,7 @@ modules/UnitFrames/UnitAttributeVisuals/PlayerDamageShieldLayers.lua
 modules/UnitFrames/UnitAttributeVisuals/Regeneration.lua
 modules/UnitFrames/UnitAttributeVisuals/Unwavering.lua
 modules/UnitFrames/UnitAttributeVisuals/StatChange.lua
+modules/UnitFrames/UnitAttributeVisuals/ForceArmorShred.lua
 modules/UnitFrames/UnitAttributeVisuals/Possession.lua
 modules/UnitFrames/CustomFrames/_FrameVisualizers.lua
 modules/UnitFrames/_UnitAttributeVisualizerCoordinator.lua

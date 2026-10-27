@@ -169,6 +169,7 @@ function LUIE_CustomFramePowerData_Base:ApplyArmorAndPowerOverlays(frameConfig)
                 frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
                 {
                     ["dec"] = Shared.CreateDecreasedArmorOverlay(backdrop, false),
+                    ["shred"] = Shared.CreateForceArmorShredOverlay(backdrop),
                     ["inc"] = backdrop:GetNamedChild("_ArmorInc"),
                 }
             end

@@ -3110,6 +3110,9 @@ local function FitRaidHealthBandVisuals(unitFrame, bandWidth, bandHeight)
     if armorStat and armorStat.dec then
         customFramesShared.FitDecreasedArmorOverlay(armorStat.dec, bandWidth - 2, bandHeight - 2)
     end
+    if armorStat and armorStat.shred then
+        customFramesShared.FitDecreasedArmorOverlay(armorStat.shred, bandWidth - 2, bandHeight - 2)
+    end
 end
 
 --- Chain one top-row icon right-to-left. Visible icons anchor their RIGHT to the current neighbor; hidden icons

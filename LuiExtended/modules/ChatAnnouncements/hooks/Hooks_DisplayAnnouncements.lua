@@ -306,10 +306,22 @@ function ChatAnnouncements.Hooks.RegisterDisplayAnnouncements(ctx)
                     settings = highSeasSettings
                     debugDisable = true
                 else
-                    local dynamicEncounterSettings = ChatAnnouncements.ResolveDynamicEncounterDisplayAnnouncement(primaryText, secondaryText)
-                    if dynamicEncounterSettings then
-                        settings = dynamicEncounterSettings
+                    local nowhereVaultSettings = ChatAnnouncements.ResolveNowhereVaultDisplayAnnouncement(primaryText, secondaryText)
+                    if nowhereVaultSettings then
+                        settings = nowhereVaultSettings
                         debugDisable = true
+                    else
+                        local dynamicEncounterSettings = ChatAnnouncements.ResolveDynamicEncounterDisplayAnnouncement(primaryText, secondaryText)
+                        if dynamicEncounterSettings then
+                            settings = dynamicEncounterSettings
+                            debugDisable = true
+                        else
+                            local pyreLordSettings = ChatAnnouncements.ResolvePyreLordDisplayAnnouncement(primaryText, secondaryText)
+                            if pyreLordSettings then
+                                settings = pyreLordSettings
+                                debugDisable = true
+                            end
+                        end
                     end
                 end
             end

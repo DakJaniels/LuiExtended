@@ -9401,6 +9401,7 @@ function ChatAnnouncements.CreateConsoleSettings()
             { svKey = "ZoneDynamicEncounterBilsaDelivery",  label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_BILSA_DELIVERY,  tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_BILSA_DELIVERY_TP  },
             { svKey = "ZoneDynamicEncounterNowhereVault",   label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT,   tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_NOWHERE_VAULT_TP   },
             { svKey = "ZoneDynamicEncounterMisc",           label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_MISC,            tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_MISC_TP            },
+            { svKey = "ZoneDynamicEncounterRimegale",       label = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_RIMEGALE,        tooltip = LUIE_STRING_LAM_CA_DISPLAY_DYNAMIC_ENCOUNTER_RIMEGALE_TP        },
         }
         for _, section in ipairs(dynamicEncounterDisplaySections) do
             AddDisplayAnnouncementCheckbox(section.svKey, section.label, section.tooltip, "CA")
@@ -9417,6 +9418,10 @@ function ChatAnnouncements.CreateConsoleSettings()
         AddDisplayAnnouncementCheckbox("ZoneHighSeas", LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS, LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS_TP, "CA")
         AddDisplayAnnouncementCheckbox("ZoneHighSeas", LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS, LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS_TP, "CSA")
         AddDisplayAnnouncementCheckbox("ZoneHighSeas", LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS, LUIE_STRING_LAM_CA_DISPLAY_HIGH_SEAS_TP, "Alert")
+
+        AddDisplayAnnouncementCheckbox("ZonePyreLord", LUIE_STRING_LAM_CA_DISPLAY_PYRE_LORD, LUIE_STRING_LAM_CA_DISPLAY_PYRE_LORD_TP, "CA")
+        AddDisplayAnnouncementCheckbox("ZonePyreLord", LUIE_STRING_LAM_CA_DISPLAY_PYRE_LORD, LUIE_STRING_LAM_CA_DISPLAY_PYRE_LORD_TP, "CSA")
+        AddDisplayAnnouncementCheckbox("ZonePyreLord", LUIE_STRING_LAM_CA_DISPLAY_PYRE_LORD, LUIE_STRING_LAM_CA_DISPLAY_PYRE_LORD_TP, "Alert")
 
         settings[#settings + 1] =
         {

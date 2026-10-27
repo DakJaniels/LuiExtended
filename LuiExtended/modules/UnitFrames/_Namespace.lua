@@ -29,6 +29,7 @@ UnitFrames.moduleName = LUIE.name .. "UnitFrames"
 --- @field PowerShieldModule LUIE_PowerShieldModule
 --- @field RegenerationModule LUIE_RegenerationModule
 --- @field StatChangeModule LUIE_StatChangeModule
+--- @field ForceArmorShredModule LUIE_ForceArmorShredModule
 --- @field UnwaveringModule LUIE_UnwaveringModule
 UnitFrames.VisualizerModuleClasses =
 {
@@ -36,6 +37,7 @@ UnitFrames.VisualizerModuleClasses =
     PowerShieldModule = nil,
     RegenerationModule = nil,
     StatChangeModule = nil,
+    ForceArmorShredModule = nil,
     UnwaveringModule = nil,
 }
 
@@ -538,6 +540,8 @@ UnitFrames.SV = {}
 --- @field New fun(self, ...): LUIE_RegenerationModule
 --- @class LUIE_StatChangeModule : LUIE_UnitAttributeVisualizerModuleBase
 --- @field New fun(self, ...): LUIE_StatChangeModule
+--- @class LUIE_ForceArmorShredModule : LUIE_UnitAttributeVisualizerModuleBase
+--- @field New fun(self, ...): LUIE_ForceArmorShredModule
 --- @class LUIE_PowerShieldModule : LUIE_UnitAttributeVisualizerModuleBase
 --- @field New fun(self, ...): LUIE_PowerShieldModule
 --- @class LUIE_UnwaveringModule : LUIE_UnitAttributeVisualizerModuleBase
