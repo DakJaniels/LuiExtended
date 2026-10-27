@@ -177,7 +177,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.BracketOptionCharacter,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionCharacter],
             },
             {
                 type = "description",
@@ -2075,7 +2075,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.BracketOptionItem,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionItem],
             },
             {
                 -- Show looted item icons
@@ -5113,7 +5113,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Skills.SkillPointCA or Settings.Skills.SkillPointCSA or Settings.Skills.SkillPointAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Skills.SkillPointBracket,
+                default = bracketOptions5[Defaults.Skills.SkillPointBracket],
             },
             {
                 -- Show Skill Points Updated Partial
@@ -6214,7 +6214,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.BracketOptionCollectible,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionCollectible],
             },
             {
                 -- Collectible Color 1
@@ -6293,7 +6293,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Collectibles.CollectibleBracket,
+                default = bracketOptions5[Defaults.Collectibles.CollectibleBracket],
             },
             {
                 -- Collectible Category
@@ -6436,7 +6436,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Collectibles.CollectibleUseCA or Settings.Collectibles.CollectibleUseAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.BracketOptionCollectibleUse,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionCollectibleUse],
             },
             {
                 -- Collectible Color
@@ -6567,7 +6567,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.BracketOptionLorebook,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionLorebook],
             },
             {
                 -- Show Lorebooks (ChatAnnouncements)
@@ -6818,7 +6818,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Lorebooks.LorebookCA or Settings.Lorebooks.LorebookCSA or Settings.Lorebooks.LorebookAlert or Settings.Lorebooks.LorebookCollectionCA or Settings.Lorebooks.LorebookCollectionCSA or Settings.Lorebooks.LorebookCollectionAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Lorebooks.LorebookBracket,
+                default = bracketOptions5[Defaults.Lorebooks.LorebookBracket],
             },
             {
                 -- Lorebooks Category
@@ -6937,7 +6937,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Antiquities.AntiquityCA or Settings.Antiquities.AntiquityCSA or Settings.Antiquities.AntiquityAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Antiquities.AntiquityBracket,
+                default = linkBracketDisplayOptions[Defaults.Antiquities.AntiquityBracket],
             },
             {
                 -- Antiquities Icon
@@ -7011,7 +7011,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Antiquities.AntiquityCA or Settings.Antiquities.AntiquityCSA or Settings.Antiquities.AntiquityAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Antiquities.AntiquityPrefixBracket,
+                default = bracketOptions5[Defaults.Antiquities.AntiquityPrefixBracket],
             },
             {
                 -- Antiquities Suffix
@@ -7235,7 +7235,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Achievement.AchievementCompleteCA or Settings.Achievement.AchievementCompleteCSA or Settings.Achievement.AchievementCompleteAlert or Settings.Achievement.AchievementUpdateCA or Settings.Achievement.AchievementUpdateAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.BracketOptionAchievement,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionAchievement],
             },
             {
                 -- Achievement Message Color
@@ -7365,7 +7365,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Achievement.AchievementCompleteCA or Settings.Achievement.AchievementCompleteCSA or Settings.Achievement.AchievementCompleteAlert or Settings.Achievement.AchievementUpdateCA or Settings.Achievement.AchievementUpdateAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Achievement.AchievementBracketOptions,
+                default = bracketOptions5[Defaults.Achievement.AchievementBracketOptions],
             },
             {
                 -- Category & Subcategory Bracket Options
@@ -7383,7 +7383,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Achievement.AchievementCategory or Settings.Achievement.AchievementSubcategory) or not (Settings.Achievement.AchievementCompleteCA or Settings.Achievement.AchievementCompleteCSA or Settings.Achievement.AchievementCompleteAlert or Settings.Achievement.AchievementUpdateCA or Settings.Achievement.AchievementUpdateAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Achievement.AchievementCatBracketOptions,
+                default = bracketOptions4[Defaults.Achievement.AchievementCatBracketOptions],
             },
             {
                 -- Color Achievement Progress
@@ -8373,7 +8373,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Social.GuildRankCA or Settings.Social.GuildRankAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Social.GuildRankDisplayOptions,
+                default = guildRankDisplayOptions[Defaults.Social.GuildRankDisplayOptions],
             },
             {
                 -- Show Guild Management ChatAnnouncements
