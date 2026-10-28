@@ -104,9 +104,9 @@ local RESPEC_DISPLAY_REPEAT_WINDOW_MS = 1000
 --- @param message string
 --- @return nil
 local function LogRespecDevDebug(message)
-    if LUIE.IsDevDebugEnabled() then
-        LUIE:Log("Debug", message)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     LUIE:Log("Debug", message)
+    -- end
 end
 
 --- @class CARespecPendingState
