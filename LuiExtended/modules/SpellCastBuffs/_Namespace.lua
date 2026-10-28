@@ -188,6 +188,7 @@ local SpellCastBuffs = ZO_Object:Subclass()
 --- @field ExtraBuffs boolean
 --- @field ExtraExpanded boolean
 --- @field ShowDebugCombat boolean
+--- @field ShowDebugPower boolean
 --- @field ShowDebugEffect boolean
 --- @field ShowDebugFilter boolean
 --- @field ShowDebugAbilityId boolean
@@ -401,6 +402,7 @@ SpellCastBuffs.Defaults =
     ExtraBuffs = true,
     ExtraExpanded = false,
     ShowDebugCombat = false,
+    ShowDebugPower = false,
     ShowDebugEffect = false,
     ShowDebugFilter = false,
     ShowDebugAbilityId = false,

@@ -3894,6 +3894,26 @@ function SpellCastBuffs.CreateSettings()
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
         type = "checkbox",
+        name = GetString(LUIE_STRING_LAM_SCB_DEBUG_POWER_UPDATES),
+        tooltip = GetString(LUIE_STRING_LAM_SCB_DEBUG_POWER_UPDATES_TP),
+        getFunc = function ()
+            return Settings.ShowDebugPower
+        end,
+        setFunc = function (value)
+            Settings.ShowDebugPower = value
+            SpellCastBuffs.RegisterDebugEvents()
+        end,
+        width = "full",
+        default = Defaults.ShowDebugPower,
+        disabled = function ()
+            return not LUIE.SV.SpellCastBuff_Enable
+        end,
+    }
+
+    -- Debug
+    optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
+    {
+        type = "checkbox",
         name = GetString(LUIE_STRING_LAM_SCB_DEBUG_EFFECT_CHANGE),
         tooltip = GetString(LUIE_STRING_LAM_SCB_DEBUG_EFFECT_CHANGE_TP),
         getFunc = function ()
