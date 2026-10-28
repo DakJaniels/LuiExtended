@@ -739,11 +739,18 @@ end
 function SpellCastBuffs.RegisterDebugEvents()
     -- Unregister existing events
     eventManager:UnregisterForEvent(moduleName .. "DebugCombat", EVENT_COMBAT_EVENT)
+    eventManager:UnregisterForEvent(moduleName .. "DebugPower", EVENT_POWER_UPDATE)
     -- Register standard debug events if enabled
     if SpellCastBuffs.SV.ShowDebugCombat then
         eventManager:RegisterForEvent(moduleName .. "DebugCombat", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             SpellCastBuffs.EventCombatDebug(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
         end)
+    end
+    if SpellCastBuffs.SV.ShowDebugPower then
+        eventManager:RegisterForEvent(moduleName .. "DebugPower", EVENT_POWER_UPDATE, function (eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+            SpellCastBuffs.EventPowerDebug(eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+        end)
+        eventManager:AddFilterForEvent(moduleName .. "DebugPower", EVENT_POWER_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
     end
     eventManager:UnregisterForEvent(moduleName .. "DebugEffect", EVENT_EFFECT_CHANGED)
     if SpellCastBuffs.SV.ShowDebugEffect then
@@ -755,10 +762,18 @@ function SpellCastBuffs.RegisterDebugEvents()
     -- Author-specific debug events
     if SpellCastBuffs.devDebugEnabled then
         eventManager:UnregisterForEvent(moduleName .. "AuthorDebugCombat", EVENT_COMBAT_EVENT)
+        eventManager:UnregisterForEvent(moduleName .. "AuthorDebugPower", EVENT_POWER_UPDATE)
         if SpellCastBuffs.SV.ShowDebugCombat then
             eventManager:RegisterForEvent(moduleName .. "AuthorDebugCombat", EVENT_COMBAT_EVENT, function (eventId, ...)
                 SpellCastBuffs.AuthorCombatDebug(eventId, ...)
             end)
+        end
+        -- Absent when _DevDebug.lua returns early on a non-dev load.
+        if SpellCastBuffs.SV.ShowDebugPower and SpellCastBuffs.AuthorPowerDebug then
+            eventManager:RegisterForEvent(moduleName .. "AuthorDebugPower", EVENT_POWER_UPDATE, function (eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+                SpellCastBuffs.AuthorPowerDebug(eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+            end)
+            eventManager:AddFilterForEvent(moduleName .. "AuthorDebugPower", EVENT_POWER_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
         end
         eventManager:UnregisterForEvent(moduleName .. "AuthorDebugEffect", EVENT_EFFECT_CHANGED)
         if SpellCastBuffs.SV.ShowDebugEffect then

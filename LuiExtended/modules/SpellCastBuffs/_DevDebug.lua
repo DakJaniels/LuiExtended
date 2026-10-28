@@ -36,6 +36,7 @@ local tostring = tostring
 
 local DoesAbilityExist = DoesAbilityExist
 local GetAbilityName = GetAbilityName
+local GetString = GetString
 local GetZoneId = GetZoneId
 local GetCurrentMapZoneIndex = GetCurrentMapZoneIndex
 local GetPlayerLocationName = GetPlayerLocationName
@@ -49,6 +50,53 @@ local SetMapToMapListIndex = SetMapToMapListIndex
 local MapZoomOut = MapZoomOut
 local chatSystem = ZO_GetChatSystem()
 
+-- Last logged player powerValue per CombatMechanicFlags. Independent of _Debug.lua so author chat cannot double-log.
+local previousPowerValueByType = {}
+
+local function FormatSignedPowerDelta(delta)
+    if delta > 0 then
+        return "+" .. tostring(delta)
+    end
+    return tostring(delta)
+end
+
+local function GetCombatMechanicFlagLabel(powerType)
+    local poolName = GetString("SI_COMBATMECHANICFLAGS", powerType)
+    if poolName == nil or poolName == "" then
+        return tostring(powerType)
+    end
+    return poolName
+end
+
+local function FormatPowerDebugUnitTag(unitTag)
+    if unitTag == "player" then
+        return "Player"
+    end
+    if unitTag == nil or unitTag == "" then
+        return "NIL"
+    end
+    return unitTag
+end
+
+--- Same line as SpellCastBuffs.EventPowerDebug. This file cannot see that file's locals.
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+--- @return string
+local function FormatPowerDebugLine(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    local previousValue = previousPowerValueByType[powerType]
+    local deltaText = "n/a"
+    if previousValue ~= nil then
+        deltaText = FormatSignedPowerDelta(powerValue - previousValue)
+    end
+    previousPowerValueByType[powerType] = powerValue
+
+    local poolName = GetCombatMechanicFlagLabel(powerType)
+    local tagLabel = FormatPowerDebugUnitTag(unitTag)
+    return ("|c00E200Power:|r [Tag] " .. tagLabel .. " [Pool] " .. poolName .. " (" .. tostring(powerType) .. ") [Value] " .. tostring(powerValue) .. "/" .. tostring(powerMax) .. " [Eff] " .. tostring(powerEffectiveMax) .. " [Delta] " .. deltaText)
+end
 
 --- Formats GPS coordinates for display
 --- @param number number The raw coordinate value
@@ -105,6 +153,25 @@ function SpellCastBuffs.AuthorCombatDebug(eventCode, result, isError, abilityNam
         if SpellCastBuffs.devDebugEnabled then
             LUIE:Log("Verbose", finalString)
         end
+    end
+end
+
+-- Author chat only. EventPowerDebug already writes ChatOutput and LibDebugLogger; this must not repeat those.
+--- @param eventId integer
+--- @param unitTag string
+--- @param powerIndex luaindex
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+function SpellCastBuffs.AuthorPowerDebug(eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+    local finalString = FormatPowerDebugLine(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    for _, chatContainer in ipairs(chatSystem.containers) do
+        local chatWindow = chatContainer.windows[2]
+        if chatWindow == nil then
+            chatWindow = chatContainer.windows[1]
+        end
+        chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
     end
 end
 

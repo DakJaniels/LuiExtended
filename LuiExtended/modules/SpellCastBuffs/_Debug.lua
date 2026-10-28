@@ -27,6 +27,56 @@ local GetAbilityIcon = GetAbilityIcon
 local GetAbilityName = GetAbilityName
 local GetAbilityDuration = GetAbilityDuration
 local GetAbilityCastInfo = GetAbilityCastInfo
+local GetString = GetString
+local tostring = tostring
+
+-- Last logged player powerValue per CombatMechanicFlags, so each EVENT_POWER_UPDATE line can show a signed delta.
+local previousPowerValueByType = {}
+
+local function FormatSignedPowerDelta(delta)
+    if delta > 0 then
+        return "+" .. tostring(delta)
+    end
+    return tostring(delta)
+end
+
+local function GetCombatMechanicFlagLabel(powerType)
+    local poolName = GetString("SI_COMBATMECHANICFLAGS", powerType)
+    if poolName == nil or poolName == "" then
+        return tostring(powerType)
+    end
+    return poolName
+end
+
+local function FormatPowerDebugUnitTag(unitTag)
+    if unitTag == "player" then
+        return "Player"
+    end
+    if unitTag == nil or unitTag == "" then
+        return "NIL"
+    end
+    return unitTag
+end
+
+--- One chat line for a player power pool update. First sample for a power type has no previous value.
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+--- @return string
+local function FormatPowerDebugLine(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    local previousValue = previousPowerValueByType[powerType]
+    local deltaText = "n/a"
+    if previousValue ~= nil then
+        deltaText = FormatSignedPowerDelta(powerValue - previousValue)
+    end
+    previousPowerValueByType[powerType] = powerValue
+
+    local poolName = GetCombatMechanicFlagLabel(powerType)
+    local tagLabel = FormatPowerDebugUnitTag(unitTag)
+    return ("|c00E200Power:|r [Tag] " .. tagLabel .. " [Pool] " .. poolName .. " (" .. tostring(powerType) .. ") [Value] " .. tostring(powerValue) .. "/" .. tostring(powerMax) .. " [Eff] " .. tostring(powerEffectiveMax) .. " [Delta] " .. deltaText)
+end
 
 local function GetEffectResultString(result)
     local results =
@@ -100,6 +150,22 @@ function SpellCastBuffs.EventCombatDebug(eventId, result, isError, abilityName, 
     local formattedResult = DebugResults[result]
 
     local finalString = (iconFormatted .. " [" .. abilityId .. "] " .. ability .. ": [S] " .. source .. " --> [T] " .. target .. " [D] " .. duration .. showachantime .. showacasttime .. " [R] " .. formattedResult)
+    ChatOutput:Print(finalString, true)
+    if SpellCastBuffs.devDebugEnabled then
+        LUIE:Log("Verbose", finalString)
+    end
+end
+
+-- Debug Display for Power Updates (player EVENT_POWER_UPDATE). Not filtered by EffectOverride or ShowDebugFilter.
+--- @param eventId integer
+--- @param unitTag string
+--- @param powerIndex luaindex
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+function SpellCastBuffs.EventPowerDebug(eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+    local finalString = FormatPowerDebugLine(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
     ChatOutput:Print(finalString, true)
     if SpellCastBuffs.devDebugEnabled then
         LUIE:Log("Verbose", finalString)
