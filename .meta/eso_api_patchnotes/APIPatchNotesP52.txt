@@ -1,0 +1,620 @@
+******************
+***Enums Added ***
+******************
+
+* NON_COMBAT_BONUS_JERALL_MARK_MULTIPLIER
+
+* PLATFORM_STORE_LABEL_REUSE_ME_2
+
+* ATTRIBUTE_VISUAL_FORCE_ARMOR_SHRED
+
+* ABILITY_TYPE_DAMAGETYPEFILTER
+* ABILITY_TYPE_ITEMSETCONTRIBUTION
+
+* RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_REJECTED_ROLE_NOT_AVAILABLE
+
+* OUTFIT_SLOT_BACK_ORNAMENT
+
+* HOLDINGTYPE_IMPERIAL_CITY_DISTRICT
+
+* CAMPAIGN_RULESET_TYPE_JERALL_PASS
+
+* SCORE_TRACKER_TYPE_CTF_DEFEND_ACTIVE
+* SCORE_TRACKER_TYPE_CTF_DEFEND_PASSIVE
+* SCORE_TRACKER_TYPE_HARD_CC
+* SCORE_TRACKER_TYPE_HEALING_LOW_PERCENTAGE_TURNAROUND
+* SCORE_TRACKER_TYPE_REVIVES
+
+* COLLECTIBLE_CATEGORY_TYPE_ANIMAL_COMPANION_SKIN
+* COLLECTIBLE_CATEGORY_TYPE_BACK_ORNAMENT
+
+* PLAYER_FX_OVERRIDE_ABILITY_TYPE_COMPANION_SUMMON
+
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_CHALLENGE_REROLL_CAP
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_TOME_POINT_GAIN
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_WEEKLY_CHALLENGE_CAP
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_WEEKLY_CHALLENGE_REROLL_GRANTS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_WEEKLY_GENERIC_CHALLENGE_GRANTS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_WEEKLY_THEMED_CHALLENGE_GRANTS
+
+* STAT_HEALTH_REGEN
+* STAT_MAGICKA_REGEN
+* STAT_REGEN
+* STAT_STAMINA_REGEN
+
+* OVERLAND_DIFFICULTY_TYPE_MASTER
+* OVERLAND_DIFFICULTY_TYPE_SEASONED
+* OVERLAND_DIFFICULTY_TYPE_VESTIGE
+
+* CURT_JERALL_MARKS
+
+* HOUSE_FLAGS_SUPPORTS_SKY_CONTROL
+
+* HOUSING_EDITOR_COMMAND_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* HOUSING_EDITOR_COMMAND_RESULT_ITEM_AT_STACK_CAPACITY
+
+* HOUSING_REQUEST_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* HOUSING_REQUEST_RESULT_ITEM_AT_STACK_CAPACITY
+
+* MARKET_COLORS_NORMAL
+* MARKET_COLORS_NORMAL_DIMMED
+
+* EQUIP_SLOT_TRINKET
+
+* EQUIP_TYPE_TRINKET
+
+* EQUIPMENT_FILTER_TYPE_TRINKET
+
+* GAMEPAD_ITEM_CATEGORY_ANIMAL_COMPANION
+
+* ITEMFILTERTYPE_ANIMAL_COMPANION
+
+* ITEMTYPE_TRINKET
+
+* ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION
+
+* LOOT_ITEM_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* LOOT_ITEM_RESULT_ITEM_AT_STACK_CAPACITY
+
+* SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_SUPPLIES
+* SPECIALIZED_ITEMTYPE_TRINKET
+
+* STORE_ITEM_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* STORE_ITEM_RESULT_ITEM_AT_STACK_CAPACITY
+
+* UI_SETTING_SHOW_MINIMAP
+
+* CLAIM_REWARD_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* CLAIM_REWARD_RESULT_ITEM_AT_STACK_CAPACITY
+
+* REWARD_TYPE_JERALL_MARKS
+
+* MARKET_PURCHASE_RESULT_PURCHASE_LIMIT_REACHED
+
+* MAP_FILTER_TYPE_AVA_JERALL
+
+* ZONE_COMPLETION_TYPE_MECHANICS
+* ZONE_COMPLETION_TYPE_MILESTONES
+
+* CHATTER_END_INSTANCE_MANAGEMENT
+* CHATTER_INSTANCE_MANAGEMENT_CONFIRM
+* CHATTER_START_INSTANCE_MANAGEMENT
+
+* INTERACTION_INSTANCE_MANAGEMENT
+
+* PROVISIONER_SPECIAL_INGREDIENT_TYPE_SUPPLIES
+
+* TUTORIAL_TRIGGER_MAP_OPENED_JERALL_PASS
+
+* REWARD_TRACK_PROGRESS_RESULT_REWARD_TRACK_PVP_ONLY
+
+* ALLOW_MARKUP_TYPE_NO_EXCEPTIONS
+
+* CT_QRCODE
+
+* MAP_PIN_TYPE_SCRIPTED_EVENT
+
+
+h5. CampaignLeaderboardFlags
+* CAMPAIGN_LEADERBOARD_FLAGS_INELIGIBLE_FOR_EMPEROR_NON_HOME
+* CAMPAIGN_LEADERBOARD_FLAGS_SKIP_ALLIANCE_POINT_FACTION_RANK
+* CAMPAIGN_LEADERBOARD_FLAGS_SKIP_ALLIANCE_POINT_RANK
+
+
+h5. CampaignWorldType
+* CAMPAIGN_WORLD_TYPE_CYRODIIL
+* CAMPAIGN_WORLD_TYPE_IMPERIAL_CITY
+* CAMPAIGN_WORLD_TYPE_JERALL_PASS
+
+
+h5. PseudoCollectibleType
+* PSEUDO_COLLECTIBLE_TYPE_DLC
+* PSEUDO_COLLECTIBLE_TYPE_NONE
+
+
+h5. DamageTypeFlags
+* DAMAGE_TYPE_FLAGS_ALL
+* DAMAGE_TYPE_FLAGS_ALL_PHYSICAL
+* DAMAGE_TYPE_FLAGS_ALL_SPELL
+* DAMAGE_TYPE_FLAGS_BLEED
+* DAMAGE_TYPE_FLAGS_COLD
+* DAMAGE_TYPE_FLAGS_DISEASE
+* DAMAGE_TYPE_FLAGS_DROWN
+* DAMAGE_TYPE_FLAGS_EARTH
+* DAMAGE_TYPE_FLAGS_FIRE
+* DAMAGE_TYPE_FLAGS_GENERIC
+* DAMAGE_TYPE_FLAGS_MAGIC
+* DAMAGE_TYPE_FLAGS_OBLIVION
+* DAMAGE_TYPE_FLAGS_PHYSICAL
+* DAMAGE_TYPE_FLAGS_POISON
+* DAMAGE_TYPE_FLAGS_SHOCK
+* DAMAGE_TYPE_FLAGS_TYPELESS
+
+
+h5. PurchaseLimitResetType
+* PURCHASE_LIMIT_RESET_TYPE_CUSTOM
+* PURCHASE_LIMIT_RESET_TYPE_DAILY
+* PURCHASE_LIMIT_RESET_TYPE_MONTHLY
+* PURCHASE_LIMIT_RESET_TYPE_SEASONAL
+* PURCHASE_LIMIT_RESET_TYPE_WEEKLY
+
+h5. InstanceManagementAction
+* INSTANCE_MANAGEMENT_ACTION_LOAD
+* INSTANCE_MANAGEMENT_ACTION_NONE
+* INSTANCE_MANAGEMENT_ACTION_RESET
+* INSTANCE_MANAGEMENT_ACTION_SAVE
+
+
+h5. InstanceManagementResult
+* INSTANCE_MANAGEMENT_RESULT_BAD_STATE
+* INSTANCE_MANAGEMENT_RESULT_LOAD_FAIL
+* INSTANCE_MANAGEMENT_RESULT_LOAD_FAIL_SHUTDOWN
+* INSTANCE_MANAGEMENT_RESULT_LOAD_SUCCESS
+* INSTANCE_MANAGEMENT_RESULT_NOT_LEADER
+* INSTANCE_MANAGEMENT_RESULT_NOT_SAVEABLE
+* INSTANCE_MANAGEMENT_RESULT_NO_SAVE_TO_LOAD
+* INSTANCE_MANAGEMENT_RESULT_RESET_CANCEL_FAIL
+* INSTANCE_MANAGEMENT_RESULT_RESET_FAIL
+* INSTANCE_MANAGEMENT_RESULT_RESET_WAIT
+* INSTANCE_MANAGEMENT_RESULT_RUN_ENDED
+* INSTANCE_MANAGEMENT_RESULT_RUN_STARTED
+* INSTANCE_MANAGEMENT_RESULT_SAVE_CLEARED
+* INSTANCE_MANAGEMENT_RESULT_SAVE_FAIL
+* INSTANCE_MANAGEMENT_RESULT_SAVE_FAIL_SHUTDOWN
+* INSTANCE_MANAGEMENT_RESULT_SAVE_SUCCESS
+
+
+h5. QRCodeErrorCorrectionLevel
+* QR_CODE_ERROR_CORRECTION_LEVEL_HIGH
+* QR_CODE_ERROR_CORRECTION_LEVEL_LOW
+* QR_CODE_ERROR_CORRECTION_LEVEL_MEDIUM
+* QR_CODE_ERROR_CORRECTION_LEVEL_QUARTILE
+
+
+h5. QRCodeSegmentType
+* QR_CODE_SEGMENT_TYPE_ALPHANUMERIC
+* QR_CODE_SEGMENT_TYPE_BYTE
+* QR_CODE_SEGMENT_TYPE_NUMERIC
+
+
+
+********************
+***Enums Removed ***
+********************
+
+* PLATFORM_STORE_LABEL_DMM
+
+* PLATFORM_SERVICE_TYPE_DMM
+
+* PLAYER_PLATFORM_DMM
+
+* STAT_DEPRECATED_0
+* STAT_DEPRECATED_1
+* STAT_DEPRECATED_2
+* STAT_DEPRECATED_3
+
+* OVERLAND_DIFFICULTY_TYPE_ADVENTURER
+* OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN
+* OVERLAND_DIFFICULTY_TYPE_VETERAN
+
+* TUTORIAL_TRIGGER_REUSE_5
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* AdjustGuildIndex(*integer* _guildId_, *luaindex* _newGuildIndex_)
+
+* SetAllGuildsOrder(*integer* _guildId_)
+
+* IsGuildMailInitialized()
+** _Returns:_ *bool* _isInitialized_
+
+* GetScriptedEventOverheadIcon(*string* _unitTag_)
+** _Returns:_ *textureName* _icon_
+
+* ShouldPlayerMinimapBeZoomedIn()
+** _Returns:_ *bool* _zoomIn_
+
+* GetJerallPassMapIndex()
+** _Returns:_ *luaindex:nilable* _index_
+
+* IsInJerallPass()
+** _Returns:_ *bool* _isInJerallPass_
+
+* IsCampaignLeaderboardDataReady(*[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *bool* _isDataReady_
+
+* GetCampaignLeaderboardPlayerAlliancePoints(*integer* _campaignId_)
+** _Returns:_ *integer* _alliancePoints_
+
+* GetPossibleCampaignHoldings(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_, *[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *integer* _possibleHoldings_
+
+* GetCampaignHoldingScoreValue(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_)
+** _Returns:_ *integer* _scoreValue_
+
+* GetCampaignWorldType(*integer* _campaignId_)
+** _Returns:_ *[CampaignWorldType|#CampaignWorldType]* _campaignWorldType_
+
+* GetKeepCampaignWorldType(*integer* _keepId_)
+** _Returns:_ *[CampaignWorldType|#CampaignWorldType]* _worldType_
+
+* IsActiveCompanionAnimal()
+** _Returns:_ *bool* _isAnimalCompanion_
+
+* GetActiveCompanionType()
+** _Returns:_ *[CompanionType|#CompanionType]* _companionType_
+
+* GetActiveAnimalCompanionSilhouetteTexture()
+** _Returns:_ *textureName* _paperDollTexture_
+
+* SetTemporaryCraftedAbilityScriptSelectionsForBuild(*luaindex* _buildIndex_)
+
+* ClearTemporaryCraftedAbilityScriptSelectionsForBuild()
+
+* IsOverlandDifficultyEnabled(*integer* _zoneId_)
+** _Returns:_ *bool* _isEnabled_
+
+* IsOverlandDifficultyEnabledForWorld(*integer* _worldId_)
+** _Returns:_ *bool* _isEnabled_
+
+* GetTrialProgressionTrackAttunedUISoundByIndex(*luaindex* _trackIndex_)
+** _Returns:_ *string* _soundId_
+
+* GetTrialProgressionTrackUnattunedUISoundByIndex(*luaindex* _trackIndex_)
+** _Returns:_ *string* _soundId_
+
+* ConfirmInstanceManagementAction(*[InstanceManagementAction|#InstanceManagementAction]* _managementAction_)
+
+* GetSavedInstanceEndlessDungeonSummary()
+** _Returns:_ *integer* _stage_, *integer* _cycle_, *integer* _arc_
+
+* IsItemLinkAnimalCompanion(*string* _itemLink_)
+** _Returns:_ *bool* _isAnimalCompanion_
+
+* GetNextPseudoCollectibleId(*luaindex:nilable* _lastIndex_)
+** _Returns:_ *luaindex:nilable* _nextIndex_, *integer:nilable* _nextId_
+
+* DoesMarketProductHavePurchaseLimit(*integer* _marketProductId_)
+** _Returns:_ *bool* _hasPurchaseLimit_
+
+* ShouldMarketProductHidePurchaseLimitResetTimer(*integer* _marketProductId_)
+** _Returns:_ *bool* _shouldHidePurchaseLimitResetTimer_
+
+* GetMarketProductPurchaseLimit(*integer* _marketProductId_)
+** _Returns:_ *integer* _purchaseLimit_
+
+* GetMarketProductPurchaseCount(*integer* _marketProductId_)
+** _Returns:_ *integer* _purchaseCount_
+
+* GetMarketProductAvailablePurchaseLimit(*integer* _marketProductId_)
+** _Returns:_ *integer:nilable* _availableCount_
+
+* GetMarketProductPurchaseLimitResetType(*integer* _marketProductId_)
+** _Returns:_ *[PurchaseLimitResetType|#PurchaseLimitResetType]* _purchaseLimitResetType_
+
+* GetMarketProductPurchaseLimitResetTimeLeftInSeconds(*integer* _marketProductId_)
+** _Returns:_ *number* _timeLeftSeconds_
+
+* GetAchievementCriterionSkyshardId(*integer* _achievementId_, *luaindex* _criterionIndex_)
+** _Returns:_ *integer* _skyshardId_
+
+
+h3. CanvasControl
+* SetFillColorLinearGradient(*string* _color1_, *string* _color2_, *number* _startLocationX_, *number* _startLocationY_, *number* _endLocationX_, *number* _endLocationY_)
+
+* SetFillColorRadialGradient(*string* _color1_, *string* _color2_, *number* _centerX_, *number* _centerY_, *number* _extent_)
+
+
+h3. LabelControl
+* GetWrapMode()
+** _Returns:_ *[TextWrapMode|#TextWrapMode]* _wrapMode_
+
+
+h3. QRCodeControl
+* AddSegment(*string* _data_, *[QRCodeSegmentType|#QRCodeSegmentType]* _segmentType_)
+
+* AddSegments(*string* _data_)
+
+* BeginSegments()
+
+* Clear()
+
+* EncodeSegments(*[QRCodeErrorCorrectionLevel|#QRCodeErrorCorrectionLevel]* _errorCorrectionLevel_, *integer* _minVersion_, *integer* _maxVersion_, *integer* _mask_, *bool* _boostEcl_)
+
+* EncodeText(*string* _text_, *[QRCodeErrorCorrectionLevel|#QRCodeErrorCorrectionLevel]* _errorCorrectionLevel_)
+
+* GetObjectFit()
+** _Returns:_ *[ObjectFit|#ObjectFit]* _objectFit_
+
+* SetCanvasSize(*number* _width_, *number* _height_)
+
+* SetObjectFit(*[ObjectFit|#ObjectFit]* _objectFit_)
+
+
+h3. VectorControl
+* GetColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
+* SetColor()
+** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* OpenChapterUpgradeURL *private* (*integer* _chapterId_, *bool* _isCollectorsEdition_, *[ChapterUpgradeSource|#ChapterUpgradeSource]* _source_)
+
+* ShowPlatformESOChapterUpgradeUI *private* (*integer* _chapterId_, *bool* _isCollectorsEdition_, *[ChapterUpgradeSource|#ChapterUpgradeSource]* _source_)
+
+* GetCurrentChapterUpgradeId()
+** _Returns:_ *integer* _chapterUpgradeId_
+
+* GetChapterCollectibleId(*integer* _chapterUpgradeId_)
+** _Returns:_ *integer* _collectibleId_
+
+* IsChapterOwned(*integer* _chapterUpgradeId_)
+** _Returns:_ *bool* _isChapterOwned_
+
+* GetCampaignHoldingScoreValues(*integer* _campaignId_)
+** _Returns:_ *integer* _keepValue_, *integer* _resourceValue_, *integer* _outpostValue_, *integer* _defensiveArtifactValue_, *integer* _offensiveArtifactValue_
+
+* RequestShowMarketChapterUpgrade(*[MarketOpenOperation|#MarketOpenOperation]* _source_, *integer* _chapterUpgradeId_)
+
+* GetActiveChapterUpgradeMarketProductListings(*[MarketDisplayGroup|#MarketDisplayGroup]* _displayGroup_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _marketProductId_
+
+* GetMarketProductChapterUpgradeId(*integer* _marketProductId_)
+** _Returns:_ *integer* _chapterUpgradeId_
+
+* GetChapterSummary(*integer* _chapterUpgradeId_)
+** _Returns:_ *string* _chapterSummary_
+
+* GetChapterOverrideDisplayName(*integer* _chapterUpgradeId_)
+** _Returns:_ *string* _overrideDisplayName_
+
+* GetChapterMarketBackgroundFileImage(*integer* _chapterUpgradeId_)
+** _Returns:_ *textureName* _marketBackgroundFileIndex_
+
+* GetNumChapterPrePurchaseRewards(*integer* _chapterUpgradeId_)
+** _Returns:_ *integer* _numRewards_
+
+* GetChapterPrePurchaseRewardInfo(*integer* _chapterUpgradeId_, *luaindex* _index_)
+** _Returns:_ *integer* _marketProductId_, *bool* _isStandardReward_, *bool* _isCollectorsReward_
+
+* GetNumChapterPreOrderRewards(*integer* _chapterUpgradeId_)
+** _Returns:_ *integer* _numRewards_
+
+* GetChapterPreOrdereRewardInfo(*integer* _chapterUpgradeId_, *luaindex* _index_)
+** _Returns:_ *integer* _marketProductId_, *bool* _isStandardReward_, *bool* _isCollectorsReward_
+
+* GetNumChapterBasicRewards(*integer* _chapterUpgradeId_)
+** _Returns:_ *integer* _numRewards_
+
+* GetChapterBasicRewardInfo(*integer* _chapterUpgradeId_, *luaindex* _index_)
+** _Returns:_ *integer* _marketProductId_, *bool* _isStandardReward_, *bool* _isCollectorsReward_
+
+* IsChapterPreRelease(*integer* _chapterUpgradeId_)
+** _Returns:_ *bool* _isPreRelease_
+
+* GetChapterReleaseDateString(*integer* _chapterUpgradeId_)
+** _Returns:_ *string* _releaseDateString_
+
+* GetChapterEnumFromUpgradeId(*integer* _chapterUpgradeId_)
+** _Returns:_ *[Chapter|#Chapter]* _chapterEnum_
+
+* IsChapterContentPass(*integer* _chapterUpgradeId_)
+** _Returns:_ *bool* _isContentPass_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Renamed _crossplayDisplayName_ and/or added _platformDisplayName_
+* GetFriendInfo(*luaindex* _friendIndex_)
+** _Returns:_ *string* _crossplayDisplayName_, *string* _note_, *[PlayerStatus|#PlayerStatus]* _playerStatus_, *integer* _secsSinceLogoff_, *string* _platformDisplayName_
+
+* AcceptFriendRequest(*string* _crossplayDisplayName_)
+* RejectFriendRequest(*string* _crossplayDisplayName_)
+
+* GetOfferedQuestShareInfo(*integer* _questId_)
+** _Returns:_ *string* _questName_, *string* _characterName_, *integer* _millisecondsSinceRequest_, *string* _displayName_
+
+* GetKillingAttackerInfo(*luaindex* _index_)
+** _Returns:_ *string* _attackerRawName_, *integer* _attackerChampionPoints_, *integer* _attackerLevel_, *integer* _attackerAvARank_, *bool* _isPlayer_, *bool* _isBoss_, *[Alliance|#Alliance]* _alliance_, *string* _minionName_, *string* _attackerDisplayName_
+
+
+Added _campaignId_
+* QueryCampaignLeaderboardData(*integer* _campaignId_, *[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+
+
+Added _flags_
+* GetCampaignLeaderboardEntryInfo(*integer* _campaignId_, *luaindex* _entryIndex_)
+** _Returns:_ *bool* _isPlayer_, *integer* _ranking_, *string* _charName_, *integer* _alliancePoints_, *integer* _classId_, *[Alliance|#Alliance]* _alliance_, *string* _displayName_, *[CampaignLeaderboardFlags|#CampaignLeaderboardFlags]* _flags_
+
+* GetCampaignAllianceLeaderboardEntryInfo(*integer* _campaignId_, *[Alliance|#Alliance]* _alliance_, *luaindex* _entryIndex_)
+** _Returns:_ *bool* _isPlayer_, *integer* _ranking_, *string* _charName_, *integer* _alliancePoints_, *integer* _classId_, *string* _displayName_, *[Alliance|#Alliance]* _achievedEmperorAlliance_, *[CampaignLeaderboardFlags|#CampaignLeaderboardFlags]* _flags_
+
+
+Added _possibleHoldings_
+* GetCampaignHoldings(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_, *[Alliance|#Alliance]* _alliance_, *[Alliance|#Alliance]* _targetAlliance_)
+** _Returns:_ *integer* _holdingsControlled_, *integer* _possibleHoldings_
+
+* GetTotalCampaignHoldings(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_, *[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *integer* _holdingsControlled_, *integer* _possibleHoldings_
+
+
+* GetNumSkyShards()
+** _Returns:_ *integer* _numShards_
+to
+* GetLeftoverPartialSkillPoints()
+** _Returns:_ *integer* _partialSkillPoints_
+
+
+GetRearchLineInfoFromRetraitItem renamed to GetResearchLineInfoFromRetraitItem
+
+
+Changed type for _zoneCompletionTypeIndex_ from *integer* to *luaindex*
+* IsZoneStoryActivityComplete(*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *luaindex* _activityIndex_, *integer* _zoneCompletionTypeIndex_)
+** _Returns:_ *bool* _isActivityComplete_
+
+* GetZoneStoryActivityNameByActivityIndex(*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *luaindex* _activityIndex_, *integer* _zoneCompletionTypeIndex_)
+** _Returns:_ *string* _name_
+
+
+Added _numEffectContributions_ and _numPerfectedEffectContributions_
+* GetItemLinkSetInfo(*string* _itemLink_, *bool* _equipped_)
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _maxEquipped_, *integer* _setId_, *integer* _numPerfectedEquipped_, *integer* _numEffectContributions_, *integer* _numPerfectedEffectContributions_
+
+* GetItemSetInfo(*integer* _itemSetId_)
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _numPerfectedEquipped_, *integer* _maxEquipped_, *integer* _numEffectContributions_, *integer* _numPerfectedEffectContributions_
+
+* GetItemLinkContainerSetInfo(*string* _itemLink_, *luaindex* _containerSetIndex_)
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _maxEquipped_, *integer* _setId_, *integer* _numPerfectedEquipped_, *integer* _numEffectContributions_, *integer* _numPerfectedEffectContributions_
+
+
+h3. LabelControl
+Changed type for _wrapMode_ from *integer* to *[TextWrapMode|#TextWrapMode]*
+* SetWrapMode(*[TextWrapMode|#TextWrapMode]* _wrapMode_)
+
+
+h3. MapDisplayControl
+Added _layer_ and _drawLevelOffsetBase_
+* SetBasePinData(*[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *[MapArrowType|#MapArrowType]* _arrowType_, *number* _pinSize_, *number* _pinXInset_, *number* _pinYInset_, *number* _arrowSize_, *string* _textureFilename_, *string* _arrowTextureFilename_, *string* _areaTextureFilename_, *string* _aboveTextureFilename_, *string* _belowTextureFilename_, *string* _linkTextureFilename_, *string* _animation_, *string* _addedAnimation_, *string* _removedAnimation_, *[MapPinAnimationTarget|#MapPinAnimationTarget]* _animationTarget_, *[DrawLayer|#DrawLayer]* _layer_, *integer* _drawLevelOffsetBase_)
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_ENDLESS_DUNGEON_START_SAVING
+
+* EVENT_INSTANCE_MANAGEMENT_RESULT (*[InstanceManagementResult|#InstanceManagementResult]* _result_)
+
+* EVENT_OPEN_INSTANCE_MANAGEMENT (*[InstanceManagementAction|#InstanceManagementAction]* _managementAction_)
+
+* EVENT_QUEST_SHARE_RESULT (*string* _shareTargetCharacterName_, *string* _shareTargetCrossplayDisplayName_, *string* _questName_, *[QuestShareResult|#QuestShareResult]* _result_, *string* _shareTargetPlatformDisplayName_)
+
+* EVENT_RUMOR_HINT_UNLOCKED (*integer* _rumorId_, *luaindex* _hintIndex_)
+
+* EVENT_MARKET_PRODUCT_PURCHASE_LIMIT_UPDATED (*integer* _marketProductId_)
+
+* EVENT_MARKET_PURCHASE_LIMITS_UPDATED
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Added _errorStringOverride_
+* EVENT_COMBAT_EVENT (*[ActionResult|#ActionResult]* _result_, *bool* _isError_, *string* _abilityName_, *integer* _abilityGraphic_, *[ActionSlotType|#ActionSlotType]* _abilityActionSlotType_, *string* _sourceName_, *[CombatUnitType|#CombatUnitType]* _sourceType_, *string* _targetName_, *[CombatUnitType|#CombatUnitType]* _targetType_, *integer* _hitValue_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *[DamageType|#DamageType]* _damageType_, *bool* _log_, *integer* _sourceUnitId_, *integer* _targetUnitId_, *integer* _abilityId_, *integer* _overflow_, *string* _errorStringOverride_)
+
+
+Renamed _crossplayDisplayName_ and/or added _platformDisplayName_
+* EVENT_GROUP_MEMBER_JOINED (*string* _memberCharacterName_, *string* _memberCrossplayDisplayName_, *bool* _isLocalPlayer_, *string* _memberPlatformDisplayName_)
+
+* EVENT_GROUP_MEMBER_LEFT (*string* _memberCharacterName_, *[GroupLeaveReason|#GroupLeaveReason]* _reason_, *bool* _isLocalPlayer_, *bool* _isLeader_, *string* _memberCrossplayDisplayName_, *bool* _actionRequiredVote_, *string* _memberPlatformDisplayName_)
+
+* EVENT_FRIEND_ADDED (*string* _crossplayDisplayName_)
+* EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED (*string* _crossplayDisplayName_, *string* _characterName_, *integer* _championRank_)
+* EVENT_FRIEND_CHARACTER_LEVEL_CHANGED (*string* _crossplayDisplayName_, *string* _characterName_, *integer* _level_)
+* EVENT_FRIEND_CHARACTER_UPDATED (*string* _crossplayDisplayName_)
+* EVENT_FRIEND_CHARACTER_ZONE_CHANGED (*string* _crossplayDisplayName_, *string* _characterName_, *string* _zoneName_)
+* EVENT_FRIEND_DISPLAY_NAME_CHANGED (*string* _oldCrossplayDisplayName_, *string* _newCrossplayDisplayName_)
+* EVENT_FRIEND_NOTE_UPDATED (*string* _crossplayDisplayName_, *string* _note_)
+* EVENT_FRIEND_PLAYER_STATUS_CHANGED (*string* _crossplayDisplayName_, *string* _characterName_, *[PlayerStatus|#PlayerStatus]* _oldStatus_, *[PlayerStatus|#PlayerStatus]* _newStatus_)
+* EVENT_FRIEND_REMOVED (*string* _crossplayDisplayName_)
+* EVENT_IGNORE_ADDED (*string* _crossplayDisplayName_)
+* EVENT_IGNORE_NOTE_UPDATED (*string* _crossplayDisplayName_, *string* _note_)
+* EVENT_IGNORE_ONLINE_CHARACTER_CHANGED (*string* _crossplayDisplayName_)
+* EVENT_IGNORE_REMOVED (*string* _crossplayDisplayName_)
+* EVENT_INCOMING_FRIEND_INVITE_ADDED (*string* _crossplayDisplayName_)
+* EVENT_INCOMING_FRIEND_INVITE_NOTE_UPDATED (*string* _crossplayDisplayName_, *string* _message_)
+* EVENT_INCOMING_FRIEND_INVITE_REMOVED (*string* _crossplayDisplayName_)
+* EVENT_OUTGOING_FRIEND_INVITE_ADDED (*string* _crossplayDisplayName_)
+* EVENT_OUTGOING_FRIEND_INVITE_REMOVED (*string* _crossplayDisplayName_)
+
+
+Added _fromInit_ and _isLocalPlayer_
+* EVENT_OVERLAND_DIFFICULTY_CHANGED (*[OverlandDifficultyType|#OverlandDifficultyType]* _newValue_, *bool* _fromInit_, *bool* _isLocalPlayer_)
+
+
+Added _worldId_
+* EVENT_PREPARE_FOR_JUMP (*string* _zoneName_, *string* _zoneDescription_, *string* _loadingTexture_, *[ZoneDisplayType|#ZoneDisplayType]* _zoneDisplayType_, *integer* _worldId_)
+
+
+Added _guiName_
+* EVENT_ADD_ONS_LOADED (*string* _guiName_)
+
+
+
+*********************
+*** Globals Added ***
+*********************
+
+* DEFAULT_UI_HEIGHT
+* DEFAULT_UI_WIDTH
+
+
+
+*****************
+*** XML Added ***
+*****************
+
+h5. MapPinType
+* _attribute:_ *[DrawLayer|#DrawLayer]* _layer_
+* _attribute:_ *integer* _drawLevelOffsetBase_
+
+h5. OnDimensionsChanged
+* [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
+* ScriptArguments: local self, newWidth, oldWidth, newHeight, oldHeight = ...
+
+h5. QRText
+* _attribute:_ *string* _text_
+* _attribute:_ *[QRCodeErrorCorrectionLevel|#QRCodeErrorCorrectionLevel]* _errorCorrectionLevel_
+
+h5. QRCode
+* [Inherits: Control|#Control]
+* [Child: CanvasSize|#CanvasSize]
+* [Child: QRText|#QRText]
+* [Child: objectFit|#Attributes]
+
+h5. Control
+* [Child: OnDimensionsChanged|#OnDimensionsChanged]
+* [Child: QRCode|#QRCode]
+
+
+
+
+
+
