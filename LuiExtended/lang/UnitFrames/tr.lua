@@ -7,7 +7,7 @@
 -- Translation locale: tr
 local strings =
 {
-    LUIE_STRING_UF_WEREWOLF_POWER = "<<1>>/<<2>> Rage (<<3>>%)",
+    LUIE_STRING_UF_WEREWOLF_POWER = "<<1>>/<<2>> <<4>> (<<3>>%)",
     LUIE_STRING_UF_MOUNT_POWER = "<<1>>/<<2>> Binek Dayanıklılığı (<<3>>%)",
     LUIE_STRING_UF_SIEGE_POWER = "<<1>>/<<2>> Durum (<<3>>%)",
     LUIE_STRING_UF_DEAD_STATUS_REVIVING = "Canlandırılıyor...",

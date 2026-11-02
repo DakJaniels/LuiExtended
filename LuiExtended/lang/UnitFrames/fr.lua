@@ -7,7 +7,7 @@
 -- Translation locale: fr
 local strings =
 {
-    LUIE_STRING_UF_WEREWOLF_POWER = "<<1>>/<<2>> Rage (<<3>>%)",
+    LUIE_STRING_UF_WEREWOLF_POWER = "<<1>>/<<2>> <<4>> (<<3>>%)",
     LUIE_STRING_UF_MOUNT_POWER = "<<1>>/<<2>> Vigueur de la monture (<<3>>%)",
     LUIE_STRING_UF_SIEGE_POWER = "<<1>>/<<2>> Condition (<<3>>%)",
     LUIE_STRING_UF_DEAD_STATUS_REVIVING = "En cours de résurrection...",

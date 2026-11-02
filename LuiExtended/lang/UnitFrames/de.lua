@@ -7,7 +7,7 @@
 -- Translation locale: de
 local strings =
 {
-    LUIE_STRING_UF_WEREWOLF_POWER = "<<1>>/<<2>> Kraft (<<3>>%)", -- TODO: Should be updated to say "Rage"
+    LUIE_STRING_UF_WEREWOLF_POWER = "<<1>>/<<2>> <<4>> (<<3>>%)",
     LUIE_STRING_UF_MOUNT_POWER = "<<1>>/<<2>> Reitausdauer (<<3>>%)",
     LUIE_STRING_UF_SIEGE_POWER = "<<1>>/<<2>> Ausdauer (<<3>>%)",
     LUIE_STRING_UF_DEAD_STATUS_REVIVING = "Wiederbelebung …",
