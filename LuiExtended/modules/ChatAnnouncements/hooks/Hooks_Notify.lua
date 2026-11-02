@@ -588,7 +588,10 @@ function ChatAnnouncements.Hooks.RegisterNotify(ctx)
     local Notify = ChatAnnouncements.SV.Notify
     local lastLocalOverlandDifficulty = GetOverlandDifficulty()
 
-    local function OnOverlandDifficultyChanged(_eventId, newValue)
+    local function OnOverlandDifficultyChanged(_eventId, newValue, fromInit, isLocalPlayer)
+        if fromInit or not isLocalPlayer then
+            return
+        end
         if not (Notify.ChallengeDifficultyCA or Notify.ChallengeDifficultyAlert) then
             return
         end

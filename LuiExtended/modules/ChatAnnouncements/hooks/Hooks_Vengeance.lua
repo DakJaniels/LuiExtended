@@ -36,7 +36,7 @@ function ChatAnnouncements.Hooks.RegisterVengeance(ctx)
         if not equippedLoadoutData then
             return true
         end
-        local primaryText = zo_strformat(campaignVengeanceLoadoutEquipAnnouncementFormat, equippedLoadoutData:GetName())
+        local primaryText = zo_strformat(campaignVengeanceLoadoutEquipAnnouncementFormat, equippedLoadoutData:GetRawName())
         local secondaryText = campaignVengeanceLoadoutAnnouncementDecriptionText
         local formattedMessage = zo_strformat("<<1>>: <<2>>", primaryText, secondaryText)
 

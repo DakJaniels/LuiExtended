@@ -178,9 +178,10 @@ function LUIE.API_Hooks()
         --- @return boolean isBoss
         --- @return Alliance alliance
         --- @return string minionName
-        --- @return string attackerDisplayName
+        --- @return string attackerCrossplayDisplayName
+        --- @return string attackerPlatformDisplayName
         GetKillingAttackerInfo = function (index)
-            local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = zos_GetKillingAttackerInfo(index)
+            local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerCrossplayDisplayName, attackerPlatformDisplayName = zos_GetKillingAttackerInfo(index)
             local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits, abilityId = zos_GetKillingAttackInfo(index)
             if Effects.EffectSourceOverride[abilityId] then
                 if Effects.EffectSourceOverride[abilityId].source then
@@ -207,7 +208,7 @@ function LUIE.API_Hooks()
                     end
                 end
             end
-            return attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName
+            return attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerCrossplayDisplayName, attackerPlatformDisplayName
         end
 
         --- Override function for GetKillingAttackInfo.
@@ -222,7 +223,7 @@ function LUIE.API_Hooks()
         --- @return integer|nil abilityId
         --- @return textureName|nil abilityFxIcon
         GetKillingAttackInfo = function (index)
-            local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = zos_GetKillingAttackerInfo(index)
+            local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerCrossplayDisplayName, attackerPlatformDisplayName = zos_GetKillingAttackerInfo(index)
             local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits, abilityId, abilityFxIcon = zos_GetKillingAttackInfo(index)
 
             -- Check if there is an effect override for the abilityId

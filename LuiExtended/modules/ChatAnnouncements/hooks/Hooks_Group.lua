@@ -165,7 +165,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
     end
 
     -- EVENT_GROUP_MEMBER_LEFT (Alert Handler)
-    local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLeader, displayName, actionRequiredVote)
+    local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLeader, displayName, actionRequiredVote, memberPlatformDisplayName)
         ChatAnnouncements.IndexGroupLoot()
 
         local message = nil
@@ -174,8 +174,8 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         local alert2 = nil
         local sound = nil
 
-        local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
-        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+        local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName, memberPlatformDisplayName)
+        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName, memberPlatformDisplayName)
 
         -- Used to check for valid links
         local characterNameLink = ZO_LinkHandler_CreateCharacterLink(characterName)
@@ -299,7 +299,7 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
     end
 
     -- EVENT_GROUP_MEMBER_JOINED (Alert Handler)
-    local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer)
+    local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer, memberPlatformDisplayName)
         -- Update index for Group Loot
         ChatAnnouncements.IndexGroupLoot()
         S.g_currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())
@@ -309,7 +309,10 @@ function ChatAnnouncements.Hooks.RegisterGroup(ctx)
         if isLocalPlayer then
             zo_callLater(ChatAnnouncements.CheckLFGStatusJoin, 100)
         else
-            local joinedPlatformDisplayName = GetGroupMemberPlatformDisplayName(characterName, displayName)
+            local joinedPlatformDisplayName = memberPlatformDisplayName
+            if joinedPlatformDisplayName == nil or joinedPlatformDisplayName == "" then
+                joinedPlatformDisplayName = GetGroupMemberPlatformDisplayName(characterName, displayName)
+            end
             local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName, joinedPlatformDisplayName)
             local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName, joinedPlatformDisplayName)
             -- Set final messages to send

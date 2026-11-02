@@ -1262,9 +1262,9 @@ end
 --- @param questId integer
 function ChatAnnouncements.QuestShared(eventId, questId)
     if ChatAnnouncements.SV.Quests.QuestShareCA or ChatAnnouncements.SV.Quests.QuestShareAlert then
-        local questName, characterName, timeSinceRequestMs, displayName = GetOfferedQuestShareInfo(questId)
+        local questName, characterName, timeSinceRequestMs, crossplayDisplayName, platformDisplayName = GetOfferedQuestShareInfo(questId)
 
-        local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+        local finalName = ChatAnnouncements.ResolveNameLink(characterName, crossplayDisplayName, platformDisplayName)
 
         local message = zo_strformat(groupIncomingQuestShareFormat, finalName, ColorizeColors.QuestColorQuestNameColorize:Colorize(questName))
         local alertMessage = zo_strformat(groupIncomingQuestShareP2pFormat, finalName, questName)

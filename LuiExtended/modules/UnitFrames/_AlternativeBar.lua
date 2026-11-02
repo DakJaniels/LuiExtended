@@ -29,6 +29,7 @@ local experienceLimitReachedText = GetString(SI_EXPERIENCE_LIMIT_REACHED)
 local experienceCurrentMaxPercentFormat = GetString(SI_EXPERIENCE_CURRENT_MAX_PERCENT)
 local experienceEnlightenedTooltipFormat = GetString(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP)
 local werewolfPowerFormat = GetString(LUIE_STRING_UF_WEREWOLF_POWER)
+local furyName = ZO_CachedStrFormat("<<C:1>>", GetAbilityName(266875))
 local mountPowerFormat = GetString(LUIE_STRING_UF_MOUNT_POWER)
 local siegePowerFormat = GetString(LUIE_STRING_UF_SIEGE_POWER)
 
@@ -83,9 +84,9 @@ function UnitFrames.AltBar_OnMouseEnterWerewolf(control)
         local currentPower, maxPower = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_WEREWOLF)
         local percentagePower = zo_floor(currentPower / maxPower * 100)
 
-        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+       InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
         AddTooltipTitleText(ZO_CachedStrFormat(SI_MONSTERSOCIALCLASS45))
-        InformationTooltip:AddLine(zo_strformat(werewolfPowerFormat, currentPower, maxPower, percentagePower), LUIE.Font.GetTooltipBodyFont())
+        InformationTooltip:AddLine(zo_strformat(werewolfPowerFormat, currentPower, maxPower, percentagePower, furyName), LUIE.Font.GetTooltipBodyFont())
     end
     UpdateWerewolfPower()
 

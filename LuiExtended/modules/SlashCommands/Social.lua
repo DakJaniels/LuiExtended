@@ -52,17 +52,22 @@ function SlashCommands.SlashRemoveFriend(option)
     local friends = GetNumFriends()
     local g_friendIndex = {}
     for i = 1, friends do
-        local displayName = GetFriendInfo(i)
+        local crossplayDisplayName, _, _, _, platformDisplayName = GetFriendInfo(i)
         local _, characterName = GetFriendCharacterInfo(i)
-        local compareDisplay = zo_strlower(displayName)
+        local compareDisplay = zo_strlower(crossplayDisplayName)
         local compareCharacter = zo_strlower(characterName)
+        local comparePlatform = ""
+        if platformDisplayName ~= nil and platformDisplayName ~= "" then
+            comparePlatform = zo_strlower(platformDisplayName)
+        end
         compareCharacter = StringOnlyGSUB(compareCharacter, "%^%a+", "")
         g_friendIndex[i] =
         {
-            displayName = displayName,
+            displayName = crossplayDisplayName,
             characterName = characterName,
             compareDisplay = compareDisplay,
             compareCharacter = compareCharacter,
+            comparePlatform = comparePlatform,
         }
     end
 
@@ -70,7 +75,7 @@ function SlashCommands.SlashRemoveFriend(option)
 
     for i = 1, #g_friendIndex do
         local comparing = g_friendIndex[i]
-        if comparing.compareDisplay == compareChar or comparing.compareCharacter == compareChar then
+        if comparing.compareDisplay == compareChar or comparing.compareCharacter == compareChar or comparing.comparePlatform == compareChar then
             finalName = comparing.displayName
             break
         end

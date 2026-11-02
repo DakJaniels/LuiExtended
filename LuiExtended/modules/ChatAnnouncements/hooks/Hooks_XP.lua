@@ -480,7 +480,7 @@ function ChatAnnouncements.Hooks.RegisterXP(ctx)
             return true
         end
         local headerText = veterancyRankUpAnnouncementHeaderText
-        local rankName = currentRankData:GetName()
+        local rankName = currentRankData:GetRawName()
         local formattedMessage = zo_strformat("<<1>>: <<2>>", headerText, rankName)
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "EXPERIENCE" }
