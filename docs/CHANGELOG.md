@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.8.0
+
+### Fixed
+
+- Combat Text: Gaining a champion point shows one line for the experience you just earned. It no longer also shows a second line that does not match that gain. PC and console.
+
 ## Version 7.2.7.9
 
 ### Changes
