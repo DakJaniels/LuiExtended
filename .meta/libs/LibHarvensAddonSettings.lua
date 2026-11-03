@@ -64,9 +64,39 @@ function LHAS_AddonSettingsControl:ResetToDefaults() end
 ---@return number
 function LHAS_AddonSettingsControl:GetHeight() end
 
+--- Console settings list. `list` on LibHarvensAddonSettings is this main list while a panel is built.
+--- Observed: Console/Settings.lua CreateControls, UpdateControls, RefreshSelection.
+---@class LHAS_ConsoleParametricList
+---@field currentSection LHAS_AddonSettingsControl|nil
+local LHAS_ConsoleParametricList = {}
+function LHAS_ConsoleParametricList:Clear() end
+function LHAS_ConsoleParametricList:Commit() end
+function LHAS_ConsoleParametricList:RefreshVisible() end
+
+--- Console screen that owns the main list and the section drill-in list.
+--- Observed: Console/Settings.lua `self.scrollList = Settings_ParametricList:New(control)`.
+---@class LHAS_ConsoleScrollList
+---@field header table|nil
+local LHAS_ConsoleScrollList = {}
+
+---@return LHAS_ConsoleParametricList
+function LHAS_ConsoleScrollList:GetMainList() end
+
+---@param name string
+---@return LHAS_ConsoleParametricList
+function LHAS_ConsoleScrollList:GetList(name) end
+
+---@return LHAS_ConsoleParametricList|nil
+function LHAS_ConsoleScrollList:GetCurrentList() end
+
+---@param list LHAS_ConsoleParametricList
+function LHAS_ConsoleScrollList:SetCurrentList(list) end
+
 ---@class LHAS_AddonSettings
 ---@field name string
 ---@field selected boolean
+---@field author string|nil
+---@field version string|nil
 ---@field allowDefaults boolean|nil
 ---@field defaultsFunction function|nil
 ---@field settings LHAS_AddonSettingsControl[]
@@ -115,6 +145,22 @@ function LHAS_AddonSettings:GetIndexOf(setting, areParams) end
 
 function LHAS_AddonSettings:Select() end
 
+--- Console and PC. Console assigns each row a section. PC is empty.
+--- Observed: Console/Settings.lua AddonSettings:SetupSections, PC/Settings.lua AddonSettings:SetupSections.
+function LHAS_AddonSettings:SetupSections() end
+
+--- Console fills the current parametric list. PC builds keyboard controls.
+--- Observed: Console/Settings.lua AddonSettings:CreateControls, PC/Settings.lua AddonSettings:CreateControls.
+function LHAS_AddonSettings:CreateControls() end
+
+--- Console refreshes visible rows. PC updates keyboard controls.
+--- Observed: Console/Settings.lua AddonSettings:UpdateControls, PC/Settings.lua AddonSettings:UpdateControls.
+function LHAS_AddonSettings:UpdateControls() end
+
+--- Console only. Restores the selected row after the list is rebuilt.
+--- Observed: Console/Settings.lua AddonSettings:RefreshSelection.
+function LHAS_AddonSettings:RefreshSelection() end
+
 function LHAS_AddonSettings:ResetToDefaults() end
 
 function LHAS_AddonSettings:Clear() end
@@ -124,6 +170,8 @@ function LHAS_AddonSettings:Clear() end
 ---@field addons LHAS_AddonSettings[]
 ---@field AddonSettings LHAS_AddonSettings
 ---@field AddonSettingsControl LHAS_AddonSettingsControl
+---@field scrollList LHAS_ConsoleScrollList|nil Console settings screen. Assigned in Console/Settings.lua CreateControlPools.
+---@field list LHAS_ConsoleParametricList|nil Main list while CreateControls is building rows. Assigned in Console/Settings.lua CreateControls.
 LibHarvensAddonSettings = {}
 
 ---@type 1
