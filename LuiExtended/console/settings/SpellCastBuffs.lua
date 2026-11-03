@@ -1829,7 +1829,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
 
         -- Buff Label Font
-        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
             kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
@@ -1872,7 +1872,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
 
         -- Buff Font Style
-        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
             kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
@@ -3614,7 +3614,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
 
         -- Prominent Buffs Label Font Face
-        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
             kind = "face",
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE),
@@ -3656,7 +3656,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
 
         -- Prominent Buffs Label Font Style
-        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
             kind = "style",
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE),
@@ -3701,9 +3701,9 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
 
         -- Prominent Buffs Progress Bar Texture
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "texture",
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE_TP),
             items = statusbarTextureItems,
@@ -3718,7 +3718,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
             end,
-        }
+        })
 
         -- Prominent Buffs Gradient Color 1
         settings[#settings + 1] =

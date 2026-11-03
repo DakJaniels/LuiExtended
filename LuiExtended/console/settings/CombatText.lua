@@ -2144,7 +2144,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
 
-        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
             kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
@@ -2179,7 +2179,7 @@ function CombatText.CreateConsoleSettings()
             default = Defaults.fontSize
         }
 
-        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
             kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
