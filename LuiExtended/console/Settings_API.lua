@@ -801,8 +801,9 @@ local function GetStatusbarPreviewTexture(mediaKey)
     return texturePath
 end
 
---- @param control Control
---- @param data ZO_GamepadEntryData
+--- @param control LUIE_OptionSelectEntryControl
+--- @param data LUIE_OptionSelectEntryData
+--- @param ... any
 --- @return nil
 local function SetupOptionSelectEntry(control, data, ...)
     ZO_SharedGamepadEntry_OnSetup(control, data, ...)
@@ -837,14 +838,14 @@ local function SetupOptionSelectEntry(control, data, ...)
     end
 end
 
---- @param data ZO_GamepadEntryData
+--- @param data LUIE_OptionSelectEntryData
 --- @return boolean
 local function OptionSelectEntryIsSelected(data)
     return data.isActive
 end
 
 --- Pooled dialog rows must go back to the submenu font. M0RMarkers does this on select.
---- @param dialog ZO_Dialog
+--- @param dialog LUIE_OptionSelectDialog
 --- @return nil
 local function ResetOptionSelectEntryFonts(dialog)
     local entryList = dialog.entryList
@@ -859,7 +860,7 @@ local function ResetOptionSelectEntryFonts(dialog)
     end
 end
 
---- @param dialog ZO_Dialog
+--- @param dialog LUIE_OptionSelectDialog
 --- @return nil
 local function SetupOptionSelectDialog(dialog)
     local request = dialog.data
@@ -869,6 +870,7 @@ local function SetupOptionSelectDialog(dialog)
         local currentValue = request.getFunction()
         for itemIndex = 1, #items do
             local item = items[itemIndex]
+            ---@type LUIE_OptionSelectEntryData
             local entryData = ZO_GamepadEntryData:New(item.name)
             entryData:SetFontScaleOnSelection(false)
             entryData:SetIconTintOnSelection(request.kind ~= "texture")
@@ -899,7 +901,7 @@ local function SetupOptionSelectDialog(dialog)
     end
 end
 
---- @param dialog ZO_Dialog
+--- @param dialog LUIE_OptionSelectDialog
 --- @return nil
 local function OnOptionSelectConfirmed(dialog)
     local request = dialog.data
@@ -945,14 +947,7 @@ ESO_Dialogs[OPTION_SELECT_DIALOG_NAME] =
     },
 }
 
---- @class OptionSelectRequest
---- @field title string
---- @field items table|function
---- @field getFunction function
---- @field setFunction function
---- @field kind "face"|"style"|"texture"|nil
-
---- @param request OptionSelectRequest
+--- @param request LUIE_OptionSelectRequest
 --- @return nil
 function SettingsAPI:ShowOptionSelect(request)
     ZO_Dialogs_ShowPlatformDialog(OPTION_SELECT_DIALOG_NAME, request)
