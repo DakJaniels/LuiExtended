@@ -2,6 +2,10 @@
 
 ## Version 7.2.8.0
 
+### Changes
+
+- Edit HUD: LuiExtended no longer adds Battleground Score, Objective and Resurrection Meter, Player Interaction Prompt, Experience/Champion Bar, Interact Text, Ram, and Tutorials. Those movers are in HUDitorTools. PC and console.
+
 ### Fixed
 
 - Combat Text: Gaining a champion point shows one line for the experience you just earned. It no longer also shows a second line that does not match that gain. PC and console.
