@@ -38,6 +38,18 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.7.9
+    "|cFFA500LuiExtended Version 7.2.7.9|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: |cFFFFFFFont|r and |cFFFFFFFont Style|r open a list. Each font name is drawn in that font, and each style is drawn in that style. The settings row still shows the current choice. This includes |cFFFFFFFont|r and |cFFFFFFFont Style|r under |cFFFFFFFont/Texture Settings (per frame type)|r.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Long choices open a scrollable list instead of the left and right selector. Statusbar textures show a preview of the bar beside the name, including |cFFFFFFTexture|r under |cFFFFFFFont/Texture Settings (per frame type)|r. The same list is used for Unit Frame label formats, sounds, slash command choices for home, companion, banker, merchant, armory, deconstruction, and fence, and profile copy |cFFFFFFSource @account|r, |cFFFFFFSource character|r, and |cFFFFFFSource settings|r.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Chat Announcements no longer errors while loading when attribute respec announcements are registered. Attribute respec announcements still work.",
+    "",
     -- Version Header 7.2.7.8
     "|cFFA500LuiExtended Version 7.2.7.8|r",
     "",

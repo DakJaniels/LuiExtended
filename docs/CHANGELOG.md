@@ -1,5 +1,16 @@
 # LuiExtended Changelog
 
+## Version 7.2.7.9
+
+### Changes
+
+- Console: **Font** and **Font Style** open a list. Each font name is drawn in that font, and each style is drawn in that style. The settings row still shows the current choice. This includes **Font** and **Font Style** under **Font/Texture Settings (per frame type)**.
+- Console: Long choices open a scrollable list instead of the left and right selector. Statusbar textures show a preview of the bar beside the name, including **Texture** under **Font/Texture Settings (per frame type)**. The same list is used for Unit Frame label formats, sounds, slash command choices for home, companion, banker, merchant, armory, deconstruction, and fence, and profile copy **Source @account**, **Source character**, and **Source settings**.
+
+### Fixed
+
+- Console: Chat Announcements no longer errors while loading when attribute respec announcements are registered. Attribute respec announcements still work.
+
 ## Version 7.2.7.8
 
 ### New
