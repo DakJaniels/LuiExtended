@@ -2144,9 +2144,9 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_FACE_TP),
             items = fontItems,
@@ -2158,7 +2158,7 @@ function CombatText.CreateConsoleSettings()
                 SettingsAPI:MarkFontDeferred("combatText")
             end,
             default = SettingsAPI:LHASDropdownGetData(Defaults.fontFace)
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -2179,9 +2179,9 @@ function CombatText.CreateConsoleSettings()
             default = Defaults.fontSize
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
             items = fontStyleItems,
@@ -2193,7 +2193,7 @@ function CombatText.CreateConsoleSettings()
                 SettingsAPI:MarkFontDeferred("combatText")
             end,
             default = SettingsAPI:LHASDropdownGetData(Defaults.fontStyle)
-        }
+        })
     end)
 
     -- Build Animation Options Section

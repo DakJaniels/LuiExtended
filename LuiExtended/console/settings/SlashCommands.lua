@@ -153,9 +153,8 @@ function SlashCommands.CreateConsoleSettings()
         }
 
         -- Choose Home Option
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_CHOICE),
             items = GetHomeItems,
             getFunction = function ()
@@ -166,7 +165,7 @@ function SlashCommands.CreateConsoleSettings()
             end,
             default = Defaults.SlashHomeChoice,
             disable = function () return not Settings.SlashHome end
-        }
+        })
 
         -- SlashSetPrimaryHome
         settings[#settings + 1] =
@@ -212,9 +211,8 @@ function SlashCommands.CreateConsoleSettings()
         }
 
         -- Choose Companion
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION_CHOICE),
             items = GetCompanionItems,
             getFunction = function ()
@@ -225,7 +223,7 @@ function SlashCommands.CreateConsoleSettings()
             end,
             default = Defaults.SlashCompanionChoice,
             disable = function () return not Settings.SlashCompanion end
-        }
+        })
 
         -- SlashBanker
         settings[#settings + 1] =
@@ -243,9 +241,8 @@ function SlashCommands.CreateConsoleSettings()
         }
 
         -- Choose Banker
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER_CHOICE),
             items = GetBankerItems,
             getFunction = function ()
@@ -256,7 +253,7 @@ function SlashCommands.CreateConsoleSettings()
             end,
             default = Defaults.SlashBankerChoice,
             disable = function () return not Settings.SlashBanker end
-        }
+        })
 
         -- SlashMerchant
         settings[#settings + 1] =
@@ -274,9 +271,8 @@ function SlashCommands.CreateConsoleSettings()
         }
 
         -- Choose Merchant
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT_CHOICE),
             items = GetMerchantItems,
             getFunction = function ()
@@ -287,7 +283,7 @@ function SlashCommands.CreateConsoleSettings()
             end,
             default = Defaults.SlashMerchantChoice,
             disable = function () return not Settings.SlashMerchant end
-        }
+        })
 
         -- SlashArmory
         settings[#settings + 1] =
@@ -305,9 +301,8 @@ function SlashCommands.CreateConsoleSettings()
         }
 
         -- Choose Armory
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY_CHOICE),
             items = GetArmoryItems,
             getFunction = function ()
@@ -318,7 +313,7 @@ function SlashCommands.CreateConsoleSettings()
             end,
             default = Defaults.SlashArmoryChoice,
             disable = function () return not Settings.SlashArmory end
-        }
+        })
 
         -- SlashDecon
         settings[#settings + 1] =
@@ -336,9 +331,8 @@ function SlashCommands.CreateConsoleSettings()
         }
 
         -- Choose Decon
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SLASHCMDS_DECON_CHOICE),
             items = GetDeconItems,
             getFunction = function ()
@@ -349,7 +343,7 @@ function SlashCommands.CreateConsoleSettings()
             end,
             default = Defaults.SlashDeconChoice,
             disable = function () return not Settings.SlashDecon end
-        }
+        })
 
         -- SlashFence
         settings[#settings + 1] =
@@ -367,9 +361,8 @@ function SlashCommands.CreateConsoleSettings()
         }
 
         -- Choose Fence
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_CHOICE),
             items = GetFenceItems,
             getFunction = function ()
@@ -380,7 +373,7 @@ function SlashCommands.CreateConsoleSettings()
             end,
             default = Defaults.SlashFenceChoice,
             disable = function () return not Settings.SlashFence end
-        }
+        })
 
         -- SlashEye
         settings[#settings + 1] =

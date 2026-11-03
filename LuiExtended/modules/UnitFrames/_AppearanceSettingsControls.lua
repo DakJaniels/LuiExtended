@@ -360,7 +360,6 @@ end
 --- @param disabledFunc function|nil
 --- @return table[]
 function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults, settingsAPI, disabledFunc)
-    local LHAS = LibHarvensAddonSettings
     local defaultEntry = GetDefaultAppearanceEntry(defaults, category)
     disabledFunc = disabledFunc or function ()
         return not LUIE.SV.UnitFrames_Enabled
@@ -371,9 +370,9 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
         settingsAPI:MarkUnitFramesFontDeferred("custom")
     end
 
-    rows[#rows + 1] =
+    rows[#rows + 1] = settingsAPI:CreateOptionSelectButton(
     {
-        type = LHAS.ST_DROPDOWN,
+        kind = "face",
         label = GetString(LUIE_STRING_LAM_FONT),
         tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TP),
         items = settingsAPI:GetFontsList(),
@@ -386,11 +385,11 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
         end,
         disable = disabledFunc,
         default = settingsAPI:LHASDropdownGetData(defaultEntry.fontFace),
-    }
+    })
 
-    rows[#rows + 1] =
+    rows[#rows + 1] = settingsAPI:CreateOptionSelectButton(
     {
-        type = LHAS.ST_DROPDOWN,
+        kind = "style",
         label = GetString(LUIE_STRING_LAM_FONT_STYLE),
         tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_STYLE_TP),
         items = function ()
@@ -409,13 +408,13 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
         end,
         default = settingsAPI:LHASDropdownGetData(defaultEntry.fontStyle),
         disable = disabledFunc,
-    }
+    })
 
     AppendLHASFontSizeRows(rows, category, settings, defaults, defaultEntry, disabledFunc, markFontDeferred)
 
-    rows[#rows + 1] =
+    rows[#rows + 1] = settingsAPI:CreateOptionSelectButton(
     {
-        type = LHAS.ST_DROPDOWN,
+        kind = "texture",
         label = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
         tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
         items = settingsAPI:GetStatusbarTexturesList(),
@@ -428,7 +427,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
         end,
         default = settingsAPI:LHASDropdownGetData(defaultEntry.texture),
         disable = disabledFunc,
-    }
+    })
 
     return rows
 end

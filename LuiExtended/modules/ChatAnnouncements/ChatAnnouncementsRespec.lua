@@ -104,9 +104,9 @@ local RESPEC_DISPLAY_REPEAT_WINDOW_MS = 1000
 --- @param message string
 --- @return nil
 local function LogRespecDevDebug(message)
-    if LUIE.IsDevDebugEnabled() then
-        LUIE:Log("Debug", message)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     LUIE:Log("Debug", message)
+    -- end
 end
 
 --- @class CARespecPendingState
@@ -498,8 +498,12 @@ function ChatAnnouncements.RegisterRespecEvents()
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("OnSkillsCleared", RefreshSkillRespecCommitType)
     SKILL_LINE_ASSIGNMENT_MANAGER:RegisterCallback("SkillLineRespecUpdate", RefreshSkillRespecCommitType)
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", OnSkillPointAllocationModeChanged)
-    STATS:RegisterCallback("AttributePointAllocationModeChanged", OnAttributePointAllocationModeChanged)
-    GAMEPAD_STATS:RegisterCallback("AttributePointAllocationModeChanged", OnAttributePointAllocationModeChanged)
+    if ZO_IsConsoleOrGameCoreUI() then
+        GAMEPAD_STATS:RegisterCallback("AttributePointAllocationModeChanged", OnAttributePointAllocationModeChanged)
+    else
+        STATS:RegisterCallback("AttributePointAllocationModeChanged", OnAttributePointAllocationModeChanged)
+        GAMEPAD_STATS:RegisterCallback("AttributePointAllocationModeChanged", OnAttributePointAllocationModeChanged)
+    end
     eventManager:RegisterForEvent(moduleName, EVENT_SKILL_RESPEC_RESULT, OnSkillRespecResult)
     eventManager:RegisterForEvent(moduleName, EVENT_ATTRIBUTE_RESPEC_RESULT, OnAttributeRespecResult)
     eventManager:RegisterForEvent(moduleName .. "VengeanceCampaign", EVENT_CURRENT_CAMPAIGN_CHANGED, OnVengeanceCampaignChanged)

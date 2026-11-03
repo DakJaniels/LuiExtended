@@ -344,9 +344,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.DefaultIncTransparency,
         }
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_DFRAMES_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_LABEL_TP),
             items = formatDropdownItems,
@@ -360,10 +359,10 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-        }
-        settings[#settings + 1] =
+        })
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_TP),
             items = SettingsAPI:GetFontsList(),
@@ -378,7 +377,7 @@ function UnitFrames.CreateConsoleSettings()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
             default = SettingsAPI:LHASDropdownGetData(Defaults.DefaultFontFace),
-        }
+        })
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
@@ -399,9 +398,9 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.DefaultFontSize,
         }
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_STYLE_TP),
             items = defaultFramesFontStyleItems,
@@ -416,7 +415,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-        }
+        })
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
@@ -1208,9 +1207,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
             items = formatDropdownItems,
@@ -1226,11 +1224,10 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-        }
+        })
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
             items = formatDropdownItems,
@@ -1246,7 +1243,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -1723,9 +1720,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
             items = formatDropdownItems,
@@ -1741,11 +1737,10 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-        }
+        })
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
             items = formatDropdownItems,
@@ -1761,7 +1756,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -2464,9 +2459,8 @@ function UnitFrames.CreateConsoleSettings()
             default = Defaults.BarAlignCenterLabelTarget,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_LABEL_CENTER_FORM),
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_LABEL_CENTER_FORM),
             items = formatDropdownItems,
@@ -2483,7 +2477,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-        }
+        })
     end)
 
     -- Build Additional Player Frame Display Options Section
@@ -2811,9 +2805,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
             items = formatDropdownItems,
@@ -2829,11 +2822,10 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
             end,
-        }
+        })
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
             items = formatDropdownItems,
@@ -2849,7 +2841,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
             end,
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -3285,9 +3277,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
             items = formatDropdownItems,
@@ -3303,7 +3294,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
             end,
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -4620,9 +4611,8 @@ function UnitFrames.CreateConsoleSettings()
             default = Defaults.CustomFramesCompanion,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
             items = formatDropdownItems,
@@ -4638,7 +4628,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
             end,
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -4997,9 +4987,8 @@ function UnitFrames.CreateConsoleSettings()
             default = Defaults.CustomFramesPet,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
             items = formatDropdownItems,
@@ -5015,7 +5004,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
             end,
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -5382,9 +5371,8 @@ function UnitFrames.CreateConsoleSettings()
             default = Defaults.CustomFramesBosses,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_TP),
             items = formatDropdownItems,
@@ -5399,7 +5387,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
             end,
-        }
+        })
 
         settings[#settings + 1] =
         {

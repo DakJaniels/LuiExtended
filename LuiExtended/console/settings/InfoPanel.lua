@@ -206,9 +206,9 @@ function InfoPanel.CreateConsoleSettings()
 
     panel:AddSetting(SettingsAPI:ConsoleFontDeferLabelSetting())
 
-    panel:AddSetting(
+    panel:AddSetting(SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_FONT),
             items = fontItems,
@@ -223,7 +223,7 @@ function InfoPanel.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.InfoPanel_Enabled
             end
-        })
+        }))
 
     -- Font Size Slider
     panel:AddSetting(
@@ -255,9 +255,9 @@ function InfoPanel.CreateConsoleSettings()
     end
     table.sort(fontStyleItems, function (a, b) return a.name < b.name end)
 
-    panel:AddSetting(
+    panel:AddSetting(SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
             items = fontStyleItems,
@@ -279,7 +279,7 @@ function InfoPanel.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.InfoPanel_Enabled
             end
-        })
+        }))
 
     -- Info Panel Options Header
     panel:AddSetting(

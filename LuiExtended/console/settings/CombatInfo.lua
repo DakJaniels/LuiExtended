@@ -250,9 +250,9 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.alertEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTFACE_TP),
             items = fontItems,
@@ -268,7 +268,7 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.alerts.toggles.alertEnable
             end,
             default = Defaults.alerts.toggles.alertFontFace
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -293,9 +293,9 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.alertFontSize
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -317,7 +317,7 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.alerts.toggles.alertEnable
             end,
             default = Defaults.alerts.toggles.alertFontStyle
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -1456,10 +1456,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_stEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_st
@@ -1471,7 +1471,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_stEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - Single Target CC
         settings[#settings + 1] =
@@ -1491,10 +1491,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_st_ccEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_CC),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_st_cc
@@ -1506,7 +1506,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_st_ccEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - AOE
         settings[#settings + 1] =
@@ -1526,10 +1526,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_aoeEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_aoe
@@ -1541,7 +1541,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_aoeEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - AOE CC
         settings[#settings + 1] =
@@ -1561,10 +1561,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_aoe_ccEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE_CC),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_aoe_cc
@@ -1576,7 +1576,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_aoe_ccEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - POWER ATTACK
         settings[#settings + 1] =
@@ -1596,10 +1596,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_powerattackEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_POWER_ATTACK),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_powerattack
@@ -1611,7 +1611,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_powerattackEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - RADIAL AVOID
         settings[#settings + 1] =
@@ -1631,10 +1631,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_radialEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_RADIAL_AVOID),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_radial
@@ -1646,7 +1646,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_radialEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - GROUND TRAVEL
         settings[#settings + 1] =
@@ -1666,10 +1666,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_travelEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_travel
@@ -1681,7 +1681,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_travelEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - GROUND TRAVEL CC
         settings[#settings + 1] =
@@ -1701,10 +1701,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_travel_ccEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL_CC),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_travel_cc
@@ -1716,7 +1716,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_travel_ccEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - GROUND
         settings[#settings + 1] =
@@ -1736,10 +1736,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_groundEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_ground
@@ -1751,7 +1751,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_groundEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - METEOR
         settings[#settings + 1] =
@@ -1771,10 +1771,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_meteorEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_METEOR),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_meteor
@@ -1786,7 +1786,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_meteorEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - UNMIT ST
         settings[#settings + 1] =
@@ -1806,10 +1806,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_unmit_stEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_unmit_st
@@ -1821,7 +1821,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_unmit_stEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - UNMIT AOE
         settings[#settings + 1] =
@@ -1841,10 +1841,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_unmit_aoeEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT_AOE),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_unmit_aoe
@@ -1856,7 +1856,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_unmit_aoeEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - POWER DAMAGE
         settings[#settings + 1] =
@@ -1876,10 +1876,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_power_damageEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DAMAGE),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_power_damage
@@ -1891,7 +1891,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_power_damageEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - POWER DEFENSE
         settings[#settings + 1] =
@@ -1911,10 +1911,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_power_buffEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DEFENSE),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_power_buff
@@ -1926,7 +1926,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_power_buffEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - SUMMON
         settings[#settings + 1] =
@@ -1946,10 +1946,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_summonEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_SUMMON),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_summon
@@ -1961,7 +1961,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_summonEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - DESTROY
         settings[#settings + 1] =
@@ -1981,10 +1981,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_destroyEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_DESTROY),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_destroy
@@ -1996,7 +1996,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_destroyEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
 
         -- Sound Options - HEAL
         settings[#settings + 1] =
@@ -2016,10 +2016,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.sound_healEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_HEAL),
             items = soundItems,
             getFunction = function ()
                 return Settings.alerts.sounds.sound_heal
@@ -2031,7 +2031,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.alerts.toggles.sound_healEnable and Settings.alerts.toggles.alertEnable)
             end
-        }
+        })
     end)
 
     -- Build Crowd Control Tracker Section
@@ -2293,10 +2293,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.cct.playSound
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = GetString(LUIE_STRING_LAM_CI_CCT_SOUND),
             items = soundItems,
             getFunction = function ()
                 return Settings.cct.playSoundOption
@@ -2308,7 +2308,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.cct.playSound and Settings.cct.enabled)
             end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -2766,10 +2766,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.cct.aoePlayerUltimateSoundToggle
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
             items = soundItems,
             getFunction = function ()
                 return Settings.cct.aoePlayerUltimateSound
@@ -2781,7 +2781,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.cct.showAoe and Settings.cct.aoePlayerUltimate and Settings.cct.aoePlayerUltimateSoundToggle and Settings.cct.enabled)
             end
-        }
+        })
 
         -- AOE Display Options - Player Normal
         settings[#settings + 1] =
@@ -2819,10 +2819,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.cct.aoePlayerNormalSoundToggle
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
             items = soundItems,
             getFunction = function ()
                 return Settings.cct.aoePlayerNormalSound
@@ -2834,7 +2834,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.cct.showAoe and Settings.cct.aoePlayerNormal and Settings.cct.aoePlayerNormalSoundToggle and Settings.cct.enabled)
             end
-        }
+        })
 
         -- AOE Display Options - Player Set
         settings[#settings + 1] =
@@ -2872,10 +2872,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.cct.aoePlayerSetSoundToggle
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
             items = soundItems,
             getFunction = function ()
                 return Settings.cct.aoePlayerSetSound
@@ -2887,7 +2887,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.cct.showAoe and Settings.cct.aoePlayerSet and Settings.cct.aoePlayerSetSoundToggle and Settings.cct.enabled)
             end
-        }
+        })
 
         -- AOE Display Options - Trap
         settings[#settings + 1] =
@@ -2925,10 +2925,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.cct.aoeTrapsSoundToggle
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
             items = soundItems,
             getFunction = function ()
                 return Settings.cct.aoeTrapsSound
@@ -2940,7 +2940,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.cct.showAoe and Settings.cct.aoeTraps and Settings.cct.aoeTrapsSoundToggle and Settings.cct.enabled)
             end
-        }
+        })
 
         -- AOE Display Options - NPC Boss
         settings[#settings + 1] =
@@ -2978,10 +2978,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.cct.aoeNPCBossSoundToggle
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
             items = soundItems,
             getFunction = function ()
                 return Settings.cct.aoeNPCBossSound
@@ -2993,7 +2993,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.cct.showAoe and Settings.cct.aoeNPCBoss and Settings.cct.aoeNPCBossSoundToggle and Settings.cct.enabled)
             end
-        }
+        })
 
         -- AOE Display Options - NPC Elite
         settings[#settings + 1] =
@@ -3031,10 +3031,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.cct.aoeNPCEliteSoundToggle
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
             items = soundItems,
             getFunction = function ()
                 return Settings.cct.aoeNPCEliteSound
@@ -3046,7 +3046,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.cct.showAoe and Settings.cct.aoeNPCElite and Settings.cct.aoeNPCEliteSoundToggle and Settings.cct.enabled)
             end
-        }
+        })
 
         -- AOE Display Options - NPC Normal
         settings[#settings + 1] =
@@ -3084,10 +3084,10 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.cct.aoeNPCNormalSoundToggle
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = "  ",
+            title = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
             items = soundItems,
             getFunction = function ()
                 return Settings.cct.aoeNPCNormalSound
@@ -3099,7 +3099,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.cct.showAoe and Settings.cct.aoeNPCNormal and Settings.cct.aoeNPCNormalSoundToggle and Settings.cct.enabled)
             end
-        }
+        })
     end)
 
     -- Build Block Indicator Section
@@ -3159,9 +3159,9 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.block.enabled
             end,
         }
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_FACE),
             items = fontItems,
             getFunction = function ()
@@ -3175,10 +3175,10 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.block.enabled
             end,
-        }
-        settings[#settings + 1] =
+        })
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_STYLE),
             items = fontStyleItems,
             getFunction = function ()
@@ -3198,7 +3198,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.block.enabled
             end,
-        }
+        })
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
@@ -3283,9 +3283,9 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.block.enabled
             end,
         }
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_FACE),
             items = fontItems,
             getFunction = function ()
@@ -3299,10 +3299,10 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.block.enabled
             end,
-        }
-        settings[#settings + 1] =
+        })
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_STYLE),
             items = fontStyleItems,
             getFunction = function ()
@@ -3322,7 +3322,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.block.enabled
             end,
-        }
+        })
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,

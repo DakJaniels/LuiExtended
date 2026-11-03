@@ -694,6 +694,307 @@ function SettingsAPI:GetBracketStyleOptions4List()
     }
 end
 
+-- ---------------------------------------------------------------------------------------
+-- Option select dialog (parametric gamepad list, same pattern as M0RMarkers)
+-- kind "face" / "style" previews the font. Other lists use ZoFontGamepad34.
+-- ---------------------------------------------------------------------------------------
+
+local OPTION_SELECT_PREVIEW_SIZE = 34
+local OPTION_SELECT_DIALOG_FONT = "ZoFontGamepad34"
+local OPTION_SELECT_ENTRY_TEMPLATE = "ZO_GamepadSubMenuEntryWithStatusTemplate"
+local OPTION_SELECT_CHECKED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
+local OPTION_SELECT_DIALOG_NAME = "LUIE_OptionSelect"
+local OPTION_SELECT_TEXTURE_WIDTH = 64
+local OPTION_SELECT_TEXTURE_HEIGHT = 14
+-- The parametric list scales only the icon, up to ZO_GAMEPAD_DEFAULT_LIST_MAX_CONTROL_SCALE.
+-- The stock icon offset assumes a 40px icon. A wider bar needs its own offset or the selected row covers the name.
+local OPTION_SELECT_TEXTURE_TEXT_GAP = 16
+
+--- @param item table
+--- @param currentValue any
+--- @return boolean
+local function OptionSelectItemIsCurrent(item, currentValue)
+    if currentValue == item.data or currentValue == item.name then
+        return true
+    end
+    if type(currentValue) == "table" and currentValue.data == item.data then
+        return true
+    end
+    return false
+end
+
+--- @param items table
+--- @param currentValue any
+--- @return table|nil
+local function FindOptionSelectItem(items, currentValue)
+    for itemIndex = 1, #items do
+        local item = items[itemIndex]
+        if OptionSelectItemIsCurrent(item, currentValue) then
+            return item
+        end
+    end
+    return nil
+end
+
+--- @param items table|function
+--- @return table
+local function ResolveOptionSelectItems(items)
+    if type(items) == "function" then
+        return items()
+    end
+    return items
+end
+
+--- Named ZoFont / LUIE_Font tokens are decomposed so the preview stays at the submenu size.
+--- @param mediaKey string
+--- @return string
+local function GetFontFacePreviewString(mediaKey)
+    local font = LUIE.Font
+    local mediaData = font.FetchMedia(mediaKey)
+    local faceName = mediaData
+    if font.IsNamedData(mediaData) then
+        local fontObject = _G[mediaData]
+        local fontFace
+        if fontObject and fontObject.GetFontInfo then
+            fontFace = fontObject:GetFontInfo()
+        end
+        if type(fontFace) == "string" and fontFace ~= "" then
+            faceName = fontFace
+        else
+            faceName = font.FetchMedia(font.DEFAULT_FONT_KEY)
+        end
+    end
+    if type(faceName) ~= "string" or faceName == "" or font.IsNamedData(faceName) then
+        return OPTION_SELECT_DIALOG_FONT
+    end
+    return LUIE.CreateFontString(faceName, OPTION_SELECT_PREVIEW_SIZE, FONT_STYLE_SOFT_SHADOW_THICK)
+end
+
+--- Style rows preview against the dynamic default face. Named faces ignore style in Font.Resolve.
+--- @param styleValue string|number
+--- @return string
+local function GetFontStylePreviewString(styleValue)
+    local faceName = LUIE.Font.FetchMedia(LUIE.Font.DEFAULT_FONT_KEY)
+    if type(faceName) ~= "string" or faceName == "" or LUIE.Font.IsNamedData(faceName) then
+        return OPTION_SELECT_DIALOG_FONT
+    end
+    return LUIE.CreateFontString(faceName, OPTION_SELECT_PREVIEW_SIZE, styleValue)
+end
+
+--- Statusbar media value is a texture path. The key is what the setting stores.
+--- @param mediaKey string
+--- @return string|nil
+local function GetStatusbarPreviewTexture(mediaKey)
+    if type(mediaKey) ~= "string" or mediaKey == "" then
+        return nil
+    end
+    local texturePath = LUIE.StatusbarTextures and LUIE.StatusbarTextures[mediaKey]
+    if type(texturePath) ~= "string" or texturePath == "" then
+        local mediaProvider = LibMediaProvider
+        if mediaProvider then
+            texturePath = mediaProvider:Fetch(mediaProvider.MediaType.STATUSBAR, mediaKey)
+        end
+    end
+    if type(texturePath) ~= "string" or texturePath == "" then
+        return nil
+    end
+    return texturePath
+end
+
+--- @param control LUIE_OptionSelectEntryControl
+--- @param data LUIE_OptionSelectEntryData
+--- @param ... any
+--- @return nil
+local function SetupOptionSelectEntry(control, data, ...)
+    ZO_SharedGamepadEntry_OnSetup(control, data, ...)
+    local statusIndicator = control.statusIndicator
+    if statusIndicator then
+        statusIndicator:AddIcon(OPTION_SELECT_CHECKED_ICON)
+        if data.isActive then
+            statusIndicator:Show()
+        else
+            statusIndicator:Hide()
+        end
+    end
+    local label = control.label or control:GetNamedChild("Label")
+    if label then
+        label:SetFont(data.previewFont or OPTION_SELECT_DIALOG_FONT)
+    end
+    local icon = control.icon
+    if icon and label then
+        icon:ClearAnchors()
+        if data.previewTexture then
+            local halfWidthAtMaxScale = OPTION_SELECT_TEXTURE_WIDTH * ZO_GAMEPAD_DEFAULT_LIST_MAX_CONTROL_SCALE * 0.5
+            local offsetX = -(halfWidthAtMaxScale + OPTION_SELECT_TEXTURE_TEXT_GAP)
+            icon:SetAnchor(CENTER, label, LEFT, offsetX, 0)
+            icon:SetDimensions(OPTION_SELECT_TEXTURE_WIDTH, OPTION_SELECT_TEXTURE_HEIGHT)
+            icon:SetColor(1, 1, 1, 1)
+        else
+            icon:SetAnchor(CENTER, label, LEFT, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET, 0)
+            icon:ClearIcons()
+            icon:SetDimensions(ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION)
+            icon:Hide()
+        end
+    end
+end
+
+--- @param data LUIE_OptionSelectEntryData
+--- @return boolean
+local function OptionSelectEntryIsSelected(data)
+    return data.isActive
+end
+
+--- Pooled dialog rows must go back to the submenu font. M0RMarkers does this on select.
+--- @param dialog LUIE_OptionSelectDialog
+--- @return nil
+local function ResetOptionSelectEntryFonts(dialog)
+    local entryList = dialog.entryList
+    if not entryList or not entryList.dataIndexToControl then
+        return
+    end
+    for _, entryControl in pairs(entryList.dataIndexToControl) do
+        local label = entryControl.label or entryControl:GetNamedChild("Label")
+        if label then
+            label:SetFont(OPTION_SELECT_DIALOG_FONT)
+        end
+    end
+end
+
+--- @param dialog LUIE_OptionSelectDialog
+--- @return nil
+local function SetupOptionSelectDialog(dialog)
+    local request = dialog.data
+    dialog.info.parametricList = {}
+    local items = request and ResolveOptionSelectItems(request.items) or nil
+    if items and request.getFunction then
+        local currentValue = request.getFunction()
+        for itemIndex = 1, #items do
+            local item = items[itemIndex]
+            ---@type LUIE_OptionSelectEntryData
+            local entryData = ZO_GamepadEntryData:New(item.name)
+            entryData:SetFontScaleOnSelection(false)
+            entryData:SetIconTintOnSelection(request.kind ~= "texture")
+            entryData.setup = SetupOptionSelectEntry
+            entryData.name = item.name
+            entryData.optionSelectItem = item
+            if request.kind == "style" then
+                entryData.previewFont = GetFontStylePreviewString(item.data)
+            elseif request.kind == "face" then
+                entryData.previewFont = GetFontFacePreviewString(item.data)
+            elseif request.kind == "texture" then
+                local texturePath = GetStatusbarPreviewTexture(item.data)
+                if texturePath then
+                    entryData:AddIcon(texturePath)
+                    entryData.previewTexture = texturePath
+                end
+            end
+            entryData.isActive = OptionSelectItemIsCurrent(item, currentValue)
+            table_insert(dialog.info.parametricList, {
+                template = OPTION_SELECT_ENTRY_TEMPLATE,
+                entryData = entryData,
+            })
+        end
+    end
+    dialog:setupFunc()
+    if dialog.entryList then
+        dialog.entryList:SetSelectedDataByEval(OptionSelectEntryIsSelected)
+    end
+end
+
+--- @param dialog LUIE_OptionSelectDialog
+--- @return nil
+local function OnOptionSelectConfirmed(dialog)
+    local request = dialog.data
+    local targetData = dialog.entryList and dialog.entryList:GetTargetData()
+    if request and request.setFunction and targetData and targetData.optionSelectItem then
+        local item = targetData.optionSelectItem
+        request.setFunction(nil, item.name, item)
+    end
+    ResetOptionSelectEntryFonts(dialog)
+    if LibHarvensAddonSettings.list then
+        LibHarvensAddonSettings.list:RefreshVisible()
+    end
+end
+
+ESO_Dialogs[OPTION_SELECT_DIALOG_NAME] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+    },
+    setup = SetupOptionSelectDialog,
+    title =
+    {
+        text = function (dialog)
+            local request = dialog.data
+            if request and request.title then
+                return request.title
+            end
+            return ""
+        end,
+    },
+    buttons =
+    {
+        {
+            text = SI_GAMEPAD_SELECT_OPTION,
+            callback = OnOptionSelectConfirmed,
+        },
+        {
+            text = SI_DIALOG_EXIT,
+            callback = ResetOptionSelectEntryFonts,
+        },
+    },
+}
+
+--- @param request LUIE_OptionSelectRequest
+--- @return nil
+function SettingsAPI:ShowOptionSelect(request)
+    ZO_Dialogs_ShowPlatformDialog(OPTION_SELECT_DIALOG_NAME, request)
+end
+
+--- LHAS button. clickHandler opens the option dialog. buttonText is the current choice.
+--- setFunction on the button is the defaults-reset adapter: LHAS calls it with the default value only.
+--- The dialog still calls params.setFunction(nil, item.name, item), matching the old dropdown setters.
+--- @param params table
+--- @return table
+function SettingsAPI:CreateOptionSelectButton(params)
+    local function GetItems()
+        return ResolveOptionSelectItems(params.items)
+    end
+    return
+    {
+        type = LibHarvensAddonSettings.ST_BUTTON,
+        label = params.label,
+        tooltip = params.tooltip,
+        buttonText = function ()
+            local currentItem = FindOptionSelectItem(GetItems(), params.getFunction())
+            if currentItem then
+                return currentItem.name
+            end
+            return ""
+        end,
+        clickHandler = function ()
+            self:ShowOptionSelect(
+            {
+                title = params.title or params.label,
+                items = GetItems(),
+                getFunction = params.getFunction,
+                setFunction = params.setFunction,
+                kind = params.kind,
+            })
+        end,
+        disable = params.disable,
+        default = params.default,
+        setFunction = function (defaultValue)
+            local matchedItem = FindOptionSelectItem(GetItems(), defaultValue)
+            if matchedItem then
+                params.setFunction(nil, matchedItem.name, matchedItem)
+            end
+        end,
+    }
+end
+
 --- Bracket style dropdown (5 choices); SV stores index 1-5.
 --- @return table
 function SettingsAPI:GetBracketStyleOptions5List()

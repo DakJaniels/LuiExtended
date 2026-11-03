@@ -1829,9 +1829,9 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
 
         -- Buff Label Font
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FONT_TP),
             items = SettingsAPI:GetFontsList(),
@@ -1846,7 +1846,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
             end,
-        }
+        })
 
         -- Buff Font Size
         settings[#settings + 1] =
@@ -1872,9 +1872,9 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
 
         -- Buff Font Style
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -1894,7 +1894,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             disable = function ()
                 return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
             end,
-        }
+        })
 
         -- Buff Colored Label
         settings[#settings + 1] =
@@ -3614,9 +3614,9 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
 
         -- Prominent Buffs Label Font Face
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE_TP),
             items = SettingsAPI:GetFontsList(),
@@ -3631,7 +3631,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentLabel)
             end,
-        }
+        })
 
         -- Prominent Buffs Label Font Size
         settings[#settings + 1] =
@@ -3656,9 +3656,9 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
 
         -- Prominent Buffs Label Font Style
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -3679,7 +3679,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentLabel)
             end,
-        }
+        })
 
         -- Prominent Buffs Progress Bar
         settings[#settings + 1] =
@@ -3701,9 +3701,9 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
 
         -- Prominent Buffs Progress Bar Texture
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "texture",
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE_TP),
             items = statusbarTextureItems,
@@ -3718,7 +3718,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
             end,
-        }
+        })
 
         -- Prominent Buffs Gradient Color 1
         settings[#settings + 1] =
