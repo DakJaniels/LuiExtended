@@ -335,9 +335,9 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
             items = fontItems,
@@ -348,7 +348,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.UltimateFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -368,9 +368,9 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -389,7 +389,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.UltimateFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -481,9 +481,9 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
             items = fontItems,
@@ -494,7 +494,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.CompanionUltimateFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -514,9 +514,9 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -535,7 +535,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.CompanionUltimateFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -684,9 +684,9 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
             items = fontItems,
@@ -697,7 +697,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.BarFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -717,9 +717,9 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -738,7 +738,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.BarFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -898,9 +898,9 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
             items = fontItems,
@@ -911,7 +911,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.PotionTimerFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -931,9 +931,9 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -952,7 +952,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.PotionTimerFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -1200,9 +1200,9 @@ function ActionBar.CreateConsoleSettings()
             end,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE_TP),
             items = fontItems,
@@ -1214,7 +1214,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.CastBarFontFace,
             disable = castBarFontDisabled,
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -1235,9 +1235,9 @@ function ActionBar.CreateConsoleSettings()
             disable = castBarFontDisabled,
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -1257,7 +1257,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             default = Defaults.CastBarFontStyle,
             disable = castBarFontDisabled,
-        }
+        })
 
         settings[#settings + 1] =
         {
