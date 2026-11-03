@@ -27,8 +27,8 @@ LUIE = {}
 LUIE.__index = LUIE
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.7.8"
-LUIE.addonVersion = 7278
+LUIE.version = "7.2.7.9"
+LUIE.addonVersion = 7279
 
 local platform = GetUIPlatform()
 if platform == UI_PLATFORM_XBOX or IsGameCoreUI() then
