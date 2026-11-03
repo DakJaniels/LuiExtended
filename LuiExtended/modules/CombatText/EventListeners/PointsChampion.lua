@@ -15,46 +15,83 @@ LUIE.CombatTextPointsChampionEventListener = CombatTextPointsChampionEventListen
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local pointType = LuiData.Data.CombatTextConstants.pointType
 
-function CombatTextPointsChampionEventListener:Initialize()
-    LUIE.CombatTextEventListener.Initialize(self)
-    self:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function (unitTag, oldChampionPoints, currentChampionPoints) self:OnEvent(unitTag, oldChampionPoints, currentChampionPoints) end, REGISTER_FILTER_UNIT_TAG, "player")
-    self.gain = 0
-    self.timeoutActive = false
-    self.previousCP = GetUnitChampionPoints("player")
-    self.hasMaxCP = not CanUnitGainChampionPoints("player")
+local POINT_GAIN_MERGE_MS = 500
+
+--- Champion bar size for the rank the player was filling before the latest gain.
+--- `GetNumChampionXPInChampionPoint` is nil at the progression cap (`CPBarType:GetLevelSize`).
+--- @param listener LuiExtended.CombatTextPointsChampionEventListener
+local function RefreshChampionRankSize(listener)
+    local earnedChampionPoints = GetPlayerChampionPointsEarned()
+    listener.previousRankSize = GetNumChampionXPInChampionPoint(earnedChampionPoints)
 end
 
---- @param unitTag string
---- @param oldChampionPoints integer
---- @param currentChampionPoints integer
-function CombatTextPointsChampionEventListener:OnEvent(unitTag, oldChampionPoints, currentChampionPoints)
-    if LUIE.CombatText.SV.toggles.showPointsChampion and not self.hasMaxCP then
-        local currentCP = GetUnitChampionPoints(unitTag)
-        local gainDelta
-        if currentCP == self.previousCP then
-            gainDelta = currentChampionPoints - oldChampionPoints
-        elseif currentCP > self.previousCP then
-            local maxForOldRank = GetNumChampionXPInChampionPoint(self.previousCP)
-            gainDelta = (maxForOldRank - oldChampionPoints) + currentChampionPoints
-        else
-            gainDelta = currentChampionPoints - oldChampionPoints
-        end
-
-        if gainDelta > 0 then
-            self.gain = self.gain + gainDelta
-        end
-
-        self.previousCP = currentCP
-        self.hasMaxCP = self.hasMaxCP or not CanUnitGainChampionPoints(unitTag)
-
-        -- Trigger custom event (500ms buffer)
-        if self.gain > 0 and not self.timeoutActive then
-            self.timeoutActive = true
-            zo_callLater(function ()
-                             self:TriggerEvent(eventType.POINT, pointType.CHAMPION_POINTS, self.gain)
-                             self.gain = 0
-                             self.timeoutActive = false
-                         end, 500)
-        end
+--- `EVENT_EXPERIENCE_GAIN` reports previous and current experience on the same bar.
+--- A rank-up can wrap so current is lower than previous. The filled bar is the size
+--- stored before this event, not the rank integers from `EVENT_CHAMPION_POINT_UPDATE`.
+--- @param previousExperience integer
+--- @param currentExperience integer
+--- @param rankSize integer|nil
+--- @return integer
+local function GetExperienceGain(previousExperience, currentExperience, rankSize)
+    if currentExperience >= previousExperience then
+        return currentExperience - previousExperience
     end
+    if rankSize == nil then
+        return 0
+    end
+    return (rankSize - previousExperience) + currentExperience
+end
+
+--- @param listener LuiExtended.CombatTextPointsChampionEventListener
+local function SchedulePointGain(listener)
+    if listener.gain > 0 and not listener.timeoutActive then
+        listener.timeoutActive = true
+        zo_callLater(function ()
+                         listener:TriggerEvent(eventType.POINT, pointType.CHAMPION_POINTS, listener.gain)
+                         listener.gain = 0
+                         listener.timeoutActive = false
+                     end, POINT_GAIN_MERGE_MS)
+    end
+end
+
+function CombatTextPointsChampionEventListener:Initialize()
+    LUIE.CombatTextEventListener.Initialize(self)
+    self:RegisterForEvent(EVENT_EXPERIENCE_GAIN, function (reason, level, previousExperience, currentExperience, championPoints)
+        self:OnExperienceGain(reason, level, previousExperience, currentExperience, championPoints)
+    end)
+    self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function ()
+        RefreshChampionRankSize(self)
+    end)
+    self.gain = 0
+    self.timeoutActive = false
+    self.previousRankSize = nil
+    RefreshChampionRankSize(self)
+end
+
+--- @param reason ProgressReason
+--- @param level integer
+--- @param previousExperience integer
+--- @param currentExperience integer
+--- @param championPoints integer
+function CombatTextPointsChampionEventListener:OnExperienceGain(reason, level, previousExperience, currentExperience, championPoints)
+    if not CanUnitGainChampionPoints("player") then
+        return
+    end
+    -- Nil means this rank has no champion bar (progression cap), same as CPBarType:GetLevelSize.
+    if GetNumChampionXPInChampionPoint(championPoints) == nil then
+        return
+    end
+
+    local gainDelta = GetExperienceGain(previousExperience, currentExperience, self.previousRankSize)
+    RefreshChampionRankSize(self)
+
+    if not LUIE.CombatText.SV.toggles.showPointsChampion then
+        return
+    end
+
+    if gainDelta > 0 then
+        self.gain = self.gain + gainDelta
+    end
+
+    SchedulePointGain(self)
 end
