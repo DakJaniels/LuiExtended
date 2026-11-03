@@ -695,19 +695,25 @@ function SettingsAPI:GetBracketStyleOptions4List()
 end
 
 -- ---------------------------------------------------------------------------------------
--- Font face / style preview dialog (parametric gamepad list, same pattern as M0RMarkers)
+-- Option select dialog (parametric gamepad list, same pattern as M0RMarkers)
+-- kind "face" / "style" previews the font. Other lists use ZoFontGamepad34.
 -- ---------------------------------------------------------------------------------------
 
-local FONT_SELECT_PREVIEW_SIZE = 34
-local FONT_SELECT_DIALOG_FONT = "ZoFontGamepad34"
-local FONT_SELECT_ENTRY_TEMPLATE = "ZO_GamepadSubMenuEntryWithStatusTemplate"
-local FONT_SELECT_CHECKED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
-local FONT_SELECT_DIALOG_NAME = "LUIE_FontSelect"
+local OPTION_SELECT_PREVIEW_SIZE = 34
+local OPTION_SELECT_DIALOG_FONT = "ZoFontGamepad34"
+local OPTION_SELECT_ENTRY_TEMPLATE = "ZO_GamepadSubMenuEntryWithStatusTemplate"
+local OPTION_SELECT_CHECKED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
+local OPTION_SELECT_DIALOG_NAME = "LUIE_OptionSelect"
+local OPTION_SELECT_TEXTURE_WIDTH = 64
+local OPTION_SELECT_TEXTURE_HEIGHT = 14
+-- The parametric list scales only the icon, up to ZO_GAMEPAD_DEFAULT_LIST_MAX_CONTROL_SCALE.
+-- The stock icon offset assumes a 40px icon. A wider bar needs its own offset or the selected row covers the name.
+local OPTION_SELECT_TEXTURE_TEXT_GAP = 16
 
 --- @param item table
 --- @param currentValue any
 --- @return boolean
-local function FontSelectItemIsCurrent(item, currentValue)
+local function OptionSelectItemIsCurrent(item, currentValue)
     if currentValue == item.data or currentValue == item.name then
         return true
     end
@@ -720,10 +726,10 @@ end
 --- @param items table
 --- @param currentValue any
 --- @return table|nil
-local function FindFontSelectItem(items, currentValue)
+local function FindOptionSelectItem(items, currentValue)
     for itemIndex = 1, #items do
         local item = items[itemIndex]
-        if FontSelectItemIsCurrent(item, currentValue) then
+        if OptionSelectItemIsCurrent(item, currentValue) then
             return item
         end
     end
@@ -732,7 +738,7 @@ end
 
 --- @param items table|function
 --- @return table
-local function ResolveFontSelectItems(items)
+local function ResolveOptionSelectItems(items)
     if type(items) == "function" then
         return items()
     end
@@ -759,9 +765,9 @@ local function GetFontFacePreviewString(mediaKey)
         end
     end
     if type(faceName) ~= "string" or faceName == "" or font.IsNamedData(faceName) then
-        return FONT_SELECT_DIALOG_FONT
+        return OPTION_SELECT_DIALOG_FONT
     end
-    return LUIE.CreateFontString(faceName, FONT_SELECT_PREVIEW_SIZE, FONT_STYLE_SOFT_SHADOW_THICK)
+    return LUIE.CreateFontString(faceName, OPTION_SELECT_PREVIEW_SIZE, FONT_STYLE_SOFT_SHADOW_THICK)
 end
 
 --- Style rows preview against the dynamic default face. Named faces ignore style in Font.Resolve.
@@ -770,19 +776,39 @@ end
 local function GetFontStylePreviewString(styleValue)
     local faceName = LUIE.Font.FetchMedia(LUIE.Font.DEFAULT_FONT_KEY)
     if type(faceName) ~= "string" or faceName == "" or LUIE.Font.IsNamedData(faceName) then
-        return FONT_SELECT_DIALOG_FONT
+        return OPTION_SELECT_DIALOG_FONT
     end
-    return LUIE.CreateFontString(faceName, FONT_SELECT_PREVIEW_SIZE, styleValue)
+    return LUIE.CreateFontString(faceName, OPTION_SELECT_PREVIEW_SIZE, styleValue)
+end
+
+--- Statusbar media value is a texture path. The key is what the setting stores.
+--- @param mediaKey string
+--- @return string|nil
+local function GetStatusbarPreviewTexture(mediaKey)
+    if type(mediaKey) ~= "string" or mediaKey == "" then
+        return nil
+    end
+    local texturePath = LUIE.StatusbarTextures and LUIE.StatusbarTextures[mediaKey]
+    if type(texturePath) ~= "string" or texturePath == "" then
+        local mediaProvider = LibMediaProvider
+        if mediaProvider then
+            texturePath = mediaProvider:Fetch(mediaProvider.MediaType.STATUSBAR, mediaKey)
+        end
+    end
+    if type(texturePath) ~= "string" or texturePath == "" then
+        return nil
+    end
+    return texturePath
 end
 
 --- @param control Control
 --- @param data ZO_GamepadEntryData
 --- @return nil
-local function SetupFontSelectEntry(control, data, ...)
+local function SetupOptionSelectEntry(control, data, ...)
     ZO_SharedGamepadEntry_OnSetup(control, data, ...)
     local statusIndicator = control.statusIndicator
     if statusIndicator then
-        statusIndicator:AddIcon(FONT_SELECT_CHECKED_ICON)
+        statusIndicator:AddIcon(OPTION_SELECT_CHECKED_ICON)
         if data.isActive then
             statusIndicator:Show()
         else
@@ -790,21 +816,37 @@ local function SetupFontSelectEntry(control, data, ...)
         end
     end
     local label = control.label or control:GetNamedChild("Label")
-    if label and data.previewFont then
-        label:SetFont(data.previewFont)
+    if label then
+        label:SetFont(data.previewFont or OPTION_SELECT_DIALOG_FONT)
+    end
+    local icon = control.icon
+    if icon and label then
+        icon:ClearAnchors()
+        if data.previewTexture then
+            local halfWidthAtMaxScale = OPTION_SELECT_TEXTURE_WIDTH * ZO_GAMEPAD_DEFAULT_LIST_MAX_CONTROL_SCALE * 0.5
+            local offsetX = -(halfWidthAtMaxScale + OPTION_SELECT_TEXTURE_TEXT_GAP)
+            icon:SetAnchor(CENTER, label, LEFT, offsetX, 0)
+            icon:SetDimensions(OPTION_SELECT_TEXTURE_WIDTH, OPTION_SELECT_TEXTURE_HEIGHT)
+            icon:SetColor(1, 1, 1, 1)
+        else
+            icon:SetAnchor(CENTER, label, LEFT, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET, 0)
+            icon:ClearIcons()
+            icon:SetDimensions(ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION)
+            icon:Hide()
+        end
     end
 end
 
 --- @param data ZO_GamepadEntryData
 --- @return boolean
-local function FontSelectEntryIsSelected(data)
+local function OptionSelectEntryIsSelected(data)
     return data.isActive
 end
 
 --- Pooled dialog rows must go back to the submenu font. M0RMarkers does this on select.
 --- @param dialog ZO_Dialog
 --- @return nil
-local function ResetFontSelectEntryFonts(dialog)
+local function ResetOptionSelectEntryFonts(dialog)
     local entryList = dialog.entryList
     if not entryList or not entryList.dataIndexToControl then
         return
@@ -812,68 +854,74 @@ local function ResetFontSelectEntryFonts(dialog)
     for _, entryControl in pairs(entryList.dataIndexToControl) do
         local label = entryControl.label or entryControl:GetNamedChild("Label")
         if label then
-            label:SetFont(FONT_SELECT_DIALOG_FONT)
+            label:SetFont(OPTION_SELECT_DIALOG_FONT)
         end
     end
 end
 
 --- @param dialog ZO_Dialog
 --- @return nil
-local function SetupFontSelectDialog(dialog)
+local function SetupOptionSelectDialog(dialog)
     local request = dialog.data
     dialog.info.parametricList = {}
-    local items = request and ResolveFontSelectItems(request.items) or nil
+    local items = request and ResolveOptionSelectItems(request.items) or nil
     if items and request.getFunction then
         local currentValue = request.getFunction()
         for itemIndex = 1, #items do
             local item = items[itemIndex]
             local entryData = ZO_GamepadEntryData:New(item.name)
             entryData:SetFontScaleOnSelection(false)
-            entryData:SetIconTintOnSelection(true)
-            entryData.setup = SetupFontSelectEntry
+            entryData:SetIconTintOnSelection(request.kind ~= "texture")
+            entryData.setup = SetupOptionSelectEntry
             entryData.name = item.name
-            entryData.fontSelectItem = item
+            entryData.optionSelectItem = item
             if request.kind == "style" then
                 entryData.previewFont = GetFontStylePreviewString(item.data)
-            else
+            elseif request.kind == "face" then
                 entryData.previewFont = GetFontFacePreviewString(item.data)
+            elseif request.kind == "texture" then
+                local texturePath = GetStatusbarPreviewTexture(item.data)
+                if texturePath then
+                    entryData:AddIcon(texturePath)
+                    entryData.previewTexture = texturePath
+                end
             end
-            entryData.isActive = FontSelectItemIsCurrent(item, currentValue)
+            entryData.isActive = OptionSelectItemIsCurrent(item, currentValue)
             table_insert(dialog.info.parametricList, {
-                template = FONT_SELECT_ENTRY_TEMPLATE,
+                template = OPTION_SELECT_ENTRY_TEMPLATE,
                 entryData = entryData,
             })
         end
     end
     dialog:setupFunc()
     if dialog.entryList then
-        dialog.entryList:SetSelectedDataByEval(FontSelectEntryIsSelected)
+        dialog.entryList:SetSelectedDataByEval(OptionSelectEntryIsSelected)
     end
 end
 
 --- @param dialog ZO_Dialog
 --- @return nil
-local function OnFontSelectConfirmed(dialog)
+local function OnOptionSelectConfirmed(dialog)
     local request = dialog.data
     local targetData = dialog.entryList and dialog.entryList:GetTargetData()
-    if request and request.setFunction and targetData and targetData.fontSelectItem then
-        local item = targetData.fontSelectItem
+    if request and request.setFunction and targetData and targetData.optionSelectItem then
+        local item = targetData.optionSelectItem
         request.setFunction(nil, item.name, item)
     end
-    ResetFontSelectEntryFonts(dialog)
+    ResetOptionSelectEntryFonts(dialog)
     if LibHarvensAddonSettings.list then
         LibHarvensAddonSettings.list:RefreshVisible()
     end
 end
 
-ESO_Dialogs[FONT_SELECT_DIALOG_NAME] =
+ESO_Dialogs[OPTION_SELECT_DIALOG_NAME] =
 {
     canQueue = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
     },
-    setup = SetupFontSelectDialog,
+    setup = SetupOptionSelectDialog,
     title =
     {
         text = function (dialog)
@@ -888,36 +936,36 @@ ESO_Dialogs[FONT_SELECT_DIALOG_NAME] =
     {
         {
             text = SI_GAMEPAD_SELECT_OPTION,
-            callback = OnFontSelectConfirmed,
+            callback = OnOptionSelectConfirmed,
         },
         {
             text = SI_DIALOG_EXIT,
-            callback = ResetFontSelectEntryFonts,
+            callback = ResetOptionSelectEntryFonts,
         },
     },
 }
 
---- @class FontSelectRequest
+--- @class OptionSelectRequest
 --- @field title string
 --- @field items table|function
 --- @field getFunction function
 --- @field setFunction function
---- @field kind "face"|"style"
+--- @field kind "face"|"style"|"texture"|nil
 
---- @param request FontSelectRequest
+--- @param request OptionSelectRequest
 --- @return nil
-function SettingsAPI:ShowFontSelect(request)
-    ZO_Dialogs_ShowPlatformDialog(FONT_SELECT_DIALOG_NAME, request)
+function SettingsAPI:ShowOptionSelect(request)
+    ZO_Dialogs_ShowPlatformDialog(OPTION_SELECT_DIALOG_NAME, request)
 end
 
---- LHAS button. clickHandler opens the preview dialog. buttonText is the current choice.
+--- LHAS button. clickHandler opens the option dialog. buttonText is the current choice.
 --- setFunction on the button is the defaults-reset adapter: LHAS calls it with the default value only.
 --- The dialog still calls params.setFunction(nil, item.name, item), matching the old dropdown setters.
 --- @param params table
 --- @return table
-function SettingsAPI:CreateFontSelectButton(params)
+function SettingsAPI:CreateOptionSelectButton(params)
     local function GetItems()
-        return ResolveFontSelectItems(params.items)
+        return ResolveOptionSelectItems(params.items)
     end
     return
     {
@@ -925,16 +973,16 @@ function SettingsAPI:CreateFontSelectButton(params)
         label = params.label,
         tooltip = params.tooltip,
         buttonText = function ()
-            local currentItem = FindFontSelectItem(GetItems(), params.getFunction())
+            local currentItem = FindOptionSelectItem(GetItems(), params.getFunction())
             if currentItem then
                 return currentItem.name
             end
             return ""
         end,
         clickHandler = function ()
-            self:ShowFontSelect(
+            self:ShowOptionSelect(
             {
-                title = params.label,
+                title = params.title or params.label,
                 items = GetItems(),
                 getFunction = params.getFunction,
                 setFunction = params.setFunction,
@@ -944,7 +992,7 @@ function SettingsAPI:CreateFontSelectButton(params)
         disable = params.disable,
         default = params.default,
         setFunction = function (defaultValue)
-            local matchedItem = FindFontSelectItem(GetItems(), defaultValue)
+            local matchedItem = FindOptionSelectItem(GetItems(), defaultValue)
             if matchedItem then
                 params.setFunction(nil, matchedItem.name, matchedItem)
             end

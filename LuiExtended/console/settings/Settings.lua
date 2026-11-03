@@ -527,9 +527,8 @@ function LUIE.CreateConsoleSettings()
     }
 
     -- Source @account
-    profileSectionRows[#profileSectionRows + 1] =
+    profileSectionRows[#profileSectionRows + 1] = SettingsAPI:CreateOptionSelectButton(
     {
-        type = LHAS.ST_DROPDOWN,
         label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_ACCOUNT),
         tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_ACCOUNT_TP),
         items = function ()
@@ -565,7 +564,7 @@ function LUIE.CreateConsoleSettings()
             end
             ProfileCopyRefreshBucketOrSplitPicks()
         end
-    }
+    })
 
     if profileCopySplitSourceUI then
         profileSectionRows[#profileSectionRows + 1] =
@@ -595,9 +594,8 @@ function LUIE.CreateConsoleSettings()
             end
         }
 
-        profileSectionRows[#profileSectionRows + 1] =
+        profileSectionRows[#profileSectionRows + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER),
             tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER_TP),
             items = function ()
@@ -627,12 +625,11 @@ function LUIE.CreateConsoleSettings()
             disable = function ()
                 return (copyPick_sourceKind or "accountwide") ~= "character"
             end
-        }
+        })
     else
         -- Source row ($AccountWide or character) - single list when not using character-specific saved vars
-        profileSectionRows[#profileSectionRows + 1] =
+        profileSectionRows[#profileSectionRows + 1] = SettingsAPI:CreateOptionSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_BUCKET),
             tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_BUCKET_TP),
             items = function ()
@@ -666,7 +663,7 @@ function LUIE.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 copyPick_bucket = item.data
             end
-        }
+        })
     end
 
     -- Copy Profile Button

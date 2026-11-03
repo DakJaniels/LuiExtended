@@ -520,7 +520,7 @@ function MiniMap.CreateConsoleSettings()
             default = Defaults.zoneNameAboveMap,
             disable = zoneNameFontDisabled,
         },
-        SettingsAPI:CreateFontSelectButton(
+        SettingsAPI:CreateOptionSelectButton(
         {
             kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
@@ -552,7 +552,7 @@ function MiniMap.CreateConsoleSettings()
             default = Defaults.zoneNameFontSize,
             disable = zoneNameFontDisabled,
         },
-        SettingsAPI:CreateFontSelectButton(
+        SettingsAPI:CreateOptionSelectButton(
         {
             kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),

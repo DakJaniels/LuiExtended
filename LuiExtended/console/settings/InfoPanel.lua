@@ -206,7 +206,7 @@ function InfoPanel.CreateConsoleSettings()
 
     panel:AddSetting(SettingsAPI:ConsoleFontDeferLabelSetting())
 
-    panel:AddSetting(SettingsAPI:CreateFontSelectButton(
+    panel:AddSetting(SettingsAPI:CreateOptionSelectButton(
         {
             kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
@@ -255,7 +255,7 @@ function InfoPanel.CreateConsoleSettings()
     end
     table.sort(fontStyleItems, function (a, b) return a.name < b.name end)
 
-    panel:AddSetting(SettingsAPI:CreateFontSelectButton(
+    panel:AddSetting(SettingsAPI:CreateOptionSelectButton(
         {
             kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
