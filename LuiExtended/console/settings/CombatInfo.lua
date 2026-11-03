@@ -250,9 +250,9 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.alertEnable
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTFACE_TP),
             items = fontItems,
@@ -268,7 +268,7 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.alerts.toggles.alertEnable
             end,
             default = Defaults.alerts.toggles.alertFontFace
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -293,9 +293,9 @@ function CombatInfo.CreateConsoleSettings()
             default = Defaults.alerts.toggles.alertFontSize
         }
 
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTSTYLE_TP),
             items = fontStyleItems,
@@ -317,7 +317,7 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.alerts.toggles.alertEnable
             end,
             default = Defaults.alerts.toggles.alertFontStyle
-        }
+        })
 
         settings[#settings + 1] =
         {
@@ -3159,9 +3159,9 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.block.enabled
             end,
         }
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_FACE),
             items = fontItems,
             getFunction = function ()
@@ -3175,10 +3175,10 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.block.enabled
             end,
-        }
-        settings[#settings + 1] =
+        })
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_CI_BLOCK_FONT_STYLE),
             items = fontStyleItems,
             getFunction = function ()
@@ -3198,7 +3198,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.block.enabled
             end,
-        }
+        })
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
@@ -3283,9 +3283,9 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.block.enabled
             end,
         }
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_FACE),
             items = fontItems,
             getFunction = function ()
@@ -3299,10 +3299,10 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.block.enabled
             end,
-        }
-        settings[#settings + 1] =
+        })
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_CI_BLOODLORD_FONT_STYLE),
             items = fontStyleItems,
             getFunction = function ()
@@ -3322,7 +3322,7 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.block.enabled
             end,
-        }
+        })
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,

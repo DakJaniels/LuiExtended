@@ -361,9 +361,9 @@ function UnitFrames.CreateConsoleSettings()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
         }
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "face",
             label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_TP),
             items = SettingsAPI:GetFontsList(),
@@ -378,7 +378,7 @@ function UnitFrames.CreateConsoleSettings()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
             default = SettingsAPI:LHASDropdownGetData(Defaults.DefaultFontFace),
-        }
+        })
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
@@ -399,9 +399,9 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.DefaultFontSize,
         }
-        settings[#settings + 1] =
+        settings[#settings + 1] = SettingsAPI:CreateFontSelectButton(
         {
-            type = LHAS.ST_DROPDOWN,
+            kind = "style",
             label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_STYLE_TP),
             items = defaultFramesFontStyleItems,
@@ -416,7 +416,7 @@ function UnitFrames.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
             end,
-        }
+        })
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
