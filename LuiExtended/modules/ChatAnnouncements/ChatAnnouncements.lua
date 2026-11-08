@@ -191,6 +191,8 @@ S.g_itemCounterLoss = 0        -- Counter value for items removed via crafting
 S.g_itemCounterLossTracker = 0 -- Tracker for how many items have been counted, when we reach a certain threshold, it is too many items to display so we cut the string off.
 S.g_itemStringLoss = ""        -- Combined string variable for items removed via crafting
 S.g_oldItem = {}               -- Saved old item for crafting upgrades
+S.g_improvementAttempt = nil   -- Slotted item captured when an improvement craft starts
+S.g_improvementSucceeded = false -- Set when that slotted item's functional quality increases
 
 -- Mail
 S.g_mailCOD = 0            -- Tracks COD amount
@@ -860,6 +862,9 @@ function ChatAnnouncements.RegisterLootEvents()
     -- CRAFT
     eventManager:UnregisterForEvent(moduleName, EVENT_CRAFTING_STATION_INTERACT)
     eventManager:UnregisterForEvent(moduleName, EVENT_END_CRAFTING_STATION_INTERACT)
+    eventManager:UnregisterForEvent(moduleName, EVENT_CRAFT_STARTED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_CRAFT_COMPLETED)
+    eventManager:UnregisterForUpdate(moduleName .. "ImprovementResult")
     -- TRADE
     eventManager:UnregisterForEvent(moduleName, EVENT_TRADE_ITEM_ADDED)
     eventManager:UnregisterForEvent(moduleName, EVENT_TRADE_ITEM_REMOVED)
@@ -4253,6 +4258,8 @@ function ChatAnnouncements.CraftingOpen(eventId, craftSkill, sameStation)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootCraft then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdateCraft)
+        eventManager:RegisterForEvent(moduleName, EVENT_CRAFT_STARTED, ChatAnnouncements.OnSmithingImprovementCraftStarted)
+        eventManager:RegisterForEvent(moduleName, EVENT_CRAFT_COMPLETED, ChatAnnouncements.OnSmithingImprovementCraftCompleted)
         S.g_inventoryStacks = {}
         S.g_bankStacks = {}
         S.g_banksubStacks = {}
@@ -4265,6 +4272,11 @@ end
 --- @param craftSkill TradeskillType
 function ChatAnnouncements.CraftingClose(eventId, craftSkill)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    eventManager:UnregisterForEvent(moduleName, EVENT_CRAFT_STARTED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_CRAFT_COMPLETED)
+    eventManager:UnregisterForUpdate(moduleName .. "ImprovementResult")
+    S.g_improvementAttempt = nil
+    S.g_improvementSucceeded = false
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
     end
