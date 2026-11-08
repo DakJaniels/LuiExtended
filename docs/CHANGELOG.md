@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.8.1
+
+### Fixed
+
+- Chat Announcements: Improving an item at a crafting station no longer says you failed to upgrade the tempering materials when the upgrade succeeded. Materials you spend print as used. If the upgrade fails, chat says you failed to upgrade that item. Equipping gear while the improvement tab is still open no longer prints upgrade or failed upgrade lines for that gear. PC and console.
+
 ## Version 7.2.8.0
 
 ### Changes
