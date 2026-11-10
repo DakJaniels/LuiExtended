@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.8.2
+
+### Fixed
+
+- Chat Announcements: Accepting a quest whose step text has a blank line keeps that description on one chat line, with its color and timestamp. A master writ objective such as "Craft a Grape Preserves" and "• Progress: 4 / 12" stays on one chat line as well. PC and console.
+
 ## Version 7.2.8.1
 
 ### Fixed

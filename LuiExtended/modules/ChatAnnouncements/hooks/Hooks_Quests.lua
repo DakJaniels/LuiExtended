@@ -51,6 +51,20 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         S.g_itemReceivedIsQuestAbandon = false
     end
 
+    --- Quest journal text can include a blank line between paragraphs.
+    --- Master writ conditions do this on purpose: "Craft a <<1>>\n• Progress" (SI_MASTER_WRIT_QUEST_PROVISIONING_FORMAT_STRING).
+    --- A newline ends a chat color code, so the rest of the announcement loses its color and timestamp.
+    --- @param questAnnouncementText string|nil
+    --- @return string|nil
+    local function GetQuestAnnouncementText(questAnnouncementText)
+        if type(questAnnouncementText) ~= "string" or questAnnouncementText == "" then
+            return questAnnouncementText
+        end
+        local singleLineAnnouncementText = zo_strgsub(questAnnouncementText, "[\r\n]+", " ")
+        singleLineAnnouncementText = zo_strgsub(singleLineAnnouncementText, "%s%s+", " ")
+        return zo_strtrim(singleLineAnnouncementText)
+    end
+
     --- @param questIndex integer
     --- @return boolean
     local function ShouldSuppressWritCrafterQuestAnnouncement(questIndex)
@@ -107,7 +121,7 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
 
         if ChatAnnouncements.SV.Quests.QuestAcceptCA then
             local questNameFormatted
-            local stepText = GetJournalQuestStepInfo(journalIndex, 1)
+            local stepText = GetQuestAnnouncementText(GetJournalQuestStepInfo(journalIndex, 1))
             local formattedString
 
             if ChatAnnouncements.SV.Quests.QuestLong then
@@ -332,11 +346,13 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
         end
 
         -- Override text if its listed in the override table.
+        -- Match the journal text first. SI_ALERTTEXT_QUEST_CONDITION_UPDATE appends ": current / max" after a writ's "\n• Progress" line.
         if Quests.QuestObjectiveCompleteOverride[formattedMessage] then
             messageParams:SetText(Quests.QuestObjectiveCompleteOverride[formattedMessage])
             alertMessage = Quests.QuestObjectiveCompleteOverride[formattedMessage]
             formattedMessage = Quests.QuestObjectiveCompleteOverride[formattedMessage]
         end
+        formattedMessage = GetQuestAnnouncementText(formattedMessage)
 
         if isConditionComplete then
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED)
@@ -520,16 +536,17 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
             end
 
             if visibility == nil or visibility == QUEST_STEP_VISIBILITY_OPTIONAL then
+                local chatStepOverrideText = GetQuestAnnouncementText(stepOverrideText)
                 if stepOverrideText ~= "" then
                     if ChatAnnouncements.SV.Quests.QuestObjUpdateCA then
                         -- This event sometimes results in duplicate messages - if an equivalent message is already detected in queue, then abort!
                         for i = 1, #ChatAnnouncements.QueuedMessages do
-                            if ChatAnnouncements.QueuedMessages[i].message == stepOverrideText then
+                            if ChatAnnouncements.QueuedMessages[i].message == chatStepOverrideText then
                                 -- Set the old message to blank so it gets skipped by the printer
                                 ChatAnnouncements.QueuedMessages[i].message = ""
                             end
                         end
-                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = stepOverrideText, type = "MESSAGE" }
+                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = chatStepOverrideText, type = "MESSAGE" }
                         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                     end
@@ -548,15 +565,16 @@ function ChatAnnouncements.Hooks.RegisterQuests(ctx)
                         local conditionText, curCount, maxCount, isFailCondition, isConditionComplete, _, isVisible = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex, false)
 
                         if not (isFailCondition or isConditionComplete) and isVisible then
+                            local chatConditionText = GetQuestAnnouncementText(conditionText)
                             if ChatAnnouncements.SV.Quests.QuestObjUpdateCA then
                                 -- This event sometimes results in duplicate messages - if an equivalent message is already detected in queue, then abort!
                                 for i = 1, #ChatAnnouncements.QueuedMessages do
-                                    if ChatAnnouncements.QueuedMessages[i].message == conditionText then
+                                    if ChatAnnouncements.QueuedMessages[i].message == chatConditionText then
                                         -- Set the old message to blank so it gets skipped by the printer
                                         ChatAnnouncements.QueuedMessages[i].message = ""
                                     end
                                 end
-                                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = conditionText, type = "MESSAGE" }
+                                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = chatConditionText, type = "MESSAGE" }
                                 ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                                 eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages, true)
                             end
