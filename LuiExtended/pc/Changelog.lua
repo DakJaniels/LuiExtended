@@ -38,6 +38,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.8.2
+    "|cFFA500LuiExtended Version 7.2.8.2|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Accepting a quest whose step text has a blank line keeps that description on one chat line, with its color and timestamp. A master writ objective such as \"Craft a Grape Preserves\" and \"• Progress: 4 / 12\" stays on one chat line as well. PC and console.",
+    "",
     -- Version Header 7.2.8.1
     "|cFFA500LuiExtended Version 7.2.8.1|r",
     "",

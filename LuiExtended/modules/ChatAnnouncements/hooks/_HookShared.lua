@@ -16,7 +16,7 @@ ChatAnnouncements.Hooks = ChatAnnouncements.Hooks or {}
 --- @field alertHandlers table
 --- @field csaHandlers table
 --- @field csaCallbackHandlers table
---- @field eventManager table
+--- @field eventManager EventManager
 --- @field moduleName string
 --- @field SV CADefaults
 --- @field FindCsaCallbackHandler fun(registrationName: string, callbackManager?: table): table|nil
