@@ -160,6 +160,82 @@ function UnitFrames.ApplyHideDefaultPlayerAttributeBarsIfNeeded()
     end
 end
 
+-- ZO_UnitFrameObject:SetHiddenForReason reason. Hides the vanilla reticleover frame object so RefreshControls only marks dirty.
+local VANILLA_RETICLEOVER_HIDDEN_REASON = "LUIE_DefaultTargetDisabled"
+local vanillaReticleoverVisualizerHookInstalled = false
+
+--  Player bars use unit tag "player".
+--- @param visualizer ZO_UnitAttributeVisualizer
+--- @return boolean
+local function ShouldSkipVanillaReticleoverVisualizer(visualizer)
+    if visualizer:GetUnitTag() ~= "reticleover" then
+        return false
+    end
+    return UnitFrames.ShouldHideVanillaTargetFrameForCustomTarget()
+end
+
+local function InstallVanillaReticleoverVisualizerHook()
+    if vanillaReticleoverVisualizerHookInstalled then
+        return
+    end
+    ZO_PreHook(ZO_UnitAttributeVisualizer, "OnUnitChanged", ShouldSkipVanillaReticleoverVisualizer)
+    vanillaReticleoverVisualizerHookInstalled = true
+end
+
+--- Hide the vanilla reticleover frame and drop its reticle-target rebuild when Default TARGET is Disable and LUIE custom target is enabled.
+--- Dropdown changes already require /reloadui, so this does not put the ZOS callback back.
+function UnitFrames.ApplyHideDefaultTargetFrameUpdatesIfNeeded()
+    InstallVanillaReticleoverVisualizerHook()
+
+    if not UnitFrames.ShouldHideVanillaTargetFrameForCustomTarget() then
+        return
+    end
+
+    local unitFrame = ZO_UnitFrames_GetUnitFrame("reticleover")
+    unitFrame:SetHiddenForReason(VANILLA_RETICLEOVER_HIDDEN_REASON, true)
+    -- These handlers only refresh the reticleover frame. OnGuildNameAvailable calls UpdateCaption.
+    ZO_UnitFrames:UnregisterForEvent(EVENT_RETICLE_TARGET_CHANGED)
+    ZO_UnitFrames:UnregisterForEvent(EVENT_GUILD_NAME_AVAILABLE)
+    ZO_UnitFrames:UnregisterForEvent(EVENT_GUILD_ID_CHANGED)
+    ZO_UnitFrames:UnregisterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED)
+    ZO_UnitFrames:UnregisterForEvent(EVENT_TARGET_CHANGED)
+end
+
+--- ZO_UnitFrames OnCompanionStateChanged calls CreateLocalCompanion, which builds a full vanilla companion frame.
+--- Skip that when the LUIE companion frame is on and default group frames are disabled.
+function UnitFrames.UnregisterVanillaCompanionFrameCreation()
+    if not UnitFrames.SV.CustomFramesCompanion then
+        return
+    end
+    if not UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Group")) then
+        return
+    end
+    ZO_UnitFrames:UnregisterForEvent(EVENT_ACTIVE_COMPANION_STATE_CHANGED)
+end
+
+--- ZO_UnitFrames.xml OnUpdate calls ZO_UnitFrames_OnUpdate every frame, which only restyles dirty group frames.
+--- ZO_MostRecentPowerUpdateHandler:New("UnitFrames", ...) also RegisterForUpdate("UnitFrames", 0) and drives ZO_UnitFrameBar:Update.
+--- Both stay off once removed. Default frame dropdowns already require /reloadui.
+function UnitFrames.UnregisterUnusedVanillaUnitFrameRuntime()
+    local hideGroupFrames = UnitFrames.SV.CustomFramesGroup
+        and UnitFrames.SV.CustomFramesRaid
+        and UnitFrames.IsDefaultFramesModeHideVanilla(UnitFrames.GetEffectiveDefaultFramesMode("Group"))
+    if not hideGroupFrames then
+        return
+    end
+
+    ZO_UnitFrames:SetHandler("OnUpdate", nil)
+
+    if not UnitFrames.ShouldHideVanillaTargetFrameForCustomTarget() then
+        return
+    end
+
+    eventManager:UnregisterForEvent("UnitFrames", EVENT_POWER_UPDATE)
+    eventManager:UnregisterForUpdate("UnitFrames")
+    ZO_UnitFrames:UnregisterForEvent(EVENT_TARGET_MARKER_UPDATE)
+    ZO_UnitFrames:UnregisterForEvent(EVENT_OVERLAND_DIFFICULTY_CHANGED)
+end
+
 -- A function to extract the anchor information
 --- @param frame Control
 --- @return {point:AnchorPosition,relativeTo:object,relativePoint:AnchorPosition,offsetX:number,offsetY:number }|nil
@@ -469,6 +545,15 @@ function UnitFrames.SetDefaultFramesSetting(frame, value)
             UnitFrames.SV[key] = modeIndex
             UnitFrames.ResetCompassBarMenu()
             UnitFrames.ApplyHideDefaultPlayerAttributeBarsIfNeeded()
+            if frame == "Target" then
+                UnitFrames.ApplyHideDefaultTargetFrameUpdatesIfNeeded()
+            end
+            if frame == "Group" then
+                UnitFrames.UnregisterVanillaCompanionFrameCreation()
+            end
+            if frame == "Target" or frame == "Group" then
+                UnitFrames.UnregisterUnusedVanillaUnitFrameRuntime()
+            end
             return
         end
     end
