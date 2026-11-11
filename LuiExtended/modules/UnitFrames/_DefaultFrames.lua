@@ -178,7 +178,11 @@ local function InstallVanillaReticleoverVisualizerHook()
     if vanillaReticleoverVisualizerHookInstalled then
         return
     end
+    -- OnUnitChanged is the reticle rescan. The three visual handlers are what play DecreasedArmorFadeAnimation and the other target-frame modules.
     ZO_PreHook(ZO_UnitAttributeVisualizer, "OnUnitChanged", ShouldSkipVanillaReticleoverVisualizer)
+    ZO_PreHook(ZO_UnitAttributeVisualizer, "OnUnitAttributeVisualAdded", ShouldSkipVanillaReticleoverVisualizer)
+    ZO_PreHook(ZO_UnitAttributeVisualizer, "OnUnitAttributeVisualUpdated", ShouldSkipVanillaReticleoverVisualizer)
+    ZO_PreHook(ZO_UnitAttributeVisualizer, "OnUnitAttributeVisualRemoved", ShouldSkipVanillaReticleoverVisualizer)
     vanillaReticleoverVisualizerHookInstalled = true
 end
 
