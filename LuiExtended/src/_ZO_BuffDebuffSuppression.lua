@@ -24,13 +24,22 @@ function LUIE.ShouldSuppressZOBuffDebuff()
     return tonumber(GetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_ALL_ENABLED)) == BUFF_DEBUFF_ENABLED_CHOICE_DONT_SHOW
 end
 
+-- ZO_BuffDebuff_ContainerObject:Initialize registers MarkDirty with control:RegisterForEvent.
+-- Player uses EVENT_PLAYER_ACTIVATED. Target uses EVENT_RETICLE_TARGET_CHANGED.
+local CONTAINER_MARK_DIRTY_EVENTS =
+{
+    EVENT_PLAYER_ACTIVATED,
+    EVENT_RETICLE_TARGET_CHANGED,
+    EVENT_EFFECTS_FULL_UPDATE,
+    EVENT_EFFECT_CHANGED,
+    EVENT_ARTIFICIAL_EFFECT_ADDED,
+    EVENT_ARTIFICIAL_EFFECT_REMOVED,
+    EVENT_PLAYER_COMBAT_STATE,
+}
+
 function LUIE.SuppressZOBuffDebuffContainerControl(control)
-    if control == nil then
-        return
-    end
-    local controlName = control:GetName()
-    if controlName and controlName ~= "" then
-        eventManager:UnregisterForAllEvents(controlName)
+    for eventIndex = 1, #CONTAINER_MARK_DIRTY_EVENTS do
+        control:UnregisterForEvent(CONTAINER_MARK_DIRTY_EVENTS[eventIndex])
     end
     control:SetHandler("OnUpdate", nil)
     control:SetHidden(true)
@@ -40,27 +49,16 @@ function LUIE.ApplyZOBuffDebuffSuppression()
     if not LUIE.ShouldSuppressZOBuffDebuff() then
         return
     end
-    if BUFF_DEBUFF == nil then
-        return
-    end
 
     local containerObjectsByUnitTag = BUFF_DEBUFF.containerObjectsByUnitTag
-    if containerObjectsByUnitTag then
-        for _, containerObject in pairs(containerObjectsByUnitTag) do
-            if containerObject and containerObject.GetControl then
-                LUIE.SuppressZOBuffDebuffContainerControl(containerObject:GetControl())
-            end
-        end
+    for _, containerObject in pairs(containerObjectsByUnitTag) do
+        LUIE.SuppressZOBuffDebuffContainerControl(containerObject:GetControl())
     end
 
     local topLevelControl = BUFF_DEBUFF.control
-    if topLevelControl then
-        local topLevelName = topLevelControl:GetName()
-        if topLevelName and topLevelName ~= "" then
-            eventManager:UnregisterForAllEvents(topLevelName)
-        end
-        topLevelControl:SetHidden(true)
-    end
+    topLevelControl:UnregisterForEvent(EVENT_INTERFACE_SETTING_CHANGED)
+    topLevelControl:UnregisterForEvent(EVENT_ADD_ONS_LOADED)
+    topLevelControl:SetHidden(true)
 end
 
 local function OnGameBuffSettingChanged(_eventId_, _settingSystemType_, settingId)
