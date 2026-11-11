@@ -217,6 +217,9 @@ function UnitFrames.Initialize(enabled)
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()
     UnitFrames.ApplyHideDefaultPlayerAttributeBarsIfNeeded()
+    UnitFrames.ApplyHideDefaultTargetFrameUpdatesIfNeeded()
+    UnitFrames.UnregisterVanillaCompanionFrameCreation()
+    UnitFrames.UnregisterUnusedVanillaUnitFrameRuntime()
     if not UnitFrames.dodgePrediction then
         UnitFrames.dodgePrediction = LUIE_PlayerDodgePrediction:New()
     end
