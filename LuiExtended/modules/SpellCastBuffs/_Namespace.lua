@@ -112,6 +112,7 @@ local SpellCastBuffs = ZO_Object:Subclass()
 --- @field SortPromDebuffsHorz string
 --- @field AlignmentPromDebuffsVert string
 --- @field SortPromDebuffsVert string
+--- @field ProminentTimeSort string Recently Cast, Shortest Remaining, or Longest Remaining
 --- @field StackPlayerBuffs string
 --- @field StackPlayerDebuffs string
 --- @field StackTargetBuffs string
@@ -324,6 +325,7 @@ SpellCastBuffs.Defaults =
     SortPromDebuffsHorz = "Left to Right",
     AlignmentPromDebuffsVert = "Bottom",
     SortPromDebuffsVert = "Bottom to Top",
+    ProminentTimeSort = "Recently Cast",
     StackPlayerBuffs = "Down",
     StackPlayerDebuffs = "Up",
     StackTargetBuffs = "Down",

@@ -3033,6 +3033,28 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROMINET_HEADER),
         }
 
+        -- Prominent Time Sorting
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME_TP),
+            items =
+            {
+                { name = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME_CAST),     data = "Recently Cast"       },
+                { name = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME_SHORTEST), data = "Shortest Remaining"  },
+                { name = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME_LONGEST),  data = "Longest Remaining"   },
+            },
+            getFunction = function ()
+                return SettingsAPI:LHASDropdownGetData(SettingsAPI:NormalizeTokenChoice(Settings.ProminentTimeSort, { "Recently Cast", "Shortest Remaining", "Longest Remaining" }, Defaults.ProminentTimeSort or "Recently Cast"))
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.ProminentTimeSort = item.data
+                SpellCastBuffs.MarkDisplayDirty()
+            end,
+            default = SettingsAPI:LHASDropdownGetData(Defaults.ProminentTimeSort or "Recently Cast"),
+        }
+
         -- Prominent Buff Container Orientation
         settings[#settings + 1] =
         {

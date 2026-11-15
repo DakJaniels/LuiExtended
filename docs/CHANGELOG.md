@@ -2,6 +2,10 @@
 
 ## Version 7.2.8.2
 
+### New
+
+- Buffs & Debuffs: **Prominent Time Sorting**, under Alignment & Sorting for Prominent Buffs & Debuffs. Choose Recently Cast, Shortest Remaining, or Longest Remaining. Recently Cast is the default and keeps the current order. Shortest Remaining puts the soonest expiry first, and icons with no duration last. Longest Remaining puts icons with no duration first, then the countdown that lasts longest. The existing horizontal and vertical sort direction still chooses which edge is first. PC and console.
+
 ### Fixed
 
 - Chat Announcements: Accepting a quest whose step text has a blank line keeps that description on one chat line, with its color and timestamp. A master writ objective such as "Craft a Grape Preserves" and "• Progress: 4 / 12" stays on one chat line as well. PC and console.
