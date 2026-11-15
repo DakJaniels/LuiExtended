@@ -618,6 +618,81 @@ local function buffSort(x, y)
     return nil
 end
 
+--- True when the effect has a countdown. Matches the no-duration test in buffSort.
+--- @param effect { dur: number|nil, ends: number|nil, groundLabel: string|nil, toggle: boolean|nil }
+--- @return boolean
+local function effectHasFiniteDuration(effect)
+    return not (effect.ends == nil or effect.dur == 0 or effect.groundLabel or effect.toggle)
+end
+
+--- @param x { name: string, displayUid?: number }
+--- @param y { name: string, displayUid?: number }
+--- @return boolean
+local function compareEffectNameAndDisplayUid(x, y)
+    if x.name ~= y.name then
+        return x.name < y.name
+    end
+    local xDisplayUid = x.displayUid or 0
+    local yDisplayUid = y.displayUid or 0
+    return xDisplayUid < yDisplayUid
+end
+
+--- Shortest puts the soonest expiry first and no-duration icons last.
+--- Longest is the reverse: no-duration icons first, then the latest expiry.
+--- Name and displayUid keep the same direction for both, so ties stay stable.
+--- @param x { dur: number|nil, ends: number|nil, groundLabel: string|nil, name: string, toggle: boolean|nil, displayUid?: number }
+--- @param y { dur: number|nil, ends: number|nil, groundLabel: string|nil, name: string, toggle: boolean|nil, displayUid?: number }
+--- @param shortestFirst boolean
+--- @return boolean
+local function compareByTimeRemaining(x, y, shortestFirst)
+    local xHasFiniteDuration = effectHasFiniteDuration(x)
+    local yHasFiniteDuration = effectHasFiniteDuration(y)
+    if xHasFiniteDuration and yHasFiniteDuration then
+        if x.ends ~= y.ends then
+            if shortestFirst then
+                return x.ends < y.ends
+            end
+            return x.ends > y.ends
+        end
+    elseif xHasFiniteDuration ~= yHasFiniteDuration then
+        if shortestFirst then
+            return xHasFiniteDuration
+        end
+        return not xHasFiniteDuration
+    end
+    return compareEffectNameAndDisplayUid(x, y)
+end
+
+--- @param x { dur: number|nil, ends: number|nil, groundLabel: string|nil, name: string, toggle: boolean|nil, displayUid?: number }
+--- @param y { dur: number|nil, ends: number|nil, groundLabel: string|nil, name: string, toggle: boolean|nil, displayUid?: number }
+--- @return boolean
+local function buffSortShortestRemaining(x, y)
+    return compareByTimeRemaining(x, y, true)
+end
+
+--- @param x { dur: number|nil, ends: number|nil, groundLabel: string|nil, name: string, toggle: boolean|nil, displayUid?: number }
+--- @param y { dur: number|nil, ends: number|nil, groundLabel: string|nil, name: string, toggle: boolean|nil, displayUid?: number }
+--- @return boolean
+local function buffSortLongestRemaining(x, y)
+    return compareByTimeRemaining(x, y, false)
+end
+
+--- Recently Cast, and any other saved value, keeps buffSort.
+--- @param container string
+--- @return function
+local function getContainerSortFunction(container)
+    if container == "prominentbuffs" or container == "prominentdebuffs" then
+        local prominentTimeSort = SpellCastBuffs.SV.ProminentTimeSort
+        if prominentTimeSort == "Shortest Remaining" then
+            return buffSortShortestRemaining
+        end
+        if prominentTimeSort == "Longest Remaining" then
+            return buffSortLongestRemaining
+        end
+    end
+    return buffSort
+end
+
 --- Appends an effect into the sorted display list for a container.
 --- Reuses effect.displayUid when present so sort order stays stable across dirty rebuilds.
 --- @param container string
@@ -758,7 +833,7 @@ local function rebuildDisplaySortedLists(currentTimeMs)
         local container = uniqueContainers[i]
         local sortedList = g_buffsSorted[container]
         if sortedList then
-            table_sort(sortedList, buffSort)
+            table_sort(sortedList, getContainerSortFunction(container))
             g_cachedDisplaySortedLists[container] = sortedList
             local skipStructure = containerUidSequenceUnchanged(container, sortedList)
                 and not containerNeedsLayoutPass(container, sortedList)

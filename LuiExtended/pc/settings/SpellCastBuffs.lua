@@ -59,6 +59,13 @@ local sortVertChoices =
     GetString(LUIE_STRING_SHARED_SORT_TOP_TO_BOTTOM),
 }
 local sortVertValues = { "Bottom to Top", "Top to Bottom" }
+local prominentTimeSortChoices =
+{
+    GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME_CAST),
+    GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME_SHORTEST),
+    GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME_LONGEST),
+}
+local prominentTimeSortValues = { "Recently Cast", "Shortest Remaining", "Longest Remaining" }
 local stackRowChoices =
 {
     GetString(LUIE_STRING_SHARED_STACK_DOWN),
@@ -2826,6 +2833,23 @@ function SpellCastBuffs.CreateSettings()
                 type = "header",
                 name = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROMINET_HEADER),
                 width = "full",
+            },
+            {
+                -- Prominent Time Sorting
+                type = "dropdown",
+                name = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME),
+                tooltip = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROM_TIME_TP),
+                choices = prominentTimeSortChoices,
+                choicesValues = prominentTimeSortValues,
+                getFunc = function ()
+                    return Settings.ProminentTimeSort
+                end,
+                setFunc = function (value)
+                    Settings.ProminentTimeSort = value
+                    SpellCastBuffs.MarkDisplayDirty()
+                end,
+                width = "full",
+                default = Defaults.ProminentTimeSort,
             },
 
             {

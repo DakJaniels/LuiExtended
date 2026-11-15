@@ -41,6 +41,10 @@ local changelogMessages =
     -- Version Header 7.2.8.2
     "|cFFA500LuiExtended Version 7.2.8.2|r",
     "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Buffs & Debuffs: |cFFFFFFProminent Time Sorting|r, under Alignment & Sorting for Prominent Buffs & Debuffs. Choose Recently Cast, Shortest Remaining, or Longest Remaining. Recently Cast is the default and keeps the current order. Shortest Remaining puts the soonest expiry first, and icons with no duration last. Longest Remaining puts icons with no duration first, then the countdown that lasts longest. The existing horizontal and vertical sort direction still chooses which edge is first. PC and console.",
+    "",
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Accepting a quest whose step text has a blank line keeps that description on one chat line, with its color and timestamp. A master writ objective such as \"Craft a Grape Preserves\" and \"• Progress: 4 / 12\" stays on one chat line as well. PC and console.",
