@@ -766,6 +766,24 @@ function UnitFrames.ClearTargetFrame()
     end
 end
 
+--- Quick Hide Dead applies to NPC corpses only. Players stay on the target frame.
+--- Strict monster corpses limits that to dead hostile monsters (IsUnitMonster).
+--- @param reactionType integer|nil
+--- @return boolean
+function UnitFrames.ShouldQuickHideDeadReticleover(reactionType)
+    if not UnitFrames.SV.QuickHideDead or not DoesUnitExist("reticleover") or IsUnitPlayer("reticleover") or not IsUnitDead("reticleover") then
+        return false
+    end
+    if UnitFrames.SV.QuickHideDeadUseUnitMonster then
+        return reactionType == UNIT_REACTION_HOSTILE and IsUnitMonster("reticleover")
+    end
+    local isMonster = IsGameCameraInteractableUnitMonster()
+    return reactionType == UNIT_REACTION_NEUTRAL
+        or reactionType == UNIT_REACTION_FRIENDLY
+        or reactionType == UNIT_REACTION_NPC_ALLY
+        or (reactionType == UNIT_REACTION_HOSTILE and isMonster)
+end
+
 -- Runs on the EVENT_RETICLE_TARGET_CHANGED listener.
 -- This handler fires every time the player's reticle target changes.
 -- Used to read initial values of target's health and shield.
@@ -860,26 +878,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
                 end)
             end
 
-            local showAvaPlayerTarget = UnitFrames.ShouldShowAvaPlayerTargetForReticleover(reactionType)
-            if not showAvaPlayerTarget then
-                UnitFrames.CustomFrames["reticleover"].control:SetHidden(false)
-                if UnitFrames.SV.QuickHideDead then
-                    local isMonster
-                    if UnitFrames.SV.QuickHideDeadUseUnitMonster and IsUnitMonster then
-                        isMonster = IsUnitMonster("reticleover")
-                    else
-                        isMonster = IsGameCameraInteractableUnitMonster()
-                    end
-                    local isNPC = reactionType == UNIT_REACTION_NEUTRAL
-                        or reactionType == UNIT_REACTION_FRIENDLY
-                        or reactionType == UNIT_REACTION_NPC_ALLY
-                        or (reactionType == UNIT_REACTION_HOSTILE and isMonster)
-                    local shouldHide = IsUnitDead("reticleover") and isNPC
-                    UnitFrames.CustomFrames["reticleover"].control:SetHidden(shouldHide)
-                end
-            else
-                UnitFrames.CustomFrames["reticleover"].control:SetHidden(true)
-            end
+            UnitFrames.CustomFrames["reticleover"].control:SetHidden(UnitFrames.ShouldQuickHideDeadReticleover(reactionType))
             UnitFrames.targetFrameLingered = true
         end
 
@@ -943,6 +942,8 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
     if not UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.ShouldHideVanillaTargetFrameForCustomTarget() then
         ZO_TargetUnitFramereticleover:SetHidden(true)
     end
+
+    UnitFrames.LogReticleTargetShowHide()
 end
 
 function UnitFrames.OnReticleTargetPlayerChanged(eventCode)
@@ -2319,8 +2320,7 @@ function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
 
     UnitFrames.CustomFramesTryUnhideTlw("reticleover", unhide)
     if unhide then
-        local reactionType = DoesUnitExist("reticleover") and GetUnitReaction("reticleover") or nil
-        target.control:SetHidden(UnitFrames.ShouldShowAvaPlayerTargetForReticleover(reactionType))
+        target.control:SetHidden(false)
     end
 end
 
