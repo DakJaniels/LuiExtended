@@ -21,6 +21,7 @@ local UnitFrames = LUIE.UnitFrames
 local PREVIEW_SOURCE_UNIT = "player"
 
 UnitFrames.debugAttributeVisualOverrides = UnitFrames.debugAttributeVisualOverrides or {}
+UnitFrames.debugReticleTargetLog = false
 
 local function VisualEffectCacheKey(visualType, statType, attributeType, powerType)
     return string.format("%d_%d_%d_%d", visualType, statType, attributeType, powerType)
@@ -805,6 +806,55 @@ end
 -- Slash command registration
 -- -----------------------------------------------------------------------------
 
+local lastReticleTargetLogSignature = nil
+
+--- Same dead-NPC rule as UnitFrames.ShouldQuickHideDeadReticleover.
+--- @param reactionType integer|nil
+--- @return boolean
+local function GetReticleoverQuickHideDead(reactionType)
+    return UnitFrames.ShouldQuickHideDeadReticleover(reactionType)
+end
+
+--- One chat line when the custom target show/hide decision changes. /luireticlelog toggles this.
+function UnitFrames.LogReticleTargetShowHide()
+    if not UnitFrames.debugReticleTargetLog then
+        return
+    end
+    local unitExists = DoesUnitExist("reticleover")
+    local reactionType = unitExists and GetUnitReaction("reticleover") or nil
+    local isPlayer = unitExists and IsUnitPlayer("reticleover") or false
+    local isDead = unitExists and IsUnitDead("reticleover") or false
+    local showAvaPlayerTarget = UnitFrames.ShouldShowAvaPlayerTargetForReticleover(reactionType)
+    local quickHideDead = GetReticleoverQuickHideDead(reactionType)
+    local targetFrame = UnitFrames.CustomFrames["reticleover"]
+    local avaPlayerTargetFrame = UnitFrames.CustomFrames["AvaPlayerTarget"]
+    local targetControlHidden = true
+    if targetFrame and targetFrame.control then
+        targetControlHidden = targetFrame.control:IsControlHidden()
+    end
+    local avaControlHidden = true
+    if avaPlayerTargetFrame and avaPlayerTargetFrame.control then
+        avaControlHidden = avaPlayerTargetFrame.control:IsControlHidden()
+    end
+    local unitName = unitExists and GetUnitName("reticleover") or ""
+    local signature = string.format("%s|%s|%s|%s|%s|%s|%s|%s|%s",
+        tostring(unitExists), tostring(reactionType), tostring(isPlayer), tostring(isDead),
+        tostring(showAvaPlayerTarget), tostring(quickHideDead), tostring(targetControlHidden), tostring(avaControlHidden), unitName)
+    if signature == lastReticleTargetLogSignature then
+        return
+    end
+    lastReticleTargetLogSignature = signature
+    LUIE:Log("Debug", string.format("[LUIE reticle] name=%s exists=%s reaction=%s player=%s dead=%s showAva=%s quickHide=%s targetHidden=%s avaHidden=%s",
+        unitName, tostring(unitExists), tostring(reactionType), tostring(isPlayer), tostring(isDead),
+        tostring(showAvaPlayerTarget), tostring(quickHideDead), tostring(targetControlHidden), tostring(avaControlHidden)))
+end
+
+local function ToggleReticleTargetLog()
+    UnitFrames.debugReticleTargetLog = not UnitFrames.debugReticleTargetLog
+    lastReticleTargetLogSignature = nil
+    LUIE:Log("Debug", string.format("[LUIE] reticle target log %s", UnitFrames.debugReticleTargetLog and "on" or "off"))
+end
+
 local DEBUG_COMMANDS =
 {
     ["/luiufsm"]        = DebugGroup,
@@ -818,6 +868,7 @@ local DEBUG_COMMANDS =
     ["/luiufall"]       = DebugAll,
     ["/luiufdumpfonts"] = UnitFrames.DumpFontDiagnostics,
     ["/luiufnamefit"]   = UnitFrames.DumpNameFitDiagnostics,
+    ["/luireticlelog"]  = ToggleReticleTargetLog,
 }
 
 SLASH_COMMANDS["/luieufdebug"] = function (arg)
