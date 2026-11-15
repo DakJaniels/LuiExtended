@@ -51,6 +51,11 @@ local windowManager = GetWindowManager()
 local guildEventManager = GetEventManager()
 local guildModuleName = LUIE.name .. "ChatAnnouncements"
 
+-- Pending invites are delivered as a list on EVENT_GUILD_INVITES_INITIALIZED (GetNumGuildInvites /
+-- GetGuildInviteInfo). EVENT_GUILD_INVITE_ADDED is only the live arrival. Track guild ids so a login
+-- snapshot and a later ADDED for the same invite do not print twice. Cleared on EVENT_GUILD_INVITE_REMOVED.
+local announcedGuildInviteIds = {}
+
 local GUILD_MAIL_INCOMING_SUPPRESS_MS = 3000
 
 local function FormatGuildMailSubject(subject)
@@ -201,7 +206,13 @@ end
 function ChatAnnouncements.RegisterGuildEvents()
     -- TODO: Possibly implement conditionals here again in the future
     guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_SELF_JOINED_GUILD, ChatAnnouncements.GuildAddedSelf)
+    guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_INVITES_INITIALIZED, ChatAnnouncements.GuildInvitesInitialized)
     guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_INVITE_ADDED, ChatAnnouncements.GuildInviteAdded)
+    guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_INVITE_REMOVED, ChatAnnouncements.GuildInviteRemoved)
+    -- Same namespace cannot also own EVENT_PLAYER_ACTIVATED (ChatAnnouncements.OnPlayerActivated).
+    -- ZOS refreshes ZO_GuildInviteProvider on player activation, so scan here in case the list is
+    -- already populated and EVENT_GUILD_INVITES_INITIALIZED was missed.
+    guildEventManager:RegisterForEvent(guildModuleName .. "PendingGuildInvites", EVENT_PLAYER_ACTIVATED, ChatAnnouncements.GuildInvitesInitialized)
     guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_MEMBER_RANK_CHANGED, ChatAnnouncements.GuildRankChanged)
     guildEventManager:RegisterForEvent(guildModuleName, EVENT_HERALDRY_SAVED, ChatAnnouncements.GuildHeraldrySaved) -- TODO: Fix later
     guildEventManager:RegisterForEvent(guildModuleName, EVENT_GUILD_RANKS_CHANGED, ChatAnnouncements.GuildRanksSaved)
@@ -495,6 +506,43 @@ function ChatAnnouncements.GuildAddedSelf(eventId, guildId, guildName)
     end
 end
 
+--- @param guildId integer
+--- @param guildName string
+--- @param guildAlliance Alliance
+--- @param inviterName string
+local function AnnounceIncomingGuildInvite(guildId, guildName, guildAlliance, inviterName)
+    local social = ChatAnnouncements.SV.Social
+    if guildId == nil or announcedGuildInviteIds[guildId] then
+        return
+    end
+    if not social.GuildCA and not social.GuildAlert then
+        return
+    end
+    announcedGuildInviteIds[guildId] = true
+
+    local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(inviterName, inviterName)
+    local guildColor = social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
+    local guildNameAlliance = social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
+    local guildNameAllianceAlert = social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
+    if social.GuildCA then
+        ChatOutput:Print(zo_strformat(guildIncomingGuildRequestFormat, displayNameLink, guildNameAlliance), true)
+    end
+    if social.GuildAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(guildIncomingGuildRequestFormat, inviterName, guildNameAllianceAlert))
+    end
+end
+
+-- EVENT_GUILD_INVITES_INITIALIZED
+-- Also used from EVENT_PLAYER_ACTIVATED. Pending invites have no per-invite payload on this event;
+-- ZO_GuildInviteProvider:BuildNotificationList reads them with GetNumGuildInvites / GetGuildInviteInfo.
+function ChatAnnouncements.GuildInvitesInitialized()
+    local numGuildInvites = GetNumGuildInvites()
+    for inviteIndex = 1, numGuildInvites do
+        local guildId, guildName, guildAlliance, inviterDisplayName = GetGuildInviteInfo(inviteIndex)
+        AnnounceIncomingGuildInvite(guildId, guildName, guildAlliance, inviterDisplayName)
+    end
+end
+
 -- EVENT_GUILD_INVITE_ADDED
 --- @param eventId integer
 --- @param guildId integer
@@ -502,16 +550,14 @@ end
 --- @param guildAlliance Alliance
 --- @param inviterName string
 function ChatAnnouncements.GuildInviteAdded(eventId, guildId, guildName, guildAlliance, inviterName)
-    local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(inviterName, inviterName)
-    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
-    local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
-    local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
-    if ChatAnnouncements.SV.Social.GuildCA then
-        ChatOutput:Print(zo_strformat(guildIncomingGuildRequestFormat, displayNameLink, guildNameAlliance), true)
-    end
-    if ChatAnnouncements.SV.Social.GuildAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(guildIncomingGuildRequestFormat, inviterName, guildNameAllianceAlert))
-    end
+    AnnounceIncomingGuildInvite(guildId, guildName, guildAlliance, inviterName)
+end
+
+-- EVENT_GUILD_INVITE_REMOVED
+--- @param eventId integer
+--- @param guildId integer
+function ChatAnnouncements.GuildInviteRemoved(eventId, guildId)
+    announcedGuildInviteIds[guildId] = nil
 end
 
 --- @param ctx CAHookContext
