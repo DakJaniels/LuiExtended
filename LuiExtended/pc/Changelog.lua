@@ -43,11 +43,16 @@ local changelogMessages =
     "",
     -- New
     "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: |cFFFFFFUse Weapon Icons|r, under Info Panel elements. Off by default. The weapon charge icons show the art of the weapons you have equipped instead of the generic rune icon. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: |cFFFFFFTint Weapons by Poison|r, under Info Panel elements. Off by default. While a poison is equipped on the bar you are on, the weapon charge icons are colored by how much poison is left instead of by charge: green, yellow below 25%, red below 10%. PC and console.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Buffs & Debuffs: |cFFFFFFProminent Time Sorting|r, under Alignment & Sorting for Prominent Buffs & Debuffs. Choose Recently Cast, Shortest Remaining, or Longest Remaining. Recently Cast is the default and keeps the current order. Shortest Remaining puts the soonest expiry first, and icons with no duration last. Longest Remaining puts icons with no duration first, then the countdown that lasts longest. The existing horizontal and vertical sort direction still chooses which edge is first. PC and console.",
     "",
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Announcements: Accepting a quest whose step text has a blank line keeps that description on one chat line, with its color and timestamp. A master writ objective such as \"Craft a Grape Preserves\" and \"• Progress: 4 / 12\" stays on one chat line as well. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: Armour durability updates right away when your gear's condition changes, including when you or a group member uses a group repair kit such as the Impresario's Group Repair Kit, and when you die. It no longer waits up to a minute, or until the panel is shown again. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: The two weapon charge icons now show the main hand and off hand of the bar you are on, and switch when you swap bars. Before, they showed the main hand of each bar, so an off-hand weapon was never checked. On a bar with a two-handed weapon, staff, or bow, the second icon is grey. Charges and poison update right away when they change. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: Changing an Info Panel setting applies as soon as you close the settings menu. It no longer needs a Reload UI. PC and console.",
     "",
     -- Version Header 7.2.8.1
     "|cFFA500LuiExtended Version 7.2.8.1|r",

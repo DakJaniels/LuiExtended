@@ -55,6 +55,8 @@ InfoPanel.Defaults =
     transparency = 100,
     HideInCombat = false,
     HideMemory = false,
+    UseWeaponIcons = false,
+    WeaponPoisonTint = false,
 }
 InfoPanel.SV = {}
 InfoPanel.panelUnlocked = false
@@ -138,6 +140,34 @@ local uiWeapons =
         [2] = { charges = 25, color = colors.YELLOW },
         [3] = { color = colors.WHITE },
     },
+    poisonColor =
+    {
+        [1] = { stack = 10, color = colors.RED },
+        [2] = { stack = 25, color = colors.YELLOW },
+        [3] = { color = colors.GREEN },
+    },
+}
+
+local WEAPON_GENERIC_ICON_TEXTURE = "/esoui/art/progression/icon_1handplusrune.dds"
+local WEAPON_GENERIC_ICON_SIZE = 30
+local WEAPON_GENERIC_OFF_HAND_OFFSET_X = 5
+-- Item art is a full square; at the generic size the two icons would overlap inside the 46px weapons control.
+local WEAPON_ITEM_ICON_SIZE = 20
+
+local WEAPON_PAIR_SLOTS =
+{
+    [ACTIVE_WEAPON_PAIR_MAIN] = { mainHand = EQUIP_SLOT_MAIN_HAND, offHand = EQUIP_SLOT_OFF_HAND, poison = EQUIP_SLOT_POISON },
+    [ACTIVE_WEAPON_PAIR_BACKUP] = { mainHand = EQUIP_SLOT_BACKUP_MAIN, offHand = EQUIP_SLOT_BACKUP_OFF, poison = EQUIP_SLOT_BACKUP_POISON },
+}
+
+local WEAPON_TRACKED_WORN_SLOTS =
+{
+    [EQUIP_SLOT_MAIN_HAND] = true,
+    [EQUIP_SLOT_OFF_HAND] = true,
+    [EQUIP_SLOT_POISON] = true,
+    [EQUIP_SLOT_BACKUP_MAIN] = true,
+    [EQUIP_SLOT_BACKUP_OFF] = true,
+    [EQUIP_SLOT_BACKUP_POISON] = true,
 }
 
 local uiBags =
@@ -635,23 +665,94 @@ function WeaponChargesMeter:IsEnabled()
     return not self.infoPanel.SV.HideWeapons
 end
 
-function WeaponChargesMeter:Update(nowMs)
-    if not self:IsEnabled() or not uiWeapons.main or not uiWeapons.swap then return end
-    for _, icon in pairs({ uiWeapons.main, uiWeapons.swap }) do
-        local charges, maxCharges = GetChargeInfoForItem(BAG_WORN, icon.slotIndex)
-        local color = colors.GRAY
-        if maxCharges > 0 then
-            color = uiWeapons.color[#uiWeapons.color].color
-            local chargesPercentage = 100 * charges / maxCharges
-            for i = 1, #uiWeapons.color - 1 do
-                if chargesPercentage < uiWeapons.color[i].charges then
-                    color = uiWeapons.color[i].color
-                    break
-                end
-            end
+--- @return table weaponPairSlots
+local function GetActiveWeaponPairSlots()
+    local activeWeaponPair = GetActiveWeaponPairInfo()
+    return WEAPON_PAIR_SLOTS[activeWeaponPair] or WEAPON_PAIR_SLOTS[ACTIVE_WEAPON_PAIR_MAIN]
+end
+
+--- @param colorTiers table
+--- @param tierKey string
+--- @param percentage number
+--- @return table color
+local function GetTierColorForPercentage(colorTiers, tierKey, percentage)
+    for i = 1, #colorTiers - 1 do
+        if percentage < colorTiers[i][tierKey] then
+            return colorTiers[i].color
         end
-        icon:SetColor(color.r, color.g, color.b, 1)
     end
+    return colorTiers[#colorTiers].color
+end
+
+--- @param poisonSlot EquipSlot
+--- @return table|nil color nil when no poison is slotted
+local function GetPoisonColorForSlot(poisonSlot)
+    if not HasItemInSlot(BAG_WORN, poisonSlot) then
+        return nil
+    end
+    local stackSize, maxStackSize = GetSlotStackSize(BAG_WORN, poisonSlot)
+    if not maxStackSize or maxStackSize <= 0 then
+        return uiWeapons.poisonColor[#uiWeapons.poisonColor].color
+    end
+    return GetTierColorForPercentage(uiWeapons.poisonColor, "stack", 100 * stackSize / maxStackSize)
+end
+
+--- @param weaponSlot EquipSlot
+--- @return table color
+local function GetChargeColorForSlot(weaponSlot)
+    local charges, maxCharges = GetChargeInfoForItem(BAG_WORN, weaponSlot)
+    if maxCharges <= 0 then
+        return colors.GRAY
+    end
+    return GetTierColorForPercentage(uiWeapons.color, "charges", 100 * charges / maxCharges)
+end
+
+--- @param useItemIcons boolean
+local function ApplyWeaponIconLayout(useItemIcons)
+    local iconSize = useItemIcons and WEAPON_ITEM_ICON_SIZE or WEAPON_GENERIC_ICON_SIZE
+    local offHandOffsetX = useItemIcons and 0 or WEAPON_GENERIC_OFF_HAND_OFFSET_X
+    uiWeapons.mainHandIcon:SetDimensions(iconSize, iconSize)
+    uiWeapons.offHandIcon:SetDimensions(iconSize, iconSize)
+    uiWeapons.offHandIcon:ClearAnchors()
+    uiWeapons.offHandIcon:SetAnchor(RIGHT, uiWeapons.control, RIGHT, offHandOffsetX, 0)
+    uiWeapons.usingItemIcons = useItemIcons
+end
+
+--- @param icon TextureControl
+--- @param weaponSlot EquipSlot
+--- @param poisonColor table|nil
+--- @param useItemIcons boolean
+local function RefreshWeaponIcon(icon, weaponSlot, poisonColor, useItemIcons)
+    local hasWeapon = HasItemInSlot(BAG_WORN, weaponSlot)
+    local texture = WEAPON_GENERIC_ICON_TEXTURE
+    if useItemIcons and hasWeapon then
+        local itemIcon = GetItemInfo(BAG_WORN, weaponSlot)
+        if itemIcon and itemIcon ~= "" then
+            texture = itemIcon
+        end
+    end
+    icon:SetTexture(texture)
+
+    local color = colors.GRAY
+    if hasWeapon then
+        color = poisonColor or GetChargeColorForSlot(weaponSlot)
+    end
+    icon:SetColor(color.r, color.g, color.b, 1)
+end
+
+function WeaponChargesMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiWeapons.mainHandIcon or not uiWeapons.offHandIcon then return end
+    local useItemIcons = self.infoPanel.SV.UseWeaponIcons == true
+    if uiWeapons.usingItemIcons ~= useItemIcons then
+        ApplyWeaponIconLayout(useItemIcons)
+    end
+    local weaponPairSlots = GetActiveWeaponPairSlots()
+    local poisonColor = nil
+    if self.infoPanel.SV.WeaponPoisonTint then
+        poisonColor = GetPoisonColorForSlot(weaponPairSlots.poison)
+    end
+    RefreshWeaponIcon(uiWeapons.mainHandIcon, weaponPairSlots.mainHand, poisonColor, useItemIcons)
+    RefreshWeaponIcon(uiWeapons.offHandIcon, weaponPairSlots.offHand, poisonColor, useItemIcons)
 end
 
 local GoldMeter = InfoPanelMeterBase:Subclass()
@@ -1195,6 +1296,12 @@ function InfoPanel.Initialize(enabled)
     InfoPanel.Panel = uiPanel
 
     panelFragment = ZO_HUDFadeSceneFragment:New(uiPanel, 0, 0)
+    -- Settings changes mark the refresh group dirty while the menu hides the panel; it only cleans while the panel is shown.
+    panelFragment:RegisterCallback("StateChange", function (oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWN and infoPanelRefreshGroup then
+            infoPanelRefreshGroup:TryClean()
+        end
+    end)
 
     sceneManager:GetScene("hud"):AddFragment(panelFragment)
     sceneManager:GetScene("hudui"):AddFragment(panelFragment)
@@ -1241,10 +1348,8 @@ function InfoPanel.Initialize(enabled)
     uiArmour.label = LUIE_InfoPanel_BotRow_Armour_Label
 
     uiWeapons.control = LUIE_InfoPanel_BotRow_Weapons
-    uiWeapons.main = LUIE_InfoPanel_BotRow_Weapons_Main
-    uiWeapons.swap = LUIE_InfoPanel_BotRow_Weapons_Swap
-    uiWeapons.main.slotIndex = EQUIP_SLOT_MAIN_HAND
-    uiWeapons.swap.slotIndex = EQUIP_SLOT_BACKUP_MAIN
+    uiWeapons.mainHandIcon = LUIE_InfoPanel_BotRow_Weapons_Main
+    uiWeapons.offHandIcon = LUIE_InfoPanel_BotRow_Weapons_Swap
 
     uiBags.control = LUIE_InfoPanel_BotRow_Bags
     uiBags.icon = LUIE_InfoPanel_BotRow_Bags_Icon
@@ -1285,11 +1390,18 @@ function InfoPanel.Initialize(enabled)
     -- * EVENT_LOOT_RECEIVED (*string* _receivedBy_, *string* _itemName_, *integer* _quantity_, *[ItemUISoundCategory|#ItemUISoundCategory]* _soundCategory_, *[LootItemType|#LootItemType]* _lootType_, *bool* _self_, *bool* _isPickpocketLoot_, *string* _questItemIcon_, *integer* _itemId_, *bool* _isStolen_)
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_RECEIVED, function () InfoPanel.OnBagUpdate() end)
     -- * EVENT_INVENTORY_SINGLE_SLOT_UPDATE (*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *bool* _isNewItem_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_, *integer* _inventoryUpdateReason_, *integer* _stackCountChange_, *string:nilable* _triggeredByCharacterName_, *string:nilable* _triggeredByDisplayName_, *bool* _isLastUpdateForMessage_, *[BonusDropSource|#BonusDropSource]* _bonusDropSource_)
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function () InfoPanel.OnBagUpdate() end)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, InfoPanel.OnInventorySingleSlotUpdate)
+    -- * EVENT_PLAYER_DEAD
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_DEAD, function () InfoPanel.ScheduleArmourUpdate() end)
+    -- * EVENT_ACTIVE_WEAPON_PAIR_CHANGED
+    eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function () InfoPanel.ScheduleWeaponChargesUpdate() end)
     -- * EVENT_INVENTORY_ITEM_DESTROYED (*[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_DESTROYED, function () InfoPanel.OnBagUpdate() end)
     -- * EVENT_INVENTORY_FULL_UPDATE
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_FULL_UPDATE, function () InfoPanel.OnBagUpdate() end)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_FULL_UPDATE, function ()
+        InfoPanel.ScheduleWeaponChargesUpdate()
+        InfoPanel.OnBagUpdate()
+    end)
     -- * EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG, function () InfoPanel.OnBagUpdate() end)
     -- * EVENT_INVENTORY_BAG_CAPACITY_CHANGED (*integer* _previousCapacity_, *integer* _currentCapacity_, *integer* _previousUpgrade_, *integer* _currentUpgrade_)
@@ -1418,6 +1530,62 @@ function InfoPanel.OnBagUpdate(eventId, bagId, slotIndex, isNewItem, itemSoundCa
     -- This is needed to avoid lockups when the game start flooding us with same event for every bag slot used
     -- While we do not need any good latency, we can afford to update info-panel label with 250ms delay
     eventManager:RegisterForUpdate(moduleName .. "PendingBagsUpdate", 250, InfoPanel.DoBagUpdate)
+end
+
+--- @param eventId integer
+--- @param bagId Bag
+--- @param slotIndex integer
+--- @param isNewItem boolean
+--- @param itemSoundCategory ItemUISoundCategory
+--- @param inventoryUpdateReason integer
+function InfoPanel.OnInventorySingleSlotUpdate(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason)
+    if bagId == BAG_WORN then
+        if inventoryUpdateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
+            InfoPanel.ScheduleArmourUpdate()
+        end
+        if WEAPON_TRACKED_WORN_SLOTS[slotIndex] then
+            InfoPanel.ScheduleWeaponChargesUpdate()
+        end
+    end
+    InfoPanel.OnBagUpdate()
+end
+
+-- Weapon swap, charge use, recharge, and each poison application all land here; coalesce into one read.
+function InfoPanel.ScheduleWeaponChargesUpdate()
+    eventManager:RegisterForUpdate(moduleName .. "PendingWeaponChargesUpdate", 50, InfoPanel.DoWeaponChargesUpdate)
+end
+
+function InfoPanel.DoWeaponChargesUpdate()
+    eventManager:UnregisterForUpdate(moduleName .. "PendingWeaponChargesUpdate")
+
+    if not InfoPanel.Enabled then
+        return
+    end
+    local weaponChargesMeter = InfoPanel.GetMeter("WeaponCharges")
+    if weaponChargesMeter then
+        local nowMs = GetFrameTimeMilliseconds()
+        weaponChargesMeter:Update(nowMs)
+        weaponChargesMeter:MarkUpdated(nowMs)
+    end
+end
+
+-- One durability update fires per worn slot (group repair, death penalty); re-registering restarts the delay so the burst settles on one read.
+function InfoPanel.ScheduleArmourUpdate()
+    eventManager:RegisterForUpdate(moduleName .. "PendingArmourUpdate", 50, InfoPanel.DoArmourUpdate)
+end
+
+function InfoPanel.DoArmourUpdate()
+    eventManager:UnregisterForUpdate(moduleName .. "PendingArmourUpdate")
+
+    if not InfoPanel.Enabled then
+        return
+    end
+    local armourMeter = InfoPanel.GetMeter("Armour")
+    if armourMeter then
+        local nowMs = GetFrameTimeMilliseconds()
+        armourMeter:Update(nowMs)
+        armourMeter:MarkUpdated(nowMs)
+    end
 end
 
 function InfoPanel.UpdateGoldDisplay()

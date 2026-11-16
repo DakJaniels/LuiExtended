@@ -443,6 +443,44 @@ function InfoPanel.CreateConsoleSettings()
             end
         })
 
+    -- Use Weapon Icons
+    panel:AddSetting(
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_PNL_USEWEAPONICONS),
+            tooltip = GetString(LUIE_STRING_LAM_PNL_USEWEAPONICONS_TP),
+            getFunction = function ()
+                return Settings.UseWeaponIcons
+            end,
+            setFunction = function (value)
+                Settings.UseWeaponIcons = value
+                InfoPanel.RearrangePanel(true)
+            end,
+            default = Defaults.UseWeaponIcons,
+            disable = function ()
+                return not (LUIE.SV.InfoPanel_Enabled and not Settings.HideWeapons)
+            end
+        })
+
+    -- Tint Weapons by Poison
+    panel:AddSetting(
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_PNL_WEAPONPOISONTINT),
+            tooltip = GetString(LUIE_STRING_LAM_PNL_WEAPONPOISONTINT_TP),
+            getFunction = function ()
+                return Settings.WeaponPoisonTint
+            end,
+            setFunction = function (value)
+                Settings.WeaponPoisonTint = value
+                InfoPanel.RearrangePanel(true)
+            end,
+            default = Defaults.WeaponPoisonTint,
+            disable = function ()
+                return not (LUIE.SV.InfoPanel_Enabled and not Settings.HideWeapons)
+            end
+        })
+
     -- Show Bag Space
     panel:AddSetting(
         {

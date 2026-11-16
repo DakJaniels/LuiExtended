@@ -293,6 +293,34 @@ function InfoPanel.CreateSettings()
         true
     )
 
+    -- Use Weapon Icons
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_USEWEAPONICONS),
+        GetString(LUIE_STRING_LAM_PNL_USEWEAPONICONS_TP),
+        function () return Settings.UseWeaponIcons end,
+        function (value)
+            Settings.UseWeaponIcons = value
+            InfoPanel.RearrangePanel(true)
+        end,
+        "full",
+        function () return not (LUIE.SV.InfoPanel_Enabled and not Settings.HideWeapons) end,
+        Defaults.UseWeaponIcons
+    )
+
+    -- Tint Weapons by Poison
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_WEAPONPOISONTINT),
+        GetString(LUIE_STRING_LAM_PNL_WEAPONPOISONTINT_TP),
+        function () return Settings.WeaponPoisonTint end,
+        function (value)
+            Settings.WeaponPoisonTint = value
+            InfoPanel.RearrangePanel(true)
+        end,
+        "full",
+        function () return not (LUIE.SV.InfoPanel_Enabled and not Settings.HideWeapons) end,
+        Defaults.WeaponPoisonTint
+    )
+
     -- Show Bag Space
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWBAGSPACE),
