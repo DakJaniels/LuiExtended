@@ -191,27 +191,48 @@ do
     -- Load state cannot change until ReloadUI. Store false so a missing or disabled addon is not scanned again.
     local enabledByAddOnName = {}
 
+    -- Addon manifest name to the global that holds its table, when those names differ.
+    local ADDON_TABLE_GLOBAL_NAME =
+    {
+        ["CombatMetrics"] = "CMX",
+        ["HarvestMap"] = "Harvest",
+        ["DolgubonsLazyWritCreator"] = "WritCreater",
+        ["LibMapPins-1.0"] = "LibMapPins",
+    }
+
+    --- Enabled state from AddOnManager, plus the addon table when istable confirms the global.
+    --- The table is resolved on every call. A nil table is not cached: an addon that is not an
+    --- OptionalDependsOn can publish its global after the first check in this session.
     --- @param addOnName string
-    --- @return boolean
+    --- @return boolean enabled
+    --- @return table|nil addonTable
     local function is_it_enabled(addOnName)
         local cachedEnabled = enabledByAddOnName[addOnName]
-        if cachedEnabled ~= nil then
-            return cachedEnabled
-        end
-
-        local enabled = false
-        if addonManager:WasAddOnDetected(addOnName) then
-            for addOnIndex = 1, numAddOns do
-                local name, _, _, _, _, state = addonManager:GetAddOnInfo(addOnIndex)
-                if name == addOnName and state == ADDON_STATE_ENABLED then
-                    enabled = true
-                    break
+        if cachedEnabled == nil then
+            local enabled = false
+            if addonManager:WasAddOnDetected(addOnName) then
+                for addOnIndex = 1, numAddOns do
+                    local name, _, _, _, _, state = addonManager:GetAddOnInfo(addOnIndex)
+                    if name == addOnName and state == ADDON_STATE_ENABLED then
+                        enabled = true
+                        break
+                    end
                 end
             end
+            enabledByAddOnName[addOnName] = enabled
+            cachedEnabled = enabled
         end
 
-        enabledByAddOnName[addOnName] = enabled
-        return enabled
+        if not cachedEnabled then
+            return false
+        end
+
+        local addonGlobalName = ADDON_TABLE_GLOBAL_NAME[addOnName] or addOnName
+        local addonTable = _G[addonGlobalName]
+        if istable(addonTable) then
+            return true, addonTable
+        end
+        return true
     end
 
     LUIE.IsItEnabled = is_it_enabled
@@ -763,16 +784,17 @@ do
     --- LibLazyCrafting deconstruct queue is active (Writ Crafter bulk decon, etc.). LLC does not set isCurrentlyCrafting during deconstruct.
     --- @return boolean
     local function IsLibLazyCraftingDeconstructing()
-        if not LibLazyCrafting or not LibLazyCrafting.craftingQueue then
+        local _, libLazyCrafting = LUIE.IsItEnabled("LibLazyCrafting")
+        if not libLazyCrafting or not libLazyCrafting.craftingQueue then
             return false
         end
-        if LibLazyCrafting.isCurrentlyCrafting and LibLazyCrafting.isCurrentlyCrafting[1] == true then
-            local kind = LibLazyCrafting.isCurrentlyCrafting[2]
+        if libLazyCrafting.isCurrentlyCrafting and libLazyCrafting.isCurrentlyCrafting[1] == true then
+            local kind = libLazyCrafting.isCurrentlyCrafting[2]
             if kind == "smithing" or kind == "improve" or kind == "improvement" then
                 return false
             end
         end
-        for _, stations in pairs(LibLazyCrafting.craftingQueue) do
+        for _, stations in pairs(libLazyCrafting.craftingQueue) do
             if type(stations) == "table" then
                 for station, queue in pairs(stations) do
                     if type(station) == "number" and type(queue) == "table" then
