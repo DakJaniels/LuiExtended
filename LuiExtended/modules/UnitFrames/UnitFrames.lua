@@ -2600,9 +2600,10 @@ local RAID_LAYOUT_DIMENSIONS =
 local RAID_LAYOUT_DEFAULT = "1 x 12"
 -- Battleground layouts (Big Team Battles: 6v6v6 and 9v9) are shapes (UnitFrames.RAID_LAYOUT_BATTLEGROUND_* in
 -- _Namespace.lua), not fixed grids: the slot count follows the match's team size (GetBattlegroundTeamSize) so the same
--- setting yields 1x9 / 3x3 / 9x1 or 1x6 / 3x2 / 6x1.
+-- setting yields 1x9 / 3x3 / 9x1 or 1x6 / 3x2 / 6x1. Two columns is the 2 x 6 raid footprint: 6 frames per column.
 local RAID_LAYOUT_BATTLEGROUND_DEFAULT = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID
 local RAID_LAYOUT_BATTLEGROUND_GRID_COLUMNS = 3
+local RAID_LAYOUT_BATTLEGROUND_TWO_COLUMN_ROWS = 6
 -- Pre-U51 saved values (fixed 9 slot grids) -> shape.
 local RAID_LAYOUT_BATTLEGROUND_LEGACY =
 {
@@ -2613,6 +2614,7 @@ local RAID_LAYOUT_BATTLEGROUND_LEGACY =
 local RAID_LAYOUT_BATTLEGROUND_SHAPES =
 {
     [UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN] = true,
+    [UnitFrames.RAID_LAYOUT_BATTLEGROUND_TWO_COLUMN] = true,
     [UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID] = true,
     [UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW] = true,
 }
@@ -2658,7 +2660,7 @@ function UnitFrames.IsBattlegroundRaidLayoutActive()
 end
 
 --- RaidLayoutBattleground shape from SavedVariables, migrating the pre-U51 fixed grid values in place.
---- @return string shape one of UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN / _GRID / _ROW
+--- @return string shape one of UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN / _TWO_COLUMN / _GRID / _ROW
 function UnitFrames.GetBattlegroundRaidLayoutShape()
     local shape = UnitFrames.SV.RaidLayoutBattleground
     local migratedShape = RAID_LAYOUT_BATTLEGROUND_LEGACY[shape]
@@ -2672,7 +2674,9 @@ function UnitFrames.GetBattlegroundRaidLayoutShape()
     return shape
 end
 
---- Grid for a battleground shape and team size (column: 1 x N, row: N x 1, grid: 3 x ceil(N / 3)).
+--- Grid for a battleground shape and team size.
+--- column: 1 x N. row: N x 1. grid: 3 x ceil(N / 3).
+--- two columns: 6 per column (a team of 9 is 6 then 3; a team of 6 fills one column).
 --- @param shape string
 --- @param teamSize number
 --- @return number columns
@@ -2682,6 +2686,11 @@ local function GetBattlegroundRaidLayoutDimensions(shape, teamSize)
         return 1, teamSize
     elseif shape == UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW then
         return teamSize, 1
+    elseif shape == UnitFrames.RAID_LAYOUT_BATTLEGROUND_TWO_COLUMN then
+        local rowsPerColumn = RAID_LAYOUT_BATTLEGROUND_TWO_COLUMN_ROWS
+        local columns = zo_ceil(teamSize / rowsPerColumn)
+        local rows = (columns == 1) and teamSize or rowsPerColumn
+        return columns, rows
     end
     return RAID_LAYOUT_BATTLEGROUND_GRID_COLUMNS, zo_ceil(teamSize / RAID_LAYOUT_BATTLEGROUND_GRID_COLUMNS)
 end

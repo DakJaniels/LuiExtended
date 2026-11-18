@@ -3394,9 +3394,10 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_LAYOUT_BG_TP),
             items =
             {
-                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_COLUMN), data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN },
-                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_GRID),   data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID   },
-                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_ROW),    data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW    }
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_COLUMN),      data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN      },
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_TWO_COLUMN),  data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_TWO_COLUMN },
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_GRID),        data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID        },
+                { name = GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_ROW),         data = UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW         }
             },
             getFunction = function ()
                 -- Migrates pre-U51 "1 x 9" / "3 x 3" / "9 x 1" values to a shape
