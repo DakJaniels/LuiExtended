@@ -753,13 +753,12 @@ function LUIE_ChatOutput:WouldDeliverToPrimaryTab(chatOutputSettings, tabIndex)
     if not primaryContainer or not primaryContainer.windows or tabIndex < 1 or tabIndex > #primaryContainer.windows then
         return false
     end
-    if LUIE.IsItEnabled("CombatMetrics") then
-        local CMX = CMX
-        local db = CMX.db
-        if not db then return false end
-        local do_chat_logging = db.chatlog and db.chatlog.enabled
-        if do_chat_logging and primaryContainer.GetTabName then
-            if primaryContainer:GetTabName(tabIndex) == db.chatLog.name then
+    local _, combatMetrics = LUIE.IsItEnabled("CombatMetrics")
+    if combatMetrics then
+        local combatMetricsSavedVars = combatMetrics.db
+        local chatLog = combatMetricsSavedVars and combatMetricsSavedVars.chatLog
+        if chatLog and chatLog.enabled and primaryContainer.GetTabName then
+            if primaryContainer:GetTabName(tabIndex) == chatLog.name then
                 return false
             end
         end
