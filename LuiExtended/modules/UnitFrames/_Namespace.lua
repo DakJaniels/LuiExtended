@@ -354,6 +354,8 @@ UnitFrames.Defaults =
     -- shape. Pre-U51 "1 x 9" / "3 x 3" / "9 x 1" values are migrated by UnitFrames.GetBattlegroundRaidLayoutShape.
     RaidLayoutBattleground = UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID,
     RaidFrameTemplate = UnitFrames.RAID_FRAME_TEMPLATE_COMPACT,
+    -- Expanded template only: hide the outer _Frame black fill and edge. The health band keeps its backdrop.
+    RaidExpandedHideBackground = false,
     RoleIconSmallGroup = true,
     ColorRoleGroup = true,
     ColorRoleRaid = true,

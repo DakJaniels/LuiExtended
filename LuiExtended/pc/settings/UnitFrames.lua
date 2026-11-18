@@ -3392,6 +3392,24 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                -- Expanded template: hide the outer black frame fill. Health bar and bottom row stay.
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESR_HIDE_BACKGROUND),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESR_HIDE_BACKGROUND_TP),
+                getFunc = function ()
+                    return Settings.RaidExpandedHideBackground
+                end,
+                setFunc = function (value)
+                    Settings.RaidExpandedHideBackground = value
+                    UnitFrames.CustomFramesApplyLayoutRaid(false)
+                end,
+                width = "full",
+                default = Defaults.RaidExpandedHideBackground,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid and Settings.RaidFrameTemplate == UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED)
+                end,
+            },
+            {
                 -- Player Name Display Method (Group/Raid)
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_GROUPRAID),

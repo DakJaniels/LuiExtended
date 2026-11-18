@@ -2949,6 +2949,9 @@ end
 -- Anchor-based geometry: padding 2 | top row 20 | gap 2 | health band (grows, min 16) | gap 2 | bottom row 16.
 -- Static anchors (rows, health band, health text) live in the XML; settings-dependent chains are built here.
 -- ---------------------------------------------------------------------------
+-- LUIE_UF_BlackFill40_Edge60 (SharedTemplates.xml): center "66000000", edge "99000000".
+local RAID_EXPANDED_FRAME_CENTER = ZO_ColorDef:New("66000000")
+local RAID_EXPANDED_FRAME_EDGE = ZO_ColorDef:New("99000000")
 local RAID_EXPANDED_PADDING = 2
 local RAID_EXPANDED_TOP_ROW_HEIGHT = 20
 local RAID_EXPANDED_ROW_GAP = 2
@@ -3232,6 +3235,19 @@ function UnitFrames.ApplyRaidExpandedMemberLayout(unitFrame, showPlaceholders)
         return
     end
     local sv = UnitFrames.SV
+
+    -- Outer _Frame fill (SharedTemplates.xml LUIE_UF_BlackFill40_Edge60). Alpha 0 keeps the control
+    -- shown so its combat-glow child still draws. The health band keeps its own backdrop.
+    local frameBackdrop = unitFrame.frameBackdrop
+    if frameBackdrop then
+        if sv.RaidExpandedHideBackground then
+            frameBackdrop:SetCenterColor(0, 0, 0, 0)
+            frameBackdrop:SetEdgeColor(0, 0, 0, 0)
+        else
+            frameBackdrop:SetCenterColor(RAID_EXPANDED_FRAME_CENTER:UnpackRGBA())
+            frameBackdrop:SetEdgeColor(RAID_EXPANDED_FRAME_EDGE:UnpackRGBA())
+        end
+    end
 
     -- Top row ---------------------------------------------------------------
     local customIconPosition = UnitFrames.SV.CustomIconPosition
