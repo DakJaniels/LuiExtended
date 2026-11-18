@@ -281,6 +281,7 @@ function LUIE_MiniMap_Frame:ApplyRootLayout(settings)
 
     -- Parchment is anchored to the backdrop in XML; keep the 512px tile at 1:1 scale.
     self.parchment:SetTextureCoords(0, backgroundWidth / MINIMAP_PARCHMENT_TILE_PIXELS, 0, backgroundHeight / MINIMAP_PARCHMENT_TILE_PIXELS)
+    self.zone:SetDimensionConstraints(0, 0, root:GetWidth(), 0)
     self:ApplyDragBarPlacement()
     self:ApplyCircularMap()
 end
