@@ -4,11 +4,20 @@
 
 ### New
 
+- Info Panel: **Use Weapon Icons**, under Info Panel elements. Off by default. The weapon charge icons show the art of the weapons you have equipped instead of the generic rune icon. PC and console.
+- Info Panel: **Tint Weapons by Poison**, under Info Panel elements. Off by default. While a poison is equipped on the bar you are on, the weapon charge icons are colored by how much poison is left instead of by charge: green, yellow below 25%, red below 10%. PC and console.
 - Buffs & Debuffs: **Prominent Time Sorting**, under Alignment & Sorting for Prominent Buffs & Debuffs. Choose Recently Cast, Shortest Remaining, or Longest Remaining. Recently Cast is the default and keeps the current order. Shortest Remaining puts the soonest expiry first, and icons with no duration last. Longest Remaining puts icons with no duration first, then the countdown that lasts longest. The existing horizontal and vertical sort direction still chooses which edge is first. PC and console.
+- Unit Frames: **Battleground Raid Layout (Big Team Battles)** can use **Two Columns (2 x 6)**. Six frames per column, the same footprint as the 2 x 6 raid layout. A team of 9 fills 6 in the first column and 3 in the second. A team of 6 fills one column. PC and console. Requested by HatchetHaro on Discord.
+- Unit Frames: **Hide Expanded Frame Background**, under Custom Unit Frames (Raid). Off by default. Hides the black background and border behind the expanded raid frame. The name, health bar, and bottom row stay, so ultimate and potion icons remain. The health bar keeps its own background. PC and console. Requested by Mizeov on Github.
 
 ### Fixed
 
 - Chat Announcements: Accepting a quest whose step text has a blank line keeps that description on one chat line, with its color and timestamp. A master writ objective such as "Craft a Grape Preserves" and "• Progress: 4 / 12" stays on one chat line as well. PC and console.
+- Info Panel: Armour durability updates right away when your gear's condition changes, including when you or a group member uses a group repair kit such as the Impresario's Group Repair Kit, and when you die. It no longer waits up to a minute, or until the panel is shown again. PC and console.
+- Info Panel: The two weapon charge icons now show the main hand and off hand of the bar you are on, and switch when you swap bars. Before, they showed the main hand of each bar, so an off-hand weapon was never checked. On a bar with a two-handed weapon, staff, or bow, the second icon is grey. Charges and poison update right away when they change. PC and console.
+- Info Panel: Changing an Info Panel setting applies as soon as you close the settings menu. It no longer needs a Reload UI. PC and console.
+- Chat Announcements: A guild invite that is already waiting when you log in now prints in chat and as an alert, using the existing guild invite options. It no longer prints only when the invite arrives while you are already playing. The same invite does not print twice. PC and console.
+- MiniMap: The zone name under the map is centered and stays within the map width. A long name can use two lines and ends with an ellipsis.
 
 ## Version 7.2.8.1
 
