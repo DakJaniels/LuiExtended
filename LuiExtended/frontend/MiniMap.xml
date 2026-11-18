@@ -97,7 +97,11 @@
         <Label name="$(parent)_Zone"
                font="ZoFontGame"
                layer="1"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="CENTER"
+               maxLineCount="2"
                text="">
+          <DimensionConstraints maxX="272" />
           <Anchor point="TOP"
                   relativeTo="$(parent)"
                   relativePoint="BOTTOM"
