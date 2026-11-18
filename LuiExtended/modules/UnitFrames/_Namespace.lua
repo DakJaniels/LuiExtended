@@ -121,9 +121,11 @@ UnitFrames.RAID_FRAME_TEMPLATE_COMPACT = "Compact"
 UnitFrames.RAID_FRAME_TEMPLATE_EXPANDED = "Expanded"
 -- RaidLayoutBattleground shapes (Big Team Battles 6v6v6 / 9v9): the slot count N follows GetBattlegroundTeamSize,
 -- so one setting gives 1x9 / 3x3 / 9x1 in a 9v9 and 1x6 / 3x2 / 6x1 in a 6v6v6 (UnitFrames.GetActiveRaidLayout).
-UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN = "column" -- 1 x N
-UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID = "grid"     -- 3 x ceil(N / 3)
-UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW = "row"       -- N x 1
+-- Two columns keeps 6 frames per column, the same footprint as the 2 x 6 raid layout: a team of 9 fills 6 then 3.
+UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN = "column"       -- 1 x N
+UnitFrames.RAID_LAYOUT_BATTLEGROUND_TWO_COLUMN = "twoColumn" -- 6 per column
+UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID = "grid"           -- 3 x ceil(N / 3)
+UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW = "row"             -- N x 1
 
 --- True when the raid frames use the expanded (two-row) member template.
 --- @return boolean

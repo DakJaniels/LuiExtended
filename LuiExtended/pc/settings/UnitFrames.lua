@@ -110,12 +110,14 @@ local raidLayoutValues = { "1 x 12", "2 x 6", "3 x 4", "6 x 2" }
 local raidLayoutBattlegroundChoices =
 {
     GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_COLUMN),
+    GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_TWO_COLUMN),
     GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_GRID),
     GetString(LUIE_STRING_LAM_UF_RAID_LAYOUT_BG_ROW),
 }
 local raidLayoutBattlegroundValues =
 {
     UnitFrames.RAID_LAYOUT_BATTLEGROUND_COLUMN,
+    UnitFrames.RAID_LAYOUT_BATTLEGROUND_TWO_COLUMN,
     UnitFrames.RAID_LAYOUT_BATTLEGROUND_GRID,
     UnitFrames.RAID_LAYOUT_BATTLEGROUND_ROW,
 }
