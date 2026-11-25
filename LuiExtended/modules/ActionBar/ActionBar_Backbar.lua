@@ -30,11 +30,18 @@ local KEYBOARD_CONSTANTS = ActionBar.KEYBOARD_CONSTANTS
 local ACTION_BUTTON_BORDERS = ActionBar.ACTION_BUTTON_BORDERS
 local BOUNCE_DURATION_MS = ActionBar.BOUNCE_DURATION_MS
 
+local CHAOS_BALL_WEREWOLF_ABILITY_ID = 227032
+local CHAOS_BALL_VAMPIRE_ABILITY_ID = 227041
+
 --- @type {[integer]:ActionButton}
 local g_backbarButtons = {}
 local g_backbarContainer
+local g_chaosBallFormActive = false
 
 local function ShouldHideDefaultBackRowTimers()
+    if g_chaosBallFormActive then
+        return true
+    end
     if not ActionBar.SV.BarShowBack or not g_backbarContainer or g_backbarContainer:IsHidden() then
         return false
     end
@@ -561,6 +568,11 @@ end
 -- Called from the menu and on init
 --- Shows/hides backbar container and slots per SV (BarShowBack, BarHideUnused, BarDarkUnused, etc.).
 function Backbar.BackbarToggleSettings()
+    if g_chaosBallFormActive and g_backbarContainer then
+        g_backbarContainer:SetHidden(true)
+        Backbar.SyncDefaultBackRowTimers()
+        return
+    end
     -- If BarShowBack is on, check for bar-swap disablers - keep backbar hidden while active
     if ActionBar.SV.BarShowBack and g_backbarContainer then
         if GetUnitLevel("player") < GetWeaponSwapUnlockedLevel() then
@@ -568,6 +580,10 @@ function Backbar.BackbarToggleSettings()
             Backbar.SyncDefaultBackRowTimers()
             return
         elseif Backbar.OakensoulEquipped() then
+            g_backbarContainer:SetHidden(true)
+            Backbar.SyncDefaultBackRowTimers()
+            return
+        elseif IsPlayerInWerewolfForm() then
             g_backbarContainer:SetHidden(true)
             Backbar.SyncDefaultBackRowTimers()
             return
@@ -637,6 +653,31 @@ function Backbar.OnActionUpdateCooldowns()
     end
 end
 
+--- Chaos Ball gained. Result is filtered to ACTION_RESULT_EFFECT_GAINED.
+local function OnChaosBallGained(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow, errorStringOverride)
+    g_chaosBallFormActive = true
+    if g_backbarContainer then
+        g_backbarContainer:SetHidden(true)
+    end
+    Backbar.SyncDefaultBackRowTimers()
+end
+
+--- Chaos Ball faded. Result is filtered to ACTION_RESULT_EFFECT_FADED.
+local function OnChaosBallFaded(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow, errorStringOverride)
+    g_chaosBallFormActive = false
+    Backbar.BackbarToggleSettings()
+end
+
+--- @param eventName string
+--- @param abilityId integer
+--- @param combatResult ActionResult
+--- @param callback function
+local function RegisterChaosBallCombatEvent(eventName, abilityId, combatResult, callback)
+    eventManager:UnregisterForEvent(eventName, EVENT_COMBAT_EVENT)
+    eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, callback)
+    eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, abilityId, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, combatResult)
+end
+
 function Backbar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "BackbarCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS)
     eventManager:UnregisterForEvent(moduleName .. "BackbarSlotState", EVENT_HOTBAR_SLOT_STATE_UPDATED)
@@ -658,6 +699,10 @@ function Backbar.RegisterEvents()
             g_backbarContainer:SetHidden(werewolf)
         end
     end)
+    RegisterChaosBallCombatEvent(moduleName .. "ChaosBallWerewolfGained", CHAOS_BALL_WEREWOLF_ABILITY_ID, ACTION_RESULT_EFFECT_GAINED, OnChaosBallGained)
+    RegisterChaosBallCombatEvent(moduleName .. "ChaosBallWerewolfFaded", CHAOS_BALL_WEREWOLF_ABILITY_ID, ACTION_RESULT_EFFECT_FADED, OnChaosBallFaded)
+    RegisterChaosBallCombatEvent(moduleName .. "ChaosBallVampireGained", CHAOS_BALL_VAMPIRE_ABILITY_ID, ACTION_RESULT_EFFECT_GAINED, OnChaosBallGained)
+    RegisterChaosBallCombatEvent(moduleName .. "ChaosBallVampireFaded", CHAOS_BALL_VAMPIRE_ABILITY_ID, ACTION_RESULT_EFFECT_FADED, OnChaosBallFaded)
     eventManager:RegisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE, function (eventId, result, buildIndex)
         Backbar.BackbarToggleSettings()
     end)

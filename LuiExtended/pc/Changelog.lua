@@ -38,6 +38,13 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.8.3
+    "|cFFA500LuiExtended Version 7.2.8.3|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Picking up the Battleground Chaos Ball (Werewolf or Vampire) hides the back bar, the same as werewolf form. Dropping the ball shows it again. PC and console.",
+    "",
     -- Version Header 7.2.8.2
     "|cFFA500LuiExtended Version 7.2.8.2|r",
     "",
